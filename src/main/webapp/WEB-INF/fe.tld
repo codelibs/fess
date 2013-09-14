@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+  version="2.0">
+    
+  <description>JSTL 1.1 functions library</description>
+  <display-name>JSTL functions</display-name>
+  <tlib-version>1.1</tlib-version>
+  <short-name>fe</short-name>
+  <uri>http://fess.codelibs.org/functions</uri>
+  
+  <function>
+    <description>
+      Returns a label name.
+    </description>
+    <name>label</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String label(java.lang.String)</function-signature>
+    <example>
+      ${fe:label("value")}
+    </example>
+  </function>
+  
+  <function>
+    <description>
+      Returns a list of hot search words.
+    </description>
+    <name>hsw</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.util.List hsw(java.lang.String, java.lang.Integer)</function-signature>
+    <example>
+      ${fe:hsw("week", 5)}
+    </example>
+  </function>
+  
+  <function>
+    <description>
+      Returns a size of hot search words.
+    </description>
+    <name>hswsize</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.Integer hswsize(java.lang.String)</function-signature>
+    <example>
+      ${fe:hswsize("week")}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns Date from a given value.
+    </description>
+    <name>date</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.util.Date date(java.lang.Long)</function-signature>
+    <example>
+      ${fe:date(doc.tstamp)}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns Date from a given value.
+    </description>
+    <name>parseDate</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.util.Date parseDate(java.lang.String)</function-signature>
+    <example>
+      ${fe:parseDate(doc.tstamp)}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns query parameters for Facet.
+    </description>
+    <name>facetQuery</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String facetQuery()</function-signature>
+    <example>
+      ${fe:facetQuery()}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns query parameters for More Like This.
+    </description>
+    <name>mltQuery</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String mltQuery()</function-signature>
+    <example>
+      ${fe:mltQuery()}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns query parameters for Geo.
+    </description>
+    <name>geoQuery</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String geoQuery()</function-signature>
+    <example>
+      ${fe:geoQuery()}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns a hidden form for Facet.
+    </description>
+    <name>facetForm</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String facetForm()</function-signature>
+    <example>
+      ${fe:facetForm()}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns a hidden form for More Like This.
+    </description>
+    <name>mltForm</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String mltForm()</function-signature>
+    <example>
+      ${fe:mltForm()}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns a hidden form for Geo.
+    </description>
+    <name>geoForm</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String geoForm()</function-signature>
+    <example>
+      ${fe:geoForm()}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns a list of FacetQueryView.
+    </description>
+    <name>facetQueryViewList</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.util.List facetQueryViewList()</function-signature>
+    <example>
+      ${fe:facetQueryViewList()}
+    </example>
+  </function>
+
+</taglib>

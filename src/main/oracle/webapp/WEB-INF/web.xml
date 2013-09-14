@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<!--
+ * Copyright 2004-2006 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+-->
+<web-app
+    xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+  <context-param>
+    <param-name>sastruts.VIEW_PREFIX</param-name>
+    <param-value>/WEB-INF/view</param-value>
+  </context-param>
+
+<!--
+  <filter>
+    <filter-name>encodingfilter</filter-name>
+    <filter-class>org.seasar.extension.filter.EncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+-->
+  <filter>
+    <filter-name>mobyletfilter</filter-name>
+    <filter-class>org.seasar.mobylet.http.S2MobyletFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+
+  <filter>
+    <filter-name>s2filter</filter-name>
+    <filter-class>org.seasar.framework.container.filter.S2ContainerFilter</filter-class>
+  </filter>
+
+  <filter>
+    <filter-name>hotdeployfilter</filter-name>
+    <filter-class>org.seasar.framework.container.hotdeploy.HotdeployFilter</filter-class>
+  </filter>
+
+  <filter>
+    <filter-name>authenticationFilter</filter-name>
+    <filter-class>jp.sf.fess.filter.AuthenticationFilter</filter-class>
+    <init-param>
+      <param-name>urlPatterns</param-name>
+      <param-value>/fess/admin.*</param-value>
+    </init-param>
+    <init-param>
+      <param-name>loginPath</param-name>
+      <param-value>/fess/login/</param-value>
+    </init-param>
+    <init-param>
+      <param-name>cipherName</param-name>
+      <param-value>authenticationCipher</param-value>
+    </init-param>
+  </filter>
+
+  <filter>
+    <filter-name>routingfilter</filter-name>
+    <filter-class>org.seasar.struts.filter.RoutingFilter</filter-class>
+    <init-param>
+      <param-name>jspDirectAccess</param-name>
+      <param-value>false</param-value>
+    </init-param>
+  </filter>
+
+<!--
+  <filter-mapping>
+    <filter-name>encodingfilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+-->
+  <filter-mapping>
+    <filter-name>mobyletfilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>s2filter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>INCLUDE</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>hotdeployfilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>INCLUDE</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>authenticationFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>routingfilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <servlet>
+    <servlet-name>action</servlet-name>
+    <servlet-class>org.codelibs.sastruts.core.servlet.SSCActionServlet</servlet-class>
+    <init-param>
+      <param-name>config</param-name>
+      <param-value>/WEB-INF/struts-config.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>configFactory</param-name>
+      <param-value>org.seasar.struts.config.S2ModuleConfigFactory</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <!--
+  <servlet>
+    <servlet-name>h2ConfigServlet</servlet-name>
+    <servlet-class>jp.sf.fess.servlet.H2ConfigServlet</servlet-class>
+    <init-param>
+      <param-name>tcpPort</param-name>
+      <param-value>19092</param-value>
+    </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  -->
+
+  <servlet>
+    <servlet-name>tomcat7ConfigServlet</servlet-name>
+    <servlet-class>jp.sf.fess.servlet.Tomcat7ConfigServlet</servlet-class>
+    <load-on-startup>3</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <servlet-name>s2container</servlet-name>
+    <servlet-class>org.seasar.framework.container.servlet.S2ContainerServlet</servlet-class>
+    <load-on-startup>4</load-on-startup>
+  </servlet>
+
+  <!-- for S2Chronos -->
+  <servlet>
+    <servlet-name>chronosServlet</servlet-name>
+    <servlet-class>org.seasar.chronos.extension.servlet.S2ChronosServlet</servlet-class>
+    <load-on-startup>5</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <servlet-name>imageScaleServlet</servlet-name>
+    <servlet-class>org.mobylet.core.http.image.MobyletImageScaleServlet</servlet-class>
+    <load-on-startup>6</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>action</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+
+<!--
+  <servlet-mapping>
+    <servlet-name>s2container</servlet-name>
+    <url-pattern>/s2container</url-pattern>
+  </servlet-mapping>
+-->
+
+  <servlet-mapping>
+    <servlet-name>imageScaleServlet</servlet-name>
+    <url-pattern>/imageScaler</url-pattern>
+  </servlet-mapping>
+
+  <listener>
+  	<listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
+  </listener>
+
+<!--
+    <session-config>
+        <session-timeout>1</session-timeout>
+    </session-config>
+	-->
+
+<!--
+    <welcome-file-list>
+    </welcome-file-list>
+	-->
+
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <el-ignored>false</el-ignored>
+      <page-encoding>UTF-8</page-encoding>
+      <scripting-invalid>false</scripting-invalid>
+      <include-prelude>/WEB-INF/view/common/common.jsp</include-prelude>
+    </jsp-property-group>
+  </jsp-config>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Fess Authentication</web-resource-name>
+      <url-pattern>/login/login</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>fess</role-name>
+      <!--
+      <role-name>role1</role-name>
+      -->
+    </auth-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <form-login-config>
+      <form-login-page>/WEB-INF/view/login/index.jsp</form-login-page>
+      <form-error-page>/WEB-INF/view/login/error.jsp</form-error-page>
+    </form-login-config>
+  </login-config>
+
+  <security-role>
+  	<role-name>fess</role-name>
+  </security-role>
+
+  <!--
+  <security-role>
+  	<role-name>role1</role-name>
+  </security-role>
+  -->
+
+  <error-page>
+  	<error-code>403</error-code>
+  	<location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+  </error-page>
+  <error-page>
+  	<error-code>404</error-code>
+  	<location>/WEB-INF/view/error/redirect.jsp?type=notFound</location>
+  </error-page>
+  <error-page>
+  	<error-code>408</error-code>
+  	<location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+  </error-page>
+  <error-page>
+  	<error-code>500</error-code>
+  	<location>/WEB-INF/view/error/redirect.jsp?type=systemError</location>
+  </error-page>
+
+</web-app>

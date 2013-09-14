@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<!-- Manager -->
+	<component name="suggesterManager" class="jp.sf.fess.suggest.SuggesterManager">
+		<initMethod name="addSuggester">
+			<arg>"content"</arg>
+			<arg>contentSuggester</arg>
+		</initMethod>
+		<initMethod name="addSuggester">
+			<arg>"content_ja"</arg>
+			<arg>contentJaSuggester</arg>
+		</initMethod>
+		<initMethod name="addSuggester">
+			<arg>"content_ts"</arg>
+			<arg>contentTsSuggester</arg>
+		</initMethod>
+		<initMethod name="addSuggester">
+			<arg>"title_ss"</arg>
+			<arg>titleSsSuggester</arg>
+		</initMethod>
+	</component>
+	<!-- Suggester -->
+	<component name="contentSuggester" class="jp.sf.fess.suggest.Suggester">
+		<!-- TODO -->
+	</component>
+	<component name="contentJaSuggester" class="jp.sf.fess.suggest.Suggester">
+		<!-- TODO -->
+	</component>
+	<component name="contentTsSuggester" class="jp.sf.fess.suggest.Suggester">
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.ICUConverter">
+					<arg>"Fullwidth-Halfwidth"</arg>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.ICUConverter">
+					<arg>"Any-Lower"</arg>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.NormalizeConverter"/>
+			</arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg><component class="jp.sf.fess.suggest.converter.ReadingConverter"/></arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.SymbolConverter">
+					<initMethod name="addSymbol">
+						<arg>new String[]{ "0",
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "０", "１", "２", "３", "４",
+            "５", "６", "７", "８", "９", " ", "　", "【", "】", "・", "（", "）",
+            "(", ")", "%", "％", "～", "+", "#", "＃", "\"", "”", "\'", "\\", "￥",
+            "[", "]", "「", "」", "『", "』", "&lt;", "&gt;", "＜", "＞", "/", "／", "{",
+            "}", "&amp;", "＆", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ",
+            "ⅰ", "ⅱ", "ⅲ", "ⅳ", "ⅴ", "ⅵ", "ⅶ", "ⅷ", "ⅸ", "ⅹ", "-", "－", "." }
+						</arg>
+					</initMethod>
+				</component>
+			</arg>
+		</initMethod>
+	</component>
+	<component name="titleSsSuggester" class="jp.sf.fess.suggest.Suggester">
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.ICUConverter">
+					<arg>"Fullwidth-Halfwidth"</arg>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.ICUConverter">
+					<arg>"Any-Lower"</arg>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.NormalizeConverter"/>
+			</arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg><component class="jp.sf.fess.suggest.converter.ReadingConverter"/></arg>
+		</initMethod>
+		<initMethod name="addPreQueryConverter">
+			<arg>
+				<component class="jp.sf.fess.suggest.converter.SymbolConverter">
+					<initMethod name="addSymbol">
+						<arg>new String[]{ "0",
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "０", "１", "２", "３", "４",
+            "５", "６", "７", "８", "９", " ", "　", "【", "】", "・", "（", "）",
+            "(", ")", "%", "％", "～", "+", "#", "＃", "\"", "”", "\'", "\\", "￥",
+            "[", "]", "「", "」", "『", "』", "&lt;", "&gt;", "＜", "＞", "/", "／", "{",
+            "}", "&amp;", "＆", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ",
+            "ⅰ", "ⅱ", "ⅲ", "ⅳ", "ⅴ", "ⅵ", "ⅶ", "ⅷ", "ⅸ", "ⅹ", "-", "－", "." }
+						</arg>
+					</initMethod>
+				</component>
+			</arg>
+		</initMethod>
+	</component>
+</components>

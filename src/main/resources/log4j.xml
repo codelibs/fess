@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+    </layout>
+  </appender>
+  <appender name="file" class="org.apache.log4j.FileAppender">
+    <param name="File" value="${fess.log.file}"/>
+    <param name="Append" value="false"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+    </layout>
+  </appender>
+  <appender name="rollingFile" class="org.apache.log4j.RollingFileAppender">
+    <param name="File" value="${fess.log.file}"/>
+    <param name="Append" value="true"/>
+    <param name="MaxFileSize" value="10MB"/>
+    <param name="MaxBackupIndex" value="20"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+    </layout>
+  </appender>
+<!--
+  <logger name="org.seasar" >
+    <level value ="debug" />
+  </logger>
+  <logger name="jp.sf.fess" >
+    <level value ="debug" />
+  </logger>
+  <logger name="org.seasar.robot" >
+    <level value ="debug" />
+  </logger>
+  <logger name="org.seasar.robot.dbflute" >
+    <level value ="debug" />
+  </logger>
+  <logger name="jp.sf.fess.solr" >
+    <level value ="debug" />
+  </logger>
+  <logger name="org.apache.commons.httpclient" >
+    <level value ="debug" />
+  </logger>
+-->
+  <logger name="org.apache.commons.httpclient.auth" >
+    <level value ="warn" />
+  </logger>
+  <root>
+    <priority value="info"/>
+    <appender-ref ref="rollingFile"/>
+  </root>
+</log4j:configuration>

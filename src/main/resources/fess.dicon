@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<include path="solrlib.dicon"/>
+	<include path="fess_ds.dicon"/>
+
+	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
+		<arg>
+			@jp.sf.fess.util.ResourceUtil@getConfPath("crawler.properties")
+		</arg>
+	</component>
+
+    <component name="pathMappingHelper" class="jp.sf.fess.helper.PathMappingHelper">
+    </component>
+	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
+		<!--
+		<property name="adminRole">"fess"</property>
+		<property name="javaCommandPath">"java"</property>
+		<property name="filterPathEncoding">"UTF-8"</property>
+		<property name="useOwnTmpDir">true</property>
+		<property name="baseHelpLink">"http://fess.codelibs.org/{lang}/8.0/admin/"</property>
+		-->
+		<property name="solrDataDirName">"fess.solr.data.dir"</property>
+		<property name="logFilePath">@System@getProperty("fess.log.file").replaceAll(".out", "_crawler.out")</property>
+        <property name="crawlerJavaOptions">new String[] {
+"-Djava.awt.headless=true",
+"-server",
+"-Xmx512m",
+"-XX:MaxPermSize=128m",
+"-XX:-UseGCOverheadLimit",
+"-XX:+UseConcMarkSweepGC",
+"-XX:CMSInitiatingOccupancyFraction=75",
+"-XX:+CMSIncrementalMode",
+"-XX:+CMSIncrementalPacing",
+"-XX:CMSIncrementalDutyCycleMin=0",
+"-XX:+UseParNewGC",
+"-XX:+UseStringCache",
+"-XX:+UseTLAB",
+"-XX:+DisableExplicitGC"
+}</property>
+<!--
+"-XX:+OptimizeStringConcat",
+"-XX:+UseCompressedStrings",
+-->
+<!-- remote debug
+"-Xdebug",
+"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
+ -->
+		<initMethod name="addDesignJspFileName">
+			<arg>"index"</arg>
+			<arg>"index.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"header"</arg>
+			<arg>"header.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"footer"</arg>
+			<arg>"footer.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"search"</arg>
+			<arg>"search.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"searchResults"</arg>
+			<arg>"searchResults.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"searchNoResult"</arg>
+			<arg>"searchNoResult.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"error"</arg>
+			<arg>"error.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileIndex"</arg>
+			<arg>"mobile/index.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileIndexHtmlHead"</arg>
+			<arg>"mobile/indexHtmlHead.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileIndexMain"</arg>
+			<arg>"mobile/indexMain.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileSearch"</arg>
+			<arg>"mobile/search.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileSearchHtmlHead"</arg>
+			<arg>"mobile/searchHtmlHead.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileSearchHeader"</arg>
+			<arg>"mobile/searchHeader.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileSearchFooter"</arg>
+			<arg>"mobile/searchFooter.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileSearchResults"</arg>
+			<arg>"mobile/searchResults.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"mobileSearchNoResult"</arg>
+			<arg>"mobile/searchNoResult.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"appletLauncher"</arg>
+			<arg>"applet/launcher.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"errorHeader"</arg>
+			<arg>"error/header.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"errorFooter"</arg>
+			<arg>"error/footer.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"errorNotFound"</arg>
+			<arg>"error/notFound.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"errorSystem"</arg>
+			<arg>"error/system.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"errorRedirect"</arg>
+			<arg>"error/redirect.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"help"</arg>
+			<arg>"help.jsp"</arg>
+		</initMethod>
+	</component>
+	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
+		<!--
+		<property name="defaultExpiredDays">365</property>
+		-->
+	</component>
+	<component name="mailHelper" class="jp.sf.fess.helper.MailHelper">
+		<!--
+		<property name="from">"Administrator &lt;root@localhost&gt;"</property>
+		-->
+	</component>
+	<component name="roleQueryHelper" class="jp.sf.fess.helper.impl.RoleQueryHelperImpl">
+		<!-- ex. parameter: fessRoles=123%0aadmin -->
+		<!-- 
+		<property name="parameterKey">"fessRoles"</property>
+		<property name="encryptedParameterValue">false</property>
+		<property name="headerKey">"fessRoles"</property>
+		<property name="encryptedHeaderValue">true</property>
+		<property name="cookieKey">"fessRoles"</property>
+		<property name="encryptedCookieValue">true</property>
+		<property name="fessCipher">
+			<component class="jp.sf.fess.crypto.FessCipher">
+				<property name="key">"1234567890123456"</property>
+			</component>
+		</property>
+		<property name="defaultRoleList">
+			{"guest"}
+		</property>
+		<property name="valueSeparator">"\\n"</property>
+		<property name="roleSeparator">","</property>
+		 -->
+	</component>
+<!--
+	<component name="screenShotManager" class="jp.sf.fess.screenshot.ScreenShotManager">
+		<initMethod name="add">
+			<arg>htmlScreenShotGenerator</arg>
+		</initMethod>
+	</component>
+	<component name="htmlScreenShotGenerator" class="jp.sf.fess.screenshot.impl.CommandGenerator">
+		<property name="commandList">
+			{"bash", 
+			"/opt/fess/bin/html-screenshot.sh",
+			"${url}",
+			"${outputFile}"}
+		</property>
+		<initMethod name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</initMethod>
+	</component>
+-->
+</components>

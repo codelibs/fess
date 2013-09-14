@@ -1,0 +1,61 @@
+/*
+ * Copyright 2009-2013 the Fess Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+package jp.sf.fess.pager;
+
+import jp.sf.fess.Constants;
+import jp.sf.fess.crud.pager.BsFavoriteLogPager;
+
+public class FavoriteLogPager extends BsFavoriteLogPager {
+
+    private static final long serialVersionUID = 1L;
+
+    public String userCode;
+
+    public String startDate;
+
+    public String startHour;
+
+    public String startMin;
+
+    public String endDate;
+
+    public String endHour;
+
+    public String endMin;
+
+    public FavoriteLogPager() {
+        super();
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        userCode = null;
+        startDate = null;
+        startHour = null;
+        startMin = null;
+        endDate = null;
+        endHour = null;
+        endMin = null;
+    }
+
+    @Override
+    protected int getDefaultPageSize() {
+        return Constants.DEFAULT_ADMIN_PAGE_SIZE;
+    }
+
+}

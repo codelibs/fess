@@ -1,0 +1,14 @@
+<projectDescription>
+  <name>fess</name>
+  <comment>Fess is Full tExt Search System.</comment>
+  <projects/>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+    <nature>com.sysdeo.eclipse.tomcat.tomcatnature</nature>
+  </natures>
+</projectDescription>

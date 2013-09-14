@@ -1,0 +1,26 @@
+# /---------------------------------------------------------------------------
+# additionalUniqueKeyMap: (NotRequired - Default map:{})
+#
+# If unique key does not exist in your database,
+# you can set up here as virtual unique key for DBFlute.
+# And you can use it to view objects too.
+# The names are treated as case insensitive.
+#
+# Example:
+# map:{
+#     ; UQ_MEMBER = map:{
+#         ; tableName = MEMBER ; columnName = MEMBER_ACCOUNT
+#     }
+#     ; UQ_PRODUCT = map:{
+#         ; tableName = PRODUCT ; columnName = PRODUCT_HANDLE_CODE
+#     }
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    #; UQ_MEMBER = map:{
+    #    ; tableName = MEMBER ; columnName = MEMBER_ACCOUNT
+    #}
+}
+# ----------------/

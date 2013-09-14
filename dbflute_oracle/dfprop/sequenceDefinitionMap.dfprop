@@ -1,0 +1,54 @@
+# /---------------------------------------------------------------------------
+# sequenceDefinitionMap: (NotRequired - Default map:{})
+#
+# The relation mappings between sequence and table.
+# If you don't specify the mappings, you cannot insert 
+# a record of the table by sequence.
+# The table names are treated as case insensitive.
+#
+# Example:
+# map:{
+#     ; PURCHASE     = SEQ_PURCHASE
+#     ; MEMBER       = SEQ_MEMBER
+#     ; MEMBER_LOGIN = SEQ_MEMBER_LOGIN
+#     ; PRODUCT      = SEQ_PRODUCT
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    #; PURCHASE     = SEQ_PURCHASE
+    #; MEMBER       = SEQ_MEMBER
+    #; MEMBER_LOGIN = SEQ_MEMBER_LOGIN
+    #; PRODUCT      = SEQ_PRODUCT
+; WEB_CRAWLING_CONFIG = WEB_CRAWLING_CONFIG_SEQ:dfcache()
+; BROWSER_TYPE = BROWSER_TYPE_SEQ:dfcache()
+; FILE_CRAWLING_CONFIG = FILE_CRAWLING_CONFIG_SEQ:dfcache()
+; WEB_CONFIG_TO_B_TYPE = WEB_CONFIG_TO_B_TYPE_SEQ:dfcache()
+; FILE_CONFIG_TO_B_TYPE = FILE_CONFIG_TO_B_TYPE_SEQ:dfcache()
+; PATH_MAPPING = PATH_MAPPING_SEQ:dfcache()
+; CRAWLING_SESSION = CRAWLING_SESSION_SEQ:dfcache()
+; OVERLAPPING_HOST = OVERLAPPING_HOST_SEQ:dfcache()
+; REQUEST_HEADER = REQUEST_HEADER_SEQ:dfcache()
+; WEB_AUTHENTICATION = WEB_AUTHENTICATION_SEQ:dfcache()
+; CRAWLING_SESSION_INFO = CRAWLING_SESSION_INFO_SEQ:dfcache()
+; LABEL_TYPE = LABEL_TYPE_SEQ:dfcache()
+; FILE_CONFIG_TO_LABEL_TYPE = FILE_CONFIG_TO_LABEL_TYPE_SEQ:dfcache()
+; WEB_CONFIG_TO_LABEL_TYPE = WEB_CONFIG_TO_LABEL_TYPE_SEQ:dfcache()
+; ROLE_TYPE = ROLE_TYPE_SEQ:dfcache()
+; FILE_CONFIG_TO_ROLE_TYPE = FILE_CONFIG_TO_ROLE_TYPE_SEQ:dfcache()
+; WEB_CONFIG_TO_ROLE_TYPE = WEB_CONFIG_TO_ROLE_TYPE_SEQ:dfcache()
+; DATA_CRAWLING_CONFIG = DATA_CRAWLING_CONFIG_SEQ:dfcache()
+; DATA_CONFIG_TO_ROLE_TYPE = DATA_CONFIG_TO_ROLE_TYPE_SEQ:dfcache()
+; DATA_CONFIG_TO_LABEL_TYPE = DATA_CONFIG_TO_LABEL_TYPE_SEQ:dfcache()
+; DATA_CONFIG_TO_B_TYPE = DATA_CONFIG_TO_B_TYPE_SEQ:dfcache()
+; USER_INFO = USER_INFO_SEQ:dfcache()
+; SEARCH_LOG = SEARCH_LOG_SEQ:dfcache()
+; LABEL_TYPE_TO_ROLE_TYPE = LABEL_TYPE_TO_ROLE_TYPE_SEQ:dfcache()
+; CLICK_LOG = CLICK_LOG_SEQ:dfcache()
+; FAILURE_URL = FAILURE_URL_SEQ:dfcache()
+; FILE_AUTHENTICATION = FILE_AUTHENTICATION_SEQ:dfcache()
+; SEARCH_FIELD_LOG = SEARCH_FIELD_LOG_SEQ:dfcache()
+; FAVORITE_LOG = FAVORITE_LOG_SEQ:dfcache()
+}
+# ----------------/

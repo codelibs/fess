@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<include path="convention.dicon"/>
+	<include path="aop.dicon"/>
+	<include path="dbflute.dicon"/>
+
+	<include path="fess.dicon"/>
+
+	<include path="chronos-extension.dicon"/>
+	<include path="mobylet.dicon"/>
+
+    <include path="s2robot_db.dicon"/>
+
+	<!-- Web -->
+	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
+
+	<component name="authenticationCipher" class="jp.sf.fess.crypto.FessCipher">
+		<property name="key">"1234567890123456"</property>
+	</component>
+	<component name="browserTypeHelper" class="jp.sf.fess.helper.BrowserTypeHelper">
+	</component>
+	<component name="queryHelper" class="jp.sf.fess.helper.impl.QueryHelperImpl">
+	</component>
+	<component name="roleQueryHelper" class="jp.sf.fess.helper.impl.RoleQueryHelperImpl">
+		<!-- ex. parameter: fessRoles=123%0aadmin -->
+		<!-- 
+		<property name="parameterKey">"fessRoles"</property>
+		<property name="encryptedParameterValue">false</property>
+		<property name="headerKey">"fessRoles"</property>
+		<property name="encryptedHeaderValue">true</property>
+		<property name="cookieKey">"fessRoles"</property>
+		<property name="encryptedCookieValue">true</property>
+		<property name="fessCipher">
+			<component class="jp.sf.fess.crypto.FessCipher">
+				<property name="key">"1234567890123456"</property>
+			</component>
+		</property>
+		<property name="defaultRoleList">
+			{"guest"}
+		</property>
+		 -->
+	</component>
+	<component name="viewHelper" class="jp.sf.fess.helper.ViewHelper">
+		<!-- 
+		<property name="useDigest">true</property>
+		<property name="useHighlightContent">true</property>
+		 -->
+	</component>
+	<component name="userAgentName" class="java.lang.String">
+		<arg>"Fess Robot/1.0"</arg>
+	</component>
+
+	<!-- Cmd -->
+    <component name="webFsIndexHelper" class="jp.sf.fess.helper.WebFsIndexHelper">
+    </component>
+    <component name="crawlingConfigHelper" class="jp.sf.fess.helper.CrawlingConfigHelper">
+    </component>
+    <component name="pathMappingHelper" class="jp.sf.fess.helper.PathMappingHelper">
+    </component>
+    <component name="overlappingHostHelper" class="jp.sf.fess.helper.OverlappingHostHelper">
+    </component>
+    <component name="intervalControlHelper" class="jp.sf.fess.helper.IntervalControlHelper">
+    </component>
+    <component name="indexUpdater" class="jp.sf.fess.solr.IndexUpdater" instance="prototype">
+        <!--
+        <property name="maxDocumentCacheSize">10</property>
+        <property name="unprocessedDocumentSize">100</property>
+         -->
+    </component>
+    <!-- for H2 -->
+    <component name="databaseHelper" class="jp.sf.fess.helper.impl.H2DatabaseHelperImpl">
+    <!-- for MySQL -->
+<!--
+    <component name="databaseHelper" class="jp.sf.fess.helper.impl.MySqlDatabaseHelperImpl">
+-->
+        <aspect pointcut="optimize">
+            j2ee.requiresNewTx
+        </aspect>
+    </component>
+    <component name="fessCrawler" class="jp.sf.fess.exec.Crawler" instance="prototype">
+    </component>
+
+</components>

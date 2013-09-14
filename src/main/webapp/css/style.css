@@ -1,0 +1,213 @@
+/* Override some defaults */
+
+.content {
+	min-height: 500px;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 32px;
+}
+
+h1 {
+  font-size: 30px;
+}
+
+h2 {
+  font-size: 24px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+.navbar .help-link {
+	color: #ffffff;
+}
+
+.navbar .help-link:hover {
+	color: #08c;
+	text-decoration: none;
+}
+
+.center {
+	text-align: center;
+}
+
+#result ol {
+	list-style: none;
+}
+
+#result ol li {
+	margin-bottom: 20px;
+}
+
+#result .body cite {
+	color: #093;
+}
+
+#result .favorited {
+	display: none;
+}
+
+#screenshot {
+	position: fixed;
+}
+
+.searchFormBox {
+	text-align: center;
+	margin-top: 160px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.form-stacked {
+	margin-top: 10px;
+}
+
+
+#contentOptionButton {
+	margin-left: 10px;
+}
+
+.searchButtonBox {
+	margin-top: 15px;
+}
+
+#searchOptions {
+	text-align: left;
+}
+
+.move-to-top {
+    margin-bottom: 10px;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+    #query {
+	    width: 500px;
+    }
+
+    #contentQuery {
+	    width: 500px;
+    }
+}
+ 
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+    .br-tablet {
+	    display: block;
+    }
+
+    #query {
+	    width: 200px;
+    }
+
+    #contentQuery {
+	    width: 500px;
+    }
+}
+ 
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+    #query {
+	    width: 500px;
+    }
+
+    #contentQuery {
+	    width: 500px;
+    }
+}
+ 
+/* Portrait Garaxly */
+@media (max-width: 640px) {
+    #query {
+	    width: 400px;
+    }
+
+    #contentQuery {
+	    width: 400px;
+    }
+
+    .searchFormBox {
+	    margin-top: 20px;
+    }
+}
+
+/* Landscape phones and down */
+@media (max-width: 480px) {
+    .br-phone {
+	    display: block;
+    }
+
+    #query {
+	    width: 150px;
+    }
+
+    #contentQuery {
+	    width: 200px;
+    }
+
+    .searchFormBox {
+	    margin-top: 20px;
+    }
+
+    #result ol {
+        margin-left: 0;
+    }
+
+    .hotSearchWordBody {
+        width: 440px;
+    }
+
+    #result .site {
+        width: 440px;
+    }
+
+    #result .info {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .br-phone {
+	    display: block;
+    }
+
+    .mainLogo img {
+	    width: 200px;
+    }
+
+    .brand img {
+	    width: 80px;
+    }
+
+    #query {
+	    width: 100px;
+    }
+
+    .searchFormBox {
+	    margin-top: 80px;
+    }
+
+    .hotSearchWordBody {
+        width: 280px;
+    }
+
+    #result .site {
+        width: 280px;
+    }
+
+    #result .info {
+        display: none;
+    }
+}

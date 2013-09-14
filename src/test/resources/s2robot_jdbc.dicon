@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR2.1//DTD S2Container//EN"
+    "http://www.seasar.org/dtd/components21.dtd">
+<components namespace="jdbc">
+    <include path="jta.dicon"/>
+
+    <!-- for H2 -->
+    <component name="xaDataSource"
+        class="org.seasar.extension.dbcp.impl.XADataSourceImpl">
+        <property name="driverClassName">
+            "org.h2.Driver"
+        </property>
+        <property name="URL">
+            "jdbc:h2:file:"
+            + @org.seasar.framework.util.ResourceUtil@getBuildDir(@jp.sf.fess.FessClass@class).getCanonicalPath()
+            + "db/robot;DB_CLOSE_ON_EXIT=FALSE"
+        </property>
+        <property name="user">"sa"</property>
+        <property name="password"></property>
+    </component>
+
+    <component name="connectionPool"
+        class="org.seasar.extension.dbcp.impl.ConnectionPoolImpl">
+        <property name="timeout">600</property>
+        <property name="maxPoolSize">10</property>
+        <property name="allowLocalTx">true</property>
+        <destroyMethod name="close"/>
+    </component>
+
+    <component name="DataSource"
+        class="org.seasar.extension.dbcp.impl.DataSourceImpl"
+    />
+
+</components>

@@ -1,0 +1,16 @@
+<project basedir=".">
+   <property name="sql.driver" value="oracle.jdbc.driver.OracleDriver"/>
+   <property name="sql.url" value="jdbc:oracle:thin:@localhost:1521:XE"/>
+   <property name="sql.user" value="fess"/>
+   <property name="sql.pass" value="fess"/>
+
+   <target name="create">
+      <sql driver="${sql.driver}" url="${sql.url}" userid="${sql.user}" password="${sql.pass}" >
+           <classpath>
+            <pathelement location="${oracle.jar.file}"/>
+           </classpath>   
+           <transaction src="fess.ddl"/>
+      </sql>
+   </target>
+
+</project>

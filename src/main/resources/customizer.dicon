@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN" 
+    "http://www.seasar.org/dtd/components24.dtd">
+<components>
+    <include path="default-customizer.dicon"/>
+	
+    <component name="actionCustomizer"
+        class="org.seasar.framework.container.customizer.CustomizerChain">
+        <initMethod name="addAspectCustomizer">
+            <arg>"aop.traceInterceptor"</arg>
+        </initMethod>
+        <initMethod name="addAspectCustomizer">
+            <arg>"actionMessagesThrowsInterceptor"</arg>
+        </initMethod>
+        <initMethod name="addAspectCustomizer">
+            <arg>"tokenInterceptor"</arg>
+        </initMethod>
+        <initMethod name="addCustomizer">
+            <arg>
+                <component
+                    class="org.seasar.struts.customizer.ActionCustomizer"/>
+            </arg>
+        </initMethod>
+    </component>
+    
+    <component name="formCustomizer"
+        class="org.seasar.framework.container.customizer.CustomizerChain">
+    </component>
+	
+    <component name="serviceCustomizer"
+        class="org.seasar.framework.container.customizer.CustomizerChain">
+        <initMethod name="addAspectCustomizer">
+            <arg>"aop.traceInterceptor"</arg>
+        </initMethod>
+        <initMethod name="addCustomizer">
+            <arg>
+                <component
+                    class="org.seasar.framework.container.customizer.TxAttributeCustomizer"/>
+            </arg>
+        </initMethod>
+    </component>
+
+    <component name="taskSupportAspectCustomizer" class="org.seasar.framework.container.customizer.AspectCustomizer">
+        <initMethod name="addInterceptorName">
+            <arg>"aop.traceInterceptor"</arg>
+        </initMethod>
+        <property name="pointcut">"do.*, initialize, destroy"</property>
+    </component>
+    <component name="taskCustomizer" class="org.seasar.framework.container.customizer.CustomizerChain">
+        <initMethod name="addCustomizer">
+            <arg>taskSupportAspectCustomizer</arg>
+        </initMethod>
+    </component>
+    <component name="triggerSupportAspectCustomizer" class="org.seasar.framework.container.customizer.AspectCustomizer">
+        <initMethod name="addInterceptorName">
+            <arg>"aop.traceInterceptor"</arg>
+        </initMethod>
+        <property name="pointcut">".*"</property>
+    </component>
+    <component name="triggerCustomizer" class="org.seasar.framework.container.customizer.CustomizerChain">
+        <initMethod name="addCustomizer">
+            <arg>triggerSupportAspectCustomizer</arg>
+        </initMethod>
+    </component>
+    
+    <component name="pagerCustomizer" class="org.seasar.framework.container.customizer.CustomizerChain">
+    </component>
+
+</components>

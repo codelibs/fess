@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<include path="convention.dicon" />
+	<include path="aop.dicon" />
+	<include path="dbflute.dicon" />
+	<include path="fess.dicon" />
+
+	<include path="s2robot_db.dicon" />
+
+	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
+	</component>
+	<component name="webFsIndexHelper" class="jp.sf.fess.helper.WebFsIndexHelper">
+	</component>
+	<component name="dataIndexHelper" class="jp.sf.fess.helper.DataIndexHelper">
+	</component>
+	<component name="crawlingConfigHelper" class="jp.sf.fess.helper.CrawlingConfigHelper">
+	</component>
+	<component name="overlappingHostHelper" class="jp.sf.fess.helper.OverlappingHostHelper">
+	</component>
+	<component name="intervalControlHelper" class="jp.sf.fess.helper.IntervalControlHelper">
+		<!-- 
+		<initMethod name="addIntervalRule">
+			<arg>"5:00"</arg>
+			<arg>"10:00"</arg>
+			<arg>"2,3,4,5,6"</arg>
+			<arg>3600000</arg>
+		</initMethod>
+		 -->
+	</component>
+	<component name="sambaHelper" class="jp.sf.fess.helper.SambaHelper">
+	</component>
+	<component name="indexUpdater" class="jp.sf.fess.solr.IndexUpdater"
+		instance="prototype">
+		<!-- 
+		<property name="maxDocumentCacheSize">10</property>
+		<property name="unprocessedDocumentSize">100</property>
+		<property name="threadDump">false</property>
+		<initMethod name="addBoostDocumentRule">
+			<arg>
+				<component class="jp.sf.fess.solr.BoostDocumentRule">
+					<property name="matchExpression">"url.matches(\".*fess.*\")"</property>
+					<property name="boostExpression">"1000.0"</property>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addDefaultDocValue">
+			<arg>"FieldName"</arg>
+			<arg>"VALUE"</arg>
+		</initMethod>
+		 -->
+	</component>
+	<!-- for H2 -->
+	<component name="databaseHelper" class="jp.sf.fess.helper.impl.H2DatabaseHelperImpl">
+		<!--
+		<component name="databaseHelper" class="jp.sf.fess.helper.impl.DatabaseHelperImpl">
+		 -->
+		<aspect pointcut="optimize">
+			j2ee.requiresNewTx
+		</aspect>
+	</component>
+	<component name="fessCrawler" class="jp.sf.fess.exec.Crawler"
+		instance="prototype">
+	</component>
+
+</components>

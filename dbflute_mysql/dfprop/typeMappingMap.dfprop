@@ -1,0 +1,56 @@
+# /---------------------------------------------------------------------------
+# typeMappingMap: (NotRequired - Default map:{})
+#
+# If you want to change mappings from default mappings,
+# you can specify your original mappings.
+# But it is possible that unanticipated problems occurs, so be careful!
+#
+# About '$$AutoMapping$$':
+# If the database is Oracle, they often use this.
+# For example, if you use this for NUMERIC.
+#   o Numeric( 1 -  9 , 0) is mapping to INTEGER
+#   o Numeric(10 - 18 , 0) is mapping to BIGINT
+#   o Numeric(19 - 38 , 0) is mapping to NUMERIC
+#   o Numeric( 1 - 38 , 2) is mapping to NUMERIC
+#
+# Example:
+# map:{
+#     ; INTEGER = java.lang.Integer
+#     ; BIGINT = java.lang.Long
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # AutoMapping for Numeric and Decimal
+    ; NUMERIC = $$AutoMapping$$ ; DECIMAL = $$AutoMapping$$
+}
+# ----------------/
+#
+# Default mapping as follows:
+# --------------------------------------------------------
+# | JDBC Type     | Java Native          | CSharp Native |
+# | ------------------------------------------------------
+# | CHAR          | java.lang.String     | String        |
+# | VARCHAR       | java.lang.String     | String        |
+# | LONGVARCHAR   | java.lang.String     | String        |
+# | NUMERIC       | java.math.BigDecimal | decimal?      |
+# | DECIMAL       | java.math.BigDecimal | decimal?      |
+# | TINYINT       | java.lang.Integer    | int?          |
+# | SMALLINT      | java.lang.Integer    | int?          |
+# | INTEGER       | java.lang.Integer    | int?          |
+# | BIGINT        | java.lang.Long       | long?         |
+# | REAL          | java.math.BigDecimal | decimal?      |
+# | FLOAT         | java.math.BigDecimal | decimal?      |
+# | DOUBLE        | java.math.BigDecimal | decimal?      |
+# | DATE          | java.util.Date       | DateTime?     |
+# | TIME          | java.sql.Time        | DateTime?     |
+# | TIMESTAMP     | java.sql.Timestamp   | DateTime?     |
+# | BIT           | java.lang.Boolean    | bool?         |
+# | BOOLEAN       | java.lang.Boolean    | bool?         |
+# | BINARY        | byte[]               | byte[]        |
+# | VARBINARY     | byte[]               | byte[]        |
+# | LONGVARBINARY | byte[]               | byte[]        |
+# | ARRAY         | *Unsupported         | *Unsupported  |
+# | UUID          | java.util.UUID       | *Unsupported  |
+# --------------------------------------------------------

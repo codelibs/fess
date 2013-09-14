@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<include path="convention.dicon"/>
+	<include path="aop.dicon"/>
+	<include path="dbflute.dicon"/>
+
+	<include path="fess.dicon"/>
+	<include path="fess_suggest.dicon"/>
+
+	<include path="chronos-extension.dicon"/>
+	<include path="mobylet.dicon"/>
+
+	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
+
+	<component name="authenticationCipher" class="jp.sf.fess.crypto.FessCipher">
+        <!-- CHANGE THE FOLLOWING KEY -->
+		<property name="key">"1234567890123456"</property>
+	</component>
+	<component name="browserTypeHelper" class="jp.sf.fess.helper.BrowserTypeHelper">
+	</component>
+	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
+	</component>
+	<component name="queryHelper" class="jp.sf.fess.helper.impl.QueryHelperImpl">
+		<property name="defaultFacetInfo">
+			<component class="jp.sf.fess.entity.FacetInfo">
+				<property name="field">new String[] {"label"}</property>
+				<property name="query">new String[] {
+					"lastModified:[NOW/DAY-1DAY TO NOW]",
+					"lastModified:[NOW/DAY-7DAYS TO NOW]",
+					"lastModified:[NOW/MONTH-1MONTH TO NOW]",
+					"lastModified:[NOW/YEAR-1YEAR TO NOW]",
+					"contentLength:[0 TO 9999]",
+					"contentLength:[10000 TO 99999]",
+					"contentLength:[100000 TO 499999]",
+					"contentLength:[500000 TO 999999]",
+					"contentLength:[1000000 TO *]"
+				}</property>
+			</component>
+		</property>
+		<initMethod name="addFieldLanguage">
+			<arg>"zh"</arg>
+			<arg>"cjk"</arg>
+		</initMethod>
+		<initMethod name="addFieldLanguage">
+			<arg>"zh_CN"</arg>
+			<arg>"cjk"</arg>
+		</initMethod>
+		<initMethod name="addFieldLanguage">
+			<arg>"zh_TW"</arg>
+			<arg>"cjk"</arg>
+		</initMethod>
+		<initMethod name="addFieldLanguage">
+			<arg>"ko"</arg>
+			<arg>"cjk"</arg>
+		</initMethod>
+		<!-- 
+		<property name="additionalGeoQuery">"location_i_i:1"</property>
+		<property name="responseFields">new String[]{"id", "score", "boost",
+            "contentLength", "host", "site", "lastModified", "mimetype",
+            "tstamp", "title", "digest", "url", "clickCount_i", "favoriteCount_i",
+            "screenshot_s_s"}</property>
+		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
+		<property name="searchFields">new String[]{"url", "host", 
+            "title", "content", "contentLength", "lastModified", "mimetype",
+            "label", "segment" }</property>
+		<property name="facetFields">new String[]{"url", "host", 
+            "title", "content", "contentLength", "lastModified", "mimetype",
+            "label", "segment" }</property>
+		<property name="sortPrefix">"sort:"</property>
+		<property name="supportedSortFields">new String[]{"tstamp",
+            "contentLength", "lastModified", "clickCount_i" }</property>
+		<property name="supportedMltFields">new String[]{"content",
+            "content_ja" }</property>
+		<property name="supportedSuggestFields">new String[]{"content",
+            "content_ja", "content_ts", "title_ss" }</property>
+		<property name="shards">"localhost:8983/solr,localhost:7574/solr"</property>
+		<property name="useBigram">true</property>
+		<property name="additionalQuery">""</property>
+		<property name="maxFilterQueriesForRole">3</property>
+		<property name="timeAllowed">1000</property>
+		<initMethod name="addRequestParameter">
+			<arg>"debug.explain.structured"</arg>
+			<arg>"true"</arg>
+		</initMethod>
+		<property name="supportedLanguages">new String[] { "ar", "bg", "ca",
+            "cz", "da", "de", "el", "es", "eu", "fa", "fi", "fr", "ga", "gl",
+            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
+            "ro", "ru", "sv", "th", "tr", "zh", "zh_CN", "zh_TW" }</property>
+		<initMethod name="addDefaultSortField">
+			<arg>"score"</arg>
+			<arg>"desc"</arg>
+		</initMethod>
+		<initMethod name="addQueryParam">
+			<arg>"word"</arg>
+			<arg>new String[]{"$query"}</arg>
+		</initMethod>
+		-->
+	</component>
+	<component name="viewHelper" class="jp.sf.fess.helper.ViewHelper">
+		<initMethod name="addFacetQueryView">
+			<arg>
+				<component class="jp.sf.fess.entity.FacetQueryView">
+					<property name="title">"label.facet_lastModified_title"</property>
+					<initMethod name="addQuery">
+						<arg>"label.facet_lastModified_1day"</arg>
+						<arg>"lastModified:[NOW/DAY-1DAY TO NOW]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_lastModified_1week"</arg>
+						<arg>"lastModified:[NOW/DAY-7DAYS TO NOW]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_lastModified_1month"</arg>
+						<arg>"lastModified:[NOW/MONTH-1MONTH TO NOW]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_lastModified_1year"</arg>
+						<arg>"lastModified:[NOW/YEAR-1YEAR TO NOW]"</arg>
+					</initMethod>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addFacetQueryView">
+			<arg>
+				<component class="jp.sf.fess.entity.FacetQueryView">
+					<property name="title">"label.facet_contentLength_title"</property>
+					<initMethod name="addQuery">
+						<arg>"label.facet_contentLength_10k"</arg>
+						<arg>"contentLength:[0 TO 9999]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_contentLength_10kto100k"</arg>
+						<arg>"contentLength:[10000 TO 99999]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_contentLength_100kto500k"</arg>
+						<arg>"contentLength:[100000 TO 499999]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_contentLength_500kto1m"</arg>
+						<arg>"contentLength:[500000 TO 999999]"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_contentLength_1m"</arg>
+						<arg>"contentLength:[1000000 TO *]"</arg>
+					</initMethod>
+				</component>
+			</arg>
+		</initMethod>
+		<!-- 
+		<property name="encodeUrlLink">false</property>
+		<property name="mobileDescriptionLength">50</property>
+		<property name="pcDescriptionLength">200</property>
+		<property name="mobileTitleLength">50</property>
+		<property name="pcTitleLength">50</property>
+		<property name="urlLinkEncoding">"UTF-8"</property>
+		<property name="highlightingFields">new String[] { "hl_content", "digest" }</property>
+		<initMethod name="addInitFacetParam">
+			<arg>"facet.field"</arg>
+			<arg>"label"</arg>
+		</initMethod>
+		 -->
+	</component>
+	<component name="webManagementHelper" class="jp.sf.fess.helper.impl.TomcatManagementHelperImpl">
+		<initMethod name="addSolrInstance">
+			<arg>
+				<component class="jp.sf.fess.helper.impl.TomcatManagementHelperImpl$SolrInstance">
+					<property name="name">"solrServer1"</property>
+					<property name="managerUrl">"http://localhost:8080/manager/text/"</property>
+					<property name="contextPath">"/solr"</property>
+					<property name="username">"manager"</property>
+					<property name="password">"manager"</property>
+				</component>
+			</arg>
+		</initMethod>
+	</component>
+	<component name="searchLogHelper" class="jp.sf.fess.helper.SearchLogHelper">
+	</component>
+	<component name="hotSearchWordHelper" class="jp.sf.fess.helper.HotSearchWordHelper">
+		<property name="excludedWordPattern">@java.util.regex.Pattern@compile(".*[a-zA-Z0-9_]+:.*")</property>
+		<!-- 
+		<property name="size">10</property>
+		 -->
+	</component>
+	<component name="userInfoHelper" class="jp.sf.fess.helper.impl.CookieUserInfoHelperImpl">
+		<!-- 
+		<property name="cookieName">"fu"</property>
+		<property name="cookieDomain">""</property>
+		<property name="cookieMaxAge">30 * 24 * 60 * 60</property>
+		<property name="cookiePath">""</property>
+		<property name="cookieSecure">false</property>
+		 -->
+	</component>
+	<component name="openSearchHelper" class="jp.sf.fess.helper.OpenSearchHelper">
+		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
+		<property name="encoding">"UTF-8"</property>
+	</component>
+	<component name="queryResponseList" class="jp.sf.fess.util.QueryResponseList" instance="prototype">
+	</component>
+	<component name="userAgentName" class="java.lang.String">
+		<arg>"Mozilla/5.0 (compatible; Fess/" + @jp.sf.fess.Constants@FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
+	</component>
+</components>

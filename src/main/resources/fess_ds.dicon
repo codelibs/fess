@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<component name="dataStoreFactory" class="jp.sf.fess.ds.DataStoreFactory">
+		<initMethod name="add">
+			<arg>"DatabaseDataStore"</arg>
+			<arg>databaseDataStore</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"CsvDataStore"</arg>
+			<arg>csvDataStore</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"FileListDataStore"</arg>
+			<arg>fileListDataStore</arg>
+		</initMethod>
+	</component>
+
+	<component name="databaseDataStore" class="jp.sf.fess.ds.impl.DatabaseDataStoreImpl">
+	</component>
+	<component name="csvDataStore" class="jp.sf.fess.ds.impl.CsvDataStoreImpl">
+		<!-- 
+		<property name="csvFileSuffixs">new String[] { ".csv", ".tsv" }</property>
+		 -->
+	</component>
+	<component name="fileListDataStore" class="jp.sf.fess.ds.impl.FileListDataStoreImpl">
+	</component>
+
+	<component name="indexUpdateCallback" class="jp.sf.fess.ds.impl.IndexUpdateCallbackImpl" instance="prototype">
+		<!-- 
+		<property name="maxDocumentCacheSize">10</property>
+		 -->
+	</component>
+
+</components>

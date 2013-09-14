@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+    <include path="s2robot_dbflute.dicon"/>
+    <include path="s2robot_client.dicon"/>
+    <include path="s2robot_rule.dicon"/>
+    <include path="s2robot_filter.dicon"/>
+    <include path="s2robot_interval.dicon"/>
+    <include path="s2robot_extractor.dicon"/>
+    <include path="s2robot_mimetype.dicon"/>
+    <include path="s2robot_encoding.dicon"/>
+    <include path="s2robot_urlconverter.dicon"/>
+    <include path="s2robot_log.dicon"/>
+    <include path="s2robot_sitemaps.dicon"/>
+
+	<!-- S2Robot -->
+	<component name="s2Robot" class="org.seasar.robot.S2Robot" instance="prototype" >
+	</component>
+
+	<!-- Robot Thread -->
+	<component name="robotThread" class="jp.sf.fess.robot.FessS2RobotThread" instance="prototype" >
+		<property name="noWaitOnFolder">true</property>
+	</component>
+
+	<!-- Entity -->
+	<component name="accessResult" class="org.seasar.robot.db.exentity.AccessResult" instance="prototype" >
+	</component>
+	<component name="urlQueue" class="org.seasar.robot.db.exentity.UrlQueue" instance="prototype" >
+	</component>
+
+    <!-- Service -->
+	<component name="urlQueueService" class="org.seasar.robot.service.impl.DBUrlQueueServiceImpl" instance="prototype" >
+		<aspect pointcut="poll,visited,add,delete,deleteAll,generateUrlQueues,insert,offerAll,saveSession,updateSessionId">
+			s2robot_j2ee.requiredTx
+		</aspect>
+	</component>
+	<component name="dataService" class="org.seasar.robot.service.impl.DBDataServiceImpl" instance="prototype" >
+		<aspect pointcut="getAccessResult,getAccessResultList,getCount,delete,deleteAll,iterate,iterateUrlDiff,store,update">
+			s2robot_j2ee.requiredTx
+		</aspect>
+	</component>
+	<component name="urlFilterService" class="org.seasar.robot.service.impl.DBUrlFilterServiceImpl" instance="prototype" >
+		<aspect pointcut="getExcludeUrlPatternList,getIncludeUrlPatternList,addExcludeUrlFilter,addIncludeUrlFilter,delete,deleteAll">
+			s2robot_j2ee.requiredTx
+		</aspect>
+	</component>
+
+</components>

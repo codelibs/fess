@@ -1,0 +1,19 @@
+# /---------------------------------------------------------------------------
+# refreshDefinitionMap: (NotRequired - Default map:{})
+#
+# If you use ResourceSynchronizer and specify this property,
+# You don't need to refresh(F5) your eclipse project.
+#
+# Specification:
+# map:{
+#     ; projectName = [Eclipse Project1] / [Eclipse Project2] / ...
+#     ; requestUrl = [ResourceSynchronizer's URL]
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    #; projectName = dbflute-basic-example
+    #; requestUrl = http://localhost:8386/
+}
+# ----------------/

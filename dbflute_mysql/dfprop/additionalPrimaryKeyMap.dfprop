@@ -1,0 +1,26 @@
+# /---------------------------------------------------------------------------
+# additionalPrimaryKeyMap: (NotRequired - Default map:{})
+#
+# If primary key does not exist in your database,
+# you can set up here as virtual primary key for DBFlute.
+# And you can use it to view objects too.
+# The names are treated as case insensitive.
+#
+# Example:
+# map:{
+#     ; PK_MEMBER = map:{
+#         ; tableName = MEMBER ; columnName = MEMBER_ID
+#     }
+#     ; PK_PURCHASE = map:{
+#         ; tableName = PURCHASE ; columnName = PURCHASE_ID
+#     }
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    #; PK_MEMBER = map:{
+    #    ; tableName = MEMBER ; columnName = MEMBER_ID
+    #}
+}
+# ----------------/
