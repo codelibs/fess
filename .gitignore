@@ -1,4 +1,6 @@
-target/
-bin/
-work/
+/target
+/work
+/bin
+/src/main/webapp/WEB-INF/classes/
+/src/main/webapp/WEB-INF/lib/
 .classpath
