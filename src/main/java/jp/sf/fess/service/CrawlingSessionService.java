@@ -24,6 +24,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -154,19 +155,19 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         return crawlingSessionInfoBhv.selectList(cb);
     }
 
-    public void deleteOldSessions(final String activeSessionId) {
+    public void deleteOldSessions(final Set<String> activeSessionId) {
         final CrawlingSessionInfoCB cb1 = new CrawlingSessionInfoCB();
-        if (StringUtil.isNotEmpty(activeSessionId)) {
+        if (!activeSessionId.isEmpty()) {
             cb1.query().queryCrawlingSession()
-                    .setSessionId_NotEqual(activeSessionId);
+                    .setSessionId_NotInScope(activeSessionId);
         }
         crawlingSessionInfoBhv
                 .varyingQueryDelete(cb1,
                         new DeleteOption<CrawlingSessionInfoCB>()
                                 .allowNonQueryDelete());
         final CrawlingSessionCB cb2 = new CrawlingSessionCB();
-        if (StringUtil.isNotEmpty(activeSessionId)) {
-            cb2.query().setSessionId_NotEqual(activeSessionId);
+        if (!activeSessionId.isEmpty()) {
+            cb2.query().setSessionId_NotInScope(activeSessionId);
         }
         crawlingSessionBhv.varyingQueryDelete(cb2,
                 new DeleteOption<CrawlingSessionCB>().allowNonQueryDelete());

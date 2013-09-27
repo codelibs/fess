@@ -76,6 +76,7 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
                 "jp.sf.fess.db.bsentity.dbmeta.FileConfigToRoleTypeMappingDbm");
         tmpMap.put("FILE_CRAWLING_CONFIG",
                 "jp.sf.fess.db.bsentity.dbmeta.FileCrawlingConfigDbm");
+        tmpMap.put("JOB_LOG", "jp.sf.fess.db.bsentity.dbmeta.JobLogDbm");
         tmpMap.put("LABEL_TYPE", "jp.sf.fess.db.bsentity.dbmeta.LabelTypeDbm");
         tmpMap.put("LABEL_TYPE_TO_ROLE_TYPE_MAPPING",
                 "jp.sf.fess.db.bsentity.dbmeta.LabelTypeToRoleTypeMappingDbm");
@@ -86,6 +87,8 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
         tmpMap.put("REQUEST_HEADER",
                 "jp.sf.fess.db.bsentity.dbmeta.RequestHeaderDbm");
         tmpMap.put("ROLE_TYPE", "jp.sf.fess.db.bsentity.dbmeta.RoleTypeDbm");
+        tmpMap.put("SCHEDULED_JOB",
+                "jp.sf.fess.db.bsentity.dbmeta.ScheduledJobDbm");
         tmpMap.put("SEARCH_FIELD_LOG",
                 "jp.sf.fess.db.bsentity.dbmeta.SearchFieldLogDbm");
         tmpMap.put("SEARCH_LOG", "jp.sf.fess.db.bsentity.dbmeta.SearchLogDbm");

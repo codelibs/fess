@@ -8,7 +8,6 @@
 
 	<include path="fess.dicon"/>
 
-	<include path="chronos-extension.dicon"/>
 	<include path="mobylet.dicon"/>
 
     <include path="s2robot_db.dicon"/>

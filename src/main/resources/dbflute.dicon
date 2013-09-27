@@ -28,12 +28,14 @@
     <component name="fileConfigToLabelTypeMappingBhv" class="jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv"/>
     <component name="fileConfigToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv"/>
     <component name="fileCrawlingConfigBhv" class="jp.sf.fess.db.exbhv.FileCrawlingConfigBhv"/>
+    <component name="jobLogBhv" class="jp.sf.fess.db.exbhv.JobLogBhv"/>
     <component name="labelTypeBhv" class="jp.sf.fess.db.exbhv.LabelTypeBhv"/>
     <component name="labelTypeToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.LabelTypeToRoleTypeMappingBhv"/>
     <component name="overlappingHostBhv" class="jp.sf.fess.db.exbhv.OverlappingHostBhv"/>
     <component name="pathMappingBhv" class="jp.sf.fess.db.exbhv.PathMappingBhv"/>
     <component name="requestHeaderBhv" class="jp.sf.fess.db.exbhv.RequestHeaderBhv"/>
     <component name="roleTypeBhv" class="jp.sf.fess.db.exbhv.RoleTypeBhv"/>
+    <component name="scheduledJobBhv" class="jp.sf.fess.db.exbhv.ScheduledJobBhv"/>
     <component name="searchFieldLogBhv" class="jp.sf.fess.db.exbhv.SearchFieldLogBhv"/>
     <component name="searchLogBhv" class="jp.sf.fess.db.exbhv.SearchLogBhv"/>
     <component name="userInfoBhv" class="jp.sf.fess.db.exbhv.UserInfoBhv"/>

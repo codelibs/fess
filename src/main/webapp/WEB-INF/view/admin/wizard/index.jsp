@@ -27,7 +27,7 @@
 					<bean:message key="labels.wizard_start_desc" />
 				</p>
 				<div class="span8">
-				<input type="submit" name="scheduleForm"
+				<input type="submit" name="crawlingConfigForm"
 					class="btn small"
 					value="<bean:message key="labels.wizard_start_button"/>" /></td>
 				</div>

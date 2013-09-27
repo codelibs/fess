@@ -16,22 +16,19 @@
 
 package jp.sf.fess.helper;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.ServletContext;
@@ -40,10 +37,13 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.exec.Crawler;
+import jp.sf.fess.job.JobExecutor;
 import jp.sf.fess.service.RoleTypeService;
+import jp.sf.fess.util.InputStreamThread;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.policy.QueryType;
@@ -66,15 +66,9 @@ public class SystemHelper implements Serializable {
     private static final Logger logger = LoggerFactory
             .getLogger(SystemHelper.class);
 
-    private final AtomicBoolean crawlProcessStatus = new AtomicBoolean();
+    private final ConcurrentHashMap<String, Process> runningProcessMap = new ConcurrentHashMap<String, Process>();
 
-    private final AtomicBoolean replicationProcessStatus = new AtomicBoolean();
-
-    private String sessionId;
-
-    private final AtomicBoolean forceStop = new AtomicBoolean();
-
-    private volatile Process currentProcess;
+    private final ConcurrentHashMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<Long, JobExecutor>();
 
     private String adminRole = "fess";
 
@@ -119,6 +113,8 @@ public class SystemHelper implements Serializable {
     private String launcherJarPath;
 
     private String launcherJnlpPath;
+
+    private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
     @InitMethod
     public void init() {
@@ -175,12 +171,14 @@ public class SystemHelper implements Serializable {
 
     @DestroyMethod
     public void destroy() {
-        if (currentProcess != null) {
-            destroyCrawlerProcess();
+        for (final String sessionId : runningProcessMap.keySet()) {
+            destroyCrawlerProcess(sessionId);
         }
     }
 
-    public void executeCrawler(final String sessionId) {
+    public void executeCrawler(final String sessionId,
+            final String[] webConfigIds, final String[] fileConfigIds,
+            final String[] dataConfigIds, final String operation) {
         final List<String> crawlerCmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonS2Container
@@ -248,6 +246,23 @@ public class SystemHelper implements Serializable {
         crawlerCmdList.add("--name");
         crawlerCmdList.add(Constants.CRAWLING_SESSION_SYSTEM_NAME);
 
+        if (webConfigIds != null) {
+            crawlerCmdList.add("-w");
+            crawlerCmdList.add(StringUtils.join(webConfigIds, ','));
+        }
+        if (webConfigIds != null) {
+            crawlerCmdList.add("-f");
+            crawlerCmdList.add(StringUtils.join(fileConfigIds, ','));
+        }
+        if (webConfigIds != null) {
+            crawlerCmdList.add("-d");
+            crawlerCmdList.add(StringUtils.join(dataConfigIds, ','));
+        }
+        if (StringUtil.isNotBlank(operation)) {
+            crawlerCmdList.add("-o");
+            crawlerCmdList.add(operation);
+        }
+
         final File baseDir = new File(servletContext.getRealPath("/"));
 
         if (logger.isInfoEnabled()) {
@@ -259,12 +274,12 @@ public class SystemHelper implements Serializable {
         pb.directory(baseDir);
         pb.redirectErrorStream(true);
 
-        if (currentProcess != null) {
-            destroyCrawlerProcess();
-        }
+        destroyCrawlerProcess(sessionId);
 
         try {
-            currentProcess = pb.start();
+            final Process currentProcess = pb.start();
+            destroyCrawlerProcess(runningProcessMap.putIfAbsent(sessionId,
+                    currentProcess));
 
             final InputStreamThread it = new InputStreamThread(
                     currentProcess.getInputStream(), Constants.UTF_8);
@@ -284,11 +299,7 @@ public class SystemHelper implements Serializable {
         } catch (final Exception e) {
             throw new FessSystemException("Crawler Process terminated.", e);
         } finally {
-            if (currentProcess != null) {
-                destroyCrawlerProcess();
-            }
-            currentProcess = null;
-
+            destroyCrawlerProcess(sessionId);
             if (ownTmpDir != null && !ownTmpDir.delete()) {
                 logger.warn("Could not delete a temp dir: "
                         + ownTmpDir.getAbsolutePath());
@@ -296,22 +307,27 @@ public class SystemHelper implements Serializable {
         }
     }
 
-    public void destroyCrawlerProcess() {
-        if (currentProcess != null) {
+    public void destroyCrawlerProcess(final String sessionId) {
+        final Process process = runningProcessMap.remove(sessionId);
+        destroyCrawlerProcess(process);
+    }
+
+    protected void destroyCrawlerProcess(final Process process) {
+        if (process != null) {
             try {
-                IOUtils.closeQuietly(currentProcess.getInputStream());
+                IOUtils.closeQuietly(process.getInputStream());
             } catch (final Exception e) {
             }
             try {
-                IOUtils.closeQuietly(currentProcess.getErrorStream());
+                IOUtils.closeQuietly(process.getErrorStream());
             } catch (final Exception e) {
             }
             try {
-                IOUtils.closeQuietly(currentProcess.getOutputStream());
+                IOUtils.closeQuietly(process.getOutputStream());
             } catch (final Exception e) {
             }
             try {
-                currentProcess.destroy();
+                process.destroy();
             } catch (final Exception e) {
             }
         }
@@ -348,71 +364,8 @@ public class SystemHelper implements Serializable {
         return new Timestamp(System.currentTimeMillis());
     }
 
-    public boolean readyCrawlProcess() {
-        return crawlProcessStatus.compareAndSet(false, true);
-    }
-
     public boolean isCrawlProcessRunning() {
-        return crawlProcessStatus.get();
-    }
-
-    public void finishCrawlProcess() {
-        crawlProcessStatus.set(false);
-        sessionId = null;
-    }
-
-    public boolean readyReplicationProcess() {
-        return replicationProcessStatus.compareAndSet(false, true);
-    }
-
-    public boolean isReplicationProcessRunning() {
-        return replicationProcessStatus.get();
-    }
-
-    public void finishReplicationProcess() {
-        replicationProcessStatus.set(false);
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(final String sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public File getSnapshotDir(final String path) {
-        final File file = new File(path);
-        if (!file.getName().contains("*")) {
-            return file;
-        }
-        File targetDir = null;
-        final String dirName = file.getName().replaceAll("\\.", "\\\\.")
-                .replaceAll("\\*", ".*");
-        for (final File f : file.getParentFile().listFiles(
-                new FilenameFilter() {
-                    @Override
-                    public boolean accept(final File dir, final String name) {
-                        return name.matches(dirName);
-                    }
-                })) {
-            if (targetDir == null
-                    || targetDir.lastModified() < f.lastModified()) {
-                targetDir = f;
-            }
-        }
-        if (targetDir != null) {
-            return targetDir;
-        }
-        return file;
-    }
-
-    public boolean isForceStop() {
-        return forceStop.get();
-    }
-
-    public void setForceStop(final boolean forceStop) {
-        this.forceStop.set(forceStop);
+        return !runningProcessMap.isEmpty();
     }
 
     public String getLogFilePath() {
@@ -421,52 +374,6 @@ public class SystemHelper implements Serializable {
 
     public void setLogFilePath(final String logFilePath) {
         this.logFilePath = logFilePath;
-    }
-
-    protected static class InputStreamThread extends Thread {
-
-        private BufferedReader br;
-
-        private static final int MAX_BUFFER_SIZE = 1000;
-
-        private final List<String> list = new LinkedList<String>();
-
-        public InputStreamThread(final InputStream is, final String charset) {
-            try {
-                br = new BufferedReader(new InputStreamReader(is, charset));
-            } catch (final UnsupportedEncodingException e) {
-                throw new FessSystemException(e);
-            }
-        }
-
-        @Override
-        public void run() {
-            for (;;) {
-                try {
-                    final String line = br.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(line);
-                    }
-                    list.add(line);
-                    if (list.size() > MAX_BUFFER_SIZE) {
-                        list.remove(0);
-                    }
-                } catch (final IOException e) {
-                    throw new FessSystemException(e);
-                }
-            }
-        }
-
-        public String getOutput() {
-            final StringBuilder buf = new StringBuilder();
-            for (final String value : list) {
-                buf.append(value).append("\n");
-            }
-            return buf.toString();
-        }
     }
 
     public String encodeUrlFilter(final String path) {
@@ -681,4 +588,28 @@ public class SystemHelper implements Serializable {
 
     }
 
+    public Set<String> getRunningSessionIdSet() {
+        return runningProcessMap.keySet();
+    }
+
+    public boolean isForceStop() {
+        return forceStop.get();
+    }
+
+    public void setForceStop(final boolean b) {
+        forceStop.set(true);
+    }
+
+    public void addRunningJobExecutoer(final Long id,
+            final JobExecutor jobExecutor) {
+        runningJobExecutorMap.put(id, jobExecutor);
+    }
+
+    public void removeRunningJobExecutoer(final Long id) {
+        runningJobExecutorMap.remove(id);
+    }
+
+    public boolean isRunningJobExecutoer(final Long id) {
+        return runningJobExecutorMap.containsKey(id);
+    }
 }

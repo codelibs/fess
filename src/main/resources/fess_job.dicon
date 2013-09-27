@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<component name="jobScheduler" class="jp.sf.fess.job.JobScheduler">
+	</component>
+	<component name="groovyJobExecutor" class="jp.sf.fess.job.impl.GroovyExecutor" instance="prototype">
+	</component>
+
+	<!-- Jobs -->
+	<component name="crawlJob" class="jp.sf.fess.job.CrawlJob" instance="prototype">
+	</component>
+	<component name="minutelyJob" class="jp.sf.fess.job.MinutelyJob" instance="prototype">
+	</component>
+	<component name="hourlyJob" class="jp.sf.fess.job.HourlyJob" instance="prototype">
+	</component>
+	<component name="dailyJob" class="jp.sf.fess.job.DailyJob" instance="prototype">
+	</component>
+</components>

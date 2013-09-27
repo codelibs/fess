@@ -260,7 +260,7 @@ public class SearchListAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (systemHelper.readyCrawlProcess()) {
+                    if (!systemHelper.isCrawlProcessRunning()) {
                         final long time = System.currentTimeMillis();
                         try {
                             solrGroup.deleteById(deleteId);
@@ -273,8 +273,6 @@ public class SearchListAction implements Serializable {
                         } catch (final Exception e) {
                             logger.error("Failed to delete index (query="
                                     + deleteId + ").", e);
-                        } finally {
-                            systemHelper.finishCrawlProcess();
                         }
                     } else {
                         if (logger.isInfoEnabled()) {

@@ -27,24 +27,6 @@ public class WizardForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Maxbytelength(maxbytelength = 10, target = "schedule")
-    public String scheduleEnabled;
-
-    @Maxbytelength(maxbytelength = 2, target = "schedule")
-    public String scheduleMonth;
-
-    @Maxbytelength(maxbytelength = 2, target = "schedule")
-    public String scheduleDate;
-
-    @Maxbytelength(maxbytelength = 2, target = "schedule")
-    public String scheduleHour;
-
-    @Maxbytelength(maxbytelength = 2, target = "schedule")
-    public String scheduleMin;
-
-    @Maxbytelength(maxbytelength = 20, target = "schedule")
-    public String scheduleDay;
-
     @Maxbytelength(maxbytelength = 200, target = "crawlingConfig,crawlingConfigNext")
     public String crawlingConfigName;
 
@@ -59,11 +41,6 @@ public class WizardForm implements Serializable {
     public String depth;
 
     public WizardForm() {
-        scheduleEnabled = null;
-        scheduleMonth = "*";
-        scheduleDate = "*";
-        scheduleHour = "0";
-        scheduleMin = "0";
         maxAccessCount = "10000";
         depth = null;
     }

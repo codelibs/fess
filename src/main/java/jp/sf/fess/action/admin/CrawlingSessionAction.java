@@ -49,7 +49,8 @@ public class CrawlingSessionAction extends BsCrawlingSessionAction {
 
     @Execute(validator = false, input = "error.jsp")
     public String deleteall() {
-        crawlingSessionService.deleteOldSessions(systemHelper.getSessionId());
+        crawlingSessionService.deleteOldSessions(systemHelper
+                .getRunningSessionIdSet());
         SAStrutsUtil.addSessionMessage("success.crawling_session_delete_all");
         return displayList(true);
     }

@@ -714,7 +714,9 @@ public abstract class BsWebConfigToBrowserTypeMappingBhv extends
     }
 
     /**
-     * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl)
+     * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
+     * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
+     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
      * @param webConfigToBrowserTypeMapping The entity of insert or update target. (NotNull)
      * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
@@ -847,8 +849,8 @@ public abstract class BsWebConfigToBrowserTypeMappingBhv extends
     //                                                                        ============
     /**
      * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are insert target. (so default constraints are not available in this method)</span> <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement.
+     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
      * And if the table has an identity, entities after the process don't have incremented values.
      * When you use the (normal) insert(), an entity after the process has an incremented value.
      * @param webConfigToBrowserTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
@@ -881,13 +883,14 @@ public abstract class BsWebConfigToBrowserTypeMappingBhv extends
     /**
      * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() method, which you can specify update columns like this:
+     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
+     * So you should the other batchUpdate() (overload) method for performace,
+     * which you can specify update columns like this:
      * <pre>
      * webConfigToBrowserTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(webConfigToBrowserTypeMappingList, new SpecifyQuery<WebConfigToBrowserTypeMappingCB>() {
-     *     public void specify(WebConfigToBrowserTypeMappingCB cb) { <span style="color: #3F7E5E">// FOO_STATUS_CODE, BAR_DATE only updated</span>
-     *         cb.specify().columnFooStatusCode();
-     *         cb.specify().columnBarDate();
+     *     public void specify(WebConfigToBrowserTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
+     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
+     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
      *     }
      * });
      * </pre>
@@ -905,8 +908,21 @@ public abstract class BsWebConfigToBrowserTypeMappingBhv extends
             final UpdateOption<WebConfigToBrowserTypeMappingCB> option) {
         assertObjectNotNull("webConfigToBrowserTypeMappingList",
                 webConfigToBrowserTypeMappingList);
-        prepareUpdateOption(option);
+        prepareBatchUpdateOption(webConfigToBrowserTypeMappingList, option);
         return delegateBatchUpdate(webConfigToBrowserTypeMappingList, option);
+    }
+
+    protected void prepareBatchUpdateOption(
+            final List<WebConfigToBrowserTypeMapping> webConfigToBrowserTypeMappingList,
+            final UpdateOption<WebConfigToBrowserTypeMappingCB> option) {
+        if (option == null) {
+            return;
+        }
+        prepareUpdateOption(option);
+        // under review
+        //if (option.hasSpecifiedUpdateColumn()) {
+        //    option.xgatherUpdateColumnModifiedProperties(webConfigToBrowserTypeMappingList);
+        //}
     }
 
     @Override
@@ -921,18 +937,27 @@ public abstract class BsWebConfigToBrowserTypeMappingBhv extends
 
     /**
      * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * You can specify update columns used on set clause of update statement.
-     * However you do not need to specify common columns for update
-     * and an optimistick lock column because they are specified implicitly.
+     * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
+     * <span style="color: #3F7E5E">// e.g. update two columns only</span> 
      * webConfigToBrowserTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(webConfigToBrowserTypeMappingList, new SpecifyQuery<WebConfigToBrowserTypeMappingCB>() {
-     *     public void specify(WebConfigToBrowserTypeMappingCB cb) { <span style="color: #3F7E5E">// FOO_STATUS_CODE, BAR_DATE only updated</span>
-     *         cb.specify().columnFooStatusCode();
-     *         cb.specify().columnBarDate();
+     *     public void specify(WebConfigToBrowserTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
+     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *     }
+     * });
+     * <span style="color: #3F7E5E">// e.g. update every column in the table</span> 
+     * webConfigToBrowserTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(webConfigToBrowserTypeMappingList, new SpecifyQuery<WebConfigToBrowserTypeMappingCB>() {
+     *     public void specify(WebConfigToBrowserTypeMappingCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
+     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
+     * <p>You can specify update columns used on set clause of update statement.
+     * However you do not need to specify common columns for update
+     * and an optimistic lock column because they are specified implicitly.</p>
+     * <p>And you should specify columns that are modified in any entities (at least one entity).
+     * But if you specify every column, it has no check.</p>
      * @param webConfigToBrowserTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)

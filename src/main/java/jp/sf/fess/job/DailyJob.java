@@ -14,68 +14,49 @@
  * governing permissions and limitations under the License.
  */
 
-package jp.sf.fess.task;
+package jp.sf.fess.job;
 
-import java.io.Serializable;
 import java.util.Date;
-
-import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.service.CrawlingSessionService;
+import jp.sf.fess.service.JobLogService;
 import jp.sf.fess.service.SearchLogService;
 import jp.sf.fess.service.UserInfoService;
 
 import org.codelibs.core.util.DynamicProperties;
-import org.seasar.chronos.core.TaskTrigger;
-import org.seasar.chronos.core.annotation.task.Task;
-import org.seasar.chronos.core.trigger.CCronTrigger;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Task
-public class DailyTask implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class DailyJob {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(DailyTask.class);
+            .getLogger(DailyJob.class);
 
-    @Resource
-    protected DynamicProperties crawlerProperties;
+    public String execute() {
+        final CrawlingSessionService crawlingSessionService = SingletonS2Container
+                .getComponent(CrawlingSessionService.class);
+        final SearchLogService searchLogService = SingletonS2Container
+                .getComponent(SearchLogService.class);
+        final JobLogService jobLogService = SingletonS2Container
+                .getComponent(JobLogService.class);
+        final UserInfoService userInfoService = SingletonS2Container
+                .getComponent(UserInfoService.class);
+        final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
+                .getComponent(HotSearchWordHelper.class);
+        final DynamicProperties crawlerProperties = SingletonS2Container
+                .getComponent("crawlerProperties");
 
-    @Resource
-    protected CrawlingSessionService crawlingSessionService;
+        final StringBuilder resultBuf = new StringBuilder();
 
-    @Resource
-    protected SearchLogService searchLogService;
-
-    @Resource
-    protected UserInfoService userInfoService;
-
-    private CCronTrigger trigger;
-
-    public TaskTrigger getTrigger() {
-        if (trigger == null) {
-            trigger = new CCronTrigger(crawlerProperties.getProperty(
-                    Constants.DAILY_CRON_EXPRESSION_PROPERTY,
-                    Constants.DEFAULT_DAILY_CRON_EXPRESSION));
-        } else {
-            trigger.setExpression(crawlerProperties.getProperty(
-                    Constants.DAILY_CRON_EXPRESSION_PROPERTY,
-                    Constants.DEFAULT_DAILY_CRON_EXPRESSION));
-        }
-        return trigger;
-    }
-
-    public void doExecute() {
         // hot words
         try {
-            SingletonS2Container.getComponent(HotSearchWordHelper.class)
-                    .reload();
+            hotSearchWordHelper.reload();
         } catch (final Exception e) {
             logger.error("Failed to store a search log.", e);
+            resultBuf.append(e.getMessage()).append("\n");
         }
 
         // purge crawling sessions
@@ -83,17 +64,31 @@ public class DailyTask implements Serializable {
             crawlingSessionService.deleteBefore(new Date());
         } catch (final Exception e) {
             logger.error("Failed to purge crawling sessions.", e);
+            resultBuf.append(e.getMessage()).append("\n");
         }
 
         // purge search logs
         try {
             final String value = crawlerProperties.getProperty(
-                    Constants.PURGE_SERCH_LOG_DAY_PROPERTY,
+                    Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
                     Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
             searchLogService.deleteBefore(days);
         } catch (final Exception e) {
             logger.error("Failed to purge search logs.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
+        // purge job logs
+        try {
+            final String value = crawlerProperties.getProperty(
+                    Constants.PURGE_JOB_LOG_DAY_PROPERTY,
+                    Constants.DEFAULT_PURGE_DAY);
+            final int days = Integer.parseInt(value);
+            jobLogService.deleteBefore(days);
+        } catch (final Exception e) {
+            logger.error("Failed to purge job logs.", e);
+            resultBuf.append(e.getMessage()).append("\n");
         }
 
         // purge user info
@@ -105,10 +100,10 @@ public class DailyTask implements Serializable {
             userInfoService.deleteBefore(days);
         } catch (final Exception e) {
             logger.error("Failed to purge user info.", e);
+            resultBuf.append(e.getMessage()).append("\n");
         }
+
+        return resultBuf.toString();
     }
 
-    public void catchException(final Exception e) {
-        logger.error("Failed to execute search log task.", e);
-    }
 }

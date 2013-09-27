@@ -60,17 +60,8 @@ public class CrawlAction implements Serializable {
     }
 
     protected String showIndex(final boolean redirect) {
-        crawlForm.cronExpression = crawlerProperties.getProperty(
-                Constants.CRON_EXPRESSION_PROPERTY,
-                Constants.DEFAULT_CRON_EXPRESSION);
-        crawlForm.diffCrawling = crawlerProperties.getProperty(
-                Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
         crawlForm.useAclAsRole = crawlerProperties.getProperty(
                 Constants.USE_ACL_AS_ROLE, Constants.FALSE);
-        crawlForm.optimize = crawlerProperties.getProperty(
-                Constants.OPTIMIZE_PROPERTY, Constants.FALSE);
-        crawlForm.commit = crawlerProperties.getProperty(
-                Constants.COMMIT_PROPERTY, Constants.TRUE);
         crawlForm.serverRotation = crawlerProperties.getProperty(
                 Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
         crawlForm.dayForCleanup = crawlerProperties.getProperty(
@@ -114,7 +105,10 @@ public class CrawlAction implements Serializable {
         crawlForm.csvFileEncoding = crawlerProperties.getProperty(
                 Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
         crawlForm.purgeSearchLogDay = crawlerProperties.getProperty(
-                Constants.PURGE_SERCH_LOG_DAY_PROPERTY,
+                Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
+                Constants.DEFAULT_PURGE_DAY);
+        crawlForm.purgeJobLogDay = crawlerProperties.getProperty(
+                Constants.PURGE_JOB_LOG_DAY_PROPERTY,
                 Constants.DEFAULT_PURGE_DAY);
         crawlForm.purgeUserInfoDay = crawlerProperties.getProperty(
                 Constants.PURGE_USER_INFO_DAY_PROPERTY,
@@ -140,35 +134,12 @@ public class CrawlAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index.jsp")
     public String update() {
-        crawlerProperties.setProperty(Constants.CRON_EXPRESSION_PROPERTY,
-                crawlForm.cronExpression);
-        crawlerProperties
-                .setProperty(
-                        Constants.DIFF_CRAWLING_PROPERTY,
-                        crawlForm.diffCrawling != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.diffCrawling) ? Constants.TRUE
-                                : Constants.FALSE);
         crawlerProperties
                 .setProperty(
                         Constants.USE_ACL_AS_ROLE,
                         crawlForm.useAclAsRole != null
                                 && Constants.ON
                                         .equalsIgnoreCase(crawlForm.useAclAsRole) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.OPTIMIZE_PROPERTY,
-                        crawlForm.optimize != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.optimize) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.COMMIT_PROPERTY,
-                        crawlForm.commit != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.commit) ? Constants.TRUE
                                 : Constants.FALSE);
         crawlerProperties
                 .setProperty(
@@ -260,8 +231,10 @@ public class CrawlAction implements Serializable {
                                 : Constants.FALSE);
         crawlerProperties.setProperty(Constants.CSV_FILE_ENCODING_PROPERTY,
                 crawlForm.csvFileEncoding);
-        crawlerProperties.setProperty(Constants.PURGE_SERCH_LOG_DAY_PROPERTY,
+        crawlerProperties.setProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
                 crawlForm.purgeSearchLogDay);
+        crawlerProperties.setProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY,
+                crawlForm.purgeJobLogDay);
         crawlerProperties.setProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY,
                 crawlForm.purgeUserInfoDay);
         crawlerProperties.setProperty(Constants.PURGE_BY_BOTS_PROPERTY,

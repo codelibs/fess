@@ -10,7 +10,5 @@
     <component class="org.seasar.framework.container.creator.ServiceCreator"/>
     <component class="org.seasar.framework.container.creator.DtoCreator"/>
     <component class="org.seasar.framework.container.creator.InterceptorCreator"/>
-    <component class="org.seasar.chronos.core.creator.TaskCreator"/>
-    <component class="org.seasar.chronos.core.creator.TriggerCreator"/>
     <component class="jp.sf.fess.crud.creator.PagerCreator"/>
 </components>

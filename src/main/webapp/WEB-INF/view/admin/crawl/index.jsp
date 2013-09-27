@@ -23,14 +23,6 @@
 			<tbody>
 				<tr>
 					<th style="width:200px;">
-						<bean:message key="labels.schedule"/>
-					</th>
-					<td>
-						<html:text property="cronExpression"/>
-					</td>
-				</tr>
-				<tr>
-					<th>
 						<bean:message key="labels.search_log_enabled"/>
 					</th>
 					<td>
@@ -143,6 +135,14 @@
 				</tr>
 				<tr>
 					<th>
+						<bean:message key="labels.purge_job_log_day"/>
+					</th>
+					<td>
+						<html:text property="purgeJobLogDay"  styleClass="small"/>
+					</td>
+				</tr>
+				<tr>
+					<th>
 						<bean:message key="labels.purge_user_info_day"/>
 					</th>
 					<td>
@@ -187,22 +187,6 @@
 					</th>
 					<td>
 						<html:checkbox property="useAclAsRole"/><bean:message key="labels.enabled"/>
-					</td>
-				</tr>
-				<tr>
-					<th>
-						<bean:message key="labels.optimize"/>
-					</th>
-					<td>
-						<html:checkbox property="optimize"/><bean:message key="labels.enabled"/>
-					</td>
-				</tr>
-				<tr>
-					<th>
-						<bean:message key="labels.commit"/>
-					</th>
-					<td>
-						<html:checkbox property="commit"/><bean:message key="labels.enabled"/>
 					</td>
 				</tr>
 				<tr>

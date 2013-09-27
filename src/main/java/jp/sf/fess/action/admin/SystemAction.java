@@ -21,15 +21,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
+import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.form.admin.SystemForm;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
-import jp.sf.fess.task.CrawlTask;
+import jp.sf.fess.job.TriggeredJob;
+import jp.sf.fess.service.ScheduledJobService;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.sastruts.core.annotation.Token;
@@ -213,15 +216,18 @@ public class SystemAction implements Serializable {
         final SolrGroup solrGroup = solrGroupManager.getSolrGroup(groupName);
         if (solrGroup != null) {
             if (!systemHelper.isCrawlProcessRunning()) {
-                final CrawlTask crawlTask = SingletonS2Container
-                        .getComponent(CrawlTask.class);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        systemHelper.updateStatus(solrGroup, QueryType.ADD);
-                        crawlTask.doExecute();
-                    }
-                }).start();
+                final ScheduledJobService scheduledJobService = SingletonS2Container
+                        .getComponent(ScheduledJobService.class);
+                final List<ScheduledJob> scheduledJobList = scheduledJobService
+                        .getCrawloerJobList();
+                for (final ScheduledJob scheduledJob : scheduledJobList) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new TriggeredJob().execute(scheduledJob);
+                        }
+                    }).start();
+                }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
             } else {
                 SAStrutsUtil
@@ -238,8 +244,9 @@ public class SystemAction implements Serializable {
     @Execute(validator = true, input = "index")
     public String stop() {
         if (systemHelper.isCrawlProcessRunning()) {
-            systemHelper.destroyCrawlerProcess();
-            systemHelper.finishCrawlProcess();
+            for (final String sessionId : systemHelper.getRunningSessionIdSet()) {
+                systemHelper.destroyCrawlerProcess(sessionId);
+            }
             SAStrutsUtil.addSessionMessage("success.stopping_crawl_process");
         } else {
             SAStrutsUtil.addSessionMessage("errors.no_running_crawl_process");
@@ -305,12 +312,12 @@ public class SystemAction implements Serializable {
         return solrInstanceList;
     }
 
-    public boolean isSolrProcessRunning() {
+    public boolean isCrawlerRunning() {
         return systemHelper.isCrawlProcessRunning();
     }
 
-    public String getRunningSessionId() {
-        return systemHelper.getSessionId();
+    public Set<String> getRunningSessionIdSet() {
+        return systemHelper.getRunningSessionIdSet();
     }
 
 }

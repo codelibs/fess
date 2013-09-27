@@ -154,7 +154,7 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_E21C3B1F_7B77_4948_A99B_DB55AF5D8FD4",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_2795E3E2_31C9_48A3_9ACB_D0394EDA5A08",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnLabelTypeId = cci("LABEL_TYPE_ID",

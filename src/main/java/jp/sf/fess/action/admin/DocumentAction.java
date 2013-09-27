@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -169,7 +170,7 @@ public class DocumentAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (systemHelper.readyCrawlProcess()) {
+                    if (!systemHelper.isCrawlProcessRunning()) {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
@@ -184,8 +185,6 @@ public class DocumentAction implements Serializable {
                             }
                         } catch (final Exception e) {
                             logger.error("Failed to commit index.", e);
-                        } finally {
-                            systemHelper.finishCrawlProcess();
                         }
                     } else {
                         if (logger.isInfoEnabled()) {
@@ -217,7 +216,7 @@ public class DocumentAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (systemHelper.readyCrawlProcess()) {
+                    if (!systemHelper.isCrawlProcessRunning()) {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
@@ -231,8 +230,6 @@ public class DocumentAction implements Serializable {
                             }
                         } catch (final Exception e) {
                             logger.error("Failed to optimize index.", e);
-                        } finally {
-                            systemHelper.finishCrawlProcess();
                         }
                     } else {
                         if (logger.isInfoEnabled()) {
@@ -290,7 +287,7 @@ public class DocumentAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (systemHelper.readyCrawlProcess()) {
+                    if (!systemHelper.isCrawlProcessRunning()) {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup,
@@ -307,8 +304,6 @@ public class DocumentAction implements Serializable {
                         } catch (final Exception e) {
                             logger.error("Failed to delete index (query="
                                     + deleteQuery + ").", e);
-                        } finally {
-                            systemHelper.finishCrawlProcess();
                         }
                     } else {
                         if (logger.isInfoEnabled()) {
@@ -385,8 +380,8 @@ public class DocumentAction implements Serializable {
         return systemHelper.isCrawlProcessRunning();
     }
 
-    public String getRunningSessionId() {
-        return systemHelper.getSessionId();
+    public Set<String> getRunningSessionIdSet() {
+        return systemHelper.getRunningSessionIdSet();
     }
 
     private static class SessionIdList<E> extends ArrayList<E> {

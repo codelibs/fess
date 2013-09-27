@@ -48,8 +48,6 @@ public class CrawlingSessionInfoCQ extends BsCrawlingSessionInfoCQ {
         super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
-    // MySQL: public BsCrawlingSessionInfoCQ addOrderBy_Key_Asc() {return super.addOrderBy_IdKey_Asc();}
-
     // ===================================================================================
     //                                                                       Arrange Query
     //                                                                       =============

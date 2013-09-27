@@ -55,6 +55,7 @@ import jp.sf.fess.db.cbean.OverlappingHostCB;
 import jp.sf.fess.db.cbean.PathMappingCB;
 import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.RoleTypeCB;
+import jp.sf.fess.db.cbean.ScheduledJobCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
 import jp.sf.fess.db.cbean.WebConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
@@ -78,6 +79,7 @@ import jp.sf.fess.db.exbhv.OverlappingHostBhv;
 import jp.sf.fess.db.exbhv.PathMappingBhv;
 import jp.sf.fess.db.exbhv.RequestHeaderBhv;
 import jp.sf.fess.db.exbhv.RoleTypeBhv;
+import jp.sf.fess.db.exbhv.ScheduledJobBhv;
 import jp.sf.fess.db.exbhv.WebAuthenticationBhv;
 import jp.sf.fess.db.exbhv.WebConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
@@ -101,6 +103,7 @@ import jp.sf.fess.db.exentity.OverlappingHost;
 import jp.sf.fess.db.exentity.PathMapping;
 import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.RoleType;
+import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.db.exentity.WebAuthentication;
 import jp.sf.fess.db.exentity.WebConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
@@ -126,6 +129,8 @@ public class DatabaseService {
     private static final String VERSION_KEY = "version";
 
     private static final String CRAWLER_PROPERTIES_KEY = "crawlerProperties";
+
+    private static final String SCHEDULED_JOB_KEY = "scheduledJob";
 
     private static final String BROWSER_TYPE_KEY = "browserType";
 
@@ -172,6 +177,9 @@ public class DatabaseService {
     private static final String REQUEST_HEADER_KEY = "requestHeader";
 
     private static final String OVERLAPPING_HOST_KEY = "overlappingHost";
+
+    @Resource
+    protected ScheduledJobBhv scheduledJobBhv;
 
     @Resource
     protected BrowserTypeBhv browserTypeBhv;
@@ -268,6 +276,11 @@ public class DatabaseService {
         // version
         dataSet.put(VERSION_KEY, Constants.FESS_VERSION);
 
+        // scheduledJob
+        final ScheduledJobCB scheduledJobCB = new ScheduledJobCB();
+        scheduledJobCB.query().setDeletedBy_IsNull();
+        dataSet.put(SCHEDULED_JOB_KEY + LIST_SUFFIX,
+                scheduledJobBhv.selectList(scheduledJobCB));
         // browserType
         final BrowserTypeCB browserTypeCB = new BrowserTypeCB();
         browserTypeCB.query().setDeletedBy_IsNull();
@@ -360,86 +373,16 @@ public class DatabaseService {
 
         // crawlerProperties
         final Map<String, String> crawlerPropertyMap = new HashMap<String, String>();
-        crawlerPropertyMap.put(Constants.CRON_EXPRESSION_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.CRON_EXPRESSION_PROPERTY,
-                        Constants.DEFAULT_CRON_EXPRESSION));
-        crawlerPropertyMap.put(Constants.OPTIMIZE_PROPERTY, crawlerProperties
-                .getProperty(Constants.OPTIMIZE_PROPERTY, Constants.FALSE));
-        crawlerPropertyMap.put(Constants.COMMIT_PROPERTY, crawlerProperties
-                .getProperty(Constants.COMMIT_PROPERTY, Constants.TRUE));
-        crawlerPropertyMap.put(Constants.SERVER_ROTATION_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE));
-        crawlerPropertyMap.put(Constants.DAY_FOR_CLEANUP_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.DAY_FOR_CLEANUP_PROPERTY, "1"));
-        crawlerPropertyMap.put(Constants.COMMIT_PER_COUNT_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.COMMIT_PER_COUNT_PROPERTY,
-                        Long.toString(Constants.DEFAULT_COMMIT_PER_COUNT)));
-        crawlerPropertyMap.put(Constants.CRAWLING_THREAD_COUNT_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5"));
-        crawlerPropertyMap.put(Constants.MOBILE_TRANSCODER_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.MOBILE_TRANSCODER_PROPERTY,
-                        Constants.EMPTY_STRING));
-        crawlerPropertyMap.put(Constants.DIFF_CRAWLING_PROPERTY,
-                crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY,
-                        Constants.TRUE));
-        crawlerPropertyMap.put(Constants.USE_ACL_AS_ROLE, crawlerProperties
-                .getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE));
-        crawlerPropertyMap.put(Constants.SEARCH_LOG_PROPERTY, crawlerProperties
-                .getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
-        crawlerPropertyMap.put(Constants.USER_INFO_PROPERTY, crawlerProperties
-                .getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE));
-        crawlerPropertyMap.put(Constants.USER_FAVORITE_PROPERTY,
-                crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY,
-                        Constants.FALSE));
-        crawlerPropertyMap.put(Constants.WEB_API_XML_PROPERTY,
-                crawlerProperties.getProperty(Constants.WEB_API_XML_PROPERTY,
-                        Constants.TRUE));
-        crawlerPropertyMap.put(Constants.WEB_API_JSON_PROPERTY,
-                crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY,
-                        Constants.TRUE));
-        crawlerPropertyMap.put(Constants.WEB_API_SUGGEST_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE));
-        crawlerPropertyMap.put(Constants.WEB_API_ANALYSIS_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE));
-        crawlerPropertyMap.put(Constants.WEB_DESIGN_EDITOR_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
-        crawlerPropertyMap.put(Constants.SEARCH_LOG_CRON_EXPRESSION_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.SEARCH_LOG_CRON_EXPRESSION_PROPERTY,
-                        Constants.DEFAULT_SEARCH_LOG_CRON_EXPRESSION));
-        crawlerPropertyMap.put(Constants.DEFAULT_LABEL_VALUE_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.DEFAULT_LABEL_VALUE_PROPERTY,
-                        Constants.EMPTY_STRING));
-        crawlerPropertyMap.put(Constants.APPEND_QUERY_PARAMETER_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.APPEND_QUERY_PARAMETER_PROPERTY,
-                        Constants.FALSE));
-        crawlerPropertyMap.put(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                        Constants.SUPPORTED_SEARCH_WEB_MOBILE));
-        crawlerPropertyMap.put(Constants.IGNORE_FAILURE_TYPE_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.IGNORE_FAILURE_TYPE_PROPERTY,
-                        Constants.DEFAULT_IGNORE_FAILURE_TYPE));
-        crawlerPropertyMap.put(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
-                        Constants.DEFAULT_FAILURE_COUNT));
-        crawlerPropertyMap.put(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
-                crawlerProperties.getProperty(
-                        Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
-                        Constants.TRUE));
+        for (final Map.Entry<Object, Object> entry : crawlerProperties
+                .entrySet()) {
+            try {
+                crawlerPropertyMap.put(entry.getKey().toString(), entry
+                        .getValue().toString());
+            } catch (final Exception e) {
+                logger.warn("Invalid data. key: " + entry.getKey()
+                        + ", value: " + entry.getValue(), e);
+            }
+        }
         dataSet.put(CRAWLER_PROPERTIES_KEY, crawlerPropertyMap);
 
         try {
@@ -496,6 +439,43 @@ public class DatabaseService {
         public void run() {
             final Map<String, Long> idMap = new HashMap<String, Long>();
 
+            // scheduledJob
+            try {
+                userTransaction.begin();
+
+                final List<ScheduledJob> scheduledJobList = (List<ScheduledJob>) dataSet
+                        .get(SCHEDULED_JOB_KEY + LIST_SUFFIX);
+                if (scheduledJobList != null) {
+                    for (ScheduledJob scheduledJob : scheduledJobList) {
+                        final Long id = scheduledJob.getId();
+
+                        final ScheduledJobCB cb = new ScheduledJobCB();
+                        cb.query().setName_Equal(scheduledJob.getName());
+                        cb.query().setDeletedBy_IsNull();
+                        final ScheduledJob entity = scheduledJobBhv
+                                .selectEntity(cb);
+                        scheduledJob.setId(null);
+                        if (entity == null) {
+                            scheduledJobBhv.insert(scheduledJob);
+                        } else {
+                            if (overwrite) {
+                                scheduledJob.setVersionNo(null);
+                                Beans.copy(scheduledJob, entity).excludesNull()
+                                        .execute();
+                                scheduledJob = entity;
+                                scheduledJobBhv.update(scheduledJob);
+                            } else {
+                                scheduledJobBhv.insert(scheduledJob);
+                            }
+                        }
+                        idMap.put(SCHEDULED_JOB_KEY + ":" + id.toString(),
+                                scheduledJob.getId());
+                    }
+                }
+                userTransaction.commit();
+            } catch (final Exception e) {
+                rollback(BROWSER_TYPE_KEY, e);
+            }
             // browserType
             try {
                 userTransaction.begin();
@@ -1490,150 +1470,12 @@ public class DatabaseService {
             try {
                 final Map<String, String> crawlerPropertyMap = (Map<String, String>) dataSet
                         .get(CRAWLER_PROPERTIES_KEY);
-                String value;
-                value = crawlerPropertyMap
-                        .get(Constants.CRON_EXPRESSION_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.CRON_EXPRESSION_PROPERTY, value);
-                }
-                value = crawlerPropertyMap.get(Constants.OPTIMIZE_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(Constants.OPTIMIZE_PROPERTY,
-                            value);
-                }
-                value = crawlerPropertyMap.get(Constants.COMMIT_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(Constants.COMMIT_PROPERTY,
-                            value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.SERVER_ROTATION_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.SERVER_ROTATION_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.DAY_FOR_CLEANUP_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.DAY_FOR_CLEANUP_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.COMMIT_PER_COUNT_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.COMMIT_PER_COUNT_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.CRAWLING_THREAD_COUNT_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.MOBILE_TRANSCODER_PROPERTY);
-                if (value != null) {
-                    crawlerProperties.setProperty(
-                            Constants.MOBILE_TRANSCODER_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.DIFF_CRAWLING_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.DIFF_CRAWLING_PROPERTY, value);
-                }
-                value = crawlerPropertyMap.get(Constants.USE_ACL_AS_ROLE);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(Constants.USE_ACL_AS_ROLE,
-                            value);
-                }
-                value = crawlerPropertyMap.get(Constants.SEARCH_LOG_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.SEARCH_LOG_PROPERTY, value);
-                }
-                value = crawlerPropertyMap.get(Constants.USER_INFO_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(Constants.USER_INFO_PROPERTY,
-                            value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.USER_FAVORITE_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.USER_FAVORITE_PROPERTY, value);
-                }
-                value = crawlerPropertyMap.get(Constants.WEB_API_XML_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.WEB_API_XML_PROPERTY, value);
-                }
-                value = crawlerPropertyMap.get(Constants.WEB_API_JSON_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.WEB_API_JSON_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.WEB_API_SUGGEST_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.WEB_API_SUGGEST_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.WEB_API_ANALYSIS_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.WEB_API_ANALYSIS_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.WEB_DESIGN_EDITOR_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.WEB_DESIGN_EDITOR_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.SEARCH_LOG_CRON_EXPRESSION_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.SEARCH_LOG_CRON_EXPRESSION_PROPERTY,
-                            value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
-                if (value != null) {
-                    crawlerProperties.setProperty(
-                            Constants.DEFAULT_LABEL_VALUE_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.APPEND_QUERY_PARAMETER_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.APPEND_QUERY_PARAMETER_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.IGNORE_FAILURE_TYPE_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.IGNORE_FAILURE_TYPE_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, value);
-                }
-                value = crawlerPropertyMap
-                        .get(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY);
-                if (StringUtil.isNotBlank(value)) {
-                    crawlerProperties.setProperty(
-                            Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, value);
+                for (final Map.Entry<String, String> entry : crawlerPropertyMap
+                        .entrySet()) {
+                    final String value = entry.getValue();
+                    if (StringUtil.isNotBlank(value)) {
+                        crawlerProperties.setProperty(entry.getKey(), value);
+                    }
                 }
                 crawlerProperties.store();
             } catch (final Exception e) {

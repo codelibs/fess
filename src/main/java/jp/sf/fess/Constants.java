@@ -56,6 +56,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String DONE = "done";
 
+    public static final String OK = "ok";
+
+    public static final String FAIL = "fail";
+
     public static final String ITEM_LABEL = "label";
 
     public static final String ITEM_VALUE = "value";
@@ -65,6 +69,10 @@ public class Constants extends CoreLibConstants {
     public static final String UTF_8 = "UTF-8";
 
     public static final String MS932 = "MS932";
+
+    public static final String OPTIMIZE = "optimize";
+
+    public static final String COMMIT = "commit";
 
     public static final String DEFAULT_CRON_EXPRESSION = "0 0 0 * * ?";
 
@@ -109,19 +117,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String CRAWLING_THREAD_COUNT_PROPERTY = "crawling.thread.count";
 
-    public static final String CRON_EXPRESSION_PROPERTY = "cron.expression";
-
-    public static final String SEARCH_LOG_CRON_EXPRESSION_PROPERTY = "cron.expression.searchlog";
-
-    public static final String DAILY_CRON_EXPRESSION_PROPERTY = "cron.expression.daily";
-
-    public static final String HOURLY_CRON_EXPRESSION_PROPERTY = "cron.expression.hourly";
-
     public static final String DAY_FOR_CLEANUP_PROPERTY = "day.for.cleanup";
-
-    public static final String OPTIMIZE_PROPERTY = "optimize.index";
-
-    public static final String COMMIT_PROPERTY = "commit.index";
 
     public static final String COMMIT_PER_COUNT_PROPERTY = "commit.count";
 
@@ -151,9 +147,11 @@ public class Constants extends CoreLibConstants {
 
     public static final String CSV_FILE_ENCODING_PROPERTY = "csv.file.encoding";
 
-    public static final String PURGE_SERCH_LOG_DAY_PROPERTY = "purge.searchlog.day";
+    public static final String PURGE_SEARCH_LOG_DAY_PROPERTY = "purge.searchlog.day";
 
     public static final String PURGE_USER_INFO_DAY_PROPERTY = "purge.userinfo.day";
+
+    public static final String PURGE_JOB_LOG_DAY_PROPERTY = "purge.joblog.day";
 
     public static final String PURGE_BY_BOTS_PROPERTY = "purge.by.bots";
 
@@ -300,5 +298,16 @@ public class Constants extends CoreLibConstants {
     public static final String OPTION_QUERY_OQ = "oq";
 
     public static final String OPTION_QUERY_NQ = "nq";
+
+    // job
+    public static final String JOB_ID_PREFIX = "job";
+
+    public static final String SCHEDULED_JOB = "scheduledJob";
+
+    public static final String JOB_EXECUTOR_TYPE = "jobExecutor";
+
+    public static final String DEFAULT_JOB_TARGET = "all";
+
+    public static final String DEFAULT_JOB_SCRIPT_TYPE = "groovy";
 
 }

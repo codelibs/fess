@@ -205,7 +205,7 @@ public class BsWebAuthenticationAction implements Serializable {
         return "confirm.jsp";
     }
 
-    @Token(save = false, validate = true, keep = true)
+    @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String deletefromconfirm() {
         webAuthenticationForm.crudMode = CommonConstants.DELETE_MODE;

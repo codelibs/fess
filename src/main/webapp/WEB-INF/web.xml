@@ -158,13 +158,6 @@
     <load-on-startup>4</load-on-startup>
   </servlet>
 
-  <!-- for S2Chronos -->
-  <servlet>
-    <servlet-name>chronosServlet</servlet-name>
-    <servlet-class>org.seasar.chronos.extension.servlet.S2ChronosServlet</servlet-class>
-    <load-on-startup>5</load-on-startup>
-  </servlet>
-
   <servlet>
     <servlet-name>imageScaleServlet</servlet-name>
     <servlet-class>org.mobylet.core.http.image.MobyletImageScaleServlet</servlet-class>

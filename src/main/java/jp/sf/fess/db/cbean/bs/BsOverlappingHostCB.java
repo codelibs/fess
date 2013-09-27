@@ -36,6 +36,7 @@ import org.seasar.dbflute.cbean.chelper.HpCBPurpose;
 import org.seasar.dbflute.cbean.chelper.HpCalculator;
 import org.seasar.dbflute.cbean.chelper.HpColQyHandler;
 import org.seasar.dbflute.cbean.chelper.HpColQyOperand;
+import org.seasar.dbflute.cbean.chelper.HpColumnSpHandler;
 import org.seasar.dbflute.cbean.chelper.HpSDRFunction;
 import org.seasar.dbflute.cbean.chelper.HpSDRSetupper;
 import org.seasar.dbflute.cbean.chelper.HpSpQyCall;
@@ -333,14 +334,14 @@ public class BsOverlappingHostCB extends AbstractConditionBean {
     }
 
     @Override
-    protected boolean hasSpecifiedColumn() {
-        return _specification != null
-                && _specification.isAlreadySpecifiedRequiredColumn();
+    public HpColumnSpHandler localSp() {
+        return specify();
     }
 
     @Override
-    protected HpAbstractSpecification<? extends ConditionQuery> localSp() {
-        return specify();
+    public boolean hasSpecifiedColumn() {
+        return _specification != null
+                && _specification.isAlreadySpecifiedRequiredColumn();
     }
 
     public static class HpSpecification extends
@@ -439,10 +440,12 @@ public class BsOverlappingHostCB extends AbstractConditionBean {
             return doColumn("VERSION_NO");
         }
 
-        /**
-         * Specify columns except record meta columns. <br />
-         * You cannot use normal SpecifyColumn with this method.
-         */
+        @Override
+        public void everyColumn() {
+            doEveryColumn();
+        }
+
+        @Override
         public void exceptRecordMetaColumn() {
             doExceptRecordMetaColumn();
         }

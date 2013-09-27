@@ -33,7 +33,6 @@ import org.seasar.dbflute.cbean.chelper.HpSSQFunction;
 import org.seasar.dbflute.cbean.chelper.HpSSQOption;
 import org.seasar.dbflute.cbean.chelper.HpSSQSetupper;
 import org.seasar.dbflute.cbean.ckey.ConditionKey;
-import org.seasar.dbflute.cbean.coption.DateFromToOption;
 import org.seasar.dbflute.cbean.coption.DerivedReferrerOption;
 import org.seasar.dbflute.cbean.coption.FromToOption;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
@@ -1577,7 +1576,8 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      */
     public void setCreatedTime_DateFromTo(final java.util.Date fromDate,
             final java.util.Date toDate) {
-        setCreatedTime_FromTo(fromDate, toDate, new DateFromToOption());
+        setCreatedTime_FromTo(fromDate, toDate,
+                new FromToOption().compareAsDate());
     }
 
     protected void regCreatedTime(final ConditionKey k, final Object v) {
@@ -1815,7 +1815,8 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      */
     public void setUpdatedTime_DateFromTo(final java.util.Date fromDate,
             final java.util.Date toDate) {
-        setUpdatedTime_FromTo(fromDate, toDate, new DateFromToOption());
+        setUpdatedTime_FromTo(fromDate, toDate,
+                new FromToOption().compareAsDate());
     }
 
     /**
@@ -2069,7 +2070,8 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      */
     public void setDeletedTime_DateFromTo(final java.util.Date fromDate,
             final java.util.Date toDate) {
-        setDeletedTime_FromTo(fromDate, toDate, new DateFromToOption());
+        setDeletedTime_FromTo(fromDate, toDate,
+                new FromToOption().compareAsDate());
     }
 
     /**

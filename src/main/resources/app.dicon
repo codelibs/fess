@@ -8,8 +8,8 @@
 
 	<include path="fess.dicon"/>
 	<include path="fess_suggest.dicon"/>
+	<include path="fess_job.dicon"/>
 
-	<include path="chronos-extension.dicon"/>
 	<include path="mobylet.dicon"/>
 
 	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>

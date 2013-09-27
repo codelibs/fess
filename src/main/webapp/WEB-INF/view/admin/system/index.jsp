@@ -32,17 +32,17 @@
 										key="labels.solr_process_running" /></th>
 								<td>
 									<span style="margin-right:20px;">
-									<c:if test="${solrProcessRunning}">
+									<c:if test="${crawlerRunning}">
 										<bean:message key="labels.solr_running" />
 										<c:if test="${runningSessionId!=null}">(${f:h(runningSessionId)})</c:if>
-									</c:if><c:if test="${!solrProcessRunning}">
+									</c:if><c:if test="${!crawlerRunning}">
 										<bean:message key="labels.solr_stopped" />
 									</c:if>
 									</span>
-									<c:if test="${solrProcessRunning}">
+									<c:if test="${crawlerRunning}">
 										<input type="submit" class="btn" name="stop"
 											value="<bean:message key="labels.solr_button_stop"/>" />
-									</c:if> <c:if test="${!solrProcessRunning}">
+									</c:if> <c:if test="${!crawlerRunning}">
 										<input type="submit" class="btn" name="start"
 											value="<bean:message key="labels.solr_button_start"/>" />
 									</c:if>
@@ -161,17 +161,17 @@
 											value="${f:h(solrInstance.name)}" />
 										<c:if test="${solrInstance.status!='running'}">
 											<html:submit styleClass="btn" property="startSolrInstance"
-												disabled="${solrProcessRunning}">
+												disabled="${crawlerRunning}">
 												<bean:message key="labels.solr_instance_start" />
 											</html:submit>
 										</c:if>
 										<c:if test="${solrInstance.status=='running'}">
 											<html:submit property="stopSolrInstance"
-												disabled="${solrProcessRunning}" styleClass="btn">
+												disabled="${crawlerRunning}" styleClass="btn">
 												<bean:message key="labels.solr_instance_stop" />
 											</html:submit>
 											<html:submit property="reloadSolrInstance"
-												disabled="${solrProcessRunning}" styleClass="btn">
+												disabled="${crawlerRunning}" styleClass="btn">
 												<bean:message key="labels.solr_instance_reload" />
 											</html:submit>
 										</c:if>
@@ -183,7 +183,7 @@
 			</div>
 
 		</div>
-		<c:if test="${solrProcessRunning}">
+		<c:if test="${crawlerRunning}">
 			<script type="text/javascript">
 			<!--
 				setTimeout(function() {

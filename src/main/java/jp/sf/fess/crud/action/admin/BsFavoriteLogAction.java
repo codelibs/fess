@@ -203,7 +203,7 @@ public class BsFavoriteLogAction implements Serializable {
         return "confirm.jsp";
     }
 
-    @Token(save = false, validate = true, keep = true)
+    @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String deletefromconfirm() {
         favoriteLogForm.crudMode = CommonConstants.DELETE_MODE;

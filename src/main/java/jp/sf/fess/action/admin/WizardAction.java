@@ -30,19 +30,20 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.db.exentity.BrowserType;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
+import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
 import jp.sf.fess.form.admin.WizardForm;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.job.TriggeredJob;
 import jp.sf.fess.service.BrowserTypeService;
 import jp.sf.fess.service.FileCrawlingConfigService;
+import jp.sf.fess.service.ScheduledJobService;
 import jp.sf.fess.service.WebCrawlingConfigService;
-import jp.sf.fess.task.CrawlTask;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.chronos.core.trigger.cron.CronExpression;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.CharUtil;
@@ -83,72 +84,6 @@ public class WizardAction implements Serializable {
     @Execute(validator = false)
     public String index() {
         return "index.jsp";
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false)
-    public String scheduleForm() {
-        final String cronExpression = crawlerProperties.getProperty(
-                Constants.CRON_EXPRESSION_PROPERTY,
-                Constants.DEFAULT_CRON_EXPRESSION);
-
-        final String[] exps = cronExpression.split(" ");
-        if (exps.length > 5) {
-            if (exps.length > 6 && "1970".equals(exps[6])) {
-                wizardForm.scheduleEnabled = null;
-            } else {
-                wizardForm.scheduleEnabled = "on";
-            }
-            wizardForm.scheduleMin = exps[1];
-            wizardForm.scheduleHour = exps[2];
-            wizardForm.scheduleDate = exps[3];
-            wizardForm.scheduleMonth = exps[4];
-            wizardForm.scheduleDay = exps[5];
-        }
-
-        return "schedule.jsp";
-    }
-
-    @Token(save = false, validate = true)
-    @Execute(validator = true, input = "scheduleForm")
-    public String schedule() {
-        if ("on".equalsIgnoreCase(wizardForm.scheduleEnabled)) {
-            final StringBuilder buf = new StringBuilder();
-            buf.append("0 ");
-            buf.append(wizardForm.scheduleMin);
-            buf.append(' ');
-            buf.append(wizardForm.scheduleHour);
-            buf.append(' ');
-            if ("?".equals(wizardForm.scheduleDay)) {
-                buf.append(wizardForm.scheduleDate);
-            } else {
-                buf.append('?');
-            }
-            buf.append(' ');
-            buf.append(wizardForm.scheduleMonth);
-            buf.append(' ');
-            buf.append(wizardForm.scheduleDay);
-            final String cronExpression = buf.toString();
-            if (!CronExpression.isValidExpression(cronExpression)) {
-                throw new SSCActionMessagesException("errors.cronexpression",
-                        cronExpression);
-            }
-            crawlerProperties.setProperty(Constants.CRON_EXPRESSION_PROPERTY,
-                    cronExpression);
-        } else {
-            crawlerProperties.setProperty(Constants.CRON_EXPRESSION_PROPERTY,
-                    "0 0 0 1 1 ? 1970");
-        }
-
-        try {
-            crawlerProperties.store();
-            SAStrutsUtil.addSessionMessage("success.update_crawler_schedule");
-            return "crawlingConfigForm?redirect=true";
-        } catch (final Exception e) {
-            logger.error("Failed to update crawler schedule.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_update_crawler_schedule");
-        }
     }
 
     @Token(save = true, validate = false)
@@ -390,14 +325,18 @@ public class WizardAction implements Serializable {
     @Execute(validator = false)
     public String startCrawling() {
         if (!systemHelper.isCrawlProcessRunning()) {
-            final CrawlTask crawlTask = SingletonS2Container
-                    .getComponent(CrawlTask.class);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    crawlTask.doExecute();
-                }
-            }).start();
+            final ScheduledJobService scheduledJobService = SingletonS2Container
+                    .getComponent(ScheduledJobService.class);
+            final List<ScheduledJob> scheduledJobList = scheduledJobService
+                    .getCrawloerJobList();
+            for (final ScheduledJob scheduledJob : scheduledJobList) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new TriggeredJob().execute(scheduledJob);
+                    }
+                }).start();
+            }
             SAStrutsUtil.addSessionMessage("success.start_crawl_process");
         } else {
             SAStrutsUtil

@@ -167,7 +167,7 @@ public class UserInfoDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D7A5A401_B121_44B6_AF68_1D6AB0DDF551",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_BFF7D53B_C7B4_4C41_ABCF_193706E5CCCA",
             false, null, null, null, "favoriteLogList,searchLogList", null);
 
     protected final ColumnInfo _columnCode = cci("CODE", "CODE", null, null,

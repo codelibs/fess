@@ -309,9 +309,7 @@ public class IndexUpdater extends Thread {
             }
         } catch (final Throwable t) { // NOPMD
             logger.error("IndexUpdater is terminated.", t);
-            if (systemHelper.isCrawlProcessRunning()) {
-                forceStop();
-            }
+            forceStop();
         } finally {
             intervalControlHelper.setCrawlerRunning(true);
             if (screenShotManager != null) {

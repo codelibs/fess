@@ -18,8 +18,6 @@ package jp.sf.fess.form.admin;
 
 import java.io.Serializable;
 
-import jp.sf.fess.annotation.CronExpression;
-
 import org.seasar.struts.annotation.IntRange;
 import org.seasar.struts.annotation.LongRange;
 import org.seasar.struts.annotation.Maxbytelength;
@@ -28,17 +26,6 @@ import org.seasar.struts.annotation.Required;
 public class CrawlForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Required
-    @CronExpression
-    @Maxbytelength(maxbytelength = 1000)
-    public String cronExpression;
-
-    @Maxbytelength(maxbytelength = 10)
-    public String optimize;
-
-    @Maxbytelength(maxbytelength = 10)
-    public String commit;
 
     @Maxbytelength(maxbytelength = 10)
     public String diffCrawling;
@@ -107,10 +94,13 @@ public class CrawlForm implements Serializable {
     @Maxbytelength(maxbytelength = 20)
     public String csvFileEncoding;
 
-    @IntRange(min = 0, max = 1000)
+    @IntRange(min = 0, max = 100000)
     public String purgeSearchLogDay;
 
-    @IntRange(min = 0, max = 1000)
+    @IntRange(min = 0, max = 100000)
+    public String purgeJobLogDay;
+
+    @IntRange(min = 0, max = 100000)
     public String purgeUserInfoDay;
 
     @Maxbytelength(maxbytelength = 1000)

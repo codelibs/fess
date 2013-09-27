@@ -180,7 +180,7 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_5B6AC213_95C9_4804_B9EE_8DB5791F2F17",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_06421DD4_26CC_40F0_848B_9976FBF88FD7",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnCrawlingSessionId = cci(

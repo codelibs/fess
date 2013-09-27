@@ -42,7 +42,6 @@ import jp.sf.fess.helper.DatabaseHelper;
 import jp.sf.fess.helper.MailHelper;
 import jp.sf.fess.helper.OverlappingHostHelper;
 import jp.sf.fess.helper.PathMappingHelper;
-import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebFsIndexHelper;
 import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.CrawlingSessionService;
@@ -80,8 +79,6 @@ import com.github.jknack.handlebars.io.FileTemplateLoader;
 
 public class Crawler implements Serializable {
 
-    private static final String MAIL_TEMPLATE_NAME = "crawler";
-
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
@@ -89,6 +86,8 @@ public class Crawler implements Serializable {
     private static final String WEB_CRAWLING_PROCESS = "Web Crawling Process";
 
     private static final String DATA_CRAWLING_PROCESS = "Data Crawling Process";
+
+    private static final String MAIL_TEMPLATE_NAME = "crawler";
 
     @Resource
     protected SolrGroupManager solrGroupManager;
@@ -118,6 +117,7 @@ public class Crawler implements Serializable {
     public String notificationSubject = "[FESS] Crawler completed";
 
     protected static class Options {
+
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")
         protected String sessionId;
 
@@ -135,6 +135,9 @@ public class Crawler implements Serializable {
 
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
         protected String propertiesPath;
+
+        @Option(name = "-o", aliases = "--operation", metaVar = "operation", usage = "Opration when crawlwer is finised")
+        protected String operation;
 
         protected Options() {
             // noghing
@@ -174,6 +177,14 @@ public class Crawler implements Serializable {
             }
             return idList;
         }
+
+        public boolean isOptimize() {
+            return Constants.OPTIMIZE.equalsIgnoreCase(operation);
+        }
+
+        public boolean isCommit() {
+            return Constants.COMMIT.equalsIgnoreCase(operation);
+        }
     }
 
     public static void main(final String[] args) {
@@ -207,6 +218,17 @@ public class Crawler implements Serializable {
         externalContext.setRequest(request);
         externalContext.setResponse(response);
 
+        final Thread shutdownCallback = new Thread("ShutdownHook") {
+            @Override
+            public void run() {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Destroying S2Container..");
+                }
+                SingletonS2ContainerFactory.destroy();
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownCallback);
+
         try {
             process(options);
         } finally {
@@ -231,8 +253,6 @@ public class Crawler implements Serializable {
             options.sessionId = sdf.format(new Date());
         }
 
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent(SystemHelper.class);
         final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                 .getComponent("crawlingSessionHelper");
         final DynamicProperties crawlerProperties = SingletonS2Container
@@ -271,10 +291,8 @@ public class Crawler implements Serializable {
         }
 
         try {
-            systemHelper.readyCrawlProcess();
             crawler.doCrawl(options);
         } finally {
-            systemHelper.finishCrawlProcess();
             try {
                 crawlingSessionHelper.store(options.sessionId);
             } catch (final Exception e) {
@@ -341,8 +359,6 @@ public class Crawler implements Serializable {
 
         final long totalTime = System.currentTimeMillis();
 
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
         final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                 .getComponent("crawlingSessionHelper");
 
@@ -434,15 +450,6 @@ public class Crawler implements Serializable {
             joinCrawlerThread(webFsCrawlerThread);
             joinCrawlerThread(dataCrawlerThread);
 
-            // Stop a crawling process
-            if (systemHelper.isForceStop()) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Interrupted this crawling process: "
-                            + options.sessionId);
-                }
-                return;
-            }
-
             // clean up
             try {
                 final Set<String> expiredSessionIdSet = crawlingSessionHelper
@@ -465,7 +472,15 @@ public class Crawler implements Serializable {
                 }
             }
 
-            commitOrOptimize(crawlingSessionHelper, updateSolrGroup);
+            if (options.isCommit()) {
+                commit(crawlingSessionHelper, updateSolrGroup);
+            } else if (options.isOptimize()) {
+                optimize(crawlingSessionHelper, updateSolrGroup);
+            } else {
+                if (logger.isInfoEnabled()) {
+                    logger.info("No index commit.");
+                }
+            }
 
             final String serverRotationStr = crawlerProperties.getProperty(
                     Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
@@ -494,67 +509,56 @@ public class Crawler implements Serializable {
         }
     }
 
-    private void commitOrOptimize(
-            final CrawlingSessionHelper crawlingSessionHelper,
+    private void optimize(final CrawlingSessionHelper crawlingSessionHelper,
             final SolrGroup solrGroup) {
-        final String optimizeStr = crawlerProperties.getProperty(
-                Constants.OPTIMIZE_PROPERTY, Constants.FALSE);
-        final String commitStr = crawlerProperties.getProperty(
-                Constants.COMMIT_PROPERTY, Constants.TRUE);
-        if (Constants.TRUE.equalsIgnoreCase(optimizeStr)) {
-            writeTimeToSessionInfo(crawlingSessionHelper,
-                    Constants.OPTIMIZE_START_TIME);
-            long startTime = System.currentTimeMillis();
-            solrGroup.optimize();
-            startTime = System.currentTimeMillis() - startTime;
-            writeTimeToSessionInfo(crawlingSessionHelper,
-                    Constants.OPTIMIZE_END_TIME);
-            if (crawlingSessionHelper != null) {
-                crawlingSessionHelper.putToInfoMap(
-                        Constants.OPTIMIZE_EXEC_TIME, Long.toString(startTime));
-            }
+        writeTimeToSessionInfo(crawlingSessionHelper,
+                Constants.OPTIMIZE_START_TIME);
+        long startTime = System.currentTimeMillis();
+        solrGroup.optimize();
+        startTime = System.currentTimeMillis() - startTime;
+        writeTimeToSessionInfo(crawlingSessionHelper,
+                Constants.OPTIMIZE_END_TIME);
+        if (crawlingSessionHelper != null) {
+            crawlingSessionHelper.putToInfoMap(Constants.OPTIMIZE_EXEC_TIME,
+                    Long.toString(startTime));
+        }
 
-            // update status
-            final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
-            for (final String serverName : solrGroup.getServerNames()) {
-                if (statusPolicy.isActive(QueryType.OPTIMIZE, serverName)) {
-                    statusPolicy.activate(QueryType.OPTIMIZE, serverName);
-                }
+        // update status
+        final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
+        for (final String serverName : solrGroup.getServerNames()) {
+            if (statusPolicy.isActive(QueryType.OPTIMIZE, serverName)) {
+                statusPolicy.activate(QueryType.OPTIMIZE, serverName);
             }
+        }
 
-            if (logger.isInfoEnabled()) {
-                logger.info("[EXEC TIME] index optimize time: " + startTime
-                        + "ms");
-            }
-        } else if (Constants.TRUE.equalsIgnoreCase(commitStr)) {
-            writeTimeToSessionInfo(crawlingSessionHelper,
-                    Constants.COMMIT_START_TIME);
-            long startTime = System.currentTimeMillis();
-            solrGroup.commit();
-            startTime = System.currentTimeMillis() - startTime;
-            writeTimeToSessionInfo(crawlingSessionHelper,
-                    Constants.COMMIT_END_TIME);
-            if (crawlingSessionHelper != null) {
-                crawlingSessionHelper.putToInfoMap(Constants.COMMIT_EXEC_TIME,
-                        Long.toString(startTime));
-            }
+        if (logger.isInfoEnabled()) {
+            logger.info("[EXEC TIME] index optimize time: " + startTime + "ms");
+        }
+    }
 
-            // update status
-            final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
-            for (final String serverName : solrGroup.getServerNames()) {
-                if (statusPolicy.isActive(QueryType.COMMIT, serverName)) {
-                    statusPolicy.activate(QueryType.COMMIT, serverName);
-                }
-            }
+    private void commit(final CrawlingSessionHelper crawlingSessionHelper,
+            final SolrGroup solrGroup) {
+        writeTimeToSessionInfo(crawlingSessionHelper,
+                Constants.COMMIT_START_TIME);
+        long startTime = System.currentTimeMillis();
+        solrGroup.commit();
+        startTime = System.currentTimeMillis() - startTime;
+        writeTimeToSessionInfo(crawlingSessionHelper, Constants.COMMIT_END_TIME);
+        if (crawlingSessionHelper != null) {
+            crawlingSessionHelper.putToInfoMap(Constants.COMMIT_EXEC_TIME,
+                    Long.toString(startTime));
+        }
 
-            if (logger.isInfoEnabled()) {
-                logger.info("[EXEC TIME] index commit time: " + startTime
-                        + "ms");
+        // update status
+        final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
+        for (final String serverName : solrGroup.getServerNames()) {
+            if (statusPolicy.isActive(QueryType.COMMIT, serverName)) {
+                statusPolicy.activate(QueryType.COMMIT, serverName);
             }
-        } else {
-            if (logger.isInfoEnabled()) {
-                logger.info("No index commit.");
-            }
+        }
+
+        if (logger.isInfoEnabled()) {
+            logger.info("[EXEC TIME] index commit time: " + startTime + "ms");
         }
     }
 

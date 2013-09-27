@@ -33,7 +33,7 @@
     </developer>
   </developers>
   <issueManagement>
-    <url><![CDATA[http://sourceforge.jp/projects/fess/ticket/]]></url>
+    <url>https://github.com/codelibs/fess/issues</url>
   </issueManagement>
   <distributionManagement>
     <repository>
@@ -46,9 +46,9 @@
     </site>
   </distributionManagement>
   <scm>
-    <connection>scm:svn:http://svn.sourceforge.jp/svnroot/fess/fess/trunk</connection>
-    <developerConnection>scm:svn:https://svn.sourceforge.jp/svnroot/fess/fess/trunk</developerConnection>
-    <url>http://sourceforge.jp/projects/fess/svn/view/</url>
+    <connection>scm:git:git@github.com:codelibs/fess.git</connection>
+    <developerConnection>scm:git:git@github.com:codelibs/fess.git</developerConnection>
+    <url>https://github.com/codelibs/fess</url>
   </scm>
   <mailingLists>
     <mailingList>
@@ -262,16 +262,16 @@
       <plugin>
         <groupId>org.seasar.dbflute</groupId>
         <artifactId>dbflute-maven-plugin</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2-SNAPSHOT</version>
         <dependencies>
           <dependency>
             <groupId>jp.sf.fess</groupId>
             <artifactId>fess-crud-template</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
           </dependency>
         </dependencies>
         <configuration>
-          <dbfluteVersion>1.0.4H</dbfluteVersion>
+          <dbfluteVersion>1.0.4K</dbfluteVersion>
           <rootPackage>jp.sf.fess</rootPackage>
           <dbPackage>jp.sf.fess.db</dbPackage>
           <actionPackageName>action.admin</actionPackageName>
@@ -633,12 +633,12 @@
     <dependency>
       <groupId>org.seasar.dbflute</groupId>
       <artifactId>dbflute-runtime</artifactId>
-      <version>1.0.4H</version>
+      <version>1.0.4K</version>
     </dependency>
     <dependency>
-      <groupId>jp.sf.fess.chronos</groupId>
-      <artifactId>s2chronos-extension</artifactId>
-      <version>1.0.2</version>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <version>2.2.0</version>
     </dependency>
     <!-- Geronimo -->
     <dependency>
@@ -818,6 +818,11 @@
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
       <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+      <version>2.1.7</version>
     </dependency>
     <!-- Removed from war -->
     <dependency>

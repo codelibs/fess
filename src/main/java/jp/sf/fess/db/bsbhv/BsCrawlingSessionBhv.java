@@ -768,7 +768,9 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl)
+     * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
+     * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
+     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
      * @param crawlingSession The entity of insert or update target. (NotNull)
      * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
@@ -893,8 +895,8 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /**
      * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are insert target. (so default constraints are not available in this method)</span> <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement.
+     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
      * And if the table has an identity, entities after the process don't have incremented values.
      * When you use the (normal) insert(), an entity after the process has an incremented value.
      * @param crawlingSessionList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
@@ -925,13 +927,14 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     /**
      * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() method, which you can specify update columns like this:
+     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
+     * So you should the other batchUpdate() (overload) method for performace,
+     * which you can specify update columns like this:
      * <pre>
      * crawlingSessionBhv.<span style="color: #FD4747">batchUpdate</span>(crawlingSessionList, new SpecifyQuery<CrawlingSessionCB>() {
-     *     public void specify(CrawlingSessionCB cb) { <span style="color: #3F7E5E">// FOO_STATUS_CODE, BAR_DATE only updated</span>
-     *         cb.specify().columnFooStatusCode();
-     *         cb.specify().columnBarDate();
+     *     public void specify(CrawlingSessionCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
+     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
+     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
      *     }
      * });
      * </pre>
@@ -947,8 +950,21 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
             final List<CrawlingSession> crawlingSessionList,
             final UpdateOption<CrawlingSessionCB> option) {
         assertObjectNotNull("crawlingSessionList", crawlingSessionList);
-        prepareUpdateOption(option);
+        prepareBatchUpdateOption(crawlingSessionList, option);
         return delegateBatchUpdate(crawlingSessionList, option);
+    }
+
+    protected void prepareBatchUpdateOption(
+            final List<CrawlingSession> crawlingSessionList,
+            final UpdateOption<CrawlingSessionCB> option) {
+        if (option == null) {
+            return;
+        }
+        prepareUpdateOption(option);
+        // under review
+        //if (option.hasSpecifiedUpdateColumn()) {
+        //    option.xgatherUpdateColumnModifiedProperties(crawlingSessionList);
+        //}
     }
 
     @Override
@@ -963,18 +979,27 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
 
     /**
      * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * You can specify update columns used on set clause of update statement.
-     * However you do not need to specify common columns for update
-     * and an optimistick lock column because they are specified implicitly.
+     * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
+     * <span style="color: #3F7E5E">// e.g. update two columns only</span> 
      * crawlingSessionBhv.<span style="color: #FD4747">batchUpdate</span>(crawlingSessionList, new SpecifyQuery<CrawlingSessionCB>() {
-     *     public void specify(CrawlingSessionCB cb) { <span style="color: #3F7E5E">// FOO_STATUS_CODE, BAR_DATE only updated</span>
-     *         cb.specify().columnFooStatusCode();
-     *         cb.specify().columnBarDate();
+     *     public void specify(CrawlingSessionCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
+     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *     }
+     * });
+     * <span style="color: #3F7E5E">// e.g. update every column in the table</span> 
+     * crawlingSessionBhv.<span style="color: #FD4747">batchUpdate</span>(crawlingSessionList, new SpecifyQuery<CrawlingSessionCB>() {
+     *     public void specify(CrawlingSessionCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
+     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
+     * <p>You can specify update columns used on set clause of update statement.
+     * However you do not need to specify common columns for update
+     * and an optimistic lock column because they are specified implicitly.</p>
+     * <p>And you should specify columns that are modified in any entities (at least one entity).
+     * But if you specify every column, it has no check.</p>
      * @param crawlingSessionList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)

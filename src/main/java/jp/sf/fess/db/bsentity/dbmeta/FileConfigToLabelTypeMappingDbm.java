@@ -154,7 +154,7 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_0FF88574_2CA8_4155_9BD2_9FDD47E1E56D",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_5D84DEE5_03E7_4F4C_9C55_A578CA9956F7",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnFileConfigId = cci("FILE_CONFIG_ID",

@@ -167,7 +167,7 @@ public class ClickLogDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_0754AF3F_61DC_4BEF_A897_50236FD8CF6F",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_052D962A_D034_4EE0_A0E1_D06990433B06",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSearchId = cci("SEARCH_ID", "SEARCH_ID",
