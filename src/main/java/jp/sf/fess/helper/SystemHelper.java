@@ -246,15 +246,15 @@ public class SystemHelper implements Serializable {
         crawlerCmdList.add("--name");
         crawlerCmdList.add(Constants.CRAWLING_SESSION_SYSTEM_NAME);
 
-        if (webConfigIds != null) {
+        if (webConfigIds != null && webConfigIds.length > 0) {
             crawlerCmdList.add("-w");
             crawlerCmdList.add(StringUtils.join(webConfigIds, ','));
         }
-        if (webConfigIds != null) {
+        if (fileConfigIds != null && fileConfigIds.length > 0) {
             crawlerCmdList.add("-f");
             crawlerCmdList.add(StringUtils.join(fileConfigIds, ','));
         }
-        if (webConfigIds != null) {
+        if (dataConfigIds != null && dataConfigIds.length > 0) {
             crawlerCmdList.add("-d");
             crawlerCmdList.add(StringUtils.join(dataConfigIds, ','));
         }
