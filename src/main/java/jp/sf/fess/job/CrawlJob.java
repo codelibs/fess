@@ -40,11 +40,21 @@ public class CrawlJob {
     public String execute(final JobExecutor jobExecutor,
             final String[] webConfigIds, final String[] fileConfigIds,
             final String[] dataConfigIds, final String operation) {
-        final StringBuilder resultBuf = new StringBuilder();
 
         // create session id
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         final String sessionId = sdf.format(new Date());
+
+        return execute(jobExecutor, sessionId, webConfigIds, fileConfigIds,
+                dataConfigIds, operation);
+
+    }
+
+    public String execute(final JobExecutor jobExecutor,
+            final String sessionId, final String[] webConfigIds,
+            final String[] fileConfigIds, final String[] dataConfigIds,
+            final String operation) {
+        final StringBuilder resultBuf = new StringBuilder();
 
         if (jobExecutor != null) {
             jobExecutor.addShutdownListener(new ShutdownListener() {
@@ -70,6 +80,7 @@ public class CrawlJob {
         }
 
         return resultBuf.toString();
+
     }
 
 }
