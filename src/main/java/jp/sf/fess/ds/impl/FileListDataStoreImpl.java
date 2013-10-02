@@ -172,8 +172,12 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                     return false;
                 }
 
+                final long startTime = System.currentTimeMillis();
                 final ResponseData responseData = robotClient.doGet(dataMap
                         .get(urlField).toString());
+                responseData.setExecutionTime(System.currentTimeMillis()
+                        - startTime);
+                responseData.setSessionId((String) dataMap.get("sessionId"));
 
                 // TODO inefficient conversion...
                 final ResultData resultData = transformer
