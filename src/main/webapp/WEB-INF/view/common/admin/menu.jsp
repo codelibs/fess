@@ -15,16 +15,6 @@
 			</span>
 		</c:if>
 		<br />
-		<c:if test="${menuType=='crawl'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="../crawl/index">
-			<bean:message key="labels.menu.crawl_config" />
-		</s:link>
-		<c:if test="${menuType=='crawl'}">
-			</span>
-		</c:if>
-		<br />
 		<c:if test="${menuType=='scheduledJob'}">
 			<span class="selected">
 		</c:if>
@@ -32,6 +22,16 @@
 			<bean:message key="labels.menu.scheduled_job_config" />
 		</s:link>
 		<c:if test="${menuType=='scheduledJob'}">
+			</span>
+		</c:if>
+		<br />
+		<c:if test="${menuType=='crawl'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="../crawl/index">
+			<bean:message key="labels.menu.crawl_config" />
+		</s:link>
+		<c:if test="${menuType=='crawl'}">
 			</span>
 		</c:if>
 		<br />
@@ -205,6 +205,16 @@
 			</span>
 		</c:if>
 		<br />
+		<c:if test="${menuType=='jobLog'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="../jobLog/index">
+			<bean:message key="labels.menu.jobLog" />
+		</s:link>
+		<c:if test="${menuType=='jobLog'}">
+			</span>
+		</c:if>
+		<br />
 		<c:if test="${menuType=='crawlingSession'}">
 			<span class="selected">
 		</c:if>
@@ -222,16 +232,6 @@
 			<bean:message key="labels.menu.log" />
 		</s:link>
 		<c:if test="${menuType=='log'}">
-			</span>
-		</c:if>
-		<br />
-		<c:if test="${menuType=='jobLog'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="../jobLog/index">
-			<bean:message key="labels.menu.jobLog" />
-		</s:link>
-		<c:if test="${menuType=='jobLog'}">
 			</span>
 		</c:if>
 		<br />
