@@ -312,4 +312,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_JOB_SCRIPT_TYPE = "groovy";
 
+    public static final int EXIT_OK = 0;
+
+    public static final int EXIT_FAIL = 1;
+
 }

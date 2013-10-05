@@ -229,14 +229,22 @@ public class Crawler implements Serializable {
         };
         Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
+        int exitCode;
         try {
-            process(options);
+            exitCode = process(options);
+        } catch (final Throwable t) {
+            logger.error("Crawler does not work correctly.", t);
+            exitCode = Constants.EXIT_FAIL;
         } finally {
             SingletonS2ContainerFactory.destroy();
         }
+
+        if (exitCode != Constants.EXIT_OK) {
+            System.exit(exitCode);
+        }
     }
 
-    private static void process(final Options options) {
+    private static int process(final Options options) {
         // initialize mobylet
         MobyletLauncher.launch();
 
@@ -291,7 +299,7 @@ public class Crawler implements Serializable {
         }
 
         try {
-            crawler.doCrawl(options);
+            return crawler.doCrawl(options);
         } finally {
             try {
                 crawlingSessionHelper.store(options.sessionId);
@@ -349,7 +357,7 @@ public class Crawler implements Serializable {
         }
     }
 
-    public void doCrawl(final Options options) {
+    public int doCrawl(final Options options) {
         if (logger.isInfoEnabled()) {
             logger.info("Starting Crawler..");
         }
@@ -363,6 +371,7 @@ public class Crawler implements Serializable {
                 .getComponent("crawlingSessionHelper");
 
         boolean completed = false;
+        int exitCode = Constants.EXIT_OK;
         try {
             writeTimeToSessionInfo(crawlingSessionHelper,
                     Constants.CRAWLER_START_TIME);
@@ -470,6 +479,7 @@ public class Crawler implements Serializable {
                     logger.warn("Could not delete expired sessions in "
                             + updateSolrGroup.getGroupName(), e);
                 }
+                exitCode = Constants.EXIT_FAIL;
             }
 
             if (options.isCommit()) {
@@ -493,10 +503,11 @@ public class Crawler implements Serializable {
                 logger.info("Finished Crawler");
             }
             completed = true;
+
+            return exitCode;
         } catch (final Throwable t) { // NOPMD
-            if (logger.isWarnEnabled()) {
-                logger.warn("Interrupted a crawl task.", t);
-            }
+            logger.warn("Interrupted a crawl task.", t);
+            return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
             crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_STATUS,
