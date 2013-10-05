@@ -236,6 +236,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DATA_INDEX_SIZE = "DataIndexSize";
 
+    public static final String SESSION_ID = "sessionId";
+
     public static final String INDEXING_TARGET = "indexingTarget";
 
     public static final String DIGEST_PREFIX = "...";

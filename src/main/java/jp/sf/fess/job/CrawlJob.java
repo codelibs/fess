@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import jp.sf.fess.Constants;
+import jp.sf.fess.FessSystemException;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.JobExecutor.ShutdownListener;
@@ -56,6 +57,35 @@ public class CrawlJob {
             final String operation) {
         final StringBuilder resultBuf = new StringBuilder();
 
+        resultBuf.append("Session Id: ").append(sessionId).append("\n");
+        resultBuf.append("Web  Config Id:");
+        if (webConfigIds == null) {
+            resultBuf.append(" ALL\n");
+        } else {
+            for (final String id : webConfigIds) {
+                resultBuf.append(' ').append(id);
+            }
+            resultBuf.append('\n');
+        }
+        resultBuf.append("File Config Id:");
+        if (fileConfigIds == null) {
+            resultBuf.append(" ALL\n");
+        } else {
+            for (final String id : fileConfigIds) {
+                resultBuf.append(' ').append(id);
+            }
+            resultBuf.append('\n');
+        }
+        resultBuf.append("Data Config Id:");
+        if (dataConfigIds == null) {
+            resultBuf.append(" ALL\n");
+        } else {
+            for (final String id : dataConfigIds) {
+                resultBuf.append(' ').append(id);
+            }
+            resultBuf.append('\n');
+        }
+
         if (jobExecutor != null) {
             jobExecutor.addShutdownListener(new ShutdownListener() {
                 @Override
@@ -74,9 +104,10 @@ public class CrawlJob {
             SingletonS2Container.getComponent(SystemHelper.class)
                     .executeCrawler(sessionId, webConfigIds, fileConfigIds,
                             dataConfigIds, operation);
+        } catch (final FessSystemException e) {
+            throw e;
         } catch (final Exception e) {
-            logger.error("Failed to execute a crawl job.", e);
-            resultBuf.append(e.getMessage());
+            throw new FessSystemException("Failed to execute a crawl job.", e);
         }
 
         return resultBuf.toString();

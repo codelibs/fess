@@ -101,6 +101,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
     public Map<String, String> parentEncodingMap = Collections
             .synchronizedMap(new LruHashMap<String, String>(1000));
 
+    public String[] ignoreFieldNames = new String[] {
+            Constants.INDEXING_TARGET, Constants.SESSION_ID };
+
     @Override
     protected boolean isCsvFile(final File parentFile, final String filename) {
         if (super.isCsvFile(parentFile, filename)) {
@@ -233,9 +236,12 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count
                     + ".name");
         }
-        initParamMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList
-                .toArray(new org.seasar.robot.client.http.RequestHeader[rhList
-                        .size()]));
+        if (!rhList.isEmpty()) {
+            initParamMap
+                    .put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
+                            rhList.toArray(new org.seasar.robot.client.http.RequestHeader[rhList
+                                    .size()]));
+        }
 
         // file auth
         final String fileAuthStr = paramMap.get(S2ROBOT_FILE_AUTH);
@@ -337,7 +343,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
         @Override
         public boolean store(final Map<String, Object> dataMap) {
-            final Object eventType = dataMap.get(eventTypeField);
+            final Object eventType = dataMap.remove(eventTypeField);
 
             if (createEventName.equals(eventType)
                     || modifyEventName.equals(eventType)) {
@@ -375,7 +381,8 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 final ResponseData responseData = client.doGet(url);
                 responseData.setExecutionTime(System.currentTimeMillis()
                         - startTime);
-                responseData.setSessionId((String) dataMap.get("sessionId"));
+                responseData.setSessionId((String) dataMap
+                        .get(Constants.SESSION_ID));
 
                 final RuleManager ruleManager = SingletonS2Container
                         .getComponent(RuleManager.class);
@@ -404,6 +411,11 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                                         "Could not create an instanced from bytes.",
                                         e);
                             }
+                        }
+
+                        // remove
+                        for (final String fieldName : ignoreFieldNames) {
+                            dataMap.remove(fieldName);
                         }
 
                         return indexUpdateCallback.store(dataMap);

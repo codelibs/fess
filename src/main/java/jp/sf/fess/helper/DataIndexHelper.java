@@ -129,7 +129,7 @@ public class DataIndexHelper implements Serializable {
                     dataCrawlingConfig);
             sessionIdList.add(sid);
 
-            initParamMap.put("sessionId", sessionId);
+            initParamMap.put(Constants.SESSION_ID, sessionId);
             initParamMap.put("crawlingSessionId", sid);
 
             final DataCrawlingThread dataCrawlingThread = new DataCrawlingThread(

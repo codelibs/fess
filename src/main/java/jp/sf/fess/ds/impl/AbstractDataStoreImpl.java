@@ -61,7 +61,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // default values
         final Map<String, Object> defaultDataMap = new HashMap<String, Object>();
         // segment
-        defaultDataMap.put("segment", initParamMap.get("sessionId"));
+        defaultDataMap.put("segment", initParamMap.get(Constants.SESSION_ID));
         // tstamp
         defaultDataMap.put("tstamp", "NOW");
         // boost

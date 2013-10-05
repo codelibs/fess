@@ -294,6 +294,12 @@ public class SystemHelper implements Serializable {
                 logger.info("Crawler: Exit Code=" + exitValue
                         + " - Crawler Process Output:\n" + it.getOutput());
             }
+            if (exitValue != 0) {
+                throw new FessSystemException("Exit code is " + exitValue
+                        + "\nOutput:\n" + it.getOutput());
+            }
+        } catch (final FessSystemException e) {
+            throw e;
         } catch (final InterruptedException e) {
             logger.warn("Crawler Process interrupted.");
         } catch (final Exception e) {
