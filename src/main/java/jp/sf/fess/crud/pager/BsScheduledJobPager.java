@@ -54,6 +54,8 @@ public abstract class BsScheduledJobPager implements Serializable {
 
     public String jobLogging;
 
+    public String available;
+
     public String sortOrder;
 
     public String createdBy;
@@ -73,6 +75,7 @@ public abstract class BsScheduledJobPager implements Serializable {
         scriptType = null;
         crawler = null;
         jobLogging = null;
+        available = null;
         sortOrder = null;
         createdBy = null;
         createdTime = null;

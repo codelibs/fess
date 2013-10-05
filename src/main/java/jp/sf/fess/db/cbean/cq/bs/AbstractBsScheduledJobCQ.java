@@ -1139,6 +1139,135 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     abstract protected ConditionValue getCValueJobLogging();
 
     /**
+     * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as equal. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_Equal(final String available) {
+        doSetAvailable_Equal(fRES(available));
+    }
+
+    protected void doSetAvailable_Equal(final String available) {
+        regAvailable(CK_EQ, available);
+    }
+
+    /**
+     * NotEqual(&lt;&gt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as notEqual. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_NotEqual(final String available) {
+        doSetAvailable_NotEqual(fRES(available));
+    }
+
+    protected void doSetAvailable_NotEqual(final String available) {
+        regAvailable(CK_NES, available);
+    }
+
+    /**
+     * GreaterThan(&gt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as greaterThan. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_GreaterThan(final String available) {
+        regAvailable(CK_GT, fRES(available));
+    }
+
+    /**
+     * LessThan(&lt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as lessThan. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_LessThan(final String available) {
+        regAvailable(CK_LT, fRES(available));
+    }
+
+    /**
+     * GreaterEqual(&gt;=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as greaterEqual. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_GreaterEqual(final String available) {
+        regAvailable(CK_GE, fRES(available));
+    }
+
+    /**
+     * LessEqual(&lt;=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as lessEqual. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_LessEqual(final String available) {
+        regAvailable(CK_LE, fRES(available));
+    }
+
+    /**
+     * InScope {in ('a', 'b')}. And NullOrEmptyIgnored, NullOrEmptyElementIgnored, SeveralRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param availableList The collection of available as inScope. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_InScope(final Collection<String> availableList) {
+        doSetAvailable_InScope(availableList);
+    }
+
+    public void doSetAvailable_InScope(final Collection<String> availableList) {
+        regINS(CK_INS, cTL(availableList), getCValueAvailable(), "AVAILABLE");
+    }
+
+    /**
+     * NotInScope {not in ('a', 'b')}. And NullOrEmptyIgnored, NullOrEmptyElementIgnored, SeveralRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param availableList The collection of available as notInScope. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_NotInScope(final Collection<String> availableList) {
+        doSetAvailable_NotInScope(availableList);
+    }
+
+    public void doSetAvailable_NotInScope(final Collection<String> availableList) {
+        regINS(CK_NINS, cTL(availableList), getCValueAvailable(), "AVAILABLE");
+    }
+
+    /**
+     * PrefixSearch {like 'xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as prefixSearch. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setAvailable_PrefixSearch(final String available) {
+        setAvailable_LikeSearch(available, cLSOP());
+    }
+
+    /**
+     * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)} <br />
+     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * @param available The value of available as likeSearch. (NullAllowed: if null (or empty), no condition)
+     * @param likeSearchOption The option of like-search. (NotNull)
+     */
+    public void setAvailable_LikeSearch(final String available,
+            final LikeSearchOption likeSearchOption) {
+        regLSQ(CK_LS, fRES(available), getCValueAvailable(), "AVAILABLE",
+                likeSearchOption);
+    }
+
+    /**
+     * NotLikeSearch with various options. (versatile) {not like 'xxx%' escape ...} <br />
+     * And NullOrEmptyIgnored, SeveralRegistered. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @param available The value of available as notLikeSearch. (NullAllowed: if null (or empty), no condition)
+     * @param likeSearchOption The option of not-like-search. (NotNull)
+     */
+    public void setAvailable_NotLikeSearch(final String available,
+            final LikeSearchOption likeSearchOption) {
+        regLSQ(CK_NLS, fRES(available), getCValueAvailable(), "AVAILABLE",
+                likeSearchOption);
+    }
+
+    protected void regAvailable(final ConditionKey k, final Object v) {
+        regQ(k, v, getCValueAvailable(), "AVAILABLE");
+    }
+
+    abstract protected ConditionValue getCValueAvailable();
+
+    /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
      * SORT_ORDER: {NotNull, INTEGER(10)}
      * @param sortOrder The value of sortOrder as equal. (NullAllowed: if null, no condition)

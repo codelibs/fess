@@ -154,7 +154,7 @@ public class FileConfigToBrowserTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_4A2AE538_DD96_4228_A294_A736985F4E59",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_F3AD73A5_3429_439A_A897_8AA60BA7F92F",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnFileConfigId = cci("FILE_CONFIG_ID",

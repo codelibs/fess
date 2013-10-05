@@ -137,6 +137,11 @@ public class ScheduledJobCIQ extends AbstractBsScheduledJobCQ {
     }
 
     @Override
+    protected ConditionValue getCValueAvailable() {
+        return _myCQ.getAvailable();
+    }
+
+    @Override
     protected ConditionValue getCValueSortOrder() {
         return _myCQ.getSortOrder();
     }

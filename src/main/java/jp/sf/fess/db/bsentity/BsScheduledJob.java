@@ -34,7 +34,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     ID
  * 
  * [column]
- *     ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, DELETED_BY, DELETED_TIME, VERSION_NO
+ *     ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, DELETED_BY, DELETED_TIME, VERSION_NO
  * 
  * [sequence]
  *     
@@ -67,6 +67,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * String scriptData = entity.getScriptData();
  * String crawler = entity.getCrawler();
  * String jobLogging = entity.getJobLogging();
+ * String available = entity.getAvailable();
  * Integer sortOrder = entity.getSortOrder();
  * String createdBy = entity.getCreatedBy();
  * java.sql.Timestamp createdTime = entity.getCreatedTime();
@@ -83,6 +84,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * entity.setScriptData(scriptData);
  * entity.setCrawler(crawler);
  * entity.setJobLogging(jobLogging);
+ * entity.setAvailable(available);
  * entity.setSortOrder(sortOrder);
  * entity.setCreatedBy(createdBy);
  * entity.setCreatedTime(createdTime);
@@ -132,6 +134,9 @@ public abstract class BsScheduledJob implements Entity, Serializable, Cloneable 
 
     /** JOB_LOGGING: {NotNull, VARCHAR(1)} */
     protected String _jobLogging;
+
+    /** AVAILABLE: {NotNull, VARCHAR(1)} */
+    protected String _available;
 
     /** SORT_ORDER: {NotNull, INTEGER(10)} */
     protected Integer _sortOrder;
@@ -347,6 +352,7 @@ public abstract class BsScheduledJob implements Entity, Serializable, Cloneable 
         sb.append(delimiter).append(getScriptData());
         sb.append(delimiter).append(getCrawler());
         sb.append(delimiter).append(getJobLogging());
+        sb.append(delimiter).append(getAvailable());
         sb.append(delimiter).append(getSortOrder());
         sb.append(delimiter).append(getCreatedBy());
         sb.append(delimiter).append(getCreatedTime());
@@ -517,6 +523,23 @@ public abstract class BsScheduledJob implements Entity, Serializable, Cloneable 
     public void setJobLogging(final String jobLogging) {
         __modifiedProperties.addPropertyName("jobLogging");
         _jobLogging = jobLogging;
+    }
+
+    /**
+     * [get] AVAILABLE: {NotNull, VARCHAR(1)} <br />
+     * @return The value of the column 'AVAILABLE'. (basically NotNull if selected: for the constraint)
+     */
+    public String getAvailable() {
+        return _available;
+    }
+
+    /**
+     * [set] AVAILABLE: {NotNull, VARCHAR(1)} <br />
+     * @param available The value of the column 'AVAILABLE'. (basically NotNull if update: for the constraint)
+     */
+    public void setAvailable(final String available) {
+        __modifiedProperties.addPropertyName("available");
+        _available = available;
     }
 
     /**

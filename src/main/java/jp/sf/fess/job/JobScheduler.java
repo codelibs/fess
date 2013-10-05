@@ -37,9 +37,11 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
+import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,7 @@ public class JobScheduler {
 
     public Class<? extends Job> jobClass = TriggeredJob.class;
 
-    public List<String> targetList;
+    public List<String> targetList = new ArrayList<String>();
 
     @InitMethod
     public void init() {
@@ -65,23 +67,18 @@ public class JobScheduler {
             throw new ScheduledJobException("Failed to start a scheduler.", e);
         }
 
-        final List<String> list = new ArrayList<String>();
-        list.add(Constants.DEFAULT_JOB_TARGET);
-        if (targetList != null) {
-            list.addAll(targetList);
-        }
         final ScheduledJobCB cb = new ScheduledJobCB();
-        if (targetList != null) {
-            cb.query().setTarget_InScope(targetList);
-        }
+        cb.query().setAvailable_Equal(Constants.T);
         cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
         cb.query().addOrderBy_Name_Asc();
-        final List<ScheduledJob> scheduledJobList = SingletonS2Container
-                .getComponent(ScheduledJobBhv.class).selectList(cb);
-        for (final ScheduledJob scheduledJob : scheduledJobList) {
-            register(scheduledJob);
-        }
+        SingletonS2Container.getComponent(ScheduledJobBhv.class).selectCursor(
+                cb, new EntityRowHandler<ScheduledJob>() {
+                    @Override
+                    public void handle(final ScheduledJob scheduledJob) {
+                        register(scheduledJob);
+                    }
+                });
     }
 
     @DestroyMethod
@@ -98,20 +95,23 @@ public class JobScheduler {
             throw new ScheduledJobException("No job.");
         }
 
+        if (!Constants.T.equals(scheduledJob.getAvailable())) {
+            logger.info("Inactive Job " + scheduledJob.getId() + ":"
+                    + scheduledJob.getName());
+            try {
+                unregister(scheduledJob);
+            } catch (final Exception e) {
+                // ignore
+            }
+            return;
+        }
+
         final String target = scheduledJob.getTarget();
-        if (targetList != null) {
-            if (!Constants.DEFAULT_JOB_TARGET.equals(target)
-                    && !targetList.contains(target)) {
-                logger.warn("Ignore Job " + scheduledJob.getId()
-                        + " because of not target: " + scheduledJob.getTarget());
-                return;
-            }
-        } else {
-            if (!Constants.DEFAULT_JOB_TARGET.equals(target)) {
-                logger.warn("Ignore Job " + scheduledJob.getId()
-                        + " because of not target: " + scheduledJob.getTarget());
-                return;
-            }
+        if (!isTarget(target)) {
+            logger.info("Ignore Job " + scheduledJob.getId() + ":"
+                    + scheduledJob.getName() + " because of not target: "
+                    + scheduledJob.getTarget());
+            return;
         }
 
         String scriptType = scheduledJob.getScriptType();
@@ -139,6 +139,10 @@ public class JobScheduler {
             throw new ScheduledJobException("Failed to add Job: "
                     + scheduledJob, e);
         }
+
+        logger.info("Starting Job " + scheduledJob.getId() + ":"
+                + scheduledJob.getName());
+
     }
 
     public void unregister(final ScheduledJob scheduledJob) {
@@ -149,5 +153,21 @@ public class JobScheduler {
             throw new ScheduledJobException("Failed to delete Job: "
                     + scheduledJob, e);
         }
+    }
+
+    protected boolean isTarget(final String target) {
+        if (StringUtil.isBlank(target)) {
+            return true;
+        }
+
+        final String[] targets = target.split(",");
+        for (String name : targets) {
+            name = name.trim();
+            if (Constants.DEFAULT_JOB_TARGET.equals(name)
+                    || targetList.contains(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

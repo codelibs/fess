@@ -162,6 +162,7 @@ CREATE TABLE "SCHEDULED_JOB"(
   "SCRIPT_DATA" VARCHAR2(4000),
   "CRAWLER" VARCHAR2(1) NOT NULL,
   "JOB_LOGGING" VARCHAR2(1) NOT NULL,
+  "AVAILABLE" VARCHAR2(1) NOT NULL,
   "SORT_ORDER" NUMBER(9,0) NOT NULL,
   "CREATED_BY" VARCHAR2(255) NOT NULL,
   "CREATED_TIME" TIMESTAMP NOT NULL,
@@ -586,8 +587,8 @@ INSERT INTO BROWSER_TYPE (ID, NAME, VALUE, SORT_ORDER, CREATED_BY, CREATED_TIME,
 INSERT INTO BROWSER_TYPE (ID, NAME, VALUE, SORT_ORDER, CREATED_BY, CREATED_TIME, VERSION_NO) VALUES (3, 'au', 'au', 3, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 1);
 INSERT INTO BROWSER_TYPE (ID, NAME, VALUE, SORT_ORDER, CREATED_BY, CREATED_TIME, VERSION_NO) VALUES (4, 'Softbank', 'softbank', 4, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 1);
 
-INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (1, 'Crawler', 'all', '0 0 0 * * ?', 'groovy', 'return container.getComponent("crawlJob").execute(executor);', 'T', 'T', 0, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
-INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (2, 'Minutely', 'all', '0 * * * * ?', 'groovy', 'return container.getComponent("minutelyJob").execute();', 'F', 'F', 10, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
-INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (3, 'Hourly', 'all', '0 0 * * * ?', 'groovy', 'return container.getComponent("houryJob").execute();', 'F', 'F', 20, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
-INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (4, 'Daily', 'all', '0 0 0 * * ?', 'groovy', 'return container.getComponent("dailyJob").execute();', 'F', 'F', 30, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
+INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (1, 'Crawler', 'all', '0 0 0 * * ?', 'groovy', 'return container.getComponent("crawlJob").execute(executor);', 'T', 'T', 'T', 0, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
+INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (2, 'Minutely Tasks', 'all', '0 * * * * ?', 'groovy', 'return container.getComponent("minutelyJob").execute();', 'F', 'F', 'T', 10, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
+INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (3, 'Hourly Tasks', 'all', '0 0 * * * ?', 'groovy', 'return container.getComponent("houryJob").execute();', 'F', 'F', 'T', 20, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
+INSERT INTO SCHEDULED_JOB (ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, VERSION_NO) VALUES (4, 'Daily Tasks', 'all', '0 0 0 * * ?', 'groovy', 'return container.getComponent("dailyJob").execute();', 'F', 'F', 'T', 30, 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 'system', to_date('2000-01-01', 'yyyy-MM-dd'), 0);
 

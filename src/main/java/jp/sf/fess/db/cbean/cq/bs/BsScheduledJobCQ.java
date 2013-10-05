@@ -372,6 +372,40 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return this;
     }
 
+    protected ConditionValue _available;
+
+    public ConditionValue getAvailable() {
+        if (_available == null) {
+            _available = nCV();
+        }
+        return _available;
+    }
+
+    @Override
+    protected ConditionValue getCValueAvailable() {
+        return getAvailable();
+    }
+
+    /** 
+     * Add order-by as ascend. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @return this. (NotNull)
+     */
+    public BsScheduledJobCQ addOrderBy_Available_Asc() {
+        regOBA("AVAILABLE");
+        return this;
+    }
+
+    /**
+     * Add order-by as descend. <br />
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @return this. (NotNull)
+     */
+    public BsScheduledJobCQ addOrderBy_Available_Desc() {
+        regOBD("AVAILABLE");
+        return this;
+    }
+
     protected ConditionValue _sortOrder;
 
     public ConditionValue getSortOrder() {

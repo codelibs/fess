@@ -70,6 +70,7 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgScriptData(), "scriptData");
         setupEpg(_epgMap, new EpgCrawler(), "crawler");
         setupEpg(_epgMap, new EpgJobLogging(), "jobLogging");
+        setupEpg(_epgMap, new EpgAvailable(), "available");
         setupEpg(_epgMap, new EpgSortOrder(), "sortOrder");
         setupEpg(_epgMap, new EpgCreatedBy(), "createdBy");
         setupEpg(_epgMap, new EpgCreatedTime(), "createdTime");
@@ -178,6 +179,18 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         @Override
         public void write(final Entity e, final Object v) {
             ((ScheduledJob) e).setJobLogging((String) v);
+        }
+    }
+
+    public static class EpgAvailable implements PropertyGateway {
+        @Override
+        public Object read(final Entity e) {
+            return ((ScheduledJob) e).getAvailable();
+        }
+
+        @Override
+        public void write(final Entity e, final Object v) {
+            ((ScheduledJob) e).setAvailable((String) v);
         }
     }
 
@@ -322,7 +335,7 @@ public class ScheduledJobDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D6F9129E_73D7_4058_B2B1_ABC852F6C6F9",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_DE6BB1F9_9750_40AE_A9B6_72DBBB66E240",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
@@ -354,6 +367,10 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     protected final ColumnInfo _columnJobLogging = cci("JOB_LOGGING",
             "JOB_LOGGING", null, null, true, "jobLogging", String.class, false,
             false, "VARCHAR", 1, 0, null, false, null, null, null, null, null);
+
+    protected final ColumnInfo _columnAvailable = cci("AVAILABLE", "AVAILABLE",
+            null, null, true, "available", String.class, false, false,
+            "VARCHAR", 1, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSortOrder = cci("SORT_ORDER",
             "SORT_ORDER", null, null, true, "sortOrder", Integer.class, false,
@@ -423,6 +440,10 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         return _columnJobLogging;
     }
 
+    public ColumnInfo columnAvailable() {
+        return _columnAvailable;
+    }
+
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
@@ -466,6 +487,7 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         ls.add(columnScriptData());
         ls.add(columnCrawler());
         ls.add(columnJobLogging());
+        ls.add(columnAvailable());
         ls.add(columnSortOrder());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());

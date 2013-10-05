@@ -96,6 +96,14 @@
 							</td>
 						</tr>
 						<tr>
+							<th><bean:message key="labels.scheduledjob_status" /></th>
+							<td>
+								<c:if test="${available=='on'}"><bean:message key="labels.enabled"/></c:if>
+								<c:if test="${available!='on'}"><bean:message key="labels.disabled"/></c:if>
+								<html:hidden property="available" />
+							</td>
+						</tr>
+						<tr>
 							<th><bean:message key="labels.sortOrder" /></th>
 							<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
 						</tr>

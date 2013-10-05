@@ -43,6 +43,10 @@ public class ScheduledJob extends BsScheduledJob {
         return Constants.T.equals(getCrawler());
     }
 
+    public boolean isEnabled() {
+        return Constants.T.equals(getAvailable());
+    }
+
     public boolean isRunning() {
         return SingletonS2Container.getComponent(SystemHelper.class)
                 .isRunningJobExecutoer(getId());

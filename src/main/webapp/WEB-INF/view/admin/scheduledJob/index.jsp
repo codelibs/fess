@@ -58,7 +58,10 @@
 								<td>${f:h(data.name)}</td>
 								<td style="text-align: center;">
 									<c:if test="${data.running}"><bean:message key="labels.scheduledjob_running" /></c:if>
-									<c:if test="${!data.running}"><bean:message key="labels.scheduledjob_nojob" /></c:if>
+									<c:if test="${!data.running}">
+										<c:if test="${data.available=='T'}"><bean:message key="labels.scheduledjob_active" /></c:if>
+										<c:if test="${data.available!='T'}"><bean:message key="labels.scheduledjob_nojob" /></c:if>
+									</c:if>
 								</td>
 								<td style="text-align: center;">${f:h(data.target)}</td>
 								<td style="text-align: center;">${f:h(data.cronExpression)}</td>

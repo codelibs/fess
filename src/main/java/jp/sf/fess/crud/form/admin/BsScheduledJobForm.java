@@ -72,6 +72,9 @@ public abstract class BsScheduledJobForm {
     // ignore
     public String jobLogging;
 
+    // ignore
+    public String available;
+
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @IntegerType
     @IntRange(min = 0, max = 2147483647)
@@ -108,6 +111,7 @@ public abstract class BsScheduledJobForm {
         scriptData = null;
         crawler = null;
         jobLogging = null;
+        available = null;
         sortOrder = null;
         createdBy = null;
         createdTime = null;

@@ -167,7 +167,7 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_C9FF7DA3_0F42_4BA3_B038_9C5DF4E0E6EC",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_70BB7CA0_550F_4EBD_8E4F_68BF81F61FAB",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSearchId = cci("SEARCH_ID", "SEARCH_ID",

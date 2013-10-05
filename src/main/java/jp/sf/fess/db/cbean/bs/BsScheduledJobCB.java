@@ -416,6 +416,14 @@ public class BsScheduledJobCB extends AbstractConditionBean {
         }
 
         /**
+         * AVAILABLE: {NotNull, VARCHAR(1)}
+         * @return The information object of specified column. (NotNull)
+         */
+        public HpSpecifiedColumn columnAvailable() {
+            return doColumn("AVAILABLE");
+        }
+
+        /**
          * SORT_ORDER: {NotNull, INTEGER(10)}
          * @return The information object of specified column. (NotNull)
          */

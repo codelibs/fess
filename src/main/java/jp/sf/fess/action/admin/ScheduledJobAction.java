@@ -73,6 +73,8 @@ public class ScheduledJobAction extends BsScheduledJobAction {
                 : null;
         scheduledJobForm.crawler = scheduledJob.isCrawlerJob() ? Constants.ON
                 : null;
+        scheduledJobForm.available = scheduledJob.isEnabled() ? Constants.ON
+                : null;
     }
 
     @Override
@@ -102,6 +104,9 @@ public class ScheduledJobAction extends BsScheduledJobAction {
                 : Constants.F);
         scheduledJob
                 .setCrawler(Constants.ON.equals(scheduledJobForm.crawler) ? Constants.T
+                        : Constants.F);
+        scheduledJob
+                .setAvailable(Constants.ON.equals(scheduledJobForm.available) ? Constants.T
                         : Constants.F);
 
         return scheduledJob;

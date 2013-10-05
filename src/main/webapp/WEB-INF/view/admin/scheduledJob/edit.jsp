@@ -88,6 +88,10 @@
 							<td><html:checkbox property="crawler"/><bean:message key="labels.enabled"/></td>
 						</tr>
 						<tr>
+							<th><bean:message key="labels.scheduledjob_status" /></th>
+							<td><html:checkbox property="available"/><bean:message key="labels.enabled"/></td>
+						</tr>
+						<tr>
 							<th><bean:message key="labels.sortOrder" /></th>
 							<td><html:text property="sortOrder"  styleClass="xlarge"/></td>
 						</tr>

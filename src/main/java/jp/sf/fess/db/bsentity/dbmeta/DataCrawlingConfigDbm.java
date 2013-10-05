@@ -310,7 +310,7 @@ public class DataCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_69485FF1_9248_4CA0_B20B_21AAF4A55C3B",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_7B3BF39C_5D9F_4776_9789_EF2051BF07FC",
             false,
             null,
             null,
