@@ -295,7 +295,7 @@ public class SystemHelper implements Serializable {
                         + " - Crawler Process Output:\n" + it.getOutput());
             }
             if (exitValue != 0) {
-                throw new FessSystemException("Exit code is " + exitValue
+                throw new FessSystemException("Exit Code: " + exitValue
                         + "\nOutput:\n" + it.getOutput());
             }
         } catch (final FessSystemException e) {

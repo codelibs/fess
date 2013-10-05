@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.sf.fess.Constants;
+import jp.sf.fess.FessSystemException;
 import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.DataIndexHelper;
@@ -378,6 +379,10 @@ public class Crawler implements Serializable {
 
             final SolrGroup updateSolrGroup = solrGroupManager
                     .getSolrGroup(QueryType.ADD);
+            if (!updateSolrGroup.isActive(QueryType.ADD)) {
+                throw new FessSystemException("SolrGroup "
+                        + updateSolrGroup.getGroupName() + " is not available.");
+            }
 
             // setup path mapping
             final List<CDef.ProcessType> ptList = new ArrayList<CDef.ProcessType>();
@@ -506,7 +511,7 @@ public class Crawler implements Serializable {
 
             return exitCode;
         } catch (final Throwable t) { // NOPMD
-            logger.warn("Interrupted a crawl task.", t);
+            logger.warn("An exception occurs on the crawl task.", t);
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
