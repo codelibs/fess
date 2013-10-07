@@ -369,8 +369,6 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 }
 
                 final String url = dataMap.get(urlField).toString();
-                final S2RobotClientFactory robotClientFactory = SingletonS2Container
-                        .getComponent(S2RobotClientFactory.class);
                 final S2RobotClient client = robotClientFactory.getClient(url);
                 if (client == null) {
                     logger.warn("S2RobotClient is null. Data: " + dataMap);
