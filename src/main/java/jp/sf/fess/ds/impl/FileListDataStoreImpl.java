@@ -272,10 +272,12 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                     final SmbAuthentication smbAuth = new SmbAuthentication();
                     smbAuth.setDomain(domain == null ? "" : domain);
                     smbAuth.setServer(hostname);
-                    try {
-                        smbAuth.setPort(Integer.parseInt(port));
-                    } catch (final NumberFormatException e) {
-                        logger.warn("Failed to parse " + port, e);
+                    if (StringUtil.isNotBlank(port)) {
+                        try {
+                            smbAuth.setPort(Integer.parseInt(port));
+                        } catch (final NumberFormatException e) {
+                            logger.warn("Failed to parse " + port, e);
+                        }
                     }
                     smbAuth.setUsername(username);
                     smbAuth.setPassword(password == null ? "" : password);
