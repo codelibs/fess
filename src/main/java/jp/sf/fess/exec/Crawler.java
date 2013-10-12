@@ -525,7 +525,7 @@ public class Crawler implements Serializable {
         }
     }
 
-    private void optimize(final CrawlingSessionHelper crawlingSessionHelper,
+    protected void optimize(final CrawlingSessionHelper crawlingSessionHelper,
             final SolrGroup solrGroup) {
         writeTimeToSessionInfo(crawlingSessionHelper,
                 Constants.OPTIMIZE_START_TIME);
@@ -552,12 +552,12 @@ public class Crawler implements Serializable {
         }
     }
 
-    private void commit(final CrawlingSessionHelper crawlingSessionHelper,
+    protected void commit(final CrawlingSessionHelper crawlingSessionHelper,
             final SolrGroup solrGroup) {
         writeTimeToSessionInfo(crawlingSessionHelper,
                 Constants.COMMIT_START_TIME);
         long startTime = System.currentTimeMillis();
-        solrGroup.commit();
+        solrGroup.commit(true, true, false, true);
         startTime = System.currentTimeMillis() - startTime;
         writeTimeToSessionInfo(crawlingSessionHelper, Constants.COMMIT_END_TIME);
         if (crawlingSessionHelper != null) {
