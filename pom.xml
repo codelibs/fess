@@ -106,6 +106,10 @@
       </properties>
     </profile>
   </profiles>
+  <properties>
+    <dbflute.version>1.0.4K</dbflute.version>
+    <s2robot.version>0.6.0-SNAPSHOT</s2robot.version>
+  </properties>
   <build>
     <finalName>fess</finalName>
     <resources>
@@ -271,7 +275,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <dbfluteVersion>1.0.4K</dbfluteVersion>
+          <dbfluteVersion>${dbflute.version}</dbfluteVersion>
           <rootPackage>jp.sf.fess</rootPackage>
           <dbPackage>jp.sf.fess.db</dbPackage>
           <actionPackageName>action.admin</actionPackageName>
@@ -594,7 +598,7 @@
     <dependency>
       <groupId>org.codelibs.solr</groupId>
       <artifactId>solrlib</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.codelibs.sastruts</groupId>
@@ -609,7 +613,7 @@
     <dependency>
       <groupId>org.seasar.robot</groupId>
       <artifactId>s2-robot-db-${database}</artifactId>
-      <version>0.5.8</version>
+      <version>${s2robot.version}</version>
       <exclusions>
         <exclusion>
           <groupId>xml-apis</groupId>
@@ -628,12 +632,12 @@
     <dependency>
       <groupId>org.seasar.robot</groupId>
       <artifactId>s2-robot-db</artifactId>
-      <version>0.5.8</version>
+      <version>${s2robot.version}</version>
     </dependency>
     <dependency>
       <groupId>org.seasar.dbflute</groupId>
       <artifactId>dbflute-runtime</artifactId>
-      <version>1.0.4K</version>
+      <version>${dbflute.version}</version>
     </dependency>
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
