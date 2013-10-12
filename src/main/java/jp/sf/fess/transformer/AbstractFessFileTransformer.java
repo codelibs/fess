@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +169,7 @@ public abstract class AbstractFessFileTransformer extends
                 .getComponent("crawlingSessionHelper");
         final String sessionId = crawlingSessionHelper
                 .getCanonicalSessionId(responseData.getSessionId());
+        final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = SingletonS2Container
                 .getComponent("pathMappingHelper");
         final String url = pathMappingHelper.replaceUrl(sessionId,
@@ -180,6 +182,11 @@ public abstract class AbstractFessFileTransformer extends
                 Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                 Constants.TRUE);
 
+        //  expires
+        if (documentExpires != null) {
+            putResultDataBody(dataMap, crawlingSessionHelper.getExpiresField(),
+                    FessFunctions.formatDate(documentExpires));
+        }
         // segment
         putResultDataBody(dataMap, "segment", sessionId);
         // content

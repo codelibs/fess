@@ -180,7 +180,7 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_DE97C640_5BFE_435C_8103_F926207130A2",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_1A4E45FC_6AD7_4BDF_A764_207DD200D40E",
             false, null, null, null, "crawlingSessionInfoList", null);
 
     protected final ColumnInfo _columnSessionId = cci("SESSION_ID",
@@ -192,7 +192,7 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnExpiredTime = cci("EXPIRED_TIME",
-            "EXPIRED_TIME", null, null, true, "expiredTime",
+            "EXPIRED_TIME", null, null, false, "expiredTime",
             java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 

@@ -178,7 +178,8 @@ public class SystemHelper implements Serializable {
 
     public void executeCrawler(final String sessionId,
             final String[] webConfigIds, final String[] fileConfigIds,
-            final String[] dataConfigIds, final String operation) {
+            final String[] dataConfigIds, final String operation,
+            final int documentExpires) {
         final List<String> crawlerCmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonS2Container
@@ -261,6 +262,10 @@ public class SystemHelper implements Serializable {
         if (StringUtil.isNotBlank(operation)) {
             crawlerCmdList.add("-o");
             crawlerCmdList.add(operation);
+        }
+        if (documentExpires >= -1) {
+            crawlerCmdList.add("-e");
+            crawlerCmdList.add(Integer.toString(documentExpires));
         }
 
         final File baseDir = new File(servletContext.getRealPath("/"));

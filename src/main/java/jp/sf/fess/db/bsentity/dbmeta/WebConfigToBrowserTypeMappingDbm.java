@@ -154,7 +154,7 @@ public class WebConfigToBrowserTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_6C07DF1E_714C_4196_BCDB_49A66B981945",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_710C901B_F4B7_42F7_B97F_3CB64A6939D9",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnWebConfigId = cci("WEB_CONFIG_ID",

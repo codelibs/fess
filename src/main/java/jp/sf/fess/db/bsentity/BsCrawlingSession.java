@@ -98,7 +98,7 @@ public abstract class BsCrawlingSession implements Entity, Serializable,
     /** NAME: {IX, VARCHAR(20)} */
     protected String _name;
 
-    /** EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} */
+    /** EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)} */
     protected java.sql.Timestamp _expiredTime;
 
     /** CREATED_TIME: {NotNull, TIMESTAMP(23, 10)} */
@@ -415,16 +415,16 @@ public abstract class BsCrawlingSession implements Entity, Serializable,
     }
 
     /**
-     * [get] EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} <br />
-     * @return The value of the column 'EXPIRED_TIME'. (basically NotNull if selected: for the constraint)
+     * [get] EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)} <br />
+     * @return The value of the column 'EXPIRED_TIME'. (NullAllowed even if selected: for no constraint)
      */
     public java.sql.Timestamp getExpiredTime() {
         return _expiredTime;
     }
 
     /**
-     * [set] EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} <br />
-     * @param expiredTime The value of the column 'EXPIRED_TIME'. (basically NotNull if update: for the constraint)
+     * [set] EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)} <br />
+     * @param expiredTime The value of the column 'EXPIRED_TIME'. (NullAllowed: null update allowed for no constraint)
      */
     public void setExpiredTime(final java.sql.Timestamp expiredTime) {
         __modifiedProperties.addPropertyName("expiredTime");

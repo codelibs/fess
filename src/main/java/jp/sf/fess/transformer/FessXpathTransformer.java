@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -208,11 +209,17 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 .getComponent("crawlingSessionHelper");
         final String sessionId = crawlingSessionHelper
                 .getCanonicalSessionId(responseData.getSessionId());
+        final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = SingletonS2Container
                 .getComponent("pathMappingHelper");
         final String url = pathMappingHelper.replaceUrl(sessionId,
                 responseData.getUrl());
 
+        //  expires
+        if (documentExpires != null) {
+            putResultDataBody(dataMap, crawlingSessionHelper.getExpiresField(),
+                    FessFunctions.formatDate(documentExpires));
+        }
         // title
         // content
         putResultDataBody(dataMap, "content",

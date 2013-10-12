@@ -653,7 +653,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @param expiredTime The value of expiredTime as equal. (NullAllowed: if null, no condition)
      */
     public void setExpiredTime_Equal(final java.sql.Timestamp expiredTime) {
@@ -662,7 +662,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
 
     /**
      * GreaterThan(&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @param expiredTime The value of expiredTime as greaterThan. (NullAllowed: if null, no condition)
      */
     public void setExpiredTime_GreaterThan(final java.sql.Timestamp expiredTime) {
@@ -671,7 +671,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
 
     /**
      * LessThan(&lt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @param expiredTime The value of expiredTime as lessThan. (NullAllowed: if null, no condition)
      */
     public void setExpiredTime_LessThan(final java.sql.Timestamp expiredTime) {
@@ -680,7 +680,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
 
     /**
      * GreaterEqual(&gt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @param expiredTime The value of expiredTime as greaterEqual. (NullAllowed: if null, no condition)
      */
     public void setExpiredTime_GreaterEqual(final java.sql.Timestamp expiredTime) {
@@ -689,7 +689,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
 
     /**
      * LessEqual(&lt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @param expiredTime The value of expiredTime as lessEqual. (NullAllowed: if null, no condition)
      */
     public void setExpiredTime_LessEqual(final java.sql.Timestamp expiredTime) {
@@ -699,7 +699,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
     /**
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * <pre>e.g. setExpiredTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of expiredTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of expiredTime. (NullAllowed: if null, no to-condition)
@@ -717,7 +717,7 @@ public abstract class AbstractBsCrawlingSessionCQ extends
     /**
      * DateFromTo. (Date means yyyy/MM/dd) {fromDate &lt;= column &lt; toDate + 1 day} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
      *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
@@ -729,6 +729,22 @@ public abstract class AbstractBsCrawlingSessionCQ extends
             final java.util.Date toDate) {
         setExpiredTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
+    }
+
+    /**
+     * IsNull {is null}. And OnlyOnceRegistered. <br />
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
+     */
+    public void setExpiredTime_IsNull() {
+        regExpiredTime(CK_ISN, DOBJ);
+    }
+
+    /**
+     * IsNotNull {is not null}. And OnlyOnceRegistered. <br />
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
+     */
+    public void setExpiredTime_IsNotNull() {
+        regExpiredTime(CK_ISNN, DOBJ);
     }
 
     protected void regExpiredTime(final ConditionKey k, final Object v) {

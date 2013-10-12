@@ -57,9 +57,9 @@
 								<th style="text-align: center; width: 150px;"><bean:message
 										key="labels.crawling_session_session_id" /></th>
 								<th style="text-align: center; width: 180px;"><bean:message
-										key="labels.crawling_session_expired_time" /></th>
-								<th style="text-align: center; width: 180px;"><bean:message
 										key="labels.crawling_session_created_time" /></th>
+								<th style="text-align: center; width: 180px;"><bean:message
+										key="labels.crawling_session_expired_time" /></th>
 
 								<th style="text-align: center; width: 100px;">&nbsp;</th>
 							</tr>
@@ -68,13 +68,13 @@
 							<c:forEach var="data" varStatus="s"
 								items="${crawlingSessionItems}">
 								<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
-
-
-
 									<td style="text-align: center;"><html:link
 											href="${f:url('/admin/searchList/search')}?query=segment:${f:u(data.sessionId)}">${f:h(data.sessionId)}</html:link></td>
-									<td style="text-align: center;">${f:h(data.expiredTime)}</td>
 									<td style="text-align: center;">${f:h(data.createdTime)}</td>
+									<td style="text-align: center;">
+										<c:if test="${data.expiredTime==null}"><bean:message key="labels.none" /></c:if>
+										<c:if test="${data.expiredTime!=null}">${f:h(data.expiredTime)}</c:if>
+									</td>
 
 
 									<td  style="text-align: center;"><s:link

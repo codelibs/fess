@@ -34,6 +34,8 @@ public class CrawlJob {
     private static final Logger logger = LoggerFactory
             .getLogger(CrawlJob.class);
 
+    protected int documentExpires = -2;
+
     public String execute(final JobExecutor jobExecutor) {
         return execute(jobExecutor, null, null, null, Constants.COMMIT);
     }
@@ -103,7 +105,7 @@ public class CrawlJob {
             crawlingSessionHelper.store(sessionId);
             SingletonS2Container.getComponent(SystemHelper.class)
                     .executeCrawler(sessionId, webConfigIds, fileConfigIds,
-                            dataConfigIds, operation);
+                            dataConfigIds, operation, documentExpires);
         } catch (final FessSystemException e) {
             throw e;
         } catch (final Exception e) {
@@ -112,6 +114,14 @@ public class CrawlJob {
 
         return resultBuf.toString();
 
+    }
+
+    public int getDocumentExpires() {
+        return documentExpires;
+    }
+
+    public void setDocumentExpires(final int documentExpires) {
+        this.documentExpires = documentExpires;
     }
 
 }

@@ -79,9 +79,6 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
             throw new FessSystemException("Crawling Session is null.");
         }
         final Timestamp now = new Timestamp(System.currentTimeMillis());
-        if (crawlingSession.getExpiredTime() == null) {
-            crawlingSession.setExpiredTime(now);
-        }
         if (crawlingSession.getCreatedTime() == null) {
             crawlingSession.setCreatedTime(now);
         }

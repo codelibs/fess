@@ -141,9 +141,6 @@
 		</initMethod>
 	</component>
 	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
-		<!--
-		<property name="defaultExpiredDays">365</property>
-		-->
 	</component>
 	<component name="mailHelper" class="jp.sf.fess.helper.MailHelper">
 		<!--

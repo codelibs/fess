@@ -271,7 +271,7 @@ public class PathMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_349291E0_7C94_4183_8713_9C0B5B13AC61",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_7B1E2705_018B_4143_B47F_BD2917F734C1",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnRegex = cci("REGEX", "REGEX", null, null,

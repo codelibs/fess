@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
@@ -47,6 +46,7 @@ import jp.sf.fess.helper.WebFsIndexHelper;
 import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.CrawlingSessionService;
 import jp.sf.fess.service.PathMappingService;
+import jp.sf.fess.taglib.FessFunctions;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.codelibs.core.CoreLibConstants;
@@ -139,6 +139,9 @@ public class Crawler implements Serializable {
 
         @Option(name = "-o", aliases = "--operation", metaVar = "operation", usage = "Opration when crawlwer is finised")
         protected String operation;
+
+        @Option(name = "-e", aliases = "--expires", metaVar = "expires", usage = "Expires for documents")
+        protected String expires;
 
         protected Options() {
             // noghing
@@ -286,8 +289,13 @@ public class Crawler implements Serializable {
 
         try {
             crawlingSessionHelper.store(options.sessionId);
-            final String dayForCleanupStr = crawlerProperties.getProperty(
-                    Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
+            final String dayForCleanupStr;
+            if (StringUtil.isNotBlank(options.expires)) {
+                dayForCleanupStr = options.expires;
+            } else {
+                dayForCleanupStr = crawlerProperties.getProperty(
+                        Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
+            }
             int dayForCleanup = -1;
             try {
                 dayForCleanup = Integer.parseInt(dayForCleanupStr);
@@ -466,19 +474,11 @@ public class Crawler implements Serializable {
 
             // clean up
             try {
-                final Set<String> expiredSessionIdSet = crawlingSessionHelper
-                        .getExpiredSessionIdSet();
-                for (final String expiredSessionId : expiredSessionIdSet) {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Deleted segment:" + expiredSessionId
-                                + " in " + updateSolrGroup.getGroupName());
-                    }
-                    updateSolrGroup
-                            .deleteByQuery("segment:" + expiredSessionId);
-                    if (screenShotManager != null) {
-                        screenShotManager.delete(expiredSessionId);
-                    }
-                }
+                updateSolrGroup.deleteByQuery(crawlingSessionHelper
+                        .getExpiresField()
+                        + ":[* TO "
+                        + FessFunctions.formatDate(new Date())
+                        + "] NOT segment:" + options.sessionId);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Could not delete expired sessions in "

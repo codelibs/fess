@@ -323,7 +323,7 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_C887871E_7E3A_4F11_9FEF_3365211EB6A7",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_B7ED1035_3C63_4922_B4CF_C02B104FA82E",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnHostname = cci("HOSTNAME", "HOSTNAME",

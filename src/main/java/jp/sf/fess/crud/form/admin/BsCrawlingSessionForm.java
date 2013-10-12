@@ -49,7 +49,6 @@ public abstract class BsCrawlingSessionForm {
     @Maxbytelength(maxbytelength = 20)
     public String name;
 
-    @Required(target = "confirmfromupdate,update,delete")
     @DateType
     public String expiredTime;
 

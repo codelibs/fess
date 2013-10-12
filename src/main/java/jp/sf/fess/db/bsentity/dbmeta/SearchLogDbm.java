@@ -286,7 +286,7 @@ public class SearchLogDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_72E440DA_72EE_4806_A0C2_BB7C52933D22",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_8D6385B7_786D_45E2_AA41_D5FA8C17BBF9",
             false, null, null, null, "clickLogList,searchFieldLogList", null);
 
     protected final ColumnInfo _columnSearchWord = cci("SEARCH_WORD",

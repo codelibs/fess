@@ -17,6 +17,7 @@
 package jp.sf.fess.ds.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,11 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStore;
 import jp.sf.fess.ds.IndexUpdateCallback;
+import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.taglib.FessFunctions;
 import jp.sf.fess.util.ParameterUtil;
 
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.OgnlUtil;
 import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
@@ -54,12 +58,20 @@ public abstract class AbstractDataStoreImpl implements DataStore {
                 .getHandlerParameter());
         final Map<String, String> scriptMap = ParameterUtil.parse(config
                 .getHandlerScript());
+        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
+                .getComponent("crawlingSessionHelper");
+        final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
 
         initParamMap.putAll(paramMap);
         paramMap = initParamMap;
 
         // default values
         final Map<String, Object> defaultDataMap = new HashMap<String, Object>();
+        //  expires
+        if (documentExpires != null) {
+            defaultDataMap.put(crawlingSessionHelper.getExpiresField(),
+                    FessFunctions.formatDate(documentExpires));
+        }
         // segment
         defaultDataMap.put("segment", initParamMap.get(Constants.SESSION_ID));
         // tstamp

@@ -378,7 +378,7 @@ public class BsCrawlingSessionCB extends AbstractConditionBean {
         }
 
         /**
-         * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+         * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnExpiredTime() {

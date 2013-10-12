@@ -44,8 +44,6 @@ public abstract class BsCrawlingSessionPager implements Serializable {
 
     public String sessionId;
 
-    public String expiredTime;
-
     public String createdTime;
 
     public void clear() {
@@ -54,7 +52,6 @@ public abstract class BsCrawlingSessionPager implements Serializable {
 
         id = null;
         sessionId = null;
-        expiredTime = null;
         createdTime = null;
 
     }

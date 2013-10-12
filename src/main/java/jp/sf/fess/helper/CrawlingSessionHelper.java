@@ -51,13 +51,13 @@ public class CrawlingSessionHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public int defaultExpiredDays = 365;
-
-    public int expiredMinutesByZeroDay = 1;
-
     protected Map<String, String> infoMap;
 
     protected Set<String> expiredSessionIdSet = new HashSet<String>();
+
+    protected Date documentExpires;
+
+    protected String expiresField = "expires_dt";
 
     protected CrawlingSessionService getCrawlingSessionService() {
         return SingletonS2Container.getComponent(CrawlingSessionService.class);
@@ -90,8 +90,6 @@ public class CrawlingSessionHelper implements Serializable {
                 sessionId);
         if (crawlingSession == null) {
             crawlingSession = new CrawlingSession(sessionId);
-            crawlingSession
-                    .setExpiredTime(getExpiredTimestamp(defaultExpiredDays));
             try {
                 getCrawlingSessionService().store(crawlingSession);
             } catch (final Exception e) {
@@ -135,11 +133,10 @@ public class CrawlingSessionHelper implements Serializable {
         } else {
             crawlingSession.setName(Constants.CRAWLING_SESSION_SYSTEM_NAME);
         }
-        if (dayForCleanup < 0) {
-            crawlingSession
-                    .setExpiredTime(getExpiredTimestamp(defaultExpiredDays));
-        } else {
-            crawlingSession.setExpiredTime(getExpiredTimestamp(dayForCleanup));
+        if (dayForCleanup >= 0) {
+            final Timestamp expires = getExpiredTimestamp(dayForCleanup);
+            crawlingSession.setExpiredTime(expires);
+            documentExpires = expires;
         }
         try {
             getCrawlingSessionService().store(crawlingSession);
@@ -149,13 +146,12 @@ public class CrawlingSessionHelper implements Serializable {
 
     }
 
+    public Date getDocumentExpires() {
+        return documentExpires;
+    }
+
     protected Timestamp getExpiredTimestamp(final int days) {
-        if (days > 0) {
-            return new Timestamp(DateUtils.addDays(new Date(), days).getTime());
-        } else {
-            return new Timestamp(DateUtils.addMinutes(new Date(),
-                    expiredMinutesByZeroDay).getTime());
-        }
+        return new Timestamp(DateUtils.addDays(new Date(), days).getTime());
     }
 
     public Map<String, String> getInfoMap(final String sessionId) {
@@ -171,7 +167,9 @@ public class CrawlingSessionHelper implements Serializable {
 
     public String generateId(final Map<String, Object> dataMap) {
         final String url = (String) dataMap.get("url");
+        @SuppressWarnings("unchecked")
         final List<String> browserTypeList = (List<String>) dataMap.get("type");
+        @SuppressWarnings("unchecked")
         final List<String> roleTypeList = (List<String>) dataMap.get("role");
         return generateId(url, browserTypeList, roleTypeList);
     }
@@ -233,6 +231,14 @@ public class CrawlingSessionHelper implements Serializable {
 
     private String normalize(final String value) {
         return value.replace('"', ' ');
+    }
+
+    public String getExpiresField() {
+        return expiresField;
+    }
+
+    public void setExpiresField(final String expiresField) {
+        this.expiresField = expiresField;
     }
 
 }

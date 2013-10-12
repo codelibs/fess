@@ -414,7 +414,7 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_05B91638_28D1_4204_BE8E_55C7BEAFE3E3",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_A2A25811_03ED_49AF_9DA3_3BF45CE3AED3",
             false,
             null,
             null,

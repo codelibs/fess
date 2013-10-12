@@ -349,7 +349,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
 
     /** 
      * Add order-by as ascend. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
      */
     public BsCrawlingSessionCQ addOrderBy_ExpiredTime_Asc() {
@@ -359,7 +359,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
 
     /**
      * Add order-by as descend. <br />
-     * EXPIRED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
      */
     public BsCrawlingSessionCQ addOrderBy_ExpiredTime_Desc() {
