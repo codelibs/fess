@@ -29,7 +29,6 @@ import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.taglib.FessFunctions;
-import jp.sf.fess.util.ParameterUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.OgnlUtil;
@@ -55,18 +54,18 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     public void store(final DataCrawlingConfig config,
             final IndexUpdateCallback callback,
             final Map<String, String> initParamMap) {
-        Map<String, String> paramMap = ParameterUtil.parse(config
-                .getHandlerParameter());
-        final Map<String, String> scriptMap = ParameterUtil.parse(config
-                .getHandlerScript());
+        final Map<String, String> configParamMap = config
+                .getHandlerParameterMap();
+        final Map<String, String> configScriptMap = config
+                .getHandlerScriptMap();
         final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                 .getComponent("crawlingSessionHelper");
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
         final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
                 .getComponent("crawlingConfigHelper");
 
-        initParamMap.putAll(paramMap);
-        paramMap = initParamMap;
+        initParamMap.putAll(configParamMap);
+        final Map<String, String> paramMap = initParamMap;
 
         // default values
         final Map<String, Object> defaultDataMap = new HashMap<String, Object>();
@@ -120,7 +119,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // lastModified
         // id
 
-        storeData(callback, paramMap, scriptMap, defaultDataMap);
+        storeData(callback, paramMap, configScriptMap, defaultDataMap);
 
     }
 

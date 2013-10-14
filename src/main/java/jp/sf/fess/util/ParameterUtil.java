@@ -55,4 +55,12 @@ public class ParameterUtil {
         }
         return paramMap;
     }
+
+    public static void loadConfigParams(final Map<String, Object> paramMap,
+            final String configParam) {
+        final Map<String, String> map = ParameterUtil.parse(configParam);
+        if (!map.isEmpty()) {
+            paramMap.putAll(map);
+        }
+    }
 }

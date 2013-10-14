@@ -18,13 +18,22 @@ package jp.sf.fess.db.exentity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsWebCrawlingConfig;
+import jp.sf.fess.service.RequestHeaderService;
+import jp.sf.fess.service.WebAuthenticationService;
+import jp.sf.fess.util.ParameterUtil;
 
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
+import org.seasar.robot.client.S2RobotClientFactory;
+import org.seasar.robot.client.http.Authentication;
+import org.seasar.robot.client.http.HcHttpClient;
 
 /**
  * The entity of WEB_CRAWLING_CONFIG.
@@ -223,6 +232,49 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
             return Constants.WEB_CONFIG_ID_PREFIX + getId().toString();
         }
         return null;
+    }
+
+    public void initializeClientFactory(
+            final S2RobotClientFactory clientFactory) {
+        final WebAuthenticationService webAuthenticationService = SingletonS2Container
+                .getComponent(WebAuthenticationService.class);
+        final RequestHeaderService requestHeaderService = SingletonS2Container
+                .getComponent(RequestHeaderService.class);
+
+        // HttpClient Parameters
+        final Map<String, Object> paramMap = new HashMap<String, Object>();
+        clientFactory.setInitParameterMap(paramMap);
+
+        final String configParam = getConfigParameter();
+        if (StringUtil.isNotBlank(configParam)) {
+            ParameterUtil.loadConfigParams(paramMap, configParam);
+        }
+
+        final String userAgent = getUserAgent();
+        if (StringUtil.isNotBlank(userAgent)) {
+            paramMap.put(HcHttpClient.USER_AGENT_PROPERTY, userAgent);
+        }
+
+        final List<WebAuthentication> webAuthList = webAuthenticationService
+                .getWebAuthenticationList(getId());
+        final List<Authentication> basicAuthList = new ArrayList<Authentication>();
+        for (final WebAuthentication webAuth : webAuthList) {
+            basicAuthList.add(webAuth.getAuthentication());
+        }
+        paramMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY,
+                basicAuthList.toArray(new Authentication[basicAuthList.size()]));
+
+        // request header
+        final List<RequestHeader> requestHeaderList = requestHeaderService
+                .getRequestHeaderList(getId());
+        final List<org.seasar.robot.client.http.RequestHeader> rhList = new ArrayList<org.seasar.robot.client.http.RequestHeader>();
+        for (final RequestHeader requestHeader : requestHeaderList) {
+            rhList.add(requestHeader.getS2RobotRequestHeader());
+        }
+        paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList
+                .toArray(new org.seasar.robot.client.http.RequestHeader[rhList
+                        .size()]));
+
     }
 
 }

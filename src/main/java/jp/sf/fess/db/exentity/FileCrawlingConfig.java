@@ -18,15 +18,22 @@ package jp.sf.fess.db.exentity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsFileCrawlingConfig;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.service.FileAuthenticationService;
+import jp.sf.fess.util.ParameterUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
+import org.seasar.robot.client.S2RobotClientFactory;
+import org.seasar.robot.client.smb.SmbAuthentication;
+import org.seasar.robot.client.smb.SmbClient;
 
 /**
  * The entity of FILE_CRAWLING_CONFIG.
@@ -221,5 +228,40 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
             return Constants.FILE_CONFIG_ID_PREFIX + getId().toString();
         }
         return null;
+    }
+
+    public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
+        final FileAuthenticationService fileAuthenticationService = SingletonS2Container
+                .getComponent(FileAuthenticationService.class);
+
+        //  Parameters
+        final Map<String, Object> paramMap = new HashMap<String, Object>();
+        clientFactory.setInitParameterMap(paramMap);
+        final String configParam = getConfigParameter();
+        if (StringUtil.isNotBlank(configParam)) {
+            ParameterUtil.loadConfigParams(paramMap, configParam);
+        }
+
+        // auth params
+        final List<FileAuthentication> fileAuthList = fileAuthenticationService
+                .getFileAuthenticationList(getId());
+        final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
+        for (final FileAuthentication fileAuth : fileAuthList) {
+            if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
+                final SmbAuthentication smbAuth = new SmbAuthentication();
+                final Map<String, String> map = ParameterUtil.parse(fileAuth
+                        .getParameters());
+                final String domain = map.get("domain");
+                smbAuth.setDomain(domain == null ? "" : domain);
+                smbAuth.setServer(fileAuth.getHostname());
+                smbAuth.setPort(fileAuth.getPort());
+                smbAuth.setUsername(fileAuth.getUsername());
+                smbAuth.setPassword(fileAuth.getPassword());
+                smbAuthList.add(smbAuth);
+            }
+        }
+        paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
+                smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+
     }
 }

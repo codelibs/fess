@@ -16,6 +16,8 @@
 
 package jp.sf.fess.db.exentity;
 
+import org.seasar.robot.client.S2RobotClientFactory;
+
 public interface CrawlingConfig {
 
     Long getId();
@@ -31,4 +33,6 @@ public interface CrawlingConfig {
     String getIndexingTarget(String input);
 
     String getConfigId();
+
+    void initializeClientFactory(S2RobotClientFactory s2RobotClientFactory);
 }

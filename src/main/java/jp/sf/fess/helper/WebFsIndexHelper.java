@@ -19,27 +19,19 @@ package jp.sf.fess.helper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.db.exentity.FileAuthentication;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
-import jp.sf.fess.db.exentity.RequestHeader;
-import jp.sf.fess.db.exentity.WebAuthentication;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
 import jp.sf.fess.interval.FessIntervalController;
 import jp.sf.fess.service.FailureUrlService;
 import jp.sf.fess.service.FileAuthenticationService;
 import jp.sf.fess.service.FileCrawlingConfigService;
-import jp.sf.fess.service.RequestHeaderService;
-import jp.sf.fess.service.WebAuthenticationService;
 import jp.sf.fess.service.WebCrawlingConfigService;
 import jp.sf.fess.solr.IndexUpdater;
-import jp.sf.fess.util.ParameterUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.SolrGroup;
@@ -47,10 +39,6 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.S2Robot;
 import org.seasar.robot.S2RobotContext;
-import org.seasar.robot.client.http.Authentication;
-import org.seasar.robot.client.http.HcHttpClient;
-import org.seasar.robot.client.smb.SmbAuthentication;
-import org.seasar.robot.client.smb.SmbClient;
 import org.seasar.robot.service.DataService;
 import org.seasar.robot.service.UrlFilterService;
 import org.seasar.robot.service.UrlQueueService;
@@ -69,12 +57,6 @@ public class WebFsIndexHelper implements Serializable {
 
     @Resource
     public WebCrawlingConfigService webCrawlingConfigService;
-
-    @Resource
-    protected WebAuthenticationService webAuthenticationService;
-
-    @Resource
-    protected RequestHeaderService requestHeaderService;
 
     @Resource
     protected FileCrawlingConfigService fileCrawlingConfigService;
@@ -209,40 +191,8 @@ public class WebFsIndexHelper implements Serializable {
                     .getMaxAccessCount() : maxAccessCount;
             robotContext.setMaxAccessCount(maxCount);
 
-            // HttpClient Parameters
-            final Map<String, Object> paramMap = new HashMap<String, Object>();
-            s2Robot.getClientFactory().setInitParameterMap(paramMap);
-            final String configParam = webCrawlingConfig.getConfigParameter();
-            if (StringUtil.isNotBlank(configParam)) {
-                loadConfigParams(paramMap, configParam);
-            }
-
-            final String userAgent = webCrawlingConfig.getUserAgent();
-            if (StringUtil.isNotBlank(userAgent)) {
-                paramMap.put(HcHttpClient.USER_AGENT_PROPERTY, userAgent);
-            }
-
-            final List<WebAuthentication> webAuthList = webAuthenticationService
-                    .getWebAuthenticationList(webCrawlingConfig.getId());
-            final List<Authentication> basicAuthList = new ArrayList<Authentication>();
-            for (final WebAuthentication webAuth : webAuthList) {
-                basicAuthList.add(webAuth.getAuthentication());
-            }
-            paramMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY,
-                    basicAuthList.toArray(new Authentication[basicAuthList
-                            .size()]));
-
-            // request header
-            final List<RequestHeader> requestHeaderList = requestHeaderService
-                    .getRequestHeaderList(webCrawlingConfig.getId());
-            final List<org.seasar.robot.client.http.RequestHeader> rhList = new ArrayList<org.seasar.robot.client.http.RequestHeader>();
-            for (final RequestHeader requestHeader : requestHeaderList) {
-                rhList.add(requestHeader.getS2RobotRequestHeader());
-            }
-            paramMap.put(
-                    HcHttpClient.REQUERT_HEADERS_PROPERTY,
-                    rhList.toArray(new org.seasar.robot.client.http.RequestHeader[rhList
-                            .size()]));
+            webCrawlingConfig.initializeClientFactory(s2Robot
+                    .getClientFactory());
 
             // set urls
             final String[] urls = urlsStr.split("[\r\n]");
@@ -358,34 +308,8 @@ public class WebFsIndexHelper implements Serializable {
                     .getMaxAccessCount() : maxAccessCount;
             robotContext.setMaxAccessCount(maxCount);
 
-            //  Parameters
-            final Map<String, Object> paramMap = new HashMap<String, Object>();
-            s2Robot.getClientFactory().setInitParameterMap(paramMap);
-            final String configParam = fileCrawlingConfig.getConfigParameter();
-            if (StringUtil.isNotBlank(configParam)) {
-                loadConfigParams(paramMap, configParam);
-            }
-
-            // auth params
-            final List<FileAuthentication> fileAuthList = fileAuthenticationService
-                    .getFileAuthenticationList(fileCrawlingConfig.getId());
-            final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
-            for (final FileAuthentication fileAuth : fileAuthList) {
-                if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
-                    final SmbAuthentication smbAuth = new SmbAuthentication();
-                    final Map<String, String> map = ParameterUtil
-                            .parse(fileAuth.getParameters());
-                    final String domain = map.get("domain");
-                    smbAuth.setDomain(domain == null ? "" : domain);
-                    smbAuth.setServer(fileAuth.getHostname());
-                    smbAuth.setPort(fileAuth.getPort());
-                    smbAuth.setUsername(fileAuth.getUsername());
-                    smbAuth.setPassword(fileAuth.getPassword());
-                    smbAuthList.add(smbAuth);
-                }
-            }
-            paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList
-                    .toArray(new SmbAuthentication[smbAuthList.size()]));
+            fileCrawlingConfig.initializeClientFactory(s2Robot
+                    .getClientFactory());
 
             // set paths
             final String[] paths = pathsStr.split("[\r\n]");
@@ -584,14 +508,6 @@ public class WebFsIndexHelper implements Serializable {
                 .getComponent(DataService.class);
         dataService.deleteAll();
 
-    }
-
-    protected void loadConfigParams(final Map<String, Object> paramMap,
-            final String configParam) {
-        final Map<String, String> map = ParameterUtil.parse(configParam);
-        if (!map.isEmpty()) {
-            paramMap.putAll(map);
-        }
     }
 
 }
