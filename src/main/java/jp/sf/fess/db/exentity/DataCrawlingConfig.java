@@ -150,4 +150,12 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
         // always return true
         return Constants.TRUE;
     }
+
+    @Override
+    public String getConfigId() {
+        if (getId() != null) {
+            return Constants.DATE_CONFIG_ID_PREFIX + getId().toString();
+        }
+        return null;
+    }
 }

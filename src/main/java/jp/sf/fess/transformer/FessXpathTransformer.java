@@ -214,7 +214,17 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 .getComponent("pathMappingHelper");
         final String url = pathMappingHelper.replaceUrl(sessionId,
                 responseData.getUrl());
+        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
+                .getComponent("crawlingConfigHelper");
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper
+                .get(responseData.getSessionId());
 
+        // cid
+        final String configId = crawlingConfig.getConfigId();
+        if (configId != null) {
+            putResultDataBody(dataMap, crawlingConfigHelper.getConfigIdField(),
+                    configId);
+        }
         //  expires
         if (documentExpires != null) {
             putResultDataBody(dataMap, crawlingSessionHelper.getExpiresField(),
@@ -254,11 +264,6 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         //  lastModified
         putResultDataBody(dataMap, "lastModified",
                 FessFunctions.formatDate(responseData.getLastModified()));
-        // config
-        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                .getComponent("crawlingConfigHelper");
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper
-                .get(responseData.getSessionId());
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET,
                 crawlingConfig.getIndexingTarget(url));

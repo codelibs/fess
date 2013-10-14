@@ -138,9 +138,9 @@ public class RobotLogHelper extends LogHelperImpl {
         failureUrlBhv.insertOrUpdate(failureUrl);
     }
 
-    private CrawlingConfig getCrawlingConfig(final String sessionId) {
+    private CrawlingConfig getCrawlingConfig(final String sessionCountId) {
         return SingletonS2Container.getComponent(CrawlingConfigHelper.class)
-                .get(sessionId);
+                .get(sessionCountId);
     }
 
     private String getStackTrace(final Throwable t) {

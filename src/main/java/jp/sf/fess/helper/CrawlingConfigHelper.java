@@ -30,12 +30,14 @@ public class CrawlingConfigHelper implements Serializable {
 
     protected int count = 1;
 
+    protected String configIdField = "cid_s_s";
+
     public synchronized String store(final String sessionId,
             final CrawlingConfig crawlingConfig) {
-        final String sid = sessionId + "-" + count;
-        crawlingConfigMap.put(sid, crawlingConfig);
+        final String sessionCountId = sessionId + "-" + count;
+        crawlingConfigMap.put(sessionCountId, crawlingConfig);
         count++;
-        return sid;
+        return sessionCountId;
     }
 
     public void remove(final String sessionId) {
@@ -44,6 +46,14 @@ public class CrawlingConfigHelper implements Serializable {
 
     public CrawlingConfig get(final String sessionId) {
         return crawlingConfigMap.get(sessionId);
+    }
+
+    public String getConfigIdField() {
+        return configIdField;
+    }
+
+    public void setConfigIdField(final String configIdField) {
+        this.configIdField = configIdField;
     }
 
 }

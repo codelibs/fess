@@ -316,4 +316,10 @@ public class Constants extends CoreLibConstants {
 
     public static final int EXIT_FAIL = 1;
 
+    public static final String DATE_CONFIG_ID_PREFIX = "D";
+
+    public static final String FILE_CONFIG_ID_PREFIX = "F";
+
+    public static final String WEB_CONFIG_ID_PREFIX = "W";
+
 }

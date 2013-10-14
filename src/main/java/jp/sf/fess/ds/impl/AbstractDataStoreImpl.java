@@ -26,6 +26,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStore;
 import jp.sf.fess.ds.IndexUpdateCallback;
+import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.taglib.FessFunctions;
 import jp.sf.fess.util.ParameterUtil;
@@ -61,12 +62,21 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                 .getComponent("crawlingSessionHelper");
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
+        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
+                .getComponent("crawlingConfigHelper");
 
         initParamMap.putAll(paramMap);
         paramMap = initParamMap;
 
         // default values
         final Map<String, Object> defaultDataMap = new HashMap<String, Object>();
+
+        // cid
+        final String configId = config.getConfigId();
+        if (configId != null) {
+            defaultDataMap.put(crawlingConfigHelper.getConfigIdField(),
+                    configId);
+        }
         //  expires
         if (documentExpires != null) {
             defaultDataMap.put(crawlingSessionHelper.getExpiresField(),

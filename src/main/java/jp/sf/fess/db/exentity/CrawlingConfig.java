@@ -18,15 +18,17 @@ package jp.sf.fess.db.exentity;
 
 public interface CrawlingConfig {
 
-    public abstract Long getId();
+    Long getId();
 
-    public abstract String[] getBrowserTypeValues();
+    String[] getBrowserTypeValues();
 
-    public abstract String[] getRoleTypeValues();
+    String[] getRoleTypeValues();
 
-    public abstract String[] getLabelTypeValues();
+    String[] getLabelTypeValues();
 
-    public abstract String getDocumentBoost();
+    String getDocumentBoost();
 
-    public abstract String getIndexingTarget(String input);
+    String getIndexingTarget(String input);
+
+    String getConfigId();
 }

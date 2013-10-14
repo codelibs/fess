@@ -181,7 +181,17 @@ public abstract class AbstractFessFileTransformer extends
         final boolean useAclAsRole = crawlerProperties.getProperty(
                 Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                 Constants.TRUE);
+        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
+                .getComponent("crawlingConfigHelper");
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper
+                .get(responseData.getSessionId());
 
+        // cid
+        final String configId = crawlingConfig.getConfigId();
+        if (configId != null) {
+            putResultDataBody(dataMap, crawlingConfigHelper.getConfigIdField(),
+                    configId);
+        }
         //  expires
         if (documentExpires != null) {
             putResultDataBody(dataMap, crawlingSessionHelper.getExpiresField(),
@@ -250,11 +260,6 @@ public abstract class AbstractFessFileTransformer extends
         //  lastModified
         putResultDataBody(dataMap, "lastModified",
                 FessFunctions.formatDate(responseData.getLastModified()));
-        // config
-        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                .getComponent("crawlingConfigHelper");
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper
-                .get(responseData.getSessionId());
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET,
                 crawlingConfig.getIndexingTarget(url));
