@@ -310,7 +310,7 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_2699B42A_0BB3_41FF_BFB5_AF81A30D0A01",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_0DE6A197_6735_4CA5_99EE_3DC42CD9A8E2",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnHostname = cci("HOSTNAME", "HOSTNAME",

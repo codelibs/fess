@@ -415,7 +415,7 @@ public class BsJobLogCB extends AbstractConditionBean {
         }
 
         /**
-         * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+         * END_TIME: {TIMESTAMP(23, 10)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnEndTime() {

@@ -1120,7 +1120,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @param endTime The value of endTime as equal. (NullAllowed: if null, no condition)
      */
     public void setEndTime_Equal(final java.sql.Timestamp endTime) {
@@ -1129,7 +1129,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
 
     /**
      * GreaterThan(&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @param endTime The value of endTime as greaterThan. (NullAllowed: if null, no condition)
      */
     public void setEndTime_GreaterThan(final java.sql.Timestamp endTime) {
@@ -1138,7 +1138,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
 
     /**
      * LessThan(&lt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @param endTime The value of endTime as lessThan. (NullAllowed: if null, no condition)
      */
     public void setEndTime_LessThan(final java.sql.Timestamp endTime) {
@@ -1147,7 +1147,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
 
     /**
      * GreaterEqual(&gt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @param endTime The value of endTime as greaterEqual. (NullAllowed: if null, no condition)
      */
     public void setEndTime_GreaterEqual(final java.sql.Timestamp endTime) {
@@ -1156,7 +1156,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
 
     /**
      * LessEqual(&lt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @param endTime The value of endTime as lessEqual. (NullAllowed: if null, no condition)
      */
     public void setEndTime_LessEqual(final java.sql.Timestamp endTime) {
@@ -1166,7 +1166,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
     /**
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * <pre>e.g. setEndTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of endTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of endTime. (NullAllowed: if null, no to-condition)
@@ -1184,7 +1184,7 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
     /**
      * DateFromTo. (Date means yyyy/MM/dd) {fromDate &lt;= column &lt; toDate + 1 day} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
      *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
@@ -1195,6 +1195,22 @@ public abstract class AbstractBsJobLogCQ extends AbstractConditionQuery {
     public void setEndTime_DateFromTo(final java.util.Date fromDate,
             final java.util.Date toDate) {
         setEndTime_FromTo(fromDate, toDate, new FromToOption().compareAsDate());
+    }
+
+    /**
+     * IsNull {is null}. And OnlyOnceRegistered. <br />
+     * END_TIME: {TIMESTAMP(23, 10)}
+     */
+    public void setEndTime_IsNull() {
+        regEndTime(CK_ISN, DOBJ);
+    }
+
+    /**
+     * IsNotNull {is not null}. And OnlyOnceRegistered. <br />
+     * END_TIME: {TIMESTAMP(23, 10)}
+     */
+    public void setEndTime_IsNotNull() {
+        regEndTime(CK_ISNN, DOBJ);
     }
 
     protected void regEndTime(final ConditionKey k, final Object v) {

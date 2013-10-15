@@ -230,6 +230,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
         return null;
     }
 
+    @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
         final FileAuthenticationService fileAuthenticationService = SingletonS2Container
                 .getComponent(FileAuthenticationService.class);

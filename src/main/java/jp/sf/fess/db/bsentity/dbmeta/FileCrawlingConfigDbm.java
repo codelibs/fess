@@ -401,7 +401,7 @@ public class FileCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_50C8436F_B31A_41CB_A67E_77A1CEDD7E46",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_98769B60_EC99_43E9_9C3F_CF1E75ABBF60",
             false,
             null,
             null,

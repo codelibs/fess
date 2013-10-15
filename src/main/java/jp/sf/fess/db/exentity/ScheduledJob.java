@@ -49,6 +49,6 @@ public class ScheduledJob extends BsScheduledJob {
 
     public boolean isRunning() {
         return SingletonS2Container.getComponent(SystemHelper.class)
-                .isRunningJobExecutoer(getId());
+                .getJobExecutoer(getId()) != null;
     }
 }

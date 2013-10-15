@@ -55,7 +55,10 @@
 								<td>${f:h(data.jobName)}</td>
 								<td style="text-align: center;text-transform: uppercase;">${f:h(data.jobStatus)}</td>
 								<td style="text-align: center;"><fmt:formatDate value="${data.startTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
-								<td style="text-align: center;"><fmt:formatDate value="${data.endTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
+								<td style="text-align: center;">
+									<c:if test="${data.endTime!=null}"><fmt:formatDate value="${data.endTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></c:if>
+									<c:if test="${data.endTime==null}"><bean:message key="labels.none" /></c:if>
+								</td>
 								<td style="text-align: center;"><s:link
 										href="confirmpage/4/${f:u(data.id)}">
 										<bean:message key="labels.joblog_link_details" />

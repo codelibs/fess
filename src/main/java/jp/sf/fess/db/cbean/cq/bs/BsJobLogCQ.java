@@ -388,7 +388,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
 
     /** 
      * Add order-by as ascend. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
      */
     public BsJobLogCQ addOrderBy_EndTime_Asc() {
@@ -398,7 +398,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
 
     /**
      * Add order-by as descend. <br />
-     * END_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * END_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
      */
     public BsJobLogCQ addOrderBy_EndTime_Desc() {

@@ -63,7 +63,6 @@ public abstract class BsJobLogForm {
     @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
     public String startTime;
 
-    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
     public String endTime;
 

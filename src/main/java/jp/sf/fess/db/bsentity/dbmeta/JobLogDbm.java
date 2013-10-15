@@ -231,7 +231,7 @@ public class JobLogDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_A597AD31_D6B7_44D4_8A2C_D6B301347DAF",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_131D8FB9_8D41_4A03_BEB7_9262977BC90D",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnJobName = cci("JOB_NAME", "JOB_NAME",
@@ -266,7 +266,7 @@ public class JobLogDbm extends AbstractDBMeta {
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnEndTime = cci("END_TIME", "END_TIME",
-            null, null, true, "endTime", java.sql.Timestamp.class, false,
+            null, null, false, "endTime", java.sql.Timestamp.class, false,
             false, "TIMESTAMP", 23, 10, null, false, null, null, null, null,
             null);
 

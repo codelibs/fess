@@ -258,7 +258,7 @@ public class RequestHeaderDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_976724F3_86F3_49E4_8A47_4FAC5AA8F709",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_A06C281D_C680_48EA_AC66_2A96E56C0304",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,

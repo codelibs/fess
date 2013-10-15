@@ -56,11 +56,6 @@ public class TriggeredJob implements Job {
         final String script = scheduledJob.getScriptData();
         final Long id = scheduledJob.getId();
         final String jobId = Constants.JOB_ID_PREFIX + id;
-        if (systemHelper.isRunningJobExecutoer(id)) {
-            logger.info(jobId + " is running.");
-            return;
-        }
-
         final JobExecutor jobExecutor = SingletonS2Container
                 .getComponent(scriptType + JOB_EXECUTOR_SUFFIX);
         if (jobExecutor == null) {
@@ -68,8 +63,17 @@ public class TriggeredJob implements Job {
                     + JOB_EXECUTOR_SUFFIX);
         }
 
+        if (systemHelper.startJobExecutoer(id, jobExecutor) != null) {
+            logger.info(jobId + " is running.");
+            return;
+        }
+
+        final JobLogService jobLogService = SingletonS2Container
+                .getComponent(JobLogService.class);
         try {
-            systemHelper.addRunningJobExecutoer(id, jobExecutor);
+            if (scheduledJob.isLoggingEnabled()) {
+                jobLogService.store(jobLog);
+            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Job " + jobId + "/" + scriptType
@@ -89,10 +93,8 @@ public class TriggeredJob implements Job {
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(e.getLocalizedMessage());
         } finally {
-            systemHelper.removeRunningJobExecutoer(id);
+            systemHelper.finishJobExecutoer(id);
             jobLog.setEndTime(new Timestamp(System.currentTimeMillis()));
-            final JobLogService jobLogService = SingletonS2Container
-                    .getComponent(JobLogService.class);
             if (logger.isDebugEnabled()) {
                 logger.debug("jobLog: " + jobLog);
             }

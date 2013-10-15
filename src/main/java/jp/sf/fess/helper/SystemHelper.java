@@ -611,16 +611,17 @@ public class SystemHelper implements Serializable {
         forceStop.set(true);
     }
 
-    public void addRunningJobExecutoer(final Long id,
+    public JobExecutor startJobExecutoer(final Long id,
             final JobExecutor jobExecutor) {
-        runningJobExecutorMap.put(id, jobExecutor);
+        return runningJobExecutorMap.putIfAbsent(id, jobExecutor);
     }
 
-    public void removeRunningJobExecutoer(final Long id) {
+    public void finishJobExecutoer(final Long id) {
         runningJobExecutorMap.remove(id);
     }
 
-    public boolean isRunningJobExecutoer(final Long id) {
-        return runningJobExecutorMap.containsKey(id);
+    public JobExecutor getJobExecutoer(final Long id) {
+        return runningJobExecutorMap.get(id);
     }
+
 }

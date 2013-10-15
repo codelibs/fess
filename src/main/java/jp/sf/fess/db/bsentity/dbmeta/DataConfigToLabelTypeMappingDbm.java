@@ -154,7 +154,7 @@ public class DataConfigToLabelTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_DC8C6B08_CE09_4FA8_9584_365B3ABDD21E",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_A3F5F83E_2B8A_46F0_9F23_E925931DB082",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDataConfigId = cci("DATA_CONFIG_ID",

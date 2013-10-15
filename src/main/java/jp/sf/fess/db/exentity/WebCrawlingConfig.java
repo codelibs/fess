@@ -234,8 +234,8 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
         return null;
     }
 
-    public void initializeClientFactory(
-            final S2RobotClientFactory clientFactory) {
+    @Override
+    public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
         final WebAuthenticationService webAuthenticationService = SingletonS2Container
                 .getComponent(WebAuthenticationService.class);
         final RequestHeaderService requestHeaderService = SingletonS2Container

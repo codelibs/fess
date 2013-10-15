@@ -119,7 +119,7 @@ public abstract class BsJobLog implements Entity, Serializable, Cloneable {
     /** START_TIME: {NotNull, TIMESTAMP(23, 10)} */
     protected java.sql.Timestamp _startTime;
 
-    /** END_TIME: {NotNull, TIMESTAMP(23, 10)} */
+    /** END_TIME: {TIMESTAMP(23, 10)} */
     protected java.sql.Timestamp _endTime;
 
     // -----------------------------------------------------
@@ -478,16 +478,16 @@ public abstract class BsJobLog implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [get] END_TIME: {NotNull, TIMESTAMP(23, 10)} <br />
-     * @return The value of the column 'END_TIME'. (basically NotNull if selected: for the constraint)
+     * [get] END_TIME: {TIMESTAMP(23, 10)} <br />
+     * @return The value of the column 'END_TIME'. (NullAllowed even if selected: for no constraint)
      */
     public java.sql.Timestamp getEndTime() {
         return _endTime;
     }
 
     /**
-     * [set] END_TIME: {NotNull, TIMESTAMP(23, 10)} <br />
-     * @param endTime The value of the column 'END_TIME'. (basically NotNull if update: for the constraint)
+     * [set] END_TIME: {TIMESTAMP(23, 10)} <br />
+     * @param endTime The value of the column 'END_TIME'. (NullAllowed: null update allowed for no constraint)
      */
     public void setEndTime(final java.sql.Timestamp endTime) {
         __modifiedProperties.addPropertyName("endTime");

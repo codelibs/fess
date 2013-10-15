@@ -52,8 +52,6 @@ public abstract class BsJobLogPager implements Serializable {
 
     public String startTime;
 
-    public String endTime;
-
     public void clear() {
         pageSize = getDefaultPageSize();
         currentPageNumber = getDefaultCurrentPageNumber();
@@ -64,7 +62,6 @@ public abstract class BsJobLogPager implements Serializable {
         target = null;
         scriptType = null;
         startTime = null;
-        endTime = null;
 
     }
 
