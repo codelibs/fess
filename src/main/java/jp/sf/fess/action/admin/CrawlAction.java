@@ -60,6 +60,8 @@ public class CrawlAction implements Serializable {
     }
 
     protected String showIndex(final boolean redirect) {
+        crawlForm.diffCrawling = crawlerProperties.getProperty(
+                Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
         crawlForm.useAclAsRole = crawlerProperties.getProperty(
                 Constants.USE_ACL_AS_ROLE, Constants.FALSE);
         crawlForm.serverRotation = crawlerProperties.getProperty(
@@ -134,6 +136,13 @@ public class CrawlAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index.jsp")
     public String update() {
+        crawlerProperties
+                .setProperty(
+                        Constants.DIFF_CRAWLING_PROPERTY,
+                        crawlForm.diffCrawling != null
+                                && Constants.ON
+                                        .equalsIgnoreCase(crawlForm.diffCrawling) ? Constants.TRUE
+                                : Constants.FALSE);
         crawlerProperties
                 .setProperty(
                         Constants.USE_ACL_AS_ROLE,

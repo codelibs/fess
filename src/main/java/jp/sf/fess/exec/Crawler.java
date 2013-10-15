@@ -412,21 +412,6 @@ public class Crawler implements Serializable {
             crawlingSessionService.deleteSessionIdsBefore(options.sessionId,
                     options.name, new Date());
 
-            // expired session ids
-            final List<Map<String, String>> sessionIdInfoList = crawlingSessionHelper
-                    .getSessionIdList(updateSolrGroup);
-            for (final Map<String, String> sessionIdInfoMap : sessionIdInfoList) {
-                final String sid = sessionIdInfoMap
-                        .get(CrawlingSessionHelper.FACET_SEGMENT_KEY);
-                if (crawlingSessionService.get(sid) == null) {
-                    crawlingSessionHelper.addExpiredSessions(sid);
-                }
-            }
-            if (logger.isInfoEnabled()) {
-                logger.info("Expired Session Ids: "
-                        + crawlingSessionHelper.getExpiredSessionIdSet());
-            }
-
             final List<Long> webConfigIdList = options.getWebConfigIdList();
             final List<Long> fileConfigIdList = options.getFileConfigIdList();
             final List<Long> dataConfigIdList = options.getDataConfigIdList();

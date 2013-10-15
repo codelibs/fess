@@ -22,11 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
@@ -53,28 +51,12 @@ public class CrawlingSessionHelper implements Serializable {
 
     protected Map<String, String> infoMap;
 
-    protected Set<String> expiredSessionIdSet = new HashSet<String>();
-
     protected Date documentExpires;
 
     protected String expiresField = "expires_dt";
 
     protected CrawlingSessionService getCrawlingSessionService() {
         return SingletonS2Container.getComponent(CrawlingSessionService.class);
-    }
-
-    public void addExpiredSessions(final String sessionId) {
-        if (sessionId != null) {
-            expiredSessionIdSet.add(sessionId);
-        }
-    }
-
-    public Set<String> getExpiredSessionIdSet() {
-        return expiredSessionIdSet;
-    }
-
-    public boolean expired(final String sessionId) {
-        return expiredSessionIdSet.contains(sessionId);
     }
 
     public String getCanonicalSessionId(final String sessionId) {

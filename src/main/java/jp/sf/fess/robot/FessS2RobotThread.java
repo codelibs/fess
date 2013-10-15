@@ -44,7 +44,6 @@ import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.S2RobotThread;
 import org.seasar.robot.client.S2RobotClient;
 import org.seasar.robot.client.smb.SmbClient;
@@ -78,10 +77,11 @@ public class FessS2RobotThread extends S2RobotThread {
             final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                     .getComponent(CrawlingSessionHelper.class);
             final SambaHelper sambaHelper = SingletonS2Container
-                    .getComponent("sambaHelper");
+                    .getComponent(SambaHelper.class);
             final boolean useAclAsRole = crawlerProperties.getProperty(
                     Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                     Constants.TRUE);
+            final String expiresField = crawlingSessionHelper.getExpiresField();
 
             ResponseData responseData = null;
             try {
@@ -91,7 +91,7 @@ public class FessS2RobotThread extends S2RobotThread {
                     return true;
                 }
 
-                SolrDocumentList oldSolrDocumentList = null;
+                SolrDocumentList oldDocWithRoleList = null;
                 final CrawlingConfig crawlingConfig = crawlingConfigHelper
                         .get(robotContext.getSessionId());
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -108,7 +108,8 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
                 if (useAclAsRole && responseData.getUrl().startsWith("smb://")) {
                     final String id = crawlingSessionHelper.generateId(dataMap);
-                    oldSolrDocumentList = getSolrDocumentList(id, true);
+                    oldDocWithRoleList = getSolrDocumentList(id, true,
+                            expiresField);
 
                     final ACE[] aces = (ACE[]) responseData.getMetaDataMap()
                             .get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
@@ -127,59 +128,44 @@ public class FessS2RobotThread extends S2RobotThread {
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
                 final SolrDocumentList solrDocumentList = getSolrDocumentList(
-                        id, false);
+                        id, false, expiresField);
                 if (solrDocumentList == null) {
-                    final Set<String> childUrlSet = getChildUrlSet(id);
-                    if (childUrlSet != null) {
-                        synchronized (robotContext.getAccessCountLock()) {
-                            //  add an url
-                            storeChildUrls(
-                                    childUrlSet,
-                                    urlQueue.getUrl(),
-                                    urlQueue.getDepth() != null ? urlQueue
-                                            .getDepth() + 1 : 1);
-                        }
-                    }
+                    deleteSolrDocumentList(oldDocWithRoleList);
+                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(id));
+                    return true;
+                }
 
-                    deleteSolrDocumentList(oldSolrDocumentList);
+                if (solrDocumentList.size() > 1) {
+                    // invalid state
+                    deleteSolrDocumentList(oldDocWithRoleList);
+                    deleteSolrDocumentList(solrDocumentList);
                     return true;
                 }
 
                 final SolrDocument solrDocument = solrDocumentList.get(0);
-
-                final String sessionId = (String) solrDocument.get("segment");
-                if (StringUtil.isNotBlank(sessionId)
-                        && crawlingSessionHelper.expired(sessionId)) {
-                    deleteSolrDocumentList(oldSolrDocumentList);
+                final Date expires = (Date) solrDocument.get(expiresField);
+                if (expires != null
+                        && expires.getTime() < System.currentTimeMillis()) {
+                    deleteSolrDocumentList(oldDocWithRoleList);
                     return true;
                 }
 
                 final Date lastModified = (Date) solrDocument
                         .get("lastModified");
                 if (lastModified == null) {
-                    deleteSolrDocumentList(oldSolrDocumentList);
+                    deleteSolrDocumentList(oldDocWithRoleList);
                     return true;
                 }
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
                     deleteSolrDocument(id);
-                    final Set<String> childUrlSet = getAnchorSet(solrDocument
-                            .get("anchor"));
-                    if (childUrlSet != null) {
-                        synchronized (robotContext.getAccessCountLock()) {
-                            //  add an url
-                            storeChildUrls(
-                                    childUrlSet,
-                                    urlQueue.getUrl(),
-                                    urlQueue.getDepth() != null ? urlQueue
-                                            .getDepth() + 1 : 1);
-                        }
-                    }
-
+                    deleteSolrDocumentList(oldDocWithRoleList);
+                    storeChildUrlsToQueue(urlQueue,
+                            getAnchorSet(solrDocument.get("anchor")));
                     return false;
                 } else if (responseData.getLastModified() == null) {
-                    deleteSolrDocumentList(oldSolrDocumentList);
+                    deleteSolrDocumentList(oldDocWithRoleList);
                     return true;
                 } else if (responseData.getLastModified().getTime() <= lastModified
                         .getTime() && httpStatusCode == 200) {
@@ -194,18 +180,8 @@ public class FessS2RobotThread extends S2RobotThread {
                             .setStatus(org.seasar.robot.Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
-                    final Set<String> childUrlSet = getAnchorSet(solrDocument
-                            .get("anchor"));
-                    if (childUrlSet != null) {
-                        synchronized (robotContext.getAccessCountLock()) {
-                            //  add an url
-                            storeChildUrls(
-                                    childUrlSet,
-                                    urlQueue.getUrl(),
-                                    urlQueue.getDepth() != null ? urlQueue
-                                            .getDepth() + 1 : 1);
-                        }
-                    }
+                    storeChildUrlsToQueue(urlQueue,
+                            getAnchorSet(solrDocument.get("anchor")));
 
                     return false;
                 }
@@ -218,6 +194,19 @@ public class FessS2RobotThread extends S2RobotThread {
         return true;
     }
 
+    protected void storeChildUrlsToQueue(final UrlQueue urlQueue,
+            final Set<String> childUrlSet) {
+        if (childUrlSet != null) {
+            synchronized (robotContext.getAccessCountLock()) {
+                //  add an url
+                storeChildUrls(childUrlSet, urlQueue.getUrl(),
+                        urlQueue.getDepth() != null ? urlQueue.getDepth() + 1
+                                : 1);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     protected Set<String> getAnchorSet(final Object obj) {
         List<String> anchorList;
         if (obj instanceof String) {
@@ -241,7 +230,7 @@ public class FessS2RobotThread extends S2RobotThread {
     }
 
     protected SolrDocumentList getSolrDocumentList(final String id,
-            final boolean wildcard) {
+            final boolean wildcard, final String expiresField) {
         final SolrGroupManager solrGroupManager = SingletonS2Container
                 .getComponent(SolrGroupManager.class);
         final SolrGroup solrGroup = solrGroupManager
@@ -255,7 +244,8 @@ public class FessS2RobotThread extends S2RobotThread {
         }
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
-        solrQuery.setFields("id", "lastModified", "anchor", "segment", "role");
+        solrQuery.setFields("id", "lastModified", "anchor", "segment", "role",
+                expiresField);
         for (int i = 0; i < maxSolrQueryRetryCount; i++) {
             try {
                 final QueryResponse response = solrGroup.query(solrQuery);
