@@ -225,20 +225,22 @@ public abstract class AbstractFessFileTransformer extends
         putResultDataBody(dataMap, "digest", Constants.DIGEST_PREFIX
                 + abbreviate(cache, maxDigestLength));
         // title
-        if (url.endsWith("/")) {
-            if (StringUtil.isNotBlank(content)) {
-                putResultDataBody(dataMap, "title",
-                        abbreviate(body, maxTitleLength));
+        if (!dataMap.containsKey("title")) {
+            if (url.endsWith("/")) {
+                if (StringUtil.isNotBlank(content)) {
+                    putResultDataBody(dataMap, "title",
+                            abbreviate(body, maxTitleLength));
+                } else {
+                    putResultDataBody(dataMap, "title", noTitleLabel);
+                }
             } else {
-                putResultDataBody(dataMap, "title", noTitleLabel);
-            }
-        } else {
-            final String u = decodeUrlAsName(url, url.startsWith("file:"));
-            final int pos = u.lastIndexOf('/');
-            if (pos == -1) {
-                putResultDataBody(dataMap, "title", u);
-            } else {
-                putResultDataBody(dataMap, "title", u.substring(pos + 1));
+                final String u = decodeUrlAsName(url, url.startsWith("file:"));
+                final int pos = u.lastIndexOf('/');
+                if (pos == -1) {
+                    putResultDataBody(dataMap, "title", u);
+                } else {
+                    putResultDataBody(dataMap, "title", u.substring(pos + 1));
+                }
             }
         }
         // host
@@ -375,6 +377,8 @@ public abstract class AbstractFessFileTransformer extends
                             sessionId);
                     if (pageEnc != null) {
                         enc = pageEnc;
+                    } else if (urlQueue.getEncoding() != null) {
+                        enc = urlQueue.getEncoding();
                     }
                 }
             }
