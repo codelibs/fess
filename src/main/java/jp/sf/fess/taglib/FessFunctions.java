@@ -17,6 +17,7 @@
 package jp.sf.fess.taglib;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -32,6 +33,7 @@ import jp.sf.fess.helper.ViewHelper;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.common.util.DateUtil;
+import org.codelibs.core.util.DynamicProperties;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.URLEncoderUtil;
@@ -48,6 +50,7 @@ public class FessFunctions {
     }
 
     public static String label(final String value) {
+        @SuppressWarnings("unchecked")
         final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil
                 .getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
@@ -60,6 +63,10 @@ public class FessFunctions {
     }
 
     public static List<String> hsw(final String value, final Integer size) {
+        if (!isSupportHotSearchWord()) {
+            return Collections.emptyList();
+        }
+
         Range range;
         if (value == null) {
             range = Range.ENTIRE;
@@ -86,6 +93,10 @@ public class FessFunctions {
     }
 
     public static Integer hswsize(final String value) {
+        if (!isSupportHotSearchWord()) {
+            return 0;
+        }
+
         Range range;
         if (value == null) {
             range = Range.ENTIRE;
@@ -104,6 +115,15 @@ public class FessFunctions {
         final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
                 .getComponent(HotSearchWordHelper.class);
         return hotSearchWordHelper.getHotSearchWordList(range).size();
+    }
+
+    private static boolean isSupportHotSearchWord() {
+        final DynamicProperties crawlerProperties = SingletonS2Container
+                .getComponent("crawlerProperties");
+        return crawlerProperties != null
+                && Constants.TRUE.equals(crawlerProperties.getProperty(
+                        Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
+                        Constants.TRUE));
     }
 
     public static Date date(final Long value) {
