@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import jp.sf.fess.FessSystemException;
+import jp.sf.fess.db.cbean.ClickLogCB;
+import jp.sf.fess.db.exbhv.ClickLogBhv;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 
@@ -38,6 +40,10 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     protected SolrGroup solrGroup;
 
     public int maxDocumentCacheSize = 10;
+
+    public boolean clickCountEnabled = true;
+
+    public String clickCountField = "clickCount_i";
 
     protected volatile AtomicLong documentSize = new AtomicLong(0);
 
@@ -80,6 +86,10 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
                 }
             }
             doc.addField(entry.getKey(), entry.getValue());
+        }
+
+        if (clickCountEnabled) {
+            addClickCountField(doc, dataMap.get("url").toString());
         }
 
         docList.add(doc);
@@ -145,6 +155,19 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
                     + (System.currentTimeMillis() - execTime) + "ms.");
         }
         docList.clear();
+    }
+
+    protected void addClickCountField(final SolrInputDocument doc,
+            final String url) {
+        final ClickLogBhv clickLogBhv = SingletonS2Container
+                .getComponent(ClickLogBhv.class);
+        final ClickLogCB cb = new ClickLogCB();
+        cb.query().setUrl_Equal(url);
+        final int count = clickLogBhv.selectCount(cb);
+        doc.addField(clickCountField, count);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Click Count: " + count + ", url: " + url);
+        }
     }
 
     @Override
