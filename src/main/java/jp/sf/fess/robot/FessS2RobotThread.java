@@ -28,6 +28,10 @@ import java.util.Set;
 import jcifs.smb.ACE;
 import jcifs.smb.SID;
 import jp.sf.fess.Constants;
+import jp.sf.fess.db.cbean.ClickLogCB;
+import jp.sf.fess.db.cbean.FavoriteLogCB;
+import jp.sf.fess.db.exbhv.ClickLogBhv;
+import jp.sf.fess.db.exbhv.FavoriteLogBhv;
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
@@ -60,6 +64,10 @@ public class FessS2RobotThread extends S2RobotThread {
     public int maxSolrQueryRetryCount = 5;
 
     public int childUrlSize = 10000;
+
+    public String clickCountField = "clickCount_i";
+
+    public String favoriteCountField = "favoriteCount_i";
 
     @Override
     protected boolean isContentUpdated(final S2RobotClient client,
@@ -157,6 +165,34 @@ public class FessS2RobotThread extends S2RobotThread {
                     return true;
                 }
 
+                final Integer clickCount = (Integer) solrDocument
+                        .get(clickCountField);
+                if (clickCount != null) {
+                    final ClickLogBhv clickLogBhv = SingletonS2Container
+                            .getComponent(ClickLogBhv.class);
+                    final ClickLogCB cb = new ClickLogCB();
+                    cb.query().setUrl_Equal(urlQueue.getUrl());
+                    final int count = clickLogBhv.selectCount(cb);
+                    if (count != clickCount.intValue()) {
+                        deleteSolrDocumentList(oldDocWithRoleList);
+                        return true;
+                    }
+                }
+
+                final Integer favoriteCount = (Integer) solrDocument
+                        .get(favoriteCountField);
+                if (favoriteCount != null) {
+                    final FavoriteLogBhv favoriteLogBhv = SingletonS2Container
+                            .getComponent(FavoriteLogBhv.class);
+                    final FavoriteLogCB cb = new FavoriteLogCB();
+                    cb.query().setUrl_Equal(urlQueue.getUrl());
+                    final int count = favoriteLogBhv.selectCount(cb);
+                    if (count != favoriteCount.intValue()) {
+                        deleteSolrDocumentList(oldDocWithRoleList);
+                        return true;
+                    }
+                }
+
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
                     deleteSolrDocument(id);
@@ -245,7 +281,7 @@ public class FessS2RobotThread extends S2RobotThread {
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
         solrQuery.setFields("id", "lastModified", "anchor", "segment", "role",
-                expiresField);
+                expiresField, clickCountField, favoriteCountField);
         for (int i = 0; i < maxSolrQueryRetryCount; i++) {
             try {
                 final QueryResponse response = solrGroup.query(solrQuery);
