@@ -135,6 +135,7 @@ public class CrawlingConfigHelper implements Serializable {
         final HttpServletResponse response = ResponseUtil.getResponse();
         writeFileName(response, responseData);
         writeContentType(response, responseData);
+        writeNoCache(response, responseData);
         InputStream is = null;
         OutputStream os = null;
         try {
@@ -150,6 +151,13 @@ public class CrawlingConfigHelper implements Serializable {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
         }
+    }
+
+    protected void writeNoCache(final HttpServletResponse response,
+            final ResponseData responseData) {
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
     }
 
     protected void writeFileName(final HttpServletResponse response,
