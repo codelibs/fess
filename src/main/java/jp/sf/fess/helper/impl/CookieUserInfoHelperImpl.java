@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
@@ -33,7 +34,6 @@ import jp.sf.fess.service.UserInfoService;
 
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.StringUtil;
-import org.seasar.framework.util.UUID;
 import org.seasar.robot.util.LruHashMap;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
@@ -45,7 +45,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
     public int userInfoCacheSize = 1000;
 
-    public int resultUrlCacheSize = 10;
+    public int resultDocIdsCacheSize = 20;
 
     public String cookieName = "fsid";
 
@@ -90,7 +90,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     }
 
     protected String getId() {
-        return UUID.create();
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     protected void updateUserSessionId(final String userCode) {
@@ -143,22 +143,20 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
             final List<Map<String, Object>> documentItems) {
         final HttpSession session = RequestUtil.getRequest().getSession(false);
         if (session != null) {
-            String queryId = query.hashCode() + session.getId()
-                    + System.currentTimeMillis();
-            queryId = Integer.toString(queryId.hashCode());
+            final String queryId = getId();
 
-            final List<String> urlList = new ArrayList<String>();
+            final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentItems) {
-                final Object url = map.get("url");
-                if (url != null && url.toString().length() > 0) {
-                    urlList.add(url.toString());
+                final Object docId = map.get(Constants.DOC_ID);
+                if (docId != null && docId.toString().length() > 0) {
+                    docIdList.add(docId.toString());
                 }
             }
 
-            if (!urlList.isEmpty()) {
-                final Map<String, String[]> resultUrlCache = getResultUrlCache(session);
-                resultUrlCache.put(queryId,
-                        urlList.toArray(new String[urlList.size()]));
+            if (!docIdList.isEmpty()) {
+                final Map<String, String[]> resultDocIdsCache = getResultDocIdsCache(session);
+                resultDocIdsCache.put(queryId,
+                        docIdList.toArray(new String[docIdList.size()]));
                 return queryId;
             }
         }
@@ -166,10 +164,10 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     }
 
     @Override
-    public String[] getResultUrls(final String queryId) {
+    public String[] getResultDocIds(final String queryId) {
         final HttpSession session = RequestUtil.getRequest().getSession(false);
         if (session != null) {
-            final Map<String, String[]> resultUrlCache = getResultUrlCache(session);
+            final Map<String, String[]> resultUrlCache = getResultDocIdsCache(session);
             final String[] urls = resultUrlCache.get(queryId);
             if (urls != null) {
                 return urls;
@@ -178,14 +176,16 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
         return new String[0];
     }
 
-    private Map<String, String[]> getResultUrlCache(final HttpSession session) {
-        Map<String, String[]> resultUrlCache = (Map<String, String[]>) session
-                .getAttribute(Constants.RESULT_URL_CACHE);
-        if (resultUrlCache == null) {
-            resultUrlCache = new LruHashMap<String, String[]>(
-                    resultUrlCacheSize);
-            session.setAttribute(Constants.RESULT_URL_CACHE, resultUrlCache);
+    private Map<String, String[]> getResultDocIdsCache(final HttpSession session) {
+        @SuppressWarnings("unchecked")
+        Map<String, String[]> resultDocIdsCache = (Map<String, String[]>) session
+                .getAttribute(Constants.RESULT_DOC_ID_CACHE);
+        if (resultDocIdsCache == null) {
+            resultDocIdsCache = new LruHashMap<String, String[]>(
+                    resultDocIdsCacheSize);
+            session.setAttribute(Constants.RESULT_DOC_ID_CACHE,
+                    resultDocIdsCache);
         }
-        return resultUrlCache;
+        return resultDocIdsCache;
     }
 }

@@ -250,8 +250,8 @@ public abstract class AbstractFessFileTransformer extends
                 getSite(url, responseData.getCharSet()));
         // url
         putResultDataBody(dataMap, "url", url);
-        // tstamp
-        putResultDataBody(dataMap, "tstamp", "NOW");
+        // created
+        putResultDataBody(dataMap, "created", "NOW");
         // TODO anchor
         putResultDataBody(dataMap, "anchor", "");
         // mimetype

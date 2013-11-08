@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.db.bsbhv.BsFavoriteLogBhv;
 import jp.sf.fess.db.cbean.ClickLogCB;
@@ -30,6 +31,7 @@ import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
 import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.SystemHelper;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.solr.lib.SolrGroup;
@@ -83,28 +85,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
                 .getComponent(CrawlingSessionHelper.class);
         dataMap.put("id", crawlingSessionHelper.generateId(dataMap));
 
-        final SolrInputDocument doc = new SolrInputDocument();
-        for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            if ("boost".equals(entry.getKey())) {
-                // boost
-                final float documentBoost = Float.valueOf(entry.getValue()
-                        .toString());
-                doc.setDocumentBoost(documentBoost);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Set a document boost (" + documentBoost
-                            + ").");
-                }
-            }
-            doc.addField(entry.getKey(), entry.getValue());
-        }
-
-        if (clickCountEnabled) {
-            addClickCountField(doc, urlObj.toString());
-        }
-
-        if (favoriteCountEnabled) {
-            addFavoriteCountField(doc, urlObj.toString());
-        }
+        final SolrInputDocument doc = createSolrDocument(dataMap);
 
         docList.add(doc);
         if (logger.isDebugEnabled()) {
@@ -131,6 +112,42 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         executeTime += System.currentTimeMillis() - startTime;
         return true;
+    }
+
+    protected SolrInputDocument createSolrDocument(
+            final Map<String, Object> dataMap) {
+        final String url = dataMap.get("url").toString();
+
+        final SolrInputDocument doc = new SolrInputDocument();
+        for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
+            if ("boost".equals(entry.getKey())) {
+                // boost
+                final float documentBoost = Float.valueOf(entry.getValue()
+                        .toString());
+                doc.setDocumentBoost(documentBoost);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Set a document boost (" + documentBoost
+                            + ").");
+                }
+            }
+            doc.addField(entry.getKey(), entry.getValue());
+        }
+
+        if (clickCountEnabled) {
+            addClickCountField(doc, url);
+        }
+
+        if (favoriteCountEnabled) {
+            addFavoriteCountField(doc, url);
+        }
+
+        if (!dataMap.containsKey(Constants.DOC_ID)) {
+            final SystemHelper systemHelper = SingletonS2Container
+                    .getComponent(SystemHelper.class);
+            doc.addField(Constants.DOC_ID, systemHelper.generateDocId(dataMap));
+        }
+
+        return doc;
     }
 
     @Override

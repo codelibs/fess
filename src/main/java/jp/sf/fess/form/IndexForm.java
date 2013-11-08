@@ -60,8 +60,8 @@ public class IndexForm implements Serializable {
     public String rt;
 
     @Required(target = "go")
-    @Maxbytelength(maxbytelength = 4000)
-    public String u;
+    @Maxbytelength(maxbytelength = 100)
+    public String docId;
 
     // xml/json
 

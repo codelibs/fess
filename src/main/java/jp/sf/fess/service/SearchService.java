@@ -17,6 +17,7 @@
 package jp.sf.fess.service;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,13 +60,39 @@ public class SearchService implements Serializable {
     @Resource
     protected QueryHelper queryHelper;
 
-    public List<Map<String, Object>> selectList(final String query,
-            final FacetInfo facetInfo, final int start, final int rows,
-            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo) {
-        return selectList(query, facetInfo, start, rows, geoInfo, mltInfo, true);
+    public Map<String, Object> getDocument(final String query) {
+        final List<Map<String, Object>> docList = getDocumentList(query, null,
+                0, 1, null, null);
+        if (!docList.isEmpty()) {
+            return docList.get(0);
+        }
+        return null;
     }
 
-    public List<Map<String, Object>> selectList(final String query,
+    public List<Map<String, Object>> getDocumentListByDocIds(
+            final String[] docIds, final int pageSize) {
+        if (docIds == null || docIds.length == 0) {
+            return Collections.emptyList();
+        }
+
+        final StringBuilder buf = new StringBuilder(1000);
+        for (int i = 0; i < docIds.length; i++) {
+            if (i != 0) {
+                buf.append(" OR ");
+            }
+            buf.append("docId:").append(docIds[i]);
+        }
+        return getDocumentList(buf.toString(), null, 0, pageSize, null, null);
+    }
+
+    public List<Map<String, Object>> getDocumentList(final String query,
+            final FacetInfo facetInfo, final int start, final int rows,
+            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo) {
+        return getDocumentList(query, facetInfo, start, rows, geoInfo, mltInfo,
+                true);
+    }
+
+    public List<Map<String, Object>> getDocumentList(final String query,
             final FacetInfo facetInfo, final int start, final int rows,
             final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
             final boolean forUser) {

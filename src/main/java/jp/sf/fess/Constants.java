@@ -271,7 +271,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String STATS_REPORT_TYPE = "reportType";
 
-    public static final String RESULT_URL_CACHE = "resultUrls";
+    public static final String RESULT_DOC_ID_CACHE = "resultDocIds";
 
     public static final String SCREEN_SHOT_PATH_CACHE = "screenShotPaths";
 
@@ -321,5 +321,7 @@ public class Constants extends CoreLibConstants {
     public static final String FILE_CONFIG_ID_PREFIX = "F";
 
     public static final String WEB_CONFIG_ID_PREFIX = "W";
+
+    public static final String DOC_ID = "docId";
 
 }

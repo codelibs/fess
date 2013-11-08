@@ -63,11 +63,11 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 							<option value="">
 								<bean:message key="labels.search_result_select_sort" />
 							</option>
-							<html:option value="tstamp.asc">
-								<bean:message key="labels.search_result_sort_tstamp_asc" />
+							<html:option value="created.asc">
+								<bean:message key="labels.search_result_sort_created_asc" />
 							</html:option>
-							<html:option value="tstamp.desc">
-								<bean:message key="labels.search_result_sort_tstamp_desc" />
+							<html:option value="created.desc">
+								<bean:message key="labels.search_result_sort_created_desc" />
 							</html:option>
 							<html:option value="contentLength.asc">
 								<bean:message key="labels.search_result_sort_contentLength_asc" />

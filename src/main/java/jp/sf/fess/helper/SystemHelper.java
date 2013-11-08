@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -115,6 +116,8 @@ public class SystemHelper implements Serializable {
     private String launcherJnlpPath;
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
+
+    private final int maxTextLength = 4000;
 
     @InitMethod
     public void init() {
@@ -622,6 +625,14 @@ public class SystemHelper implements Serializable {
 
     public JobExecutor getJobExecutoer(final Long id) {
         return runningJobExecutorMap.get(id);
+    }
+
+    public String generateDocId(final Map<String, Object> map) {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    public String abbreviateLongText(final String str) {
+        return StringUtils.abbreviate(str, maxTextLength);
     }
 
 }

@@ -91,7 +91,8 @@ public class TriggeredJob implements Job {
         } catch (final Throwable e) {
             logger.error("Failed to execute " + jobId + ": " + script, e);
             jobLog.setJobStatus(Constants.FAIL);
-            jobLog.setScriptResult(e.getLocalizedMessage());
+            jobLog.setScriptResult(systemHelper.abbreviateLongText(e
+                    .getLocalizedMessage()));
         } finally {
             systemHelper.finishJobExecutoer(id);
             jobLog.setEndTime(new Timestamp(System.currentTimeMillis()));

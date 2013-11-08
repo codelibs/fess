@@ -474,6 +474,10 @@ public class IndexUpdater extends Thread {
             addBoostValue(map, documentBoost, doc);
         }
 
+        if (!map.containsKey(Constants.DOC_ID)) {
+            doc.addField(Constants.DOC_ID, systemHelper.generateDocId(map));
+        }
+
         return doc;
     }
 

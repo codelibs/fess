@@ -22,16 +22,15 @@
 	</div>
 </c:if>
 <div id="result" class="row content">
-	<input type="hidden" id="queryId" value="${f:u(queryId)}" /> <input
-		type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
+	<input type="hidden" id="queryId" value="${f:u(queryId)}" />
+	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<input type="hidden" id="rt" value="${f:u(rt)}" />
 	<div class="span8">
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title">
-						<a href="${doc.urlLink}" class="link">
-							${f:h(doc.contentTitle)} </a>
+						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.docId}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
 						<div class="description">${doc.contentDescription}</div>
@@ -42,9 +41,9 @@
 							<a href="#result${s.index}"><bean:message key="labels.search_result_more" /></a>
 						</div>
 						<div class="info">
-							<c:if test="${doc.tstamp!=null && doc.tstamp!=''}">
-								<bean:message key="labels.search_result_tstamp" />
-								<fmt:formatDate value="${fe:parseDate(doc.tstamp)}" type="BOTH" />
+							<c:if test="${doc.created!=null && doc.created!=''}">
+								<bean:message key="labels.search_result_created" />
+								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
 								<span class="br-phone"></span>
 								<span class="hidden-phone">-</span>
 							</c:if>
@@ -62,7 +61,7 @@
 								<span class="hidden-phone">-</span>
 							</c:if>
 							<c:if test="${favoriteSupport}">
-								<a href="#${doc.url}" class="favorite"><bean:message
+								<a href="#${doc.docId}" class="favorite"><bean:message
 										key="labels.search_result_favorite" /></a>
 								<span class="favorited"><bean:message
 										key="labels.search_result_favorited" /></span>

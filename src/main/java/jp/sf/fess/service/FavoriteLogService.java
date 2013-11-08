@@ -22,6 +22,7 @@ import java.io.Writer;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -115,9 +116,10 @@ public class FavoriteLogService extends BsFavoriteLogService implements
         return false;
     }
 
-    public String[] getUrls(final String userCode, final String[] urls) {
-        if (urls.length == 0) {
-            return urls;
+    public List<String> getUrlList(final String userCode,
+            final List<String> urlList) {
+        if (urlList.isEmpty()) {
+            return urlList;
         }
 
         final UserInfoCB cb = new UserInfoCB();
@@ -125,10 +127,6 @@ public class FavoriteLogService extends BsFavoriteLogService implements
         final UserInfo userInfo = userInfoBhv.selectEntity(cb);
 
         if (userInfo != null) {
-            final List<String> urlList = new ArrayList<String>();
-            for (final String url : urls) {
-                urlList.add(url);
-            }
             final FavoriteLogCB cb2 = new FavoriteLogCB();
             cb2.query().setUserId_Equal(userInfo.getId());
             cb2.query().setUrl_InScope(urlList);
@@ -136,15 +134,16 @@ public class FavoriteLogService extends BsFavoriteLogService implements
             final ListResultBean<FavoriteLog> list = favoriteLogBhv
                     .selectList(cb2);
             if (!list.isEmpty()) {
-                urlList.clear();
+                final List<String> newUrlList = new ArrayList<String>(
+                        list.size());
                 for (final FavoriteLog favoriteLog : list) {
-                    urlList.add(favoriteLog.getUrl());
+                    newUrlList.add(favoriteLog.getUrl());
                 }
-                return urlList.toArray(new String[urlList.size()]);
+                return newUrlList;
             }
         }
 
-        return new String[0];
+        return Collections.emptyList();
     }
 
     public void deleteAll(final FavoriteLogPager favoriteLogPager) {

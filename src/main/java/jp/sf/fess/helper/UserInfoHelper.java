@@ -25,6 +25,6 @@ public interface UserInfoHelper {
 
     String generateQueryId(String query, List<Map<String, Object>> documentItems);
 
-    String[] getResultUrls(String decode);
+    String[] getResultDocIds(String queryId);
 
 }

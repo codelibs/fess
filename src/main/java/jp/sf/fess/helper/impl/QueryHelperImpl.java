@@ -77,16 +77,16 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     @Resource
     protected RoleQueryHelper roleQueryHelper;
 
-    protected String[] responseFields = new String[] { "id", "score", "boost",
-            "contentLength", "host", "site", "lastModified", "mimetype",
-            "tstamp", "title", "digest", "url", "clickCount_i",
+    protected String[] responseFields = new String[] { "id", "docId", "score",
+            "boost", "contentLength", "host", "site", "lastModified",
+            "mimetype", "created", "title", "digest", "url", "clickCount_i",
             "favoriteCount_i", "screenshot_s_s" };
 
     protected String[] highlightingFields = new String[] { "content" };
 
-    protected String[] searchFields = new String[] { "url", "host", "title",
-            "content", "contentLength", "lastModified", "mimetype", "label",
-            "segment", "clickCount_i", "favoriteCount_i", "inurl" };
+    protected String[] searchFields = new String[] { "url", "docId", "host",
+            "title", "content", "contentLength", "lastModified", "mimetype",
+            "label", "segment", "clickCount_i", "favoriteCount_i", "inurl" };
 
     protected String[] facetFields = new String[] { "url", "host", "title",
             "content", "contentLength", "lastModified", "mimetype", "label",
@@ -94,7 +94,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String sortPrefix = "sort:";
 
-    protected String[] supportedSortFields = new String[] { "tstamp",
+    protected String[] supportedSortFields = new String[] { "created",
             "contentLength", "lastModified", "clickCount_i", "favoriteCount_i" };
 
     protected String[] supportedMltFields = new String[] { "content",

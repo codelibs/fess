@@ -83,8 +83,8 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
         // segment
         defaultDataMap.put("segment", initParamMap.get(Constants.SESSION_ID));
-        // tstamp
-        defaultDataMap.put("tstamp", "NOW");
+        // created
+        defaultDataMap.put("created", "NOW");
         // boost
         defaultDataMap.put("boost", config.getBoost().toString());
         // type: browserType

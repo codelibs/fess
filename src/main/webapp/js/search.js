@@ -21,32 +21,31 @@ $(function(){
 	});
 
 	$result.on('mousedown', 'a.link', function(e){
-		var url = $(this).attr('href'),
+		var docId = $(this).attr('data-id'),
 			rt = $('#rt').val(),
 			buf = [];
 		buf.push('go?rt=');
 		buf.push(rt);
-		buf.push('&u=');
-		buf.push(encodeURIComponent(url));
+		buf.push('&docId=');
+		buf.push(docId);
 		$(this).attr('href', buf.join(''));
 	});
 
 	$result.on('mouseover', 'a.link', function(e){
 		if($screenshot.size() > 0) {
-			var url = $(this).attr('href'),
+			var docId = $(this).attr('data-id'),
 				rt = $('#rt').val(),
 				queryId = $queryId.val(),
 				buf = [];
 			buf.push('go?rt=');
 			buf.push(rt);
-			buf.push('&u=');
-			buf.push(encodeURIComponent(url));
+			buf.push('&docId=');
+			buf.push(docId);
 
 			$screenshot.children().remove();
 			
 			var content = '<a href="' + buf.join('') + '"><img src="screenshot?queryId='
-				+ queryId + '&u=' + encodeURIComponent(url)
-				+ '"></a>'
+				+ queryId + '&docId=' + docId + '"></a>'
 			$screenshot.append(content);
 			$('img', $screenshot).error(function() {
 				$screenshot.children().remove();
@@ -60,7 +59,7 @@ $(function(){
 		if(values.length === 2 && $queryId.size() > 0){
 			var contextPath = $('#contextPath').val();
 			var actionUrl = contextPath + '/favorite';
-			var favoriteUrl = values[1];
+			var docId = values[1];
 			$.ajax({
 				dataType: 'json',
 				cache: false,
@@ -68,18 +67,18 @@ $(function(){
 				timeoutNumber: 10000,
 				url: actionUrl,
 				data: {
-					u: favoriteUrl,
+					docId: docId,
 					queryId: $queryId.val()
 					}
 			}).done(function ( data ) {
 				if(data.response.status === 0 
 					&& typeof data.response.result !== 'undefined'
-					&& data.response.result == 'ok'){
+					&& data.response.result === 'ok'){
 					var $favorited = $favorite.siblings('.favorited');
 					$favorite.fadeOut(1000, function(){$favorited.fadeIn(1000)});
 				}
 			}).fail(function ( data ) {
-				$favorite.attr('href', '#' + favoriteUrl);
+				$favorite.attr('href', '#' + docId);
 //alert(JSON.stringify(data));
 			});
 		}
@@ -95,23 +94,23 @@ $(function(){
 			type: 'post',
 			timeoutNumber: 10000,
 			url: contextPath + '/favorites',
-				data: {
-						queryId: $queryId.val()
-				}
+			data: {
+				queryId: $queryId.val()
+			}
 		}).done(function ( data ) {
 			if(data.response.status === 0 
 				&& typeof data.response.num !== 'undefined'
 				&& data.response.num > 0){
-				var urls = data.response.urls;
-				for(var i = 0; i < urls.length; i++) {
-					urls[i] = '#' + urls[i];
+				var docIds = data.response.docIds;
+				for(var i = 0; i < docIds.length; i++) {
+					docIds[i] = '#' + docIds[i];
 				}
 				$favorites.each(function(index) {
 					var $favorite = $(this);
 					var url = $favorite.attr('href');
 					var found = false;
-					for(var i = 0; i< urls.length; i++) {
-						if(url == urls[i]) {
+					for(var i = 0; i< docIds.length; i++) {
+						if(url == docIds[i]) {
 							found = true;
 							break;
 						}

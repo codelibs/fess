@@ -144,7 +144,7 @@ public class MobileAction {
         final int pageNum = Integer.parseInt(mobileForm.num);
         // TODO add GeoInfo if needed...
         try {
-            documentItems = searchService.selectList(mobileForm.query, null,
+            documentItems = searchService.getDocumentList(mobileForm.query, null,
                     pageStart, pageNum, null, null);
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {

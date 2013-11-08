@@ -17,7 +17,7 @@
 		&lt;order&gt; は asc または desc で昇順・降順を指定できます。
 		たとえば、Fess を含むドキュメントでサイズの降順にソートしたい場合、次のように入力します。
 		<pre>Fess sort:contentLength.desc</pre>
-		標準で利用可能なフィールドは tstamp, contentLength および lastModified になります。
+		標準で利用可能なフィールドは created, contentLength および lastModified になります。
 		設定で指定するフィールドは変更することができます。
 	</dd>
 	<dt>AND検索</dt>

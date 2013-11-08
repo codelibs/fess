@@ -251,8 +251,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 getSite(url, responseData.getCharSet()));
         // url
         putResultDataBody(dataMap, "url", url);
-        // tstamp
-        putResultDataBody(dataMap, "tstamp", "NOW");
+        // created
+        putResultDataBody(dataMap, "created", "NOW");
         // anchor
         putResultDataBody(dataMap, "anchor",
                 getAnchorList(document, responseData));
@@ -290,8 +290,6 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             roleTypeList.add(roleType);
         }
         putResultDataBody(dataMap, "role", roleTypeList);
-        // TODO date
-        // TODO lang
         // id
         putResultDataBody(dataMap, "id",
                 crawlingSessionHelper.generateId(dataMap));

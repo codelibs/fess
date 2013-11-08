@@ -18,7 +18,7 @@
 		desc. If you want to find documents which has "Fess" and sort them in
 		descending order, you can enter:
 		<pre>Fess sort:contentLength.desc</pre>
-		The available sort field are "tstamp", "contentLength" and
+		The available sort field are "created", "contentLength" and
 		"lastModified", and they are customizable.
 	</dd>
 	<dt>AND</dt>

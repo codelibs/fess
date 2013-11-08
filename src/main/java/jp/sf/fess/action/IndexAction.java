@@ -81,7 +81,6 @@ import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.exception.IORuntimeException;
 import org.seasar.framework.util.InputStreamUtil;
 import org.seasar.framework.util.OutputStreamUtil;
 import org.seasar.framework.util.StringUtil;
@@ -279,6 +278,27 @@ public class IndexAction {
 
     @Execute(validator = true, input = "index")
     public String go() throws IOException {
+        Map<String, Object> doc = null;
+        try {
+            doc = searchService.getDocument("docId:" + indexForm.docId);
+        } catch (final Exception e) {
+            logger.warn("Failed to request: " + indexForm.docId, e);
+        }
+        if (doc == null) {
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
+                    .getRequest().getLocale(), "errors.docid_not_found",
+                    indexForm.docId);
+            return "error.jsp";
+        }
+        final Object urlObj = doc.get("url");
+        if (urlObj == null) {
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
+                    .getRequest().getLocale(), "errors.document_not_found",
+                    indexForm.docId);
+            return "error.jsp";
+        }
+        final String url = urlObj.toString();
+
         if (Constants.TRUE.equals(crawlerProperties.getProperty(
                 Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
             final String userSessionId = userInfoHelper.getUserCode();
@@ -286,7 +306,7 @@ public class IndexAction {
                 final SearchLogHelper searchLogHelper = SingletonS2Container
                         .getComponent(SearchLogHelper.class);
                 final ClickLog clickLog = new ClickLog();
-                clickLog.setUrl(indexForm.u);
+                clickLog.setUrl(url);
                 clickLog.setRequestedTime(new Timestamp(System
                         .currentTimeMillis()));
                 clickLog.setQueryRequestedTime(new Timestamp(Long
@@ -295,15 +315,15 @@ public class IndexAction {
                 searchLogHelper.addClickLog(clickLog);
             }
         }
-        if (indexForm.u.startsWith("file:")) {
+        if (url.startsWith("file:")) {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(
                     Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
-                final String path = indexForm.u.replaceFirst("file:/+", "//");
+                final String path = url.replaceFirst("file:/+", "//");
                 final File file = new File(path);
                 if (!file.exists()) {
                     errorMessage = MessageResourcesUtil.getMessage(RequestUtil
                             .getRequest().getLocale(),
-                            "errors.not_found_on_file_system", indexForm.u);
+                            "errors.not_found_on_file_system", url);
                     return "error.jsp";
                 }
                 final Desktop desktop = Desktop.getDesktop();
@@ -312,7 +332,7 @@ public class IndexAction {
                 } catch (final Exception e) {
                     errorMessage = MessageResourcesUtil.getMessage(RequestUtil
                             .getRequest().getLocale(),
-                            "errors.could_not_open_on_system", indexForm.u);
+                            "errors.could_not_open_on_system", url);
                     logger.warn("Could not open " + path, e);
                     return "error.jsp";
                 }
@@ -324,13 +344,12 @@ public class IndexAction {
                     Constants.SEARCH_FILE_LAUNCHER_PROPERTY, Constants.TRUE))) {
                 ResponseUtil.getResponse().sendRedirect(
                         RequestUtil.getRequest().getContextPath()
-                                + "/applet/launcher?uri="
-                                + S2Functions.u(indexForm.u));
+                                + "/applet/launcher?uri=" + S2Functions.u(url));
             } else {
-                ResponseUtil.getResponse().sendRedirect(indexForm.u);
+                ResponseUtil.getResponse().sendRedirect(url);
             }
         } else {
-            ResponseUtil.getResponse().sendRedirect(indexForm.u);
+            ResponseUtil.getResponse().sendRedirect(url);
         }
         return null;
     }
@@ -413,8 +432,9 @@ public class IndexAction {
         final int pageStart = Integer.parseInt(indexForm.start);
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
-            documentItems = searchService.selectList(query, indexForm.facet,
-                    pageStart, pageNum, indexForm.geo, indexForm.mlt);
+            documentItems = searchService.getDocumentList(query,
+                    indexForm.facet, pageStart, pageNum, indexForm.geo,
+                    indexForm.mlt);
         } catch (final SolrLibQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -1882,10 +1902,13 @@ public class IndexAction {
             errMsg = "Not supported.";
             status = 10;
         } else {
-            final String userCode = userInfoHelper.getUserCode();
-            final String favoriteUrl = indexForm.u;
-
             try {
+                final Map<String, Object> doc = indexForm.docId == null ? null
+                        : searchService.getDocument("docId:" + indexForm.docId);
+                final String userCode = userInfoHelper.getUserCode();
+                final String favoriteUrl = doc == null ? null : (String) doc
+                        .get("url");
+
                 if (StringUtil.isBlank(userCode)) {
                     errMsg = "No user session.";
                     status = 2;
@@ -1893,21 +1916,20 @@ public class IndexAction {
                     errMsg = "URL is null.";
                     status = 3;
                 } else {
-                    final String[] urls = userInfoHelper
-                            .getResultUrls(URLDecoder.decode(indexForm.queryId,
-                                    Constants.UTF_8));
-                    if (urls != null) {
-                        String targetUrl = null;
-                        final String matchUrl = favoriteUrl.replaceFirst(":/+",
-                                ":/");
-                        for (final String url : urls) {
-                            if (url.replaceFirst(":/+", ":/").equals(matchUrl)) {
-                                targetUrl = url;
+                    final String[] docIds = userInfoHelper
+                            .getResultDocIds(URLDecoder.decode(
+                                    indexForm.queryId, Constants.UTF_8));
+                    if (docIds != null) {
+                        boolean found = false;
+                        for (final String docId : docIds) {
+                            if (indexForm.docId.equals(docId)) {
+                                found = true;
                                 break;
                             }
                         }
-                        if (targetUrl != null) {
-                            if (favoriteLogService.addUrl(userCode, targetUrl)) {
+                        if (found) {
+                            if (favoriteLogService
+                                    .addUrl(userCode, favoriteUrl)) {
                                 body = "\"result\":\"ok\"";
                             } else {
                                 errMsg = "Failed to add url.";
@@ -1954,19 +1976,41 @@ public class IndexAction {
                     errMsg = "Query ID is null.";
                     status = 3;
                 } else {
-                    String[] urls = userInfoHelper.getResultUrls(URLDecoder
-                            .decode(indexForm.queryId, Constants.UTF_8));
-                    urls = favoriteLogService.getUrls(userCode, urls);
+                    final String[] docIds = userInfoHelper
+                            .getResultDocIds(indexForm.queryId);
+                    final List<Map<String, Object>> docList = searchService
+                            .getDocumentListByDocIds(docIds, MAX_PAGE_SIZE);
+                    List<String> urlList = new ArrayList<String>(docList.size());
+                    for (final Map<String, Object> doc : docList) {
+                        final Object urlObj = doc.get("url");
+                        if (urlObj != null) {
+                            urlList.add(urlObj.toString());
+                        }
+                    }
+                    urlList = favoriteLogService.getUrlList(userCode, urlList);
+                    final List<String> docIdList = new ArrayList<String>(
+                            urlList.size());
+                    for (final Map<String, Object> doc : docList) {
+                        final Object urlObj = doc.get("url");
+                        if (urlObj != null
+                                && urlList.contains(urlObj.toString())) {
+                            final Object docIdObj = doc.get(Constants.DOC_ID);
+                            if (docIdObj != null) {
+                                docIdList.add(docIdObj.toString());
+                            }
+                        }
+                    }
+
                     final StringBuilder buf = new StringBuilder();
-                    buf.append("\"num\":").append(urls.length);
-                    if (urls.length > 0) {
-                        buf.append(", \"urls\":[");
-                        for (int i = 0; i < urls.length; i++) {
+                    buf.append("\"num\":").append(docIdList.size());
+                    if (!docIdList.isEmpty()) {
+                        buf.append(", \"docIds\":[");
+                        for (int i = 0; i < docIdList.size(); i++) {
                             if (i > 0) {
                                 buf.append(',');
                             }
                             buf.append('"');
-                            buf.append(escapeJsonString(urls[i]));
+                            buf.append(docIdList.get(i));
                             buf.append('"');
                         }
                         buf.append(']');
@@ -1986,40 +2030,35 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String screenshot() {
-        if (StringUtil.isBlank(indexForm.queryId)
-                || StringUtil.isBlank(indexForm.u) || screenShotManager == null) {
-            // 404
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException e) {
-                throw new IORuntimeException(e);
-            }
-            return null;
-        }
-
-        final File screenShotFile = screenShotManager.getScreenShotFile(
-                indexForm.queryId, indexForm.u);
-        if (screenShotFile == null) {
-            // 404
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException e) {
-                throw new IORuntimeException(e);
-            }
-            return null;
-        }
-
-        response.setContentType(getImageMimeType(screenShotFile));
-
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
+            final Map<String, Object> doc = searchService.getDocument("docId:"
+                    + indexForm.docId);
+            final String url = doc == null ? null : (String) doc.get("url");
+            if (StringUtil.isBlank(indexForm.queryId)
+                    || StringUtil.isBlank(url) || screenShotManager == null) {
+                // 404
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
+
+            final File screenShotFile = screenShotManager.getScreenShotFile(
+                    indexForm.queryId, url);
+            if (screenShotFile == null) {
+                // 404
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
+
+            response.setContentType(getImageMimeType(screenShotFile));
+
             out = response.getOutputStream();
             in = new BufferedInputStream(new FileInputStream(screenShotFile));
             InputStreamUtil.copy(in, out);
             OutputStreamUtil.flush(out);
-        } catch (final IOException e) {
-            throw new IORuntimeException(e);
+        } catch (final Exception e) {
+            logger.error("Failed to response: " + indexForm.docId, e);
         } finally {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(out);
