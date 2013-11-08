@@ -357,4 +357,11 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
 
     }
 
+    public DataCrawlingConfig getDataCrawlingConfig(final long id) {
+        final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
+        cb.query().setId_Equal(id);
+        cb.query().setDeletedBy_IsNull();
+        return dataCrawlingConfigBhv.selectEntity(cb);
+    }
+
 }

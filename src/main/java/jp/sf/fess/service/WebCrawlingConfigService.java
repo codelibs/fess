@@ -355,4 +355,10 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
 
     }
 
+    public WebCrawlingConfig getWebCrawlingConfig(final long id) {
+        final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
+        cb.query().setId_Equal(id);
+        cb.query().setDeletedBy_IsNull();
+        return webCrawlingConfigBhv.selectEntity(cb);
+    }
 }

@@ -75,4 +75,5 @@ public interface QueryHelper {
 
     Map<String, String[]> getQueryParamMap();
 
+    boolean isApiResponseField(String field);
 }

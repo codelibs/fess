@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.entity.FacetQueryView;
+import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
@@ -51,13 +52,14 @@ public class ViewHelper implements Serializable {
 
     protected static final String GOOGLE_MOBILE_TRANSCODER_LINK = "http://www.google.co.jp/gwt/n?u=";
 
-    private static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
-
     @Resource
     protected BrowserTypeHelper browserTypeHelper;
 
     @Resource
     protected PathMappingHelper pathMappingHelper;
+
+    @Resource
+    protected UserAgentHelper userAgentHelper;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -196,7 +198,7 @@ public class ViewHelper implements Serializable {
             final int pos = url.indexOf(':', 5);
             final boolean isLocalFile = pos > 0 && pos < 12;
 
-            final UserAgentType ua = getUserAgentType();
+            final UserAgentType ua = userAgentHelper.getUserAgentType();
             switch (ua) {
             case IE:
                 if (isLocalFile) {
@@ -333,37 +335,6 @@ public class ViewHelper implements Serializable {
             return url;
         }
         return buf.toString();
-    }
-
-    protected UserAgentType getUserAgentType() {
-        final HttpServletRequest request = RequestUtil.getRequest();
-        UserAgentType uaType = (UserAgentType) request
-                .getAttribute(USER_AGENT_TYPE);
-        if (uaType == null) {
-            final String userAgent = request.getHeader("user-agent");
-            if (userAgent != null) {
-                if (userAgent.indexOf("MSIE") >= 0) {
-                    uaType = UserAgentType.IE;
-                } else if (userAgent.indexOf("Firefox") >= 0) {
-                    uaType = UserAgentType.FIREFOX;
-                } else if (userAgent.indexOf("Chrome") >= 0) {
-                    uaType = UserAgentType.CHROME;
-                } else if (userAgent.indexOf("Safari") >= 0) {
-                    uaType = UserAgentType.SAFARI;
-                } else if (userAgent.indexOf("Opera") >= 0) {
-                    uaType = UserAgentType.OPERA;
-                }
-            }
-            if (uaType == null) {
-                uaType = UserAgentType.OTHER;
-            }
-            request.setAttribute(USER_AGENT_TYPE, uaType);
-        }
-        return uaType;
-    }
-
-    protected enum UserAgentType {
-        IE, FIREFOX, CHROME, SAFARI, OPERA, OTHER;
     }
 
     public String getPagePath(final String page) {

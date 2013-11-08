@@ -357,4 +357,11 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
 
     }
 
+    public FileCrawlingConfig getFileCrawlingConfig(final long id) {
+        final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
+        cb.query().setId_Equal(id);
+        cb.query().setDeletedBy_IsNull();
+        return fileCrawlingConfigBhv.selectEntity(cb);
+    }
+
 }

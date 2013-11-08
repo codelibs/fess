@@ -155,6 +155,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String PURGE_BY_BOTS_PROPERTY = "purge.by.bots";
 
+    public static final String SEARCH_FILE_PROXY_PROPERTY = "search.file.proxy";
+
     public static final String SEARCH_DESKTOP_PROPERTY = "search.desktop";
 
     public static final String SEARCH_FILE_LAUNCHER_PROPERTY = "search.file.launcher";
@@ -316,7 +318,7 @@ public class Constants extends CoreLibConstants {
 
     public static final int EXIT_FAIL = 1;
 
-    public static final String DATE_CONFIG_ID_PREFIX = "D";
+    public static final String DATA_CONFIG_ID_PREFIX = "D";
 
     public static final String FILE_CONFIG_ID_PREFIX = "F";
 

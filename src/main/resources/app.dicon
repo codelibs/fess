@@ -12,6 +12,9 @@
 
 	<include path="mobylet.dicon"/>
 
+	<include path="s2robot_client.dicon" />
+	<include path="s2robot_mimetype.dicon" />
+
 	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
 
 	<component name="authenticationCipher" class="jp.sf.fess.crypto.FessCipher">
@@ -55,12 +58,17 @@
 			<arg>"ko"</arg>
 			<arg>"cjk"</arg>
 		</initMethod>
+		<initMethod name="setApiResponseFields">
+			<arg>new String[]{"id", "docId", "score", "boost",
+            "contentLength", "host", "site", "lastModified", "mimetype",
+            "created", "title", "digest", "url", "clickCount_i", "favoriteCount_i"}</arg>
+		</initMethod>
 		<!-- 
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{"id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype",
             "created", "title", "digest", "url", "clickCount_i", "favoriteCount_i",
-            "screenshot_s_s"}</property>
+            "screenshot_s_s", "cid_s_s"}</property>
 		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
 		<property name="searchFields">new String[]{"url", "docId", "host", 
             "title", "content", "contentLength", "lastModified", "mimetype",
@@ -162,6 +170,8 @@
 			<arg>"label"</arg>
 		</initMethod>
 		 -->
+	</component>
+	<component name="userAgentHelper" class="jp.sf.fess.helper.UserAgentHelper">
 	</component>
 	<component name="webManagementHelper" class="jp.sf.fess.helper.impl.TomcatManagementHelperImpl">
 		<initMethod name="addSolrInstance">

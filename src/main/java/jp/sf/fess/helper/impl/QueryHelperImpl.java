@@ -19,6 +19,7 @@ package jp.sf.fess.helper.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -77,10 +78,12 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     @Resource
     protected RoleQueryHelper roleQueryHelper;
 
+    protected Set<String> apiResponseFieldSet;
+
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
             "mimetype", "created", "title", "digest", "url", "clickCount_i",
-            "favoriteCount_i", "screenshot_s_s" };
+            "favoriteCount_i", "screenshot_s_s", "cid_s_s" };
 
     protected String[] highlightingFields = new String[] { "content" };
 
@@ -1056,6 +1059,21 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         }
 
         return buf.toString().trim();
+    }
+
+    public void setApiResponseFields(final String[] fields) {
+        apiResponseFieldSet = new HashSet<String>();
+        for (final String field : fields) {
+            apiResponseFieldSet.add(field);
+        }
+    }
+
+    @Override
+    public boolean isApiResponseField(final String field) {
+        if (apiResponseFieldSet == null) {
+            return true;
+        }
+        return apiResponseFieldSet.contains(field);
     }
 
     /**

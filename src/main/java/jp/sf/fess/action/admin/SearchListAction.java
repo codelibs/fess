@@ -150,8 +150,8 @@ public class SearchListAction implements Serializable {
         final int offset = Integer.parseInt(searchListForm.start);
         final int size = Integer.parseInt(searchListForm.num);
         try {
-            documentItems = searchService.getDocumentList(query, null, offset, size,
-                    null, null, false);
+            documentItems = searchService.getDocumentList(query, offset, size,
+                    null, null, null, false);
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);

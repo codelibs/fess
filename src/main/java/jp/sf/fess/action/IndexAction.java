@@ -53,6 +53,7 @@ import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.BrowserTypeHelper;
+import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.HotSearchWordHelper.Range;
 import jp.sf.fess.helper.LabelTypeHelper;
@@ -315,8 +316,23 @@ public class IndexAction {
                 searchLogHelper.addClickLog(clickLog);
             }
         }
+
         if (url.startsWith("file:")) {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(
+                    Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
+                final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
+                        .getComponent(CrawlingConfigHelper.class);
+                try {
+                    crawlingConfigHelper.writeContent(doc);
+                    return null;
+                } catch (final Exception e) {
+                    logger.error("Failed to load: " + doc, e);
+                    errorMessage = MessageResourcesUtil.getMessage(RequestUtil
+                            .getRequest().getLocale(),
+                            "errors.not_load_from_server", url);
+                    return "error.jsp";
+                }
+            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(
                     Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
                 final String path = url.replaceFirst("file:/+", "//");
                 final File file = new File(path);
@@ -432,9 +448,8 @@ public class IndexAction {
         final int pageStart = Integer.parseInt(indexForm.start);
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
-            documentItems = searchService.getDocumentList(query,
-                    indexForm.facet, pageStart, pageNum, indexForm.geo,
-                    indexForm.mlt);
+            documentItems = searchService.getDocumentList(query, pageStart,
+                    pageNum, indexForm.facet, indexForm.geo, indexForm.mlt);
         } catch (final SolrLibQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -692,10 +707,10 @@ public class IndexAction {
                 buf.append("<doc>");
                 for (final Map.Entry<String, Object> entry : document
                         .entrySet()) {
-                    if (StringUtil.isNotBlank(entry.getKey())
-                            && entry.getValue() != null) {
-                        final String tagName = StringUtil
-                                .decamelize(entry.getKey())
+                    final String name = entry.getKey();
+                    if (StringUtil.isNotBlank(name) && entry.getValue() != null
+                            && queryHelper.isApiResponseField(name)) {
+                        final String tagName = StringUtil.decamelize(name)
                                 .replaceAll("_", "-").toLowerCase();
                         buf.append('<');
                         buf.append(tagName);
@@ -1106,15 +1121,17 @@ public class IndexAction {
                     boolean first2 = true;
                     for (final Map.Entry<String, Object> entry : document
                             .entrySet()) {
-                        if (StringUtil.isNotBlank(entry.getKey())
-                                && entry.getValue() != null) {
+                        final String name = entry.getKey();
+                        if (StringUtil.isNotBlank(name)
+                                && entry.getValue() != null
+                                && queryHelper.isApiResponseField(name)) {
                             if (!first2) {
                                 buf.append(',');
                             } else {
                                 first2 = false;
                             }
                             buf.append('\"');
-                            buf.append(escapeJsonString(entry.getKey()));
+                            buf.append(escapeJsonString(name));
                             buf.append("\":\"");
                             buf.append(escapeJsonString(entry.getValue()
                                     .toString()));

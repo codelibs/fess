@@ -61,8 +61,8 @@ public class SearchService implements Serializable {
     protected QueryHelper queryHelper;
 
     public Map<String, Object> getDocument(final String query) {
-        final List<Map<String, Object>> docList = getDocumentList(query, null,
-                0, 1, null, null);
+        final List<Map<String, Object>> docList = getDocumentList(query, 0, 1,
+                null, null, null);
         if (!docList.isEmpty()) {
             return docList.get(0);
         }
@@ -82,18 +82,18 @@ public class SearchService implements Serializable {
             }
             buf.append("docId:").append(docIds[i]);
         }
-        return getDocumentList(buf.toString(), null, 0, pageSize, null, null);
+        return getDocumentList(buf.toString(), 0, pageSize, null, null, null);
     }
 
     public List<Map<String, Object>> getDocumentList(final String query,
-            final FacetInfo facetInfo, final int start, final int rows,
+            final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo) {
-        return getDocumentList(query, facetInfo, start, rows, geoInfo, mltInfo,
+        return getDocumentList(query, start, rows, facetInfo, geoInfo, mltInfo,
                 true);
     }
 
     public List<Map<String, Object>> getDocumentList(final String query,
-            final FacetInfo facetInfo, final int start, final int rows,
+            final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
             final boolean forUser) {
         if (start > queryHelper.getMaxSearchResultOffset()) {
