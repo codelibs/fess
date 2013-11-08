@@ -22,13 +22,18 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import jp.sf.fess.FessSystemException;
+import jp.sf.fess.db.bsbhv.BsFavoriteLogBhv;
 import jp.sf.fess.db.cbean.ClickLogCB;
 import jp.sf.fess.db.exbhv.ClickLogBhv;
+import jp.sf.fess.db.exbhv.FavoriteLogBhv;
+import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
+import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.solr.lib.SolrGroup;
+import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +48,11 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     public boolean clickCountEnabled = true;
 
+    public boolean favoriteCountEnabled = true;
+
     public String clickCountField = "clickCount_i";
+
+    public String favoriteCountField = "favoriteCount_i";
 
     protected volatile AtomicLong documentSize = new AtomicLong(0);
 
@@ -64,8 +73,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.debug("Adding " + dataMap);
         }
 
-        // TODO required check
-        if (!dataMap.containsKey("url") || dataMap.get("url") == null) {
+        //   required check
+        final Object urlObj = dataMap.get("url");
+        if (urlObj == null) {
             throw new FessSystemException("url is null. dataMap=" + dataMap);
         }
 
@@ -89,7 +99,11 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (clickCountEnabled) {
-            addClickCountField(doc, dataMap.get("url").toString());
+            addClickCountField(doc, urlObj.toString());
+        }
+
+        if (favoriteCountEnabled) {
+            addFavoriteCountField(doc, urlObj.toString());
         }
 
         docList.add(doc);
@@ -167,6 +181,27 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         doc.addField(clickCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Click Count: " + count + ", url: " + url);
+        }
+    }
+
+    protected void addFavoriteCountField(final SolrInputDocument doc,
+            final String url) {
+        final FavoriteLogBhv favoriteLogBhv = SingletonS2Container
+                .getComponent(FavoriteLogBhv.class);
+        final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
+        pmb.setUrl(url);
+        final String path = BsFavoriteLogBhv.PATH_selectFavoriteUrlCount;
+        final ListResultBean<FavoriteUrlCount> list = favoriteLogBhv
+                .outsideSql().selectList(path, pmb, FavoriteUrlCount.class);
+
+        long count = 0;
+        if (!list.isEmpty()) {
+            count = list.get(0).getCnt().longValue();
+        }
+
+        doc.addField(favoriteCountField, count);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Favorite Count: " + count + ", url: " + url);
         }
     }
 
