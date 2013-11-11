@@ -317,7 +317,7 @@ public class IndexAction {
             }
         }
 
-        if (url.startsWith("file:")) {
+        if (isFileSystemPath(url)) {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(
                     Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
                 final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
@@ -368,6 +368,10 @@ public class IndexAction {
             ResponseUtil.getResponse().sendRedirect(url);
         }
         return null;
+    }
+
+    protected boolean isFileSystemPath(final String url) {
+        return url.startsWith("file:") || url.startsWith("smb:");
     }
 
     protected String doSearchInternal() {

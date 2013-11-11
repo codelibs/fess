@@ -96,6 +96,9 @@ public class CrawlingConfigHelper implements Serializable {
     }
 
     public void writeContent(final Map<String, Object> doc) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("writing the content of: " + doc);
+        }
         final Object configIdObj = doc.get(configIdField);
         if (configIdObj == null || configIdObj.toString().length() < 2) {
             throw new FessSystemException("Invalid configId: " + configIdObj);
@@ -103,6 +106,9 @@ public class CrawlingConfigHelper implements Serializable {
         final String configType = configIdObj.toString().substring(0, 1);
         final String idStr = configIdObj.toString().substring(1);
         CrawlingConfig config = null;
+        if (logger.isDebugEnabled()) {
+            logger.debug("configType: " + configType + ", idStr: " + idStr);
+        }
         if (Constants.WEB_CONFIG_ID_PREFIX.equals(configType)) {
             final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
                     .getComponent(WebCrawlingConfigService.class);
@@ -151,6 +157,9 @@ public class CrawlingConfigHelper implements Serializable {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Finished to write " + url);
+        }
     }
 
     protected void writeNoCache(final HttpServletResponse response,
@@ -177,6 +186,11 @@ public class CrawlingConfigHelper implements Serializable {
                 name = URLDecoder.decode(url.substring(pos + 1), charset);
             } else {
                 name = URLDecoder.decode(url, charset);
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("userAgentType: " + userAgentType + ", charset: "
+                        + charset + ", name: " + name);
             }
 
             switch (userAgentType) {
@@ -215,6 +229,9 @@ public class CrawlingConfigHelper implements Serializable {
     protected void writeContentType(final HttpServletResponse response,
             final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
+        if (logger.isDebugEnabled()) {
+            logger.debug("mimeType: " + mimeType);
+        }
         if (mimeType == null) {
             return;
         }
