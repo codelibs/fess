@@ -68,11 +68,9 @@ public class TriggeredJob implements Job {
             return;
         }
 
-        final JobLogService jobLogService = SingletonS2Container
-                .getComponent(JobLogService.class);
         try {
             if (scheduledJob.isLoggingEnabled()) {
-                jobLogService.store(jobLog);
+                storeJobLog(jobLog);
             }
 
             if (logger.isDebugEnabled()) {
@@ -100,9 +98,15 @@ public class TriggeredJob implements Job {
                 logger.debug("jobLog: " + jobLog);
             }
             if (scheduledJob.isLoggingEnabled()) {
-                jobLogService.store(jobLog);
+                storeJobLog(jobLog);
             }
         }
+    }
+
+    private void storeJobLog(final JobLog jobLog) {
+        final JobLogService jobLogService = SingletonS2Container
+                .getComponent(JobLogService.class);
+        jobLogService.store(jobLog);
     }
 
 }
