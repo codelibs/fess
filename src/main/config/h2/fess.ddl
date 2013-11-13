@@ -557,6 +557,6 @@ INSERT INTO BROWSER_TYPE (ID, NAME, VALUE, SORT_ORDER, CREATED_BY, CREATED_TIME,
 INSERT INTO PUBLIC.SCHEDULED_JOB(ID, NAME, TARGET, CRON_EXPRESSION, SCRIPT_TYPE, SCRIPT_DATA, CRAWLER, JOB_LOGGING, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, DELETED_BY, DELETED_TIME, VERSION_NO) VALUES
 (1, 'Crawler', 'all', '0 0 0 * * ?', 'groovy', 'return container.getComponent("crawlJob").execute(executor);', 'T', 'T', 'T', 0, 'system', TIMESTAMP '2013-01-01 00:00:00.000', 'system', TIMESTAMP '2013-01-01 00:00:00.000', NULL, NULL, 0),
 (2, 'Minutely Tasks', 'all', '0 * * * * ?', 'groovy', 'return container.getComponent("minutelyJob").execute();', 'F', 'F', 'T', 10, 'system', TIMESTAMP '2013-01-01 00:00:00.000', 'system', TIMESTAMP '2013-01-01 00:00:00.000', NULL, NULL, 0),
-(3, 'Hourly Tasks', 'all', '0 0 * * * ?', 'groovy', 'return container.getComponent("houryJob").execute();', 'F', 'F', 'T', 20, 'system', TIMESTAMP '2013-01-01 00:00:00.000', 'system', TIMESTAMP '2013-01-01 00:00:00.000', NULL, NULL, 0),
+(3, 'Hourly Tasks', 'all', '0 0 * * * ?', 'groovy', 'return container.getComponent("hourlyJob").execute();', 'F', 'F', 'T', 20, 'system', TIMESTAMP '2013-01-01 00:00:00.000', 'system', TIMESTAMP '2013-01-01 00:00:00.000', NULL, NULL, 0),
 (4, 'Daily Tasks', 'all', '0 0 0 * * ?', 'groovy', 'return container.getComponent("dailyJob").execute();', 'F', 'F', 'T', 30, 'system', TIMESTAMP '2013-01-01 00:00:00.000', 'system', TIMESTAMP '2013-01-01 00:00:00.000', NULL, NULL, 0);
 
