@@ -58,6 +58,8 @@ import org.seasar.robot.client.fs.ChildUrlsException;
 import org.seasar.robot.entity.AccessResultData;
 import org.seasar.robot.entity.ResponseData;
 import org.seasar.robot.entity.ResultData;
+import org.seasar.robot.entity.UrlQueue;
+import org.seasar.robot.util.CrawlingParameterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -218,6 +220,13 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 .getComponent("crawlingConfigHelper");
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
+        String urlEncoding;
+        final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
+        if (urlQueue != null && urlQueue.getEncoding() != null) {
+            urlEncoding = urlQueue.getEncoding();
+        } else {
+            urlEncoding = responseData.getCharSet();
+        }
 
         // cid
         final String configId = crawlingConfig.getConfigId();
@@ -247,8 +256,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // host
         putResultDataBody(dataMap, "host", getHost(url));
         // site
-        putResultDataBody(dataMap, "site",
-                getSite(url, responseData.getCharSet()));
+        putResultDataBody(dataMap, "site", getSite(url, urlEncoding));
         // url
         putResultDataBody(dataMap, "url", url);
         // created

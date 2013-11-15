@@ -185,6 +185,13 @@ public abstract class AbstractFessFileTransformer extends
                 .getComponent("crawlingConfigHelper");
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
+        String urlEncoding;
+        final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
+        if (urlQueue != null && urlQueue.getEncoding() != null) {
+            urlEncoding = urlQueue.getEncoding();
+        } else {
+            urlEncoding = responseData.getCharSet();
+        }
 
         // cid
         final String configId = crawlingConfig.getConfigId();
@@ -246,8 +253,7 @@ public abstract class AbstractFessFileTransformer extends
         // host
         putResultDataBody(dataMap, "host", getHost(url));
         // site
-        putResultDataBody(dataMap, "site",
-                getSite(url, responseData.getCharSet()));
+        putResultDataBody(dataMap, "site", getSite(url, urlEncoding));
         // url
         putResultDataBody(dataMap, "url", url);
         // created
