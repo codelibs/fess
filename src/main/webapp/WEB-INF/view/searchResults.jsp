@@ -81,10 +81,10 @@
 			<div class="well span3">
 				<ul class="nav nav-list">
 					<c:forEach var="fieldData" items="${facetResponse.fieldList}">
-						<c:if test="${fieldData.name == 'label'}">
+						<c:if test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
 					<li class="nav-header"><bean:message key="label.facet_label_title" /></li>
 							<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
-								<c:if test="${countEntry.value != 0}">
+								<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 					<li><s:link
 							href="search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">
 							${f:h(fe:label(countEntry.key))} (${f:h(countEntry.value)})</s:link></li>

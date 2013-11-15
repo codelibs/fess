@@ -49,6 +49,16 @@ public class FessFunctions {
         // nothing
     }
 
+    public static Boolean labelExists(final String value) {
+        @SuppressWarnings("unchecked")
+        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil
+                .getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        if (labelValueMap != null) {
+            return labelValueMap.get(value) != null;
+        }
+        return false;
+    }
+
     public static String label(final String value) {
         @SuppressWarnings("unchecked")
         final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil

@@ -15,6 +15,18 @@
     <description>
       Returns a label name.
     </description>
+    <name>labelexists</name>
+    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.Boolean labelExists(java.lang.String)</function-signature>
+    <example>
+      ${fe:labelexists("value")}
+    </example>
+  </function>
+
+  <function>
+    <description>
+      Returns a label name.
+    </description>
     <name>label</name>
     <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String label(java.lang.String)</function-signature>
@@ -22,7 +34,7 @@
       ${fe:label("value")}
     </example>
   </function>
-  
+
   <function>
     <description>
       Returns a list of hot search words.
@@ -34,7 +46,7 @@
       ${fe:hsw("week", 5)}
     </example>
   </function>
-  
+
   <function>
     <description>
       Returns a size of hot search words.
