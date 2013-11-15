@@ -17,6 +17,8 @@
 package jp.sf.fess.api.xml;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -118,14 +120,14 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                     .getObject("moreLikeThisResponse");
 
             buf.append("<query>");
-            buf.append(StringEscapeUtils.escapeXml(query));
+            buf.append(escapeXml(query));
             buf.append("</query>");
             buf.append("<exec-time>");
             buf.append(execTime);
             buf.append("</exec-time>");
             if (StringUtil.isNotBlank(queryId)) {
                 buf.append("<query-id>");
-                buf.append(StringEscapeUtils.escapeXml(queryId));
+                buf.append(escapeXml(queryId));
                 buf.append("</query-id>");
             }
             buf.append("<page-size>");
@@ -148,13 +150,11 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                     final String name = entry.getKey();
                     if (StringUtil.isNotBlank(name) && entry.getValue() != null
                             && getQueryHelper().isApiResponseField(name)) {
-                        final String tagName = StringUtil.decamelize(name)
-                                .replaceAll("_", "-").toLowerCase();
+                        final String tagName = convertTagName(name);
                         buf.append('<');
                         buf.append(tagName);
                         buf.append('>');
-                        buf.append(StringEscapeUtils.escapeXml(entry.getValue()
-                                .toString()));
+                        buf.append(escapeXml(entry.getValue()));
                         buf.append("</");
                         buf.append(tagName);
                         buf.append('>');
@@ -169,15 +169,14 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                 if (facetResponse.getFieldList() != null) {
                     for (final Field field : facetResponse.getFieldList()) {
                         buf.append("<field name=\"");
-                        buf.append(StringEscapeUtils.escapeXml(field.getName()));
+                        buf.append(escapeXml(field.getName()));
                         buf.append("\">");
                         for (final Map.Entry<String, Long> entry : field
                                 .getValueCountMap().entrySet()) {
                             buf.append("<value count=\"");
-                            buf.append(entry.getValue());
+                            buf.append(escapeXml(entry.getValue()));
                             buf.append("\">");
-                            buf.append(StringEscapeUtils.escapeXml(entry
-                                    .getKey()));
+                            buf.append(escapeXml(entry.getKey()));
                             buf.append("</value>");
                         }
                         buf.append("</field>");
@@ -189,9 +188,9 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                     for (final Map.Entry<String, Long> entry : facetResponse
                             .getQueryCountMap().entrySet()) {
                         buf.append("<value count=\"");
-                        buf.append(entry.getValue());
+                        buf.append(escapeXml(entry.getValue()));
                         buf.append("\">");
-                        buf.append(StringEscapeUtils.escapeXml(entry.getKey()));
+                        buf.append(escapeXml(entry.getKey()));
                         buf.append("</value>");
                     }
                     buf.append("</query>");
@@ -203,7 +202,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                 for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse
                         .entrySet()) {
                     buf.append("<result id=\"");
-                    buf.append(StringEscapeUtils.escapeXml(mltEntry.getKey()));
+                    buf.append(escapeXml(mltEntry.getKey()));
                     buf.append("\">");
                     for (final Map<String, Object> document : mltEntry
                             .getValue()) {
@@ -212,14 +211,13 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                                 .entrySet()) {
                             if (StringUtil.isNotBlank(entry.getKey())
                                     && entry.getValue() != null) {
-                                final String tagName = StringUtil
-                                        .decamelize(entry.getKey())
-                                        .replaceAll("_", "-").toLowerCase();
+                                final String tagName = convertTagName(entry
+                                        .getKey());
                                 buf.append('<');
                                 buf.append(tagName);
                                 buf.append('>');
-                                buf.append(StringEscapeUtils.escapeXml(entry
-                                        .getValue().toString()));
+                                buf.append(escapeXml(entry.getValue()
+                                        .toString()));
                                 buf.append("</");
                                 buf.append(tagName);
                                 buf.append('>');
@@ -245,6 +243,12 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         writeXmlResponse(status, buf.toString(), errMsg);
     }
 
+    private String convertTagName(final String name) {
+        final String tagName = StringUtil.decamelize(name).replaceAll("_", "-")
+                .toLowerCase();
+        return tagName;
+    }
+
     protected void processLabelRequest(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
@@ -260,12 +264,10 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             for (final Map<String, String> labelMap : labelTypeItems) {
                 buf.append("<label>");
                 buf.append("<name>");
-                buf.append(StringEscapeUtils.escapeXml(labelMap
-                        .get(Constants.ITEM_LABEL)));
+                buf.append(escapeXml(labelMap.get(Constants.ITEM_LABEL)));
                 buf.append("</name>");
                 buf.append("<value>");
-                buf.append(StringEscapeUtils.escapeXml(labelMap
-                        .get(Constants.ITEM_VALUE)));
+                buf.append(escapeXml(labelMap.get(Constants.ITEM_VALUE)));
                 buf.append("</value>");
                 buf.append("</label>");
             }
@@ -320,30 +322,28 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         if (suggester != null) {
                             buf.append("<suggest>");
                             buf.append("<token>");
-                            buf.append(StringEscapeUtils.escapeXml(entry
-                                    .getKey()));
+                            buf.append(escapeXml(entry.getKey()));
                             buf.append("</token>");
                             buf.append("<fn>");
-                            buf.append(StringEscapeUtils.escapeXml(fn));
+                            buf.append(escapeXml(fn));
                             buf.append("</fn>");
                             buf.append("<start-offset>");
-                            buf.append(StringEscapeUtils.escapeXml(Integer
-                                    .toString(srList.getStartOffset())));
+                            buf.append(escapeXml(Integer.toString(srList
+                                    .getStartOffset())));
                             buf.append("</start-offset>");
                             buf.append("<end-offset>");
-                            buf.append(StringEscapeUtils.escapeXml(Integer
-                                    .toString(srList.getEndOffset())));
+                            buf.append(escapeXml(Integer.toString(srList
+                                    .getEndOffset())));
                             buf.append("</end-offset>");
                             buf.append("<num-found>");
-                            buf.append(StringEscapeUtils.escapeXml(Integer
-                                    .toString(srList.getNumFound())));
+                            buf.append(escapeXml(Integer.toString(srList
+                                    .getNumFound())));
                             buf.append("</num-found>");
                             buf.append("<result>");
                             for (final String value : srList) {
                                 buf.append("<value>");
-                                buf.append(StringEscapeUtils
-                                        .escapeXml(suggester
-                                                .convertResultString(value)));
+                                buf.append(escapeXml(suggester
+                                        .convertResultString(value)));
                                 buf.append("</value>");
                             }
                             buf.append("</result>");
@@ -390,13 +390,12 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         .entrySet()) {
 
                     buf.append("<field name=\"")
-                            .append(StringEscapeUtils.escapeXml(fEntry.getKey()))
-                            .append("\">");
+                            .append(escapeXml(fEntry.getKey())).append("\">");
                     for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
                             .getValue().entrySet()) {
                         buf.append("<analysis name=\"")
-                                .append(StringEscapeUtils.escapeXml(aEntry
-                                        .getKey())).append("\">");
+                                .append(escapeXml(aEntry.getKey()))
+                                .append("\">");
                         for (final Map<String, Object> dataMap : aEntry
                                 .getValue()) {
                             buf.append("<token>");
@@ -406,8 +405,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                                 final Object value = dEntry.getValue();
                                 if (StringUtil.isNotBlank(key) && value != null) {
                                     buf.append("<value name=\"")
-                                            .append(StringEscapeUtils
-                                                    .escapeXml(key))
+                                            .append(escapeXml(key))
                                             .append("\">")
                                             .append(escapeXml(value))
                                             .append("</value>");
@@ -453,7 +451,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append(body);
         } else {
             buf.append("<message>");
-            buf.append(StringEscapeUtils.escapeXml(errMsg));
+            buf.append(escapeXml(errMsg));
             buf.append("</message>");
         }
         buf.append("</response>");
@@ -478,6 +476,10 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         .append(escapeXml(entry.getValue())).append("</value>");
             }
             buf.append("</data>");
+        } else if (obj instanceof Date) {
+            final SimpleDateFormat sdf = new SimpleDateFormat(
+                    Constants.DATE_FORMAT_ISO_8601_EXTEND);
+            buf.append(StringEscapeUtils.escapeXml(sdf.format(obj)));
         } else if (obj != null) {
             buf.append(StringEscapeUtils.escapeXml(obj.toString()));
         }

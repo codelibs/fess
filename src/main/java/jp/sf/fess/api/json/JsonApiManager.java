@@ -18,6 +18,8 @@ package jp.sf.fess.api.json;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,7 @@ import jp.sf.fess.util.FacetResponse.Field;
 import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.WebApiUtil;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
@@ -127,15 +130,14 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil
                     .getObject("moreLikeThisResponse");
 
-            buf.append("\"query\":\"");
-            buf.append(escapeJsonString(query));
-            buf.append("\",");
-            buf.append("\"execTime\":");
+            buf.append("\"query\":");
+            buf.append(escapeJson(query));
+            buf.append(",\"execTime\":");
             buf.append(execTime);
             buf.append(',');
             if (StringUtil.isNotBlank(queryId)) {
                 buf.append("\"queryId\":");
-                buf.append(escapeJsonString(queryId));
+                buf.append(escapeJson(queryId));
                 buf.append(',');
             }
             buf.append("\"pageSize\":");
@@ -172,12 +174,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                             } else {
                                 first2 = false;
                             }
-                            buf.append('\"');
-                            buf.append(escapeJsonString(name));
-                            buf.append("\":\"");
-                            buf.append(escapeJsonString(entry.getValue()
-                                    .toString()));
-                            buf.append('\"');
+                            buf.append(escapeJson(name));
+                            buf.append(':');
+                            buf.append(escapeJson(entry.getValue()));
                         }
                     }
                     buf.append('}');
@@ -196,9 +195,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                         } else {
                             first1 = false;
                         }
-                        buf.append("{\"name\":\"");
-                        buf.append(escapeJsonString(field.getName()));
-                        buf.append("\",\"result\":[");
+                        buf.append("{\"name\":");
+                        buf.append(escapeJson(field.getName()));
+                        buf.append(",\"result\":[");
                         boolean first2 = true;
                         for (final Map.Entry<String, Long> entry : field
                                 .getValueCountMap().entrySet()) {
@@ -207,9 +206,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                             } else {
                                 first2 = false;
                             }
-                            buf.append("{\"value\":\"");
-                            buf.append(escapeJsonString(entry.getKey()));
-                            buf.append("\",\"count\":");
+                            buf.append("{\"value\":");
+                            buf.append(escapeJson(entry.getKey()));
+                            buf.append(",\"count\":");
                             buf.append(entry.getValue());
                             buf.append('}');
                         }
@@ -230,9 +229,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                         } else {
                             first1 = false;
                         }
-                        buf.append("{\"value\":\"");
-                        buf.append(escapeJsonString(entry.getKey()));
-                        buf.append("\",\"count\":");
+                        buf.append("{\"value\":");
+                        buf.append(escapeJson(entry.getKey()));
+                        buf.append(",\"count\":");
                         buf.append(entry.getValue());
                         buf.append('}');
                     }
@@ -250,9 +249,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     } else {
                         first = false;
                     }
-                    buf.append("{\"id\":\"");
-                    buf.append(escapeJsonString(mltEntry.getKey()));
-                    buf.append("\",\"result\":[");
+                    buf.append("{\"id\":");
+                    buf.append(escapeJson(mltEntry.getKey()));
+                    buf.append(",\"result\":[");
                     boolean first1 = true;
                     for (final Map<String, Object> document : mltEntry
                             .getValue()) {
@@ -272,12 +271,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                                 } else {
                                     first2 = false;
                                 }
-                                buf.append('\"');
-                                buf.append(escapeJsonString(entry.getKey()));
-                                buf.append("\":\"");
-                                buf.append(escapeJsonString(entry.getValue()
-                                        .toString()));
-                                buf.append('\"');
+                                buf.append(escapeJson(entry.getKey()));
+                                buf.append(':');
+                                buf.append(escapeJson(entry.getValue()));
                             }
                         }
                         buf.append('}');
@@ -321,13 +317,11 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     } else {
                         first1 = false;
                     }
-                    buf.append("{\"label\":\"");
-                    buf.append(escapeJsonString(labelMap
-                            .get(Constants.ITEM_LABEL)));
-                    buf.append("\", \"value\":\"");
-                    buf.append(escapeJsonString(labelMap
-                            .get(Constants.ITEM_VALUE)));
-                    buf.append("\"}");
+                    buf.append("{\"label\":");
+                    buf.append(escapeJson(labelMap.get(Constants.ITEM_LABEL)));
+                    buf.append(", \"value\":");
+                    buf.append(escapeJson(labelMap.get(Constants.ITEM_VALUE)));
+                    buf.append('}');
                 }
                 buf.append(']');
             }
@@ -387,11 +381,11 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                             final SuggestResponseList srList = (SuggestResponseList) entry
                                     .getValue();
 
-                            buf.append("{\"token\":\"");
-                            buf.append(escapeJsonString(entry.getKey()));
-                            buf.append("\", \"fn\":\"");
-                            buf.append(escapeJsonString(fn));
-                            buf.append("\", \"startOffset\":");
+                            buf.append("{\"token\":");
+                            buf.append(escapeJson(entry.getKey()));
+                            buf.append(", \"fn\":");
+                            buf.append(escapeJson(fn));
+                            buf.append(", \"startOffset\":");
                             buf.append(Integer.toString(srList.getStartOffset()));
                             buf.append(", \"endOffset\":");
                             buf.append(Integer.toString(srList.getEndOffset()));
@@ -406,10 +400,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                                 } else {
                                     first2 = false;
                                 }
-                                buf.append('"');
-                                buf.append(escapeJsonString(suggester
+                                buf.append(escapeJson(suggester
                                         .convertResultString(value)));
-                                buf.append('"');
                             }
                             buf.append("]}");
                         }
@@ -461,9 +453,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     } else {
                         buf.append(',');
                     }
-                    buf.append("{\"field\":\"")
-                            .append(escapeJsonString(fEntry.getKey()))
-                            .append("\",\"analysis\":[");
+                    buf.append("{\"field\":")
+                            .append(escapeJson(fEntry.getKey()))
+                            .append(",\"analysis\":[");
                     boolean first2 = true;
                     for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
                             .getValue().entrySet()) {
@@ -472,9 +464,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                         } else {
                             buf.append(',');
                         }
-                        buf.append("{\"name\":\"")
-                                .append(escapeJsonString(aEntry.getKey()))
-                                .append("\",\"data\":[");
+                        buf.append("{\"name\":")
+                                .append(escapeJson(aEntry.getKey()))
+                                .append(",\"data\":[");
                         boolean first3 = true;
                         for (final Map<String, Object> dataMap : aEntry
                                 .getValue()) {
@@ -495,9 +487,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                                     } else {
                                         buf.append(',');
                                     }
-                                    buf.append('\"')
-                                            .append(escapeJsonString(key))
-                                            .append("\":")
+                                    buf.append(escapeJson(key)).append(':')
                                             .append(escapeJson(value));
                                 }
                             }
@@ -547,9 +537,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 } else {
                     first1 = false;
                 }
-                buf.append("\"");
-                buf.append(escapeJsonString(word));
-                buf.append("\"");
+                buf.append(escapeJson(word));
             }
             buf.append(']');
         } catch (final Exception e) {
@@ -615,9 +603,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     if (i > 0) {
                         buf.append(',');
                     }
-                    buf.append('"');
-                    buf.append(docIdList.get(i));
-                    buf.append('"');
+                    buf.append(escapeJson(docIdList.get(i)));
                 }
                 buf.append(']');
             }
@@ -659,9 +645,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         if (status == 0) {
             buf.append(body);
         } else {
-            buf.append("\"message\":\"");
-            buf.append(escapeJsonString(errMsg));
-            buf.append('\"');
+            buf.append("\"message\":");
+            buf.append(escapeJson(errMsg));
         }
         buf.append('}');
         buf.append('}');
@@ -678,6 +663,10 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected String escapeJson(final Object obj) {
+        if (obj == null) {
+            return "null";
+        }
+
         final StringBuilder buf = new StringBuilder(255);
         if (obj instanceof List<?>) {
             buf.append('[');
@@ -708,8 +697,12 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 || obj instanceof Float || obj instanceof Double
                 || obj instanceof Short) {
             buf.append(obj);
-        } else if (obj == null) {
-            buf.append("\"\"");
+        } else if (obj instanceof Date) {
+            final SimpleDateFormat sdf = new SimpleDateFormat(
+                    Constants.DATE_FORMAT_ISO_8601_EXTEND);
+            buf.append('\"')
+                    .append(StringEscapeUtils.escapeXml(sdf.format(obj)))
+                    .append('\"');
         } else {
             buf.append('\"').append(escapeJsonString(obj.toString()))
                     .append('\"');
@@ -718,9 +711,6 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected String escapeJsonString(final String str) {
-        if (str == null) {
-            return "";
-        }
 
         final StringWriter out = new StringWriter(str.length() * 2);
         int sz;
@@ -730,11 +720,14 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
             // handle unicode
             if (ch > 0xfff) {
-                out.write("\\u" + hex(ch));
+                out.write("\\u");
+                out.write(hex(ch));
             } else if (ch > 0xff) {
-                out.write("\\u0" + hex(ch));
+                out.write("\\u0");
+                out.write(hex(ch));
             } else if (ch > 0x7f) {
-                out.write("\\u00" + hex(ch));
+                out.write("\\u00");
+                out.write(hex(ch));
             } else if (ch < 32) {
                 switch (ch) {
                 case '\b':
@@ -759,9 +752,11 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     break;
                 default:
                     if (ch > 0xf) {
-                        out.write("\\u00" + hex(ch));
+                        out.write("\\u00");
+                        out.write(hex(ch));
                     } else {
-                        out.write("\\u000" + hex(ch));
+                        out.write("\\u000");
+                        out.write(hex(ch));
                     }
                     break;
                 }
