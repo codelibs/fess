@@ -69,13 +69,13 @@
 						</tr>
 						<tr>
 							<th style="width: 150px;"><bean:message
-									key="labels.included_paths" /></th>
+									key="labels.labeltype_included_paths" /></th>
 							<td style="width: 345px; word-break: break-all;">${f:br(f:h(includedPaths))}<html:hidden
 									property="includedPaths" /></td>
 						</tr>
 						<tr>
 							<th style="width: 150px;"><bean:message
-									key="labels.excluded_paths" /></th>
+									key="labels.labeltype_excluded_paths" /></th>
 							<td style="width: 345px; word-break: break-all;">${f:br(f:h(excludedPaths))}<html:hidden
 									property="excludedPaths" /></td>
 						</tr>

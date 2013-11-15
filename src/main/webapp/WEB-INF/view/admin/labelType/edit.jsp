@@ -70,13 +70,13 @@
 						</tr>
 						<tr>
 							<th style="width: 150px;"><bean:message
-									key="labels.included_paths" /></th>
+									key="labels.labeltype_included_paths" /></th>
 							<td><html:textarea property="includedPaths"
 									style="width:345px;" rows="5" /></td>
 						</tr>
 						<tr>
 							<th style="width: 150px;"><bean:message
-									key="labels.excluded_paths" /></th>
+									key="labels.labeltype_excluded_paths" /></th>
 							<td><html:textarea property="excludedPaths"
 									style="width:345px;" rows="5" /></td>
 						</tr>
