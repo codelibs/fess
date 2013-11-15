@@ -55,12 +55,15 @@
 			</div>
 		<table class="bordered-table zebra-striped" style="width:500px;">
 			<tbody>
-
-					                <tr>
+                <c:if test="${id != null}"><tr>
+                    <th style="width:150px;"><bean:message key="labels.id" /></th>
+                    <td style="width:345px;word-break:break-all;">${f:h(id)}</td>
+                </tr></c:if>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.name"/></th>
                     <td style="width:345px;word-break:break-all;">${f:h(name)}<html:hidden property="name"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.handler_name"/></th>
                 	<td>
 <c:forEach var="hn" varStatus="s" items="${handlerNameItems}">
@@ -71,15 +74,15 @@ ${f:h(hn.label)}<br/>
 <html:hidden property="handlerName"/>
                 	</td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.handler_parameter"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(handlerParameter))}<html:hidden property="handlerParameter"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.handler_script"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(handlerScript))}<html:hidden property="handlerScript"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.boost"/></th>
                     <td>${f:h(boost)}<html:hidden property="boost"/></td>
                 </tr>

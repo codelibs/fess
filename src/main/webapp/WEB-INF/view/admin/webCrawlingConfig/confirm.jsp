@@ -56,56 +56,59 @@
 			</div>
 		<table class="bordered-table zebra-striped" style="width:500px;">
 			<tbody>
-
-					                <tr>
+                <c:if test="${id != null}"><tr>
+                    <th style="width:150px;"><bean:message key="labels.id" /></th>
+                    <td style="width:345px;word-break:break-all;">${f:h(id)}</td>
+                </tr></c:if>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.name" /></th>
                     <td style="width:345px;word-break:break-all;">${f:h(name)}<html:hidden property="name"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.urls" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(urls))}<html:hidden property="urls"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.included_urls" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(includedUrls))}<html:hidden property="includedUrls"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.excluded_urls" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(excludedUrls))}<html:hidden property="excludedUrls"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.included_doc_urls" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(includedDocUrls))}<html:hidden property="includedDocUrls"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.excluded_doc_urls" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(excludedDocUrls))}<html:hidden property="excludedDocUrls"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.config_parameter" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(configParameter))}<html:hidden property="configParameter"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.depth" /></th>
                     <td>${f:h(depth)}<html:hidden property="depth"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.max_access_count" /></th>
                     <td>${f:h(maxAccessCount)}<html:hidden property="maxAccessCount"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.user_agent" /></th>
                     <td style="width:345px;word-break:break-all;">${f:h(userAgent)}<html:hidden property="userAgent"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.number_of_thread" /></th>
                     <td>${f:h(numOfThread)}<html:hidden property="numOfThread"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.interval_time" /></th>
                     <td>${f:h(intervalTime)}<html:hidden property="intervalTime"/><bean:message key="labels.millisec"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.boost" /></th>
                     <td>${f:h(boost)}<html:hidden property="boost"/></td>
                 </tr>

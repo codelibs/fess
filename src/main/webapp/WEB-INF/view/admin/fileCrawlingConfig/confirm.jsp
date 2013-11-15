@@ -55,52 +55,55 @@
 			</div>
 		<table class="bordered-table zebra-striped" style="width:500px;">
 			<tbody>
-
-					                <tr>
+                <c:if test="${id != null}"><tr>
+                    <th style="width:150px;"><bean:message key="labels.id" /></th>
+                    <td style="width:345px;word-break:break-all;">${f:h(id)}</td>
+                </tr></c:if>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.name"/></th>
                     <td style="width:345px;word-break:break-all;">${f:h(name)}<html:hidden property="name"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.paths"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(paths))}<html:hidden property="paths"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.included_paths"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(includedPaths))}<html:hidden property="includedPaths"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.excluded_paths"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(excludedPaths))}<html:hidden property="excludedPaths"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.included_doc_paths"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(includedDocPaths))}<html:hidden property="includedDocPaths"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.excluded_doc_paths"/></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(excludedDocPaths))}<html:hidden property="excludedDocPaths"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th style="width:150px;"><bean:message key="labels.config_parameter" /></th>
                     <td style="width:345px;word-break:break-all;">${f:br(f:h(configParameter))}<html:hidden property="configParameter"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.depth"/></th>
                     <td>${f:h(depth)}<html:hidden property="depth"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.max_access_count"/></th>
                     <td>${f:h(maxAccessCount)}<html:hidden property="maxAccessCount"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.number_of_thread"/></th>
                     <td>${f:h(numOfThread)}<html:hidden property="numOfThread"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.interval_time"/></th>
                     <td>${f:h(intervalTime)}<html:hidden property="intervalTime"/><bean:message key="labels.millisec"/></td>
                 </tr>
-					                <tr>
+                <tr>
                     <th><bean:message key="labels.boost"/></th>
                     <td>${f:h(boost)}<html:hidden property="boost"/></td>
                 </tr>
