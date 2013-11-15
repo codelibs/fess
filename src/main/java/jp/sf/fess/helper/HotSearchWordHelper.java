@@ -34,6 +34,7 @@ import jp.sf.fess.db.exbhv.pmbean.HotSearchWordPmb;
 
 import org.seasar.dbflute.jdbc.CursorHandler;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.seasar.framework.util.StringUtil;
 
 public class HotSearchWordHelper {
 
@@ -77,6 +78,9 @@ public class HotSearchWordHelper {
                             throws SQLException {
                         while (rs.next()) {
                             final String word = rs.getString("name");
+                            if (StringUtil.isBlank(word)) {
+                                continue;
+                            }
                             if (excludedWordPattern != null) {
                                 if (!excludedWordPattern.matcher(word)
                                         .matches()) {

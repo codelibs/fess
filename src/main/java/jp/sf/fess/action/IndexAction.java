@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
@@ -50,7 +49,6 @@ import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.SuggestResponse;
-import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.BrowserTypeHelper;
 import jp.sf.fess.helper.CrawlingConfigHelper;
@@ -68,9 +66,9 @@ import jp.sf.fess.service.SearchService;
 import jp.sf.fess.suggest.Suggester;
 import jp.sf.fess.suggest.SuggesterManager;
 import jp.sf.fess.util.FacetResponse;
-import jp.sf.fess.util.FacetResponse.Field;
 import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.QueryResponseList;
+import jp.sf.fess.util.WebApiUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -96,20 +94,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexAction {
+    private static final Logger logger = LoggerFactory
+            .getLogger(IndexAction.class);
+
     private static final String REDIRECT_TO_INDEX = "index?redirect=true";
 
     private static final String LABEL_FIELD = "label";
-
-    private static final Logger logger = LoggerFactory
-            .getLogger(IndexAction.class);
 
     protected static final long DEFAULT_START_COUNT = 0;
 
     protected static final int DEFAULT_PAGE_SIZE = 20;
 
-    protected static final int DEFAULT_SUGGEST_PAGE_SIZE = 5;
-
     protected static final int MAX_PAGE_SIZE = 100;
+
+    protected static final int DEFAULT_SUGGEST_PAGE_SIZE = 5;
 
     protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern
             .compile("^([a-zA-Z0-9_]+):.*");
@@ -147,6 +145,9 @@ public class IndexAction {
     protected OpenSearchHelper openSearchHelper;
 
     @Resource
+    protected SuggesterManager suggesterManager;
+
+    @Resource
     protected DynamicProperties crawlerProperties;
 
     @Resource
@@ -154,9 +155,6 @@ public class IndexAction {
 
     @Resource
     protected HttpServletResponse response;
-
-    @Resource
-    protected SuggesterManager suggesterManager;
 
     public List<Map<String, Object>> documentItems;
 
@@ -270,7 +268,7 @@ public class IndexAction {
             return REDIRECT_TO_INDEX;
         }
 
-        updateSearchParams(false);
+        updateSearchParams();
         doSearchInternal();
         buildViewParams();
 
@@ -370,8 +368,331 @@ public class IndexAction {
         return null;
     }
 
-    protected boolean isFileSystemPath(final String url) {
-        return url.startsWith("file:") || url.startsWith("smb:");
+    @Execute(validator = false, input = "index")
+    public String search() {
+        if (viewHelper.isUseSession() && StringUtil.isNotBlank(indexForm.num)) {
+            normalizePageNum();
+            final HttpSession session = request.getSession();
+            if (session != null) {
+                session.setAttribute(Constants.RESULTS_PER_PAGE, indexForm.num);
+            }
+        }
+
+        return doSearch();
+    }
+
+    @Execute(validator = false, input = "index")
+    public String prev() {
+        return doMove(-1);
+    }
+
+    @Execute(validator = false, input = "index")
+    public String next() {
+        return doMove(1);
+    }
+
+    @Execute(validator = false, input = "index")
+    public String move() {
+        return doMove(0);
+    }
+
+    @Execute(validator = false)
+    public String screenshot() {
+        OutputStream out = null;
+        BufferedInputStream in = null;
+        try {
+            final Map<String, Object> doc = searchService.getDocument("docId:"
+                    + indexForm.docId);
+            final String url = doc == null ? null : (String) doc.get("url");
+            if (StringUtil.isBlank(indexForm.queryId)
+                    || StringUtil.isBlank(url) || screenShotManager == null) {
+                // 404
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
+
+            final File screenShotFile = screenShotManager.getScreenShotFile(
+                    indexForm.queryId, url);
+            if (screenShotFile == null) {
+                // 404
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
+
+            response.setContentType(getImageMimeType(screenShotFile));
+
+            out = response.getOutputStream();
+            in = new BufferedInputStream(new FileInputStream(screenShotFile));
+            InputStreamUtil.copy(in, out);
+            OutputStreamUtil.flush(out);
+        } catch (final Exception e) {
+            logger.error("Failed to response: " + indexForm.docId, e);
+        } finally {
+            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(out);
+        }
+
+        return null;
+    }
+
+    @Execute(validator = false)
+    public String searchApi() {
+        try {
+            WebApiUtil.setObject("searchQuery", doSearchInternal());
+            WebApiUtil.setObject("execTime", execTime);
+            WebApiUtil.setObject("pageSize", pageSize);
+            WebApiUtil.setObject("currentPageNumber", currentPageNumber);
+            WebApiUtil.setObject("allRecordCount", allRecordCount);
+            WebApiUtil.setObject("allPageCount", allPageCount);
+            WebApiUtil.setObject("documentItems", documentItems);
+            WebApiUtil.setObject("facetResponse", facetResponse);
+            WebApiUtil.setObject("moreLikeThisResponse", moreLikeThisResponse);
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+    }
+
+    @Execute(validator = false)
+    public String suggestApi() {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(
+                Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
+            WebApiUtil.setError(9, "Unsupported operation.");
+            return null;
+        }
+
+        if (indexForm.fn == null || indexForm.fn.length == 0) {
+            WebApiUtil.setError(2, "The field name is empty.");
+            return null;
+        }
+
+        if (StringUtil.isBlank(indexForm.query)) {
+            WebApiUtil.setError(3, "Your query is empty.");
+            return null;
+        }
+
+        if (StringUtil.isBlank(indexForm.num)) {
+            indexForm.num = String.valueOf(DEFAULT_SUGGEST_PAGE_SIZE);
+        }
+
+        int num = Integer.parseInt(indexForm.num);
+        if (num > getMaxPageSize()) {
+            num = getMaxPageSize();
+        }
+
+        final String[] fieldNames = indexForm.fn;
+
+        final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
+        WebApiUtil.setObject("suggestResultList", suggestResultList);
+        final List<String> suggestFieldName = new ArrayList<String>();
+        WebApiUtil.setObject("suggestFieldName", suggestFieldName);
+        int suggestRecordCount = 0;
+        try {
+            for (final String fn : fieldNames) {
+                final Suggester suggester = suggesterManager.getSuggester(fn);
+                if (suggester != null) {
+                    final String suggestQuery = suggester
+                            .convertQuery(indexForm.query);
+                    final SuggestResponse suggestResponse = searchService
+                            .getSuggestResponse(fn, suggestQuery, num);
+
+                    if (!suggestResponse.isEmpty()) {
+                        suggestRecordCount += suggestResponse.size();
+
+                        suggestResultList.add(suggestResponse);
+                        suggestFieldName.add(fn);
+                    }
+                }
+            }
+            WebApiUtil.setObject("suggestRecordCount", suggestRecordCount);
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+    }
+
+    @Execute(validator = false)
+    public String analysisApi() {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(
+                Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE))) {
+            WebApiUtil.setError(9, "Unsupported operation.");
+            return null;
+        }
+
+        if (indexForm.fn == null || indexForm.fn.length == 0) {
+            WebApiUtil.setError(2, "The field name is empty.");
+            return null;
+        }
+
+        if (StringUtil.isBlank(indexForm.query)) {
+            WebApiUtil.setError(3, "Your query is empty.");
+            return null;
+        }
+
+        try {
+            final String[] fieldNames = indexForm.fn;
+            final FieldAnalysisResponse fieldAnalysis = searchService
+                    .getFieldAnalysisResponse(fieldNames, indexForm.query);
+            WebApiUtil.setObject("fieldAnalysis", fieldAnalysis);
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+    }
+
+    @Execute(validator = false)
+    public String hotSearchWordApi() {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(
+                Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
+            WebApiUtil.setError(9, "Unsupported operation.");
+            return null;
+        }
+
+        Range range;
+        if (indexForm.range == null) {
+            range = Range.ENTIRE;
+        } else if ("day".equals(indexForm.range) || "1".equals(indexForm.range)) {
+            range = Range.ONE_DAY;
+        } else if ("week".equals(indexForm.range)
+                || "7".equals(indexForm.range)) {
+            range = Range.ONE_DAY;
+        } else if ("month".equals(indexForm.range)
+                || "30".equals(indexForm.range)) {
+            range = Range.ONE_DAY;
+        } else if ("year".equals(indexForm.range)
+                || "365".equals(indexForm.range)) {
+            range = Range.ONE_DAY;
+        } else {
+            range = Range.ENTIRE;
+        }
+
+        try {
+            final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
+                    .getComponent(HotSearchWordHelper.class);
+            final List<String> hotSearchWordList = hotSearchWordHelper
+                    .getHotSearchWordList(range);
+            WebApiUtil.setObject("hotSearchWordList", hotSearchWordList);
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+
+    }
+
+    @Execute(validator = false)
+    public String favoriteApi() {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(
+                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+            WebApiUtil.setError(9, "Unsupported operation.");
+            return null;
+        }
+
+        try {
+            final Map<String, Object> doc = indexForm.docId == null ? null
+                    : searchService.getDocument("docId:" + indexForm.docId);
+            final String userCode = userInfoHelper.getUserCode();
+            final String favoriteUrl = doc == null ? null : (String) doc
+                    .get("url");
+
+            if (StringUtil.isBlank(userCode)) {
+                WebApiUtil.setError(2, "No user session.");
+                return null;
+            } else if (StringUtil.isBlank(favoriteUrl)) {
+                WebApiUtil.setError(2, "URL is null.");
+                return null;
+            }
+
+            final String[] docIds = userInfoHelper.getResultDocIds(URLDecoder
+                    .decode(indexForm.queryId, Constants.UTF_8));
+            if (docIds == null) {
+                WebApiUtil.setError(6, "No searched urls.");
+                return null;
+            }
+
+            boolean found = false;
+            for (final String docId : docIds) {
+                if (indexForm.docId.equals(docId)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                WebApiUtil.setError(5, "Not found: " + favoriteUrl);
+                return null;
+            }
+
+            if (!favoriteLogService.addUrl(userCode, favoriteUrl)) {
+                WebApiUtil.setError(4, "Failed to add url: " + favoriteUrl);
+                return null;
+            }
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+
+    }
+
+    @Execute(validator = false)
+    public String favoritesApi() {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(
+                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+            WebApiUtil.setError(9, "Unsupported operation.");
+            return null;
+        }
+
+        try {
+            final String userCode = userInfoHelper.getUserCode();
+
+            if (StringUtil.isBlank(userCode)) {
+                WebApiUtil.setError(2, "No user session.");
+                return null;
+            } else if (StringUtil.isBlank(indexForm.queryId)) {
+                WebApiUtil.setError(3, "Query ID is null.");
+                return null;
+            }
+
+            final String[] docIds = userInfoHelper
+                    .getResultDocIds(indexForm.queryId);
+            final List<Map<String, Object>> docList = searchService
+                    .getDocumentListByDocIds(docIds, MAX_PAGE_SIZE);
+            List<String> urlList = new ArrayList<String>(docList.size());
+            for (final Map<String, Object> doc : docList) {
+                final Object urlObj = doc.get("url");
+                if (urlObj != null) {
+                    urlList.add(urlObj.toString());
+                }
+            }
+            urlList = favoriteLogService.getUrlList(userCode, urlList);
+            final List<String> docIdList = new ArrayList<String>(urlList.size());
+            for (final Map<String, Object> doc : docList) {
+                final Object urlObj = doc.get("url");
+                if (urlObj != null && urlList.contains(urlObj.toString())) {
+                    final Object docIdObj = doc.get(Constants.DOC_ID);
+                    if (docIdObj != null) {
+                        docIdList.add(docIdObj.toString());
+                    }
+                }
+            }
+
+            WebApiUtil.setObject("docIdList", docIdList);
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+
+    }
+
+    @Execute(validator = false)
+    public String osdd() {
+        openSearchHelper.write(ResponseUtil.getResponse());
+        return null;
+    }
+
+    @Execute(validator = false, input = "index")
+    public String help() {
+        buildViewParams();
+        buildInitParams();
+        return "help.jsp";
     }
 
     protected String doSearchInternal() {
@@ -579,46 +900,22 @@ public class IndexAction {
         return query;
     }
 
-    protected void updateSearchParams(final boolean isAPI) {
-        if (indexForm.facet == null && !isAPI) {
+    protected void updateSearchParams() {
+        if (indexForm.facet == null) {
             indexForm.facet = queryHelper.getDefaultFacetInfo();
         }
 
-        if (indexForm.mlt == null && !isAPI) {
+        if (indexForm.mlt == null) {
             indexForm.mlt = queryHelper.getDefaultMoreLikeThisInfo();
         }
 
-        if (indexForm.geo == null && !isAPI) {
+        if (indexForm.geo == null) {
             indexForm.geo = queryHelper.getDefaultGeoInfo();
         }
     }
 
-    @Execute(validator = false, input = "index")
-    public String search() {
-        if (viewHelper.isUseSession() && StringUtil.isNotBlank(indexForm.num)) {
-            normalizePageNum();
-            final HttpSession session = request.getSession();
-            if (session != null) {
-                session.setAttribute(Constants.RESULTS_PER_PAGE, indexForm.num);
-            }
-        }
-
-        return doSearch();
-    }
-
-    @Execute(validator = false, input = "index")
-    public String prev() {
-        return doMove(-1);
-    }
-
-    @Execute(validator = false, input = "index")
-    public String next() {
-        return doMove(1);
-    }
-
-    @Execute(validator = false, input = "index")
-    public String move() {
-        return doMove(0);
+    protected boolean isFileSystemPath(final String url) {
+        return url.startsWith("file:") || url.startsWith("smb:");
     }
 
     protected String doMove(final int move) {
@@ -649,1046 +946,6 @@ public class IndexAction {
         }
 
         return doSearch();
-    }
-
-    @Execute(validator = false)
-    public String xml() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_XML_PROPERTY, Constants.TRUE))) {
-            return REDIRECT_TO_INDEX;
-        }
-
-        switch (getFormatType()) {
-        case SEARCH:
-            return searchByXml();
-        case LABEL:
-            return labelByXml();
-        case SUGGEST:
-            return suggestByXml();
-        case ANALYSIS:
-            return analysisByXml();
-        default:
-            writeXmlResponse(-1, Constants.EMPTY_STRING, "Not found.");
-            return null;
-        }
-    }
-
-    protected String searchByXml() {
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(1000);
-        String query = null;
-        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
-                CDef.AccessType.Xml);
-        updateSearchParams(true);
-        try {
-            query = doSearchInternal();
-            buf.append("<query>");
-            buf.append(StringEscapeUtils.escapeXml(query));
-            buf.append("</query>");
-            buf.append("<exec-time>");
-            buf.append(execTime);
-            buf.append("</exec-time>");
-            if (StringUtil.isNotBlank(indexForm.queryId)) {
-                buf.append("<query-id>");
-                buf.append(indexForm.queryId);
-                buf.append("</query-id>");
-            }
-            buf.append("<page-size>");
-            buf.append(pageSize);
-            buf.append("</page-size>");
-            buf.append("<page-number>");
-            buf.append(currentPageNumber);
-            buf.append("</page-number>");
-            buf.append("<record-count>");
-            buf.append(allRecordCount);
-            buf.append("</record-count>");
-            buf.append("<page-count>");
-            buf.append(allPageCount);
-            buf.append("</page-count>");
-            buf.append("<result>");
-            for (final Map<String, Object> document : documentItems) {
-                buf.append("<doc>");
-                for (final Map.Entry<String, Object> entry : document
-                        .entrySet()) {
-                    final String name = entry.getKey();
-                    if (StringUtil.isNotBlank(name) && entry.getValue() != null
-                            && queryHelper.isApiResponseField(name)) {
-                        final String tagName = StringUtil.decamelize(name)
-                                .replaceAll("_", "-").toLowerCase();
-                        buf.append('<');
-                        buf.append(tagName);
-                        buf.append('>');
-                        buf.append(StringEscapeUtils.escapeXml(entry.getValue()
-                                .toString()));
-                        buf.append("</");
-                        buf.append(tagName);
-                        buf.append('>');
-                    }
-                }
-                buf.append("</doc>");
-            }
-            buf.append("</result>");
-            if (facetResponse != null && facetResponse.hasFacetResponse()) {
-                buf.append("<facet>");
-                // facet field
-                if (facetResponse.getFieldList() != null) {
-                    for (final Field field : facetResponse.getFieldList()) {
-                        buf.append("<field name=\"");
-                        buf.append(StringEscapeUtils.escapeXml(field.getName()));
-                        buf.append("\">");
-                        for (final Map.Entry<String, Long> entry : field
-                                .getValueCountMap().entrySet()) {
-                            buf.append("<value count=\"");
-                            buf.append(entry.getValue());
-                            buf.append("\">");
-                            buf.append(StringEscapeUtils.escapeXml(entry
-                                    .getKey()));
-                            buf.append("</value>");
-                        }
-                        buf.append("</field>");
-                    }
-                }
-                // facet query
-                if (facetResponse.getQueryCountMap() != null) {
-                    buf.append("<query>");
-                    for (final Map.Entry<String, Long> entry : facetResponse
-                            .getQueryCountMap().entrySet()) {
-                        buf.append("<value count=\"");
-                        buf.append(entry.getValue());
-                        buf.append("\">");
-                        buf.append(StringEscapeUtils.escapeXml(entry.getKey()));
-                        buf.append("</value>");
-                    }
-                    buf.append("</query>");
-                }
-                buf.append("</facet>");
-            }
-            if (moreLikeThisResponse != null && !moreLikeThisResponse.isEmpty()) {
-                buf.append("<more-like-this>");
-                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse
-                        .entrySet()) {
-                    buf.append("<result id=\"");
-                    buf.append(StringEscapeUtils.escapeXml(mltEntry.getKey()));
-                    buf.append("\">");
-                    for (final Map<String, Object> document : mltEntry
-                            .getValue()) {
-                        buf.append("<doc>");
-                        for (final Map.Entry<String, Object> entry : document
-                                .entrySet()) {
-                            if (StringUtil.isNotBlank(entry.getKey())
-                                    && entry.getValue() != null) {
-                                final String tagName = StringUtil
-                                        .decamelize(entry.getKey())
-                                        .replaceAll("_", "-").toLowerCase();
-                                buf.append('<');
-                                buf.append(tagName);
-                                buf.append('>');
-                                buf.append(StringEscapeUtils.escapeXml(entry
-                                        .getValue().toString()));
-                                buf.append("</");
-                                buf.append(tagName);
-                                buf.append('>');
-                            }
-                        }
-                        buf.append("</doc>");
-                    }
-                    buf.append("</result>");
-                }
-                buf.append("</more-like-this>");
-            }
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-            if (errMsg == null) {
-                errMsg = e.getClass().getName();
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-        return null;
-    }
-
-    protected String labelByXml() {
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            labelTypeItems = labelTypeHelper.getLabelTypeItemList();
-            buf.append("<record-count>");
-            buf.append(labelTypeItems.size());
-            buf.append("</record-count>");
-            buf.append("<result>");
-            for (final Map<String, String> labelMap : labelTypeItems) {
-                buf.append("<label>");
-                buf.append("<name>");
-                buf.append(StringEscapeUtils.escapeXml(labelMap
-                        .get(Constants.ITEM_LABEL)));
-                buf.append("</name>");
-                buf.append("<value>");
-                buf.append(StringEscapeUtils.escapeXml(labelMap
-                        .get(Constants.ITEM_VALUE)));
-                buf.append("</value>");
-                buf.append("</label>");
-            }
-            buf.append("</result>");
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-        return null;
-    }
-
-    protected String suggestByXml() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
-            writeXmlResponse(9, null, "Unsupported operation.");
-            return null;
-        }
-
-        if (indexForm.fn == null || indexForm.fn.length == 0) {
-            writeXmlResponse(2, null, "The field name is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.query)) {
-            writeXmlResponse(3, null, "Your query is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.num)) {
-            indexForm.num = String.valueOf(DEFAULT_SUGGEST_PAGE_SIZE);
-        }
-
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            int num = Integer.parseInt(indexForm.num);
-            if (num > getMaxPageSize()) {
-                num = getMaxPageSize();
-            }
-
-            final String[] fieldNames = indexForm.fn;
-
-            int suggestRecordCount = 0;
-            final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
-            final List<String> suggestFieldName = new ArrayList<String>();
-
-            for (final String fn : fieldNames) {
-                final Suggester suggester = suggesterManager.getSuggester(fn);
-                if (suggester != null) {
-                    final String suggestQuery = suggester
-                            .convertQuery(indexForm.query);
-                    final SuggestResponse suggestResponse = searchService
-                            .getSuggestResponse(fn, suggestQuery, num);
-
-                    if (!suggestResponse.isEmpty()) {
-                        suggestRecordCount += suggestResponse.size();
-
-                        suggestResultList.add(suggestResponse);
-                        suggestFieldName.add(fn);
-                    }
-                }
-            }
-
-            buf.append("<record-count>");
-            buf.append(suggestRecordCount);
-            buf.append("</record-count>");
-            if (suggestResultList.size() > 0) {
-                buf.append("<result>");
-
-                for (int i = 0; i < suggestResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = suggestResultList
-                            .get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
-                        final String fn = suggestFieldName.get(i);
-                        final Suggester suggester = suggesterManager
-                                .getSuggester(fn);
-                        if (suggester != null) {
-                            buf.append("<suggest>");
-                            buf.append("<token>");
-                            buf.append(StringEscapeUtils.escapeXml(entry
-                                    .getKey()));
-                            buf.append("</token>");
-                            buf.append("<fn>");
-                            buf.append(StringEscapeUtils.escapeXml(fn));
-                            buf.append("</fn>");
-                            buf.append("<start-offset>");
-                            buf.append(StringEscapeUtils.escapeXml(Integer
-                                    .toString(srList.getStartOffset())));
-                            buf.append("</start-offset>");
-                            buf.append("<end-offset>");
-                            buf.append(StringEscapeUtils.escapeXml(Integer
-                                    .toString(srList.getEndOffset())));
-                            buf.append("</end-offset>");
-                            buf.append("<num-found>");
-                            buf.append(StringEscapeUtils.escapeXml(Integer
-                                    .toString(srList.getNumFound())));
-                            buf.append("</num-found>");
-                            buf.append("<result>");
-                            for (final String value : srList) {
-                                buf.append("<value>");
-                                buf.append(StringEscapeUtils
-                                        .escapeXml(suggester
-                                                .convertResultString(value)));
-                                buf.append("</value>");
-                            }
-                            buf.append("</result>");
-                            buf.append("</suggest>");
-                        }
-                    }
-                }
-                buf.append("</result>");
-            }
-
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-        return null;
-    }
-
-    protected String analysisByXml() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE))) {
-            writeXmlResponse(9, null, "Unsupported operation.");
-            return null;
-        }
-
-        if (indexForm.fn == null || indexForm.fn.length == 0) {
-            writeXmlResponse(2, null, "The field name is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.query)) {
-            writeXmlResponse(3, null, "Your query is empty.");
-            return null;
-        }
-
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-
-            final String[] fieldNames = indexForm.fn;
-            final FieldAnalysisResponse fieldAnalysis = searchService
-                    .getFieldAnalysisResponse(fieldNames, indexForm.query);
-
-            buf.append("<record-count>");
-            buf.append(fieldAnalysis.size());
-            buf.append("</record-count>");
-            if (fieldAnalysis.size() > 0) {
-                buf.append("<result>");
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis
-                        .entrySet()) {
-
-                    buf.append("<field name=\"")
-                            .append(StringEscapeUtils.escapeXml(fEntry.getKey()))
-                            .append("\">");
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
-                            .getValue().entrySet()) {
-                        buf.append("<analysis name=\"")
-                                .append(StringEscapeUtils.escapeXml(aEntry
-                                        .getKey())).append("\">");
-                        for (final Map<String, Object> dataMap : aEntry
-                                .getValue()) {
-                            buf.append("<token>");
-                            for (final Map.Entry<String, Object> dEntry : dataMap
-                                    .entrySet()) {
-                                final String key = dEntry.getKey();
-                                final Object value = dEntry.getValue();
-                                if (StringUtil.isNotBlank(key) && value != null) {
-                                    buf.append("<value name=\"")
-                                            .append(StringEscapeUtils
-                                                    .escapeXml(key))
-                                            .append("\">")
-                                            .append(escapeXml(value))
-                                            .append("</value>");
-                                }
-                            }
-                            buf.append("</token>");
-                        }
-                        buf.append("</analysis>");
-                    }
-                    buf.append("</field>");
-                }
-                buf.append("</result>");
-            }
-
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-        return null;
-    }
-
-    protected void writeXmlResponse(final int status, final String body,
-            final String errMsg) {
-        final StringBuilder buf = new StringBuilder(1000);
-        buf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        buf.append("<response>");
-        buf.append("<version>");
-        buf.append(Constants.WEB_API_VERSION);
-        buf.append("</version>");
-        buf.append("<status>");
-        buf.append(status);
-        buf.append("</status>");
-        if (status == 0) {
-            buf.append(body);
-        } else {
-            buf.append("<message>");
-            buf.append(StringEscapeUtils.escapeXml(errMsg));
-            buf.append("</message>");
-        }
-        buf.append("</response>");
-        ResponseUtil.write(buf.toString(), "text/xml", Constants.UTF_8);
-
-    }
-
-    @Execute(validator = false)
-    public String json() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_JSON_PROPERTY, Constants.TRUE))) {
-            return REDIRECT_TO_INDEX;
-        }
-
-        switch (getFormatType()) {
-        case SEARCH:
-            return searchByJson();
-        case LABEL:
-            return labelByJson();
-        case SUGGEST:
-            return suggestByJson();
-        case ANALYSIS:
-            return analysisByJson();
-        default:
-            writeJsonResponse(-1, Constants.EMPTY_STRING, "Not found.");
-            return null;
-        }
-    }
-
-    protected String searchByJson() {
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        String query = null;
-        final StringBuilder buf = new StringBuilder(1000);
-        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
-                CDef.AccessType.Json);
-        updateSearchParams(true);
-        try {
-            query = doSearchInternal();
-            buf.append("\"query\":\"");
-            buf.append(escapeJsonString(query));
-            buf.append("\",");
-            buf.append("\"execTime\":");
-            buf.append(execTime);
-            buf.append(',');
-            if (StringUtil.isNotBlank(indexForm.queryId)) {
-                buf.append("\"queryId\":");
-                buf.append(indexForm.queryId);
-                buf.append(',');
-            }
-            buf.append("\"pageSize\":");
-            buf.append(pageSize);
-            buf.append(',');
-            buf.append("\"pageNumber\":");
-            buf.append(currentPageNumber);
-            buf.append(',');
-            buf.append("\"recordCount\":");
-            buf.append(allRecordCount);
-            buf.append(',');
-            buf.append("\"pageCount\":");
-            buf.append(allPageCount);
-            if (!documentItems.isEmpty()) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (final Map<String, Object> document : documentItems) {
-                    if (!first1) {
-                        buf.append(',');
-                    } else {
-                        first1 = false;
-                    }
-                    buf.append('{');
-                    boolean first2 = true;
-                    for (final Map.Entry<String, Object> entry : document
-                            .entrySet()) {
-                        final String name = entry.getKey();
-                        if (StringUtil.isNotBlank(name)
-                                && entry.getValue() != null
-                                && queryHelper.isApiResponseField(name)) {
-                            if (!first2) {
-                                buf.append(',');
-                            } else {
-                                first2 = false;
-                            }
-                            buf.append('\"');
-                            buf.append(escapeJsonString(name));
-                            buf.append("\":\"");
-                            buf.append(escapeJsonString(entry.getValue()
-                                    .toString()));
-                            buf.append('\"');
-                        }
-                    }
-                    buf.append('}');
-                }
-                buf.append(']');
-            }
-            if (facetResponse != null && facetResponse.hasFacetResponse()) {
-                // facet field
-                if (facetResponse.getFieldList() != null) {
-                    buf.append(',');
-                    buf.append("\"facetField\":[");
-                    boolean first1 = true;
-                    for (final Field field : facetResponse.getFieldList()) {
-                        if (!first1) {
-                            buf.append(',');
-                        } else {
-                            first1 = false;
-                        }
-                        buf.append("{\"name\":\"");
-                        buf.append(escapeJsonString(field.getName()));
-                        buf.append("\",\"result\":[");
-                        boolean first2 = true;
-                        for (final Map.Entry<String, Long> entry : field
-                                .getValueCountMap().entrySet()) {
-                            if (!first2) {
-                                buf.append(',');
-                            } else {
-                                first2 = false;
-                            }
-                            buf.append("{\"value\":\"");
-                            buf.append(escapeJsonString(entry.getKey()));
-                            buf.append("\",\"count\":");
-                            buf.append(entry.getValue());
-                            buf.append('}');
-                        }
-                        buf.append(']');
-                        buf.append('}');
-                    }
-                    buf.append(']');
-                }
-                // facet query
-                if (facetResponse.getQueryCountMap() != null) {
-                    buf.append(',');
-                    buf.append("\"facetQuery\":[");
-                    boolean first1 = true;
-                    for (final Map.Entry<String, Long> entry : facetResponse
-                            .getQueryCountMap().entrySet()) {
-                        if (!first1) {
-                            buf.append(',');
-                        } else {
-                            first1 = false;
-                        }
-                        buf.append("{\"value\":\"");
-                        buf.append(escapeJsonString(entry.getKey()));
-                        buf.append("\",\"count\":");
-                        buf.append(entry.getValue());
-                        buf.append('}');
-                    }
-                    buf.append(']');
-                }
-            }
-            if (moreLikeThisResponse != null && !moreLikeThisResponse.isEmpty()) {
-                buf.append(',');
-                buf.append("\"moreLikeThis\":[");
-                boolean first = true;
-                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse
-                        .entrySet()) {
-                    if (!first) {
-                        buf.append(',');
-                    } else {
-                        first = false;
-                    }
-                    buf.append("{\"id\":\"");
-                    buf.append(escapeJsonString(mltEntry.getKey()));
-                    buf.append("\",\"result\":[");
-                    boolean first1 = true;
-                    for (final Map<String, Object> document : mltEntry
-                            .getValue()) {
-                        if (!first1) {
-                            buf.append(',');
-                        } else {
-                            first1 = false;
-                        }
-                        buf.append('{');
-                        boolean first2 = true;
-                        for (final Map.Entry<String, Object> entry : document
-                                .entrySet()) {
-                            if (StringUtil.isNotBlank(entry.getKey())
-                                    && entry.getValue() != null) {
-                                if (!first2) {
-                                    buf.append(',');
-                                } else {
-                                    first2 = false;
-                                }
-                                buf.append('\"');
-                                buf.append(escapeJsonString(entry.getKey()));
-                                buf.append("\":\"");
-                                buf.append(escapeJsonString(entry.getValue()
-                                        .toString()));
-                                buf.append('\"');
-                            }
-                        }
-                        buf.append('}');
-                    }
-                    buf.append("]}");
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-            if (errMsg == null) {
-                errMsg = e.getClass().getName();
-            }
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-        return null;
-    }
-
-    protected String labelByJson() {
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            labelTypeItems = labelTypeHelper.getLabelTypeItemList();
-            buf.append("\"recordCount\":");
-            buf.append(labelTypeItems.size());
-            if (!labelTypeItems.isEmpty()) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (final Map<String, String> labelMap : labelTypeItems) {
-                    if (!first1) {
-                        buf.append(',');
-                    } else {
-                        first1 = false;
-                    }
-                    buf.append("{\"label\":\"");
-                    buf.append(escapeJsonString(labelMap
-                            .get(Constants.ITEM_LABEL)));
-                    buf.append("\", \"value\":\"");
-                    buf.append(escapeJsonString(labelMap
-                            .get(Constants.ITEM_VALUE)));
-                    buf.append("\"}");
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-        return null;
-    }
-
-    protected String suggestByJson() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
-            writeJsonResponse(9, null, "Unsupported operation.");
-            return null;
-        }
-
-        if (indexForm.fn == null || indexForm.fn.length == 0) {
-            writeJsonResponse(2, null, "The field name is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.query)) {
-            writeJsonResponse(3, null, "Your query is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.num)) {
-            indexForm.num = String.valueOf(DEFAULT_SUGGEST_PAGE_SIZE);
-        }
-
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            int num = Integer.parseInt(indexForm.num);
-            if (num > getMaxPageSize()) {
-                num = getMaxPageSize();
-            }
-
-            final String[] fieldNames = indexForm.fn;
-
-            int suggestRecordCount = 0;
-            final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
-            final List<String> suggestFieldName = new ArrayList<String>();
-
-            for (final String fn : fieldNames) {
-                final Suggester suggester = suggesterManager.getSuggester(fn);
-                if (suggester != null) {
-                    final String suggestQuery = suggester
-                            .convertQuery(indexForm.query);
-                    final SuggestResponse suggestResponse = searchService
-                            .getSuggestResponse(fn, suggestQuery, num);
-
-                    if (!suggestResponse.isEmpty()) {
-                        suggestRecordCount += suggestResponse.size();
-
-                        suggestResultList.add(suggestResponse);
-                        suggestFieldName.add(fn);
-                    }
-                }
-            }
-
-            buf.append("\"recordCount\":");
-            buf.append(suggestRecordCount);
-
-            if (suggestResultList.size() > 0) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (int i = 0; i < suggestResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = suggestResultList
-                            .get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
-                        final String fn = suggestFieldName.get(i);
-                        final Suggester suggester = suggesterManager
-                                .getSuggester(fn);
-                        if (suggester != null) {
-                            if (!first1) {
-                                buf.append(',');
-                            } else {
-                                first1 = false;
-                            }
-
-                            final SuggestResponseList srList = (SuggestResponseList) entry
-                                    .getValue();
-
-                            buf.append("{\"token\":\"");
-                            buf.append(escapeJsonString(entry.getKey()));
-                            buf.append("\", \"fn\":\"");
-                            buf.append(escapeJsonString(fn));
-                            buf.append("\", \"startOffset\":");
-                            buf.append(Integer.toString(srList.getStartOffset()));
-                            buf.append(", \"endOffset\":");
-                            buf.append(Integer.toString(srList.getEndOffset()));
-                            buf.append(", \"numFound\":");
-                            buf.append(Integer.toString(srList.getNumFound()));
-                            buf.append(", ");
-                            buf.append("\"result\":[");
-                            boolean first2 = true;
-                            for (final String value : srList) {
-                                if (!first2) {
-                                    buf.append(',');
-                                } else {
-                                    first2 = false;
-                                }
-                                buf.append('"');
-                                buf.append(escapeJsonString(suggester
-                                        .convertResultString(value)));
-                                buf.append('"');
-                            }
-                            buf.append("]}");
-                        }
-                    }
-
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-        return null;
-    }
-
-    protected String analysisByJson() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE))) {
-            writeJsonResponse(9, null, "Unsupported operation.");
-            return null;
-        }
-
-        if (indexForm.fn == null || indexForm.fn.length == 0) {
-            writeJsonResponse(2, null, "The field name is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.query)) {
-            writeJsonResponse(3, null, "Your query is empty.");
-            return null;
-        }
-
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-
-            final String[] fieldNames = indexForm.fn;
-            final FieldAnalysisResponse fieldAnalysis = searchService
-                    .getFieldAnalysisResponse(fieldNames, indexForm.query);
-
-            buf.append("\"recordCount\":");
-            buf.append(fieldAnalysis.size());
-
-            if (fieldAnalysis.size() > 0) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis
-                        .entrySet()) {
-                    if (first1) {
-                        first1 = false;
-                    } else {
-                        buf.append(',');
-                    }
-                    buf.append("{\"field\":\"")
-                            .append(escapeJsonString(fEntry.getKey()))
-                            .append("\",\"analysis\":[");
-                    boolean first2 = true;
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
-                            .getValue().entrySet()) {
-                        if (first2) {
-                            first2 = false;
-                        } else {
-                            buf.append(',');
-                        }
-                        buf.append("{\"name\":\"")
-                                .append(escapeJsonString(aEntry.getKey()))
-                                .append("\",\"data\":[");
-                        boolean first3 = true;
-                        for (final Map<String, Object> dataMap : aEntry
-                                .getValue()) {
-                            if (first3) {
-                                first3 = false;
-                            } else {
-                                buf.append(',');
-                            }
-                            buf.append('{');
-                            boolean first4 = true;
-                            for (final Map.Entry<String, Object> dEntry : dataMap
-                                    .entrySet()) {
-                                final String key = dEntry.getKey();
-                                final Object value = dEntry.getValue();
-                                if (StringUtil.isNotBlank(key) && value != null) {
-                                    if (first4) {
-                                        first4 = false;
-                                    } else {
-                                        buf.append(',');
-                                    }
-                                    buf.append('\"')
-                                            .append(escapeJsonString(key))
-                                            .append("\":")
-                                            .append(escapeJson(value));
-                                }
-                            }
-                            buf.append('}');
-                        }
-                        buf.append("]}");
-                    }
-                    buf.append("]}");
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-        return null;
-    }
-
-    protected void writeJsonResponse(final int status, final String body,
-            final String errMsg) {
-        final boolean isJsonp = StringUtil.isNotBlank(indexForm.callback);
-
-        final StringBuilder buf = new StringBuilder(1000);
-        if (isJsonp) {
-            buf.append(escapeCallbackName(indexForm.callback));
-            buf.append('(');
-        }
-        buf.append("{\"response\":");
-        buf.append("{\"version\":");
-        buf.append(Constants.WEB_API_VERSION);
-        buf.append(',');
-        buf.append("\"status\":");
-        buf.append(status);
-        buf.append(',');
-        if (status == 0) {
-            buf.append(body);
-        } else {
-            buf.append("\"message\":\"");
-            buf.append(escapeJsonString(errMsg));
-            buf.append('\"');
-        }
-        buf.append('}');
-        buf.append('}');
-        if (isJsonp) {
-            buf.append(')');
-        }
-        ResponseUtil.write(buf.toString(), "text/javascript+json",
-                Constants.UTF_8);
-
-    }
-
-    protected String escapeCallbackName(final String callbackName) {
-        return callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", "");
-    }
-
-    protected String escapeXml(final Object obj) {
-        final StringBuilder buf = new StringBuilder(255);
-        if (obj instanceof List<?>) {
-            buf.append("<list>");
-            for (final Object child : (List<?>) obj) {
-                buf.append("<item>").append(escapeJson(child))
-                        .append("</item>");
-            }
-            buf.append("</list>");
-        } else if (obj instanceof Map<?, ?>) {
-            buf.append("<data>");
-            for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
-
-                buf.append("<name>").append(escapeXml(entry.getKey()))
-                        .append("</name><value>")
-                        .append(escapeXml(entry.getValue())).append("</value>");
-            }
-            buf.append("</data>");
-        } else if (obj != null) {
-            buf.append(StringEscapeUtils.escapeXml(obj.toString()));
-        }
-        return buf.toString();
-    }
-
-    protected String escapeJson(final Object obj) {
-        final StringBuilder buf = new StringBuilder(255);
-        if (obj instanceof List<?>) {
-            buf.append('[');
-            boolean first = true;
-            for (final Object child : (List<?>) obj) {
-                if (first) {
-                    first = false;
-                } else {
-                    buf.append(',');
-                }
-                buf.append(escapeJson(child));
-            }
-            buf.append(']');
-        } else if (obj instanceof Map<?, ?>) {
-            buf.append('{');
-            boolean first = true;
-            for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
-                if (first) {
-                    first = false;
-                } else {
-                    buf.append(',');
-                }
-                buf.append(escapeJson(entry.getKey())).append(':')
-                        .append(escapeJson(entry.getValue()));
-            }
-            buf.append('}');
-        } else if (obj instanceof Integer || obj instanceof Long
-                || obj instanceof Float || obj instanceof Double
-                || obj instanceof Short) {
-            buf.append(obj);
-        } else if (obj == null) {
-            buf.append("\"\"");
-        } else {
-            buf.append('\"').append(escapeJsonString(obj.toString()))
-                    .append('\"');
-        }
-        return buf.toString();
-    }
-
-    protected String escapeJsonString(final String str) {
-        if (str == null) {
-            return "";
-        }
-
-        final StringWriter out = new StringWriter(str.length() * 2);
-        int sz;
-        sz = str.length();
-        for (int i = 0; i < sz; i++) {
-            final char ch = str.charAt(i);
-
-            // handle unicode
-            if (ch > 0xfff) {
-                out.write("\\u" + hex(ch));
-            } else if (ch > 0xff) {
-                out.write("\\u0" + hex(ch));
-            } else if (ch > 0x7f) {
-                out.write("\\u00" + hex(ch));
-            } else if (ch < 32) {
-                switch (ch) {
-                case '\b':
-                    out.write('\\');
-                    out.write('b');
-                    break;
-                case '\n':
-                    out.write('\\');
-                    out.write('n');
-                    break;
-                case '\t':
-                    out.write('\\');
-                    out.write('t');
-                    break;
-                case '\f':
-                    out.write('\\');
-                    out.write('f');
-                    break;
-                case '\r':
-                    out.write('\\');
-                    out.write('r');
-                    break;
-                default:
-                    if (ch > 0xf) {
-                        out.write("\\u00" + hex(ch));
-                    } else {
-                        out.write("\\u000" + hex(ch));
-                    }
-                    break;
-                }
-            } else {
-                switch (ch) {
-                case '"':
-                    out.write("\\u0022");
-                    break;
-                case '\\':
-                    out.write("\\u005C");
-                    break;
-                case '/':
-                    out.write("\\u002F");
-                    break;
-                default:
-                    out.write(ch);
-                    break;
-                }
-            }
-        }
-        return out.toString();
-    }
-
-    private String hex(final char ch) {
-        return Integer.toHexString(ch).toUpperCase();
     }
 
     protected boolean isMobile() {
@@ -1811,25 +1068,6 @@ public class IndexAction {
         }
     }
 
-    protected FormatType getFormatType() {
-        if (indexForm.type == null) {
-            return FormatType.SEARCH;
-        }
-        final String type = indexForm.type.toUpperCase();
-        if (FormatType.SEARCH.name().equals(type)) {
-            return FormatType.SEARCH;
-        } else if (FormatType.LABEL.name().equals(type)) {
-            return FormatType.LABEL;
-        } else if (FormatType.SUGGEST.name().equals(type)) {
-            return FormatType.SUGGEST;
-        } else if (FormatType.ANALYSIS.name().equals(type)) {
-            return FormatType.ANALYSIS;
-        } else {
-            // default
-            return FormatType.SEARCH;
-        }
-    }
-
     protected void normalizePageNum() {
         try {
             final int num = Integer.parseInt(indexForm.num);
@@ -1852,274 +1090,12 @@ public class IndexAction {
         return MAX_PAGE_SIZE;
     }
 
-    private static enum FormatType {
-        SEARCH, LABEL, SUGGEST, ANALYSIS;
-    }
-
-    @Execute(validator = false)
-    public String hotsearchword() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
-            return REDIRECT_TO_INDEX;
-        }
-
-        Range range;
-        if (indexForm.range == null) {
-            range = Range.ENTIRE;
-        } else if ("day".equals(indexForm.range) || "1".equals(indexForm.range)) {
-            range = Range.ONE_DAY;
-        } else if ("week".equals(indexForm.range)
-                || "7".equals(indexForm.range)) {
-            range = Range.ONE_DAY;
-        } else if ("month".equals(indexForm.range)
-                || "30".equals(indexForm.range)) {
-            range = Range.ONE_DAY;
-        } else if ("year".equals(indexForm.range)
-                || "365".equals(indexForm.range)) {
-            range = Range.ONE_DAY;
-        } else {
-            range = Range.ENTIRE;
-        }
-
-        int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
-                    .getComponent(HotSearchWordHelper.class);
-            final List<String> wordList = hotSearchWordHelper
-                    .getHotSearchWordList(range);
-            buf.append("\"result\":[");
-            boolean first1 = true;
-            for (final String word : wordList) {
-                if (!first1) {
-                    buf.append(',');
-                } else {
-                    first1 = false;
-                }
-                buf.append("\"");
-                buf.append(escapeJsonString(word));
-                buf.append("\"");
-            }
-            buf.append(']');
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-        return null;
-    }
-
-    @Execute(validator = false)
-    public String favorite() {
-        int status = 0;
-        String body = null;
-        String errMsg = null;
-
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
-            errMsg = "Not supported.";
-            status = 10;
-        } else {
-            try {
-                final Map<String, Object> doc = indexForm.docId == null ? null
-                        : searchService.getDocument("docId:" + indexForm.docId);
-                final String userCode = userInfoHelper.getUserCode();
-                final String favoriteUrl = doc == null ? null : (String) doc
-                        .get("url");
-
-                if (StringUtil.isBlank(userCode)) {
-                    errMsg = "No user session.";
-                    status = 2;
-                } else if (StringUtil.isBlank(favoriteUrl)) {
-                    errMsg = "URL is null.";
-                    status = 3;
-                } else {
-                    final String[] docIds = userInfoHelper
-                            .getResultDocIds(URLDecoder.decode(
-                                    indexForm.queryId, Constants.UTF_8));
-                    if (docIds != null) {
-                        boolean found = false;
-                        for (final String docId : docIds) {
-                            if (indexForm.docId.equals(docId)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found) {
-                            if (favoriteLogService
-                                    .addUrl(userCode, favoriteUrl)) {
-                                body = "\"result\":\"ok\"";
-                            } else {
-                                errMsg = "Failed to add url.";
-                                status = 4;
-                            }
-                        } else {
-                            errMsg = "Not found: " + favoriteUrl;
-                            status = 5;
-                        }
-                    } else {
-                        errMsg = "No searched urls.";
-                        status = 6;
-                    }
-                }
-            } catch (final Exception e) {
-                errMsg = e.getMessage();
-                status = 1;
-            }
-        }
-
-        writeJsonResponse(status, body, errMsg);
-
-        return null;
-    }
-
-    @Execute(validator = false)
-    public String favorites() {
-        int status = 0;
-        String body = null;
-        String errMsg = null;
-
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
-            errMsg = "Not supported.";
-            status = 10;
-        } else {
-            final String userCode = userInfoHelper.getUserCode();
-
-            try {
-                if (StringUtil.isBlank(userCode)) {
-                    errMsg = "No user session.";
-                    status = 2;
-                } else if (StringUtil.isBlank(indexForm.queryId)) {
-                    errMsg = "Query ID is null.";
-                    status = 3;
-                } else {
-                    final String[] docIds = userInfoHelper
-                            .getResultDocIds(indexForm.queryId);
-                    final List<Map<String, Object>> docList = searchService
-                            .getDocumentListByDocIds(docIds, MAX_PAGE_SIZE);
-                    List<String> urlList = new ArrayList<String>(docList.size());
-                    for (final Map<String, Object> doc : docList) {
-                        final Object urlObj = doc.get("url");
-                        if (urlObj != null) {
-                            urlList.add(urlObj.toString());
-                        }
-                    }
-                    urlList = favoriteLogService.getUrlList(userCode, urlList);
-                    final List<String> docIdList = new ArrayList<String>(
-                            urlList.size());
-                    for (final Map<String, Object> doc : docList) {
-                        final Object urlObj = doc.get("url");
-                        if (urlObj != null
-                                && urlList.contains(urlObj.toString())) {
-                            final Object docIdObj = doc.get(Constants.DOC_ID);
-                            if (docIdObj != null) {
-                                docIdList.add(docIdObj.toString());
-                            }
-                        }
-                    }
-
-                    final StringBuilder buf = new StringBuilder();
-                    buf.append("\"num\":").append(docIdList.size());
-                    if (!docIdList.isEmpty()) {
-                        buf.append(", \"docIds\":[");
-                        for (int i = 0; i < docIdList.size(); i++) {
-                            if (i > 0) {
-                                buf.append(',');
-                            }
-                            buf.append('"');
-                            buf.append(docIdList.get(i));
-                            buf.append('"');
-                        }
-                        buf.append(']');
-                    }
-                    body = buf.toString();
-                }
-            } catch (final Exception e) {
-                errMsg = e.getMessage();
-                status = 1;
-            }
-        }
-
-        writeJsonResponse(status, body, errMsg);
-
-        return null;
-    }
-
-    @Execute(validator = false)
-    public String screenshot() {
-        OutputStream out = null;
-        BufferedInputStream in = null;
-        try {
-            final Map<String, Object> doc = searchService.getDocument("docId:"
-                    + indexForm.docId);
-            final String url = doc == null ? null : (String) doc.get("url");
-            if (StringUtil.isBlank(indexForm.queryId)
-                    || StringUtil.isBlank(url) || screenShotManager == null) {
-                // 404
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
-
-            final File screenShotFile = screenShotManager.getScreenShotFile(
-                    indexForm.queryId, url);
-            if (screenShotFile == null) {
-                // 404
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
-
-            response.setContentType(getImageMimeType(screenShotFile));
-
-            out = response.getOutputStream();
-            in = new BufferedInputStream(new FileInputStream(screenShotFile));
-            InputStreamUtil.copy(in, out);
-            OutputStreamUtil.flush(out);
-        } catch (final Exception e) {
-            logger.error("Failed to response: " + indexForm.docId, e);
-        } finally {
-            IOUtils.closeQuietly(in);
-            IOUtils.closeQuietly(out);
-        }
-
-        return null;
-    }
-
-    protected String getImageMimeType(final File imageFile) {
-        final String path = imageFile.getAbsolutePath();
-        if (path.endsWith(".png")) {
-            return "image/png";
-        } else if (path.endsWith(".gif")) {
-            return "image/gif";
-        } else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-            return "image/jpeg";
-        } else {
-            return "application/octet-stream";
-        }
-    }
-
-    @Execute(validator = false)
-    public String osdd() {
-        openSearchHelper.write(ResponseUtil.getResponse());
-        return null;
-    }
-
     public boolean isOsddLink() {
         return openSearchHelper.hasOpenSearchFile();
     }
 
     public String getHelpPage() {
         return viewHelper.getPagePath("common/help");
-    }
-
-    @Execute(validator = false, input = "index")
-    public String help() {
-        buildViewParams();
-        buildInitParams();
-        return "help.jsp";
     }
 
     protected boolean hasFieldInQuery(final Set<String> fieldSet,
@@ -2133,6 +1109,19 @@ public class IndexAction {
             fieldSet.add(field);
         }
         return false;
+    }
+
+    protected String getImageMimeType(final File imageFile) {
+        final String path = imageFile.getAbsolutePath();
+        if (path.endsWith(".png")) {
+            return "image/png";
+        } else if (path.endsWith(".gif")) {
+            return "image/gif";
+        } else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else {
+            return "application/octet-stream";
+        }
     }
 
 }

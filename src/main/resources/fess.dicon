@@ -4,6 +4,7 @@
 <components>
 	<include path="solrlib.dicon"/>
 	<include path="fess_ds.dicon"/>
+	<include path="fess_api.dicon"/>
 
 	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>

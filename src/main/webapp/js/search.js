@@ -58,7 +58,7 @@ $(function(){
 		var values = $favorite.attr('href').split('#');
 		if(values.length === 2 && $queryId.size() > 0){
 			var contextPath = $('#contextPath').val();
-			var actionUrl = contextPath + '/favorite';
+			var actionUrl = contextPath + '/json';
 			var docId = values[1];
 			$.ajax({
 				dataType: 'json',
@@ -67,6 +67,7 @@ $(function(){
 				timeoutNumber: 10000,
 				url: actionUrl,
 				data: {
+					type: 'favorite',
 					docId: docId,
 					queryId: $queryId.val()
 					}
@@ -93,8 +94,9 @@ $(function(){
 			cache: false,
 			type: 'post',
 			timeoutNumber: 10000,
-			url: contextPath + '/favorites',
+			url: contextPath + '/json',
 			data: {
+				type: 'favorites',
 				queryId: $queryId.val()
 			}
 		}).done(function ( data ) {
