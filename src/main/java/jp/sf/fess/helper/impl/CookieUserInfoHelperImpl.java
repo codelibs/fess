@@ -79,6 +79,10 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
             userCode = getUserCodeFromCookie(request);
         }
 
+        if (!request.isRequestedSessionIdValid()) {
+            return null;
+        }
+
         if (StringUtil.isBlank(userCode)) {
             userCode = getId();
         }
