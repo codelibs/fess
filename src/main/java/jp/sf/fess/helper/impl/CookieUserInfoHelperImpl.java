@@ -16,7 +16,6 @@
 
 package jp.sf.fess.helper.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +27,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.db.exentity.UserInfo;
+import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.UserInfoHelper;
-import jp.sf.fess.service.UserInfoService;
 
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.LruHashMap;
 import org.seasar.struts.util.RequestUtil;
@@ -41,9 +38,7 @@ import org.seasar.struts.util.ResponseUtil;
 public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
     @Resource
-    protected UserInfoService userInfoService;
-
-    public int userInfoCacheSize = 1000;
+    protected SearchLogHelper searchLogHelper;
 
     public int resultDocIdsCacheSize = 20;
 
@@ -56,15 +51,6 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     public String cookiePath;
 
     public Boolean cookieSecure;
-
-    public long userCheckInterval = 5 * 60 * 1000;// 5 min
-
-    private Map<String, Long> userInfoCache;
-
-    @InitMethod
-    public void init() {
-        userInfoCache = new LruHashMap<String, Long>(userInfoCacheSize);
-    }
 
     /* (non-Javadoc)
      * @see jp.sf.fess.helper.impl.UserInfoHelper#getUserCode()
@@ -98,20 +84,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     }
 
     protected void updateUserSessionId(final String userCode) {
-        final long current = System.currentTimeMillis();
-        final Long time = userInfoCache.get(userCode);
-        if (time == null || current - time.longValue() > userCheckInterval) {
-            UserInfo userInfo = userInfoService.getUserInfo(userCode);
-            if (userInfo == null) {
-                final Timestamp now = new Timestamp(current);
-                userInfo = new UserInfo();
-                userInfo.setCode(userCode);
-                userInfo.setCreatedTime(now);
-                userInfo.setUpdatedTime(now);
-                userInfoService.store(userInfo);
-            }
-            userInfoCache.put(userCode, current);
-        }
+        searchLogHelper.updateUserInfo(userCode);
 
         final HttpServletRequest request = RequestUtil.getRequest();
         request.setAttribute(Constants.USER_CODE, userCode);

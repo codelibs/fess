@@ -16,58 +16,48 @@
 
 package jp.sf.fess.helper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.Constants;
-import jp.sf.fess.db.cbean.SearchLogCB;
-import jp.sf.fess.db.cbean.UserInfoCB;
+import jp.sf.fess.db.bsbhv.BsFavoriteLogBhv;
+import jp.sf.fess.db.cbean.ClickLogCB;
 import jp.sf.fess.db.exbhv.ClickLogBhv;
-import jp.sf.fess.db.exbhv.SearchFieldLogBhv;
-import jp.sf.fess.db.exbhv.SearchLogBhv;
-import jp.sf.fess.db.exbhv.UserInfoBhv;
+import jp.sf.fess.db.exbhv.FavoriteLogBhv;
+import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
 import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
-import jp.sf.fess.db.exentity.UserInfo;
-import jp.sf.fess.service.SearchLogService;
-import jp.sf.fess.util.FessBeans;
+import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 
 import org.codelibs.core.util.DynamicProperties;
-import org.seasar.framework.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.seasar.dbflute.cbean.ListResultBean;
+import org.seasar.framework.container.SingletonS2Container;
+import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.seasar.robot.util.LruHashMap;
 
-public class SearchLogHelper {
-    private static final Logger logger = LoggerFactory // NOPMD
-            .getLogger(SearchLogHelper.class);
-
-    @Resource
-    protected SearchLogService searchLogService;
-
-    @Resource
-    protected SearchLogBhv searchLogBhv;
-
-    @Resource
-    protected SearchFieldLogBhv searchFieldLogBhv;
-
-    @Resource
-    protected ClickLogBhv clickLogBhv;
-
-    @Resource
-    protected UserInfoBhv userInfoBhv;
+public abstract class SearchLogHelper {
 
     @Resource
     protected DynamicProperties crawlerProperties;
 
-    private volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<SearchLog>();
+    public long userCheckInterval = 5 * 60 * 1000;// 5 min
 
-    private volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
+    public int userInfoCacheSize = 1000;
+
+    protected volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<SearchLog>();
+
+    protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
+
+    protected Map<String, Long> userInfoCache;
+
+    @InitMethod
+    public void init() {
+        userInfoCache = new LruHashMap<String, Long>(userInfoCacheSize);
+    }
+
+    public abstract void updateUserInfo(final String userCode);
 
     public void addSearchLog(final SearchLog searchLog) {
         searchLogQueue.add(searchLog);
@@ -79,100 +69,44 @@ public class SearchLogHelper {
 
     public void storeSearchLog() {
         if (!searchLogQueue.isEmpty()) {
-            processSearchLogQueue();
+            final Queue<SearchLog> queue = searchLogQueue;
+            searchLogQueue = new ConcurrentLinkedQueue<SearchLog>();
+            processSearchLogQueue(queue);
         }
 
         if (!clickLogQueue.isEmpty()) {
-            processClickLogQueue();
+            final Queue<ClickLog> queue = clickLogQueue;
+            clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
+            processClickLogQueue(queue);
         }
     }
 
-    protected void processSearchLogQueue() {
-        final Queue<SearchLog> queue = searchLogQueue;
-        searchLogQueue = new ConcurrentLinkedQueue<SearchLog>();
-        final List<SearchLog> searchLogList = new ArrayList<SearchLog>();
-        final String value = crawlerProperties.getProperty(
-                Constants.PURGE_BY_BOTS_PROPERTY, Constants.EMPTY_STRING);
-        String[] botNames;
-        if (StringUtil.isBlank(value)) {
-            botNames = new String[0];
-        } else {
-            botNames = value.split(",");
-        }
-
-        final Map<String, UserInfo> userInfoMap = new HashMap<String, UserInfo>();
-        for (final SearchLog searchLog : queue) {
-            boolean add = true;
-            for (final String botName : botNames) {
-                if (searchLog.getUserAgent() != null
-                        && searchLog.getUserAgent().indexOf(botName) >= 0) {
-                    add = false;
-                    break;
-                }
-            }
-            if (add) {
-                final UserInfo userInfo = searchLog.getUserInfo();
-                if (userInfo != null) {
-                    final String code = userInfo.getCode();
-                    final UserInfo oldUserInfo = userInfoMap.get(code);
-                    if (oldUserInfo != null) {
-                        userInfo.setCreatedTime(oldUserInfo.getCreatedTime());
-                    }
-                    userInfoMap.put(code, userInfo);
-                }
-                searchLogList.add(searchLog);
-            }
-        }
-
-        if (!userInfoMap.isEmpty()) {
-            final List<UserInfo> insertList = new ArrayList<UserInfo>(
-                    userInfoMap.values());
-            final List<UserInfo> updateList = new ArrayList<UserInfo>();
-            final UserInfoCB cb = new UserInfoCB();
-            cb.query().setCode_InScope(userInfoMap.keySet());
-            final List<UserInfo> list = userInfoBhv.selectList(cb);
-            for (final UserInfo userInfo : list) {
-                final String code = userInfo.getCode();
-                final UserInfo entity = userInfoMap.get(code);
-                FessBeans.copy(userInfo, entity).includes("id", "createdTime")
-                        .execute();
-                updateList.add(entity);
-                insertList.remove(entity);
-            }
-            userInfoBhv.batchInsert(insertList);
-            userInfoBhv.batchUpdate(updateList);
-            for (final SearchLog searchLog : searchLogList) {
-                final UserInfo userInfo = searchLog.getUserInfo();
-                if (userInfo != null) {
-                    final UserInfo entity = userInfoMap.get(userInfo.getCode());
-                    searchLog.setUserId(entity.getId());
-                }
-            }
-        }
-
-        if (!searchLogList.isEmpty()) {
-            searchLogService.store(searchLogList);
-        }
+    public int getClickCount(final String url) {
+        final ClickLogBhv clickLogBhv = SingletonS2Container
+                .getComponent(ClickLogBhv.class);
+        final ClickLogCB cb = new ClickLogCB();
+        cb.query().setUrl_Equal(url);
+        final int count = clickLogBhv.selectCount(cb);
+        return count;
     }
 
-    protected void processClickLogQueue() {
-        final Queue<ClickLog> queue = clickLogQueue;
-        clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
-        final List<ClickLog> clickLogList = new ArrayList<ClickLog>();
-        for (final ClickLog clickLog : queue) {
-            final SearchLogCB cb = new SearchLogCB();
-            cb.query().setRequestedTime_Equal(clickLog.getQueryRequestedTime());
-            cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
-            final SearchLog entity = searchLogBhv.selectEntity(cb);
-            if (entity != null) {
-                clickLog.setSearchId(entity.getId());
-                clickLogList.add(clickLog);
-            } else {
-                logger.warn("Not Found[ClickLog]: " + clickLog);
-            }
+    public long getFavoriteCount(final String url) {
+        final FavoriteLogBhv favoriteLogBhv = SingletonS2Container
+                .getComponent(FavoriteLogBhv.class);
+        final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
+        pmb.setUrl(url);
+        final String path = BsFavoriteLogBhv.PATH_selectFavoriteUrlCount;
+        final ListResultBean<FavoriteUrlCount> list = favoriteLogBhv
+                .outsideSql().selectList(path, pmb, FavoriteUrlCount.class);
+
+        long count = 0;
+        if (!list.isEmpty()) {
+            count = list.get(0).getCnt().longValue();
         }
-        if (!clickLogList.isEmpty()) {
-            clickLogBhv.batchInsert(clickLogList);
-        }
+        return count;
     }
+
+    protected abstract void processSearchLogQueue(Queue<SearchLog> queue);
+
+    protected abstract void processClickLogQueue(Queue<ClickLog> queue);
 }

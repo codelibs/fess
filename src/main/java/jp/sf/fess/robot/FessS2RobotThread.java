@@ -28,14 +28,11 @@ import java.util.Set;
 import jcifs.smb.ACE;
 import jcifs.smb.SID;
 import jp.sf.fess.Constants;
-import jp.sf.fess.db.cbean.ClickLogCB;
-import jp.sf.fess.db.cbean.FavoriteLogCB;
-import jp.sf.fess.db.exbhv.ClickLogBhv;
-import jp.sf.fess.db.exbhv.FavoriteLogBhv;
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SambaHelper;
+import jp.sf.fess.helper.SearchLogHelper;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -168,11 +165,10 @@ public class FessS2RobotThread extends S2RobotThread {
                 final Integer clickCount = (Integer) solrDocument
                         .get(clickCountField);
                 if (clickCount != null) {
-                    final ClickLogBhv clickLogBhv = SingletonS2Container
-                            .getComponent(ClickLogBhv.class);
-                    final ClickLogCB cb = new ClickLogCB();
-                    cb.query().setUrl_Equal(urlQueue.getUrl());
-                    final int count = clickLogBhv.selectCount(cb);
+                    final SearchLogHelper searchLogHelper = SingletonS2Container
+                            .getComponent(SearchLogHelper.class);
+                    final int count = searchLogHelper.getClickCount(urlQueue
+                            .getUrl());
                     if (count != clickCount.intValue()) {
                         deleteSolrDocumentList(oldDocWithRoleList);
                         return true;
@@ -182,12 +178,11 @@ public class FessS2RobotThread extends S2RobotThread {
                 final Integer favoriteCount = (Integer) solrDocument
                         .get(favoriteCountField);
                 if (favoriteCount != null) {
-                    final FavoriteLogBhv favoriteLogBhv = SingletonS2Container
-                            .getComponent(FavoriteLogBhv.class);
-                    final FavoriteLogCB cb = new FavoriteLogCB();
-                    cb.query().setUrl_Equal(urlQueue.getUrl());
-                    final int count = favoriteLogBhv.selectCount(cb);
-                    if (count != favoriteCount.intValue()) {
+                    final SearchLogHelper searchLogHelper = SingletonS2Container
+                            .getComponent(SearchLogHelper.class);
+                    final long count = searchLogHelper
+                            .getFavoriteCount(urlQueue.getUrl());
+                    if (count != favoriteCount.longValue()) {
                         deleteSolrDocumentList(oldDocWithRoleList);
                         return true;
                     }

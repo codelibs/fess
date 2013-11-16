@@ -23,19 +23,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
-import jp.sf.fess.db.bsbhv.BsFavoriteLogBhv;
-import jp.sf.fess.db.cbean.ClickLogCB;
-import jp.sf.fess.db.exbhv.ClickLogBhv;
-import jp.sf.fess.db.exbhv.FavoriteLogBhv;
-import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
-import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.solr.lib.SolrGroup;
-import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,11 +184,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected void addClickCountField(final SolrInputDocument doc,
             final String url) {
-        final ClickLogBhv clickLogBhv = SingletonS2Container
-                .getComponent(ClickLogBhv.class);
-        final ClickLogCB cb = new ClickLogCB();
-        cb.query().setUrl_Equal(url);
-        final int count = clickLogBhv.selectCount(cb);
+        final SearchLogHelper searchLogHelper = SingletonS2Container
+                .getComponent(SearchLogHelper.class);
+        final int count = searchLogHelper.getClickCount(url);
         doc.addField(clickCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Click Count: " + count + ", url: " + url);
@@ -203,19 +195,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected void addFavoriteCountField(final SolrInputDocument doc,
             final String url) {
-        final FavoriteLogBhv favoriteLogBhv = SingletonS2Container
-                .getComponent(FavoriteLogBhv.class);
-        final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
-        pmb.setUrl(url);
-        final String path = BsFavoriteLogBhv.PATH_selectFavoriteUrlCount;
-        final ListResultBean<FavoriteUrlCount> list = favoriteLogBhv
-                .outsideSql().selectList(path, pmb, FavoriteUrlCount.class);
-
-        long count = 0;
-        if (!list.isEmpty()) {
-            count = list.get(0).getCnt().longValue();
-        }
-
+        final SearchLogHelper searchLogHelper = SingletonS2Container
+                .getComponent(SearchLogHelper.class);
+        final long count = searchLogHelper.getFavoriteCount(url);
         doc.addField(favoriteCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Favorite Count: " + count + ", url: " + url);

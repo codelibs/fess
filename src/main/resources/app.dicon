@@ -186,7 +186,11 @@
 			</arg>
 		</initMethod>
 	</component>
-	<component name="searchLogHelper" class="jp.sf.fess.helper.SearchLogHelper">
+	<component name="searchLogHelper" class="jp.sf.fess.helper.impl.SearchLogHelperImpl">
+		<!-- 
+		<property name="userCheckInterval">5 * 60 * 1000</property>
+		<property name="userInfoCacheSize">1000</property>
+		 -->
 	</component>
 	<component name="hotSearchWordHelper" class="jp.sf.fess.helper.HotSearchWordHelper">
 		<property name="excludedWordPattern">@java.util.regex.Pattern@compile(".*[a-zA-Z0-9_]+:.*")</property>
