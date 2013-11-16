@@ -64,7 +64,9 @@ public class TriggeredJob implements Job {
         }
 
         if (systemHelper.startJobExecutoer(id, jobExecutor) != null) {
-            logger.info(jobId + " is running.");
+            if (logger.isDebugEnabled()) {
+                logger.debug(jobId + " is running.");
+            }
             return;
         }
 
@@ -74,15 +76,18 @@ public class TriggeredJob implements Job {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Job " + jobId + "/" + scriptType
-                        + " is executing: " + script);
+                logger.debug("Starting Job " + jobId + ". scriptType: "
+                        + scriptType + ", script: " + script);
+            } else if (logger.isInfoEnabled()) {
+                logger.info("Starting Job " + jobId + ".");
             }
 
             final Object ret = jobExecutor.execute(script);
             if (ret == null) {
-                logger.info("Job " + jobId + " is no response.");
+                logger.info("Finished Job " + jobId + ".");
             } else {
-                logger.info("Job " + jobId + " returns " + ret);
+                logger.info("Finished Job " + jobId
+                        + ". The return value is:\n" + ret);
                 jobLog.setScriptResult(ret.toString());
             }
             jobLog.setJobStatus(Constants.OK);
