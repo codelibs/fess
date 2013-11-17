@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
-import jp.sf.fess.db.exentity.FailureUrl;
 import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.WebAuthentication;
 import jp.sf.fess.db.exentity.WebConfigToBrowserTypeMapping;
@@ -55,13 +54,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     
  * 
  * [referrer table]
- *     FAILURE_URL, REQUEST_HEADER, WEB_AUTHENTICATION, WEB_CONFIG_TO_BROWSER_TYPE_MAPPING, WEB_CONFIG_TO_LABEL_TYPE_MAPPING, WEB_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     REQUEST_HEADER, WEB_AUTHENTICATION, WEB_CONFIG_TO_BROWSER_TYPE_MAPPING, WEB_CONFIG_TO_LABEL_TYPE_MAPPING, WEB_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     failureUrlList, requestHeaderList, webAuthenticationList, webConfigToBrowserTypeMappingList, webConfigToLabelTypeMappingList, webConfigToRoleTypeMappingList
+ *     requestHeaderList, webAuthenticationList, webConfigToBrowserTypeMappingList, webConfigToLabelTypeMappingList, webConfigToRoleTypeMappingList
  * 
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -255,28 +254,6 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     // ===================================================================================
     //                                                                   Referrer Property
     //                                                                   =================
-    /** FAILURE_URL by WEB_CONFIG_ID, named 'failureUrlList'. */
-    protected List<FailureUrl> _failureUrlList;
-
-    /**
-     * FAILURE_URL by WEB_CONFIG_ID, named 'failureUrlList'.
-     * @return The entity list of referrer property 'failureUrlList'. (NotNull: even if no loading, returns empty list)
-     */
-    public List<FailureUrl> getFailureUrlList() {
-        if (_failureUrlList == null) {
-            _failureUrlList = newReferrerList();
-        }
-        return _failureUrlList;
-    }
-
-    /**
-     * FAILURE_URL by WEB_CONFIG_ID, named 'failureUrlList'.
-     * @param failureUrlList The entity list of referrer property 'failureUrlList'. (NullAllowed)
-     */
-    public void setFailureUrlList(final List<FailureUrl> failureUrlList) {
-        _failureUrlList = failureUrlList;
-    }
-
     /** REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'. */
     protected List<RequestHeader> _requestHeaderList;
 
@@ -492,13 +469,6 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
         final String l = "\n  ";
-        if (_failureUrlList != null) {
-            for (final Entity e : _failureUrlList) {
-                if (e != null) {
-                    sb.append(l).append(xbRDS(e, "failureUrlList"));
-                }
-            }
-        }
         if (_requestHeaderList != null) {
             for (final Entity e : _requestHeaderList) {
                 if (e != null) {
@@ -600,9 +570,6 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
         final String c = ",";
-        if (_failureUrlList != null && !_failureUrlList.isEmpty()) {
-            sb.append(c).append("failureUrlList");
-        }
         if (_requestHeaderList != null && !_requestHeaderList.isEmpty()) {
             sb.append(c).append("requestHeaderList");
         }

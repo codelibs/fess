@@ -16,7 +16,10 @@
 
 package jp.sf.fess.service;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +30,18 @@ import javax.annotation.Resource;
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.service.BsFailureUrlService;
 import jp.sf.fess.db.cbean.FailureUrlCB;
+import jp.sf.fess.db.exbhv.FailureUrlBhv;
+import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.db.exentity.FailureUrl;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.pager.FailureUrlPager;
 
+import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 
 public class FailureUrlService extends BsFailureUrlService implements
@@ -61,8 +69,6 @@ public class FailureUrlService extends BsFailureUrlService implements
         super.setupEntityCondition(cb, keys);
 
         // setup condition
-        cb.setupSelect_FileCrawlingConfig();
-        cb.setupSelect_WebCrawlingConfig();
 
     }
 
@@ -113,8 +119,7 @@ public class FailureUrlService extends BsFailureUrlService implements
 
     }
 
-    public List<String> getExcludedUrlList(final Long webConfigId,
-            final Long fileConfigId) {
+    public List<String> getExcludedUrlList(final String configId) {
         final String failureCountStr = crawlerProperties.getProperty(
                 Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
                 Constants.DEFAULT_FAILURE_COUNT);
@@ -133,8 +138,7 @@ public class FailureUrlService extends BsFailureUrlService implements
         }
 
         final FailureUrlCB cb = new FailureUrlCB();
-        cb.query().setWebConfigId_Equal(webConfigId);
-        cb.query().setFileConfigId_Equal(fileConfigId);
+        cb.query().setConfigId_Equal(configId);
         cb.query().setErrorCount_GreaterEqual(failureCount);
         final ListResultBean<FailureUrl> list = failureUrlBhv.selectList(cb);
         if (list.isEmpty()) {
@@ -158,17 +162,50 @@ public class FailureUrlService extends BsFailureUrlService implements
         return urlList;
     }
 
-    public void deleteByFileConfigId(final Long id) {
+    public void deleteByConfigId(final String configId) {
         final FailureUrlCB cb = new FailureUrlCB();
-        cb.query().setFileConfigId_Equal(id);
+        cb.query().setConfigId_Equal(configId);
         failureUrlBhv.varyingQueryDelete(cb,
                 new DeleteOption<FailureUrlCB>().allowNonQueryDelete());
     }
 
-    public void deleteByWebConfigId(final Long id) {
+    public void store(final CrawlingConfig crawlingConfig,
+            final String errorName, final String url, final Throwable e) {
+        final FailureUrlBhv failureUrlBhv = SingletonS2Container
+                .getComponent(FailureUrlBhv.class);
         final FailureUrlCB cb = new FailureUrlCB();
-        cb.query().setWebConfigId_Equal(id);
-        failureUrlBhv.varyingQueryDelete(cb,
-                new DeleteOption<FailureUrlCB>().allowNonQueryDelete());
+        cb.query().setUrl_Equal(url);
+        if (crawlingConfig != null) {
+            cb.query().setConfigId_Equal(crawlingConfig.getConfigId());
+        }
+        FailureUrl failureUrl = failureUrlBhv.selectEntity(cb);
+
+        if (failureUrl != null) {
+            failureUrl.setErrorCount(failureUrl.getErrorCount() + 1);
+        } else {
+            // new
+            failureUrl = new FailureUrl();
+            failureUrl.setErrorCount(1);
+            failureUrl.setUrl(url);
+            if (crawlingConfig != null) {
+                failureUrl.setConfigId(crawlingConfig.getConfigId());
+            }
+        }
+
+        failureUrl.setErrorName(errorName);
+        failureUrl.setErrorLog(StringUtils.abbreviate(getStackTrace(e), 4000));
+        failureUrl.setLastAccessTime(new Timestamp(System.currentTimeMillis()));
+        failureUrl.setThreadName(Thread.currentThread().getName());
+
+        failureUrlBhv.insertOrUpdate(failureUrl);
+    }
+
+    private String getStackTrace(final Throwable t) {
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent(SystemHelper.class);
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
+        t.printStackTrace(pw);
+        return systemHelper.abbreviateLongText(sw.toString());
     }
 }

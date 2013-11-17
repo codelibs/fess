@@ -20,8 +20,6 @@ import java.util.Map;
 
 import jp.sf.fess.db.cbean.FailureUrlCB;
 import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
-import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.bs.AbstractBsFailureUrlCQ;
 import jp.sf.fess.db.cbean.cq.bs.BsFailureUrlCQ;
 
@@ -134,37 +132,8 @@ public class FailureUrlCIQ extends AbstractBsFailureUrlCQ {
     }
 
     @Override
-    protected ConditionValue getCValueWebConfigId() {
-        return _myCQ.getWebConfigId();
-    }
-
-    @Override
-    public String keepWebConfigId_InScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ sq) {
-        return _myCQ.keepWebConfigId_InScopeRelation_WebCrawlingConfig(sq);
-    }
-
-    @Override
-    public String keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ sq) {
-        return _myCQ.keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(sq);
-    }
-
-    @Override
-    protected ConditionValue getCValueFileConfigId() {
-        return _myCQ.getFileConfigId();
-    }
-
-    @Override
-    public String keepFileConfigId_InScopeRelation_FileCrawlingConfig(
-            final FileCrawlingConfigCQ sq) {
-        return _myCQ.keepFileConfigId_InScopeRelation_FileCrawlingConfig(sq);
-    }
-
-    @Override
-    public String keepFileConfigId_NotInScopeRelation_FileCrawlingConfig(
-            final FileCrawlingConfigCQ sq) {
-        return _myCQ.keepFileConfigId_NotInScopeRelation_FileCrawlingConfig(sq);
+    protected ConditionValue getCValueConfigId() {
+        return _myCQ.getConfigId();
     }
 
     @Override

@@ -154,7 +154,7 @@ public class DataConfigToRoleTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_78F3C3A4_FF01_4ECF_A193_4224C74B27FB",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_06775EF6_A065_45AF_8AA1_EB9E46677B83",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDataConfigId = cci("DATA_CONFIG_ID",

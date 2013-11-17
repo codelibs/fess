@@ -401,12 +401,12 @@ public class FileCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_98769B60_EC99_43E9_9C3F_CF1E75ABBF60",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_2B960FF6_C5A8_4126_9DFC_5B2862E189E9",
             false,
             null,
             null,
             null,
-            "failureUrlList,fileAuthenticationList,fileConfigToBrowserTypeMappingList,fileConfigToLabelTypeMappingList,fileConfigToRoleTypeMappingList",
+            "fileAuthenticationList,fileConfigToBrowserTypeMappingList,fileConfigToLabelTypeMappingList,fileConfigToRoleTypeMappingList",
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
@@ -656,13 +656,6 @@ public class FileCrawlingConfigDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
-    public ReferrerInfo referrerFailureUrlList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
-                FailureUrlDbm.getInstance().columnFileConfigId());
-        return cri("CONSTRAINT_FBE", "failureUrlList", this,
-                FailureUrlDbm.getInstance(), map, false, "fileCrawlingConfig");
-    }
-
     public ReferrerInfo referrerFileAuthenticationList() {
         final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
                 FileAuthenticationDbm.getInstance()

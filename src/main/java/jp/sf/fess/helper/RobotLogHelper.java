@@ -16,18 +16,9 @@
 
 package jp.sf.fess.helper;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.Timestamp;
-
-import jp.sf.fess.db.cbean.FailureUrlCB;
-import jp.sf.fess.db.exbhv.FailureUrlBhv;
 import jp.sf.fess.db.exentity.CrawlingConfig;
-import jp.sf.fess.db.exentity.FailureUrl;
-import jp.sf.fess.db.exentity.FileCrawlingConfig;
-import jp.sf.fess.db.exentity.WebCrawlingConfig;
+import jp.sf.fess.service.FailureUrlService;
 
-import org.apache.commons.lang.StringUtils;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.robot.RobotMultipleCrawlAccessException;
 import org.seasar.robot.S2RobotContext;
@@ -40,8 +31,6 @@ import org.slf4j.LoggerFactory;
 public class RobotLogHelper extends LogHelperImpl {
     private static final Logger logger = LoggerFactory // NOPMD
             .getLogger(RobotLogHelper.class);
-
-    public int maxStackTraceLength = 4000;
 
     @Override
     public void log(final LogType key, final Object... objs) {
@@ -90,52 +79,14 @@ public class RobotLogHelper extends LogHelperImpl {
 
     private void storeFailureUrl(final S2RobotContext robotContext,
             final UrlQueue urlQueue, final String errorName, final Throwable e) {
-        Long webConfigId = null;
-        Long fileConfigId = null;
 
         final CrawlingConfig crawlingConfig = getCrawlingConfig(robotContext
                 .getSessionId());
-        if (crawlingConfig instanceof WebCrawlingConfig) {
-            webConfigId = crawlingConfig.getId();
-        } else if (crawlingConfig instanceof FileCrawlingConfig) {
-            fileConfigId = crawlingConfig.getId();
-        } else {
-            return;
-        }
+        final String url = urlQueue.getUrl();
 
-        final FailureUrlBhv failureUrlBhv = SingletonS2Container
-                .getComponent(FailureUrlBhv.class);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.query().setUrl_Equal(urlQueue.getUrl());
-        if (webConfigId != null) {
-            cb.query().setWebConfigId_Equal(webConfigId);
-        }
-        if (fileConfigId != null) {
-            cb.query().setFileConfigId_Equal(fileConfigId);
-        }
-        FailureUrl failureUrl = failureUrlBhv.selectEntity(cb);
-
-        if (failureUrl != null) {
-            failureUrl.setErrorCount(failureUrl.getErrorCount() + 1);
-        } else {
-            // new
-            failureUrl = new FailureUrl();
-            failureUrl.setErrorCount(1);
-            failureUrl.setUrl(urlQueue.getUrl());
-            if (webConfigId != null) {
-                failureUrl.setWebConfigId(webConfigId);
-            }
-            if (fileConfigId != null) {
-                failureUrl.setFileConfigId(fileConfigId);
-            }
-        }
-
-        failureUrl.setErrorName(errorName);
-        failureUrl.setErrorLog(StringUtils.abbreviate(getStackTrace(e), 4000));
-        failureUrl.setLastAccessTime(new Timestamp(System.currentTimeMillis()));
-        failureUrl.setThreadName(Thread.currentThread().getName());
-
-        failureUrlBhv.insertOrUpdate(failureUrl);
+        final FailureUrlService failureUrlService = SingletonS2Container
+                .getComponent(FailureUrlService.class);
+        failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 
     private CrawlingConfig getCrawlingConfig(final String sessionCountId) {
@@ -143,12 +94,4 @@ public class RobotLogHelper extends LogHelperImpl {
                 .get(sessionCountId);
     }
 
-    private String getStackTrace(final Throwable t) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        t.printStackTrace(pw);
-        final String str = sw.toString();
-        return str.length() > maxStackTraceLength ? str.substring(0,
-                maxStackTraceLength) : str;
-    }
 }

@@ -20,11 +20,7 @@ import java.util.Collection;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.FailureUrlCB;
-import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
-import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
-import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
 import org.seasar.dbflute.cbean.ConditionQuery;
@@ -972,347 +968,157 @@ public abstract class AbstractBsFailureUrlCQ extends AbstractConditionQuery {
     abstract protected ConditionValue getCValueLastAccessTime();
 
     /**
-     * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigId The value of webConfigId as equal. (NullAllowed: if null, no condition)
+     * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as equal. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_Equal(final Long webConfigId) {
-        doSetWebConfigId_Equal(webConfigId);
+    public void setConfigId_Equal(final String configId) {
+        doSetConfigId_Equal(fRES(configId));
     }
 
-    protected void doSetWebConfigId_Equal(final Long webConfigId) {
-        regWebConfigId(CK_EQ, webConfigId);
+    protected void doSetConfigId_Equal(final String configId) {
+        regConfigId(CK_EQ, configId);
     }
 
     /**
-     * NotEqual(&lt;&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigId The value of webConfigId as notEqual. (NullAllowed: if null, no condition)
+     * NotEqual(&lt;&gt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as notEqual. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_NotEqual(final Long webConfigId) {
-        doSetWebConfigId_NotEqual(webConfigId);
+    public void setConfigId_NotEqual(final String configId) {
+        doSetConfigId_NotEqual(fRES(configId));
     }
 
-    protected void doSetWebConfigId_NotEqual(final Long webConfigId) {
-        regWebConfigId(CK_NES, webConfigId);
+    protected void doSetConfigId_NotEqual(final String configId) {
+        regConfigId(CK_NES, configId);
     }
 
     /**
-     * GreaterThan(&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigId The value of webConfigId as greaterThan. (NullAllowed: if null, no condition)
+     * GreaterThan(&gt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as greaterThan. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_GreaterThan(final Long webConfigId) {
-        regWebConfigId(CK_GT, webConfigId);
+    public void setConfigId_GreaterThan(final String configId) {
+        regConfigId(CK_GT, fRES(configId));
     }
 
     /**
-     * LessThan(&lt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigId The value of webConfigId as lessThan. (NullAllowed: if null, no condition)
+     * LessThan(&lt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as lessThan. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_LessThan(final Long webConfigId) {
-        regWebConfigId(CK_LT, webConfigId);
+    public void setConfigId_LessThan(final String configId) {
+        regConfigId(CK_LT, fRES(configId));
     }
 
     /**
-     * GreaterEqual(&gt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigId The value of webConfigId as greaterEqual. (NullAllowed: if null, no condition)
+     * GreaterEqual(&gt;=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as greaterEqual. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_GreaterEqual(final Long webConfigId) {
-        regWebConfigId(CK_GE, webConfigId);
+    public void setConfigId_GreaterEqual(final String configId) {
+        regConfigId(CK_GE, fRES(configId));
     }
 
     /**
-     * LessEqual(&lt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigId The value of webConfigId as lessEqual. (NullAllowed: if null, no condition)
+     * LessEqual(&lt;=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as lessEqual. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_LessEqual(final Long webConfigId) {
-        regWebConfigId(CK_LE, webConfigId);
+    public void setConfigId_LessEqual(final String configId) {
+        regConfigId(CK_LE, fRES(configId));
     }
 
     /**
-     * RangeOf with various options. (versatile) <br />
-     * {(default) minNumber &lt;= column &lt;= maxNumber} <br />
-     * And NullIgnored, OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param minNumber The min number of webConfigId. (NullAllowed: if null, no from-condition)
-     * @param maxNumber The max number of webConfigId. (NullAllowed: if null, no to-condition)
-     * @param rangeOfOption The option of range-of. (NotNull)
+     * InScope {in ('a', 'b')}. And NullOrEmptyIgnored, NullOrEmptyElementIgnored, SeveralRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configIdList The collection of configId as inScope. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_RangeOf(final Long minNumber,
-            final Long maxNumber, final RangeOfOption rangeOfOption) {
-        regROO(minNumber, maxNumber, getCValueWebConfigId(), "WEB_CONFIG_ID",
-                rangeOfOption);
+    public void setConfigId_InScope(final Collection<String> configIdList) {
+        doSetConfigId_InScope(configIdList);
+    }
+
+    public void doSetConfigId_InScope(final Collection<String> configIdList) {
+        regINS(CK_INS, cTL(configIdList), getCValueConfigId(), "CONFIG_ID");
     }
 
     /**
-     * InScope {in (1, 2)}. And NullIgnored, NullElementIgnored, SeveralRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigIdList The collection of webConfigId as inScope. (NullAllowed: if null (or empty), no condition)
+     * NotInScope {not in ('a', 'b')}. And NullOrEmptyIgnored, NullOrEmptyElementIgnored, SeveralRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configIdList The collection of configId as notInScope. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_InScope(final Collection<Long> webConfigIdList) {
-        doSetWebConfigId_InScope(webConfigIdList);
+    public void setConfigId_NotInScope(final Collection<String> configIdList) {
+        doSetConfigId_NotInScope(configIdList);
     }
 
-    protected void doSetWebConfigId_InScope(
-            final Collection<Long> webConfigIdList) {
-        regINS(CK_INS, cTL(webConfigIdList), getCValueWebConfigId(),
-                "WEB_CONFIG_ID");
+    public void doSetConfigId_NotInScope(final Collection<String> configIdList) {
+        regINS(CK_NINS, cTL(configIdList), getCValueConfigId(), "CONFIG_ID");
     }
 
     /**
-     * NotInScope {not in (1, 2)}. And NullIgnored, NullElementIgnored, SeveralRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
-     * @param webConfigIdList The collection of webConfigId as notInScope. (NullAllowed: if null (or empty), no condition)
+     * PrefixSearch {like 'xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as prefixSearch. (NullAllowed: if null (or empty), no condition)
      */
-    public void setWebConfigId_NotInScope(final Collection<Long> webConfigIdList) {
-        doSetWebConfigId_NotInScope(webConfigIdList);
-    }
-
-    protected void doSetWebConfigId_NotInScope(
-            final Collection<Long> webConfigIdList) {
-        regINS(CK_NINS, cTL(webConfigIdList), getCValueWebConfigId(),
-                "WEB_CONFIG_ID");
+    public void setConfigId_PrefixSearch(final String configId) {
+        setConfigId_LikeSearch(configId, cLSOP());
     }
 
     /**
-     * Set up InScopeRelation (sub-query). <br />
-     * {in (select WEB_CONFIG_ID from WEB_CRAWLING_CONFIG where ...)} <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @param subQuery The sub-query of WebCrawlingConfig for 'in-scope'. (NotNull)
+     * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)} <br />
+     * <pre>e.g. setConfigId_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * @param configId The value of configId as likeSearch. (NullAllowed: if null (or empty), no condition)
+     * @param likeSearchOption The option of like-search. (NotNull)
      */
-    public void inScopeWebCrawlingConfig(
-            final SubQuery<WebCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<WebCrawlingConfigCB>", subQuery);
-        final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepWebConfigId_InScopeRelation_WebCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "WEB_CONFIG_ID", "ID",
-                subQueryPropertyName, "webCrawlingConfig");
+    public void setConfigId_LikeSearch(final String configId,
+            final LikeSearchOption likeSearchOption) {
+        regLSQ(CK_LS, fRES(configId), getCValueConfigId(), "CONFIG_ID",
+                likeSearchOption);
     }
-
-    public abstract String keepWebConfigId_InScopeRelation_WebCrawlingConfig(
-            WebCrawlingConfigCQ subQuery);
 
     /**
-     * Set up NotInScopeRelation (sub-query). <br />
-     * {not in (select WEB_CONFIG_ID from WEB_CRAWLING_CONFIG where ...)} <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @param subQuery The sub-query of WebCrawlingConfig for 'not in-scope'. (NotNull)
+     * NotLikeSearch with various options. (versatile) {not like 'xxx%' escape ...} <br />
+     * And NullOrEmptyIgnored, SeveralRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @param configId The value of configId as notLikeSearch. (NullAllowed: if null (or empty), no condition)
+     * @param likeSearchOption The option of not-like-search. (NotNull)
      */
-    public void notInScopeWebCrawlingConfig(
-            final SubQuery<WebCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<WebCrawlingConfigCB>", subQuery);
-        final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "WEB_CONFIG_ID", "ID",
-                subQueryPropertyName, "webCrawlingConfig");
+    public void setConfigId_NotLikeSearch(final String configId,
+            final LikeSearchOption likeSearchOption) {
+        regLSQ(CK_NLS, fRES(configId), getCValueConfigId(), "CONFIG_ID",
+                likeSearchOption);
     }
-
-    public abstract String keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(
-            WebCrawlingConfigCQ subQuery);
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+     * CONFIG_ID: {IX, VARCHAR(100)}
      */
-    public void setWebConfigId_IsNull() {
-        regWebConfigId(CK_ISN, DOBJ);
+    public void setConfigId_IsNull() {
+        regConfigId(CK_ISN, DOBJ);
+    }
+
+    /**
+     * IsNullOrEmpty {is null or empty}. And OnlyOnceRegistered. <br />
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     */
+    public void setConfigId_IsNullOrEmpty() {
+        regConfigId(CK_ISNOE, DOBJ);
     }
 
     /**
      * IsNotNull {is not null}. And OnlyOnceRegistered. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+     * CONFIG_ID: {IX, VARCHAR(100)}
      */
-    public void setWebConfigId_IsNotNull() {
-        regWebConfigId(CK_ISNN, DOBJ);
+    public void setConfigId_IsNotNull() {
+        regConfigId(CK_ISNN, DOBJ);
     }
 
-    protected void regWebConfigId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueWebConfigId(), "WEB_CONFIG_ID");
+    protected void regConfigId(final ConditionKey k, final Object v) {
+        regQ(k, v, getCValueConfigId(), "CONFIG_ID");
     }
 
-    abstract protected ConditionValue getCValueWebConfigId();
-
-    /**
-     * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigId The value of fileConfigId as equal. (NullAllowed: if null, no condition)
-     */
-    public void setFileConfigId_Equal(final Long fileConfigId) {
-        doSetFileConfigId_Equal(fileConfigId);
-    }
-
-    protected void doSetFileConfigId_Equal(final Long fileConfigId) {
-        regFileConfigId(CK_EQ, fileConfigId);
-    }
-
-    /**
-     * NotEqual(&lt;&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigId The value of fileConfigId as notEqual. (NullAllowed: if null, no condition)
-     */
-    public void setFileConfigId_NotEqual(final Long fileConfigId) {
-        doSetFileConfigId_NotEqual(fileConfigId);
-    }
-
-    protected void doSetFileConfigId_NotEqual(final Long fileConfigId) {
-        regFileConfigId(CK_NES, fileConfigId);
-    }
-
-    /**
-     * GreaterThan(&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigId The value of fileConfigId as greaterThan. (NullAllowed: if null, no condition)
-     */
-    public void setFileConfigId_GreaterThan(final Long fileConfigId) {
-        regFileConfigId(CK_GT, fileConfigId);
-    }
-
-    /**
-     * LessThan(&lt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigId The value of fileConfigId as lessThan. (NullAllowed: if null, no condition)
-     */
-    public void setFileConfigId_LessThan(final Long fileConfigId) {
-        regFileConfigId(CK_LT, fileConfigId);
-    }
-
-    /**
-     * GreaterEqual(&gt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigId The value of fileConfigId as greaterEqual. (NullAllowed: if null, no condition)
-     */
-    public void setFileConfigId_GreaterEqual(final Long fileConfigId) {
-        regFileConfigId(CK_GE, fileConfigId);
-    }
-
-    /**
-     * LessEqual(&lt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigId The value of fileConfigId as lessEqual. (NullAllowed: if null, no condition)
-     */
-    public void setFileConfigId_LessEqual(final Long fileConfigId) {
-        regFileConfigId(CK_LE, fileConfigId);
-    }
-
-    /**
-     * RangeOf with various options. (versatile) <br />
-     * {(default) minNumber &lt;= column &lt;= maxNumber} <br />
-     * And NullIgnored, OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param minNumber The min number of fileConfigId. (NullAllowed: if null, no from-condition)
-     * @param maxNumber The max number of fileConfigId. (NullAllowed: if null, no to-condition)
-     * @param rangeOfOption The option of range-of. (NotNull)
-     */
-    public void setFileConfigId_RangeOf(final Long minNumber,
-            final Long maxNumber, final RangeOfOption rangeOfOption) {
-        regROO(minNumber, maxNumber, getCValueFileConfigId(), "FILE_CONFIG_ID",
-                rangeOfOption);
-    }
-
-    /**
-     * InScope {in (1, 2)}. And NullIgnored, NullElementIgnored, SeveralRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigIdList The collection of fileConfigId as inScope. (NullAllowed: if null (or empty), no condition)
-     */
-    public void setFileConfigId_InScope(final Collection<Long> fileConfigIdList) {
-        doSetFileConfigId_InScope(fileConfigIdList);
-    }
-
-    protected void doSetFileConfigId_InScope(
-            final Collection<Long> fileConfigIdList) {
-        regINS(CK_INS, cTL(fileConfigIdList), getCValueFileConfigId(),
-                "FILE_CONFIG_ID");
-    }
-
-    /**
-     * NotInScope {not in (1, 2)}. And NullIgnored, NullElementIgnored, SeveralRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @param fileConfigIdList The collection of fileConfigId as notInScope. (NullAllowed: if null (or empty), no condition)
-     */
-    public void setFileConfigId_NotInScope(
-            final Collection<Long> fileConfigIdList) {
-        doSetFileConfigId_NotInScope(fileConfigIdList);
-    }
-
-    protected void doSetFileConfigId_NotInScope(
-            final Collection<Long> fileConfigIdList) {
-        regINS(CK_NINS, cTL(fileConfigIdList), getCValueFileConfigId(),
-                "FILE_CONFIG_ID");
-    }
-
-    /**
-     * Set up InScopeRelation (sub-query). <br />
-     * {in (select FILE_CONFIG_ID from FILE_CRAWLING_CONFIG where ...)} <br />
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @param subQuery The sub-query of FileCrawlingConfig for 'in-scope'. (NotNull)
-     */
-    public void inScopeFileCrawlingConfig(
-            final SubQuery<FileCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
-        final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepFileConfigId_InScopeRelation_FileCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "FILE_CONFIG_ID", "ID",
-                subQueryPropertyName, "fileCrawlingConfig");
-    }
-
-    public abstract String keepFileConfigId_InScopeRelation_FileCrawlingConfig(
-            FileCrawlingConfigCQ subQuery);
-
-    /**
-     * Set up NotInScopeRelation (sub-query). <br />
-     * {not in (select FILE_CONFIG_ID from FILE_CRAWLING_CONFIG where ...)} <br />
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @param subQuery The sub-query of FileCrawlingConfig for 'not in-scope'. (NotNull)
-     */
-    public void notInScopeFileCrawlingConfig(
-            final SubQuery<FileCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
-        final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepFileConfigId_NotInScopeRelation_FileCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "FILE_CONFIG_ID", "ID",
-                subQueryPropertyName, "fileCrawlingConfig");
-    }
-
-    public abstract String keepFileConfigId_NotInScopeRelation_FileCrawlingConfig(
-            FileCrawlingConfigCQ subQuery);
-
-    /**
-     * IsNull {is null}. And OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     */
-    public void setFileConfigId_IsNull() {
-        regFileConfigId(CK_ISN, DOBJ);
-    }
-
-    /**
-     * IsNotNull {is not null}. And OnlyOnceRegistered. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     */
-    public void setFileConfigId_IsNotNull() {
-        regFileConfigId(CK_ISNN, DOBJ);
-    }
-
-    protected void regFileConfigId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueFileConfigId(), "FILE_CONFIG_ID");
-    }
-
-    abstract protected ConditionValue getCValueFileConfigId();
+    abstract protected ConditionValue getCValueConfigId();
 
     // ===================================================================================
     //                                                                     ScalarCondition

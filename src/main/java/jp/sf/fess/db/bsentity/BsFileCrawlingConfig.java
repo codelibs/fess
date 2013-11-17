@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
-import jp.sf.fess.db.exentity.FailureUrl;
 import jp.sf.fess.db.exentity.FileAuthentication;
 import jp.sf.fess.db.exentity.FileConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
@@ -54,13 +53,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     
  * 
  * [referrer table]
- *     FAILURE_URL, FILE_AUTHENTICATION, FILE_CONFIG_TO_BROWSER_TYPE_MAPPING, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     FILE_AUTHENTICATION, FILE_CONFIG_TO_BROWSER_TYPE_MAPPING, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     failureUrlList, fileAuthenticationList, fileConfigToBrowserTypeMappingList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
+ *     fileAuthenticationList, fileConfigToBrowserTypeMappingList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
  * 
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -249,28 +248,6 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
     // ===================================================================================
     //                                                                   Referrer Property
     //                                                                   =================
-    /** FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlList'. */
-    protected List<FailureUrl> _failureUrlList;
-
-    /**
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlList'.
-     * @return The entity list of referrer property 'failureUrlList'. (NotNull: even if no loading, returns empty list)
-     */
-    public List<FailureUrl> getFailureUrlList() {
-        if (_failureUrlList == null) {
-            _failureUrlList = newReferrerList();
-        }
-        return _failureUrlList;
-    }
-
-    /**
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlList'.
-     * @param failureUrlList The entity list of referrer property 'failureUrlList'. (NullAllowed)
-     */
-    public void setFailureUrlList(final List<FailureUrl> failureUrlList) {
-        _failureUrlList = failureUrlList;
-    }
-
     /** FILE_AUTHENTICATION by FILE_CRAWLING_CONFIG_ID, named 'fileAuthenticationList'. */
     protected List<FileAuthentication> _fileAuthenticationList;
 
@@ -464,13 +441,6 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
         final String l = "\n  ";
-        if (_failureUrlList != null) {
-            for (final Entity e : _failureUrlList) {
-                if (e != null) {
-                    sb.append(l).append(xbRDS(e, "failureUrlList"));
-                }
-            }
-        }
         if (_fileAuthenticationList != null) {
             for (final Entity e : _fileAuthenticationList) {
                 if (e != null) {
@@ -564,9 +534,6 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
         final String c = ",";
-        if (_failureUrlList != null && !_failureUrlList.isEmpty()) {
-            sb.append(c).append("failureUrlList");
-        }
         if (_fileAuthenticationList != null
                 && !_fileAuthenticationList.isEmpty()) {
             sb.append(c).append("fileAuthenticationList");

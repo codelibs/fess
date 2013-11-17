@@ -258,7 +258,7 @@ public class RoleTypeDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_0D9BC963_B611_44F0_837B_0F02BD9F4847",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_B5EB0F7F_F5B4_4F0C_AAD3_ECF2AAEA8D9A",
             false,
             null,
             null,

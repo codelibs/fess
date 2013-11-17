@@ -231,7 +231,7 @@ public class JobLogDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_131D8FB9_8D41_4A03_BEB7_9262977BC90D",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_C83BEC8C_23AD_4F46_958A_38A3C242B7D3",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnJobName = cci("JOB_NAME", "JOB_NAME",

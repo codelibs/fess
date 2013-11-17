@@ -111,13 +111,15 @@ public class SystemHelper implements Serializable {
 
     private String launcherFileNamePrefix = "fess-launcher-";
 
+    private int maxTextLength = 4000;
+
+    // readonly
     private String launcherJarPath;
 
+    // readonly
     private String launcherJnlpPath;
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
-
-    private final int maxTextLength = 4000;
 
     @InitMethod
     public void init() {
@@ -591,6 +593,14 @@ public class SystemHelper implements Serializable {
 
     public String getLauncherJnlpPath() {
         return launcherJnlpPath;
+    }
+
+    public int getMaxTextLength() {
+        return maxTextLength;
+    }
+
+    public void setMaxTextLength(final int maxTextLength) {
+        this.maxTextLength = maxTextLength;
     }
 
     public void updateStatus(final SolrGroup solrGroup,

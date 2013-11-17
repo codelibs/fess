@@ -61,11 +61,7 @@ public abstract class BsFailureUrlForm {
     @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
     public String lastAccessTime;
 
-    @LongType
-    public String webConfigId;
-
-    @LongType
-    public String fileConfigId;
+    public String configId;
 
     public void initialize() {
 
@@ -76,8 +72,7 @@ public abstract class BsFailureUrlForm {
         errorLog = null;
         errorCount = null;
         lastAccessTime = null;
-        webConfigId = null;
-        fileConfigId = null;
+        configId = null;
 
     }
 

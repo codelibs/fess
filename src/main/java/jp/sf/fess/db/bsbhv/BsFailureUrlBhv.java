@@ -22,8 +22,6 @@ import jp.sf.fess.db.bsentity.dbmeta.FailureUrlDbm;
 import jp.sf.fess.db.cbean.FailureUrlCB;
 import jp.sf.fess.db.exbhv.FailureUrlBhv;
 import jp.sf.fess.db.exentity.FailureUrl;
-import jp.sf.fess.db.exentity.FileCrawlingConfig;
-import jp.sf.fess.db.exentity.WebCrawlingConfig;
 
 import org.seasar.dbflute.Entity;
 import org.seasar.dbflute.bhv.AbstractBehaviorWritable;
@@ -46,7 +44,7 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *     ID
  * 
  * [column]
- *     ID, URL, THREAD_NAME, ERROR_NAME, ERROR_LOG, ERROR_COUNT, LAST_ACCESS_TIME, WEB_CONFIG_ID, FILE_CONFIG_ID
+ *     ID, URL, THREAD_NAME, ERROR_NAME, ERROR_LOG, ERROR_COUNT, LAST_ACCESS_TIME, CONFIG_ID
  * 
  * [sequence]
  *     
@@ -58,13 +56,13 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *     
  * 
  * [foreign table]
- *     FILE_CRAWLING_CONFIG, WEB_CRAWLING_CONFIG
+ *     
  * 
  * [referrer table]
  *     
  * 
  * [foreign property]
- *     fileCrawlingConfig, webCrawlingConfig
+ *     
  * 
  * [referrer property]
  *     
@@ -473,59 +471,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-    /**
-     * Pull out the list of foreign table 'FileCrawlingConfig'.
-     * @param failureUrlList The list of failureUrl. (NotNull, EmptyAllowed)
-     * @return The list of foreign table. (NotNull, EmptyAllowed, NotNullElement)
-     */
-    public List<FileCrawlingConfig> pulloutFileCrawlingConfig(
-            final List<FailureUrl> failureUrlList) {
-        return helpPulloutInternally(failureUrlList,
-                new InternalPulloutCallback<FailureUrl, FileCrawlingConfig>() {
-                    @Override
-                    public FileCrawlingConfig getFr(final FailureUrl e) {
-                        return e.getFileCrawlingConfig();
-                    }
-
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final FileCrawlingConfig e,
-                            final List<FailureUrl> ls) {
-                        e.setFailureUrlList(ls);
-                    }
-                });
-    }
-
-    /**
-     * Pull out the list of foreign table 'WebCrawlingConfig'.
-     * @param failureUrlList The list of failureUrl. (NotNull, EmptyAllowed)
-     * @return The list of foreign table. (NotNull, EmptyAllowed, NotNullElement)
-     */
-    public List<WebCrawlingConfig> pulloutWebCrawlingConfig(
-            final List<FailureUrl> failureUrlList) {
-        return helpPulloutInternally(failureUrlList,
-                new InternalPulloutCallback<FailureUrl, WebCrawlingConfig>() {
-                    @Override
-                    public WebCrawlingConfig getFr(final FailureUrl e) {
-                        return e.getWebCrawlingConfig();
-                    }
-
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final WebCrawlingConfig e,
-                            final List<FailureUrl> ls) {
-                        e.setFailureUrlList(ls);
-                    }
-                });
-    }
 
     // ===================================================================================
     //                                                                      Extract Column

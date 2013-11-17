@@ -19,7 +19,6 @@ package jp.sf.fess.db.cbean.cq.bs;
 import java.util.Map;
 
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
-import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
 import jp.sf.fess.db.cbean.cq.RequestHeaderCQ;
 import jp.sf.fess.db.cbean.cq.WebAuthenticationCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToBrowserTypeMappingCQ;
@@ -120,24 +119,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getId();
     }
 
-    protected Map<String, FailureUrlCQ> _id_ExistsReferrer_FailureUrlListMap;
-
-    public Map<String, FailureUrlCQ> getId_ExistsReferrer_FailureUrlList() {
-        return _id_ExistsReferrer_FailureUrlListMap;
-    }
-
-    @Override
-    public String keepId_ExistsReferrer_FailureUrlList(
-            final FailureUrlCQ subQuery) {
-        if (_id_ExistsReferrer_FailureUrlListMap == null) {
-            _id_ExistsReferrer_FailureUrlListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_FailureUrlListMap.size() + 1);
-        _id_ExistsReferrer_FailureUrlListMap.put(key, subQuery);
-        return "id_ExistsReferrer_FailureUrlList." + key;
-    }
-
     protected Map<String, RequestHeaderCQ> _id_ExistsReferrer_RequestHeaderListMap;
 
     public Map<String, RequestHeaderCQ> getId_ExistsReferrer_RequestHeaderList() {
@@ -229,24 +210,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
                 + (_id_ExistsReferrer_WebConfigToRoleTypeMappingListMap.size() + 1);
         _id_ExistsReferrer_WebConfigToRoleTypeMappingListMap.put(key, subQuery);
         return "id_ExistsReferrer_WebConfigToRoleTypeMappingList." + key;
-    }
-
-    protected Map<String, FailureUrlCQ> _id_NotExistsReferrer_FailureUrlListMap;
-
-    public Map<String, FailureUrlCQ> getId_NotExistsReferrer_FailureUrlList() {
-        return _id_NotExistsReferrer_FailureUrlListMap;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_FailureUrlList(
-            final FailureUrlCQ subQuery) {
-        if (_id_NotExistsReferrer_FailureUrlListMap == null) {
-            _id_NotExistsReferrer_FailureUrlListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_FailureUrlListMap.size() + 1);
-        _id_NotExistsReferrer_FailureUrlListMap.put(key, subQuery);
-        return "id_NotExistsReferrer_FailureUrlList." + key;
     }
 
     protected Map<String, RequestHeaderCQ> _id_NotExistsReferrer_RequestHeaderListMap;
@@ -343,24 +306,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         _id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap.put(key,
                 subQuery);
         return "id_NotExistsReferrer_WebConfigToRoleTypeMappingList." + key;
-    }
-
-    protected Map<String, FailureUrlCQ> _id_SpecifyDerivedReferrer_FailureUrlListMap;
-
-    public Map<String, FailureUrlCQ> getId_SpecifyDerivedReferrer_FailureUrlList() {
-        return _id_SpecifyDerivedReferrer_FailureUrlListMap;
-    }
-
-    @Override
-    public String keepId_SpecifyDerivedReferrer_FailureUrlList(
-            final FailureUrlCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_FailureUrlListMap == null) {
-            _id_SpecifyDerivedReferrer_FailureUrlListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_FailureUrlListMap.size() + 1);
-        _id_SpecifyDerivedReferrer_FailureUrlListMap.put(key, subQuery);
-        return "id_SpecifyDerivedReferrer_FailureUrlList." + key;
     }
 
     protected Map<String, RequestHeaderCQ> _id_SpecifyDerivedReferrer_RequestHeaderListMap;
@@ -462,24 +407,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
                 + key;
     }
 
-    protected Map<String, FailureUrlCQ> _id_InScopeRelation_FailureUrlListMap;
-
-    public Map<String, FailureUrlCQ> getId_InScopeRelation_FailureUrlList() {
-        return _id_InScopeRelation_FailureUrlListMap;
-    }
-
-    @Override
-    public String keepId_InScopeRelation_FailureUrlList(
-            final FailureUrlCQ subQuery) {
-        if (_id_InScopeRelation_FailureUrlListMap == null) {
-            _id_InScopeRelation_FailureUrlListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_FailureUrlListMap.size() + 1);
-        _id_InScopeRelation_FailureUrlListMap.put(key, subQuery);
-        return "id_InScopeRelation_FailureUrlList." + key;
-    }
-
     protected Map<String, RequestHeaderCQ> _id_InScopeRelation_RequestHeaderListMap;
 
     public Map<String, RequestHeaderCQ> getId_InScopeRelation_RequestHeaderList() {
@@ -573,24 +500,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         _id_InScopeRelation_WebConfigToRoleTypeMappingListMap
                 .put(key, subQuery);
         return "id_InScopeRelation_WebConfigToRoleTypeMappingList." + key;
-    }
-
-    protected Map<String, FailureUrlCQ> _id_NotInScopeRelation_FailureUrlListMap;
-
-    public Map<String, FailureUrlCQ> getId_NotInScopeRelation_FailureUrlList() {
-        return _id_NotInScopeRelation_FailureUrlListMap;
-    }
-
-    @Override
-    public String keepId_NotInScopeRelation_FailureUrlList(
-            final FailureUrlCQ subQuery) {
-        if (_id_NotInScopeRelation_FailureUrlListMap == null) {
-            _id_NotInScopeRelation_FailureUrlListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_FailureUrlListMap.size() + 1);
-        _id_NotInScopeRelation_FailureUrlListMap.put(key, subQuery);
-        return "id_NotInScopeRelation_FailureUrlList." + key;
     }
 
     protected Map<String, RequestHeaderCQ> _id_NotInScopeRelation_RequestHeaderListMap;
@@ -687,43 +596,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         _id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap.put(key,
                 subQuery);
         return "id_NotInScopeRelation_WebConfigToRoleTypeMappingList." + key;
-    }
-
-    protected Map<String, FailureUrlCQ> _id_QueryDerivedReferrer_FailureUrlListMap;
-
-    public Map<String, FailureUrlCQ> getId_QueryDerivedReferrer_FailureUrlList() {
-        return _id_QueryDerivedReferrer_FailureUrlListMap;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FailureUrlList(
-            final FailureUrlCQ subQuery) {
-        if (_id_QueryDerivedReferrer_FailureUrlListMap == null) {
-            _id_QueryDerivedReferrer_FailureUrlListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_FailureUrlListMap.size() + 1);
-        _id_QueryDerivedReferrer_FailureUrlListMap.put(key, subQuery);
-        return "id_QueryDerivedReferrer_FailureUrlList." + key;
-    }
-
-    protected Map<String, Object> _id_QueryDerivedReferrer_FailureUrlListParameterMap;
-
-    public Map<String, Object> getId_QueryDerivedReferrer_FailureUrlListParameter() {
-        return _id_QueryDerivedReferrer_FailureUrlListParameterMap;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FailureUrlListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_FailureUrlListParameterMap == null) {
-            _id_QueryDerivedReferrer_FailureUrlListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_FailureUrlListParameterMap.size() + 1);
-        _id_QueryDerivedReferrer_FailureUrlListParameterMap.put(key,
-                parameterValue);
-        return "id_QueryDerivedReferrer_FailureUrlListParameter." + key;
     }
 
     protected Map<String, RequestHeaderCQ> _id_QueryDerivedReferrer_RequestHeaderListMap;

@@ -154,7 +154,7 @@ public class DataConfigToBrowserTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_E5B07DE6_C536_40E4_8F72_E39704B418C4",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_54B90FC1_2994_458B_B414_189B55C9EE4D",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDataConfigId = cci("DATA_CONFIG_ID",

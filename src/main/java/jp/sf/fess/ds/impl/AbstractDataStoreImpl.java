@@ -119,7 +119,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // lastModified
         // id
 
-        storeData(callback, paramMap, configScriptMap, defaultDataMap);
+        storeData(config, callback, paramMap, configScriptMap, defaultDataMap);
 
     }
 
@@ -162,7 +162,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
     }
 
-    protected abstract void storeData(IndexUpdateCallback callback,
-            Map<String, String> paramMap, Map<String, String> scriptMap,
-            Map<String, Object> defaultDataMap);
+    protected abstract void storeData(DataCrawlingConfig dataConfig,
+            IndexUpdateCallback callback, Map<String, String> paramMap,
+            Map<String, String> scriptMap, Map<String, Object> defaultDataMap);
 }

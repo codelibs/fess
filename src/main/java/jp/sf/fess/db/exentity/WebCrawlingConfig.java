@@ -228,10 +228,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
 
     @Override
     public String getConfigId() {
-        if (getId() != null) {
-            return Constants.WEB_CONFIG_ID_PREFIX + getId().toString();
-        }
-        return null;
+        return ConfigType.WEB.getConfigId(getId());
     }
 
     @Override

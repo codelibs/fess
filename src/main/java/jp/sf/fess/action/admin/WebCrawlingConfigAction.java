@@ -139,7 +139,7 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
                         new Object[] { webCrawlingConfigForm.id });
             }
 
-            failureUrlService.deleteByWebConfigId(webCrawlingConfig.getId());
+            failureUrlService.deleteByConfigId(webCrawlingConfig.getConfigId());
 
             //     webCrawlingConfigService.delete(webCrawlingConfig);
             final String username = systemHelper.getUsername();

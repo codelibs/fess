@@ -258,7 +258,7 @@ public class BrowserTypeDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D41CA918_16A9_416B_B647_2C87A057862D",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_22259CE8_7A1A_48C9_B0CC_2E33C7875229",
             false,
             null,
             null,

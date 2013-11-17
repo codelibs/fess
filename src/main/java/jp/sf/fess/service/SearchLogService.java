@@ -204,8 +204,10 @@ public class SearchLogService extends BsSearchLogService implements
                     entity.setAccessType(list.get(12));
                     if (list.size() >= 14) {
                         final String jsonStr = list.get(13);
+                        @SuppressWarnings("rawtypes")
                         final List objList = JSON.decode(jsonStr);
                         for (final Object obj : objList) {
+                            @SuppressWarnings("rawtypes")
                             final Map objMap = (Map) obj;
                             entity.addSearchFieldLogValue(
                                     (String) objMap.get(Constants.ITEM_NAME),

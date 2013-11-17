@@ -44,6 +44,7 @@ import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.WebApiUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.codelibs.core.CoreLibConstants;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -478,7 +479,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("</data>");
         } else if (obj instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(
-                    Constants.DATE_FORMAT_ISO_8601_EXTEND);
+                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             buf.append(StringEscapeUtils.escapeXml(sdf.format(obj)));
         } else if (obj != null) {
             buf.append(StringEscapeUtils.escapeXml(obj.toString()));

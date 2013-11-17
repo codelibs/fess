@@ -137,7 +137,8 @@ public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
                         new Object[] { fileCrawlingConfigForm.id });
             }
 
-            failureUrlService.deleteByFileConfigId(fileCrawlingConfig.getId());
+            failureUrlService
+                    .deleteByConfigId(fileCrawlingConfig.getConfigId());
 
             //fileCrawlingConfigService.delete(fileCrawlingConfig);
             final String username = systemHelper.getUsername();

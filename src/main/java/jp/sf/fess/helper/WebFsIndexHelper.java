@@ -238,7 +238,7 @@ public class WebFsIndexHelper implements Serializable {
 
             // failure url
             final List<String> excludedUrlList = failureUrlService
-                    .getExcludedUrlList(webCrawlingConfig.getId(), null);
+                    .getExcludedUrlList(webCrawlingConfig.getConfigId());
             if (excludedUrlList != null) {
                 for (final String u : excludedUrlList) {
                     if (StringUtil.isNotBlank(u)) {
@@ -364,7 +364,7 @@ public class WebFsIndexHelper implements Serializable {
 
             // failure url
             final List<String> excludedUrlList = failureUrlService
-                    .getExcludedUrlList(null, fileCrawlingConfig.getId());
+                    .getExcludedUrlList(fileCrawlingConfig.getConfigId());
             if (excludedUrlList != null) {
                 for (final String u : excludedUrlList) {
                     if (StringUtil.isNotBlank(u)) {

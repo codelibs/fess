@@ -224,10 +224,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
 
     @Override
     public String getConfigId() {
-        if (getId() != null) {
-            return Constants.FILE_CONFIG_ID_PREFIX + getId().toString();
-        }
-        return null;
+        return ConfigType.FILE.getConfigId(getId());
     }
 
     @Override

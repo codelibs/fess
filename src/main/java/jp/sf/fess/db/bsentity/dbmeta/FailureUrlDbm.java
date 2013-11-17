@@ -28,7 +28,6 @@ import org.seasar.dbflute.Entity;
 import org.seasar.dbflute.dbmeta.AbstractDBMeta;
 import org.seasar.dbflute.dbmeta.PropertyGateway;
 import org.seasar.dbflute.dbmeta.info.ColumnInfo;
-import org.seasar.dbflute.dbmeta.info.ForeignInfo;
 import org.seasar.dbflute.dbmeta.info.UniqueInfo;
 import org.seasar.dbflute.dbmeta.name.TableSqlName;
 
@@ -70,8 +69,7 @@ public class FailureUrlDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgErrorLog(), "errorLog");
         setupEpg(_epgMap, new EpgErrorCount(), "errorCount");
         setupEpg(_epgMap, new EpgLastAccessTime(), "lastAccessTime");
-        setupEpg(_epgMap, new EpgWebConfigId(), "webConfigId");
-        setupEpg(_epgMap, new EpgFileConfigId(), "fileConfigId");
+        setupEpg(_epgMap, new EpgConfigId(), "configId");
     }
 
     @Override
@@ -163,27 +161,15 @@ public class FailureUrlDbm extends AbstractDBMeta {
         }
     }
 
-    public static class EpgWebConfigId implements PropertyGateway {
+    public static class EpgConfigId implements PropertyGateway {
         @Override
         public Object read(final Entity e) {
-            return ((FailureUrl) e).getWebConfigId();
+            return ((FailureUrl) e).getConfigId();
         }
 
         @Override
         public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setWebConfigId(ctl(v));
-        }
-    }
-
-    public static class EpgFileConfigId implements PropertyGateway {
-        @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getFileConfigId();
-        }
-
-        @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setFileConfigId(ctl(v));
+            ((FailureUrl) e).setConfigId((String) v);
         }
     }
 
@@ -232,7 +218,7 @@ public class FailureUrlDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_4A115054_9480_4EE9_86AB_7EAEF962B3A2",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_7B2DAF5F_D6A4_4685_9369_BB3D040D4CE8",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null, true,
@@ -261,15 +247,9 @@ public class FailureUrlDbm extends AbstractDBMeta {
             java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
-    protected final ColumnInfo _columnWebConfigId = cci("WEB_CONFIG_ID",
-            "WEB_CONFIG_ID", null, null, false, "webConfigId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
-            "webCrawlingConfig", null, null);
-
-    protected final ColumnInfo _columnFileConfigId = cci("FILE_CONFIG_ID",
-            "FILE_CONFIG_ID", null, null, false, "fileConfigId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
-            "fileCrawlingConfig", null, null);
+    protected final ColumnInfo _columnConfigId = cci("CONFIG_ID", "CONFIG_ID",
+            null, null, false, "configId", String.class, false, false,
+            "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     public ColumnInfo columnId() {
         return _columnId;
@@ -299,12 +279,8 @@ public class FailureUrlDbm extends AbstractDBMeta {
         return _columnLastAccessTime;
     }
 
-    public ColumnInfo columnWebConfigId() {
-        return _columnWebConfigId;
-    }
-
-    public ColumnInfo columnFileConfigId() {
-        return _columnFileConfigId;
+    public ColumnInfo columnConfigId() {
+        return _columnConfigId;
     }
 
     @Override
@@ -317,8 +293,7 @@ public class FailureUrlDbm extends AbstractDBMeta {
         ls.add(columnErrorLog());
         ls.add(columnErrorCount());
         ls.add(columnLastAccessTime());
-        ls.add(columnWebConfigId());
-        ls.add(columnFileConfigId());
+        ls.add(columnConfigId());
         return ls;
     }
 
@@ -353,23 +328,6 @@ public class FailureUrlDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
-    public ForeignInfo foreignFileCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
-                columnFileConfigId(), FileCrawlingConfigDbm.getInstance()
-                        .columnId());
-        return cfi("CONSTRAINT_FBE", "fileCrawlingConfig", this,
-                FileCrawlingConfigDbm.getInstance(), map, 0, false, false,
-                false, false, null, null, false, "failureUrlList");
-    }
-
-    public ForeignInfo foreignWebCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
-                columnWebConfigId(), WebCrawlingConfigDbm.getInstance()
-                        .columnId());
-        return cfi("CONSTRAINT_FBE3", "webCrawlingConfig", this,
-                WebCrawlingConfigDbm.getInstance(), map, 1, false, false,
-                false, false, null, null, false, "failureUrlList");
-    }
 
     // -----------------------------------------------------
     //                                     Referrer Property

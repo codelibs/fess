@@ -284,7 +284,7 @@ public class LabelTypeDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_060CF1E5_6E83_486D_9C25_2D972AF6F355",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_61698DC2_5A75_4C92_B9FB_59225A037C16",
             false,
             null,
             null,

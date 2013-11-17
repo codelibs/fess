@@ -36,6 +36,7 @@ import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.ds.DataStoreFactory;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.BrowserTypeService;
+import jp.sf.fess.service.FailureUrlService;
 import jp.sf.fess.service.LabelTypeService;
 import jp.sf.fess.service.RoleTypeService;
 import jp.sf.fess.util.FessBeans;
@@ -64,6 +65,9 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
 
     @Resource
     protected DataStoreFactory dataStoreFactory;
+
+    @Resource
+    protected FailureUrlService failureUrlService;
 
     @Resource
     protected SystemHelper systemHelper;
@@ -141,6 +145,9 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
                         "errors.crud_could_not_find_crud_table",
                         new Object[] { dataCrawlingConfigForm.id });
             }
+
+            failureUrlService
+                    .deleteByConfigId(dataCrawlingConfig.getConfigId());
 
             //dataCrawlingConfigService.delete(dataCrawlingConfig);
             final String username = systemHelper.getUsername();

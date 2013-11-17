@@ -23,8 +23,6 @@ import java.util.Set;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.exentity.FailureUrl;
-import jp.sf.fess.db.exentity.FileCrawlingConfig;
-import jp.sf.fess.db.exentity.WebCrawlingConfig;
 
 import org.seasar.dbflute.Entity;
 import org.seasar.dbflute.dbmeta.DBMeta;
@@ -36,7 +34,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     ID
  * 
  * [column]
- *     ID, URL, THREAD_NAME, ERROR_NAME, ERROR_LOG, ERROR_COUNT, LAST_ACCESS_TIME, WEB_CONFIG_ID, FILE_CONFIG_ID
+ *     ID, URL, THREAD_NAME, ERROR_NAME, ERROR_LOG, ERROR_COUNT, LAST_ACCESS_TIME, CONFIG_ID
  * 
  * [sequence]
  *     
@@ -48,13 +46,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     
  * 
  * [foreign table]
- *     FILE_CRAWLING_CONFIG, WEB_CRAWLING_CONFIG
+ *     
  * 
  * [referrer table]
  *     
  * 
  * [foreign property]
- *     fileCrawlingConfig, webCrawlingConfig
+ *     
  * 
  * [referrer property]
  *     
@@ -68,8 +66,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * String errorLog = entity.getErrorLog();
  * Integer errorCount = entity.getErrorCount();
  * java.sql.Timestamp lastAccessTime = entity.getLastAccessTime();
- * Long webConfigId = entity.getWebConfigId();
- * Long fileConfigId = entity.getFileConfigId();
+ * String configId = entity.getConfigId();
  * entity.setId(id);
  * entity.setUrl(url);
  * entity.setThreadName(threadName);
@@ -77,8 +74,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * entity.setErrorLog(errorLog);
  * entity.setErrorCount(errorCount);
  * entity.setLastAccessTime(lastAccessTime);
- * entity.setWebConfigId(webConfigId);
- * entity.setFileConfigId(fileConfigId);
+ * entity.setConfigId(configId);
  * = = = = = = = = = =/
  * </pre>
  * @author DBFlute(AutoGenerator)
@@ -118,11 +114,8 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     /** LAST_ACCESS_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} */
     protected java.sql.Timestamp _lastAccessTime;
 
-    /** WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG} */
-    protected Long _webConfigId;
-
-    /** FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG} */
-    protected Long _fileConfigId;
+    /** CONFIG_ID: {IX, VARCHAR(100)} */
+    protected String _configId;
 
     // -----------------------------------------------------
     //                                              Internal
@@ -177,45 +170,6 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
-    /** FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'. */
-    protected FileCrawlingConfig _fileCrawlingConfig;
-
-    /**
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @return The entity of foreign property 'fileCrawlingConfig'. (NullAllowed: when e.g. null FK column, no setupSelect)
-     */
-    public FileCrawlingConfig getFileCrawlingConfig() {
-        return _fileCrawlingConfig;
-    }
-
-    /**
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @param fileCrawlingConfig The entity of foreign property 'fileCrawlingConfig'. (NullAllowed)
-     */
-    public void setFileCrawlingConfig(
-            final FileCrawlingConfig fileCrawlingConfig) {
-        _fileCrawlingConfig = fileCrawlingConfig;
-    }
-
-    /** WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'. */
-    protected WebCrawlingConfig _webCrawlingConfig;
-
-    /**
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The entity of foreign property 'webCrawlingConfig'. (NullAllowed: when e.g. null FK column, no setupSelect)
-     */
-    public WebCrawlingConfig getWebCrawlingConfig() {
-        return _webCrawlingConfig;
-    }
-
-    /**
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @param webCrawlingConfig The entity of foreign property 'webCrawlingConfig'. (NullAllowed)
-     */
-    public void setWebCrawlingConfig(final WebCrawlingConfig webCrawlingConfig) {
-        _webCrawlingConfig = webCrawlingConfig;
-    }
-
     // ===================================================================================
     //                                                                   Referrer Property
     //                                                                   =================
@@ -319,19 +273,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
-        if (_fileCrawlingConfig != null) {
-            sb.append(l).append(
-                    xbRDS(_fileCrawlingConfig, "fileCrawlingConfig"));
-        }
-        if (_webCrawlingConfig != null) {
-            sb.append(l).append(xbRDS(_webCrawlingConfig, "webCrawlingConfig"));
-        }
         return sb.toString();
-    }
-
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
     }
 
     /**
@@ -364,8 +306,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
         sb.append(delimiter).append(getErrorLog());
         sb.append(delimiter).append(getErrorCount());
         sb.append(delimiter).append(getLastAccessTime());
-        sb.append(delimiter).append(getWebConfigId());
-        sb.append(delimiter).append(getFileConfigId());
+        sb.append(delimiter).append(getConfigId());
         if (sb.length() > delimiter.length()) {
             sb.delete(0, delimiter.length());
         }
@@ -374,18 +315,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     protected String buildRelationString() {
-        final StringBuilder sb = new StringBuilder();
-        final String c = ",";
-        if (_fileCrawlingConfig != null) {
-            sb.append(c).append("fileCrawlingConfig");
-        }
-        if (_webCrawlingConfig != null) {
-            sb.append(c).append("webCrawlingConfig");
-        }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
-        }
-        return sb.toString();
+        return "";
     }
 
     /**
@@ -525,36 +455,19 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [get] WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG} <br />
-     * @return The value of the column 'WEB_CONFIG_ID'. (NullAllowed even if selected: for no constraint)
+     * [get] CONFIG_ID: {IX, VARCHAR(100)} <br />
+     * @return The value of the column 'CONFIG_ID'. (NullAllowed even if selected: for no constraint)
      */
-    public Long getWebConfigId() {
-        return _webConfigId;
+    public String getConfigId() {
+        return _configId;
     }
 
     /**
-     * [set] WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG} <br />
-     * @param webConfigId The value of the column 'WEB_CONFIG_ID'. (NullAllowed: null update allowed for no constraint)
+     * [set] CONFIG_ID: {IX, VARCHAR(100)} <br />
+     * @param configId The value of the column 'CONFIG_ID'. (NullAllowed: null update allowed for no constraint)
      */
-    public void setWebConfigId(final Long webConfigId) {
-        __modifiedProperties.addPropertyName("webConfigId");
-        _webConfigId = webConfigId;
-    }
-
-    /**
-     * [get] FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG} <br />
-     * @return The value of the column 'FILE_CONFIG_ID'. (NullAllowed even if selected: for no constraint)
-     */
-    public Long getFileConfigId() {
-        return _fileConfigId;
-    }
-
-    /**
-     * [set] FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG} <br />
-     * @param fileConfigId The value of the column 'FILE_CONFIG_ID'. (NullAllowed: null update allowed for no constraint)
-     */
-    public void setFileConfigId(final Long fileConfigId) {
-        __modifiedProperties.addPropertyName("fileConfigId");
-        _fileConfigId = fileConfigId;
+    public void setConfigId(final String configId) {
+        __modifiedProperties.addPropertyName("configId");
+        _configId = configId;
     }
 }

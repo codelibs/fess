@@ -19,19 +19,16 @@ package jp.sf.fess.db.bsbhv;
 import java.util.List;
 
 import jp.sf.fess.db.bsentity.dbmeta.FileCrawlingConfigDbm;
-import jp.sf.fess.db.cbean.FailureUrlCB;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
 import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.FailureUrlBhv;
 import jp.sf.fess.db.exbhv.FileAuthenticationBhv;
 import jp.sf.fess.db.exbhv.FileConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileCrawlingConfigBhv;
-import jp.sf.fess.db.exentity.FailureUrl;
 import jp.sf.fess.db.exentity.FileAuthentication;
 import jp.sf.fess.db.exentity.FileConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
@@ -76,13 +73,13 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *     
  * 
  * [referrer table]
- *     FAILURE_URL, FILE_AUTHENTICATION, FILE_CONFIG_TO_BROWSER_TYPE_MAPPING, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     FILE_AUTHENTICATION, FILE_CONFIG_TO_BROWSER_TYPE_MAPPING, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     failureUrlList, fileAuthenticationList, fileConfigToBrowserTypeMappingList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
+ *     fileAuthenticationList, fileConfigToBrowserTypeMappingList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
@@ -498,135 +495,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                       Load Referrer
     //                                                                       =============
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param fileCrawlingConfig The entity of fileCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadFailureUrlList(final FileCrawlingConfig fileCrawlingConfig,
-            final ConditionBeanSetupper<FailureUrlCB> conditionBeanSetupper) {
-        xassLRArg(fileCrawlingConfig, conditionBeanSetupper);
-        loadFailureUrlList(xnewLRLs(fileCrawlingConfig), conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of failureUrlList with the set-upper for condition-bean of referrer. <br />
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlList'.
-     * <pre>
-     * fileCrawlingConfigBhv.<span style="color: #FD4747">loadFailureUrlList</span>(fileCrawlingConfigList, new ConditionBeanSetupper&lt;FailureUrlCB&gt;() {
-     *     public void setup(FailureUrlCB cb) {
-     *         cb.setupSelect...();
-     *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
-     *     }
-     * });
-     * for (FileCrawlingConfig fileCrawlingConfig : fileCrawlingConfigList) {
-     *     ... = fileCrawlingConfig.<span style="color: #FD4747">getFailureUrlList()</span>;
-     * }
-     * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
-     * <pre>
-     * cb.query().setFileConfigId_InScope(pkList);
-     * cb.query().addOrderBy_FileConfigId_Asc();
-     * </pre>
-     * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadFailureUrlList(
-            final List<FileCrawlingConfig> fileCrawlingConfigList,
-            final ConditionBeanSetupper<FailureUrlCB> conditionBeanSetupper) {
-        xassLRArg(fileCrawlingConfigList, conditionBeanSetupper);
-        loadFailureUrlList(fileCrawlingConfigList,
-                new LoadReferrerOption<FailureUrlCB, FailureUrl>()
-                        .xinit(conditionBeanSetupper));
-    }
-
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param fileCrawlingConfig The entity of fileCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadFailureUrlList(
-            final FileCrawlingConfig fileCrawlingConfig,
-            final LoadReferrerOption<FailureUrlCB, FailureUrl> loadReferrerOption) {
-        xassLRArg(fileCrawlingConfig, loadReferrerOption);
-        loadFailureUrlList(xnewLRLs(fileCrawlingConfig), loadReferrerOption);
-    }
-
-    /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
-     * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadFailureUrlList(
-            final List<FileCrawlingConfig> fileCrawlingConfigList,
-            final LoadReferrerOption<FailureUrlCB, FailureUrl> loadReferrerOption) {
-        xassLRArg(fileCrawlingConfigList, loadReferrerOption);
-        if (fileCrawlingConfigList.isEmpty()) {
-            return;
-        }
-        final FailureUrlBhv referrerBhv = xgetBSFLR().select(
-                FailureUrlBhv.class);
-        helpLoadReferrerInternally(
-                fileCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<FileCrawlingConfig, Long, FailureUrlCB, FailureUrl>() {
-                    @Override
-                    public Long getPKVal(final FileCrawlingConfig e) {
-                        return e.getId();
-                    }
-
-                    @Override
-                    public void setRfLs(final FileCrawlingConfig e,
-                            final List<FailureUrl> ls) {
-                        e.setFailureUrlList(ls);
-                    }
-
-                    @Override
-                    public FailureUrlCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final FailureUrlCB cb,
-                            final List<Long> ls) {
-                        cb.query().setFileConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final FailureUrlCB cb) {
-                        cb.query().addOrderBy_FileConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final FailureUrlCB cb) {
-                        cb.specify().columnFileConfigId();
-                    }
-
-                    @Override
-                    public List<FailureUrl> selRfLs(final FailureUrlCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final FailureUrl e) {
-                        return e.getFileConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final FailureUrl re,
-                            final FileCrawlingConfig le) {
-                        re.setFileCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "failureUrlList";
-                    }
-                });
-    }
-
     /**
      * {Refer to overload method that has an argument of the list of entity.}
      * @param fileCrawlingConfig The entity of fileCrawlingConfig. (NotNull)

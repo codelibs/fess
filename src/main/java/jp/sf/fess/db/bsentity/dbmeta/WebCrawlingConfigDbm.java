@@ -414,12 +414,12 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_A3B5DAAB_8D15_4A8A_8261_C0B3426CE65C",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_853D1307_E292_48A2_B130_C0D28306B556",
             false,
             null,
             null,
             null,
-            "failureUrlList,requestHeaderList,webAuthenticationList,webConfigToBrowserTypeMappingList,webConfigToLabelTypeMappingList,webConfigToRoleTypeMappingList",
+            "requestHeaderList,webAuthenticationList,webConfigToBrowserTypeMappingList,webConfigToLabelTypeMappingList,webConfigToRoleTypeMappingList",
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
@@ -678,13 +678,6 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
-    public ReferrerInfo referrerFailureUrlList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
-                FailureUrlDbm.getInstance().columnWebConfigId());
-        return cri("CONSTRAINT_FBE3", "failureUrlList", this,
-                FailureUrlDbm.getInstance(), map, false, "webCrawlingConfig");
-    }
-
     public ReferrerInfo referrerRequestHeaderList() {
         final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
                 RequestHeaderDbm.getInstance().columnWebCrawlingConfigId());

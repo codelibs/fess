@@ -18,8 +18,6 @@ package jp.sf.fess.db.cbean.nss;
 
 import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
 
-import org.seasar.dbflute.cbean.ConditionQuery;
-
 /**
  * The nest select set-upper of FAILURE_URL.
  * @author DBFlute(AutoGenerator)
@@ -42,34 +40,5 @@ public class FailureUrlNss {
     // ===================================================================================
     //                                                                     Nested Relation
     //                                                                     ===============
-    /**
-     * With nested relation columns to select clause. <br />
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
-     */
-    public FileCrawlingConfigNss withFileCrawlingConfig() {
-        _query.doNss(new FailureUrlCQ.NssCall() {
-            @Override
-            public ConditionQuery qf() {
-                return _query.queryFileCrawlingConfig();
-            }
-        });
-        return new FileCrawlingConfigNss(_query.queryFileCrawlingConfig());
-    }
-
-    /**
-     * With nested relation columns to select clause. <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
-     */
-    public WebCrawlingConfigNss withWebCrawlingConfig() {
-        _query.doNss(new FailureUrlCQ.NssCall() {
-            @Override
-            public ConditionQuery qf() {
-                return _query.queryWebCrawlingConfig();
-            }
-        });
-        return new WebCrawlingConfigNss(_query.queryWebCrawlingConfig());
-    }
 
 }

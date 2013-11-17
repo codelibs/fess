@@ -21,13 +21,7 @@ import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.allcommon.ImplementedInvokerAssistant;
 import jp.sf.fess.db.allcommon.ImplementedSqlClauseCreator;
 import jp.sf.fess.db.cbean.FailureUrlCB;
-import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
-import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
-import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.nss.FileCrawlingConfigNss;
-import jp.sf.fess.db.cbean.nss.WebCrawlingConfigNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -296,83 +290,6 @@ public class BsFailureUrlCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected FileCrawlingConfigNss _nssFileCrawlingConfig;
-
-    public FileCrawlingConfigNss getNssFileCrawlingConfig() {
-        if (_nssFileCrawlingConfig == null) {
-            _nssFileCrawlingConfig = new FileCrawlingConfigNss(null);
-        }
-        return _nssFileCrawlingConfig;
-    }
-
-    /**
-     * Set up relation columns to select clause. <br />
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * <pre>
-     * FailureUrlCB cb = new FailureUrlCB();
-     * cb.<span style="color: #FD4747">setupSelect_FileCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
-     * cb.query().setFoo...(value);
-     * FailureUrl failureUrl = failureUrlBhv.selectEntityWithDeletedCheck(cb);
-     * ... = failureUrl.<span style="color: #FD4747">getFileCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
-     * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
-     */
-    public FileCrawlingConfigNss setupSelect_FileCrawlingConfig() {
-        if (hasSpecifiedColumn()) { // if reverse call
-            specify().columnFileConfigId();
-        }
-        doSetupSelect(new SsCall() {
-            @Override
-            public ConditionQuery qf() {
-                return query().queryFileCrawlingConfig();
-            }
-        });
-        if (_nssFileCrawlingConfig == null
-                || !_nssFileCrawlingConfig.hasConditionQuery()) {
-            _nssFileCrawlingConfig = new FileCrawlingConfigNss(query()
-                    .queryFileCrawlingConfig());
-        }
-        return _nssFileCrawlingConfig;
-    }
-
-    protected WebCrawlingConfigNss _nssWebCrawlingConfig;
-
-    public WebCrawlingConfigNss getNssWebCrawlingConfig() {
-        if (_nssWebCrawlingConfig == null) {
-            _nssWebCrawlingConfig = new WebCrawlingConfigNss(null);
-        }
-        return _nssWebCrawlingConfig;
-    }
-
-    /**
-     * Set up relation columns to select clause. <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * <pre>
-     * FailureUrlCB cb = new FailureUrlCB();
-     * cb.<span style="color: #FD4747">setupSelect_WebCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
-     * cb.query().setFoo...(value);
-     * FailureUrl failureUrl = failureUrlBhv.selectEntityWithDeletedCheck(cb);
-     * ... = failureUrl.<span style="color: #FD4747">getWebCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
-     * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
-     */
-    public WebCrawlingConfigNss setupSelect_WebCrawlingConfig() {
-        if (hasSpecifiedColumn()) { // if reverse call
-            specify().columnWebConfigId();
-        }
-        doSetupSelect(new SsCall() {
-            @Override
-            public ConditionQuery qf() {
-                return query().queryWebCrawlingConfig();
-            }
-        });
-        if (_nssWebCrawlingConfig == null
-                || !_nssWebCrawlingConfig.hasConditionQuery()) {
-            _nssWebCrawlingConfig = new WebCrawlingConfigNss(query()
-                    .queryWebCrawlingConfig());
-        }
-        return _nssWebCrawlingConfig;
-    }
 
     // [DBFlute-0.7.4]
     // ===================================================================================
@@ -428,10 +345,6 @@ public class BsFailureUrlCB extends AbstractConditionBean {
 
     public static class HpSpecification extends
             HpAbstractSpecification<FailureUrlCQ> {
-        protected FileCrawlingConfigCB.HpSpecification _fileCrawlingConfig;
-
-        protected WebCrawlingConfigCB.HpSpecification _webCrawlingConfig;
-
         public HpSpecification(final ConditionBean baseCB,
                 final HpSpQyCall<FailureUrlCQ> qyCall,
                 final HpCBPurpose purpose, final DBMetaProvider dbmetaProvider) {
@@ -495,19 +408,11 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         }
 
         /**
-         * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+         * CONFIG_ID: {IX, VARCHAR(100)}
          * @return The information object of specified column. (NotNull)
          */
-        public HpSpecifiedColumn columnWebConfigId() {
-            return doColumn("WEB_CONFIG_ID");
-        }
-
-        /**
-         * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-         * @return The information object of specified column. (NotNull)
-         */
-        public HpSpecifiedColumn columnFileConfigId() {
-            return doColumn("FILE_CONFIG_ID");
+        public HpSpecifiedColumn columnConfigId() {
+            return doColumn("CONFIG_ID");
         }
 
         @Override
@@ -523,109 +428,11 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         @Override
         protected void doSpecifyRequiredColumn() {
             columnId(); // PK
-            if (qyCall().qy().hasConditionQueryFileCrawlingConfig()
-                    || qyCall().qy().xgetReferrerQuery() instanceof FileCrawlingConfigCQ) {
-                columnFileConfigId(); // FK or one-to-one referrer
-            }
-            if (qyCall().qy().hasConditionQueryWebCrawlingConfig()
-                    || qyCall().qy().xgetReferrerQuery() instanceof WebCrawlingConfigCQ) {
-                columnWebConfigId(); // FK or one-to-one referrer
-            }
         }
 
         @Override
         protected String getTableDbName() {
             return "FAILURE_URL";
-        }
-
-        /**
-         * Prepare to specify functions about relation table. <br />
-         * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-         * @return The instance for specification for relation table to specify. (NotNull)
-         */
-        public FileCrawlingConfigCB.HpSpecification specifyFileCrawlingConfig() {
-            assertRelation("fileCrawlingConfig");
-            if (_fileCrawlingConfig == null) {
-                _fileCrawlingConfig = new FileCrawlingConfigCB.HpSpecification(
-                        _baseCB, new HpSpQyCall<FileCrawlingConfigCQ>() {
-                            @Override
-                            public boolean has() {
-                                return _qyCall.has()
-                                        && _qyCall
-                                                .qy()
-                                                .hasConditionQueryFileCrawlingConfig();
-                            }
-
-                            @Override
-                            public FileCrawlingConfigCQ qy() {
-                                return _qyCall.qy().queryFileCrawlingConfig();
-                            }
-                        }, _purpose, _dbmetaProvider);
-                if (xhasSyncQyCall()) { // inherits it
-                    _fileCrawlingConfig
-                            .xsetSyncQyCall(new HpSpQyCall<FileCrawlingConfigCQ>() {
-                                @Override
-                                public boolean has() {
-                                    return xsyncQyCall().has()
-                                            && xsyncQyCall()
-                                                    .qy()
-                                                    .hasConditionQueryFileCrawlingConfig();
-                                }
-
-                                @Override
-                                public FileCrawlingConfigCQ qy() {
-                                    return xsyncQyCall().qy()
-                                            .queryFileCrawlingConfig();
-                                }
-                            });
-                }
-            }
-            return _fileCrawlingConfig;
-        }
-
-        /**
-         * Prepare to specify functions about relation table. <br />
-         * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-         * @return The instance for specification for relation table to specify. (NotNull)
-         */
-        public WebCrawlingConfigCB.HpSpecification specifyWebCrawlingConfig() {
-            assertRelation("webCrawlingConfig");
-            if (_webCrawlingConfig == null) {
-                _webCrawlingConfig = new WebCrawlingConfigCB.HpSpecification(
-                        _baseCB, new HpSpQyCall<WebCrawlingConfigCQ>() {
-                            @Override
-                            public boolean has() {
-                                return _qyCall.has()
-                                        && _qyCall
-                                                .qy()
-                                                .hasConditionQueryWebCrawlingConfig();
-                            }
-
-                            @Override
-                            public WebCrawlingConfigCQ qy() {
-                                return _qyCall.qy().queryWebCrawlingConfig();
-                            }
-                        }, _purpose, _dbmetaProvider);
-                if (xhasSyncQyCall()) { // inherits it
-                    _webCrawlingConfig
-                            .xsetSyncQyCall(new HpSpQyCall<WebCrawlingConfigCQ>() {
-                                @Override
-                                public boolean has() {
-                                    return xsyncQyCall().has()
-                                            && xsyncQyCall()
-                                                    .qy()
-                                                    .hasConditionQueryWebCrawlingConfig();
-                                }
-
-                                @Override
-                                public WebCrawlingConfigCQ qy() {
-                                    return xsyncQyCall().qy()
-                                            .queryWebCrawlingConfig();
-                                }
-                            });
-                }
-            }
-            return _webCrawlingConfig;
         }
 
         /**

@@ -20,8 +20,6 @@ import java.util.Map;
 
 import jp.sf.fess.db.cbean.FailureUrlCB;
 import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
-import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.FailureUrlCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
@@ -340,145 +338,37 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return this;
     }
 
-    protected ConditionValue _webConfigId;
+    protected ConditionValue _configId;
 
-    public ConditionValue getWebConfigId() {
-        if (_webConfigId == null) {
-            _webConfigId = nCV();
+    public ConditionValue getConfigId() {
+        if (_configId == null) {
+            _configId = nCV();
         }
-        return _webConfigId;
+        return _configId;
     }
 
     @Override
-    protected ConditionValue getCValueWebConfigId() {
-        return getWebConfigId();
-    }
-
-    protected Map<String, WebCrawlingConfigCQ> _webConfigId_InScopeRelation_WebCrawlingConfigMap;
-
-    public Map<String, WebCrawlingConfigCQ> getWebConfigId_InScopeRelation_WebCrawlingConfig() {
-        return _webConfigId_InScopeRelation_WebCrawlingConfigMap;
-    }
-
-    @Override
-    public String keepWebConfigId_InScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webConfigId_InScopeRelation_WebCrawlingConfigMap == null) {
-            _webConfigId_InScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webConfigId_InScopeRelation_WebCrawlingConfigMap.size() + 1);
-        _webConfigId_InScopeRelation_WebCrawlingConfigMap.put(key, subQuery);
-        return "webConfigId_InScopeRelation_WebCrawlingConfig." + key;
-    }
-
-    protected Map<String, WebCrawlingConfigCQ> _webConfigId_NotInScopeRelation_WebCrawlingConfigMap;
-
-    public Map<String, WebCrawlingConfigCQ> getWebConfigId_NotInScopeRelation_WebCrawlingConfig() {
-        return _webConfigId_NotInScopeRelation_WebCrawlingConfigMap;
-    }
-
-    @Override
-    public String keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webConfigId_NotInScopeRelation_WebCrawlingConfigMap == null) {
-            _webConfigId_NotInScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webConfigId_NotInScopeRelation_WebCrawlingConfigMap.size() + 1);
-        _webConfigId_NotInScopeRelation_WebCrawlingConfigMap.put(key, subQuery);
-        return "webConfigId_NotInScopeRelation_WebCrawlingConfig." + key;
+    protected ConditionValue getCValueConfigId() {
+        return getConfigId();
     }
 
     /** 
      * Add order-by as ascend. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+     * CONFIG_ID: {IX, VARCHAR(100)}
      * @return this. (NotNull)
      */
-    public BsFailureUrlCQ addOrderBy_WebConfigId_Asc() {
-        regOBA("WEB_CONFIG_ID");
+    public BsFailureUrlCQ addOrderBy_ConfigId_Asc() {
+        regOBA("CONFIG_ID");
         return this;
     }
 
     /**
      * Add order-by as descend. <br />
-     * WEB_CONFIG_ID: {IX, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+     * CONFIG_ID: {IX, VARCHAR(100)}
      * @return this. (NotNull)
      */
-    public BsFailureUrlCQ addOrderBy_WebConfigId_Desc() {
-        regOBD("WEB_CONFIG_ID");
-        return this;
-    }
-
-    protected ConditionValue _fileConfigId;
-
-    public ConditionValue getFileConfigId() {
-        if (_fileConfigId == null) {
-            _fileConfigId = nCV();
-        }
-        return _fileConfigId;
-    }
-
-    @Override
-    protected ConditionValue getCValueFileConfigId() {
-        return getFileConfigId();
-    }
-
-    protected Map<String, FileCrawlingConfigCQ> _fileConfigId_InScopeRelation_FileCrawlingConfigMap;
-
-    public Map<String, FileCrawlingConfigCQ> getFileConfigId_InScopeRelation_FileCrawlingConfig() {
-        return _fileConfigId_InScopeRelation_FileCrawlingConfigMap;
-    }
-
-    @Override
-    public String keepFileConfigId_InScopeRelation_FileCrawlingConfig(
-            final FileCrawlingConfigCQ subQuery) {
-        if (_fileConfigId_InScopeRelation_FileCrawlingConfigMap == null) {
-            _fileConfigId_InScopeRelation_FileCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_fileConfigId_InScopeRelation_FileCrawlingConfigMap.size() + 1);
-        _fileConfigId_InScopeRelation_FileCrawlingConfigMap.put(key, subQuery);
-        return "fileConfigId_InScopeRelation_FileCrawlingConfig." + key;
-    }
-
-    protected Map<String, FileCrawlingConfigCQ> _fileConfigId_NotInScopeRelation_FileCrawlingConfigMap;
-
-    public Map<String, FileCrawlingConfigCQ> getFileConfigId_NotInScopeRelation_FileCrawlingConfig() {
-        return _fileConfigId_NotInScopeRelation_FileCrawlingConfigMap;
-    }
-
-    @Override
-    public String keepFileConfigId_NotInScopeRelation_FileCrawlingConfig(
-            final FileCrawlingConfigCQ subQuery) {
-        if (_fileConfigId_NotInScopeRelation_FileCrawlingConfigMap == null) {
-            _fileConfigId_NotInScopeRelation_FileCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_fileConfigId_NotInScopeRelation_FileCrawlingConfigMap
-                        .size() + 1);
-        _fileConfigId_NotInScopeRelation_FileCrawlingConfigMap.put(key,
-                subQuery);
-        return "fileConfigId_NotInScopeRelation_FileCrawlingConfig." + key;
-    }
-
-    /** 
-     * Add order-by as ascend. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @return this. (NotNull)
-     */
-    public BsFailureUrlCQ addOrderBy_FileConfigId_Asc() {
-        regOBA("FILE_CONFIG_ID");
-        return this;
-    }
-
-    /**
-     * Add order-by as descend. <br />
-     * FILE_CONFIG_ID: {IX, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
-     * @return this. (NotNull)
-     */
-    public BsFailureUrlCQ addOrderBy_FileConfigId_Desc() {
-        regOBD("FILE_CONFIG_ID");
+    public BsFailureUrlCQ addOrderBy_ConfigId_Desc() {
+        regOBD("CONFIG_ID");
         return this;
     }
 
@@ -530,107 +420,11 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
     protected void reflectRelationOnUnionQuery(
             final ConditionQuery baseQueryAsSuper,
             final ConditionQuery unionQueryAsSuper) {
-        final FailureUrlCQ baseQuery = (FailureUrlCQ) baseQueryAsSuper;
-        final FailureUrlCQ unionQuery = (FailureUrlCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryFileCrawlingConfig()) {
-            unionQuery.queryFileCrawlingConfig().reflectRelationOnUnionQuery(
-                    baseQuery.queryFileCrawlingConfig(),
-                    unionQuery.queryFileCrawlingConfig());
-        }
-        if (baseQuery.hasConditionQueryWebCrawlingConfig()) {
-            unionQuery.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
-                    baseQuery.queryWebCrawlingConfig(),
-                    unionQuery.queryWebCrawlingConfig());
-        }
     }
 
     // ===================================================================================
     //                                                                       Foreign Query
     //                                                                       =============
-    /**
-     * Get the condition-query for relation table. <br />
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @return The instance of condition-query. (NotNull)
-     */
-    public FileCrawlingConfigCQ queryFileCrawlingConfig() {
-        return getConditionQueryFileCrawlingConfig();
-    }
-
-    protected FileCrawlingConfigCQ _conditionQueryFileCrawlingConfig;
-
-    public FileCrawlingConfigCQ getConditionQueryFileCrawlingConfig() {
-        if (_conditionQueryFileCrawlingConfig == null) {
-            _conditionQueryFileCrawlingConfig = xcreateQueryFileCrawlingConfig();
-            xsetupOuterJoinFileCrawlingConfig();
-        }
-        return _conditionQueryFileCrawlingConfig;
-    }
-
-    protected FileCrawlingConfigCQ xcreateQueryFileCrawlingConfig() {
-        final String nrp = resolveNextRelationPath("FAILURE_URL",
-                "fileCrawlingConfig");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final FileCrawlingConfigCQ cq = new FileCrawlingConfigCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("fileCrawlingConfig");
-        cq.xsetRelationPath(nrp);
-        return cq;
-    }
-
-    protected void xsetupOuterJoinFileCrawlingConfig() {
-        final FileCrawlingConfigCQ cq = getConditionQueryFileCrawlingConfig();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("FILE_CONFIG_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "fileCrawlingConfig");
-    }
-
-    public boolean hasConditionQueryFileCrawlingConfig() {
-        return _conditionQueryFileCrawlingConfig != null;
-    }
-
-    /**
-     * Get the condition-query for relation table. <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The instance of condition-query. (NotNull)
-     */
-    public WebCrawlingConfigCQ queryWebCrawlingConfig() {
-        return getConditionQueryWebCrawlingConfig();
-    }
-
-    protected WebCrawlingConfigCQ _conditionQueryWebCrawlingConfig;
-
-    public WebCrawlingConfigCQ getConditionQueryWebCrawlingConfig() {
-        if (_conditionQueryWebCrawlingConfig == null) {
-            _conditionQueryWebCrawlingConfig = xcreateQueryWebCrawlingConfig();
-            xsetupOuterJoinWebCrawlingConfig();
-        }
-        return _conditionQueryWebCrawlingConfig;
-    }
-
-    protected WebCrawlingConfigCQ xcreateQueryWebCrawlingConfig() {
-        final String nrp = resolveNextRelationPath("FAILURE_URL",
-                "webCrawlingConfig");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final WebCrawlingConfigCQ cq = new WebCrawlingConfigCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("webCrawlingConfig");
-        cq.xsetRelationPath(nrp);
-        return cq;
-    }
-
-    protected void xsetupOuterJoinWebCrawlingConfig() {
-        final WebCrawlingConfigCQ cq = getConditionQueryWebCrawlingConfig();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("WEB_CONFIG_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "webCrawlingConfig");
-    }
-
-    public boolean hasConditionQueryWebCrawlingConfig() {
-        return _conditionQueryWebCrawlingConfig != null;
-    }
-
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
             final String property) {

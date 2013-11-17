@@ -167,7 +167,7 @@ public class FavoriteLogDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_3E627B17_3EF8_4744_8F04_99A388F9A905",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_FBA5677B_CE15_44E2_AE7C_6F1081DEA432",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUserId = cci("USER_ID", "USER_ID", null,

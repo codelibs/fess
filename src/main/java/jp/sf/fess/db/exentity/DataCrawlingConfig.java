@@ -190,10 +190,7 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
 
     @Override
     public String getConfigId() {
-        if (getId() != null) {
-            return Constants.DATA_CONFIG_ID_PREFIX + getId().toString();
-        }
-        return null;
+        return ConfigType.DATA.getConfigId(getId());
     }
 
     public Map<String, String> getHandlerParameterMap() {

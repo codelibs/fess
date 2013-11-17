@@ -103,17 +103,19 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final IndexUpdateCallback callback,
+    protected void storeData(final DataCrawlingConfig dataConfig,
+            final IndexUpdateCallback callback,
             final Map<String, String> paramMap,
             final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
 
-        super.storeData(new FileListIndexUpdateCallback(callback), paramMap,
-                scriptMap, defaultDataMap);
+        super.storeData(dataConfig, new FileListIndexUpdateCallback(callback),
+                paramMap, scriptMap, defaultDataMap);
     }
 
     @Override
-    protected void processCsv(final IndexUpdateCallback callback,
+    protected void processCsv(final DataCrawlingConfig dataConfig,
+            final IndexUpdateCallback callback,
             final Map<String, String> paramMap,
             final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap,
@@ -121,9 +123,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             final long readInterval, final String csvFileEncoding,
             final boolean hasHeaderLine) {
         try {
-            super.processCsv(callback, paramMap, scriptMap, defaultDataMap,
-                    csvConfig, csvFile, readInterval, csvFileEncoding,
-                    hasHeaderLine);
+            super.processCsv(dataConfig, callback, paramMap, scriptMap,
+                    defaultDataMap, csvConfig, csvFile, readInterval,
+                    csvFileEncoding, hasHeaderLine);
 
             // delete csv file
             if (deleteProcessedFile && !csvFile.delete()) {

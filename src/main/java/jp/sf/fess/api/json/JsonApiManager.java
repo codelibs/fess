@@ -45,6 +45,7 @@ import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.WebApiUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.codelibs.core.CoreLibConstants;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
@@ -699,7 +700,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append(obj);
         } else if (obj instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(
-                    Constants.DATE_FORMAT_ISO_8601_EXTEND);
+                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             buf.append('\"')
                     .append(StringEscapeUtils.escapeXml(sdf.format(obj)))
                     .append('\"');

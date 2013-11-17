@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.db.exentity.CrawlingConfig;
+import jp.sf.fess.db.exentity.CrawlingConfig.ConfigType;
 import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
 import jp.sf.fess.service.DataCrawlingConfigService;
 import jp.sf.fess.service.FileCrawlingConfigService;
@@ -71,6 +72,61 @@ public class CrawlingConfigHelper implements Serializable {
         this.urlField = urlField;
     }
 
+    public ConfigType getConfigType(final String configId) {
+        if (configId == null || configId.length() < 2) {
+            return null;
+        }
+        final String configType = configId.substring(0, 1);
+        if (ConfigType.WEB.getTypePrefix().equals(configType)) {
+            return ConfigType.WEB;
+        } else if (ConfigType.FILE.getTypePrefix().equals(configType)) {
+            return ConfigType.FILE;
+        } else if (ConfigType.DATA.getTypePrefix().equals(configType)) {
+            return ConfigType.DATA;
+        }
+        return null;
+    }
+
+    protected Long getId(final String configId) {
+        if (configId == null || configId.length() < 2) {
+            return null;
+        }
+        try {
+            final String idStr = configId.substring(1);
+            return Long.parseLong(idStr);
+        } catch (final NumberFormatException e) {
+            // ignore
+        }
+        return null;
+    }
+
+    public CrawlingConfig getCrawlingConfig(final String configId) {
+        final ConfigType configType = getConfigType(configId);
+        if (configType == null) {
+            return null;
+        }
+        final Long id = getId(configId);
+        if (id == null) {
+            return null;
+        }
+        switch (configType) {
+        case WEB:
+            final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
+                    .getComponent(WebCrawlingConfigService.class);
+            return webCrawlingConfigService.getWebCrawlingConfig(id);
+        case FILE:
+            final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container
+                    .getComponent(FileCrawlingConfigService.class);
+            return fileCrawlingConfigService.getFileCrawlingConfig(id);
+        case DATA:
+            final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container
+                    .getComponent(DataCrawlingConfigService.class);
+            return dataCrawlingConfigService.getDataCrawlingConfig(id);
+        default:
+            return null;
+        }
+    }
+
     public synchronized String store(final String sessionId,
             final CrawlingConfig crawlingConfig) {
         final String sessionCountId = sessionId + "-" + count;
@@ -100,30 +156,34 @@ public class CrawlingConfigHelper implements Serializable {
             logger.debug("writing the content of: " + doc);
         }
         final Object configIdObj = doc.get(configIdField);
-        if (configIdObj == null || configIdObj.toString().length() < 2) {
+        if (configIdObj == null) {
             throw new FessSystemException("Invalid configId: " + configIdObj);
         }
-        final String configType = configIdObj.toString().substring(0, 1);
-        final String idStr = configIdObj.toString().substring(1);
+        final String configId = configIdObj.toString();
+        if (configId.length() < 2) {
+            throw new FessSystemException("Invalid configId: " + configIdObj);
+        }
+        final ConfigType configType = getConfigType(configId);
         CrawlingConfig config = null;
         if (logger.isDebugEnabled()) {
-            logger.debug("configType: " + configType + ", idStr: " + idStr);
+            logger.debug("configType: " + configType + ", configId: "
+                    + configId);
         }
-        if (Constants.WEB_CONFIG_ID_PREFIX.equals(configType)) {
+        if (ConfigType.WEB == configType) {
             final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
                     .getComponent(WebCrawlingConfigService.class);
-            config = webCrawlingConfigService.getWebCrawlingConfig(Long
-                    .parseLong(idStr));
-        } else if (Constants.FILE_CONFIG_ID_PREFIX.equals(configType)) {
+            config = webCrawlingConfigService
+                    .getWebCrawlingConfig(getId(configId));
+        } else if (ConfigType.FILE == configType) {
             final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container
                     .getComponent(FileCrawlingConfigService.class);
-            config = fileCrawlingConfigService.getFileCrawlingConfig(Long
-                    .parseLong(idStr));
-        } else if (Constants.DATA_CONFIG_ID_PREFIX.equals(configType)) {
+            config = fileCrawlingConfigService
+                    .getFileCrawlingConfig(getId(configId));
+        } else if (ConfigType.DATA == configType) {
             final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container
                     .getComponent(DataCrawlingConfigService.class);
-            config = dataCrawlingConfigService.getDataCrawlingConfig(Long
-                    .parseLong(idStr));
+            config = dataCrawlingConfigService
+                    .getDataCrawlingConfig(getId(configId));
         }
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);

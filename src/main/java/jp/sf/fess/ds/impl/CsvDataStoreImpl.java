@@ -29,13 +29,18 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import jp.sf.fess.Constants;
+import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
+import jp.sf.fess.service.FailureUrlService;
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 
 import org.apache.commons.io.IOUtils;
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
+import org.seasar.robot.RobotCrawlAccessException;
+import org.seasar.robot.RobotMultipleCrawlAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,7 +158,8 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final IndexUpdateCallback callback,
+    protected void storeData(final DataCrawlingConfig dataConfig,
+            final IndexUpdateCallback callback,
             final Map<String, String> paramMap,
             final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
@@ -171,13 +177,14 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
         final CsvConfig csvConfig = buildCsvConfig(paramMap);
 
         for (final File csvFile : csvFileList) {
-            processCsv(callback, paramMap, scriptMap, defaultDataMap,
-                    csvConfig, csvFile, readInterval, csvFileEncoding,
-                    hasHeaderLine);
+            processCsv(dataConfig, callback, paramMap, scriptMap,
+                    defaultDataMap, csvConfig, csvFile, readInterval,
+                    csvFileEncoding, hasHeaderLine);
         }
     }
 
-    protected void processCsv(final IndexUpdateCallback callback,
+    protected void processCsv(final DataCrawlingConfig dataConfig,
+            final IndexUpdateCallback callback,
             final Map<String, String> paramMap,
             final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap,
@@ -243,8 +250,41 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
 
                 try {
                     loop = callback.store(dataMap);
+                } catch (final RobotCrawlAccessException e) {
+                    Throwable target = e;
+                    if (target instanceof RobotMultipleCrawlAccessException) {
+                        final Throwable[] causes = ((RobotMultipleCrawlAccessException) target)
+                                .getCauses();
+                        if (causes.length > 0) {
+                            target = causes[causes.length - 1];
+                        }
+                    }
+
+                    String errorName;
+                    final Throwable cause = e.getCause();
+                    if (cause != null) {
+                        errorName = cause.getClass().getCanonicalName();
+                    } else {
+                        errorName = e.getClass().getCanonicalName();
+                    }
+
+                    final FailureUrlService failureUrlService = SingletonS2Container
+                            .getComponent(FailureUrlService.class);
+                    failureUrlService.store(
+                            dataConfig,
+                            errorName,
+                            csvFile.getAbsolutePath() + ":"
+                                    + csvReader.getLineNumber(), e);
+
+                    logger.warn("Crawling Access Exception at : " + dataMap, e);
                 } catch (final Exception e) {
-                    logger.warn("Failed to store data: " + dataMap, e);
+                    final FailureUrlService failureUrlService = SingletonS2Container
+                            .getComponent(FailureUrlService.class);
+                    failureUrlService.store(dataConfig, e.getClass()
+                            .getCanonicalName(), csvFile.getAbsolutePath()
+                            + ":" + csvReader.getLineNumber(), e);
+
+                    logger.warn("Crawling Access Exception at : " + dataMap, e);
                 }
 
                 if (readInterval > 0) {

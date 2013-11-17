@@ -22,6 +22,8 @@ public interface CrawlingConfig {
 
     Long getId();
 
+    String getName();
+
     String[] getBrowserTypeValues();
 
     String[] getRoleTypeValues();
@@ -35,4 +37,26 @@ public interface CrawlingConfig {
     String getConfigId();
 
     void initializeClientFactory(S2RobotClientFactory s2RobotClientFactory);
+
+    public enum ConfigType {
+        WEB("W"), FILE("F"), DATA("D");
+
+        private final String typePrefix;
+
+        ConfigType(final String typePrefix) {
+            this.typePrefix = typePrefix;
+        }
+
+        public String getTypePrefix() {
+            return typePrefix;
+        }
+
+        public String getConfigId(final Long id) {
+            if (id == null) {
+                return null;
+            }
+            return typePrefix + id.toString();
+        }
+    }
+
 }

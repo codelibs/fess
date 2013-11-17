@@ -19,13 +19,11 @@ package jp.sf.fess.db.cbean.cq.bs;
 import java.util.Collection;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
-import jp.sf.fess.db.cbean.FailureUrlCB;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
 import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
-import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
 import jp.sf.fess.db.cbean.cq.FileAuthenticationCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToLabelTypeMappingCQ;
@@ -189,33 +187,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     /**
      * Set up ExistsReferrer (co-related sub-query). <br />
-     * {exists (select FILE_CONFIG_ID from FAILURE_URL where ...)} <br />
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">existsFailureUrlList</span>(new SubQuery&lt;FailureUrlCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of FailureUrlList for 'exists'. (NotNull)
-     */
-    public void existsFailureUrlList(final SubQuery<FailureUrlCB> subQuery) {
-        assertObjectNotNull("subQuery<FailureUrlCB>", subQuery);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_FailureUrlList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "failureUrlList");
-    }
-
-    public abstract String keepId_ExistsReferrer_FailureUrlList(
-            FailureUrlCQ subQuery);
-
-    /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
      * {exists (select FILE_CRAWLING_CONFIG_ID from FILE_AUTHENTICATION where ...)} <br />
      * FILE_AUTHENTICATION by FILE_CRAWLING_CONFIG_ID, named 'fileAuthenticationAsOne'.
      * <pre>
@@ -327,33 +298,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     public abstract String keepId_ExistsReferrer_FileConfigToRoleTypeMappingList(
             FileConfigToRoleTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
-     * {not exists (select FILE_CONFIG_ID from FAILURE_URL where ...)} <br />
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsFailureUrlList</span>(new SubQuery&lt;FailureUrlCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of Id_NotExistsReferrer_FailureUrlList for 'not exists'. (NotNull)
-     */
-    public void notExistsFailureUrlList(final SubQuery<FailureUrlCB> subQuery) {
-        assertObjectNotNull("subQuery<FailureUrlCB>", subQuery);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_FailureUrlList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "failureUrlList");
-    }
-
-    public abstract String keepId_NotExistsReferrer_FailureUrlList(
-            FailureUrlCQ subQuery);
 
     /**
      * Set up NotExistsReferrer (co-related sub-query). <br />
@@ -471,26 +415,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     /**
      * Set up InScopeRelation (sub-query). <br />
-     * {in (select FILE_CONFIG_ID from FAILURE_URL where ...)} <br />
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlAsOne'.
-     * @param subQuery The sub-query of FailureUrlList for 'in-scope'. (NotNull)
-     */
-    public void inScopeFailureUrlList(final SubQuery<FailureUrlCB> subQuery) {
-        assertObjectNotNull("subQuery<FailureUrlCB>", subQuery);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_FailureUrlList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "failureUrlList");
-    }
-
-    public abstract String keepId_InScopeRelation_FailureUrlList(
-            FailureUrlCQ subQuery);
-
-    /**
-     * Set up InScopeRelation (sub-query). <br />
      * {in (select FILE_CRAWLING_CONFIG_ID from FILE_AUTHENTICATION where ...)} <br />
      * FILE_AUTHENTICATION by FILE_CRAWLING_CONFIG_ID, named 'fileAuthenticationAsOne'.
      * @param subQuery The sub-query of FileAuthenticationList for 'in-scope'. (NotNull)
@@ -574,26 +498,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     public abstract String keepId_InScopeRelation_FileConfigToRoleTypeMappingList(
             FileConfigToRoleTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotInScopeRelation (sub-query). <br />
-     * {not in (select FILE_CONFIG_ID from FAILURE_URL where ...)} <br />
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlAsOne'.
-     * @param subQuery The sub-query of FailureUrlList for 'not in-scope'. (NotNull)
-     */
-    public void notInScopeFailureUrlList(final SubQuery<FailureUrlCB> subQuery) {
-        assertObjectNotNull("subQuery<FailureUrlCB>", subQuery);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_FailureUrlList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "failureUrlList");
-    }
-
-    public abstract String keepId_NotInScopeRelation_FailureUrlList(
-            FailureUrlCQ subQuery);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -681,23 +585,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     public abstract String keepId_NotInScopeRelation_FileConfigToRoleTypeMappingList(
             FileConfigToRoleTypeMappingCQ subQuery);
 
-    public void xsderiveFailureUrlList(final String function,
-            final SubQuery<FailureUrlCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FailureUrlCB>", subQuery);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_FailureUrlList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName, "failureUrlList",
-                aliasName, option);
-    }
-
-    public abstract String keepId_SpecifyDerivedReferrer_FailureUrlList(
-            FailureUrlCQ subQuery);
-
     public void xsderiveFileAuthenticationList(final String function,
             final SubQuery<FileAuthenticationCB> subQuery,
             final String aliasName, final DerivedReferrerOption option) {
@@ -768,59 +655,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     public abstract String keepId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList(
             FileConfigToRoleTypeMappingCQ subQuery);
-
-    /**
-     * Prepare for (Query)DerivedReferrer. <br />
-     * {FOO &lt;= (select max(BAR) from FAILURE_URL where ...)} <br />
-     * FAILURE_URL by FILE_CONFIG_ID, named 'failureUrlAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">derivedFailureUrlList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FailureUrlCB&gt;() {
-     *     public void query(FailureUrlCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-     *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-     *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
-     * </pre>
-     * @return The object to set up a function for referrer table. (NotNull)
-     */
-    public HpQDRFunction<FailureUrlCB> derivedFailureUrlList() {
-        return xcreateQDRFunctionFailureUrlList();
-    }
-
-    protected HpQDRFunction<FailureUrlCB> xcreateQDRFunctionFailureUrlList() {
-        return new HpQDRFunction<FailureUrlCB>(
-                new HpQDRSetupper<FailureUrlCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<FailureUrlCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveFailureUrlList(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveFailureUrlList(final String function,
-            final SubQuery<FailureUrlCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FailureUrlCB>", subQuery);
-        final FailureUrlCB cb = new FailureUrlCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_FailureUrlList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_FailureUrlListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName, "failureUrlList",
-                operand, value, parameterPropertyName, option);
-    }
-
-    public abstract String keepId_QueryDerivedReferrer_FailureUrlList(
-            FailureUrlCQ subQuery);
-
-    public abstract String keepId_QueryDerivedReferrer_FailureUrlListParameter(
-            Object parameterValue);
 
     /**
      * Prepare for (Query)DerivedReferrer. <br />

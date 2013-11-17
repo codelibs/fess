@@ -19,7 +19,6 @@ package jp.sf.fess.db.cbean.cq.ciq;
 import java.util.Map;
 
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
-import jp.sf.fess.db.cbean.cq.FailureUrlCQ;
 import jp.sf.fess.db.cbean.cq.RequestHeaderCQ;
 import jp.sf.fess.db.cbean.cq.WebAuthenticationCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToBrowserTypeMappingCQ;
@@ -108,12 +107,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_ExistsReferrer_FailureUrlList(final FailureUrlCQ sq) {
-        throwIICBOE("ExistsReferrer");
-        return null;
-    }
-
-    @Override
     public String keepId_ExistsReferrer_RequestHeaderList(
             final RequestHeaderCQ sq) {
         throwIICBOE("ExistsReferrer");
@@ -145,12 +138,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     public String keepId_ExistsReferrer_WebConfigToRoleTypeMappingList(
             final WebConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("ExistsReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_FailureUrlList(final FailureUrlCQ sq) {
-        throwIICBOE("NotExistsReferrer");
         return null;
     }
 
@@ -190,11 +177,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_InScopeRelation_FailureUrlList(final FailureUrlCQ sq) {
-        return _myCQ.keepId_InScopeRelation_FailureUrlList(sq);
-    }
-
-    @Override
     public String keepId_InScopeRelation_RequestHeaderList(
             final RequestHeaderCQ sq) {
         return _myCQ.keepId_InScopeRelation_RequestHeaderList(sq);
@@ -223,11 +205,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     public String keepId_InScopeRelation_WebConfigToRoleTypeMappingList(
             final WebConfigToRoleTypeMappingCQ sq) {
         return _myCQ.keepId_InScopeRelation_WebConfigToRoleTypeMappingList(sq);
-    }
-
-    @Override
-    public String keepId_NotInScopeRelation_FailureUrlList(final FailureUrlCQ sq) {
-        return _myCQ.keepId_NotInScopeRelation_FailureUrlList(sq);
     }
 
     @Override
@@ -264,13 +241,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_SpecifyDerivedReferrer_FailureUrlList(
-            final FailureUrlCQ sq) {
-        throwIICBOE("(Specify)DerivedReferrer");
-        return null;
-    }
-
-    @Override
     public String keepId_SpecifyDerivedReferrer_RequestHeaderList(
             final RequestHeaderCQ sq) {
         throwIICBOE("(Specify)DerivedReferrer");
@@ -302,20 +272,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     public String keepId_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingList(
             final WebConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("(Specify)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FailureUrlList(
-            final FailureUrlCQ sq) {
-        throwIICBOE("(Query)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FailureUrlListParameter(
-            final Object pv) {
-        throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
 

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import jp.sf.fess.FessSystemException;
+import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 
@@ -78,7 +79,8 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final IndexUpdateCallback callback,
+    protected void storeData(final DataCrawlingConfig config,
+            final IndexUpdateCallback callback,
             final Map<String, String> paramMap,
             final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
