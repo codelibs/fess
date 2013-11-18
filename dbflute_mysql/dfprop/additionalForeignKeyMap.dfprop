@@ -53,7 +53,6 @@ map:{
  ;FK_SEARCH_LOG_USER_INFO = map:{ localTableName = SEARCH_LOG; localColumnName = USER_ID; foreignTableName = USER_INFO; foreignColumnName = ID }
  ;FK_LABEL_TYPE_TO_ROLE_TYPE_MAPPING_LABEL_TYPE = map:{ localTableName = LABEL_TYPE_TO_ROLE_TYPE_MAPPING; localColumnName = LABEL_TYPE_ID; foreignTableName = LABEL_TYPE; foreignColumnName = ID } ;FK_LABEL_TYPE_TO_ROLE_TYPE_MAPPING_ROLE_TYPE = map:{ localTableName = LABEL_TYPE_TO_ROLE_TYPE_MAPPING; localColumnName = ROLE_TYPE_ID; foreignTableName = ROLE_TYPE; foreignColumnName = ID }
  ;FK_CLICK_LOG_SEARCH_LOG = map:{ localTableName = CLICK_LOG; localColumnName = SEARCH_ID; foreignTableName = SEARCH_LOG; foreignColumnName = ID }
- ;FK_FAILURE_URL_FILE_CRAWLING_CONFIG = map:{ localTableName = FAILURE_URL; localColumnName = FILE_CONFIG_ID; foreignTableName = FILE_CRAWLING_CONFIG; foreignColumnName = ID } ;FK_FAILURE_URL_WEB_CRAWLING_CONFIG = map:{ localTableName = FAILURE_URL; localColumnName = WEB_CONFIG_ID; foreignTableName = WEB_CRAWLING_CONFIG; foreignColumnName = ID }
  ;FK_FILE_AUTHENTICATION_FILE_CRAWLING_CONFIG = map:{ localTableName = FILE_AUTHENTICATION; localColumnName = FILE_CRAWLING_CONFIG_ID; foreignTableName = FILE_CRAWLING_CONFIG; foreignColumnName = ID }
  ;FK_SEARCH_FIELD_LOG_SEARCH_LOG = map:{ localTableName = SEARCH_FIELD_LOG; localColumnName = SEARCH_ID; foreignTableName = SEARCH_LOG; foreignColumnName = ID }
  ;FK_FAVORITE_LOG_USER_INFO = map:{ localTableName = FAVORITE_LOG; localColumnName = USER_ID; foreignTableName = USER_INFO; foreignColumnName = ID }
