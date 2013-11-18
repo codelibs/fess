@@ -288,7 +288,7 @@ public class Crawler implements Serializable {
         }
 
         try {
-            crawlingSessionHelper.store(options.sessionId);
+            crawlingSessionHelper.store(options.sessionId, true);
             final String dayForCleanupStr;
             if (StringUtil.isNotBlank(options.expires)) {
                 dayForCleanupStr = options.expires;
@@ -311,7 +311,7 @@ public class Crawler implements Serializable {
             return crawler.doCrawl(options);
         } finally {
             try {
-                crawlingSessionHelper.store(options.sessionId);
+                crawlingSessionHelper.store(options.sessionId, false);
             } catch (final Exception e) {
                 logger.warn("Failed to store crawling information.", e);
             }

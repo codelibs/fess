@@ -21,18 +21,12 @@ import java.util.Date;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
-import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.JobExecutor.ShutdownListener;
 
 import org.seasar.framework.container.SingletonS2Container;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CrawlJob {
-
-    private static final Logger logger = LoggerFactory
-            .getLogger(CrawlJob.class);
 
     protected int documentExpires = -2;
 
@@ -98,11 +92,7 @@ public class CrawlJob {
             });
         }
 
-        // store crawling session
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
         try {
-            crawlingSessionHelper.store(sessionId);
             SingletonS2Container.getComponent(SystemHelper.class)
                     .executeCrawler(sessionId, webConfigIds, fileConfigIds,
                             dataConfigIds, operation, documentExpires);

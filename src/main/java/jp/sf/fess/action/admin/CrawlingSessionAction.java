@@ -16,7 +16,7 @@
 
 package jp.sf.fess.action.admin;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -40,11 +40,11 @@ public class CrawlingSessionAction extends BsCrawlingSessionAction {
     }
 
     public List<CrawlingSessionInfo> getCrawlingSessionInfoItems() {
-        if (crawlingSessionForm.sessionId != null) {
-            return crawlingSessionService
-                    .getCrawlingSessionInfoList(crawlingSessionForm.sessionId);
+        if (crawlingSessionForm.id != null) {
+            return crawlingSessionService.getCrawlingSessionInfoList(Long
+                    .parseLong(crawlingSessionForm.id));
         }
-        return new ArrayList<CrawlingSessionInfo>(0);
+        return Collections.emptyList();
     }
 
     @Execute(validator = false, input = "error.jsp")

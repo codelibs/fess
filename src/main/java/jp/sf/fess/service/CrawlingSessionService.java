@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +47,7 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.cbean.EntityRowHandler;
+import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
 import org.seasar.framework.util.StringUtil;
 
@@ -144,10 +146,21 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         crawlingSessionInfoBhv.batchInsert(crawlingSessionInfoList);
     }
 
-    public List<CrawlingSessionInfo> getCrawlingSessionInfoList(
-            final String sessionId) {
+    public List<CrawlingSessionInfo> getCrawlingSessionInfoList(final Long id) {
         final CrawlingSessionInfoCB cb = new CrawlingSessionInfoCB();
-        cb.query().queryCrawlingSession().setSessionId_Equal(sessionId);
+        cb.query().queryCrawlingSession().setId_Equal(id);
+        cb.query().addOrderBy_Id_Asc();
+        return crawlingSessionInfoBhv.selectList(cb);
+    }
+
+    public List<CrawlingSessionInfo> getLastCrawlingSessionInfoList(
+            final String sessionId) {
+        final CrawlingSession crawlingSession = getLast(sessionId);
+        if (crawlingSession == null) {
+            return Collections.emptyList();
+        }
+        final CrawlingSessionInfoCB cb = new CrawlingSessionInfoCB();
+        cb.query().setCrawlingSessionId_Equal(crawlingSession.getId());
         cb.query().addOrderBy_Id_Asc();
         return crawlingSessionInfoBhv.selectList(cb);
     }
@@ -212,6 +225,7 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);
         cfg.setQuoteDisabled(false);
+        @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
         final CrawlingSessionInfoCB cb = new CrawlingSessionInfoCB();
         cb.setupSelect_CrawlingSession();
@@ -278,16 +292,17 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
                 new DeleteOption<CrawlingSessionCB>().allowNonQueryDelete());
     }
 
-    public List<String> getExpiredSessionIdList(
-            final List<String> expiredSessionIdList) {
+    public CrawlingSession getLast(final String sessionId) {
         final CrawlingSessionCB cb = new CrawlingSessionCB();
-        cb.query().setSessionId_InScope(expiredSessionIdList);
-        cb.specify().columnSessionId();
-        final List<CrawlingSession> list = crawlingSessionBhv.selectList(cb);
-        for (final CrawlingSession crawlingSession : list) {
-            expiredSessionIdList.remove(crawlingSession.getSessionId());
+        cb.query().setSessionId_Equal(sessionId);
+        cb.query().addOrderBy_CreatedTime_Desc();
+        cb.fetchFirst(1);
+        final ListResultBean<CrawlingSession> list = crawlingSessionBhv
+                .selectList(cb);
+        if (list.isEmpty()) {
+            return null;
         }
-        return expiredSessionIdList;
+        return list.get(0);
     }
 
 }

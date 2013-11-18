@@ -40,8 +40,12 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CrawlingSessionHelper implements Serializable {
+    private static final Logger logger = LoggerFactory
+            .getLogger(CrawlingSessionHelper.class);
 
     public static final String FACET_COUNT_KEY = "count";
 
@@ -67,9 +71,9 @@ public class CrawlingSessionHelper implements Serializable {
         return sessionId;
     }
 
-    public synchronized void store(final String sessionId) {
-        CrawlingSession crawlingSession = getCrawlingSessionService().get(
-                sessionId);
+    public synchronized void store(final String sessionId, final boolean create) {
+        CrawlingSession crawlingSession = create ? null
+                : getCrawlingSessionService().getLast(sessionId);
         if (crawlingSession == null) {
             crawlingSession = new CrawlingSession(sessionId);
             try {
@@ -105,10 +109,11 @@ public class CrawlingSessionHelper implements Serializable {
 
     public void updateParams(final String sessionId, final String name,
             final int dayForCleanup) {
-        CrawlingSession crawlingSession = getCrawlingSessionService().get(
-                sessionId);
+        final CrawlingSession crawlingSession = getCrawlingSessionService()
+                .getLast(sessionId);
         if (crawlingSession == null) {
-            crawlingSession = new CrawlingSession(sessionId);
+            logger.warn("No crawling session: " + sessionId);
+            return;
         }
         if (StringUtil.isNotBlank(name)) {
             crawlingSession.setName(name);
@@ -138,7 +143,7 @@ public class CrawlingSessionHelper implements Serializable {
 
     public Map<String, String> getInfoMap(final String sessionId) {
         final List<CrawlingSessionInfo> crawlingSessionInfoList = getCrawlingSessionService()
-                .getCrawlingSessionInfoList(sessionId);
+                .getLastCrawlingSessionInfoList(sessionId);
         final Map<String, String> map = new HashMap<String, String>();
         for (final CrawlingSessionInfo crawlingSessionInfo : crawlingSessionInfoList) {
             map.put(crawlingSessionInfo.getKey(),
