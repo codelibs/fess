@@ -23,13 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.annotation.Resource;
-
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.cbean.SearchLogCB;
 import jp.sf.fess.db.cbean.UserInfoCB;
 import jp.sf.fess.db.exbhv.ClickLogBhv;
-import jp.sf.fess.db.exbhv.SearchFieldLogBhv;
 import jp.sf.fess.db.exbhv.SearchLogBhv;
 import jp.sf.fess.db.exbhv.UserInfoBhv;
 import jp.sf.fess.db.exentity.ClickLog;
@@ -40,6 +37,7 @@ import jp.sf.fess.service.SearchLogService;
 import jp.sf.fess.service.UserInfoService;
 import jp.sf.fess.util.FessBeans;
 
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,29 +46,13 @@ public class SearchLogHelperImpl extends SearchLogHelper {
     private static final Logger logger = LoggerFactory // NOPMD
             .getLogger(SearchLogHelperImpl.class);
 
-    @Resource
-    protected UserInfoService userInfoService;
-
-    @Resource
-    protected SearchLogService searchLogService;
-
-    @Resource
-    protected SearchLogBhv searchLogBhv;
-
-    @Resource
-    protected SearchFieldLogBhv searchFieldLogBhv;
-
-    @Resource
-    protected ClickLogBhv clickLogBhv;
-
-    @Resource
-    protected UserInfoBhv userInfoBhv;
-
     @Override
     public void updateUserInfo(final String userCode) {
         final long current = System.currentTimeMillis();
         final Long time = userInfoCache.get(userCode);
         if (time == null || current - time.longValue() > userCheckInterval) {
+            final UserInfoService userInfoService = SingletonS2Container
+                    .getComponent(UserInfoService.class);
             UserInfo userInfo = userInfoService.getUserInfo(userCode);
             if (userInfo == null) {
                 final Timestamp now = new Timestamp(current);
@@ -126,6 +108,8 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             final List<UserInfo> updateList = new ArrayList<UserInfo>();
             final UserInfoCB cb = new UserInfoCB();
             cb.query().setCode_InScope(userInfoMap.keySet());
+            final UserInfoBhv userInfoBhv = SingletonS2Container
+                    .getComponent(UserInfoBhv.class);
             final List<UserInfo> list = userInfoBhv.selectList(cb);
             for (final UserInfo userInfo : list) {
                 final String code = userInfo.getCode();
@@ -147,6 +131,8 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         }
 
         if (!searchLogList.isEmpty()) {
+            final SearchLogService searchLogService = SingletonS2Container
+                    .getComponent(SearchLogService.class);
             searchLogService.store(searchLogList);
         }
     }
@@ -158,6 +144,8 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             final SearchLogCB cb = new SearchLogCB();
             cb.query().setRequestedTime_Equal(clickLog.getQueryRequestedTime());
             cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
+            final SearchLogBhv searchLogBhv = SingletonS2Container
+                    .getComponent(SearchLogBhv.class);
             final SearchLog entity = searchLogBhv.selectEntity(cb);
             if (entity != null) {
                 clickLog.setSearchId(entity.getId());
@@ -167,6 +155,8 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             }
         }
         if (!clickLogList.isEmpty()) {
+            final ClickLogBhv clickLogBhv = SingletonS2Container
+                    .getComponent(ClickLogBhv.class);
             clickLogBhv.batchInsert(clickLogList);
         }
     }
