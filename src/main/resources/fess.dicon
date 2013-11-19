@@ -12,6 +12,12 @@
 		</arg>
 	</component>
 
+	<component name="searchLogHelper" class="jp.sf.fess.helper.impl.SearchLogHelperImpl">
+		<!-- 
+		<property name="userCheckInterval">5 * 60 * 1000</property>
+		<property name="userInfoCacheSize">1000</property>
+		 -->
+	</component>
 	<component name="crawlingConfigHelper" class="jp.sf.fess.helper.CrawlingConfigHelper">
 	</component>
     <component name="pathMappingHelper" class="jp.sf.fess.helper.PathMappingHelper">
