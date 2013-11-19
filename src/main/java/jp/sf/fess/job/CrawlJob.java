@@ -52,11 +52,17 @@ public class CrawlJob {
             final String[] fileConfigIds, final String[] dataConfigIds,
             final String operation) {
         final StringBuilder resultBuf = new StringBuilder();
+        final boolean runAll = webConfigIds == null && fileConfigIds == null
+                && dataConfigIds == null;
 
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         resultBuf.append("Web  Config Id:");
         if (webConfigIds == null) {
-            resultBuf.append(" ALL\n");
+            if (runAll) {
+                resultBuf.append(" ALL\n");
+            } else {
+                resultBuf.append(" NONE\n");
+            }
         } else {
             for (final String id : webConfigIds) {
                 resultBuf.append(' ').append(id);
@@ -65,7 +71,11 @@ public class CrawlJob {
         }
         resultBuf.append("File Config Id:");
         if (fileConfigIds == null) {
-            resultBuf.append(" ALL\n");
+            if (runAll) {
+                resultBuf.append(" ALL\n");
+            } else {
+                resultBuf.append(" NONE\n");
+            }
         } else {
             for (final String id : fileConfigIds) {
                 resultBuf.append(' ').append(id);
@@ -74,7 +84,11 @@ public class CrawlJob {
         }
         resultBuf.append("Data Config Id:");
         if (dataConfigIds == null) {
-            resultBuf.append(" ALL\n");
+            if (runAll) {
+                resultBuf.append(" ALL\n");
+            } else {
+                resultBuf.append(" NONE\n");
+            }
         } else {
             for (final String id : dataConfigIds) {
                 resultBuf.append(' ').append(id);

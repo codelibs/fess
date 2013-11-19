@@ -100,10 +100,22 @@ public class WebFsIndexHelper implements Serializable {
 
     public void crawl(final String sessionId, final List<Long> webConfigIdList,
             final List<Long> fileConfigIdList, final SolrGroup solrGroup) {
-        final List<WebCrawlingConfig> webConfigList = webCrawlingConfigService
-                .getWebCrawlingConfigListByIds(webConfigIdList);
-        final List<FileCrawlingConfig> fileConfigList = fileCrawlingConfigService
-                .getFileCrawlingConfigListByIds(fileConfigIdList);
+        final boolean runAll = webConfigIdList == null
+                && fileConfigIdList == null;
+        final List<WebCrawlingConfig> webConfigList;
+        if (runAll || webConfigIdList != null) {
+            webConfigList = webCrawlingConfigService
+                    .getWebCrawlingConfigListByIds(webConfigIdList);
+        } else {
+            webConfigList = Collections.emptyList();
+        }
+        final List<FileCrawlingConfig> fileConfigList;
+        if (runAll || fileConfigIdList != null) {
+            fileConfigList = fileCrawlingConfigService
+                    .getFileCrawlingConfigListByIds(fileConfigIdList);
+        } else {
+            fileConfigList = Collections.emptyList();
+        }
 
         if (webConfigList.isEmpty() && fileConfigList.isEmpty()) {
             // nothing
