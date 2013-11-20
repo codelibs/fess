@@ -5,7 +5,7 @@
    <property name="sql.pass" value="fess"/>
 
    <target name="create">
-      <sql driver="${sql.driver}" url="${sql.url}" userid="${sql.user}" password="${sql.pass}" >
+      <sql driver="${sql.driver}" url="${sql.url}" userid="${sql.user}" password="${sql.pass}" onerror="continue">
            <classpath>
             <pathelement location="${oracle.jar.file}"/>
            </classpath>   
