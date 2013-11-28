@@ -35,6 +35,8 @@ import jp.sf.fess.helper.SystemHelper;
 
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.util.RequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class returns a list of a role from a request parameter,
@@ -47,6 +49,9 @@ import org.seasar.struts.util.RequestUtil;
 public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(RoleQueryHelperImpl.class);
 
     public FessCipher fessCipher;
 
@@ -116,12 +121,19 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             roleList.addAll(defaultRoleList);
         }
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("roleList: " + roleList);
+        }
+
         return roleList;
     }
 
     protected List<String> buildByParameter(final HttpServletRequest request) {
 
         final String parameter = request.getParameter(parameterKey);
+        if (logger.isDebugEnabled()) {
+            logger.debug(parameterKey + ":" + parameter);
+        }
         if (StringUtil.isNotEmpty(parameter)) {
             return decodedRoleList(parameter, encryptedParameterValue);
         }
@@ -132,6 +144,9 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
     protected List<String> buildByHeader(final HttpServletRequest request) {
 
         final String parameter = request.getHeader(headerKey);
+        if (logger.isDebugEnabled()) {
+            logger.debug(headerKey + ":" + parameter);
+        }
         if (StringUtil.isNotEmpty(parameter)) {
             return decodedRoleList(parameter, encryptedHeaderValue);
         }
@@ -147,6 +162,9 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             for (final Cookie cookie : cookies) {
                 if (cookieKey.equals(cookie.getName())) {
                     final String value = cookie.getValue();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(cookieKey + ":" + value);
+                    }
                     if (StringUtil.isNotEmpty(value)) {
                         return decodedRoleList(value, encryptedCookieValue);
                     }
