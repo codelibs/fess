@@ -36,16 +36,13 @@
   <logger name="org.seasar.robot.dbflute" >
     <level value ="debug" />
   </logger>
-  <logger name="jp.sf.fess.solr" >
+  <logger name="org.codelibs" >
     <level value ="debug" />
   </logger>
-  <logger name="org.apache.commons.httpclient" >
+  <logger name="org.apache.http" >
     <level value ="debug" />
   </logger>
 -->
-  <logger name="org.apache.commons.httpclient.auth" >
-    <level value ="warn" />
-  </logger>
   <root>
     <priority value="info"/>
     <appender-ref ref="rollingFile"/>
