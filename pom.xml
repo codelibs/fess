@@ -504,22 +504,22 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>1.7.2</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.2</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.2</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>4.3.1</version>
+      <version>4.6.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -539,7 +539,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>4.3.1</version>
+      <version>4.6.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.httpcomponents</groupId>
@@ -680,7 +680,7 @@
     <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
-      <version>1.4.6-rc1</version>
+      <version>1.4.7</version>
     </dependency>
     <dependency>
       <groupId>javax.activation</groupId>
@@ -755,7 +755,7 @@
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
-      <version>2.0.25</version>
+      <version>2.0.26</version>
     </dependency>
     <dependency>
       <groupId>org.apache.tika</groupId>
@@ -780,7 +780,7 @@
     <dependency>
       <groupId>com.ibm.icu</groupId>
       <artifactId>icu4j</artifactId>
-      <version>51.1</version>
+      <version>52.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.pdfbox</groupId>
@@ -790,12 +790,12 @@
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
-      <version>3.9</version>
+      <version>3.10-beta2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-ooxml</artifactId>
-      <version>3.9</version>
+      <version>3.10-beta2</version>
       <exclusions>
         <exclusion>
           <groupId>xml-apis</groupId>
@@ -806,7 +806,7 @@
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-scratchpad</artifactId>
-      <version>3.9</version>
+      <version>3.10-beta2</version>
     </dependency>
     <dependency>
       <groupId>javassist</groupId>
@@ -821,7 +821,7 @@
     <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.2</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
