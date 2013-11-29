@@ -108,7 +108,7 @@
   </profiles>
   <properties>
     <dbflute.version>1.0.4K</dbflute.version>
-    <s2robot.version>0.6.0-SNAPSHOT</s2robot.version>
+    <s2robot.version>0.6.1-SNAPSHOT</s2robot.version>
   </properties>
   <build>
     <finalName>fess</finalName>
