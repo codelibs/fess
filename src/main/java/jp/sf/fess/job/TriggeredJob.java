@@ -78,16 +78,21 @@ public class TriggeredJob implements Job {
             if (logger.isDebugEnabled()) {
                 logger.debug("Starting Job " + jobId + ". scriptType: "
                         + scriptType + ", script: " + script);
-            } else if (logger.isInfoEnabled()) {
+            } else if (scheduledJob.isLoggingEnabled()
+                    && logger.isInfoEnabled()) {
                 logger.info("Starting Job " + jobId + ".");
             }
 
             final Object ret = jobExecutor.execute(script);
             if (ret == null) {
-                logger.info("Finished Job " + jobId + ".");
+                if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
+                    logger.info("Finished Job " + jobId + ".");
+                }
             } else {
-                logger.info("Finished Job " + jobId
-                        + ". The return value is:\n" + ret);
+                if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
+                    logger.info("Finished Job " + jobId
+                            + ". The return value is:\n" + ret);
+                }
                 jobLog.setScriptResult(ret.toString());
             }
             jobLog.setJobStatus(Constants.OK);
