@@ -24,6 +24,7 @@ import java.util.Map;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
+import jp.sf.fess.ds.DataStoreCrawlingException;
 import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
@@ -178,7 +179,6 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
         protected boolean addDocument(final Map<String, Object> dataMap) {
             synchronized (indexUpdateCallback) {
-
                 //   required check
                 if (!dataMap.containsKey(urlField)
                         || dataMap.get(urlField) == null) {
@@ -187,59 +187,65 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 }
 
                 final String url = dataMap.get(urlField).toString();
-                final S2RobotClient client = robotClientFactory.getClient(url);
-                if (client == null) {
-                    logger.warn("S2RobotClient is null. Data: " + dataMap);
-                    return false;
-                }
-
-                final long startTime = System.currentTimeMillis();
-                final ResponseData responseData = client.doGet(url);
-                responseData.setExecutionTime(System.currentTimeMillis()
-                        - startTime);
-                responseData.setSessionId((String) dataMap
-                        .get(Constants.SESSION_ID));
-
-                final RuleManager ruleManager = SingletonS2Container
-                        .getComponent(RuleManager.class);
-                final Rule rule = ruleManager.getRule(responseData);
-                if (rule == null) {
-                    logger.warn("No url rule. Data: " + dataMap);
-                    return false;
-                } else {
-                    responseData.setRuleId(rule.getRuleId());
-                    final ResponseProcessor responseProcessor = rule
-                            .getResponseProcessor();
-                    if (responseProcessor instanceof DefaultResponseProcessor) {
-                        final Transformer transformer = ((DefaultResponseProcessor) responseProcessor)
-                                .getTransformer();
-                        final ResultData resultData = transformer
-                                .transform(responseData);
-                        final byte[] data = resultData.getData();
-                        if (data != null) {
-                            try {
-                                @SuppressWarnings("unchecked")
-                                final Map<String, Object> responseDataMap = (Map<String, Object>) SerializeUtil
-                                        .fromBinaryToObject(data);
-                                dataMap.putAll(responseDataMap);
-                            } catch (final Exception e) {
-                                throw new RobotSystemException(
-                                        "Could not create an instanced from bytes.",
-                                        e);
-                            }
-                        }
-
-                        // remove
-                        for (final String fieldName : ignoreFieldNames) {
-                            dataMap.remove(fieldName);
-                        }
-
-                        return indexUpdateCallback.store(dataMap);
-                    } else {
-                        logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: "
-                                + responseProcessor + ", Data: " + dataMap);
+                try {
+                    final S2RobotClient client = robotClientFactory
+                            .getClient(url);
+                    if (client == null) {
+                        logger.warn("S2RobotClient is null. Data: " + dataMap);
                         return false;
                     }
+
+                    final long startTime = System.currentTimeMillis();
+                    final ResponseData responseData = client.doGet(url);
+                    responseData.setExecutionTime(System.currentTimeMillis()
+                            - startTime);
+                    responseData.setSessionId((String) dataMap
+                            .get(Constants.SESSION_ID));
+
+                    final RuleManager ruleManager = SingletonS2Container
+                            .getComponent(RuleManager.class);
+                    final Rule rule = ruleManager.getRule(responseData);
+                    if (rule == null) {
+                        logger.warn("No url rule. Data: " + dataMap);
+                        return false;
+                    } else {
+                        responseData.setRuleId(rule.getRuleId());
+                        final ResponseProcessor responseProcessor = rule
+                                .getResponseProcessor();
+                        if (responseProcessor instanceof DefaultResponseProcessor) {
+                            final Transformer transformer = ((DefaultResponseProcessor) responseProcessor)
+                                    .getTransformer();
+                            final ResultData resultData = transformer
+                                    .transform(responseData);
+                            final byte[] data = resultData.getData();
+                            if (data != null) {
+                                try {
+                                    @SuppressWarnings("unchecked")
+                                    final Map<String, Object> responseDataMap = (Map<String, Object>) SerializeUtil
+                                            .fromBinaryToObject(data);
+                                    dataMap.putAll(responseDataMap);
+                                } catch (final Exception e) {
+                                    throw new RobotSystemException(
+                                            "Could not create an instance from bytes.",
+                                            e);
+                                }
+                            }
+
+                            // remove
+                            for (final String fieldName : ignoreFieldNames) {
+                                dataMap.remove(fieldName);
+                            }
+
+                            return indexUpdateCallback.store(dataMap);
+                        } else {
+                            logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: "
+                                    + responseProcessor + ", Data: " + dataMap);
+                            return false;
+                        }
+                    }
+                } catch (final Exception e) {
+                    throw new DataStoreCrawlingException(url, "Failed to add: "
+                            + dataMap, e);
                 }
             }
         }

@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
+import jp.sf.fess.ds.DataStoreCrawlingException;
 import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.service.FailureUrlService;
@@ -261,28 +262,33 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     }
 
                     String errorName;
-                    final Throwable cause = e.getCause();
+                    final Throwable cause = target.getCause();
                     if (cause != null) {
                         errorName = cause.getClass().getCanonicalName();
                     } else {
-                        errorName = e.getClass().getCanonicalName();
+                        errorName = target.getClass().getCanonicalName();
                     }
 
+                    String url;
+                    if (target instanceof DataStoreCrawlingException) {
+                        url = ((DataStoreCrawlingException) target).getUrl();
+                    } else {
+                        url = csvFile.getAbsolutePath() + ":"
+                                + csvReader.getLineNumber();
+
+                    }
                     final FailureUrlService failureUrlService = SingletonS2Container
                             .getComponent(FailureUrlService.class);
-                    failureUrlService.store(
-                            dataConfig,
-                            errorName,
-                            csvFile.getAbsolutePath() + ":"
-                                    + csvReader.getLineNumber(), e);
+                    failureUrlService.store(dataConfig, errorName, url, target);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
                 } catch (final Exception e) {
+                    final String url = csvFile.getAbsolutePath() + ":"
+                            + csvReader.getLineNumber();
                     final FailureUrlService failureUrlService = SingletonS2Container
                             .getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, e.getClass()
-                            .getCanonicalName(), csvFile.getAbsolutePath()
-                            + ":" + csvReader.getLineNumber(), e);
+                            .getCanonicalName(), url, e);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
                 }
