@@ -85,8 +85,6 @@ public class SystemHelper implements Serializable {
 
     private String solrHome = System.getProperty("solr.solr.home");
 
-    private String solrDataDirName = "fess.solr.data.dir";
-
     private String javaCommandPath = "java";
 
     private String filterPathEncoding = Constants.UTF_8;
@@ -215,15 +213,8 @@ public class SystemHelper implements Serializable {
                         + File.separator);
         crawlerCmdList.add(buf.toString());
 
-        final String solrDataDir = System.getProperty(solrDataDirName);
-
         crawlerCmdList.add("-Dfess.crawler.process=true");
         crawlerCmdList.add("-Dsolr.solr.home=" + solrHome);
-        if (solrDataDir != null) {
-            crawlerCmdList.add("-Dsolr.data.dir=" + solrDataDir);
-        } else {
-            logger.warn("-D" + solrDataDirName + " is not found.");
-        }
         crawlerCmdList.add("-Dfess.log.file=" + logFilePath);
         if (crawlerJavaOptions != null) {
             for (final String value : crawlerJavaOptions) {
@@ -470,14 +461,6 @@ public class SystemHelper implements Serializable {
 
     public void setSolrHome(final String solrHome) {
         this.solrHome = solrHome;
-    }
-
-    public String getSolrDataDirName() {
-        return solrDataDirName;
-    }
-
-    public void setSolrDataDirName(final String solrDataDirName) {
-        this.solrDataDirName = solrDataDirName;
     }
 
     public String getJavaCommandPath() {

@@ -30,7 +30,6 @@
 		<property name="useOwnTmpDir">true</property>
 		<property name="baseHelpLink">"http://fess.codelibs.org/{lang}/8.0/admin/"</property>
 		-->
-		<property name="solrDataDirName">"fess.solr.data.dir"</property>
 		<property name="logFilePath">@System@getProperty("fess.log.file").replaceAll(".out", "_crawler.out")</property>
         <property name="crawlerJavaOptions">new String[] {
 "-Djava.awt.headless=true",
