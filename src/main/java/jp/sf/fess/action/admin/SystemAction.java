@@ -31,7 +31,6 @@ import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.form.admin.SystemForm;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
-import jp.sf.fess.job.TriggeredJob;
 import jp.sf.fess.service.ScheduledJobService;
 
 import org.codelibs.core.util.DynamicProperties;
@@ -221,12 +220,7 @@ public class SystemAction implements Serializable {
                 final List<ScheduledJob> scheduledJobList = scheduledJobService
                         .getCrawloerJobList();
                 for (final ScheduledJob scheduledJob : scheduledJobList) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new TriggeredJob().execute(scheduledJob);
-                        }
-                    }).start();
+                    scheduledJob.start();
                 }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
             } else {
@@ -244,8 +238,13 @@ public class SystemAction implements Serializable {
     @Execute(validator = true, input = "index")
     public String stop() {
         if (systemHelper.isCrawlProcessRunning()) {
-            for (final String sessionId : systemHelper.getRunningSessionIdSet()) {
-                systemHelper.destroyCrawlerProcess(sessionId);
+            if (StringUtil.isNotBlank(systemForm.sessionId)) {
+                systemHelper.destroyCrawlerProcess(systemForm.sessionId);
+            } else {
+                for (final String sessionId : systemHelper
+                        .getRunningSessionIdSet()) {
+                    systemHelper.destroyCrawlerProcess(sessionId);
+                }
             }
             SAStrutsUtil.addSessionMessage("success.stopping_crawl_process");
         } else {
@@ -316,8 +315,9 @@ public class SystemAction implements Serializable {
         return systemHelper.isCrawlProcessRunning();
     }
 
-    public Set<String> getRunningSessionIdSet() {
-        return systemHelper.getRunningSessionIdSet();
+    public String[] getRunningSessionIds() {
+        final Set<String> idSet = systemHelper.getRunningSessionIdSet();
+        return idSet.toArray(new String[idSet.size()]);
     }
 
 }

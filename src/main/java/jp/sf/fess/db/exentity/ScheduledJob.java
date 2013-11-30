@@ -19,6 +19,7 @@ package jp.sf.fess.db.exentity;
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsScheduledJob;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.job.TriggeredJob;
 
 import org.seasar.framework.container.SingletonS2Container;
 
@@ -50,5 +51,15 @@ public class ScheduledJob extends BsScheduledJob {
     public boolean isRunning() {
         return SingletonS2Container.getComponent(SystemHelper.class)
                 .getJobExecutoer(getId()) != null;
+    }
+
+    public void start() {
+        final ScheduledJob scheduledJob = this;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new TriggeredJob().execute(scheduledJob);
+            }
+        }).start();
     }
 }
