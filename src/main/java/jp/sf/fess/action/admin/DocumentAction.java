@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.form.admin.DocumentForm;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
 
@@ -72,6 +73,9 @@ public class DocumentAction implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected JobHelper jobHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("document");
@@ -157,7 +161,7 @@ public class DocumentAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String commit() {
-        if (systemHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_start_solr_process_because_of_running");
         }
@@ -170,7 +174,7 @@ public class DocumentAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!systemHelper.isCrawlProcessRunning()) {
+                    if (!jobHelper.isCrawlProcessRunning()) {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
@@ -203,7 +207,7 @@ public class DocumentAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String optimize() {
-        if (systemHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_start_solr_process_because_of_running");
         }
@@ -216,7 +220,7 @@ public class DocumentAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!systemHelper.isCrawlProcessRunning()) {
+                    if (!jobHelper.isCrawlProcessRunning()) {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
@@ -274,7 +278,7 @@ public class DocumentAction implements Serializable {
     }
 
     private String deleteByQuery(final String deleteQuery) {
-        if (systemHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_start_solr_process_because_of_running");
         }
@@ -287,7 +291,7 @@ public class DocumentAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!systemHelper.isCrawlProcessRunning()) {
+                    if (!jobHelper.isCrawlProcessRunning()) {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup,
@@ -377,11 +381,11 @@ public class DocumentAction implements Serializable {
     }
 
     public boolean isSolrProcessRunning() {
-        return systemHelper.isCrawlProcessRunning();
+        return jobHelper.isCrawlProcessRunning();
     }
 
     public Set<String> getRunningSessionIdSet() {
-        return systemHelper.getRunningSessionIdSet();
+        return jobHelper.getRunningSessionIdSet();
     }
 
     private static class SessionIdList<E> extends ArrayList<E> {

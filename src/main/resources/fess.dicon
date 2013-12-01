@@ -22,6 +22,8 @@
 	</component>
     <component name="pathMappingHelper" class="jp.sf.fess.helper.PathMappingHelper">
     </component>
+	<component name="jobHelper" class="jp.sf.fess.helper.JobHelper">
+	</component>
 	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
 		<!--
 		<property name="adminRole">"fess"</property>

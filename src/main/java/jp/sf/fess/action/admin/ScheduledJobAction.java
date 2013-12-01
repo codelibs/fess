@@ -28,6 +28,7 @@ import jp.sf.fess.crud.action.admin.BsScheduledJobAction;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.db.exentity.ScheduledJob;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.RoleTypeService;
 import jp.sf.fess.util.FessBeans;
@@ -50,6 +51,11 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     @Resource
     protected SystemHelper systemHelper;
 
+    @Resource
+    protected JobHelper jobHelper;
+
+    public boolean running = false;
+
     public String getHelpLink() {
         return systemHelper.getHelpLink("scheduledJob");
     }
@@ -57,14 +63,7 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     @Override
     protected void loadScheduledJob() {
 
-        final ScheduledJob scheduledJob = scheduledJobService
-                .getScheduledJob(createKeyMap());
-        if (scheduledJob == null) {
-            // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { scheduledJobForm.id });
-        }
+        final ScheduledJob scheduledJob = getScheduledJob();
 
         FessBeans.copy(scheduledJob, scheduledJobForm)
                 .commonColumnDateConverter()
@@ -75,6 +74,7 @@ public class ScheduledJobAction extends BsScheduledJobAction {
                 : null;
         scheduledJobForm.available = scheduledJob.isEnabled() ? Constants.ON
                 : null;
+        running = scheduledJob.isRunning();
     }
 
     @Override
@@ -122,14 +122,7 @@ public class ScheduledJobAction extends BsScheduledJobAction {
         }
 
         try {
-            final ScheduledJob scheduledJob = scheduledJobService
-                    .getScheduledJob(createKeyMap());
-            if (scheduledJob == null) {
-                // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { scheduledJobForm.id });
-            }
+            final ScheduledJob scheduledJob = getScheduledJob();
 
             final String username = systemHelper.getUsername();
             final Timestamp timestamp = systemHelper.getCurrentTimestamp();
@@ -153,7 +146,50 @@ public class ScheduledJobAction extends BsScheduledJobAction {
         }
     }
 
+    @Execute(validator = false, input = "error.jsp")
+    public String start() {
+        final ScheduledJob scheduledJob = getScheduledJob();
+        try {
+            scheduledJob.start();
+            SAStrutsUtil.addSessionMessage("success.job_started",
+                    scheduledJob.getName());
+            return displayList(true);
+        } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+            throw new SSCActionMessagesException(e,
+                    "errors.failed_to_start_job", scheduledJob.getName());
+        }
+
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String stop() {
+        final ScheduledJob scheduledJob = getScheduledJob();
+        try {
+            jobHelper.getJobExecutoer(scheduledJob.getId());
+            SAStrutsUtil.addSessionMessage("success.job_stopped",
+                    scheduledJob.getName());
+            return displayList(true);
+        } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+            throw new SSCActionMessagesException(e,
+                    "errors.failed_to_stop_job", scheduledJob.getName());
+        }
+    }
+
     public List<RoleType> getRoleTypeItems() {
         return roleTypeService.getRoleTypeList();
+    }
+
+    protected ScheduledJob getScheduledJob() {
+        final ScheduledJob scheduledJob = scheduledJobService
+                .getScheduledJob(createKeyMap());
+        if (scheduledJob == null) {
+            // throw an exception
+            throw new SSCActionMessagesException(
+                    "errors.crud_could_not_find_crud_table",
+                    new Object[] { scheduledJobForm.id });
+        }
+        return scheduledJob;
     }
 }

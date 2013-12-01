@@ -132,6 +132,14 @@
 										value="<bean:message key="labels.scheduledjob_button_edit"/>" />
 									<input type="submit" class="btn mini" name="deletefromconfirm"
 										value="<bean:message key="labels.scheduledjob_button_delete"/>" />
+									<c:if test="${running}">
+									<input type="submit" class="btn mini" name="stop"
+										value="<bean:message key="labels.scheduledjob_button_stop"/>" />
+									</c:if>
+									<c:if test="${!running}">
+									<input type="submit" class="btn mini" name="start"
+										value="<bean:message key="labels.scheduledjob_button_start"/>" />
+									</c:if>
 								</c:if></td>
 						</tr>
 					</tfoot>

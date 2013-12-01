@@ -28,6 +28,7 @@ import javax.servlet.ServletContext;
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.exec.Crawler;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.JobExecutor.ShutdownListener;
 import jp.sf.fess.util.InputStreamThread;
@@ -185,7 +186,7 @@ public class CrawlJob {
             jobExecutor.addShutdownListener(new ShutdownListener() {
                 @Override
                 public void onShutdown() {
-                    SingletonS2Container.getComponent(SystemHelper.class)
+                    SingletonS2Container.getComponent(JobHelper.class)
                             .destroyCrawlerProcess(sessionId);
                 }
             });
@@ -210,6 +211,8 @@ public class CrawlJob {
                 .getComponent(ServletContext.class);
         final SystemHelper systemHelper = SingletonS2Container
                 .getComponent(SystemHelper.class);
+        final JobHelper jobHelper = SingletonS2Container
+                .getComponent(JobHelper.class);
 
         crawlerCmdList.add(systemHelper.getJavaCommandPath());
 
@@ -302,7 +305,7 @@ public class CrawlJob {
         pb.redirectErrorStream(true);
 
         try {
-            final Process currentProcess = systemHelper.startCrawlerProcess(
+            final Process currentProcess = jobHelper.startCrawlerProcess(
                     sessionId, pb);
 
             final InputStreamThread it = new InputStreamThread(
@@ -329,7 +332,7 @@ public class CrawlJob {
         } catch (final Exception e) {
             throw new FessSystemException("Crawler Process terminated.", e);
         } finally {
-            systemHelper.destroyCrawlerProcess(sessionId);
+            jobHelper.destroyCrawlerProcess(sessionId);
             if (ownTmpDir != null && !ownTmpDir.delete()) {
                 logger.warn("Could not delete a temp dir: "
                         + ownTmpDir.getAbsolutePath());

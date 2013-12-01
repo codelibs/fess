@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.JobLog;
 import jp.sf.fess.db.exentity.ScheduledJob;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.JobLogService;
 
@@ -51,6 +52,8 @@ public class TriggeredJob implements Job {
     public void execute(final ScheduledJob scheduledJob) {
         final SystemHelper systemHelper = SingletonS2Container
                 .getComponent(SystemHelper.class);
+        final JobHelper jobHelper = SingletonS2Container
+                .getComponent(JobHelper.class);
         final JobLog jobLog = new JobLog(scheduledJob);
         final String scriptType = scheduledJob.getScriptType();
         final String script = scheduledJob.getScriptData();
@@ -63,7 +66,7 @@ public class TriggeredJob implements Job {
                     + JOB_EXECUTOR_SUFFIX);
         }
 
-        if (systemHelper.startJobExecutoer(id, jobExecutor) != null) {
+        if (jobHelper.startJobExecutoer(id, jobExecutor) != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug(jobId + " is running.");
             }
@@ -102,7 +105,7 @@ public class TriggeredJob implements Job {
             jobLog.setScriptResult(systemHelper.abbreviateLongText(e
                     .getLocalizedMessage()));
         } finally {
-            systemHelper.finishJobExecutoer(id);
+            jobHelper.finishJobExecutoer(id);
             jobLog.setEndTime(new Timestamp(System.currentTimeMillis()));
             if (logger.isDebugEnabled()) {
                 logger.debug("jobLog: " + jobLog);

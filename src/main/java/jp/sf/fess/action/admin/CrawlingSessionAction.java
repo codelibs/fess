@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 import jp.sf.fess.crud.action.admin.BsCrawlingSessionAction;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.db.exentity.CrawlingSessionInfo;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 
 import org.seasar.struts.annotation.Execute;
@@ -34,6 +35,9 @@ public class CrawlingSessionAction extends BsCrawlingSessionAction {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected JobHelper jobHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("crawlingSession");
@@ -49,7 +53,7 @@ public class CrawlingSessionAction extends BsCrawlingSessionAction {
 
     @Execute(validator = false, input = "error.jsp")
     public String deleteall() {
-        crawlingSessionService.deleteOldSessions(systemHelper
+        crawlingSessionService.deleteOldSessions(jobHelper
                 .getRunningSessionIdSet());
         SAStrutsUtil.addSessionMessage("success.crawling_session_delete_all");
         return displayList(true);

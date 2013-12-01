@@ -18,7 +18,7 @@ package jp.sf.fess.db.exentity;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsScheduledJob;
-import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.job.TriggeredJob;
 
 import org.seasar.framework.container.SingletonS2Container;
@@ -49,7 +49,7 @@ public class ScheduledJob extends BsScheduledJob {
     }
 
     public boolean isRunning() {
-        return SingletonS2Container.getComponent(SystemHelper.class)
+        return SingletonS2Container.getComponent(JobHelper.class)
                 .getJobExecutoer(getId()) != null;
     }
 

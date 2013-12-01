@@ -28,6 +28,7 @@ import jp.sf.fess.InvalidQueryException;
 import jp.sf.fess.ResultOffsetExceededException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.form.admin.SearchListForm;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.SearchService;
 import jp.sf.fess.util.QueryResponseList;
@@ -73,6 +74,12 @@ public class SearchListAction implements Serializable {
     @Resource
     protected HttpServletRequest request;
 
+    @Resource
+    protected SystemHelper systemHelper;
+
+    @Resource
+    protected JobHelper jobHelper;
+
     public List<Map<String, Object>> documentItems;
 
     public String pageSize;
@@ -94,9 +101,6 @@ public class SearchListAction implements Serializable {
     public List<String> pageNumberList;
 
     public String execTime;
-
-    @Resource
-    protected SystemHelper systemHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("searchList");
@@ -247,7 +251,7 @@ public class SearchListAction implements Serializable {
     }
 
     private String deleteByQuery(final String deleteId) {
-        if (systemHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_start_solr_process_because_of_running");
         }
@@ -260,7 +264,7 @@ public class SearchListAction implements Serializable {
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!systemHelper.isCrawlProcessRunning()) {
+                    if (!jobHelper.isCrawlProcessRunning()) {
                         final long time = System.currentTimeMillis();
                         try {
                             solrGroup.deleteById(deleteId);
@@ -290,6 +294,6 @@ public class SearchListAction implements Serializable {
     }
 
     public boolean isSolrProcessRunning() {
-        return systemHelper.isCrawlProcessRunning();
+        return jobHelper.isCrawlProcessRunning();
     }
 }

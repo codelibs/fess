@@ -33,6 +33,7 @@ import jp.sf.fess.db.exentity.FileCrawlingConfig;
 import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
 import jp.sf.fess.form.admin.WizardForm;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.TriggeredJob;
 import jp.sf.fess.service.BrowserTypeService;
@@ -76,6 +77,9 @@ public class WizardAction implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected JobHelper jobHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("wizard");
@@ -324,7 +328,7 @@ public class WizardAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = false)
     public String startCrawling() {
-        if (!systemHelper.isCrawlProcessRunning()) {
+        if (!jobHelper.isCrawlProcessRunning()) {
             final ScheduledJobService scheduledJobService = SingletonS2Container
                     .getComponent(ScheduledJobService.class);
             final List<ScheduledJob> scheduledJobList = scheduledJobService

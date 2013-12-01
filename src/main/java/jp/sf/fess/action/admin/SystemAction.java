@@ -29,6 +29,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.form.admin.SystemForm;
+import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
 import jp.sf.fess.service.ScheduledJobService;
@@ -69,6 +70,9 @@ public class SystemAction implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected JobHelper jobHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("system");
@@ -214,7 +218,7 @@ public class SystemAction implements Serializable {
                 .getProperty(SolrLibConstants.UPDATE_GROUP);
         final SolrGroup solrGroup = solrGroupManager.getSolrGroup(groupName);
         if (solrGroup != null) {
-            if (!systemHelper.isCrawlProcessRunning()) {
+            if (!jobHelper.isCrawlProcessRunning()) {
                 final ScheduledJobService scheduledJobService = SingletonS2Container
                         .getComponent(ScheduledJobService.class);
                 final List<ScheduledJob> scheduledJobList = scheduledJobService
@@ -237,13 +241,13 @@ public class SystemAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String stop() {
-        if (systemHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isCrawlProcessRunning()) {
             if (StringUtil.isNotBlank(systemForm.sessionId)) {
-                systemHelper.destroyCrawlerProcess(systemForm.sessionId);
+                jobHelper.destroyCrawlerProcess(systemForm.sessionId);
             } else {
-                for (final String sessionId : systemHelper
+                for (final String sessionId : jobHelper
                         .getRunningSessionIdSet()) {
-                    systemHelper.destroyCrawlerProcess(sessionId);
+                    jobHelper.destroyCrawlerProcess(sessionId);
                 }
             }
             SAStrutsUtil.addSessionMessage("success.stopping_crawl_process");
@@ -312,11 +316,11 @@ public class SystemAction implements Serializable {
     }
 
     public boolean isCrawlerRunning() {
-        return systemHelper.isCrawlProcessRunning();
+        return jobHelper.isCrawlProcessRunning();
     }
 
     public String[] getRunningSessionIds() {
-        final Set<String> idSet = systemHelper.getRunningSessionIdSet();
+        final Set<String> idSet = jobHelper.getRunningSessionIdSet();
         return idSet.toArray(new String[idSet.size()]);
     }
 

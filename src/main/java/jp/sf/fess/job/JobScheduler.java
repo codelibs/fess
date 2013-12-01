@@ -28,7 +28,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.cbean.ScheduledJobCB;
 import jp.sf.fess.db.exbhv.ScheduledJobBhv;
 import jp.sf.fess.db.exentity.ScheduledJob;
-import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.helper.JobHelper;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -84,10 +84,10 @@ public class JobScheduler {
 
     @DestroyMethod
     public void destroy() {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent(SystemHelper.class);
-        for (final String sessionId : systemHelper.getRunningSessionIdSet()) {
-            systemHelper.destroyCrawlerProcess(sessionId);
+        final JobHelper jobHelper = SingletonS2Container
+                .getComponent(JobHelper.class);
+        for (final String sessionId : jobHelper.getRunningSessionIdSet()) {
+            jobHelper.destroyCrawlerProcess(sessionId);
         }
         try {
             scheduler.shutdown(true);
