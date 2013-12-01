@@ -15,16 +15,6 @@
 			</span>
 		</c:if>
 		<br />
-		<c:if test="${menuType=='scheduledJob'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="../scheduledJob/index">
-			<bean:message key="labels.menu.scheduled_job_config" />
-		</s:link>
-		<c:if test="${menuType=='scheduledJob'}">
-			</span>
-		</c:if>
-		<br />
 		<c:if test="${menuType=='crawl'}">
 			<span class="selected">
 		</c:if>
@@ -52,6 +42,16 @@
 			<bean:message key="labels.menu.document_config" />
 		</s:link>
 		<c:if test="${menuType=='document'}">
+			</span>
+		</c:if>
+		<br />
+		<c:if test="${menuType=='scheduledJob'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="../scheduledJob/index">
+			<bean:message key="labels.menu.scheduled_job_config" />
+		</s:link>
+		<c:if test="${menuType=='scheduledJob'}">
 			</span>
 		</c:if>
 		<br />
