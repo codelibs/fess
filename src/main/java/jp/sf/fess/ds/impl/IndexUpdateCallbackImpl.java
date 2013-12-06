@@ -158,7 +158,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.info("Committing documents. ");
         }
         synchronized (solrGroup) {
-            solrGroup.commit();
+            solrGroup.commit(true, true, false, true);
         }
         if (logger.isInfoEnabled()) {
             logger.info("Committed documents. The execution time is "
