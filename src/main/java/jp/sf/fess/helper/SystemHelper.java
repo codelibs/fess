@@ -105,6 +105,18 @@ public class SystemHelper implements Serializable {
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
+    public String favoriteCountField = "favoriteCount_i";
+
+    public String clickCountField = "clickCount_i";
+
+    public String screenshotField = "screenshot_s_s";
+
+    public String configIdField = "cid_s_s";
+
+    public String expiresField = "expires_dt";
+
+    public String urlField = "url";
+
     @InitMethod
     public void init() {
         final File[] files = ResourceUtil.getJarFiles(launcherFileNamePrefix);

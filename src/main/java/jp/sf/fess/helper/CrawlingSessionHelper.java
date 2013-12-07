@@ -57,8 +57,6 @@ public class CrawlingSessionHelper implements Serializable {
 
     protected Date documentExpires;
 
-    protected String expiresField = "expires_dt";
-
     protected CrawlingSessionService getCrawlingSessionService() {
         return SingletonS2Container.getComponent(CrawlingSessionService.class);
     }
@@ -218,14 +216,6 @@ public class CrawlingSessionHelper implements Serializable {
 
     private String normalize(final String value) {
         return value.replace('"', ' ');
-    }
-
-    public String getExpiresField() {
-        return expiresField;
-    }
-
-    public void setExpiresField(final String expiresField) {
-        this.expiresField = expiresField;
     }
 
 }

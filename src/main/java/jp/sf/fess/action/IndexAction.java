@@ -621,7 +621,7 @@ public class IndexAction {
                 return null;
             }
 
-            if (!favoriteLogService.addUrl(userCode, favoriteUrl)) {
+            if (!favoriteLogService.addUrl(userCode, favoriteUrl, doc)) {
                 WebApiUtil.setError(4, "Failed to add url: " + favoriteUrl);
                 return null;
             }

@@ -46,10 +46,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     public boolean favoriteCountEnabled = true;
 
-    public String clickCountField = "clickCount_i";
-
-    public String favoriteCountField = "favoriteCount_i";
-
     protected volatile AtomicLong documentSize = new AtomicLong(0);
 
     protected volatile long commitPerCount = 0;
@@ -137,7 +133,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         if (!dataMap.containsKey(Constants.DOC_ID)) {
             final SystemHelper systemHelper = SingletonS2Container
-                    .getComponent(SystemHelper.class);
+                    .getComponent("systemHelper");
             doc.addField(Constants.DOC_ID, systemHelper.generateDocId(dataMap));
         }
 
@@ -186,8 +182,10 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             final String url) {
         final SearchLogHelper searchLogHelper = SingletonS2Container
                 .getComponent(SearchLogHelper.class);
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         final int count = searchLogHelper.getClickCount(url);
-        doc.addField(clickCountField, count);
+        doc.addField(systemHelper.clickCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Click Count: " + count + ", url: " + url);
         }
@@ -197,8 +195,10 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             final String url) {
         final SearchLogHelper searchLogHelper = SingletonS2Container
                 .getComponent(SearchLogHelper.class);
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         final long count = searchLogHelper.getFavoriteCount(url);
-        doc.addField(favoriteCountField, count);
+        doc.addField(systemHelper.favoriteCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Favorite Count: " + count + ", url: " + url);
         }

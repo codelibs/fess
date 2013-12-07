@@ -202,7 +202,7 @@ public class FailureUrlService extends BsFailureUrlService implements
 
     private String getStackTrace(final Throwable t) {
         final SystemHelper systemHelper = SingletonS2Container
-                .getComponent(SystemHelper.class);
+                .getComponent("systemHelper");
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);

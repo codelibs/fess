@@ -33,6 +33,7 @@ import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SambaHelper;
 import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.helper.SystemHelper;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -81,12 +82,14 @@ public class FessS2RobotThread extends S2RobotThread {
                     .getComponent(CrawlingConfigHelper.class);
             final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                     .getComponent(CrawlingSessionHelper.class);
+            final SystemHelper systemHelper = SingletonS2Container
+                    .getComponent("systemHelper");
             final SambaHelper sambaHelper = SingletonS2Container
                     .getComponent(SambaHelper.class);
             final boolean useAclAsRole = crawlerProperties.getProperty(
                     Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                     Constants.TRUE);
-            final String expiresField = crawlingSessionHelper.getExpiresField();
+            final String expiresField = systemHelper.expiresField;
 
             ResponseData responseData = null;
             try {

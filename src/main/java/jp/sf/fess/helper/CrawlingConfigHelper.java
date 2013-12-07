@@ -60,18 +60,6 @@ public class CrawlingConfigHelper implements Serializable {
 
     protected int count = 1;
 
-    protected String configIdField = "cid_s_s";
-
-    protected String urlField = "url";
-
-    public String getUrlField() {
-        return urlField;
-    }
-
-    public void setUrlField(final String urlField) {
-        this.urlField = urlField;
-    }
-
     public ConfigType getConfigType(final String configId) {
         if (configId == null || configId.length() < 2) {
             return null;
@@ -143,19 +131,13 @@ public class CrawlingConfigHelper implements Serializable {
         return crawlingConfigMap.get(sessionId);
     }
 
-    public String getConfigIdField() {
-        return configIdField;
-    }
-
-    public void setConfigIdField(final String configIdField) {
-        this.configIdField = configIdField;
-    }
-
     public void writeContent(final Map<String, Object> doc) {
         if (logger.isDebugEnabled()) {
             logger.debug("writing the content of: " + doc);
         }
-        final Object configIdObj = doc.get(configIdField);
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
+        final Object configIdObj = doc.get(systemHelper.configIdField);
         if (configIdObj == null) {
             throw new FessSystemException("Invalid configId: " + configIdObj);
         }
@@ -188,7 +170,7 @@ public class CrawlingConfigHelper implements Serializable {
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);
         }
-        final String url = (String) doc.get(urlField);
+        final String url = (String) doc.get(systemHelper.urlField);
         final S2RobotClientFactory robotClientFactory = SingletonS2Container
                 .getComponent(S2RobotClientFactory.class);
         config.initializeClientFactory(robotClientFactory);

@@ -210,7 +210,7 @@ public class CrawlJob {
         final ServletContext servletContext = SingletonS2Container
                 .getComponent(ServletContext.class);
         final SystemHelper systemHelper = SingletonS2Container
-                .getComponent(SystemHelper.class);
+                .getComponent("systemHelper");
         final JobHelper jobHelper = SingletonS2Container
                 .getComponent(JobHelper.class);
 

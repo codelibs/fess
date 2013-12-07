@@ -123,10 +123,6 @@ public class IndexUpdater extends Thread {
 
     public boolean favoriteCountEnabled = true;
 
-    public String clickCountField = "clickCount_i";
-
-    public String favoriteCountField = "favoriteCount_i";
-
     private final List<BoostDocumentRule> boostRuleList = new ArrayList<BoostDocumentRule>();
 
     private final Map<String, Object> docValueMap = new HashMap<String, Object>();
@@ -497,8 +493,8 @@ public class IndexUpdater extends Thread {
             final ClickLogCB cb = new ClickLogCB();
             cb.query().setUrl_Equal(url);
             final int count = clickLogBhv.selectCount(cb);
-            doc.addField(clickCountField, count);
-            map.put(clickCountField, count);
+            doc.addField(systemHelper.clickCountField, count);
+            map.put(systemHelper.clickCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Click Count: " + count + ", url: " + url);
             }
@@ -520,8 +516,8 @@ public class IndexUpdater extends Thread {
                 count = list.get(0).getCnt().longValue();
             }
 
-            doc.addField(favoriteCountField, count);
-            map.put(favoriteCountField, count);
+            doc.addField(systemHelper.favoriteCountField, count);
+            map.put(systemHelper.favoriteCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Favorite Count: " + count + ", url: " + url);
             }
