@@ -61,8 +61,13 @@ public class SearchService implements Serializable {
     protected QueryHelper queryHelper;
 
     public Map<String, Object> getDocument(final String query) {
+        return getDocument(query, null);
+    }
+
+    public Map<String, Object> getDocument(final String query,
+            final String[] docValuesFields) {
         final List<Map<String, Object>> docList = getDocumentList(query, 0, 1,
-                null, null, null);
+                null, null, null, docValuesFields);
         if (!docList.isEmpty()) {
             return docList.get(0);
         }
@@ -70,7 +75,8 @@ public class SearchService implements Serializable {
     }
 
     public List<Map<String, Object>> getDocumentListByDocIds(
-            final String[] docIds, final int pageSize) {
+            final String[] docIds, final String[] docValuesFields,
+            final int pageSize) {
         if (docIds == null || docIds.length == 0) {
             return Collections.emptyList();
         }
@@ -82,20 +88,22 @@ public class SearchService implements Serializable {
             }
             buf.append("docId:").append(docIds[i]);
         }
-        return getDocumentList(buf.toString(), 0, pageSize, null, null, null);
-    }
-
-    public List<Map<String, Object>> getDocumentList(final String query,
-            final int start, final int rows, final FacetInfo facetInfo,
-            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo) {
-        return getDocumentList(query, start, rows, facetInfo, geoInfo, mltInfo,
-                true);
+        return getDocumentList(buf.toString(), 0, pageSize, null, null, null,
+                docValuesFields);
     }
 
     public List<Map<String, Object>> getDocumentList(final String query,
             final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
-            final boolean forUser) {
+            final String[] docValuesFields) {
+        return getDocumentList(query, start, rows, facetInfo, geoInfo, mltInfo,
+                docValuesFields, true);
+    }
+
+    public List<Map<String, Object>> getDocumentList(final String query,
+            final int start, final int rows, final FacetInfo facetInfo,
+            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
+            final String[] docValuesFields, final boolean forUser) {
         if (start > queryHelper.getMaxSearchResultOffset()) {
             throw new ResultOffsetExceededException(
                     "The number of result size is exceeded.");
@@ -234,6 +242,12 @@ public class SearchService implements Serializable {
             if (!paramSet.isEmpty()) {
                 for (final Map.Entry<String, String[]> entry : paramSet) {
                     solrQuery.set(entry.getKey(), entry.getValue());
+                }
+            }
+
+            if (docValuesFields != null) {
+                for (final String docValuesField : docValuesFields) {
+                    solrQuery.setParam(Constants.DCF, docValuesField);
                 }
             }
 

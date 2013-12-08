@@ -39,6 +39,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QueryResponseList implements List<Map<String, Object>> {
+    private static final String PARTIAL_RESULTS = "partialResults";
+
+    private static final String MORE_LIKE_THIS = "moreLikeThis";
+
+    private static final String DOC_VALUES = "docValues";
+
     private static final String ID_FIELD = "id";
 
     private static final Logger logger = LoggerFactory
@@ -96,7 +102,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             numFound = sdList.getNumFound();
 
             final Object partialResultsValue = queryResponse
-                    .getResponseHeader().get("partialResults");
+                    .getResponseHeader().get(PARTIAL_RESULTS);
             if (partialResultsValue != null
                     && ((Boolean) partialResultsValue).booleanValue()) {
                 partialResults = true;
@@ -157,7 +163,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
             // mlt
             final Object moreLikeThisMap = queryResponse.getResponse().get(
-                    "moreLikeThis");
+                    MORE_LIKE_THIS);
             if (moreLikeThisMap instanceof SimpleOrderedMap) {
                 moreLikeThisResponse = new MoreLikeThisResponse();
                 final int size = ((SimpleOrderedMap<?>) moreLikeThisMap).size();
@@ -176,6 +182,20 @@ public class QueryResponseList implements List<Map<String, Object>> {
                             docMapList.add(docMap);
                         }
                         moreLikeThisResponse.put(id, docMapList);
+                    }
+                }
+            }
+
+            // docValues
+            final Object docValuesObj = queryResponse.getResponse().get(
+                    DOC_VALUES);
+            if (docValuesObj instanceof SimpleOrderedMap) {
+                final SimpleOrderedMap<List<Long>> docValuesMap = (SimpleOrderedMap<List<Long>>) docValuesObj;
+                for (int i = 0; i < docValuesMap.size(); i++) {
+                    final String name = docValuesMap.getName(i);
+                    final List<Long> valueList = docValuesMap.getVal(i);
+                    for (int j = 0; j < valueList.size() && j < parent.size(); j++) {
+                        parent.get(j).put(name, valueList.get(j));
                     }
                 }
             }

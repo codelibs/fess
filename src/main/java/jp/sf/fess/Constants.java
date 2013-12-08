@@ -320,4 +320,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String DOC_ID = "docId";
 
+    public static final String DCF = "dcf";
+
 }

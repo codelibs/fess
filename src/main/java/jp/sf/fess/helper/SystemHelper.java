@@ -105,9 +105,9 @@ public class SystemHelper implements Serializable {
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
-    public String favoriteCountField = "favoriteCount_i";
+    public String favoriteCountField = "favoriteCount_l_x_dv";
 
-    public String clickCountField = "clickCount_i";
+    public String clickCountField = "clickCount_l_x_dv";
 
     public String screenshotField = "screenshot_s_s";
 
@@ -116,6 +116,10 @@ public class SystemHelper implements Serializable {
     public String expiresField = "expires_dt";
 
     public String urlField = "url";
+
+    public String docIdField = "docId";
+
+    public String idField = "id";
 
     @InitMethod
     public void init() {

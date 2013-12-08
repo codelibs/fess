@@ -63,10 +63,6 @@ public class FessS2RobotThread extends S2RobotThread {
 
     public int childUrlSize = 10000;
 
-    public String clickCountField = "clickCount_i";
-
-    public String favoriteCountField = "favoriteCount_i";
-
     @Override
     protected boolean isContentUpdated(final S2RobotClient client,
             final UrlQueue urlQueue) {
@@ -166,7 +162,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
 
                 final Integer clickCount = (Integer) solrDocument
-                        .get(clickCountField);
+                        .get(systemHelper.clickCountField);
                 if (clickCount != null) {
                     final SearchLogHelper searchLogHelper = SingletonS2Container
                             .getComponent(SearchLogHelper.class);
@@ -179,7 +175,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
 
                 final Integer favoriteCount = (Integer) solrDocument
-                        .get(favoriteCountField);
+                        .get(systemHelper.favoriteCountField);
                 if (favoriteCount != null) {
                     final SearchLogHelper searchLogHelper = SingletonS2Container
                             .getComponent(SearchLogHelper.class);
@@ -267,6 +263,8 @@ public class FessS2RobotThread extends S2RobotThread {
             final boolean wildcard, final String expiresField) {
         final SolrGroupManager solrGroupManager = SingletonS2Container
                 .getComponent(SolrGroupManager.class);
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         final SolrGroup solrGroup = solrGroupManager
                 .getSolrGroup(QueryType.ADD);
         final SolrQuery solrQuery = new SolrQuery();
@@ -279,7 +277,8 @@ public class FessS2RobotThread extends S2RobotThread {
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
         solrQuery.setFields("id", "lastModified", "anchor", "segment", "role",
-                expiresField, clickCountField, favoriteCountField);
+                expiresField, systemHelper.clickCountField,
+                systemHelper.favoriteCountField);
         for (int i = 0; i < maxSolrQueryRetryCount; i++) {
             try {
                 final QueryResponse response = solrGroup.query(solrQuery);

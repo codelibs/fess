@@ -32,6 +32,7 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.form.MobileForm;
+import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.UserInfoHelper;
 import jp.sf.fess.service.SearchService;
@@ -68,6 +69,9 @@ public class MobileAction {
 
     @Resource
     protected UserInfoHelper userInfoHelper;
+
+    @Resource
+    protected QueryHelper queryHelper;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -145,7 +149,8 @@ public class MobileAction {
         // TODO add GeoInfo if needed...
         try {
             documentItems = searchService.getDocumentList(mobileForm.query,
-                    pageStart, pageNum, null, null, null);
+                    pageStart, pageNum, null, null, null,
+                    queryHelper.getResponseDocValuesFields());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);

@@ -98,8 +98,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
 
     }
 
-    public boolean addUrl(final String userCode, final String url,
-            final Map<String, Object> doc) {
+    public boolean addUrl(final String userCode, final String url) {
         final UserInfoCB cb = new UserInfoCB();
         cb.query().setCode_Equal(userCode);
         final UserInfo userInfo = userInfoBhv.selectEntity(cb);
