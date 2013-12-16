@@ -192,9 +192,11 @@ public class CrawlingConfigHelper implements Serializable {
             StreamUtil.drain(is, os);
             os.flush();
         } catch (final IOException e) {
-            throw new FessSystemException(
-                    "Failed to write a content. configId: " + configIdObj
-                            + ", url: " + url, e);
+            if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
+                throw new FessSystemException(
+                        "Failed to write a content. configId: " + configIdObj
+                                + ", url: " + url, e);
+            }
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
