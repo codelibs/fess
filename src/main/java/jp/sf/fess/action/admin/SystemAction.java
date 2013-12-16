@@ -74,6 +74,8 @@ public class SystemAction implements Serializable {
     @Resource
     protected JobHelper jobHelper;
 
+    private boolean executed = false;
+
     public String getHelpLink() {
         return systemHelper.getHelpLink("system");
     }
@@ -227,6 +229,7 @@ public class SystemAction implements Serializable {
                     scheduledJob.start();
                 }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
+                executed = true;
             } else {
                 SAStrutsUtil
                         .addSessionMessage("success.failed_to_start_crawl_process");
@@ -316,7 +319,7 @@ public class SystemAction implements Serializable {
     }
 
     public boolean isCrawlerRunning() {
-        return jobHelper.isCrawlProcessRunning();
+        return executed || jobHelper.isCrawlProcessRunning();
     }
 
     public String[] getRunningSessionIds() {
