@@ -10,6 +10,7 @@
 	<include path="fess_suggest.dicon"/>
 	<include path="fess_job.dicon"/>
 	<include path="fess_api.dicon"/>
+	<include path="fess_dic.dicon"/>
 
 	<include path="mobylet.dicon"/>
 

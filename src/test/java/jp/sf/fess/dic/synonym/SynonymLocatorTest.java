@@ -14,18 +14,20 @@
  * governing permissions and limitations under the License.
  */
 
-package jp.sf.fess.synonym;
+package jp.sf.fess.dic.synonym;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.Map;
 
 import jp.sf.fess.Constants;
+import jp.sf.fess.dic.DictionaryFile;
 
 import org.apache.commons.io.FileUtils;
 import org.seasar.extension.unit.S2TestCase;
 import org.seasar.framework.util.FileUtil;
 
-public class SynonymManagerTest extends S2TestCase {
+public class SynonymLocatorTest extends S2TestCase {
 
     private File testDir;
 
@@ -75,37 +77,19 @@ public class SynonymManagerTest extends S2TestCase {
         FileUtils.deleteDirectory(testDir);
     }
 
-    public void test_findFiles() {
-        final SynonymManager synonymManager = new SynonymManager();
-        synonymManager.excludedSynonymSet = new HashSet<String>();
-        synonymManager.excludedSynonymSet.add("data");
-        final File[] files = synonymManager
-                .findFiles(testDir.getAbsolutePath());
-        assertEquals(2, files.length);
-        assertEquals(synonymFile1.getAbsolutePath(), files[0].getAbsolutePath());
-        assertEquals(synonymFile3.getAbsolutePath(), files[1].getAbsolutePath());
+    public void test_find() {
+        final SynonymLocator synonymLocator = new SynonymLocator();
+        synonymLocator.excludedSynonymSet = new HashSet<String>();
+        synonymLocator.excludedSynonymSet.add("data");
+        synonymLocator.addSearchPath(testDir.getAbsolutePath());
+        final Map<String, DictionaryFile> fileMap = synonymLocator.find();
+        assertEquals(2, fileMap.size());
+        final DictionaryFile dicFile1 = fileMap.get(synonymFile1
+                .getAbsolutePath());
+        final DictionaryFile dicFile2 = fileMap.get(synonymFile3
+                .getAbsolutePath());
+        assertEquals(synonymFile1.getAbsolutePath(), dicFile1.getName());
+        assertEquals(synonymFile3.getAbsolutePath(), dicFile2.getName());
     }
 
-    public void test_getSynonymFiles() throws Exception {
-        final SynonymManager synonymManager = new SynonymManager();
-        synonymManager.keepAlive = 1000;
-        synonymManager.watcherTimeout = 1;
-        synonymManager.excludedSynonymSet = new HashSet<String>();
-        synonymManager.excludedSynonymSet.add("data");
-        synonymManager.addSearchPath(testDir.getAbsolutePath());
-        synonymManager.init();
-        final SynonymFile[] synonymFiles = synonymManager.getSynonymFiles();
-        assertEquals(2, synonymFiles.length);
-
-        assertNotNull(synonymManager.synonymFileMap);
-        Thread.sleep(2000);
-        assertNull(synonymManager.synonymFileMap);
-
-        final SynonymFile[] synonymFiles2 = synonymManager.getSynonymFiles();
-        assertEquals(2, synonymFiles2.length);
-
-        assertNotNull(synonymManager.synonymFileMap);
-        Thread.sleep(2000);
-        assertNull(synonymManager.synonymFileMap);
-    }
 }

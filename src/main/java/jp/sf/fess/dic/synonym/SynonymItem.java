@@ -1,8 +1,12 @@
-package jp.sf.fess.synonym;
+package jp.sf.fess.dic.synonym;
 
 import java.util.Arrays;
 
-public class SynonymItem {
+import jp.sf.fess.dic.DictionaryItem;
+
+import org.apache.commons.lang3.StringUtils;
+
+public class SynonymItem extends DictionaryItem {
     private final String[] inputs;
 
     private final String[] outputs;
@@ -56,6 +60,10 @@ public class SynonymItem {
         return newInputs != null && newOutputs != null;
     }
 
+    public boolean isDeleted() {
+        return isUpdated() && newInputs.length == 0;
+    }
+
     public void sort() {
         if (inputs != null) {
             Arrays.sort(inputs);
@@ -101,6 +109,32 @@ public class SynonymItem {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SynonymItem [id=" + id + ", inputs=" + Arrays.toString(inputs)
+                + ", outputs=" + Arrays.toString(outputs) + ", newInputs="
+                + Arrays.toString(newInputs) + ", newOutputs="
+                + Arrays.toString(newOutputs) + "]";
+    }
+
+    public String toLineString() {
+        if (isUpdated()) {
+            if (Arrays.equals(newInputs, newOutputs)) {
+                return StringUtils.join(newInputs, ",");
+            } else {
+                return StringUtils.join(newInputs, ",") + "=>"
+                        + StringUtils.join(newOutputs, ",");
+            }
+        } else {
+            if (Arrays.equals(inputs, outputs)) {
+                return StringUtils.join(inputs, ",");
+            } else {
+                return StringUtils.join(inputs, ",") + "=>"
+                        + StringUtils.join(outputs, ",");
+            }
+        }
     }
 
 }
