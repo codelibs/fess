@@ -55,6 +55,7 @@ public class DictionaryManagerTest extends S2TestCase {
         synonymLocator.excludedSynonymList = new ArrayList<String>();
         synonymLocator.excludedSynonymList.add("data");
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
+        dictionaryManager.addLocator(synonymLocator);
         dictionaryManager.init();
         final DictionaryFile[] synonymFiles = dictionaryManager
                 .getDictionaryFiles();
