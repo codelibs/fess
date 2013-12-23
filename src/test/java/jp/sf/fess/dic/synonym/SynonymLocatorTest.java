@@ -17,7 +17,7 @@
 package jp.sf.fess.dic.synonym;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Map;
 
 import jp.sf.fess.Constants;
@@ -79,8 +79,8 @@ public class SynonymLocatorTest extends S2TestCase {
 
     public void test_find() {
         final SynonymLocator synonymLocator = new SynonymLocator();
-        synonymLocator.excludedSynonymSet = new HashSet<String>();
-        synonymLocator.excludedSynonymSet.add("data");
+        synonymLocator.excludedSynonymList = new ArrayList<String>();
+        synonymLocator.excludedSynonymList.add("data");
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
         final Map<String, DictionaryFile> fileMap = synonymLocator.find();
         assertEquals(2, fileMap.size());

@@ -17,7 +17,7 @@
 package jp.sf.fess.dic;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.dic.synonym.SynonymLocator;
@@ -52,8 +52,8 @@ public class DictionaryManagerTest extends S2TestCase {
         dictionaryManager.keepAlive = 1000;
         dictionaryManager.watcherTimeout = 1;
         final SynonymLocator synonymLocator = new SynonymLocator();
-        synonymLocator.excludedSynonymSet = new HashSet<String>();
-        synonymLocator.excludedSynonymSet.add("data");
+        synonymLocator.excludedSynonymList = new ArrayList<String>();
+        synonymLocator.excludedSynonymList.add("data");
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
         dictionaryManager.init();
         final DictionaryFile[] synonymFiles = dictionaryManager
