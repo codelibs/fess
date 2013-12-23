@@ -14,14 +14,15 @@
  * governing permissions and limitations under the License.
  */
 
-package jp.sf.fess.dic.synonym;
+package jp.sf.fess.dict.synonym;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.dic.DictionaryFile;
+import jp.sf.fess.dict.DictionaryFile;
+import jp.sf.fess.dict.synonym.SynonymLocator;
 
 import org.apache.commons.io.FileUtils;
 import org.seasar.extension.unit.S2TestCase;

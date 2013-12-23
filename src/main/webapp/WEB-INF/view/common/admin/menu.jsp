@@ -65,6 +65,16 @@
 			</span>
 		</c:if>
 		<br />
+		<c:if test="${menuType=='dict'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="../dict/index">
+			<bean:message key="labels.menu.dict" />
+		</s:link>
+		<c:if test="${menuType=='dict'}">
+			</span>
+		</c:if>
+		<br />
 		<c:if test="${menuType=='data'}">
 			<span class="selected">
 		</c:if>

@@ -1,4 +1,4 @@
-package jp.sf.fess.dic;
+package jp.sf.fess.dict;
 
 public abstract class DictionaryItem {
 

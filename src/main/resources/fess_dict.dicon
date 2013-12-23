@@ -2,13 +2,13 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="synonymManager" class="jp.sf.fess.dic.DictionaryManager">
+	<component name="dictionaryManager" class="jp.sf.fess.dict.DictionaryManager">
 		<initMethod name="addLocator">
 			<arg>synonymLocator</arg>
 		</initMethod>
 	</component>
 
-	<component name="synonymLocator" class="jp.sf.fess.dic.synonym.SynonymLocator">
+	<component name="synonymLocator" class="jp.sf.fess.dict.synonym.SynonymLocator">
 		<property name="excludedSynonymList">{"data", "txlog",
 			"lib", "bin", "contrib"}</property>
 		<initMethod name="addSearchPath">

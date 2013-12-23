@@ -14,7 +14,9 @@
  * governing permissions and limitations under the License.
  */
 
-package jp.sf.fess.dic.synonym;
+package jp.sf.fess.dict.synonym;
+
+import jp.sf.fess.dict.synonym.SynonymItem;
 
 import org.seasar.extension.unit.S2TestCase;
 

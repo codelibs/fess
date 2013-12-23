@@ -1,4 +1,4 @@
-package jp.sf.fess.dic;
+package jp.sf.fess.dict;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 public abstract class DictionaryFile {
+    public abstract String getType();
+
     public abstract String getName();
 
     public abstract PagingList<DictionaryItem> selectList(int offset, int size);

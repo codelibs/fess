@@ -1,12 +1,12 @@
-package jp.sf.fess.dic.synonym;
+package jp.sf.fess.dict.synonym;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jp.sf.fess.dic.DictionaryFile;
-import jp.sf.fess.dic.DictionaryLocator;
+import jp.sf.fess.dict.DictionaryFile;
+import jp.sf.fess.dict.DictionaryLocator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

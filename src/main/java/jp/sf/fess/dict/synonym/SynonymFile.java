@@ -1,4 +1,4 @@
-package jp.sf.fess.dic.synonym;
+package jp.sf.fess.dict.synonym;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,20 +14,27 @@ import java.util.Collections;
 import java.util.List;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.dic.DictionaryException;
-import jp.sf.fess.dic.DictionaryFile;
-import jp.sf.fess.dic.DictionaryItem;
+import jp.sf.fess.dict.DictionaryException;
+import jp.sf.fess.dict.DictionaryFile;
+import jp.sf.fess.dict.DictionaryItem;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 public class SynonymFile extends DictionaryFile {
+    private static final String SYNONYM = "synonym";
+
     private final File file;
 
     List<DictionaryItem> synonymItemList;
 
     public SynonymFile(final File file) {
         this.file = file;
+    }
+
+    @Override
+    public String getType() {
+        return SYNONYM;
     }
 
     @Override
@@ -244,7 +251,7 @@ public class SynonymFile extends DictionaryFile {
 
         protected SynonymUpdater(final File file, final SynonymItem newItem) {
             try {
-                newFile = File.createTempFile("synonym", ".txt");
+                newFile = File.createTempFile(SYNONYM, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(
                         new FileOutputStream(newFile), Constants.UTF_8));
             } catch (final IOException e) {

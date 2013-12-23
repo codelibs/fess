@@ -1,8 +1,8 @@
-package jp.sf.fess.dic.synonym;
+package jp.sf.fess.dict.synonym;
 
 import java.util.Arrays;
 
-import jp.sf.fess.dic.DictionaryItem;
+import jp.sf.fess.dict.DictionaryItem;
 
 import org.apache.commons.lang3.StringUtils;
 

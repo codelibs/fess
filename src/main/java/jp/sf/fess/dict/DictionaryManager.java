@@ -1,4 +1,4 @@
-package jp.sf.fess.dic;
+package jp.sf.fess.dict;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import jp.sf.fess.dic.synonym.SynonymFile;
+import jp.sf.fess.dict.synonym.SynonymFile;
 
 import org.seasar.extension.timer.TimeoutManager;
 import org.seasar.extension.timer.TimeoutTarget;
