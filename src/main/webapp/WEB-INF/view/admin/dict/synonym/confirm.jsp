@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
 	flush="true">
 	<tiles:put name="title">
-		<bean:message key="labels.supported_browser_configuration" />
+		<bean:message key="labels.dict_synonym_configuration" />
 	</tiles:put>
 	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
@@ -11,7 +11,7 @@
 	<tiles:put name="body" type="string">
 
 		<h3>
-			<bean:message key="labels.dict_title_confirm" />
+			<bean:message key="labels.dict_synonym_title" />
 		</h3>
 
 		<%-- Message: BEGIN --%>
@@ -25,24 +25,27 @@
 
 			<div>
 				<ul class="pills">
-					<li><s:link href="index">
-							<bean:message key="labels.dict_link_list" />
+					<li><s:link href="../index">
+							<bean:message key="labels.dict_list_link" />
+						</s:link></li>
+					<li><s:link href="index?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_synonym_list_link" />
 						</s:link></li>
 					<c:if test="${crudMode == 1}">
 					<li class="active"><a href="#"><bean:message
-								key="labels.dict_link_create" /></a></li>
+								key="labels.dict_synonym_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
 					<li class="active"><a href="#"><bean:message
-								key="labels.dict_link_update" /></a></li>
+								key="labels.dict_synonym_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
 					<li class="active"><a href="#"><bean:message
-								key="labels.dict_link_delete" /></a></li>
+								key="labels.dict_synonym_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
 					<li class="active"><a href="#"><bean:message
-								key="labels.dict_link_confirm" /></a></li>
+								key="labels.dict_synonym_link_confirm" /></a></li>
 					</c:if>
 				</ul>
 			</div>
@@ -51,51 +54,46 @@
 		<s:form>
 			<html:hidden property="crudMode" />
 			<div>
+				<html:hidden property="dictId" />
 				<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
 					<html:hidden property="id" />
-					<html:hidden property="versionNo" />
 				</c:if>
-				<html:hidden property="createdBy" />
-				<html:hidden property="createdTime" />
-				<html:hidden property="sortOrder" />
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
 							<th style="width: 150px;"><bean:message
-									key="labels.dict_name" /></th>
-							<td>${f:h(name)}<html:hidden property="name" /></td>
+									key="labels.dict_synonym_source" /></th>
+							<td>${f:br(f:h(inputs))}<html:hidden property="inputs" /></td>
 						</tr>
 						<tr>
-							<th><bean:message key="labels.dict_value" /></th>
-							<td>${f:h(value)}<html:hidden property="value" /></td>
+							<th><bean:message key="labels.dict_synonym_target" /></th>
+							<td>${f:br(f:h(outputs))}<html:hidden property="outputs" /></td>
 						</tr>
-
-
 					</tbody>
 					<tfoot>
 						<tr>
 							<td colspan="2"><c:if test="${crudMode == 1}">
 									<input type="submit" class="btn mini" name="create"
-										value="<bean:message key="labels.dict_button_create"/>" />
+										value="<bean:message key="labels.dict_synonym_button_create"/>" />
 									<input type="submit" class="btn mini" name="editagain"
-										value="<bean:message key="labels.dict_button_back"/>" />
+										value="<bean:message key="labels.dict_synonym_button_back"/>" />
 								</c:if> <c:if test="${crudMode == 2}">
 									<input type="submit" class="btn mini" name="update"
-										value="<bean:message key="labels.dict_button_update"/>" />
+										value="<bean:message key="labels.dict_synonym_button_update"/>" />
 									<input type="submit" class="btn mini" name="editagain"
-										value="<bean:message key="labels.dict_button_back"/>" />
+										value="<bean:message key="labels.dict_synonym_button_back"/>" />
 								</c:if> <c:if test="${crudMode == 3}">
 									<input type="submit" class="btn mini" name="delete"
-										value="<bean:message key="labels.dict_button_delete"/>" />
+										value="<bean:message key="labels.dict_synonym_button_delete"/>" />
 									<input type="submit" class="btn mini" name="back"
-										value="<bean:message key="labels.dict_button_back"/>" />
+										value="<bean:message key="labels.dict_synonym_button_back"/>" />
 								</c:if> <c:if test="${crudMode == 4}">
 									<input type="submit" class="btn mini" name="back"
-										value="<bean:message key="labels.dict_button_back"/>" />
+										value="<bean:message key="labels.dict_synonym_button_back"/>" />
 									<input type="submit" class="btn mini" name="editfromconfirm"
-										value="<bean:message key="labels.dict_button_edit"/>" />
+										value="<bean:message key="labels.dict_synonym_button_edit"/>" />
 									<input type="submit" class="btn mini" name="deletefromconfirm"
-										value="<bean:message key="labels.dict_button_delete"/>" />
+										value="<bean:message key="labels.dict_synonym_button_delete"/>" />
 								</c:if></td>
 						</tr>
 					</tfoot>

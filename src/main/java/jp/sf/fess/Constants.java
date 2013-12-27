@@ -28,6 +28,9 @@ public class Constants extends CoreLibConstants {
     public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION)
             + "." + String.valueOf(MINOR_VERSION);
 
+    public static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
+
     public static final int DEFAULT_ADMIN_PAGE_SIZE = 25;
 
     public static final String WEB_API_VERSION = "4";
@@ -35,6 +38,8 @@ public class Constants extends CoreLibConstants {
     public static final String LOGIN_INFO = "jp.sf.fess.LoginInfo";
 
     public static final String EMPTY_STRING = "";
+
+    public static final String[] EMPTY_STRINGS = new String[0];
 
     public static final String TRUE = "true";
 

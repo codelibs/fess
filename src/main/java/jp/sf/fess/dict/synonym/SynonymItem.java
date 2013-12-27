@@ -15,9 +15,9 @@ public class SynonymItem extends DictionaryItem {
 
     private String[] newOutputs;
 
-    private final int id;
+    private final long id;
 
-    public SynonymItem(final int id, final String[] inputs,
+    public SynonymItem(final long id, final String[] inputs,
             final String[] outputs) {
         this.id = id;
         this.inputs = inputs;
@@ -26,9 +26,15 @@ public class SynonymItem extends DictionaryItem {
         if (inputs != outputs) {
             Arrays.sort(outputs);
         }
+
+        if (id == 0) {
+            // create
+            newInputs = inputs;
+            newOutputs = outputs;
+        }
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

@@ -51,7 +51,7 @@
 						<c:forEach var="data" varStatus="s" items="${dictFiles}">
 							<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
 								<td>${f:h(data.type)}</td>
-								<td>${f:h(data.name)}</td>
+								<td><s:link href="${f:h(data.type)}/index?dictId=${f:h(data.id)}">${f:h(data.name)}</s:link></td>
 							</tr>
 						</c:forEach>
 					</tbody>

@@ -18,11 +18,11 @@ package jp.sf.fess.dict.synonym;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.dict.DictionaryFile;
-import jp.sf.fess.dict.synonym.SynonymLocator;
+import jp.sf.fess.dict.DictionaryItem;
 
 import org.apache.commons.io.FileUtils;
 import org.seasar.extension.unit.S2TestCase;
@@ -83,12 +83,11 @@ public class SynonymLocatorTest extends S2TestCase {
         synonymLocator.excludedSynonymList = new ArrayList<String>();
         synonymLocator.excludedSynonymList.add("data");
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
-        final Map<String, DictionaryFile> fileMap = synonymLocator.find();
-        assertEquals(2, fileMap.size());
-        final DictionaryFile dicFile1 = fileMap.get(synonymFile1
-                .getAbsolutePath());
-        final DictionaryFile dicFile2 = fileMap.get(synonymFile3
-                .getAbsolutePath());
+        final List<DictionaryFile<? extends DictionaryItem>> list = synonymLocator
+                .find();
+        assertEquals(2, list.size());
+        final DictionaryFile<? extends DictionaryItem> dicFile1 = list.get(0);
+        final DictionaryFile<? extends DictionaryItem> dicFile2 = list.get(1);
         assertEquals(synonymFile1.getAbsolutePath(), dicFile1.getName());
         assertEquals(synonymFile3.getAbsolutePath(), dicFile2.getName());
     }

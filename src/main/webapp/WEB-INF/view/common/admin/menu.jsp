@@ -8,7 +8,7 @@
 		<c:if test="${menuType=='wizard'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../wizard/index">
+		<s:link href="${contextPath}/admin/wizard/index">
 			<bean:message key="labels.menu.wizard" />
 		</s:link>
 		<c:if test="${menuType=='wizard'}">
@@ -18,7 +18,7 @@
 		<c:if test="${menuType=='crawl'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../crawl/index">
+		<s:link href="${contextPath}/admin/crawl/index">
 			<bean:message key="labels.menu.crawl_config" />
 		</s:link>
 		<c:if test="${menuType=='crawl'}">
@@ -28,7 +28,7 @@
 		<c:if test="${menuType=='system'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../system/index">
+		<s:link href="${contextPath}/admin/system/index">
 			<bean:message key="labels.menu.system_config" />
 		</s:link>
 		<c:if test="${menuType=='system'}">
@@ -38,7 +38,7 @@
 		<c:if test="${menuType=='document'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../document/index">
+		<s:link href="${contextPath}/admin/document/index">
 			<bean:message key="labels.menu.document_config" />
 		</s:link>
 		<c:if test="${menuType=='document'}">
@@ -48,7 +48,7 @@
 		<c:if test="${menuType=='scheduledJob'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../scheduledJob/index">
+		<s:link href="${contextPath}/admin/scheduledJob/index">
 			<bean:message key="labels.menu.scheduled_job_config" />
 		</s:link>
 		<c:if test="${menuType=='scheduledJob'}">
@@ -58,7 +58,7 @@
 		<c:if test="${menuType=='design'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../design/index">
+		<s:link href="${contextPath}/admin/design/index">
 			<bean:message key="labels.menu.design" />
 		</s:link>
 		<c:if test="${menuType=='design'}">
@@ -68,7 +68,7 @@
 		<c:if test="${menuType=='dict'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../dict/index">
+		<s:link href="${contextPath}/admin/dict/index">
 			<bean:message key="labels.menu.dict" />
 		</s:link>
 		<c:if test="${menuType=='dict'}">
@@ -78,7 +78,7 @@
 		<c:if test="${menuType=='data'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../data/index">
+		<s:link href="${contextPath}/admin/data/index">
 			<bean:message key="labels.menu.data" />
 		</s:link>
 		<c:if test="${menuType=='data'}">
@@ -93,7 +93,7 @@
 		<c:if test="${menuType=='webCrawlingConfig'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../webCrawlingConfig/index">
+		<s:link href="${contextPath}/admin/webCrawlingConfig/index">
 			<bean:message key="labels.menu.web" />
 		</s:link>
 		<c:if test="${menuType=='webCrawlingConfig'}">
@@ -103,7 +103,7 @@
 		<c:if test="${menuType=='fileCrawlingConfig'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../fileCrawlingConfig/index">
+		<s:link href="${contextPath}/admin/fileCrawlingConfig/index">
 			<bean:message key="labels.menu.file_system" />
 		</s:link>
 		<c:if test="${menuType=='fileCrawlingConfig'}">
@@ -113,7 +113,7 @@
 		<c:if test="${menuType=='dataCrawlingConfig'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../dataCrawlingConfig/index">
+		<s:link href="${contextPath}/admin/dataCrawlingConfig/index">
 			<bean:message key="labels.menu.data_store" />
 		</s:link>
 		<c:if test="${menuType=='dataCrawlingConfig'}">
@@ -123,7 +123,7 @@
 		<c:if test="${menuType=='labelType'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../labelType/index">
+		<s:link href="${contextPath}/admin/labelType/index">
 			<bean:message key="labels.menu.label_type" />
 		</s:link>
 		<c:if test="${menuType=='labelType'}">
@@ -133,7 +133,7 @@
 		<c:if test="${menuType=='pathMapping'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../pathMapping/index">
+		<s:link href="${contextPath}/admin/pathMapping/index">
 			<bean:message key="labels.menu.path_mapping" />
 		</s:link>
 		<c:if test="${menuType=='pathMapping'}">
@@ -143,7 +143,7 @@
 		<c:if test="${menuType=='webAuthentication'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../webAuthentication/index">
+		<s:link href="${contextPath}/admin/webAuthentication/index">
 			<bean:message key="labels.menu.web_authentication" />
 		</s:link>
 		<c:if test="${menuType=='webAuthentication'}">
@@ -153,7 +153,7 @@
 		<c:if test="${menuType=='fileAuthentication'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../fileAuthentication/index">
+		<s:link href="${contextPath}/admin/fileAuthentication/index">
 			<bean:message key="labels.menu.file_authentication" />
 		</s:link>
 		<c:if test="${menuType=='fileAuthentication'}">
@@ -163,7 +163,7 @@
 		<c:if test="${menuType=='requestHeader'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../requestHeader/index">
+		<s:link href="${contextPath}/admin/requestHeader/index">
 			<bean:message key="labels.menu.request_header" />
 		</s:link>
 		<c:if test="${menuType=='requestHeader'}">
@@ -173,7 +173,7 @@
 		<c:if test="${menuType=='overlappingHost'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../overlappingHost/index">
+		<s:link href="${contextPath}/admin/overlappingHost/index">
 			<bean:message key="labels.menu.overlapping_host" />
 		</s:link>
 		<c:if test="${menuType=='overlappingHost'}">
@@ -183,7 +183,7 @@
 		<c:if test="${menuType=='roleType'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../roleType/index">
+		<s:link href="${contextPath}/admin/roleType/index">
 			<bean:message key="labels.menu.role_type" />
 		</s:link>
 		<c:if test="${menuType=='roleType'}">
@@ -193,7 +193,7 @@
 		<c:if test="${menuType=='browserType'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../browserType/index">
+		<s:link href="${contextPath}/admin/browserType/index">
 			<bean:message key="labels.menu.supported_browser" />
 		</s:link>
 		<c:if test="${menuType=='browserType'}">
@@ -208,7 +208,7 @@
 		<c:if test="${menuType=='systemInfo'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../systemInfo/index">
+		<s:link href="${contextPath}/admin/systemInfo/index">
 			<bean:message key="labels.menu.system_info" />
 		</s:link>
 		<c:if test="${menuType=='systemInfo'}">
@@ -218,7 +218,7 @@
 		<c:if test="${menuType=='jobLog'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../jobLog/index">
+		<s:link href="${contextPath}/admin/jobLog/index">
 			<bean:message key="labels.menu.jobLog" />
 		</s:link>
 		<c:if test="${menuType=='jobLog'}">
@@ -228,7 +228,7 @@
 		<c:if test="${menuType=='crawlingSession'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../crawlingSession/index">
+		<s:link href="${contextPath}/admin/crawlingSession/index">
 			<bean:message key="labels.menu.session_info" />
 		</s:link>
 		<c:if test="${menuType=='crawlingSession'}">
@@ -238,7 +238,7 @@
 		<c:if test="${menuType=='log'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../log/index">
+		<s:link href="${contextPath}/admin/log/index">
 			<bean:message key="labels.menu.log" />
 		</s:link>
 		<c:if test="${menuType=='log'}">
@@ -248,7 +248,7 @@
 		<c:if test="${menuType=='failureUrl'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../failureUrl/index">
+		<s:link href="${contextPath}/admin/failureUrl/index">
 			<bean:message key="labels.menu.failure_url" />
 		</s:link>
 		<c:if test="${menuType=='failureUrl'}">
@@ -258,7 +258,7 @@
 		<c:if test="${menuType=='searchList'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../searchList/index">
+		<s:link href="${contextPath}/admin/searchList/index">
 			<bean:message key="labels.menu.search_list" />
 		</s:link>
 		<c:if test="${menuType=='searchList'}">
@@ -273,7 +273,7 @@
 		<c:if test="${menuType=='searchLog'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../searchLog/index">
+		<s:link href="${contextPath}/admin/searchLog/index">
 			<bean:message key="labels.menu.search_log" />
 		</s:link>
 		<c:if test="${menuType=='searchLog'}">
@@ -283,7 +283,7 @@
 		<c:if test="${menuType=='stats'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../stats/index">
+		<s:link href="${contextPath}/admin/stats/index">
 			<bean:message key="labels.menu.stats" />
 		</s:link>
 		<c:if test="${menuType=='stats'}">
@@ -293,7 +293,7 @@
 		<c:if test="${menuType=='userInfo'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../userInfo/index">
+		<s:link href="${contextPath}/admin/userInfo/index">
 			<bean:message key="labels.menu.user" />
 		</s:link>
 		<c:if test="${menuType=='userInfo'}">
@@ -303,7 +303,7 @@
 		<c:if test="${menuType=='favoriteLog'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="../favoriteLog/index">
+		<s:link href="${contextPath}/admin/favoriteLog/index">
 			<bean:message key="labels.menu.favoriteLog" />
 		</s:link>
 		<c:if test="${menuType=='favoriteLog'}">

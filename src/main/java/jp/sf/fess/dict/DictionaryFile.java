@@ -1,25 +1,40 @@
 package jp.sf.fess.dict;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public abstract class DictionaryFile {
+public abstract class DictionaryFile<T extends DictionaryItem> {
+    protected String id;
+
     public abstract String getType();
 
     public abstract String getName();
 
-    public abstract PagingList<DictionaryItem> selectList(int offset, int size);
+    public abstract PagingList<T> selectList(int offset, int size);
 
-    public abstract void insert(DictionaryItem item);
+    public abstract T get(long id);
 
-    public abstract void update(DictionaryItem item);
+    public abstract void insert(T item);
 
-    public abstract void delete(DictionaryItem item);
+    public abstract void update(T item);
+
+    public abstract void delete(T item);
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
+    }
 
     public static class PagingList<E> implements List<E> {
         private final List<E> parent;
+
+        protected int allPageCount;
 
         protected int allRecordCount;
 
@@ -27,12 +42,15 @@ public abstract class DictionaryFile {
 
         protected int currentPageNumber;
 
+        protected int pageRangeSize;
+
         public PagingList(final List<E> list, final int offset, final int size,
                 final int allRecordCount) {
             this.parent = list;
             this.allRecordCount = allRecordCount;
             pageSize = size;
             currentPageNumber = offset / size + 1;
+            allPageCount = (allRecordCount - 1) / size + 1;
         }
 
         @Override
@@ -162,5 +180,38 @@ public abstract class DictionaryFile {
             return currentPageNumber;
         }
 
+        public int getAllPageCount() {
+            return allPageCount;
+        }
+
+        public boolean isExistPrePage() {
+            return currentPageNumber != 1;
+        }
+
+        public boolean isExistNextPage() {
+            return currentPageNumber != allPageCount;
+        }
+
+        public void setPageRangeSize(final int pageRangeSize) {
+            this.pageRangeSize = pageRangeSize;
+        }
+
+        public List<Integer> createPageNumberList() {
+            int startPage = currentPageNumber - pageRangeSize;
+            if (startPage < 1) {
+                startPage = 1;
+            }
+            int endPage = currentPageNumber + pageRangeSize;
+            if (endPage > allPageCount) {
+                endPage = allPageCount;
+            }
+            final List<Integer> pageNumberList = new ArrayList<Integer>();
+            for (int i = startPage; i <= endPage; i++) {
+                pageNumberList.add(i);
+            }
+            return pageNumberList;
+        }
+
     }
+
 }

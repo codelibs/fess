@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import jp.sf.fess.util.ResourceUtil;
 
@@ -14,7 +13,7 @@ import org.apache.commons.io.filefilter.AbstractFileFilter;
 public abstract class DictionaryLocator {
     protected List<String> searchPathList = new ArrayList<String>();
 
-    public abstract Map<String, DictionaryFile> find();
+    public abstract List<DictionaryFile<? extends DictionaryItem>> find();
 
     protected File[] findFiles(final String path, final String filenamePrefix,
             final List<String> excludedSet) {

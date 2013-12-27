@@ -1,11 +1,11 @@
 package jp.sf.fess.dict.synonym;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import jp.sf.fess.dict.DictionaryFile;
+import jp.sf.fess.dict.DictionaryItem;
 import jp.sf.fess.dict.DictionaryLocator;
 
 import org.slf4j.Logger;
@@ -20,8 +20,8 @@ public class SynonymLocator extends DictionaryLocator {
     public List<String> excludedSynonymList;
 
     @Override
-    public Map<String, DictionaryFile> find() {
-        final Map<String, DictionaryFile> fileMap = new HashMap<String, DictionaryFile>();
+    public List<DictionaryFile<? extends DictionaryItem>> find() {
+        final List<DictionaryFile<? extends DictionaryItem>> fileList = new ArrayList<DictionaryFile<? extends DictionaryItem>>();
         for (final String path : searchPathList) {
             final File[] files = findFiles(path, synonymFilePrefix,
                     excludedSynonymList);
@@ -29,10 +29,10 @@ public class SynonymLocator extends DictionaryLocator {
                 if (logger.isInfoEnabled()) {
                     logger.info("Synonym File: " + file.getAbsolutePath());
                 }
-                fileMap.put(file.getAbsolutePath(), new SynonymFile(file));
+                fileList.add(new SynonymFile(file));
             }
         }
-        return fileMap;
+        return fileList;
     }
 
 }

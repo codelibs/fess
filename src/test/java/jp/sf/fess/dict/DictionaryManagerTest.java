@@ -20,8 +20,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.dict.DictionaryFile;
-import jp.sf.fess.dict.DictionaryManager;
 import jp.sf.fess.dict.synonym.SynonymLocator;
 
 import org.apache.commons.io.FileUtils;
@@ -59,7 +57,7 @@ public class DictionaryManagerTest extends S2TestCase {
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
         dictionaryManager.addLocator(synonymLocator);
         dictionaryManager.init();
-        final DictionaryFile[] synonymFiles = dictionaryManager
+        final DictionaryFile<? extends DictionaryItem>[] synonymFiles = dictionaryManager
                 .getDictionaryFiles();
         assertEquals(1, synonymFiles.length);
 
@@ -67,7 +65,7 @@ public class DictionaryManagerTest extends S2TestCase {
         Thread.sleep(2000);
         assertNull(dictionaryManager.dicFileMap);
 
-        final DictionaryFile[] synonymFiles2 = dictionaryManager
+        final DictionaryFile<? extends DictionaryItem>[] synonymFiles2 = dictionaryManager
                 .getDictionaryFiles();
         assertEquals(1, synonymFiles2.length);
 

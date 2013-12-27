@@ -2,9 +2,10 @@ package jp.sf.fess.dict;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.UUID;
 
 import jp.sf.fess.dict.synonym.SynonymFile;
 
@@ -13,6 +14,7 @@ import org.seasar.extension.timer.TimeoutTarget;
 import org.seasar.extension.timer.TimeoutTask;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +22,7 @@ public class DictionaryManager {
     private static final Logger logger = LoggerFactory
             .getLogger(DictionaryManager.class);
 
-    protected Map<String, DictionaryFile> dicFileMap;
+    protected Map<String, DictionaryFile<? extends DictionaryItem>> dicFileMap;
 
     public long keepAlive = 5 * 60 * 1000; // 5min
 
@@ -47,29 +49,39 @@ public class DictionaryManager {
         }
     }
 
-    public DictionaryFile[] getDictionaryFiles() {
-        final Map<String, DictionaryFile> fileMap = getDictionaryFileMap();
+    public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
+        final Map<String, DictionaryFile<? extends DictionaryItem>> fileMap = getDictionaryFileMap();
 
-        final Collection<DictionaryFile> values = fileMap.values();
+        final Collection<DictionaryFile<? extends DictionaryItem>> values = fileMap
+                .values();
         return values.toArray(new SynonymFile[values.size()]);
     }
 
-    public DictionaryFile getDictionaryFile(final String uri) {
-        final Map<String, DictionaryFile> fileMap = getDictionaryFileMap();
+    public DictionaryFile<? extends DictionaryItem> getDictionaryFile(
+            final String id) {
+        if (StringUtil.isBlank(id)) {
+            return null;
+        }
 
-        return fileMap.get(uri);
+        final Map<String, DictionaryFile<? extends DictionaryItem>> fileMap = getDictionaryFileMap();
+        return fileMap.get(id);
     }
 
-    protected Map<String, DictionaryFile> getDictionaryFileMap() {
+    protected Map<String, DictionaryFile<? extends DictionaryItem>> getDictionaryFileMap() {
         synchronized (this) {
             if (lifetime > System.currentTimeMillis() && dicFileMap != null) {
                 lifetime = System.currentTimeMillis() + keepAlive;
                 return dicFileMap;
             }
 
-            final Map<String, DictionaryFile> newFileMap = new TreeMap<String, DictionaryFile>();
+            final Map<String, DictionaryFile<? extends DictionaryItem>> newFileMap = new HashMap<String, DictionaryFile<? extends DictionaryItem>>();
             for (final DictionaryLocator locator : locatorList) {
-                newFileMap.putAll(locator.find());
+                for (final DictionaryFile<? extends DictionaryItem> dictFile : locator
+                        .find()) {
+                    final String id = UUID.randomUUID().toString();
+                    dictFile.setId(id);
+                    newFileMap.put(id, dictFile);
+                }
             }
             dicFileMap = newFileMap;
             lifetime = System.currentTimeMillis() + keepAlive;
