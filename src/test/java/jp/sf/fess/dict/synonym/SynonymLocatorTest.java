@@ -88,8 +88,8 @@ public class SynonymLocatorTest extends S2TestCase {
         assertEquals(2, list.size());
         final DictionaryFile<? extends DictionaryItem> dicFile1 = list.get(0);
         final DictionaryFile<? extends DictionaryItem> dicFile2 = list.get(1);
-        assertEquals(synonymFile1.getAbsolutePath(), dicFile1.getName());
-        assertEquals(synonymFile3.getAbsolutePath(), dicFile2.getName());
+        assertEquals(synonymFile3.getAbsolutePath(), dicFile1.getName());
+        assertEquals(synonymFile1.getAbsolutePath(), dicFile2.getName());
     }
 
 }
