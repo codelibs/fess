@@ -51,7 +51,7 @@ public class TriggeredJob implements Job {
 
     public void execute(final ScheduledJob scheduledJob) {
         final SystemHelper systemHelper = SingletonS2Container
-                .getComponent(SystemHelper.class);
+                .getComponent("systemHelper");
         final JobHelper jobHelper = SingletonS2Container
                 .getComponent(JobHelper.class);
         final JobLog jobLog = new JobLog(scheduledJob);

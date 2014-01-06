@@ -178,7 +178,7 @@ public class DocumentAction implements Serializable {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
-                            solrGroup.commit();
+                            solrGroup.commit(true, true, false, true);
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.COMMIT);
 
@@ -297,7 +297,7 @@ public class DocumentAction implements Serializable {
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.DELETE);
                             solrGroup.deleteByQuery(deleteQuery);
-                            solrGroup.commit();
+                            solrGroup.commit(true, true, false, true);
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.OPTIMIZE);
                             if (logger.isInfoEnabled()) {

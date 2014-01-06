@@ -18,6 +18,8 @@ package jp.sf.fess.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
@@ -84,5 +86,27 @@ public class ResourceUtil {
                 return name.startsWith(namePrefix);
             }
         });
+    }
+
+    public static String resolve(final String value) {
+        if (value == null) {
+            return null;
+        }
+
+        final StringBuffer tunedText = new StringBuffer(value.length());
+        final Pattern pattern = Pattern.compile("(\\$\\{([\\w\\.]+)\\})");
+        final Matcher matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            final String key = matcher.group(2);
+            String replacement = System.getProperty(key);
+            if (replacement == null) {
+                replacement = matcher.group(1);
+            }
+            matcher.appendReplacement(tunedText,
+                    replacement.replace("$", "\\$"));
+
+        }
+        matcher.appendTail(tunedText);
+        return tunedText.toString();
     }
 }

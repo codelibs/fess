@@ -53,12 +53,14 @@ import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.BrowserTypeHelper;
 import jp.sf.fess.helper.CrawlingConfigHelper;
+import jp.sf.fess.helper.DocumentHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.HotSearchWordHelper.Range;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.OpenSearchHelper;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.UserInfoHelper;
 import jp.sf.fess.helper.ViewHelper;
 import jp.sf.fess.screenshot.ScreenShotManager;
@@ -143,6 +145,9 @@ public class IndexAction {
 
     @Resource
     protected OpenSearchHelper openSearchHelper;
+
+    @Resource
+    protected SystemHelper systemHelper;
 
     @Resource
     protected Suggester suggester;
@@ -590,7 +595,8 @@ public class IndexAction {
 
         try {
             final Map<String, Object> doc = indexForm.docId == null ? null
-                    : searchService.getDocument("docId:" + indexForm.docId);
+                    : searchService.getDocument("docId:" + indexForm.docId,
+                            new String[] { systemHelper.favoriteCountField });
             final String userCode = userInfoHelper.getUserCode();
             final String favoriteUrl = doc == null ? null : (String) doc
                     .get("url");
@@ -626,6 +632,19 @@ public class IndexAction {
                 WebApiUtil.setError(4, "Failed to add url: " + favoriteUrl);
                 return null;
             }
+
+            final DocumentHelper documentHelper = SingletonS2Container
+                    .getComponent("documentHelper");
+            final Object count = doc.get(systemHelper.favoriteCountField);
+            if (count instanceof Long) {
+                documentHelper.update(indexForm.docId,
+                        systemHelper.favoriteCountField,
+                        ((Long) count).longValue() + 1);
+            } else {
+                WebApiUtil
+                        .setError(7, "Failed to update count: " + favoriteUrl);
+                return null;
+            }
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
         }
@@ -655,7 +674,9 @@ public class IndexAction {
             final String[] docIds = userInfoHelper
                     .getResultDocIds(indexForm.queryId);
             final List<Map<String, Object>> docList = searchService
-                    .getDocumentListByDocIds(docIds, MAX_PAGE_SIZE);
+                    .getDocumentListByDocIds(docIds,
+                            new String[] { systemHelper.favoriteCountField },
+                            MAX_PAGE_SIZE);
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final Object urlObj = doc.get("url");
@@ -775,7 +796,8 @@ public class IndexAction {
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
             documentItems = searchService.getDocumentList(query, pageStart,
-                    pageNum, indexForm.facet, indexForm.geo, indexForm.mlt);
+                    pageNum, indexForm.facet, indexForm.geo, indexForm.mlt,
+                    queryHelper.getResponseDocValuesFields());
         } catch (final SolrLibQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);

@@ -32,8 +32,10 @@ import javax.servlet.http.HttpSession;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
+import jp.sf.fess.helper.SystemHelper;
 
 import org.apache.commons.io.FileUtils;
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.LruHashMap;
@@ -53,8 +55,6 @@ public class ScreenShotManager {
     public File baseDir;
 
     public int threadNum = 10;
-
-    public String solrFieldName = "screenshot_s_s";
 
     public long shutdownTimeout = 5 * 60 * 1000; // 5min
 
@@ -90,12 +90,14 @@ public class ScreenShotManager {
     }
 
     public void generate(final Map<String, Object> docMap) {
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         for (final ScreenShotGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
                 final String segment = (String) docMap.get("segment");
                 final String url = (String) docMap.get("url");
                 final String path = segment + "/" + generator.getPath(docMap);
-                docMap.put(solrFieldName, path);
+                docMap.put(systemHelper.screenshotField, path);
                 executorService.execute(new GenerateTask(url, new File(baseDir,
                         path), generator));
                 break;
@@ -105,11 +107,14 @@ public class ScreenShotManager {
 
     public void storeRequest(final String queryId,
             final List<Map<String, Object>> documentItems) {
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         final Map<String, String> dataMap = new HashMap<String, String>(
                 documentItems.size());
         for (final Map<String, Object> docMap : documentItems) {
             final String url = (String) docMap.get("url");
-            final String screenShotPath = (String) docMap.get(solrFieldName);
+            final String screenShotPath = (String) docMap
+                    .get(systemHelper.screenshotField);
             if (StringUtil.isNotBlank(url)
                     && StringUtil.isNotBlank(screenShotPath)) {
                 dataMap.put(url, screenShotPath);

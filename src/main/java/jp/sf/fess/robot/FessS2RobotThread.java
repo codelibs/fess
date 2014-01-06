@@ -33,6 +33,7 @@ import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SambaHelper;
 import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.helper.SystemHelper;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -62,10 +63,6 @@ public class FessS2RobotThread extends S2RobotThread {
 
     public int childUrlSize = 10000;
 
-    public String clickCountField = "clickCount_i";
-
-    public String favoriteCountField = "favoriteCount_i";
-
     @Override
     protected boolean isContentUpdated(final S2RobotClient client,
             final UrlQueue urlQueue) {
@@ -81,12 +78,14 @@ public class FessS2RobotThread extends S2RobotThread {
                     .getComponent(CrawlingConfigHelper.class);
             final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                     .getComponent(CrawlingSessionHelper.class);
+            final SystemHelper systemHelper = SingletonS2Container
+                    .getComponent("systemHelper");
             final SambaHelper sambaHelper = SingletonS2Container
                     .getComponent(SambaHelper.class);
             final boolean useAclAsRole = crawlerProperties.getProperty(
                     Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                     Constants.TRUE);
-            final String expiresField = crawlingSessionHelper.getExpiresField();
+            final String expiresField = systemHelper.expiresField;
 
             ResponseData responseData = null;
             try {
@@ -163,7 +162,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
 
                 final Integer clickCount = (Integer) solrDocument
-                        .get(clickCountField);
+                        .get(systemHelper.clickCountField);
                 if (clickCount != null) {
                     final SearchLogHelper searchLogHelper = SingletonS2Container
                             .getComponent(SearchLogHelper.class);
@@ -176,7 +175,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
 
                 final Integer favoriteCount = (Integer) solrDocument
-                        .get(favoriteCountField);
+                        .get(systemHelper.favoriteCountField);
                 if (favoriteCount != null) {
                     final SearchLogHelper searchLogHelper = SingletonS2Container
                             .getComponent(SearchLogHelper.class);
@@ -264,6 +263,8 @@ public class FessS2RobotThread extends S2RobotThread {
             final boolean wildcard, final String expiresField) {
         final SolrGroupManager solrGroupManager = SingletonS2Container
                 .getComponent(SolrGroupManager.class);
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         final SolrGroup solrGroup = solrGroupManager
                 .getSolrGroup(QueryType.ADD);
         final SolrQuery solrQuery = new SolrQuery();
@@ -276,7 +277,8 @@ public class FessS2RobotThread extends S2RobotThread {
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
         solrQuery.setFields("id", "lastModified", "anchor", "segment", "role",
-                expiresField, clickCountField, favoriteCountField);
+                expiresField, systemHelper.clickCountField,
+                systemHelper.favoriteCountField);
         for (int i = 0; i < maxSolrQueryRetryCount; i++) {
             try {
                 final QueryResponse response = solrGroup.query(solrQuery);

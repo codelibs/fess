@@ -42,6 +42,7 @@ import jp.sf.fess.helper.DatabaseHelper;
 import jp.sf.fess.helper.MailHelper;
 import jp.sf.fess.helper.OverlappingHostHelper;
 import jp.sf.fess.helper.PathMappingHelper;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebFsIndexHelper;
 import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.CrawlingSessionService;
@@ -378,6 +379,8 @@ public class Crawler implements Serializable {
 
         final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                 .getComponent("crawlingSessionHelper");
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
 
         boolean completed = false;
         int exitCode = Constants.EXIT_OK;
@@ -459,10 +462,8 @@ public class Crawler implements Serializable {
 
             // clean up
             try {
-                updateSolrGroup.deleteByQuery(crawlingSessionHelper
-                        .getExpiresField()
-                        + ":[* TO "
-                        + FessFunctions.formatDate(new Date())
+                updateSolrGroup.deleteByQuery(systemHelper.expiresField
+                        + ":[* TO " + FessFunctions.formatDate(new Date())
                         + "] NOT segment:" + options.sessionId);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {

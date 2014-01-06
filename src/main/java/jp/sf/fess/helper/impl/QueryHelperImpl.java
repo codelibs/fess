@@ -82,14 +82,19 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "created", "title", "digest", "url", "clickCount_i",
-            "favoriteCount_i", "screenshot_s_s", "cid_s_s" };
+            "mimetype", "created", "title", "digest", "url",
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "screenshot_s_s",
+            "cid_s_s" };
+
+    protected String[] responseDocValuesFields = new String[] {
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv" };
 
     protected String[] highlightingFields = new String[] { "content" };
 
     protected String[] searchFields = new String[] { "url", "docId", "host",
             "title", "content", "contentLength", "lastModified", "mimetype",
-            "label", "segment", "clickCount_i", "favoriteCount_i", "inurl" };
+            "label", "segment", "clickCount_l_x_dv", "favoriteCount_l_x_dv",
+            "inurl" };
 
     protected String[] facetFields = new String[] { "url", "host", "title",
             "content", "contentLength", "lastModified", "mimetype", "label",
@@ -98,7 +103,8 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     protected String sortPrefix = "sort:";
 
     protected String[] supportedSortFields = new String[] { "created",
-            "contentLength", "lastModified", "clickCount_i", "favoriteCount_i" };
+            "contentLength", "lastModified", "clickCount_l_x_dv",
+            "favoriteCount_l_x_dv" };
 
     protected String[] supportedMltFields = new String[] { "content",
             "content_ja" };
@@ -1087,6 +1093,15 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
      */
     public void setResponseFields(final String[] responseFields) {
         this.responseFields = responseFields;
+    }
+
+    public String[] getResponseDocValuesFields() {
+        return responseDocValuesFields;
+    }
+
+    public void setResponseDocValuesFields(
+            final String[] responseDocValuesFields) {
+        this.responseDocValuesFields = responseDocValuesFields;
     }
 
     /**

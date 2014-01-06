@@ -16,7 +16,7 @@
 						<bean:message key="labels.header.help" />
 					</s:link></li>
 				</c:if>
-				<li><s:link href="../logout">
+				<li><s:link href="${contextPath}/admin/logout">
 						<bean:message key="labels.menu.logout" />
 					</s:link></li>
 			</ul>

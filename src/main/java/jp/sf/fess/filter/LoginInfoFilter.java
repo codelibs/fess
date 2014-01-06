@@ -73,7 +73,7 @@ public class LoginInfoFilter implements Filter {
     private void updateRoleList(final HttpServletRequest hRequest,
             final LoginInfo loginInfo) {
         final SystemHelper systemHelper = SingletonS2Container
-                .getComponent(SystemHelper.class);
+                .getComponent("systemHelper");
         final List<String> authenticatedRoleList = systemHelper
                 .getAuthenticatedRoleList();
         final List<String> roleList = new ArrayList<String>();

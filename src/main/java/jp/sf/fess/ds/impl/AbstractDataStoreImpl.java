@@ -26,8 +26,8 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStore;
 import jp.sf.fess.ds.IndexUpdateCallback;
-import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
 
 import org.seasar.framework.container.SingletonS2Container;
@@ -61,8 +61,8 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
                 .getComponent("crawlingSessionHelper");
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
-        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                .getComponent("crawlingConfigHelper");
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
 
         initParamMap.putAll(configParamMap);
         final Map<String, String> paramMap = initParamMap;
@@ -73,12 +73,11 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // cid
         final String configId = config.getConfigId();
         if (configId != null) {
-            defaultDataMap.put(crawlingConfigHelper.getConfigIdField(),
-                    configId);
+            defaultDataMap.put(systemHelper.configIdField, configId);
         }
         //  expires
         if (documentExpires != null) {
-            defaultDataMap.put(crawlingSessionHelper.getExpiresField(),
+            defaultDataMap.put(systemHelper.expiresField,
                     FessFunctions.formatDate(documentExpires));
         }
         // segment

@@ -9,6 +9,8 @@
 	<include path="fess.dicon"/>
 	<include path="fess_suggest.dicon"/>
 	<include path="fess_job.dicon"/>
+	<include path="fess_api.dicon"/>
+	<include path="fess_dict.dicon"/>
 
 	<include path="mobylet.dicon"/>
 
@@ -62,14 +64,15 @@
 		<initMethod name="setApiResponseFields">
 			<arg>new String[]{"id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype",
-            "created", "title", "digest", "url", "clickCount_i", "favoriteCount_i"}</arg>
+            "created", "title", "digest", "url"}</arg>
 		</initMethod>
 		<!-- 
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{"id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype",
-            "created", "title", "digest", "url", "clickCount_i", "favoriteCount_i",
-            "screenshot_s_s", "cid_s_s"}</property>
+            "created", "title", "digest", "url", "screenshot_s_s", "cid_s_s"}</property>
+		<property name="responseDocValuesFields">new String[]{
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv"}</property>
 		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
 		<property name="searchFields">new String[]{"url", "docId", "host", 
             "title", "content", "contentLength", "lastModified", "mimetype",
@@ -79,7 +82,7 @@
             "label", "segment" }</property>
 		<property name="sortPrefix">"sort:"</property>
 		<property name="supportedSortFields">new String[]{"created",
-            "contentLength", "lastModified", "clickCount_i" }</property>
+            "contentLength", "lastModified", "clickCount_l_x_dv" }</property>
 		<property name="supportedMltFields">new String[]{"content",
             "content_ja" }</property>
 		<property name="supportedSuggestFields">new String[]{"content",
@@ -205,6 +208,8 @@
 	<component name="openSearchHelper" class="jp.sf.fess.helper.OpenSearchHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
 		<property name="encoding">"UTF-8"</property>
+	</component>
+	<component name="documentHelper" class="jp.sf.fess.helper.DocumentHelper">
 	</component>
 	<component name="queryResponseList" class="jp.sf.fess.util.QueryResponseList" instance="prototype">
 	</component>

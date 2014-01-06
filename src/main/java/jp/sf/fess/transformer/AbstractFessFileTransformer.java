@@ -37,6 +37,7 @@ import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.PathMappingHelper;
 import jp.sf.fess.helper.SambaHelper;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
 
 import org.apache.commons.io.IOUtils;
@@ -185,6 +186,8 @@ public abstract class AbstractFessFileTransformer extends
                 .getComponent("crawlingConfigHelper");
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
+        final SystemHelper systemHelper = SingletonS2Container
+                .getComponent("systemHelper");
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -196,12 +199,11 @@ public abstract class AbstractFessFileTransformer extends
         // cid
         final String configId = crawlingConfig.getConfigId();
         if (configId != null) {
-            putResultDataBody(dataMap, crawlingConfigHelper.getConfigIdField(),
-                    configId);
+            putResultDataBody(dataMap, systemHelper.configIdField, configId);
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, crawlingSessionHelper.getExpiresField(),
+            putResultDataBody(dataMap, systemHelper.expiresField,
                     FessFunctions.formatDate(documentExpires));
         }
         // segment

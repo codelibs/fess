@@ -33,6 +33,8 @@ public interface QueryHelper {
 
     String[] getResponseFields();
 
+    String[] getResponseDocValuesFields();
+
     String[] getHighlightingFields();
 
     int getHighlightSnippetSize();
