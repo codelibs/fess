@@ -138,8 +138,6 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String highlightingPrefix = "hl_";
 
-    protected String suggestPath = "/suggest/";
-
     protected String minimumShouldMatch = "100%";
 
     protected FacetInfo defaultFacetInfo;
@@ -1355,24 +1353,6 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
             return null;
         }
         return StringUtils.join(list, ',');
-    }
-
-    @Override
-    public String getSuggestQueryType(final String fieldName) {
-        for (final String supported : supportedSuggestFields) {
-            if (supported.equals(fieldName)) {
-                return suggestPath + fieldName;
-            }
-        }
-        return null;
-    }
-
-    public String getSuggestPath() {
-        return suggestPath;
-    }
-
-    public void setSuggestPath(final String suggestPath) {
-        this.suggestPath = suggestPath;
     }
 
     public String getMinimumShouldMatch() {

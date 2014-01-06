@@ -1,111 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
-<components>
-	<!-- Manager -->
-	<component name="suggesterManager" class="jp.sf.fess.suggest.SuggesterManager">
-		<initMethod name="addSuggester">
-			<arg>"content"</arg>
-			<arg>contentSuggester</arg>
+<components>	
+    <component name="suggestIntegrateConverter" class="jp.sf.fess.suggest.converter.SuggestIntegrateConverter">
+		<initMethod name="addConverter">
+			<arg>
+				<component name="alphabetConverter" class="jp.sf.fess.suggest.converter.AlphabetConverter" />
+            </arg>
 		</initMethod>
-		<initMethod name="addSuggester">
-			<arg>"content_ja"</arg>
-			<arg>contentJaSuggester</arg>
+		<initMethod name="start"/>
+    </component>
+    <component name="suggestIntegrateNormalizer" class="jp.sf.fess.suggest.normalizer.SuggestIntegrateNormalizer">
+		<initMethod name="addNormalizer">
+			<arg>
+				<component name="fullWidthToHalfWidthAlphabetNormalizer" class="jp.sf.fess.suggest.normalizer.FullWidthToHalfWidthAlphabetNormalizer" />
+			</arg>
 		</initMethod>
-		<initMethod name="addSuggester">
-			<arg>"content_ts"</arg>
-			<arg>contentTsSuggester</arg>
+		<initMethod name="addNormalizer">
+			<arg>
+				<component name="icuNormalizer" class="jp.sf.fess.suggest.normalizer.ICUNormalizer">
+					<property name="transliteratorId">"Any-Lower"</property>
+				</component>
+			</arg>
 		</initMethod>
-		<initMethod name="addSuggester">
-			<arg>"title_ss"</arg>
-			<arg>titleSsSuggester</arg>
+		<initMethod name="start"/>
+	</component>
+
+	<component name="suggester" class="jp.sf.fess.suggest.Suggester">
+		<initMethod name="setConverter">
+			<arg>suggestIntegrateConverter</arg>
+		</initMethod>
+		<initMethod name="setNormalizer">
+			<arg>suggestIntegrateNormalizer</arg>
 		</initMethod>
 	</component>
-	<!-- Suggester -->
-	<component name="contentSuggester" class="jp.sf.fess.suggest.Suggester">
-		<!-- TODO -->
+
+
+	<!-- Solr Group Configuration -->
+	<component name="suggestSolrProperties" class="org.codelibs.core.util.DynamicProperties">
+		<arg>
+			@jp.sf.fess.util.ResourceUtil@getConfPath("solr-suggest.properties")
+		</arg>
 	</component>
-	<component name="contentJaSuggester" class="jp.sf.fess.suggest.Suggester">
-		<!-- TODO -->
+	<component name="suggestSolrGroupProperties" class="org.codelibs.core.util.DynamicProperties">
+		<arg>
+			@jp.sf.fess.util.ResourceUtil@getConfPath("suggestSolrGroup.properties")
+		</arg>
 	</component>
-	<component name="contentTsSuggester" class="jp.sf.fess.suggest.Suggester">
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.ICUConverter">
-					<arg>"Fullwidth-Halfwidth"</arg>
-				</component>
-			</arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.ICUConverter">
-					<arg>"Any-Lower"</arg>
-				</component>
-			</arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.NormalizeConverter"/>
-			</arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg><component class="jp.sf.fess.suggest.converter.ReadingConverter"/></arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.SymbolConverter">
-					<initMethod name="addSymbol">
-						<arg>new String[]{ "0",
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "０", "１", "２", "３", "４",
-            "５", "６", "７", "８", "９", " ", "　", "【", "】", "・", "（", "）",
-            "(", ")", "%", "％", "～", "+", "#", "＃", "\"", "”", "\'", "\\", "￥",
-            "[", "]", "「", "」", "『", "』", "&lt;", "&gt;", "＜", "＞", "/", "／", "{",
-            "}", "&amp;", "＆", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ",
-            "ⅰ", "ⅱ", "ⅲ", "ⅳ", "ⅴ", "ⅵ", "ⅶ", "ⅷ", "ⅸ", "ⅹ", "-", "－", "." }
-						</arg>
-					</initMethod>
-				</component>
-			</arg>
+
+
+	<component name="suggestSolrGroup" class="org.codelibs.solr.lib.SolrGroup">
+		<!-- Note: groupName cannot include ".". -->
+		<property name="groupName">"suggestSolrServer"</property>
+		<property name="statusPolicy">
+			<component class="jp.sf.fess.solr.policy.FessStatusPolicy">
+				<property name="solrGroupProperties">suggestSolrGroupProperties</property>
+				<property name="minSelectServer">1</property>
+				<property name="minUpdateServer">1</property>
+				<property name="retrySelectQueryInterval">500</property>
+				<property name="retryUpdateQueryInterval">500</property>
+				<property name="maxErrorCount">3</property>
+				<property name="maxRetryUpdateQueryCount">3</property>
+				<property name="maxRetrySelectQueryCount">3</property>
+			</component>
+		</property>
+		<initMethod name="addServer">
+			<!-- Note: the server name cannot include ".". -->
+			<arg>"suggestSolrServer"</arg><!-- Group Name -->
+			<arg>suggestSolrServer</arg><!-- Solr Server -->
 		</initMethod>
 	</component>
-	<component name="titleSsSuggester" class="jp.sf.fess.suggest.Suggester">
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.ICUConverter">
-					<arg>"Fullwidth-Halfwidth"</arg>
-				</component>
-			</arg>
+
+	<component name="clientConnectionManager" class="org.apache.http.impl.conn.PoolingClientConnectionManager">
+		<arg>
+			<component class="org.apache.http.conn.scheme.SchemeRegistry">
+				<initMethod name="register">
+					<arg>
+						<component class="org.apache.http.conn.scheme.Scheme">
+							<arg>"http"</arg>
+							<arg>80</arg>
+							<arg>@org.apache.http.conn.scheme.PlainSocketFactory@getSocketFactory()</arg>
+						</component>
+					</arg>
+				</initMethod>
+				<initMethod name="register">
+					<arg>
+						<component class="org.apache.http.conn.scheme.Scheme">
+							<arg>"https"</arg>
+							<arg>443</arg>
+							<arg>@org.apache.http.conn.ssl.SSLSocketFactory@getSocketFactory()</arg>
+						</component>
+					</arg>
+				</initMethod>
+			</component>
+		</arg>
+		<arg>10</arg><!-- timeToLive -->
+		<arg>@java.util.concurrent.TimeUnit@MINUTES</arg><!-- tunit -->
+		<property name="maxTotal">50</property>
+		<property name="defaultMaxPerRoute">2</property>
+		<destroyMethod name="shutdown"></destroyMethod>
+	</component>
+	<component name="connectionMonitorTarget" class="org.seasar.robot.client.http.HcConnectionMonitorTarget">
+		<arg>clientConnectionManager</arg>
+		<arg>300000</arg>
+	</component>
+	<component name="connectionMonitorTask">
+		@org.seasar.extension.timer.TimeoutManager@getInstance()
+			.addTimeoutTarget(
+                connectionMonitorTarget,
+                10,
+                true)
+		<destroyMethod name="cancel"></destroyMethod>
+	</component>
+
+	<!-- Solr Server Configuration -->
+	<component name="suggestInterceptor" class="org.codelibs.solr.lib.server.interceptor.PreemptiveAuthInterceptor">
+	</component>
+	<component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
+		<arg>"solradmin"</arg><!-- Username -->
+		<arg>"solradmin"</arg><!-- Password -->
+	</component>
+	<component name="suggestHttpClient" class="org.apache.http.impl.client.DefaultHttpClient">
+		<arg>clientConnectionManager</arg>
+	</component>
+	<component name="suggestSolrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer">
+		<!-- Solr Server URL -->
+		<arg>"http://localhost:8080/solr/core1-suggest"</arg>
+		<arg>suggestHttpClient</arg>
+		<property name="requestWriter">new org.apache.solr.client.solrj.impl.BinaryRequestWriter()</property>
+		<property name="useMultiPartPost">true</property>
+		<property name="soTimeout">900000</property><!-- 15min -->
+		<initMethod>
+			suggestHttpClient.getCredentialsProvider()
+				.setCredentials(@org.apache.http.auth.AuthScope@ANY, suggestCredentials)
 		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.ICUConverter">
-					<arg>"Any-Lower"</arg>
-				</component>
-			</arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.NormalizeConverter"/>
-			</arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg><component class="jp.sf.fess.suggest.converter.ReadingConverter"/></arg>
-		</initMethod>
-		<initMethod name="addPreQueryConverter">
-			<arg>
-				<component class="jp.sf.fess.suggest.converter.SymbolConverter">
-					<initMethod name="addSymbol">
-						<arg>new String[]{ "0",
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "０", "１", "２", "３", "４",
-            "５", "６", "７", "８", "９", " ", "　", "【", "】", "・", "（", "）",
-            "(", ")", "%", "％", "～", "+", "#", "＃", "\"", "”", "\'", "\\", "￥",
-            "[", "]", "「", "」", "『", "』", "&lt;", "&gt;", "＜", "＞", "/", "／", "{",
-            "}", "&amp;", "＆", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ",
-            "ⅰ", "ⅱ", "ⅲ", "ⅳ", "ⅴ", "ⅵ", "ⅶ", "ⅷ", "ⅸ", "ⅹ", "-", "－", "." }
-						</arg>
-					</initMethod>
-				</component>
-			</arg>
+		<initMethod>
+			suggestHttpClient.addRequestInterceptor(suggestInterceptor)
 		</initMethod>
 	</component>
+
 </components>

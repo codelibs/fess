@@ -38,7 +38,6 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
-import jp.sf.fess.suggest.Suggester;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
 import jp.sf.fess.util.MoreLikeThisResponse;
@@ -370,42 +369,37 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     for (final Map.Entry<String, List<String>> entry : suggestResponse
                             .entrySet()) {
                         final String fn = suggestFieldName.get(i);
-                        final Suggester suggester = getSuggesterManager()
-                                .getSuggester(fn);
-                        if (suggester != null) {
-                            if (!first1) {
+                        if (!first1) {
+                            buf.append(',');
+                        } else {
+                            first1 = false;
+                        }
+
+                        final SuggestResponseList srList = (SuggestResponseList) entry
+                                .getValue();
+
+                        buf.append("{\"token\":");
+                        buf.append(escapeJson(entry.getKey()));
+                        buf.append(", \"fn\":");
+                        buf.append(escapeJson(fn));
+                        buf.append(", \"startOffset\":");
+                        buf.append(Integer.toString(srList.getStartOffset()));
+                        buf.append(", \"endOffset\":");
+                        buf.append(Integer.toString(srList.getEndOffset()));
+                        buf.append(", \"numFound\":");
+                        buf.append(Integer.toString(srList.getNumFound()));
+                        buf.append(", ");
+                        buf.append("\"result\":[");
+                        boolean first2 = true;
+                        for (final String value : srList) {
+                            if (!first2) {
                                 buf.append(',');
                             } else {
-                                first1 = false;
+                                first2 = false;
                             }
-
-                            final SuggestResponseList srList = (SuggestResponseList) entry
-                                    .getValue();
-
-                            buf.append("{\"token\":");
-                            buf.append(escapeJson(entry.getKey()));
-                            buf.append(", \"fn\":");
-                            buf.append(escapeJson(fn));
-                            buf.append(", \"startOffset\":");
-                            buf.append(Integer.toString(srList.getStartOffset()));
-                            buf.append(", \"endOffset\":");
-                            buf.append(Integer.toString(srList.getEndOffset()));
-                            buf.append(", \"numFound\":");
-                            buf.append(Integer.toString(srList.getNumFound()));
-                            buf.append(", ");
-                            buf.append("\"result\":[");
-                            boolean first2 = true;
-                            for (final String value : srList) {
-                                if (!first2) {
-                                    buf.append(',');
-                                } else {
-                                    first2 = false;
-                                }
-                                buf.append(escapeJson(suggester
-                                        .convertResultString(value)));
-                            }
-                            buf.append("]}");
+                            buf.append(escapeJson(value));
                         }
+                        buf.append("]}");
                     }
 
                 }

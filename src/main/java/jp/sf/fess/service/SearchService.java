@@ -36,13 +36,14 @@ import jp.sf.fess.entity.SearchQuery.SortField;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.solr.FessSolrQueryException;
+import jp.sf.fess.suggest.SuggestConstants;
+import jp.sf.fess.suggest.Suggester;
 import jp.sf.fess.util.QueryResponseList;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.request.FieldAnalysisRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.NamedList;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
@@ -58,7 +59,13 @@ public class SearchService implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
+    SolrGroup suggestSolrGroup;
+
+    @Resource
     protected QueryHelper queryHelper;
+
+    @Resource
+    protected Suggester suggester;
 
     public Map<String, Object> getDocument(final String query) {
         final List<Map<String, Object>> docList = getDocumentList(query, 0, 1,
@@ -250,42 +257,36 @@ public class SearchService implements Serializable {
         return queryResponseList;
     }
 
-    public SuggestResponse getSuggestResponse(final String fieldName,
-            final String q, final int rows) {
+    public SuggestResponse getSuggestResponse(final String q,
+            final List<String> fieldNames, final List<String> labels,
+            final int rows) {
 
-        final String qt = queryHelper.getSuggestQueryType(fieldName);
-        if (qt == null) {
-            throw new FessSolrQueryException("EFESS0001",
-                    new Object[] { fieldName });
-        }
+        final String suggestQuery = suggester.buildSuggestQuery(q, fieldNames,
+                labels);
 
         final long startTime = System.currentTimeMillis();
 
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.QUERY);
-
         QueryResponse queryResponse = null;
         final SolrQuery solrQuery = new SolrQuery();
-        if (StringUtil.isNotBlank(q)) {
+        if (StringUtil.isNotBlank(suggestQuery)) {
             // query
-            solrQuery.setQuery(q);
-            // path
-            solrQuery.setParam(CommonParams.QT, qt);
+            solrQuery.setQuery(suggestQuery);
             // size
-            solrQuery.set("spellcheck.count", rows);
+            solrQuery.setRows(rows);
+            //sort
+            solrQuery.setSort(SuggestConstants.SuggestFieldNames.COUNT,
+                    SolrQuery.ORDER.desc);
 
             if (queryHelper.getTimeAllowed() >= 0) {
                 solrQuery.setTimeAllowed(queryHelper.getTimeAllowed());
             }
 
-            queryResponse = solrGroup.query(solrQuery, SolrRequest.METHOD.POST);
-
+            queryResponse = suggestSolrGroup.query(solrQuery,
+                    SolrRequest.METHOD.POST);
         }
         final long execTime = System.currentTimeMillis() - startTime;
-
         final SuggestResponse suggestResponse = new SuggestResponse(
-                queryResponse);
-        suggestResponse.setSearchQuery(q);
+                queryResponse, rows, q);
         suggestResponse.setExecTime(execTime);
         return suggestResponse;
     }

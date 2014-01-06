@@ -37,7 +37,6 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
-import jp.sf.fess.suggest.Suggester;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
 import jp.sf.fess.util.MoreLikeThisResponse;
@@ -318,38 +317,34 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         final SuggestResponseList srList = (SuggestResponseList) entry
                                 .getValue();
                         final String fn = suggestFieldName.get(i);
-                        final Suggester suggester = getSuggesterManager()
-                                .getSuggester(fn);
-                        if (suggester != null) {
-                            buf.append("<suggest>");
-                            buf.append("<token>");
-                            buf.append(escapeXml(entry.getKey()));
-                            buf.append("</token>");
-                            buf.append("<fn>");
-                            buf.append(escapeXml(fn));
-                            buf.append("</fn>");
-                            buf.append("<start-offset>");
-                            buf.append(escapeXml(Integer.toString(srList
-                                    .getStartOffset())));
-                            buf.append("</start-offset>");
-                            buf.append("<end-offset>");
-                            buf.append(escapeXml(Integer.toString(srList
-                                    .getEndOffset())));
-                            buf.append("</end-offset>");
-                            buf.append("<num-found>");
-                            buf.append(escapeXml(Integer.toString(srList
-                                    .getNumFound())));
-                            buf.append("</num-found>");
-                            buf.append("<result>");
-                            for (final String value : srList) {
-                                buf.append("<value>");
-                                buf.append(escapeXml(suggester
-                                        .convertResultString(value)));
-                                buf.append("</value>");
-                            }
-                            buf.append("</result>");
-                            buf.append("</suggest>");
+                        buf.append("<suggest>");
+                        buf.append("<token>");
+                        buf.append(escapeXml(entry.getKey()));
+                        buf.append("</token>");
+                        buf.append("<fn>");
+                        buf.append(escapeXml(fn));
+                        buf.append("</fn>");
+                        buf.append("<start-offset>");
+                        buf.append(escapeXml(Integer.toString(srList
+                                .getStartOffset())));
+                        buf.append("</start-offset>");
+                        buf.append("<end-offset>");
+                        buf.append(escapeXml(Integer.toString(srList
+                                .getEndOffset())));
+                        buf.append("</end-offset>");
+                        buf.append("<num-found>");
+                        buf.append(escapeXml(Integer.toString(srList
+                                .getNumFound())));
+                        buf.append("</num-found>");
+                        buf.append("<result>");
+                        for (final String value : srList) {
+                            buf.append("<value>");
+                            buf.append(escapeXml(value));
+                            buf.append("</value>");
                         }
+                        buf.append("</result>");
+                        buf.append("</suggest>");
+
                     }
                 }
                 buf.append("</result>");

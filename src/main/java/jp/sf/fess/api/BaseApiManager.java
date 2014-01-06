@@ -18,7 +18,6 @@ package jp.sf.fess.api;
 
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.QueryHelper;
-import jp.sf.fess.suggest.SuggesterManager;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.seasar.framework.container.SingletonS2Container;
@@ -79,9 +78,5 @@ public class BaseApiManager {
 
     protected LabelTypeHelper getLabelTypeHelper() {
         return SingletonS2Container.getComponent("labelTypeHelper");
-    }
-
-    protected SuggesterManager getSuggesterManager() {
-        return SingletonS2Container.getComponent("suggesterManager");
     }
 }

@@ -16,6 +16,7 @@
 
 package jp.sf.fess.entity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,9 +26,12 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import jp.sf.fess.suggest.SuggestConstants;
+
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.SpellCheckResponse;
 import org.apache.solr.client.solrj.response.SpellCheckResponse.Suggestion;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 
 public class SuggestResponse implements Map<String, List<String>> {
     protected String searchQuery;
@@ -36,15 +40,11 @@ public class SuggestResponse implements Map<String, List<String>> {
 
     private final Map<String, List<String>> parent = new LinkedHashMap<String, List<String>>();
 
-    public SuggestResponse(final QueryResponse queryResponse) {
+    public SuggestResponse(final QueryResponse queryResponse, final int num,
+            final String query) {
         if (queryResponse != null) {
-            final SpellCheckResponse spellCheckResponse = queryResponse
-                    .getSpellCheckResponse();
-            for (final Map.Entry<String, Suggestion> entry : spellCheckResponse
-                    .getSuggestionMap().entrySet()) {
-                parent.put(entry.getKey(),
-                        new SuggestResponseList(entry.getValue()));
-            }
+            parent.put(query, new SuggestResponseList(queryResponse, query));
+            setSearchQuery(query);
         }
     }
 
@@ -138,6 +138,30 @@ public class SuggestResponse implements Map<String, List<String>> {
         private final int endOffset;
 
         private final int numFound;
+
+        public SuggestResponseList(final QueryResponse queryResponse,
+                final String query) {
+            final List<String> valueList = new ArrayList<String>();
+            final List<Integer> frequencyList = new ArrayList<Integer>();
+            final SolrDocumentList sdList = queryResponse.getResults();
+            for (final SolrDocument sd : sdList) {
+                final Object text = sd
+                        .getFieldValue(SuggestConstants.SuggestFieldNames.TEXT);
+                final Object freq = sd
+                        .getFieldValue(SuggestConstants.SuggestFieldNames.COUNT);
+                if (text != null && freq != null) {
+                    valueList.add(text.toString());
+                    frequencyList.add(Integer.parseInt(freq.toString()));
+                }
+            }
+            parent = valueList;
+            frequencies = frequencyList;
+            frequency = 1;
+            token = query;
+            startOffset = 0;
+            endOffset = query.length();
+            numFound = (int) queryResponse.getResults().getNumFound();
+        }
 
         public SuggestResponseList(final Suggestion suggestion) {
             parent = suggestion.getAlternatives();

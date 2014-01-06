@@ -26,6 +26,7 @@ import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,7 +65,6 @@ import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.FavoriteLogService;
 import jp.sf.fess.service.SearchService;
 import jp.sf.fess.suggest.Suggester;
-import jp.sf.fess.suggest.SuggesterManager;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.QueryResponseList;
@@ -145,7 +145,7 @@ public class IndexAction {
     protected OpenSearchHelper openSearchHelper;
 
     @Resource
-    protected SuggesterManager suggesterManager;
+    protected Suggester suggester;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -481,30 +481,31 @@ public class IndexAction {
         }
 
         final String[] fieldNames = indexForm.fn;
+        final String[] labels = indexForm.fields.get("label");
 
         final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
         WebApiUtil.setObject("suggestResultList", suggestResultList);
-        final List<String> suggestFieldName = new ArrayList<String>();
+
+        final List<String> suggestFieldName = Arrays.asList(fieldNames);
         WebApiUtil.setObject("suggestFieldName", suggestFieldName);
-        int suggestRecordCount = 0;
+
+        final List<String> labelList;
+        if (labels == null) {
+            labelList = new ArrayList<String>();
+        } else {
+            labelList = Arrays.asList(labels);
+        }
+
         try {
-            for (final String fn : fieldNames) {
-                final Suggester suggester = suggesterManager.getSuggester(fn);
-                if (suggester != null) {
-                    final String suggestQuery = suggester
-                            .convertQuery(indexForm.query);
-                    final SuggestResponse suggestResponse = searchService
-                            .getSuggestResponse(fn, suggestQuery, num);
+            final SuggestResponse suggestResponse = searchService
+                    .getSuggestResponse(indexForm.query, suggestFieldName,
+                            labelList, num);
 
-                    if (!suggestResponse.isEmpty()) {
-                        suggestRecordCount += suggestResponse.size();
-
-                        suggestResultList.add(suggestResponse);
-                        suggestFieldName.add(fn);
-                    }
-                }
+            if (!suggestResponse.isEmpty()) {
+                suggestResultList.add(suggestResponse);
             }
-            WebApiUtil.setObject("suggestRecordCount", suggestRecordCount);
+
+            WebApiUtil.setObject("suggestRecordCount", 1);
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
         }

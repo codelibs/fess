@@ -13,3 +13,5 @@
 /src/main/webapp/WEB-INF/db/*.lock.db
 /src/main/webapp/WEB-INF/logs/fess*
 .classpath
+*.iml
+.idea

@@ -63,8 +63,6 @@ public interface QueryHelper {
 
     String getMoreLikeThisField(String[] field);
 
-    String getSuggestQueryType(String fieldName);
-
     boolean isAnalysisFieldName(String fieldName);
 
     FacetInfo getDefaultFacetInfo();
