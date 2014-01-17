@@ -23,6 +23,9 @@ public class SynonymLocator extends DictionaryLocator {
     public List<DictionaryFile<? extends DictionaryItem>> find() {
         final List<DictionaryFile<? extends DictionaryItem>> fileList = new ArrayList<DictionaryFile<? extends DictionaryItem>>();
         for (final String path : searchPathList) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Synonym Files from " + path);
+            }
             final File[] files = findFiles(path, synonymFilePrefix,
                     excludedSynonymList);
             for (final File file : files) {
