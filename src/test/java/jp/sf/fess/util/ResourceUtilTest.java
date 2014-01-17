@@ -74,6 +74,11 @@ public class ResourceUtilTest extends S2TestCase {
         value = "${\\$}";
         assertEquals(value, ResourceUtil.resolve(value));
 
+        System.setProperty("test.dir", "c:\\test1\\test2");
+
+        value = "${test.dir}";
+        assertEquals("c:\\test1\\test2", ResourceUtil.resolve(value));
+
     }
 
 }

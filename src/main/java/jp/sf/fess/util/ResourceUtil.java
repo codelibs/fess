@@ -103,7 +103,7 @@ public class ResourceUtil {
                 replacement = matcher.group(1);
             }
             matcher.appendReplacement(tunedText,
-                    replacement.replace("$", "\\$"));
+                    replacement.replace("\\", "\\\\").replace("$", "\\$"));
 
         }
         matcher.appendTail(tunedText);
