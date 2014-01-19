@@ -17,6 +17,7 @@
 package jp.sf.fess.service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import jp.sf.fess.entity.SearchQuery;
 import jp.sf.fess.entity.SearchQuery.SortField;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.helper.QueryHelper;
+import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.solr.FessSolrQueryException;
 import jp.sf.fess.suggest.SuggestConstants;
 import jp.sf.fess.suggest.Suggester;
@@ -63,6 +65,9 @@ public class SearchService implements Serializable {
 
     @Resource
     protected QueryHelper queryHelper;
+
+    @Resource
+    protected RoleQueryHelper roleQueryHelper;
 
     @Resource
     protected Suggester suggester;
@@ -275,8 +280,15 @@ public class SearchService implements Serializable {
             final List<String> fieldNames, final List<String> labels,
             final int rows) {
 
+        final List<String> roleList;
+        if (roleQueryHelper != null) {
+            roleList = roleQueryHelper.build();
+        } else {
+            roleList = new ArrayList<String>();
+        }
+
         final String suggestQuery = suggester.buildSuggestQuery(q, fieldNames,
-                labels);
+                labels, roleList);
 
         final long startTime = System.currentTimeMillis();
 
