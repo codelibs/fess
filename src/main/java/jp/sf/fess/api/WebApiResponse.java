@@ -33,7 +33,7 @@ public class WebApiResponse extends HttpServletResponseWrapper {
     @Override
     public PrintWriter getWriter() throws IOException {
         // dummy stream
-        return new PrintWriter(new ByteArrayOutputStream());
+        return new PrintWriter(new ByteArrayOutputStream()); // NOSONAR
     }
 
 }

@@ -15,8 +15,6 @@ public class SynonymItem extends DictionaryItem {
 
     private String[] newOutputs;
 
-    private final long id;
-
     public SynonymItem(final long id, final String[] inputs,
             final String[] outputs) {
         this.id = id;
@@ -32,10 +30,6 @@ public class SynonymItem extends DictionaryItem {
             newInputs = inputs;
             newOutputs = outputs;
         }
-    }
-
-    public long getId() {
-        return id;
     }
 
     public String[] getNewInputs() {

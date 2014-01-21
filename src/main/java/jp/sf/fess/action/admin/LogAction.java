@@ -83,7 +83,8 @@ public class LogAction implements Serializable {
                         .getBytes(Constants.UTF_8)), Constants.UTF_8);
             } catch (final UnsupportedEncodingException e1) {
                 fileName = new String(Base64.decodeBase64(logForm.logFileName
-                        .getBytes()), Charset.defaultCharset());
+                        .getBytes(Charset.defaultCharset())),
+                        Charset.defaultCharset());
             }
             final File logFile = new File(parentDir, fileName);
             if (logFile.isFile()) {
@@ -155,8 +156,9 @@ public class LogAction implements Serializable {
                             Constants.UTF_8)), "UTF-8"));
         } catch (final UnsupportedEncodingException e) {
             map.put("logFileName",
-                    new String(Base64.encodeBase64(file.getName().getBytes()),
-                            Charset.defaultCharset()));
+                    new String(Base64.encodeBase64(file.getName().getBytes(
+                            Charset.defaultCharset())), Charset
+                            .defaultCharset()));
         }
         map.put("lastModified", new Date(file.lastModified()));
         return map;

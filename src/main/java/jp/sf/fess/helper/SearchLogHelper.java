@@ -86,8 +86,7 @@ public abstract class SearchLogHelper {
                 .getComponent(ClickLogBhv.class);
         final ClickLogCB cb = new ClickLogCB();
         cb.query().setUrl_Equal(url);
-        final int count = clickLogBhv.selectCount(cb);
-        return count;
+        return clickLogBhv.selectCount(cb);
     }
 
     public long getFavoriteCount(final String url) {
