@@ -20,7 +20,7 @@ import jp.sf.fess.WebApiException;
 
 import org.seasar.struts.util.RequestUtil;
 
-public class WebApiUtil {
+public final class WebApiUtil {
 
     private static final String WEB_API_EXCEPTION = "webApiException";
 

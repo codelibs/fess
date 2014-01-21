@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.sastruts.core.annotation.Token;
+import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
@@ -227,10 +228,11 @@ public class SynonymAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(),
+                    e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
+            throw new SSCActionMessagesException(e,
                     "errors.crud_failed_to_create_crud_table");
         }
     }
@@ -249,10 +251,11 @@ public class SynonymAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(),
+                    e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
+            throw new SSCActionMessagesException(e,
                     "errors.crud_failed_to_update_crud_table");
         }
     }
@@ -287,10 +290,11 @@ public class SynonymAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(),
+                    e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
+            throw new SSCActionMessagesException(e,
                     "errors.crud_failed_to_delete_crud_table");
         }
     }

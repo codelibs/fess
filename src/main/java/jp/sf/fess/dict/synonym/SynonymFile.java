@@ -238,7 +238,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     private String unescape(final String s) {
-        if (s.indexOf("\\") >= 0) {
+        if (s.indexOf('\\') >= 0) {
             final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < s.length(); i++) {
                 final char ch = s.charAt(i);

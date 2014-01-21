@@ -19,6 +19,7 @@ package jp.sf.fess.screenshot.impl;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,8 +86,8 @@ public class CommandGenerator implements ScreenShotGenerator {
         final StringBuilder buf = new StringBuilder(50);
         buf.append(RandomStringUtils.randomNumeric(directoryNameLength));
         buf.append('/');
-        buf.append(Base64Util.encode(Integer.toString(url.hashCode())
-                .getBytes()));
+        buf.append(Base64Util.encode(Integer.toString(url.hashCode()).getBytes(
+                Charset.defaultCharset())));
         buf.append('.');
         buf.append(imageExtention);
         return buf.toString();
@@ -153,7 +154,7 @@ public class CommandGenerator implements ScreenShotGenerator {
                 BufferedReader br = null;
                 try {
                     br = new BufferedReader(new InputStreamReader(
-                            p.getInputStream()));
+                            p.getInputStream(), Charset.defaultCharset()));
                     while ((line = br.readLine()) != null) {
                         if (logger.isDebugEnabled()) {
                             logger.debug(line);

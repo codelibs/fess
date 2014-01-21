@@ -99,10 +99,10 @@ public class TriggeredJob implements Job {
                 jobLog.setScriptResult(ret.toString());
             }
             jobLog.setJobStatus(Constants.OK);
-        } catch (final Throwable e) {
-            logger.error("Failed to execute " + jobId + ": " + script, e);
+        } catch (final Throwable t) { // NOPMD
+            logger.error("Failed to execute " + jobId + ": " + script, t);
             jobLog.setJobStatus(Constants.FAIL);
-            jobLog.setScriptResult(systemHelper.abbreviateLongText(e
+            jobLog.setScriptResult(systemHelper.abbreviateLongText(t
                     .getLocalizedMessage()));
         } finally {
             jobHelper.finishJobExecutoer(id);

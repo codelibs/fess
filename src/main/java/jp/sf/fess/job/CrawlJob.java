@@ -138,8 +138,7 @@ public class CrawlJob {
 
         if (sessionId == null) { // create session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            final String sessionId = sdf.format(new Date());
-            sessionId(sessionId);
+            sessionId = sdf.format(new Date());
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         resultBuf.append("Web  Config Id:");

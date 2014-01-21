@@ -237,7 +237,7 @@ public class Crawler implements Serializable {
         int exitCode;
         try {
             exitCode = process(options);
-        } catch (final Throwable t) {
+        } catch (final Throwable t) { // NOPMD
             logger.error("Crawler does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {

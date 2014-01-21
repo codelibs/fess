@@ -21,19 +21,16 @@ import java.io.Serializable;
 import javax.annotation.Resource;
 
 import jp.sf.fess.dict.DictionaryFile;
+import jp.sf.fess.dict.DictionaryItem;
 import jp.sf.fess.dict.DictionaryManager;
 import jp.sf.fess.form.admin.DictForm;
 import jp.sf.fess.helper.SystemHelper;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 
 public class DictAction implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    private static final Log log = LogFactory.getLog(DictAction.class);
 
     @Resource
     @ActionForm
@@ -45,7 +42,7 @@ public class DictAction implements Serializable {
     @Resource
     protected SystemHelper systemHelper;
 
-    public DictionaryFile[] dictFiles;
+    public DictionaryFile<? extends DictionaryItem>[] dictFiles;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("dict");

@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -82,7 +83,7 @@ public class LogAction implements Serializable {
                         .getBytes(Constants.UTF_8)), Constants.UTF_8);
             } catch (final UnsupportedEncodingException e1) {
                 fileName = new String(Base64.decodeBase64(logForm.logFileName
-                        .getBytes()));
+                        .getBytes()), Charset.defaultCharset());
             }
             final File logFile = new File(parentDir, fileName);
             if (logFile.isFile()) {
@@ -154,7 +155,8 @@ public class LogAction implements Serializable {
                             Constants.UTF_8)), "UTF-8"));
         } catch (final UnsupportedEncodingException e) {
             map.put("logFileName",
-                    new String(Base64.encodeBase64(file.getName().getBytes())));
+                    new String(Base64.encodeBase64(file.getName().getBytes()),
+                            Charset.defaultCharset()));
         }
         map.put("lastModified", new Date(file.lastModified()));
         return map;

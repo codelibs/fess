@@ -139,7 +139,7 @@ public class CrawlingConfigHelper implements Serializable {
                 .getComponent("systemHelper");
         final Object configIdObj = doc.get(systemHelper.configIdField);
         if (configIdObj == null) {
-            throw new FessSystemException("Invalid configId: " + configIdObj);
+            throw new FessSystemException("configId is null.");
         }
         final String configId = configIdObj.toString();
         if (configId.length() < 2) {
@@ -258,6 +258,7 @@ public class CrawlingConfigHelper implements Serializable {
             case CHROME:
             case FIREFOX:
             case OTHER:
+            default:
                 response.setHeader(
                         "Content-Disposition",
                         "attachment; filename=\"=?utf-8?B?"

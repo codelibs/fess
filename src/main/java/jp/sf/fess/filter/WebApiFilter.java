@@ -36,10 +36,12 @@ public class WebApiFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
+        // nothing
     }
 
     @Override
     public void destroy() {
+        // nothing
     }
 
     @Override

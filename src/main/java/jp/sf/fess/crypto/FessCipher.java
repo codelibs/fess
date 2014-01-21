@@ -16,7 +16,7 @@
 
 package jp.sf.fess.crypto;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -35,14 +35,14 @@ public class FessCipher {
     private static final Logger logger = LoggerFactory
             .getLogger(FessCipher.class);
 
-    protected static final String UTF_8 = "UTF-8";
+    protected static final Charset UTF_8 = Charset.forName("UTF-8");
 
     public String algorithm = "Blowfish";
 
     @Binding(bindingType = BindingType.MUST)
     public String key;
 
-    public String charsetName = UTF_8;
+    public Charset charset = UTF_8;
 
     protected Queue<Cipher> encryptoQueue = new ConcurrentLinkedQueue<Cipher>();
 
@@ -63,13 +63,8 @@ public class FessCipher {
     }
 
     public String encryptoText(final String text) {
-        try {
-            return new String(Base64.encodeBase64(encrypto(text
-                    .getBytes(charsetName))), UTF_8);
-        } catch (final UnsupportedEncodingException e) {
-            throw new FessSystemException("Could not encrypto a text by "
-                    + charsetName + ".", e);
-        }
+        return new String(
+                Base64.encodeBase64(encrypto(text.getBytes(charset))), UTF_8);
     }
 
     public byte[] decrypto(final byte[] data) {
@@ -87,14 +82,8 @@ public class FessCipher {
     }
 
     public String decryptoText(final String text) {
-        try {
-            return new String(
-                    decrypto(Base64.decodeBase64(text.getBytes(UTF_8))),
-                    charsetName);
-        } catch (final UnsupportedEncodingException e) {
-            throw new FessSystemException("Could not decrypto a text by "
-                    + charsetName + ".", e);
-        }
+        return new String(decrypto(Base64.decodeBase64(text.getBytes(UTF_8))),
+                charset);
     }
 
     protected Cipher pollEncryptoCipher() {
@@ -103,8 +92,8 @@ public class FessCipher {
             if (logger.isInfoEnabled()) {
                 logger.info("Initializing a cipher for an encryption.");
             }
-            final SecretKeySpec sksSpec = new SecretKeySpec(key.getBytes(),
-                    algorithm);
+            final SecretKeySpec sksSpec = new SecretKeySpec(
+                    key.getBytes(UTF_8), algorithm);
             try {
                 cipher = Cipher.getInstance(algorithm);
                 cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, sksSpec);
@@ -126,8 +115,8 @@ public class FessCipher {
             if (logger.isInfoEnabled()) {
                 logger.info("Initializing a cipher for an decryption.");
             }
-            final SecretKeySpec sksSpec = new SecretKeySpec(key.getBytes(),
-                    algorithm);
+            final SecretKeySpec sksSpec = new SecretKeySpec(
+                    key.getBytes(UTF_8), algorithm);
             try {
                 cipher = Cipher.getInstance(algorithm);
                 cipher.init(javax.crypto.Cipher.DECRYPT_MODE, sksSpec);

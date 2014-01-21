@@ -24,8 +24,7 @@ import jp.sf.fess.Constants;
 import org.seasar.framework.beans.util.Copy;
 
 public class FessCopy extends Copy {
-    public FessCopy(final Object src, final Object dest)
-            throws NullPointerException {
+    public FessCopy(final Object src, final Object dest) {
         super(src, dest);
     }
 
