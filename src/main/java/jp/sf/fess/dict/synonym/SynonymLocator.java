@@ -2,6 +2,8 @@ package jp.sf.fess.dict.synonym;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import jp.sf.fess.dict.DictionaryFile;
@@ -35,6 +37,15 @@ public class SynonymLocator extends DictionaryLocator {
                 fileList.add(new SynonymFile(file));
             }
         }
+        Collections.sort(fileList,
+                new Comparator<DictionaryFile<? extends DictionaryItem>>() {
+                    @Override
+                    public int compare(
+                            final DictionaryFile<? extends DictionaryItem> o1,
+                            final DictionaryFile<? extends DictionaryItem> o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
         return fileList;
     }
 
