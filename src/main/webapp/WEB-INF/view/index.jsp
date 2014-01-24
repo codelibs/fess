@@ -52,7 +52,7 @@
 						<div class="clearfix">
 							<div class="input">
 								<html:text styleClass="query" property="query" size="50"
-									maxlength="1000" styleId="contentQuery" />
+									maxlength="1000" styleId="contentQuery" autocomplete="off" />
 							</div>
 						</div>
 						<c:if test="${fe:hswsize(null) != 0}">
@@ -174,37 +174,11 @@
 		</div>
 		<jsp:include page="footer.jsp" />
 	</div>
+	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-1.8.3.min.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/index.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
-	<script type="text/javascript" src="js/suggestor.js"></script>
-	<script>
-	    $(function(){
-	        $("#contentQuery").suggestor( {
-	            ajaxinfo: {
-	                url: "/fess/json",
-	                fn: "content",
-	                num: 10
-	            },
-	            boxCssInfo: {
-	                border: "1px solid rgba(82, 168, 236, 0.5)",
-	                "-webkit-box-shadow": "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-	                "-moz-box-shadow": "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-	                "box-shadow": "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-	                "background-color": "#fff"
-	            },
-	            listSelectedCssInfo: {
-	                "background-color": "rgba(82, 168, 236, 0.1)"
-	            },
-	            listDeselectedCssInfo: {
-	                "background-color": "#ffffff"
-	            },
-	            minturm: 1,
-	            adjustWidthVal: 11,
-	            searchForm: $('#searchForm')
-	        });
-	    });
-	</script>
+	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/index.js')}"></script>
 </body>
 </html>

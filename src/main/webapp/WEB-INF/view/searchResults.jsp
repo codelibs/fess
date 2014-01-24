@@ -23,7 +23,6 @@
 </c:if>
 <div id="result" class="row content">
 	<input type="hidden" id="queryId" value="${f:u(queryId)}" />
-	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<input type="hidden" id="rt" value="${f:u(rt)}" />
 	<div class="span8">
 		<ol>

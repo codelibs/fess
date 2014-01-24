@@ -9,7 +9,7 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 						alt="<bean:message key="labels.header_brand_name" />" />
 				</s:link>
 				<div class="navbar-form pull-right">
-					<html:text property="query" maxlength="1000" styleId="query" />
+					<html:text property="query" maxlength="1000" styleId="query" autocomplete="off"/>
 					<button class="btn medium btn-primary" type="submit" name="search"
 						id="searchButton">
 						<i class="icon-search icon-white"></i><span class="hidden-phone"><bean:message

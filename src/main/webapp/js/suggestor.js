@@ -167,7 +167,6 @@ $.fn.suggestor = function(setting) {
 							var str = $(this).html();
 							suggestor.fixList();
 							$textArea.val(str);
-							//BEGIN: N2 SEARCH 検索開始
 							if(typeof $settingSearchForm !== "undefined") {
 								$settingSearchForm.submit();
 								//$settingSearchForm.trigger("submit");
