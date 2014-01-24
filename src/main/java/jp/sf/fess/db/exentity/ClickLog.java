@@ -39,6 +39,10 @@ public class ClickLog extends BsClickLog {
 
     private String userSessionId;
 
+    private String docId;
+
+    private long clickCount;
+
     public String getUserSessionId() {
         return userSessionId;
     }
@@ -64,13 +68,27 @@ public class ClickLog extends BsClickLog {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    public String getDocId() {
+        return docId;
+    }
+
+    public void setDocId(final String docId) {
+        this.docId = docId;
+    }
+
+    public long getClickCount() {
+        return clickCount;
+    }
+
+    public void setClickCount(final long clickCount) {
+        this.clickCount = clickCount;
+    }
+
     @Override
     public String toString() {
         return "ClickLog [queryRequestedTime=" + queryRequestedTime
-                + ", userSessionId=" + userSessionId + ", _id=" + _id
+                + ", userSessionId=" + userSessionId + ", docId=" + docId
+                + ", clickCount=" + clickCount + ", _id=" + _id
                 + ", _searchId=" + _searchId + ", _url=" + _url
                 + ", _requestedTime=" + _requestedTime + "]";
     }

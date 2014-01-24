@@ -286,7 +286,8 @@ public class IndexAction {
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
-            doc = searchService.getDocument("docId:" + indexForm.docId);
+            doc = searchService.getDocument("docId:" + indexForm.docId,
+                    new String[] { systemHelper.clickCountField });
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -318,6 +319,13 @@ public class IndexAction {
                 clickLog.setQueryRequestedTime(new Timestamp(Long
                         .parseLong(indexForm.rt)));
                 clickLog.setUserSessionId(userSessionId);
+                clickLog.setDocId(indexForm.docId);
+                long clickCount = 0;
+                final Object count = doc.get(systemHelper.clickCountField);
+                if (count instanceof Long) {
+                    clickCount = ((Long) count).longValue();
+                }
+                clickLog.setClickCount(clickCount);
                 searchLogHelper.addClickLog(clickLog);
             }
         }

@@ -32,9 +32,12 @@ import jp.sf.fess.db.exbhv.UserInfoBhv;
 import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
+import jp.sf.fess.helper.DocumentHelper;
 import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.SearchLogService;
 import jp.sf.fess.service.UserInfoService;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FessBeans;
 
 import org.seasar.framework.container.SingletonS2Container;
@@ -139,25 +142,57 @@ public class SearchLogHelperImpl extends SearchLogHelper {
 
     @Override
     protected void processClickLogQueue(final Queue<ClickLog> queue) {
+        final Map<String, Long> clickCountMap = new HashMap<String, Long>();
         final List<ClickLog> clickLogList = new ArrayList<ClickLog>();
         for (final ClickLog clickLog : queue) {
-            final SearchLogCB cb = new SearchLogCB();
-            cb.query().setRequestedTime_Equal(clickLog.getQueryRequestedTime());
-            cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
-            final SearchLogBhv searchLogBhv = SingletonS2Container
-                    .getComponent(SearchLogBhv.class);
-            final SearchLog entity = searchLogBhv.selectEntity(cb);
-            if (entity != null) {
-                clickLog.setSearchId(entity.getId());
-                clickLogList.add(clickLog);
-            } else {
-                logger.warn("Not Found[ClickLog]: " + clickLog);
+            try {
+                final SearchLogCB cb = new SearchLogCB();
+                cb.query().setRequestedTime_Equal(
+                        clickLog.getQueryRequestedTime());
+                cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
+                final SearchLogBhv searchLogBhv = SingletonS2Container
+                        .getComponent(SearchLogBhv.class);
+                final SearchLog entity = searchLogBhv.selectEntity(cb);
+                if (entity != null) {
+                    clickLog.setSearchId(entity.getId());
+                    clickLogList.add(clickLog);
+                } else {
+                    logger.warn("Not Found[ClickLog]: " + clickLog);
+                }
+
+                final String docId = clickLog.getDocId();
+                Long countObj = clickCountMap.get(docId);
+                final long clickCount = clickLog.getClickCount();
+                if (countObj == null) {
+                    countObj = Long.valueOf(clickCount);
+                } else {
+                    countObj = Math.max(countObj.longValue(), clickCount) + 1;
+                }
+                clickCountMap.put(docId, countObj);
+            } catch (final Exception e) {
+                logger.warn("Failed to process: " + clickLog, e);
             }
         }
         if (!clickLogList.isEmpty()) {
-            final ClickLogBhv clickLogBhv = SingletonS2Container
-                    .getComponent(ClickLogBhv.class);
-            clickLogBhv.batchInsert(clickLogList);
+            try {
+                final ClickLogBhv clickLogBhv = SingletonS2Container
+                        .getComponent(ClickLogBhv.class);
+                clickLogBhv.batchInsert(clickLogList);
+            } catch (final Exception e) {
+                logger.warn("Failed to insert: " + clickLogList, e);
+            }
+        }
+
+        final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        for (final Map.Entry<String, Long> entry : clickCountMap.entrySet()) {
+            try {
+                documentHelper.update(entry.getKey(),
+                        systemHelper.clickCountField, entry.getValue() + 1);
+            } catch (final Exception e) {
+                logger.warn("Failed to update a clickCount(" + entry.getValue()
+                        + ") for " + entry.getKey(), e);
+            }
         }
     }
 }
