@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 the Fess Project and the Others.
+ * Copyright 2009-2014 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class Constants extends CoreLibConstants {
 
     public static final int DEFAULT_ADMIN_PAGE_SIZE = 25;
 
-    public static final String WEB_API_VERSION = "4";
+    public static final String WEB_API_VERSION = "5";
 
     public static final String LOGIN_INFO = "jp.sf.fess.LoginInfo";
 
