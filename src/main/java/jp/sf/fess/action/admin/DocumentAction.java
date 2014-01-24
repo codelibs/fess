@@ -325,17 +325,17 @@ public class DocumentAction implements Serializable {
 
     public List<Map<String, Object>> getGroupActionItems() {
         final List<Map<String, Object>> groupActionItems = new ArrayList<Map<String, Object>>();
-        try {
-            for (final String groupName : solrGroupManager.getSolrGroupNames()) {
+        for (final String groupName : solrGroupManager.getSolrGroupNames()) {
+            try {
                 final Map<String, Object> map = new HashMap<String, Object>();
                 map.put("groupName", groupName);
                 final SessionIdList<Map<String, String>> sessionIdList = getSessionIdList(groupName);
                 map.put("sessionIdItems", sessionIdList);
                 map.put("totalCount", sessionIdList.getTotalCount());
                 groupActionItems.add(map);
+            } catch (final Exception e) {
+                logger.info("could not get server groups.", e);
             }
-        } catch (final Exception e) {
-            logger.info("could not get server groups.", e);
         }
         return groupActionItems;
     }

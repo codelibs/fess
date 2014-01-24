@@ -20,6 +20,10 @@
 		</div>
 		<%-- Message: END --%>
 
+<c:if test="${empty groupActionItems}">
+<div class="alert-message error"><bean:message key="labels.no_available_solr_servers" /></div>
+</c:if>
+<c:if test="${!empty groupActionItems}">
 			<div>
 				<h3>
 					<bean:message key="labels.solr_title_action" />
@@ -137,6 +141,7 @@
 					</tbody>
 				</table>
 			</div>
+</c:if>
 		</div>
 
 		<c:if test="${solrProcessRunning}">
