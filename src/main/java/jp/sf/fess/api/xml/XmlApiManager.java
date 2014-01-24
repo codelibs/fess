@@ -37,6 +37,7 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
 import jp.sf.fess.util.MoreLikeThisResponse;
@@ -57,8 +58,8 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (Constants.FALSE.equals(getCrawlerProperties().getProperty(
-                Constants.WEB_API_XML_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(ComponentUtil.getCrawlerProperties()
+                .getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE))) {
             return false;
         }
 
@@ -148,8 +149,10 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                 for (final Map.Entry<String, Object> entry : document
                         .entrySet()) {
                     final String name = entry.getKey();
-                    if (StringUtil.isNotBlank(name) && entry.getValue() != null
-                            && getQueryHelper().isApiResponseField(name)) {
+                    if (StringUtil.isNotBlank(name)
+                            && entry.getValue() != null
+                            && ComponentUtil.getQueryHelper()
+                                    .isApiResponseField(name)) {
                         final String tagName = convertTagName(name);
                         buf.append('<');
                         buf.append(tagName);
@@ -255,8 +258,8 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         String errMsg = Constants.EMPTY_STRING;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<Map<String, String>> labelTypeItems = getLabelTypeHelper()
-                    .getLabelTypeItemList();
+            final List<Map<String, String>> labelTypeItems = ComponentUtil
+                    .getLabelTypeHelper().getLabelTypeItemList();
             buf.append("<record-count>");
             buf.append(labelTypeItems.size());
             buf.append("</record-count>");

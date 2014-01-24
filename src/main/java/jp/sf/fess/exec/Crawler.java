@@ -48,6 +48,7 @@ import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.CrawlingSessionService;
 import jp.sf.fess.service.PathMappingService;
 import jp.sf.fess.taglib.FessFunctions;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.codelibs.core.CoreLibConstants;
@@ -256,8 +257,7 @@ public class Crawler implements Serializable {
         final Crawler crawler = SingletonS2Container
                 .getComponent(Crawler.class);
 
-        final DatabaseHelper databaseHelper = SingletonS2Container
-                .getComponent("databaseHelper");
+        final DatabaseHelper databaseHelper = ComponentUtil.getDatabaseHelper();
         databaseHelper.optimize();
 
         if (StringUtil.isBlank(options.sessionId)) {
@@ -266,10 +266,10 @@ public class Crawler implements Serializable {
             options.sessionId = sdf.format(new Date());
         }
 
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
-        final DynamicProperties crawlerProperties = SingletonS2Container
-                .getComponent("crawlerProperties");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
+        final DynamicProperties crawlerProperties = ComponentUtil
+                .getCrawlerProperties();
 
         if (StringUtil.isNotBlank(options.propertiesPath)) {
             crawlerProperties.reload(options.propertiesPath);
@@ -372,15 +372,14 @@ public class Crawler implements Serializable {
             logger.info("Starting Crawler..");
         }
 
-        final PathMappingHelper pathMappingHelper = SingletonS2Container
-                .getComponent("pathMappingHelper");
+        final PathMappingHelper pathMappingHelper = ComponentUtil
+                .getPathMappingHelper();
 
         final long totalTime = System.currentTimeMillis();
 
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         boolean completed = false;
         int exitCode = Constants.EXIT_OK;
@@ -404,8 +403,8 @@ public class Crawler implements Serializable {
 
             // overlapping host
             try {
-                final OverlappingHostHelper overlappingHostHelper = SingletonS2Container
-                        .getComponent("overlappingHostHelper");
+                final OverlappingHostHelper overlappingHostHelper = ComponentUtil
+                        .getOverlappingHostHelper();
                 overlappingHostHelper.init();
             } catch (final Exception e) {
                 logger.warn("Could not initialize overlappingHostHelper.", e);

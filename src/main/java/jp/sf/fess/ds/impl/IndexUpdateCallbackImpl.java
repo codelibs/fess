@@ -27,10 +27,10 @@ import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.solr.lib.SolrGroup;
-import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,8 +71,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             throw new FessSystemException("url is null. dataMap=" + dataMap);
         }
 
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent(CrawlingSessionHelper.class);
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
         dataMap.put("id", crawlingSessionHelper.generateId(dataMap));
 
         final SolrInputDocument doc = createSolrDocument(dataMap);
@@ -132,8 +132,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (!dataMap.containsKey(Constants.DOC_ID)) {
-            final SystemHelper systemHelper = SingletonS2Container
-                    .getComponent("systemHelper");
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             doc.addField(Constants.DOC_ID, systemHelper.generateDocId(dataMap));
         }
 
@@ -180,10 +179,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected void addClickCountField(final SolrInputDocument doc,
             final String url) {
-        final SearchLogHelper searchLogHelper = SingletonS2Container
-                .getComponent(SearchLogHelper.class);
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SearchLogHelper searchLogHelper = ComponentUtil
+                .getSearchLogHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final int count = searchLogHelper.getClickCount(url);
         doc.addField(systemHelper.clickCountField, count);
         if (logger.isDebugEnabled()) {
@@ -193,10 +191,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected void addFavoriteCountField(final SolrInputDocument doc,
             final String url) {
-        final SearchLogHelper searchLogHelper = SingletonS2Container
-                .getComponent(SearchLogHelper.class);
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SearchLogHelper searchLogHelper = ComponentUtil
+                .getSearchLogHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final long count = searchLogHelper.getFavoriteCount(url);
         doc.addField(systemHelper.favoriteCountField, count);
         if (logger.isDebugEnabled()) {

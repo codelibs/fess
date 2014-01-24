@@ -17,8 +17,8 @@
 package jp.sf.fess.interval;
 
 import jp.sf.fess.helper.IntervalControlHelper;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.robot.interval.impl.DefaultIntervalController;
 
 public class FessIntervalController extends DefaultIntervalController {
@@ -62,8 +62,8 @@ public class FessIntervalController extends DefaultIntervalController {
     @Override
     protected void delayForWaitingNewUrl() {
         try {
-            final IntervalControlHelper intervalControlHelper = SingletonS2Container
-                    .getComponent("intervalControlHelper");
+            final IntervalControlHelper intervalControlHelper = ComponentUtil
+                    .getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();
             intervalControlHelper.delayByRules();
         } catch (final Exception e) {

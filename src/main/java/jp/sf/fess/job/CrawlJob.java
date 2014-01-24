@@ -31,6 +31,7 @@ import jp.sf.fess.exec.Crawler;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.JobExecutor.ShutdownListener;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.InputStreamThread;
 
 import org.apache.commons.lang.StringUtils;
@@ -185,8 +186,8 @@ public class CrawlJob {
             jobExecutor.addShutdownListener(new ShutdownListener() {
                 @Override
                 public void onShutdown() {
-                    SingletonS2Container.getComponent(JobHelper.class)
-                            .destroyCrawlerProcess(sessionId);
+                    ComponentUtil.getJobHelper().destroyCrawlerProcess(
+                            sessionId);
                 }
             });
         }
@@ -208,10 +209,8 @@ public class CrawlJob {
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonS2Container
                 .getComponent(ServletContext.class);
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
-        final JobHelper jobHelper = SingletonS2Container
-                .getComponent(JobHelper.class);
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final JobHelper jobHelper = ComponentUtil.getJobHelper();
 
         crawlerCmdList.add(systemHelper.getJavaCommandPath());
 

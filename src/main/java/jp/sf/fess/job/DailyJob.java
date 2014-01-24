@@ -24,6 +24,7 @@ import jp.sf.fess.service.CrawlingSessionService;
 import jp.sf.fess.service.JobLogService;
 import jp.sf.fess.service.SearchLogService;
 import jp.sf.fess.service.UserInfoService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.seasar.framework.container.SingletonS2Container;
@@ -44,10 +45,10 @@ public class DailyJob {
                 .getComponent(JobLogService.class);
         final UserInfoService userInfoService = SingletonS2Container
                 .getComponent(UserInfoService.class);
-        final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
-                .getComponent(HotSearchWordHelper.class);
-        final DynamicProperties crawlerProperties = SingletonS2Container
-                .getComponent("crawlerProperties");
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
+                .getHotSearchWordHelper();
+        final DynamicProperties crawlerProperties = ComponentUtil
+                .getCrawlerProperties();
 
         final StringBuilder resultBuf = new StringBuilder();
 

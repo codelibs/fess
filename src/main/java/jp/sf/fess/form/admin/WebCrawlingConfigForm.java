@@ -22,8 +22,8 @@ import java.util.Date;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.form.admin.BsWebCrawlingConfigForm;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 
 public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements
@@ -41,7 +41,7 @@ public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements
     public void initialize() {
         super.initialize();
         sortOrder = "0";
-        userAgent = SingletonS2Container.getComponent("userAgentName");
+        userAgent = ComponentUtil.getUserAgentName();
         if (StringUtil.isBlank(userAgent)) {
             userAgent = "Fess Robot/1.0";
         }

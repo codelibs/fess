@@ -32,8 +32,7 @@ import javax.servlet.http.HttpSession;
 import jp.sf.fess.Constants;
 import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.helper.SystemHelper;
-
-import org.seasar.framework.container.SingletonS2Container;
+import jp.sf.fess.util.ComponentUtil;
 
 public class LoginInfoFilter implements Filter {
     private long updateInterval = 60 * 60 * 1000L; // 1h
@@ -72,8 +71,7 @@ public class LoginInfoFilter implements Filter {
 
     private void updateRoleList(final HttpServletRequest hRequest,
             final LoginInfo loginInfo) {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final List<String> authenticatedRoleList = systemHelper
                 .getAuthenticatedRoleList();
         final List<String> roleList = new ArrayList<String>();

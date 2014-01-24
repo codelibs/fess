@@ -24,6 +24,7 @@ import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.JobLogService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -37,8 +38,6 @@ public class TriggeredJob implements Job {
     private static final Logger logger = LoggerFactory
             .getLogger(TriggeredJob.class);
 
-    private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
-
     @Override
     public void execute(final JobExecutionContext context)
             throws JobExecutionException {
@@ -50,20 +49,17 @@ public class TriggeredJob implements Job {
     }
 
     public void execute(final ScheduledJob scheduledJob) {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
-        final JobHelper jobHelper = SingletonS2Container
-                .getComponent(JobHelper.class);
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final JobHelper jobHelper = ComponentUtil.getJobHelper();
         final JobLog jobLog = new JobLog(scheduledJob);
         final String scriptType = scheduledJob.getScriptType();
         final String script = scheduledJob.getScriptData();
         final Long id = scheduledJob.getId();
         final String jobId = Constants.JOB_ID_PREFIX + id;
-        final JobExecutor jobExecutor = SingletonS2Container
-                .getComponent(scriptType + JOB_EXECUTOR_SUFFIX);
+        final JobExecutor jobExecutor = ComponentUtil
+                .getJobExecutor(scriptType);
         if (jobExecutor == null) {
-            throw new ScheduledJobException("No jobExecutor: " + scriptType
-                    + JOB_EXECUTOR_SUFFIX);
+            throw new ScheduledJobException("No jobExecutor: " + scriptType);
         }
 
         if (jobHelper.startJobExecutoer(id, jobExecutor) != null) {

@@ -17,8 +17,8 @@
 package jp.sf.fess.transformer;
 
 import jp.sf.fess.FessSystemException;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.robot.entity.ResponseData;
 import org.seasar.robot.extractor.Extractor;
 import org.seasar.robot.extractor.ExtractorFactory;
@@ -31,8 +31,8 @@ public class FessFileTransformer extends AbstractFessFileTransformer {
 
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
-        final ExtractorFactory extractorFactory = SingletonS2Container
-                .getComponent("extractorFactory");
+        final ExtractorFactory extractorFactory = ComponentUtil
+                .getExtractorFactory();
         if (extractorFactory == null) {
             throw new FessSystemException("Could not find extractorFactory.");
         }

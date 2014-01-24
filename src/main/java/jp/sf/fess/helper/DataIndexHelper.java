@@ -31,6 +31,7 @@ import jp.sf.fess.ds.DataStore;
 import jp.sf.fess.ds.DataStoreFactory;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.service.DataCrawlingConfigService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.SolrGroup;
@@ -143,8 +144,7 @@ public class DataIndexHelper implements Serializable {
 
         }
 
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         int startedCrawlerNum = 0;
         int activeCrawlerNum = 0;
@@ -211,8 +211,8 @@ public class DataIndexHelper implements Serializable {
         indexUpdateCallback.commit();
 
         // put cralwing info
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
 
         final long execTime = System.currentTimeMillis() - startTime;
         crawlingSessionHelper.putToInfoMap(Constants.DATA_CRAWLING_EXEC_TIME,
@@ -259,8 +259,8 @@ public class DataIndexHelper implements Serializable {
         @Override
         public void run() {
             running = true;
-            final DataStoreFactory dataStoreFactory = SingletonS2Container
-                    .getComponent(DataStoreFactory.class);
+            final DataStoreFactory dataStoreFactory = ComponentUtil
+                    .getDataStoreFactory();
             dataStore = dataStoreFactory.getDataStore(dataCrawlingConfig
                     .getHandlerName());
             if (dataStore == null) {

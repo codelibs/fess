@@ -24,12 +24,12 @@ import java.util.Map;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.helper.MailHelper;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,15 +152,14 @@ public class FessStatusPolicy extends StatusPolicyImpl {
     }
 
     protected void send(final String subject, final Map<String, Object> dataMap) {
-        final DynamicProperties crawlerProperties = SingletonS2Container
-                .getComponent("crawlerProperties");
+        final DynamicProperties crawlerProperties = ComponentUtil
+                .getCrawlerProperties();
         if (crawlerProperties == null) {
             logger.info("crawlerProperties is not found.");
             return;
         }
 
-        final MailHelper mailHelper = SingletonS2Container
-                .getComponent("mailHelper");
+        final MailHelper mailHelper = ComponentUtil.getMailHelper();
         if (mailHelper == null) {
             logger.info("mailHelper is not found.");
             return;

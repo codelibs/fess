@@ -31,10 +31,10 @@ import jp.sf.fess.db.exentity.LabelType;
 import jp.sf.fess.db.exentity.LabelTypeToRoleTypeMapping;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.pager.LabelTypePager;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.seasar.dbflute.bhv.ConditionBeanSetupper;
 import org.seasar.dbflute.cbean.ListResultBean;
-import org.seasar.framework.container.SingletonS2Container;
 
 public class LabelTypeService extends BsLabelTypeService implements
         Serializable {
@@ -162,8 +162,8 @@ public class LabelTypeService extends BsLabelTypeService implements
             }
         }
 
-        final LabelTypeHelper labelTypeHelper = SingletonS2Container
-                .getComponent("labelTypeHelper");
+        final LabelTypeHelper labelTypeHelper = ComponentUtil
+                .getLabelTypeHelper();
         if (labelTypeHelper != null) {
             labelTypeHelper.refresh(getLabelTypeListWithRoles());
         }

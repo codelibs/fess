@@ -1,0 +1,201 @@
+package jp.sf.fess.util;
+
+import jp.sf.fess.api.WebApiManagerFactory;
+import jp.sf.fess.crypto.FessCipher;
+import jp.sf.fess.ds.DataStoreFactory;
+import jp.sf.fess.helper.CrawlingConfigHelper;
+import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.DatabaseHelper;
+import jp.sf.fess.helper.DocumentHelper;
+import jp.sf.fess.helper.HotSearchWordHelper;
+import jp.sf.fess.helper.IntervalControlHelper;
+import jp.sf.fess.helper.JobHelper;
+import jp.sf.fess.helper.LabelTypeHelper;
+import jp.sf.fess.helper.MailHelper;
+import jp.sf.fess.helper.OverlappingHostHelper;
+import jp.sf.fess.helper.PathMappingHelper;
+import jp.sf.fess.helper.QueryHelper;
+import jp.sf.fess.helper.SambaHelper;
+import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.helper.UserAgentHelper;
+import jp.sf.fess.helper.ViewHelper;
+import jp.sf.fess.job.JobExecutor;
+import jp.sf.fess.solr.IndexUpdater;
+
+import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.solr.lib.SolrGroupManager;
+import org.seasar.framework.container.SingletonS2Container;
+import org.seasar.robot.extractor.ExtractorFactory;
+
+public final class ComponentUtil {
+    private static final String USER_AGENT_NAME = "userAgentName";
+
+    private static final String INDEX_UPDATER = "indexUpdater";
+
+    private static final String DATABASE_HELPER = "databaseHelper";
+
+    private static final String MAIL_HELPER = "mailHelper";
+
+    private static final String EXTRACTOR_FACTORY = "extractorFactory";
+
+    private static final String INTERVAL_CONTROL_HELPER = "intervalControlHelper";
+
+    private static final String DATA_STORE_FACTORY = "dataStoreFactory";
+
+    private static final String USER_AGENT_HELPER = "userAgentHelper";
+
+    private static final String WEB_API_MANAGER_FACTORY = "webApiManagerFactory";
+
+    private static final String DOCUMENT_HELPER = "documentHelper";
+
+    private static final String JOB_HELPER = "jobHelper";
+
+    private static final String OVERLAPPING_HOST_HELPER = "overlappingHostHelper";
+
+    private static final String PATH_MAPPING_HELPER = "pathMappingHelper";
+
+    private static final String HOT_SEARCH_WORD_HELPER = "hotSearchWordHelper";
+
+    private static final String CRAWLING_SESSION_HELPER = "crawlingSessionHelper";
+
+    private static final String CRAWLING_CONFIG_HELPER = "crawlingConfigHelper";
+
+    private static final String SEARCH_LOG_HELPER = "searchLogHelper";
+
+    private static final String LABEL_TYPE_HELPER = "labelTypeHelper";
+
+    private static final String QUERY_HELPER = "queryHelper";
+
+    private static final String SAMBA_HELPER = "sambaHelper";
+
+    private static final String VIEW_HELPER = "viewHelper";
+
+    private static final String SYSTEM_HELPER = "systemHelper";
+
+    private static final String SOLR_GROUP_MANAGER = "solrGroupManager";
+
+    private static final String CRAWLER_PROPERTIES = "crawlerProperties";
+
+    private static final String PROPERTIES_SUFFIX = "Properties";
+
+    private static final String QUERY_RESPONSE_LIST = "queryResponseList";
+
+    private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
+
+    private ComponentUtil() {
+    }
+
+    public static FessCipher getCipher(final String cipherName) {
+        return SingletonS2Container.getComponent(cipherName);
+    }
+
+    public static QueryResponseList getQueryResponseList() {
+        return SingletonS2Container.getComponent(QUERY_RESPONSE_LIST);
+    }
+
+    public static DynamicProperties getSolrGroupProperties(
+            final String groupName) {
+        return SingletonS2Container.getComponent(groupName + PROPERTIES_SUFFIX);
+    }
+
+    public static DynamicProperties getCrawlerProperties() {
+        return SingletonS2Container.getComponent(CRAWLER_PROPERTIES);
+    }
+
+    public static SolrGroupManager getSolrGroupManager() {
+        return SingletonS2Container.getComponent(SOLR_GROUP_MANAGER);
+    }
+
+    public static SystemHelper getSystemHelper() {
+        return SingletonS2Container.getComponent(SYSTEM_HELPER);
+    }
+
+    public static ViewHelper getViewHelper() {
+        return SingletonS2Container.getComponent(VIEW_HELPER);
+    }
+
+    public static SambaHelper getSambaHelper() {
+        return SingletonS2Container.getComponent(SAMBA_HELPER);
+    }
+
+    public static QueryHelper getQueryHelper() {
+        return SingletonS2Container.getComponent(QUERY_HELPER);
+    }
+
+    public static LabelTypeHelper getLabelTypeHelper() {
+        return SingletonS2Container.getComponent(LABEL_TYPE_HELPER);
+    }
+
+    public static SearchLogHelper getSearchLogHelper() {
+        return SingletonS2Container.getComponent(SEARCH_LOG_HELPER);
+    }
+
+    public static CrawlingConfigHelper getCrawlingConfigHelper() {
+        return SingletonS2Container.getComponent(CRAWLING_CONFIG_HELPER);
+    }
+
+    public static CrawlingSessionHelper getCrawlingSessionHelper() {
+        return SingletonS2Container.getComponent(CRAWLING_SESSION_HELPER);
+    }
+
+    public static HotSearchWordHelper getHotSearchWordHelper() {
+        return SingletonS2Container.getComponent(HOT_SEARCH_WORD_HELPER);
+    }
+
+    public static PathMappingHelper getPathMappingHelper() {
+        return SingletonS2Container.getComponent(PATH_MAPPING_HELPER);
+    }
+
+    public static OverlappingHostHelper getOverlappingHostHelper() {
+        return SingletonS2Container.getComponent(OVERLAPPING_HOST_HELPER);
+    }
+
+    public static JobHelper getJobHelper() {
+        return SingletonS2Container.getComponent(JOB_HELPER);
+    }
+
+    public static DocumentHelper getDocumentHelper() {
+        return SingletonS2Container.getComponent(DOCUMENT_HELPER);
+    }
+
+    public static WebApiManagerFactory getWebApiManagerFactory() {
+        return SingletonS2Container.getComponent(WEB_API_MANAGER_FACTORY);
+    }
+
+    public static UserAgentHelper getUserAgentHelper() {
+        return SingletonS2Container.getComponent(USER_AGENT_HELPER);
+    }
+
+    public static DataStoreFactory getDataStoreFactory() {
+        return SingletonS2Container.getComponent(DATA_STORE_FACTORY);
+    }
+
+    public static IntervalControlHelper getIntervalControlHelper() {
+        return SingletonS2Container.getComponent(INTERVAL_CONTROL_HELPER);
+    }
+
+    public static ExtractorFactory getExtractorFactory() {
+        return SingletonS2Container.getComponent(EXTRACTOR_FACTORY);
+    }
+
+    public static JobExecutor getJobExecutor(final String name) {
+        return SingletonS2Container.getComponent(name + JOB_EXECUTOR_SUFFIX);
+    }
+
+    public static MailHelper getMailHelper() {
+        return SingletonS2Container.getComponent(MAIL_HELPER);
+    }
+
+    public static DatabaseHelper getDatabaseHelper() {
+        return SingletonS2Container.getComponent(DATABASE_HELPER);
+    }
+
+    public static IndexUpdater getIndexUpdater() {
+        return SingletonS2Container.getComponent(INDEX_UPDATER);
+    }
+
+    public static String getUserAgentName() {
+        return SingletonS2Container.getComponent(USER_AGENT_NAME);
+    }
+}

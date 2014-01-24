@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import jp.sf.fess.Constants;
 import jp.sf.fess.crypto.FessCipher;
 import jp.sf.fess.entity.LoginInfo;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 
 public class AuthenticationFilter implements Filter {
@@ -52,10 +52,6 @@ public class AuthenticationFilter implements Filter {
 
     protected boolean useSecureLogin;
 
-    protected FessCipher getFessCipher() {
-        return SingletonS2Container.getComponent(cipherName);
-    }
-
     @Override
     public void destroy() {
         urlPatternList = null;
@@ -69,7 +65,7 @@ public class AuthenticationFilter implements Filter {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
         final String uri = req.getRequestURI();
-        final FessCipher fessCipher = getFessCipher();
+        final FessCipher fessCipher = ComponentUtil.getCipher(cipherName);
         for (final Pattern pattern : urlPatternList) {
             final Matcher matcher = pattern.matcher(uri);
             if (matcher.matches()) {

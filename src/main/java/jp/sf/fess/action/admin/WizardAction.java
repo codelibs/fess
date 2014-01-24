@@ -40,12 +40,12 @@ import jp.sf.fess.service.BrowserTypeService;
 import jp.sf.fess.service.FileCrawlingConfigService;
 import jp.sf.fess.service.ScheduledJobService;
 import jp.sf.fess.service.WebCrawlingConfigService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.annotation.ActionForm;
@@ -80,6 +80,9 @@ public class WizardAction implements Serializable {
 
     @Resource
     protected JobHelper jobHelper;
+
+    @Resource
+    protected ScheduledJobService scheduledJobService;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("wizard");
@@ -193,8 +196,7 @@ public class WizardAction implements Serializable {
                 wConfig.setUrls(configPath);
                 wConfig.setUserAgent(getDefaultString(
                         "default.config.web.userAgent",
-                        (String) SingletonS2Container
-                                .getComponent("userAgentName")));
+                        ComponentUtil.getUserAgentName()));
 
                 if (!browserTypeIdList.isEmpty()) {
                     wConfig.setBrowserTypeIds(browserTypeIdList
@@ -329,8 +331,6 @@ public class WizardAction implements Serializable {
     @Execute(validator = false)
     public String startCrawling() {
         if (!jobHelper.isCrawlProcessRunning()) {
-            final ScheduledJobService scheduledJobService = SingletonS2Container
-                    .getComponent(ScheduledJobService.class);
             final List<ScheduledJob> scheduledJobList = scheduledJobService
                     .getCrawloerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {

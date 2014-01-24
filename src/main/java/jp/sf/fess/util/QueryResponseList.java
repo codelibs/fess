@@ -33,7 +33,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.SimpleOrderedMap;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,8 +108,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
 
             // build highlighting fields
-            final QueryHelper queryHelper = SingletonS2Container
-                    .getComponent(QueryHelper.class);
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
             final String hlPrefix = queryHelper.getHighlightingPrefix();
             for (final SolrDocument solrDocMap : sdList) {
                 final Map<String, Object> docMap = new HashMap<String, Object>();
@@ -140,8 +138,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
                 }
 
                 // ContentTitle
-                final ViewHelper viewHelper = SingletonS2Container
-                        .getComponent("viewHelper");
+                final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 if (viewHelper != null) {
                     docMap.put("contentTitle",
                             viewHelper.getContentTitle(docMap));

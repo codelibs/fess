@@ -31,6 +31,7 @@ import jp.sf.fess.form.admin.DocumentForm;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -44,7 +45,6 @@ import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.SolrLibConstants;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -84,8 +84,8 @@ public class DocumentAction implements Serializable {
     protected String showIndex(final boolean redirect) {
         final Map<String, DynamicProperties> groupPropMap = new HashMap<String, DynamicProperties>();
         for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            final DynamicProperties props = SingletonS2Container
-                    .getComponent(groupName + "Properties");
+            final DynamicProperties props = ComponentUtil
+                    .getSolrGroupProperties(groupName);
             if (props != null) {
                 groupPropMap.put(groupName, props);
             }

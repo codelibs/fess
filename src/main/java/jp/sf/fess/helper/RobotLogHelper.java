@@ -18,6 +18,7 @@ package jp.sf.fess.helper;
 
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.service.FailureUrlService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.robot.RobotMultipleCrawlAccessException;
@@ -90,8 +91,7 @@ public class RobotLogHelper extends LogHelperImpl {
     }
 
     private CrawlingConfig getCrawlingConfig(final String sessionCountId) {
-        return SingletonS2Container.getComponent(CrawlingConfigHelper.class)
-                .get(sessionCountId);
+        return ComponentUtil.getCrawlingConfigHelper().get(sessionCountId);
     }
 
 }

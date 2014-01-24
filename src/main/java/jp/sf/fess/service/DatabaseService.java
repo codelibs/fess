@@ -110,11 +110,11 @@ import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
 import jp.sf.fess.helper.LabelTypeHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -548,8 +548,8 @@ public class DatabaseService {
                     }
                 }
                 // restore labels
-                final LabelTypeHelper labelTypeHelper = SingletonS2Container
-                        .getComponent("labelTypeHelper");
+                final LabelTypeHelper labelTypeHelper = ComponentUtil
+                        .getLabelTypeHelper();
                 if (labelTypeHelper != null) {
                     labelTypeHelper.init();
                 }

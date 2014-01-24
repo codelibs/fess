@@ -32,6 +32,7 @@ import jp.sf.fess.service.FileAuthenticationService;
 import jp.sf.fess.service.FileCrawlingConfigService;
 import jp.sf.fess.service.WebCrawlingConfigService;
 import jp.sf.fess.solr.IndexUpdater;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.SolrGroup;
@@ -150,8 +151,7 @@ public class WebFsIndexHelper implements Serializable {
             // NOP
         }
 
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         final long startTime = System.currentTimeMillis();
 
@@ -402,8 +402,7 @@ public class WebFsIndexHelper implements Serializable {
         }
 
         // run index update
-        final IndexUpdater indexUpdater = SingletonS2Container
-                .getComponent("indexUpdater");
+        final IndexUpdater indexUpdater = ComponentUtil.getIndexUpdater();
         indexUpdater.setName("IndexUpdater");
         indexUpdater.setPriority(indexUpdaterPriority);
         indexUpdater.setSessionIdList(sessionIdList);
@@ -478,8 +477,8 @@ public class WebFsIndexHelper implements Serializable {
         s2RobotStatusList.clear();
 
         // put cralwing info
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
 
         final long execTime = System.currentTimeMillis() - startTime;
         crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME,

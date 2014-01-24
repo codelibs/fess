@@ -30,11 +30,11 @@ import jp.sf.fess.entity.FacetQueryView;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.HotSearchWordHelper.Range;
 import jp.sf.fess.helper.ViewHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.common.util.DateUtil;
 import org.codelibs.core.util.DynamicProperties;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.URLEncoderUtil;
 
@@ -92,8 +92,8 @@ public class FessFunctions {
             range = Range.ENTIRE;
         }
 
-        final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
-                .getComponent(HotSearchWordHelper.class);
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
+                .getHotSearchWordHelper();
         final List<String> wordList = hotSearchWordHelper
                 .getHotSearchWordList(range);
         if (wordList.size() > size) {
@@ -122,14 +122,14 @@ public class FessFunctions {
             range = Range.ENTIRE;
         }
 
-        final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
-                .getComponent(HotSearchWordHelper.class);
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
+                .getHotSearchWordHelper();
         return hotSearchWordHelper.getHotSearchWordList(range).size();
     }
 
     private static boolean isSupportHotSearchWord() {
-        final DynamicProperties crawlerProperties = SingletonS2Container
-                .getComponent("crawlerProperties");
+        final DynamicProperties crawlerProperties = ComponentUtil
+                .getCrawlerProperties();
         return crawlerProperties != null
                 && Constants.TRUE.equals(crawlerProperties.getProperty(
                         Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
@@ -183,8 +183,7 @@ public class FessFunctions {
     }
 
     public static List<FacetQueryView> facetQueryViewList() {
-        final ViewHelper viewHelper = SingletonS2Container
-                .getComponent("viewHelper");
+        final ViewHelper viewHelper = ComponentUtil.getViewHelper();
         return viewHelper.getFacetQueryViewList();
     }
 

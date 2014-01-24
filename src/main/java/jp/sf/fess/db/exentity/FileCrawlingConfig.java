@@ -27,6 +27,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsFileCrawlingConfig;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.FileAuthenticationService;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ParameterUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
@@ -166,8 +167,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
     }
 
     protected synchronized void initDocPathPattern() {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         if (includedDocPathPatterns == null) {
             if (StringUtil.isNotBlank(getIncludedDocPaths())) {

@@ -35,6 +35,7 @@ import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.db.exentity.FailureUrl;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.pager.FailureUrlPager;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
@@ -201,8 +202,7 @@ public class FailureUrlService extends BsFailureUrlService implements
     }
 
     private String getStackTrace(final Throwable t) {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);

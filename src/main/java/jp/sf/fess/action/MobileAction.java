@@ -36,13 +36,13 @@ import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.UserInfoHelper;
 import jp.sf.fess.service.SearchService;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.QueryResponseList;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -181,8 +181,8 @@ public class MobileAction {
         // search log
         if (Constants.TRUE.equals(crawlerProperties.getProperty(
                 Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
-            final SearchLogHelper searchLogHelper = SingletonS2Container
-                    .getComponent(SearchLogHelper.class);
+            final SearchLogHelper searchLogHelper = ComponentUtil
+                    .getSearchLogHelper();
             final Timestamp now = new Timestamp(System.currentTimeMillis());
             final SearchLog searchLog = new SearchLog();
 

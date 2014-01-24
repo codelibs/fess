@@ -33,6 +33,7 @@ import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
 import jp.sf.fess.service.ScheduledJobService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.sastruts.core.annotation.Token;
@@ -42,7 +43,6 @@ import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.SolrLibConstants;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -74,6 +74,9 @@ public class SystemAction implements Serializable {
     @Resource
     protected JobHelper jobHelper;
 
+    @Resource
+    protected ScheduledJobService scheduledJobService;
+
     private boolean executed = false;
 
     public String getHelpLink() {
@@ -83,8 +86,8 @@ public class SystemAction implements Serializable {
     protected String showIndex(final boolean redirect) {
         final Map<String, DynamicProperties> groupPropMap = new HashMap<String, DynamicProperties>();
         for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            final DynamicProperties props = SingletonS2Container
-                    .getComponent(groupName + "Properties");
+            final DynamicProperties props = ComponentUtil
+                    .getSolrGroupProperties(groupName);
             if (props != null) {
                 groupPropMap.put(groupName, props);
             }
@@ -163,8 +166,8 @@ public class SystemAction implements Serializable {
         // load solr group properties
         final Map<String, DynamicProperties> groupPropMap = new HashMap<String, DynamicProperties>();
         for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            final DynamicProperties props = SingletonS2Container
-                    .getComponent(groupName + "Properties");
+            final DynamicProperties props = ComponentUtil
+                    .getSolrGroupProperties(groupName);
             if (props != null) {
                 groupPropMap.put(groupName, props);
             }
@@ -221,8 +224,6 @@ public class SystemAction implements Serializable {
         final SolrGroup solrGroup = solrGroupManager.getSolrGroup(groupName);
         if (solrGroup != null) {
             if (!jobHelper.isCrawlProcessRunning()) {
-                final ScheduledJobService scheduledJobService = SingletonS2Container
-                        .getComponent(ScheduledJobService.class);
                 final List<ScheduledJob> scheduledJobList = scheduledJobService
                         .getCrawloerJobList();
                 for (final ScheduledJob scheduledJob : scheduledJobList) {

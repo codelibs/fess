@@ -34,6 +34,7 @@ import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SambaHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -45,7 +46,6 @@ import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.robot.S2RobotThread;
 import org.seasar.robot.client.S2RobotClient;
 import org.seasar.robot.client.smb.SmbClient;
@@ -66,22 +66,20 @@ public class FessS2RobotThread extends S2RobotThread {
     @Override
     protected boolean isContentUpdated(final S2RobotClient client,
             final UrlQueue urlQueue) {
-        final DynamicProperties crawlerProperties = SingletonS2Container
-                .getComponent("crawlerProperties");
+        final DynamicProperties crawlerProperties = ComponentUtil
+                .getCrawlerProperties();
         if (crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY,
                 Constants.TRUE).equals(Constants.TRUE)) {
 
             log(logHelper, LogType.CHECK_LAST_MODIFIED, robotContext, urlQueue);
             final long startTime = System.currentTimeMillis();
 
-            final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                    .getComponent(CrawlingConfigHelper.class);
-            final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                    .getComponent(CrawlingSessionHelper.class);
-            final SystemHelper systemHelper = SingletonS2Container
-                    .getComponent("systemHelper");
-            final SambaHelper sambaHelper = SingletonS2Container
-                    .getComponent(SambaHelper.class);
+            final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
+                    .getCrawlingConfigHelper();
+            final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                    .getCrawlingSessionHelper();
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final boolean useAclAsRole = crawlerProperties.getProperty(
                     Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                     Constants.TRUE);
@@ -164,8 +162,8 @@ public class FessS2RobotThread extends S2RobotThread {
                 final Integer clickCount = (Integer) solrDocument
                         .get(systemHelper.clickCountField);
                 if (clickCount != null) {
-                    final SearchLogHelper searchLogHelper = SingletonS2Container
-                            .getComponent(SearchLogHelper.class);
+                    final SearchLogHelper searchLogHelper = ComponentUtil
+                            .getSearchLogHelper();
                     final int count = searchLogHelper.getClickCount(urlQueue
                             .getUrl());
                     if (count != clickCount.intValue()) {
@@ -177,8 +175,8 @@ public class FessS2RobotThread extends S2RobotThread {
                 final Integer favoriteCount = (Integer) solrDocument
                         .get(systemHelper.favoriteCountField);
                 if (favoriteCount != null) {
-                    final SearchLogHelper searchLogHelper = SingletonS2Container
-                            .getComponent(SearchLogHelper.class);
+                    final SearchLogHelper searchLogHelper = ComponentUtil
+                            .getSearchLogHelper();
                     final long count = searchLogHelper
                             .getFavoriteCount(urlQueue.getUrl());
                     if (count != favoriteCount.longValue()) {
@@ -261,10 +259,9 @@ public class FessS2RobotThread extends S2RobotThread {
 
     protected SolrDocumentList getSolrDocumentList(final String id,
             final boolean wildcard, final String expiresField) {
-        final SolrGroupManager solrGroupManager = SingletonS2Container
-                .getComponent(SolrGroupManager.class);
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SolrGroupManager solrGroupManager = ComponentUtil
+                .getSolrGroupManager();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final SolrGroup solrGroup = solrGroupManager
                 .getSolrGroup(QueryType.ADD);
         final SolrQuery solrQuery = new SolrQuery();
@@ -304,8 +301,8 @@ public class FessS2RobotThread extends S2RobotThread {
     }
 
     protected Set<String> getChildUrlSet(final String id) {
-        final SolrGroupManager solrGroupManager = SingletonS2Container
-                .getComponent(SolrGroupManager.class);
+        final SolrGroupManager solrGroupManager = ComponentUtil
+                .getSolrGroupManager();
         final SolrGroup solrGroup = solrGroupManager
                 .getSolrGroup(QueryType.ADD);
         final SolrQuery solrQuery = new SolrQuery();
@@ -344,8 +341,8 @@ public class FessS2RobotThread extends S2RobotThread {
     }
 
     protected void deleteSolrDocument(final String id) {
-        final SolrGroupManager solrGroupManager = SingletonS2Container
-                .getComponent(SolrGroupManager.class);
+        final SolrGroupManager solrGroupManager = ComponentUtil
+                .getSolrGroupManager();
         final SolrGroup solrGroup = solrGroupManager
                 .getSolrGroup(QueryType.DELETE);
         final String query = "{!raw f=parentId v=\"" + id + "\"}";

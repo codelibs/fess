@@ -16,11 +16,6 @@
 
 package jp.sf.fess.api;
 
-import jp.sf.fess.helper.LabelTypeHelper;
-import jp.sf.fess.helper.QueryHelper;
-
-import org.codelibs.core.util.DynamicProperties;
-import org.seasar.framework.container.SingletonS2Container;
 
 public class BaseApiManager {
     protected static final String FAVORITES_API = "/favoritesApi";
@@ -68,15 +63,4 @@ public class BaseApiManager {
         }
     }
 
-    protected DynamicProperties getCrawlerProperties() {
-        return SingletonS2Container.getComponent("crawlerProperties");
-    }
-
-    protected QueryHelper getQueryHelper() {
-        return SingletonS2Container.getComponent("queryHelper");
-    }
-
-    protected LabelTypeHelper getLabelTypeHelper() {
-        return SingletonS2Container.getComponent("labelTypeHelper");
-    }
 }

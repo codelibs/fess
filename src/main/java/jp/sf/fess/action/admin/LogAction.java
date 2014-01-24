@@ -36,10 +36,10 @@ import javax.annotation.Resource;
 import jp.sf.fess.Constants;
 import jp.sf.fess.form.admin.LogForm;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.codec.binary.Base64;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -72,8 +72,8 @@ public class LogAction implements Serializable {
 
     @Execute(validator = true, input = "index", urlPattern = "download/{logFileName}")
     public String download() {
-        final String logFilePath = SingletonS2Container.getComponent(
-                SystemHelper.class).getLogFilePath();
+        final String logFilePath = ComponentUtil.getSystemHelper()
+                .getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             final File file = new File(logFilePath);
             final File parentDir = file.getParentFile();
@@ -104,8 +104,8 @@ public class LogAction implements Serializable {
 
     public List<Map<String, Object>> getLogFileItems() {
         final List<Map<String, Object>> logFileItems = new ArrayList<Map<String, Object>>();
-        final String logFilePath = SingletonS2Container.getComponent(
-                SystemHelper.class).getLogFilePath();
+        final String logFilePath = ComponentUtil.getSystemHelper()
+                .getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             try {
                 final File file = new File(logFilePath);

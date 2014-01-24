@@ -37,6 +37,7 @@ import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
 import jp.sf.fess.service.DataCrawlingConfigService;
 import jp.sf.fess.service.FileCrawlingConfigService;
 import jp.sf.fess.service.WebCrawlingConfigService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.seasar.framework.container.SingletonS2Container;
@@ -135,8 +136,7 @@ public class CrawlingConfigHelper implements Serializable {
         if (logger.isDebugEnabled()) {
             logger.debug("writing the content of: " + doc);
         }
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Object configIdObj = doc.get(systemHelper.configIdField);
         if (configIdObj == null) {
             throw new FessSystemException("configId is null.");
@@ -215,8 +215,8 @@ public class CrawlingConfigHelper implements Serializable {
 
     protected void writeFileName(final HttpServletResponse response,
             final ResponseData responseData) {
-        final UserAgentHelper userAgentHelper = SingletonS2Container
-                .getComponent(UserAgentHelper.class);
+        final UserAgentHelper userAgentHelper = ComponentUtil
+                .getUserAgentHelper();
         final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
         String charset = responseData.getCharSet();
         if (charset == null) {

@@ -45,12 +45,12 @@ import jp.sf.fess.helper.OverlappingHostHelper;
 import jp.sf.fess.helper.PathMappingHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xpath.objects.XObject;
 import org.cyberneko.html.parsers.DOMParser;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.RobotCrawlAccessException;
@@ -208,21 +208,20 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             }
         }
 
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper
                 .getCanonicalSessionId(responseData.getSessionId());
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
-        final PathMappingHelper pathMappingHelper = SingletonS2Container
-                .getComponent("pathMappingHelper");
+        final PathMappingHelper pathMappingHelper = ComponentUtil
+                .getPathMappingHelper();
         final String url = pathMappingHelper.replaceUrl(sessionId,
                 responseData.getUrl());
-        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                .getComponent("crawlingConfigHelper");
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
+                .getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -290,8 +289,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
             labelTypeSet.add(labelType);
         }
-        final LabelTypeHelper labelTypeHelper = SingletonS2Container
-                .getComponent("labelTypeHelper");
+        final LabelTypeHelper labelTypeHelper = ComponentUtil
+                .getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
         putResultDataBody(dataMap, "label", labelTypeSet);
         // role: roleType
@@ -469,8 +468,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     protected String replaceOverlappingHost(final String url) {
         try {
             // remove overlapping host
-            final OverlappingHostHelper overlappingHostHelper = SingletonS2Container
-                    .getComponent("overlappingHostHelper");
+            final OverlappingHostHelper overlappingHostHelper = ComponentUtil
+                    .getOverlappingHostHelper();
             return overlappingHostHelper.convert(url);
         } catch (final Exception e) {
             return url;

@@ -34,6 +34,7 @@ import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.screenshot.ScreenShotManager;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.solr.lib.SolrGroup;
@@ -189,8 +190,8 @@ public class IndexUpdater extends Thread {
         int solrErrorCount = 0;
         int errorCount = 0;
         int emptyListCount = 0;
-        final IntervalControlHelper intervalControlHelper = SingletonS2Container
-                .getComponent("intervalControlHelper");
+        final IntervalControlHelper intervalControlHelper = ComponentUtil
+                .getIntervalControlHelper();
         try {
             while (!finishCrawling || !accessResultList.isEmpty()) {
                 try {
@@ -579,8 +580,8 @@ public class IndexUpdater extends Thread {
                         + unprocessedDocumentSize + ") "
                         + " unprocessed documents.");
             }
-            final IntervalControlHelper intervalControlHelper = SingletonS2Container
-                    .getComponent("intervalControlHelper");
+            final IntervalControlHelper intervalControlHelper = ComponentUtil
+                    .getIntervalControlHelper();
             intervalControlHelper.setCrawlerRunning(false);
         }
         return arList;

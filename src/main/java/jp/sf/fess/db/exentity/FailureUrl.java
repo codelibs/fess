@@ -20,9 +20,7 @@ import java.text.SimpleDateFormat;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsFailureUrl;
-import jp.sf.fess.helper.CrawlingConfigHelper;
-
-import org.seasar.framework.container.SingletonS2Container;
+import jp.sf.fess.util.ComponentUtil;
 
 /**
  * The entity of FAILURE_URL.
@@ -47,9 +45,8 @@ public class FailureUrl extends BsFailureUrl {
     }
 
     public String getWebConfigName() {
-        final CrawlingConfig crawlingConfig = SingletonS2Container
-                .getComponent(CrawlingConfigHelper.class).getCrawlingConfig(
-                        getConfigId());
+        final CrawlingConfig crawlingConfig = ComponentUtil
+                .getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
@@ -57,9 +54,8 @@ public class FailureUrl extends BsFailureUrl {
     }
 
     public String getFileConfigName() {
-        final CrawlingConfig crawlingConfig = SingletonS2Container
-                .getComponent(CrawlingConfigHelper.class).getCrawlingConfig(
-                        getConfigId());
+        final CrawlingConfig crawlingConfig = ComponentUtil
+                .getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
@@ -67,9 +63,8 @@ public class FailureUrl extends BsFailureUrl {
     }
 
     public String getDataConfigName() {
-        final CrawlingConfig crawlingConfig = SingletonS2Container
-                .getComponent(CrawlingConfigHelper.class).getCrawlingConfig(
-                        getConfigId());
+        final CrawlingConfig crawlingConfig = ComponentUtil
+                .getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }

@@ -67,6 +67,7 @@ import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.FavoriteLogService;
 import jp.sf.fess.service.SearchService;
 import jp.sf.fess.suggest.Suggester;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.QueryResponseList;
@@ -79,7 +80,6 @@ import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
 import org.seasar.framework.util.InputStreamUtil;
@@ -309,8 +309,8 @@ public class IndexAction {
                 Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
             final String userSessionId = userInfoHelper.getUserCode();
             if (userSessionId != null) {
-                final SearchLogHelper searchLogHelper = SingletonS2Container
-                        .getComponent(SearchLogHelper.class);
+                final SearchLogHelper searchLogHelper = ComponentUtil
+                        .getSearchLogHelper();
                 final ClickLog clickLog = new ClickLog();
                 clickLog.setUrl(url);
                 clickLog.setRequestedTime(new Timestamp(System
@@ -325,8 +325,8 @@ public class IndexAction {
         if (isFileSystemPath(url)) {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(
                     Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
-                final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                        .getComponent(CrawlingConfigHelper.class);
+                final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
+                        .getCrawlingConfigHelper();
                 try {
                     crawlingConfigHelper.writeContent(doc);
                     return null;
@@ -575,8 +575,8 @@ public class IndexAction {
         }
 
         try {
-            final HotSearchWordHelper hotSearchWordHelper = SingletonS2Container
-                    .getComponent(HotSearchWordHelper.class);
+            final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
+                    .getHotSearchWordHelper();
             final List<String> hotSearchWordList = hotSearchWordHelper
                     .getHotSearchWordList(range);
             WebApiUtil.setObject("hotSearchWordList", hotSearchWordList);
@@ -635,8 +635,8 @@ public class IndexAction {
                 return null;
             }
 
-            final DocumentHelper documentHelper = SingletonS2Container
-                    .getComponent("documentHelper");
+            final DocumentHelper documentHelper = ComponentUtil
+                    .getDocumentHelper();
             final Object count = doc.get(systemHelper.favoriteCountField);
             if (count instanceof Long) {
                 documentHelper.update(indexForm.docId,
@@ -840,8 +840,8 @@ public class IndexAction {
         if (searchLogSupport) {
             final Timestamp now = new Timestamp(rt);
 
-            final SearchLogHelper searchLogHelper = SingletonS2Container
-                    .getComponent(SearchLogHelper.class);
+            final SearchLogHelper searchLogHelper = ComponentUtil
+                    .getSearchLogHelper();
             final SearchLog searchLog = new SearchLog();
 
             String userCode = null;

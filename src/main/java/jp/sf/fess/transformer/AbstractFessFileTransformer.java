@@ -39,6 +39,7 @@ import jp.sf.fess.helper.PathMappingHelper;
 import jp.sf.fess.helper.SambaHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -166,28 +167,26 @@ public abstract class AbstractFessFileTransformer extends
         final ResultData resultData = new ResultData();
         resultData.setTransformerName(getName());
 
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper
                 .getCanonicalSessionId(responseData.getSessionId());
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
-        final PathMappingHelper pathMappingHelper = SingletonS2Container
-                .getComponent("pathMappingHelper");
+        final PathMappingHelper pathMappingHelper = ComponentUtil
+                .getPathMappingHelper();
         final String url = pathMappingHelper.replaceUrl(sessionId,
                 responseData.getUrl());
-        final SambaHelper sambaHelper = SingletonS2Container
-                .getComponent("sambaHelper");
-        final DynamicProperties crawlerProperties = SingletonS2Container
-                .getComponent("crawlerProperties");
+        final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+        final DynamicProperties crawlerProperties = ComponentUtil
+                .getCrawlerProperties();
         final boolean useAclAsRole = crawlerProperties.getProperty(
                 Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                 Constants.TRUE);
-        final CrawlingConfigHelper crawlingConfigHelper = SingletonS2Container
-                .getComponent("crawlingConfigHelper");
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
+                .getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -286,8 +285,8 @@ public abstract class AbstractFessFileTransformer extends
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
             labelTypeSet.add(labelType);
         }
-        final LabelTypeHelper labelTypeHelper = SingletonS2Container
-                .getComponent("labelTypeHelper");
+        final LabelTypeHelper labelTypeHelper = ComponentUtil
+                .getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
         putResultDataBody(dataMap, "label", labelTypeSet);
         // role: roleType

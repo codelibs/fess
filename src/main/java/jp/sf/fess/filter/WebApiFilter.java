@@ -29,8 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import jp.sf.fess.api.WebApiManager;
 import jp.sf.fess.api.WebApiManagerFactory;
-
-import org.seasar.framework.container.SingletonS2Container;
+import jp.sf.fess.util.ComponentUtil;
 
 public class WebApiFilter implements Filter {
 
@@ -48,8 +47,8 @@ public class WebApiFilter implements Filter {
     public void doFilter(final ServletRequest request,
             final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
-        final WebApiManagerFactory webApiManagerFactory = SingletonS2Container
-                .getComponent(WebApiManagerFactory.class);
+        final WebApiManagerFactory webApiManagerFactory = ComponentUtil
+                .getWebApiManagerFactory();
         final WebApiManager webApiManager = webApiManagerFactory
                 .get((HttpServletRequest) request);
         if (webApiManager == null) {

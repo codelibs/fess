@@ -17,8 +17,8 @@
 package jp.sf.fess.job;
 
 import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +28,8 @@ public class MinutelyJob {
             .getLogger(MinutelyJob.class);
 
     public String execute() {
-        final SearchLogHelper searchLogHelper = SingletonS2Container
-                .getComponent(SearchLogHelper.class);
+        final SearchLogHelper searchLogHelper = ComponentUtil
+                .getSearchLogHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 

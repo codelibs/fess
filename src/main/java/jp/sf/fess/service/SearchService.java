@@ -40,6 +40,7 @@ import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.solr.FessSolrQueryException;
 import jp.sf.fess.suggest.SuggestConstants;
 import jp.sf.fess.suggest.Suggester;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.QueryResponseList;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -50,7 +51,6 @@ import org.apache.solr.common.util.NamedList;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.StringUtil;
 
 public class SearchService implements Serializable {
@@ -267,8 +267,8 @@ public class SearchService implements Serializable {
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
-        final QueryResponseList queryResponseList = SingletonS2Container
-                .getComponent(QueryResponseList.class);
+        final QueryResponseList queryResponseList = ComponentUtil
+                .getQueryResponseList();
         queryResponseList.init(queryResponse, rows);
         queryResponseList.setSearchQuery(q);
         queryResponseList.setSolrQuery(solrQuery.toString());

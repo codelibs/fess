@@ -33,9 +33,9 @@ import javax.servlet.http.HttpSession;
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.FileUtils;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.LruHashMap;
@@ -90,8 +90,7 @@ public class ScreenShotManager {
     }
 
     public void generate(final Map<String, Object> docMap) {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         for (final ScreenShotGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
                 final String segment = (String) docMap.get("segment");
@@ -107,8 +106,7 @@ public class ScreenShotManager {
 
     public void storeRequest(final String queryId,
             final List<Map<String, Object>> documentItems) {
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Map<String, String> dataMap = new HashMap<String, String>(
                 documentItems.size());
         for (final Map<String, Object> docMap : documentItems) {

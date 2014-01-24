@@ -29,8 +29,8 @@ import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.OgnlUtil;
 import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
@@ -58,11 +58,10 @@ public abstract class AbstractDataStoreImpl implements DataStore {
                 .getHandlerParameterMap();
         final Map<String, String> configScriptMap = config
                 .getHandlerScriptMap();
-        final CrawlingSessionHelper crawlingSessionHelper = SingletonS2Container
-                .getComponent("crawlingSessionHelper");
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
+                .getCrawlingSessionHelper();
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
-        final SystemHelper systemHelper = SingletonS2Container
-                .getComponent("systemHelper");
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         initParamMap.putAll(configParamMap);
         final Map<String, String> paramMap = initParamMap;
