@@ -152,7 +152,8 @@ $(function(){
             '-webkit-box-shadow': '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
             '-moz-box-shadow': '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
             'box-shadow': '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
-            'background-color': '#fff'
+            'background-color': '#fff',
+            'z-index': '10000'
         },
         listSelectedCssInfo: {
             'background-color': 'rgba(82, 168, 236, 0.1)'
