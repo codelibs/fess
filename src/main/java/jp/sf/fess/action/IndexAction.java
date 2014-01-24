@@ -195,6 +195,8 @@ public class IndexAction {
 
     protected String pagingQuery = null;
 
+    public boolean searchLogSupport;
+
     public boolean favoriteSupport;
 
     public boolean screenShotSupport;
@@ -274,8 +276,8 @@ public class IndexAction {
         }
 
         updateSearchParams();
-        doSearchInternal();
         buildViewParams();
+        doSearchInternal();
 
         return "search.jsp";
     }
@@ -777,18 +779,7 @@ public class IndexAction {
             }
         }
         if (StringUtil.isBlank(indexForm.num)) {
-            if (viewHelper.isUseSession()) {
-                final HttpSession session = request.getSession(false);
-                if (session != null) {
-                    final Object resultsPerPage = session
-                            .getAttribute(Constants.RESULTS_PER_PAGE);
-                    if (resultsPerPage != null) {
-                        indexForm.num = resultsPerPage.toString();
-                    }
-                }
-            } else {
-                indexForm.num = String.valueOf(getDefaultPageSize());
-            }
+            indexForm.num = String.valueOf(getDefaultPageSize());
         }
         normalizePageNum();
 
@@ -835,8 +826,6 @@ public class IndexAction {
         indexForm.rt = Long.toString(rt);
 
         // favorite
-        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
         if (favoriteSupport || screenShotManager != null) {
             indexForm.queryId = userInfoHelper.generateQueryId(query,
                     documentItems);
@@ -848,8 +837,7 @@ public class IndexAction {
         }
 
         // search log
-        if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
+        if (searchLogSupport) {
             final Timestamp now = new Timestamp(rt);
 
             final SearchLogHelper searchLogHelper = SingletonS2Container
@@ -1059,6 +1047,12 @@ public class IndexAction {
                 }
             }
         }
+
+        searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
+                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
+                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
+
     }
 
     protected void buildInitParams() {

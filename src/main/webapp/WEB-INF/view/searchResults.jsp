@@ -41,29 +41,33 @@
 						</div>
 						<div class="info">
 							<c:if test="${doc.created!=null && doc.created!=''}">
+								<c:set var="hasInfo" value="true"/>
 								<bean:message key="labels.search_result_created" />
 								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
-								<span class="br-phone"></span>
-								<span class="hidden-phone">-</span>
 							</c:if>
 							<c:if test="${doc.lastModified!=null && doc.lastModified!=''}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<bean:message key="labels.search_result_lastModified" />
 								<fmt:formatDate value="${fe:parseDate(doc.lastModified)}" type="BOTH" />
-								<span class="br-phone"></span>
-								<span class="br-tablet"></span>
-								<span class="hidden-phone hidden-tablet">-</span>
 							</c:if>
 							<c:if test="${doc.contentLength!=null && doc.contentLength!=''}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<bean:message key="labels.search_result_size"
 									arg0="${f:h(doc.contentLength)}" />
-								<span class="br-phone"></span>
-								<span class="hidden-phone">-</span>
+							</c:if>
+							<c:if test="${searchLogSupport}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
+								<bean:message key="labels.search_click_count"
+									arg0="${f:h(doc.clickCount_l_x_dv)}" />
 							</c:if>
 							<c:if test="${favoriteSupport}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<a href="#${doc.docId}" class="favorite"><bean:message
-										key="labels.search_result_favorite" /></a>
+										key="labels.search_result_favorite"
+										arg0="${f:h(doc.favoriteCount_l_x_dv)}" /></a>
 								<span class="favorited"><bean:message
-										key="labels.search_result_favorited" /></span>
+										key="labels.search_result_favorited"
+										arg0="${f:h(doc.favoriteCount_l_x_dv)}" /></span>
 							</c:if>
 						</div>
 					</div>

@@ -259,7 +259,7 @@ public class SearchService implements Serializable {
 
             if (docValuesFields != null) {
                 for (final String docValuesField : docValuesFields) {
-                    solrQuery.setParam(Constants.DCF, docValuesField);
+                    solrQuery.add(Constants.DCF, docValuesField);
                 }
             }
 

@@ -81,6 +81,23 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 							<html:option value="lastModified.desc">
 								<bean:message key="labels.search_result_sort_lastModified_desc" />
 							</html:option>
+							<c:if test="${searchLogSupport}">
+							<html:option value="clickCount_l_x_dv.asc">
+								<bean:message key="labels.search_result_sort_clickCount_asc" />
+							</html:option>
+							<html:option value="clickCount_l_x_dv.desc">
+								<bean:message key="labels.search_result_sort_clickCount_desc" />
+							</html:option>
+							</c:if>
+							<c:if test="${favoriteSupport}">
+							<html:option value="favoriteCount_l_x_dv.asc">
+								<bean:message key="labels.search_result_sort_favoriteCount_asc" />
+							</html:option>
+							<html:option value="favoriteCount_l_x_dv.desc">
+								<bean:message
+									key="labels.search_result_sort_favoriteCount_desc" />
+							</html:option>
+							</c:if>
 						</html:select>
 					</div>
 				</div>
