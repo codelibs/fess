@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import jp.sf.fess.dict.synonym.SynonymFile;
-
 import org.seasar.extension.timer.TimeoutManager;
 import org.seasar.extension.timer.TimeoutTarget;
 import org.seasar.extension.timer.TimeoutTask;
@@ -70,7 +68,10 @@ public class DictionaryManager {
 
         final Collection<DictionaryFile<? extends DictionaryItem>> values = fileMap
                 .values();
-        return values.toArray(new SynonymFile[values.size()]);
+        @SuppressWarnings("unchecked")
+        final DictionaryFile<? extends DictionaryItem>[] list = new DictionaryFile[values
+                .size()];
+        return values.toArray(list);
     }
 
     public DictionaryFile<? extends DictionaryItem> getDictionaryFile(

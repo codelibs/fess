@@ -117,7 +117,15 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
     @Override
     public synchronized void update(final SynonymItem item) {
-        reload(new SynonymUpdater(file, item));
+        SynonymUpdater updater = null;
+        try {
+            updater = new SynonymUpdater(file, item);
+            reload(updater);
+        } finally {
+            if (updater != null) {
+                updater.close();
+            }
+        }
     }
 
     @Override
@@ -125,7 +133,15 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         final SynonymItem synonymItem = item;
         synonymItem.setNewInputs(new String[0]);
         synonymItem.setNewOutputs(new String[0]);
-        reload(new SynonymUpdater(file, synonymItem));
+        SynonymUpdater updater = null;
+        try {
+            updater = new SynonymUpdater(file, synonymItem);
+            reload(updater);
+        } finally {
+            if (updater != null) {
+                updater.close();
+            }
+        }
     }
 
     protected void reload(final SynonymUpdater updater) {
@@ -213,9 +229,6 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                     + file.getAbsolutePath(), e);
         } finally {
             IOUtils.closeQuietly(reader);
-            if (updater != null) {
-                updater.close();
-            }
         }
     }
 
