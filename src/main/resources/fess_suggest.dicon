@@ -114,13 +114,14 @@
 	</component>
 
 	<!-- Solr Server Configuration -->
-	<component name="suggestInterceptor" class="org.codelibs.solr.lib.server.interceptor.PreemptiveAuthInterceptor">
+	<component name="suggestInterceptor" class="org.codelibs.solr.lib.server.interceptor.PreemptiveAuthInterceptor"
+		autoBinding="none">
 	</component>
 	<component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
 		<arg>"solradmin"</arg><!-- Username -->
 		<arg>"solradmin"</arg><!-- Password -->
 	</component>
-	<component name="suggestHttpClient" class="org.apache.http.impl.client.DefaultHttpClient">
+	<component name="suggestHttpClient" class="org.apache.http.impl.client.DefaultHttpClient" autoBinding="none">
 		<arg>clientConnectionManager</arg>
 	</component>
 	<component name="suggestSolrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer">

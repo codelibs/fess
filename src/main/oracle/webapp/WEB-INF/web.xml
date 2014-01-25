@@ -42,6 +42,10 @@
       <param-name>encoding</param-name>
       <param-value>UTF-8</param-value>
     </init-param>
+    <init-param>
+      <param-name>mobylet.logger.class</param-name>
+      <param-value>jp.sf.fess.log.MobyletLoggerImpl</param-value>
+    </init-param>
   </filter>
 
   <filter>
