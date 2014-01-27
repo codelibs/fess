@@ -51,7 +51,7 @@
 
 	<component name="suggestSolrGroup" class="org.codelibs.solr.lib.SolrGroup">
 		<!-- Note: groupName cannot include ".". -->
-		<property name="groupName">"suggestSolrServer"</property>
+		<property name="groupName">"suggestSolrGroup"</property>
 		<property name="statusPolicy">
 			<component class="jp.sf.fess.solr.policy.FessStatusPolicy">
 				<property name="solrGroupProperties">suggestSolrGroupProperties</property>

@@ -18,6 +18,7 @@ package jp.sf.fess.action.admin;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,9 @@ public class SystemAction implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
+    protected SolrGroup suggestSolrGroup;
+
+    @Resource
     protected WebManagementHelper webManagementHelper;
 
     @Resource
@@ -92,9 +96,24 @@ public class SystemAction implements Serializable {
                 groupPropMap.put(groupName, props);
             }
         }
+        final DynamicProperties suggestProps = ComponentUtil
+                .getSolrGroupProperties(suggestSolrGroup.getGroupName());
+        if (suggestProps != null) {
+            groupPropMap.put(suggestSolrGroup.getGroupName(), suggestProps);
+        }
 
         final String[] serverNames = solrGroupManager.getSolrServerNames();
-        for (final String name : serverNames) {
+        final String[] suggestServerNames = suggestSolrGroup.getServerNames();
+        for (int i = 0; i < suggestServerNames.length; i++) {
+            if (StringUtil.isNotBlank(suggestServerNames[i])) {
+                suggestServerNames[i] = suggestSolrGroup.getGroupName() + ":"
+                        + suggestServerNames[i];
+            }
+        }
+        final List<String> serverNameList = new ArrayList<String>();
+        serverNameList.addAll(Arrays.asList(serverNames));
+        serverNameList.addAll(Arrays.asList(suggestServerNames));
+        for (final String name : serverNameList) {
             final String[] names = name.split(":");
             if (names.length == 2) {
                 final Map<String, String> map = new HashMap<String, String>(4);
@@ -171,6 +190,11 @@ public class SystemAction implements Serializable {
             if (props != null) {
                 groupPropMap.put(groupName, props);
             }
+        }
+        final DynamicProperties suggestProps = ComponentUtil
+                .getSolrGroupProperties(suggestSolrGroup.getGroupName());
+        if (suggestProps != null) {
+            groupPropMap.put(suggestSolrGroup.getGroupName(), suggestProps);
         }
 
         try {

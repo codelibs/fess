@@ -61,7 +61,7 @@ public class SearchService implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
-    SolrGroup suggestSolrGroup;
+    protected SolrGroup suggestSolrGroup;
 
     @Resource
     protected QueryHelper queryHelper;
