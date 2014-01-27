@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
@@ -46,10 +47,13 @@ import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SystemAction implements Serializable {
+    private static final String STARTING_CRAWL_PROCESS = "startingCrawlProcess";
+
     private static final Logger logger = LoggerFactory
             .getLogger(SystemAction.class);
 
@@ -76,8 +80,6 @@ public class SystemAction implements Serializable {
 
     @Resource
     protected ScheduledJobService scheduledJobService;
-
-    private boolean executed = false;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("system");
@@ -230,7 +232,8 @@ public class SystemAction implements Serializable {
                     scheduledJob.start();
                 }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
-                executed = true;
+                RequestUtil.getRequest().getSession()
+                        .setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
             } else {
                 SAStrutsUtil
                         .addSessionMessage("success.failed_to_start_crawl_process");
@@ -320,7 +323,15 @@ public class SystemAction implements Serializable {
     }
 
     public boolean isCrawlerRunning() {
-        return executed || jobHelper.isCrawlProcessRunning();
+        final HttpSession session = RequestUtil.getRequest().getSession(false);
+        if (session != null) {
+            final Object obj = session.getAttribute(STARTING_CRAWL_PROCESS);
+            if (obj != null) {
+                session.removeAttribute(STARTING_CRAWL_PROCESS);
+                return true;
+            }
+        }
+        return jobHelper.isCrawlProcessRunning();
     }
 
     public String[] getRunningSessionIds() {
