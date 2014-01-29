@@ -1028,11 +1028,24 @@ public class IndexAction {
 
         if (!labelTypeItems.isEmpty()
                 && !indexForm.fields.containsKey(LABEL_FIELD)) {
-            final String[] values = crawlerProperties.getProperty(
+            final String defaultLabelValue = crawlerProperties.getProperty(
                     Constants.DEFAULT_LABEL_VALUE_PROPERTY,
-                    Constants.EMPTY_STRING).split("\n");
-            if (values != null && values.length > 0) {
-                indexForm.fields.put(LABEL_FIELD, values);
+                    Constants.EMPTY_STRING);
+            if (StringUtil.isNotBlank(defaultLabelValue)) {
+                final String[] values = defaultLabelValue.split("\n");
+                if (values != null && values.length > 0) {
+                    final List<String> list = new ArrayList<String>(
+                            values.length);
+                    for (final String value : values) {
+                        if (StringUtil.isNotBlank(value)) {
+                            list.add(value);
+                        }
+                    }
+                    if (!list.isEmpty()) {
+                        indexForm.fields.put(LABEL_FIELD,
+                                list.toArray(new String[list.size()]));
+                    }
+                }
             }
         }
 
