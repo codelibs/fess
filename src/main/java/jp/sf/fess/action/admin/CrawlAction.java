@@ -85,10 +85,6 @@ public class CrawlAction implements Serializable {
                 Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
         crawlForm.webApiJson = crawlerProperties.getProperty(
                 Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
-        crawlForm.webApiSuggest = crawlerProperties.getProperty(
-                Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE);
-        crawlForm.webApiAnalysis = crawlerProperties.getProperty(
-                Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE);
         crawlForm.defaultLabelValue = crawlerProperties.getProperty(
                 Constants.DEFAULT_LABEL_VALUE_PROPERTY, "");
         crawlForm.appendQueryParameter = crawlerProperties.getProperty(
@@ -199,20 +195,6 @@ public class CrawlAction implements Serializable {
                         crawlForm.webApiJson != null
                                 && Constants.ON
                                         .equalsIgnoreCase(crawlForm.webApiJson) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.WEB_API_SUGGEST_PROPERTY,
-                        crawlForm.webApiSuggest != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.webApiSuggest) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.WEB_API_ANALYSIS_PROPERTY,
-                        crawlForm.webApiAnalysis != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.webApiAnalysis) ? Constants.TRUE
                                 : Constants.FALSE);
         crawlerProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY,
                 crawlForm.defaultLabelValue);

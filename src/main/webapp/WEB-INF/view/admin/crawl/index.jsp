@@ -71,22 +71,6 @@
 				</tr>
 				<tr>
 					<th>
-						<bean:message key="labels.web_api_suggest_enabled"/>
-					</th>
-					<td>
-						<html:checkbox property="webApiSuggest"/><bean:message key="labels.enabled"/>
-					</td>
-				</tr>
-				<tr>
-					<th>
-						<bean:message key="labels.web_api_analysis_enabled"/>
-					</th>
-					<td>
-						<html:checkbox property="webApiAnalysis"/><bean:message key="labels.enabled"/>
-					</td>
-				</tr>
-				<tr>
-					<th>
 						<bean:message key="labels.mobile_transcoder"/>
 					</th>
 					<td>

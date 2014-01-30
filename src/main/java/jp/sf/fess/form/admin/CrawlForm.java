@@ -66,12 +66,6 @@ public class CrawlForm implements Serializable {
     @Maxbytelength(maxbytelength = 10)
     public String webApiJson;
 
-    @Maxbytelength(maxbytelength = 10)
-    public String webApiSuggest;
-
-    @Maxbytelength(maxbytelength = 10)
-    public String webApiAnalysis;
-
     @Maxbytelength(maxbytelength = 1000)
     public String defaultLabelValue;
 
