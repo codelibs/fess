@@ -32,7 +32,7 @@
 	<component name="indexUpdater" class="jp.sf.fess.solr.IndexUpdater"
 		instance="prototype">
 		<!-- 
-		<property name="maxDocumentCacheSize">10</property>
+		<property name="maxDocumentCacheSize">5</property>
 		<property name="unprocessedDocumentSize">100</property>
 		<property name="threadDump">false</property>
 		<initMethod name="addBoostDocumentRule">

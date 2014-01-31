@@ -94,7 +94,7 @@ public class IndexUpdater extends Thread {
     @Resource
     protected ScreenShotManager screenShotManager;
 
-    public int maxDocumentCacheSize = 10;
+    public int maxDocumentCacheSize = 5;
 
     protected boolean finishCrawling = false;
 
