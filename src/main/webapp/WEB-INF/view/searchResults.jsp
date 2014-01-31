@@ -63,11 +63,9 @@
 							<c:if test="${favoriteSupport}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<a href="#${doc.docId}" class="favorite"><bean:message
-										key="labels.search_result_favorite"
-										arg0="${f:h(doc.favoriteCount_l_x_dv)}" /></a>
+										key="labels.search_result_favorite" /> (${f:h(doc.favoriteCount_l_x_dv)})</a>
 								<span class="favorited"><bean:message
-										key="labels.search_result_favorited"
-										arg0="${f:h(doc.favoriteCount_l_x_dv)}" /></span>
+										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favoriteCount_l_x_dv)})</span></span>
 							</c:if>
 						</div>
 					</div>

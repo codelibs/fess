@@ -76,6 +76,8 @@ $(function(){
 					&& typeof data.response.result !== 'undefined'
 					&& data.response.result === 'ok'){
 					var $favorited = $favorite.siblings('.favorited');
+					var $favoritedCount = $('.favorited-count', $favorited);
+					$favoritedCount.css('display', 'none');
 					$favorite.fadeOut(1000, function(){$favorited.fadeIn(1000)});
 				}
 			}).fail(function ( data ) {
