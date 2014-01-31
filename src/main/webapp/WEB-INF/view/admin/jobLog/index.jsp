@@ -69,6 +69,26 @@
 						</c:forEach>
 					</tbody>
 				</table>
+
+				<div class="span12 center">
+<script>
+<!--
+function confirmToDeleteAll() {
+	if (confirm('<bean:message key="labels.joblog_delete_all_confirmation"/>')) {
+		return true;
+	} else {
+		return false;
+	}
+}
+// -->
+</script>
+					<s:link href="deleteall" onclick="return confirmToDeleteAll();"
+						styleClass="btn">
+						<bean:message key="labels.joblog_delete_all_link" />
+					</s:link>
+				</div>
+
+
 				<%-- Page Navigation: BEGIN --%>
 				<div class="row center">
 					<div class="pagination">

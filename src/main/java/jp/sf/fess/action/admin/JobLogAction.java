@@ -16,10 +16,17 @@
 
 package jp.sf.fess.action.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Resource;
 
+import jp.sf.fess.Constants;
 import jp.sf.fess.crud.action.admin.BsJobLogAction;
+import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.helper.SystemHelper;
+
+import org.seasar.struts.annotation.Execute;
 
 public class JobLogAction extends BsJobLogAction {
 
@@ -30,5 +37,15 @@ public class JobLogAction extends BsJobLogAction {
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("jobLog");
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String deleteall() {
+        final List<String> jobStatusList = new ArrayList<String>();
+        jobStatusList.add(Constants.OK);
+        jobStatusList.add(Constants.FAIL);
+        jobLogService.deleteByJobStatus(jobStatusList);
+        SAStrutsUtil.addSessionMessage("success.joblog_delete_all");
+        return displayList(true);
     }
 }

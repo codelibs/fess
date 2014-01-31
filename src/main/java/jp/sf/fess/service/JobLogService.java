@@ -18,6 +18,7 @@ package jp.sf.fess.service;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Map;
 
 import jp.sf.fess.crud.service.BsJobLogService;
@@ -74,6 +75,13 @@ public class JobLogService extends BsJobLogService implements Serializable {
                 - days * 24L * 60L * 60L * 1000L);
         final JobLogCB cb = new JobLogCB();
         cb.query().setEndTime_LessThan(targetTime);
+        jobLogBhv.varyingQueryDelete(cb,
+                new DeleteOption<JobLogCB>().allowNonQueryDelete());
+    }
+
+    public void deleteByJobStatus(final List<String> jobStatusList) {
+        final JobLogCB cb = new JobLogCB();
+        cb.query().setJobStatus_InScope(jobStatusList);
         jobLogBhv.varyingQueryDelete(cb,
                 new DeleteOption<JobLogCB>().allowNonQueryDelete());
     }
