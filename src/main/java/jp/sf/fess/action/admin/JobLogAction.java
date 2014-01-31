@@ -16,10 +16,19 @@
 
 package jp.sf.fess.action.admin;
 
+import javax.annotation.Resource;
+
 import jp.sf.fess.crud.action.admin.BsJobLogAction;
+import jp.sf.fess.helper.SystemHelper;
 
 public class JobLogAction extends BsJobLogAction {
 
     private static final long serialVersionUID = 1L;
 
+    @Resource
+    protected SystemHelper systemHelper;
+
+    public String getHelpLink() {
+        return systemHelper.getHelpLink("jobLog");
+    }
 }
