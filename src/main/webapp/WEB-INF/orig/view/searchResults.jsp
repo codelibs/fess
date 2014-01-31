@@ -22,16 +22,14 @@
 	</div>
 </c:if>
 <div id="result" class="row content">
-	<input type="hidden" id="queryId" value="${f:u(queryId)}" /> <input
-		type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
+	<input type="hidden" id="queryId" value="${f:u(queryId)}" />
 	<input type="hidden" id="rt" value="${f:u(rt)}" />
 	<div class="span8">
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title">
-						<a href="${doc.urlLink}" class="link">
-							${f:h(doc.contentTitle)} </a>
+						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.docId}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
 						<div class="description">${doc.contentDescription}</div>
@@ -42,30 +40,32 @@
 							<a href="#result${s.index}"><bean:message key="labels.search_result_more" /></a>
 						</div>
 						<div class="info">
-							<c:if test="${doc.tstamp!=null && doc.tstamp!=''}">
-								<bean:message key="labels.search_result_tstamp" />
-								<fmt:formatDate value="${fe:parseDate(doc.tstamp)}" type="BOTH" />
-								<span class="br-phone"></span>
-								<span class="hidden-phone">-</span>
+							<c:if test="${doc.created!=null && doc.created!=''}">
+								<c:set var="hasInfo" value="true"/>
+								<bean:message key="labels.search_result_created" />
+								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
 							</c:if>
 							<c:if test="${doc.lastModified!=null && doc.lastModified!=''}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<bean:message key="labels.search_result_lastModified" />
 								<fmt:formatDate value="${fe:parseDate(doc.lastModified)}" type="BOTH" />
-								<span class="br-phone"></span>
-								<span class="br-tablet"></span>
-								<span class="hidden-phone hidden-tablet">-</span>
 							</c:if>
 							<c:if test="${doc.contentLength!=null && doc.contentLength!=''}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<bean:message key="labels.search_result_size"
 									arg0="${f:h(doc.contentLength)}" />
-								<span class="br-phone"></span>
-								<span class="hidden-phone">-</span>
+							</c:if>
+							<c:if test="${searchLogSupport}">
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
+								<bean:message key="labels.search_click_count"
+									arg0="${f:h(doc.clickCount_l_x_dv)}" />
 							</c:if>
 							<c:if test="${favoriteSupport}">
-								<a href="#${doc.url}" class="favorite"><bean:message
-										key="labels.search_result_favorite" /></a>
+								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
+								<a href="#${doc.docId}" class="favorite"><bean:message
+										key="labels.search_result_favorite" /> (${f:h(doc.favoriteCount_l_x_dv)})</a>
 								<span class="favorited"><bean:message
-										key="labels.search_result_favorited" /></span>
+										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favoriteCount_l_x_dv)})</span></span>
 							</c:if>
 						</div>
 					</div>
@@ -82,10 +82,10 @@
 			<div class="well span3">
 				<ul class="nav nav-list">
 					<c:forEach var="fieldData" items="${facetResponse.fieldList}">
-						<c:if test="${fieldData.name == 'label'}">
+						<c:if test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
 					<li class="nav-header"><bean:message key="label.facet_label_title" /></li>
 							<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
-								<c:if test="${countEntry.value != 0}">
+								<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 					<li><s:link
 							href="search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">
 							${f:h(fe:label(countEntry.key))} (${f:h(countEntry.value)})</s:link></li>

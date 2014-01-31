@@ -15,6 +15,9 @@ if("systemError".equals(type)) {
 } else if("logOut".equals(type)) {
 	redirectPage.append("/login/index?type=logout");
 	response.sendRedirect(redirectPage.toString());
+} else if("badRequest".equals(type)) {
+	redirectPage.append("/error/badRequest");
+	response.sendRedirect(redirectPage.toString());
 } else {
 	redirectPage.append("/error/notFound?url=");
 	redirectPage.append(java.net.URLEncoder.encode(requestUri , "UTF-8"));

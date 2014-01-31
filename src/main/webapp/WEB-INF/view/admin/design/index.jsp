@@ -101,12 +101,12 @@
 								<th>
 								<html:select property="fileName" style="width:300px;">
 									<html:option value="index"><bean:message key="labels.design_file_index" /></html:option>
-									<html:option value="footer"><bean:message key="labels.design_file_footer" /></html:option>
-									<html:option value="help"><bean:message key="labels.design_file_help" /></html:option>
 									<html:option value="header"><bean:message key="labels.design_file_header" /></html:option>
+									<html:option value="footer"><bean:message key="labels.design_file_footer" /></html:option>
 									<html:option value="search"><bean:message key="labels.design_file_search" /></html:option>
 									<html:option value="searchResults"><bean:message key="labels.design_file_searchResults" /></html:option>
 									<html:option value="searchNoResult"><bean:message key="labels.design_file_searchNoResult" /></html:option>
+									<html:option value="help"><bean:message key="labels.design_file_help" /></html:option>
 									<html:option value="error"><bean:message key="labels.design_file_error" /></html:option>
 									<%-- Mobile --%>
 									<html:option value="mobileIndex"><bean:message key="labels.design_file_mobileIndex" /></html:option>
@@ -126,6 +126,7 @@
 									<html:option value="errorNotFound"><bean:message key="labels.design_file_errorNotFound" /></html:option>
 									<html:option value="errorSystem"><bean:message key="labels.design_file_errorSystem" /></html:option>
 									<html:option value="errorRedirect"><bean:message key="labels.design_file_errorRedirect" /></html:option>
+									<html:option value="errorBadRequest"><bean:message key="labels.design_file_errorBadRequest" /></html:option>
 								</html:select>
 								</th>
 								<td style="text-align: center;">

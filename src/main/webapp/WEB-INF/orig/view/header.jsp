@@ -9,7 +9,7 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 						alt="<bean:message key="labels.header_brand_name" />" />
 				</s:link>
 				<div class="navbar-form pull-right">
-					<html:text property="query" maxlength="1000" styleId="query" />
+					<html:text property="query" maxlength="1000" styleId="query" autocomplete="off"/>
 					<button class="btn medium btn-primary" type="submit" name="search"
 						id="searchButton">
 						<i class="icon-search icon-white"></i><span class="hidden-phone"><bean:message
@@ -63,11 +63,11 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 							<option value="">
 								<bean:message key="labels.search_result_select_sort" />
 							</option>
-							<html:option value="tstamp.asc">
-								<bean:message key="labels.search_result_sort_tstamp_asc" />
+							<html:option value="created.asc">
+								<bean:message key="labels.search_result_sort_created_asc" />
 							</html:option>
-							<html:option value="tstamp.desc">
-								<bean:message key="labels.search_result_sort_tstamp_desc" />
+							<html:option value="created.desc">
+								<bean:message key="labels.search_result_sort_created_desc" />
 							</html:option>
 							<html:option value="contentLength.asc">
 								<bean:message key="labels.search_result_sort_contentLength_asc" />
@@ -81,6 +81,23 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 							<html:option value="lastModified.desc">
 								<bean:message key="labels.search_result_sort_lastModified_desc" />
 							</html:option>
+							<c:if test="${searchLogSupport}">
+							<html:option value="clickCount_l_x_dv.asc">
+								<bean:message key="labels.search_result_sort_clickCount_asc" />
+							</html:option>
+							<html:option value="clickCount_l_x_dv.desc">
+								<bean:message key="labels.search_result_sort_clickCount_desc" />
+							</html:option>
+							</c:if>
+							<c:if test="${favoriteSupport}">
+							<html:option value="favoriteCount_l_x_dv.asc">
+								<bean:message key="labels.search_result_sort_favoriteCount_asc" />
+							</html:option>
+							<html:option value="favoriteCount_l_x_dv.desc">
+								<bean:message
+									key="labels.search_result_sort_favoriteCount_desc" />
+							</html:option>
+							</c:if>
 						</html:select>
 					</div>
 				</div>

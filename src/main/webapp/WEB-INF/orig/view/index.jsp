@@ -52,7 +52,7 @@
 						<div class="clearfix">
 							<div class="input">
 								<html:text styleClass="query" property="query" size="50"
-									maxlength="1000" styleId="contentQuery" />
+									maxlength="1000" styleId="contentQuery" autocomplete="off" />
 							</div>
 						</div>
 						<c:if test="${fe:hswsize(null) != 0}">
@@ -115,11 +115,11 @@
 											<option value="">
 												<bean:message key="labels.search_result_select_sort" />
 											</option>
-											<html:option value="tstamp.asc">
-												<bean:message key="labels.search_result_sort_tstamp_asc" />
+											<html:option value="created.asc">
+												<bean:message key="labels.search_result_sort_created_asc" />
 											</html:option>
-											<html:option value="tstamp.desc">
-												<bean:message key="labels.search_result_sort_tstamp_desc" />
+											<html:option value="created.desc">
+												<bean:message key="labels.search_result_sort_created_desc" />
 											</html:option>
 											<html:option value="contentLength.asc">
 												<bean:message
@@ -137,6 +137,25 @@
 												<bean:message
 													key="labels.search_result_sort_lastModified_desc" />
 											</html:option>
+											<c:if test="${searchLogSupport}">
+											<html:option value="clickCount_l_x_dv.asc">
+												<bean:message
+													key="labels.search_result_sort_clickCount_asc" />
+											</html:option>
+											<html:option value="clickCount_l_x_dv.desc">
+												<bean:message
+													key="labels.search_result_sort_clickCount_desc" />
+											</html:option>
+											</c:if><c:if test="${favoriteSupport}">
+											<html:option value="favoriteCount_l_x_dv.asc">
+												<bean:message
+													key="labels.search_result_sort_favoriteCount_asc" />
+											</html:option>
+											<html:option value="favoriteCount_l_x_dv.desc">
+												<bean:message
+													key="labels.search_result_sort_favoriteCount_desc" />
+											</html:option>
+											</c:if>
 										</html:select>
 									</div>
 								</div>
@@ -174,9 +193,11 @@
 		</div>
 		<jsp:include page="footer.jsp" />
 	</div>
+	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-1.8.3.min.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/index.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/index.js')}"></script>
 </body>
 </html>

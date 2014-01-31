@@ -45,9 +45,11 @@
 		</c:choose>
 		<jsp:include page="footer.jsp" />
 	</div>
+	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-1.8.3.min.js')}"></script>
-	<script type="text/javascript" src="${f:url('/js/search.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/search.js')}"></script>
 </body>
 </html>

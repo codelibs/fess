@@ -81,6 +81,10 @@
 			<arg>"searchNoResult.jsp"</arg>
 		</initMethod>
 		<initMethod name="addDesignJspFileName">
+			<arg>"help"</arg>
+			<arg>"help.jsp"</arg>
+		</initMethod>
+		<initMethod name="addDesignJspFileName">
 			<arg>"error"</arg>
 			<arg>"error.jsp"</arg>
 		</initMethod>
@@ -145,8 +149,8 @@
 			<arg>"error/redirect.jsp"</arg>
 		</initMethod>
 		<initMethod name="addDesignJspFileName">
-			<arg>"help"</arg>
-			<arg>"help.jsp"</arg>
+			<arg>"errorBadRequest"</arg>
+			<arg>"error/badRequest.jsp"</arg>
 		</initMethod>
 	</component>
 	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
