@@ -69,6 +69,9 @@ public class DocumentAction implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
+    protected SolrGroup suggestSolrGroup;
+
+    @Resource
     protected WebManagementHelper webManagementHelper;
 
     @Resource
@@ -171,6 +174,15 @@ public class DocumentAction implements Serializable {
             throw new SSCActionMessagesException(
                     "errors.failed_to_commit_solr_index");
         } else {
+            final boolean isUpdateSolrGroup;
+            final SolrGroup updateSolrGroup = solrGroupManager
+                    .getSolrGroup(QueryType.ADD);
+            if (updateSolrGroup.getGroupName().equals(solrGroup.getGroupName())) {
+                isUpdateSolrGroup = true;
+            } else {
+                isUpdateSolrGroup = false;
+            }
+
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -178,9 +190,17 @@ public class DocumentAction implements Serializable {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
+                            if (isUpdateSolrGroup) {
+                                systemHelper.updateStatus(suggestSolrGroup,
+                                        QueryType.ADD);
+                            }
                             solrGroup.commit(true, true, false, true);
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.COMMIT);
+                            if (isUpdateSolrGroup) {
+                                systemHelper.updateStatus(suggestSolrGroup,
+                                        QueryType.COMMIT);
+                            }
 
                             if (logger.isInfoEnabled()) {
                                 logger.info("[EXEC TIME] index commit time: "
@@ -217,6 +237,15 @@ public class DocumentAction implements Serializable {
             throw new SSCActionMessagesException(
                     "errors.failed_to_optimize_solr_index");
         } else {
+            final boolean isUpdateSolrGroup;
+            final SolrGroup updateSolrGroup = solrGroupManager
+                    .getSolrGroup(QueryType.ADD);
+            if (updateSolrGroup.getGroupName().equals(solrGroup.getGroupName())) {
+                isUpdateSolrGroup = true;
+            } else {
+                isUpdateSolrGroup = false;
+            }
+
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -224,9 +253,17 @@ public class DocumentAction implements Serializable {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
+                            if (isUpdateSolrGroup) {
+                                systemHelper.updateStatus(suggestSolrGroup,
+                                        QueryType.ADD);
+                            }
                             solrGroup.optimize();
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.OPTIMIZE);
+                            if (isUpdateSolrGroup) {
+                                systemHelper.updateStatus(suggestSolrGroup,
+                                        QueryType.OPTIMIZE);
+                            }
                             if (logger.isInfoEnabled()) {
                                 logger.info("[EXEC TIME] index optimize time: "
                                         + (System.currentTimeMillis() - execTime)
