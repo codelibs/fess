@@ -35,8 +35,8 @@
 				<property name="query">new String[] {
 					"lastModified:[NOW/DAY-1DAY TO NOW]",
 					"lastModified:[NOW/DAY-7DAYS TO NOW]",
-					"lastModified:[NOW/MONTH-1MONTH TO NOW]",
-					"lastModified:[NOW/YEAR-1YEAR TO NOW]",
+					"lastModified:[NOW/DAY-1MONTH TO NOW]",
+					"lastModified:[NOW/DAY-1YEAR TO NOW]",
 					"contentLength:[0 TO 9999]",
 					"contentLength:[10000 TO 99999]",
 					"contentLength:[100000 TO 499999]",
@@ -125,11 +125,11 @@
 					</initMethod>
 					<initMethod name="addQuery">
 						<arg>"label.facet_lastModified_1month"</arg>
-						<arg>"lastModified:[NOW/MONTH-1MONTH TO NOW]"</arg>
+						<arg>"lastModified:[NOW/DAY-1MONTH TO NOW]"</arg>
 					</initMethod>
 					<initMethod name="addQuery">
 						<arg>"label.facet_lastModified_1year"</arg>
-						<arg>"lastModified:[NOW/YEAR-1YEAR TO NOW]"</arg>
+						<arg>"lastModified:[NOW/DAY-1YEAR TO NOW]"</arg>
 					</initMethod>
 				</component>
 			</arg>
