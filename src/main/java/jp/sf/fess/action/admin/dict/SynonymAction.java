@@ -27,6 +27,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
+import jp.sf.fess.dict.DictionaryExpiredException;
 import jp.sf.fess.dict.synonym.SynonymItem;
 import jp.sf.fess.form.admin.dict.SynonymForm;
 import jp.sf.fess.helper.SystemHelper;
@@ -223,6 +224,8 @@ public class SynonymAction {
             SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
 
             return displayList(true);
+        } catch (final DictionaryExpiredException e) {
+            throw e;
         } catch (final ActionMessagesException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -246,6 +249,8 @@ public class SynonymAction {
             SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
 
             return displayList(true);
+        } catch (final DictionaryExpiredException e) {
+            throw e;
         } catch (final ActionMessagesException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -285,6 +290,8 @@ public class SynonymAction {
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
+        } catch (final DictionaryExpiredException e) {
+            throw e;
         } catch (final ActionMessagesException e) {
             log.error(e.getMessage(), e);
             throw e;

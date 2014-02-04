@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import jp.sf.fess.crud.CommonConstants;
+import jp.sf.fess.dict.DictionaryExpiredException;
 import jp.sf.fess.dict.DictionaryFile;
 import jp.sf.fess.dict.DictionaryFile.PagingList;
 import jp.sf.fess.dict.DictionaryManager;
@@ -31,7 +32,6 @@ import jp.sf.fess.pager.UserDictPager;
 
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.util.StringUtil;
-import org.seasar.struts.exception.ActionMessagesException;
 
 public class UserDictService {
     @Resource
@@ -42,8 +42,9 @@ public class UserDictService {
         final UserDictFile userDictFile = getUserDictFile(dictId);
 
         final int pageSize = userDictPager.getPageSize();
-        final PagingList<UserDictItem> userDictList = userDictFile.selectList(
-                (userDictPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+        final PagingList<UserDictItem> userDictList = userDictFile
+                .selectList((userDictPager.getCurrentPageNumber() - 1)
+                        * pageSize, pageSize);
 
         // update pager
         Beans.copy(userDictList, userDictPager)
@@ -61,7 +62,7 @@ public class UserDictService {
         if (dictionaryFile instanceof UserDictFile) {
             return (UserDictFile) dictionaryFile;
         }
-        throw new ActionMessagesException("errors.expired_dict_id");
+        throw new DictionaryExpiredException();
     }
 
     public UserDictItem getUserDict(final String dictId,

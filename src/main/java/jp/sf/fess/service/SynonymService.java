@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import jp.sf.fess.crud.CommonConstants;
+import jp.sf.fess.dict.DictionaryExpiredException;
 import jp.sf.fess.dict.DictionaryFile;
 import jp.sf.fess.dict.DictionaryFile.PagingList;
 import jp.sf.fess.dict.DictionaryManager;
@@ -31,7 +32,6 @@ import jp.sf.fess.pager.SynonymPager;
 
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.util.StringUtil;
-import org.seasar.struts.exception.ActionMessagesException;
 
 public class SynonymService {
     @Resource
@@ -61,7 +61,7 @@ public class SynonymService {
         if (dictionaryFile instanceof SynonymFile) {
             return (SynonymFile) dictionaryFile;
         }
-        throw new ActionMessagesException("errors.expired_dict_id");
+        throw new DictionaryExpiredException();
     }
 
     public SynonymItem getSynonym(final String dictId,
