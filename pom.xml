@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>jp.sf.fess</groupId>
   <artifactId>fess</artifactId>
-  <version>9.0.0</version>
+  <version>9.1.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Fess</name>
   <description>Fess is Full tExt Search System.</description>
