@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>jp.sf.fess</groupId>
   <artifactId>fess</artifactId>
-  <version>9.0.0-SNAPSHOT</version>
+  <version>9.0.0</version>
   <packaging>war</packaging>
   <name>Fess</name>
   <description>Fess is Full tExt Search System.</description>
@@ -74,7 +74,7 @@
         <databaseUrl>jdbc:h2:file:${basedir}/src/main/webapp/WEB-INF/db/fess</databaseUrl>
         <databaseTestUrl>jdbc:h2:file:${basedir}/target/test-classes/db/fess</databaseTestUrl>
         <databaseUsername>sa</databaseUsername>
-        <databasePassword/>
+        <databasePassword />
       </properties>
     </profile>
     <profile>
@@ -188,7 +188,7 @@
             <phase>initialize</phase>
             <configuration>
               <tasks>
-                <delete dir="${basedir}/src/main/webapp/WEB-INF/lib"/>
+                <delete dir="${basedir}/src/main/webapp/WEB-INF/lib" />
               </tasks>
             </configuration>
             <goals>
@@ -200,7 +200,7 @@
             <phase>test-compile</phase>
             <configuration>
               <tasks>
-                <mkdir dir="${basedir}/target/test-classes/db"/>
+                <mkdir dir="${basedir}/target/test-classes/db" />
               </tasks>
             </configuration>
             <goals>
