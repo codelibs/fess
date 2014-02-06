@@ -1,0 +1,62 @@
+ ------------------
+ スクリーンショット
+ ------------------
+ Shinsuke Sugaya
+ ------------------
+ 2009-11-05
+ ------------------
+
+一覧
+
+* ブラウザによる検索結果の表示
+
+[../images/ja/screenshot/fess_search_result.png] ブラウザによる検索結果の表示
+
+* 携帯用検索結果の表示
+
+[../images/ja/screenshot/fess_search_mobile_result.png] 携帯用検索結果の表示
+
+* クロール全般
+
+[../images/ja/screenshot/fess_admin_crawler.png] クロール全般
+
+* ウェブクロールの設定
+
+[../images/ja/screenshot/fess_admin_webconfig.png] ウェブクロールの設定
+
+* ファイルシステムクロールの設定
+
+[../images/ja/screenshot/fess_admin_fsconfig.png] ファイルシステムクロールの設定
+
+* ウェブ認証の設定
+
+[../images/ja/screenshot/fess_admin_webauth.png] ウェブ認証の設定
+
+* パスマッピングの設定
+
+[../images/ja/screenshot/fess_admin_pathmapping.png] パスマッピングの設定
+
+* ブラウザタイプの設定
+
+[../images/ja/screenshot/fess_admin_browsertype.png] ブラウザタイプの設定
+
+* Solr の設定
+
+[../images/ja/screenshot/fess_admin_solr.png] Solr の設定
+
+* セッション情報
+
+[../images/ja/screenshot/fess_admin_logfile.png] セッション情報
+
+* セッション情報一覧
+
+[../images/ja/screenshot/fess_admin_sessioninfo.png] セッション情報一覧
+
+* セッション情報詳細
+
+[../images/ja/screenshot/fess_admin_sessioninfo2.png] セッション情報詳細
+
+* バックアップ/リストア
+
+[../images/ja/screenshot/fess_admin_backuprestore.png] バックアップ/リストア
+

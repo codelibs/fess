@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>検索のソート</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="ソート検索">
+      <p>検索日時などのフィールドを指定して検索結果をソートすることができます。</p>
+      <p>デフォルトでは以下のフィールドを指定してソートすることができます。</p>
+      <table>
+        <tbody>
+          <tr>
+            <th>tstamp</th>
+            <td>クロールした日時</td>
+          </tr>
+          <tr>
+            <th>contentLength</th>
+            <td>クロールしたコンテンツサイズ</td>
+          </tr>
+          <tr>
+            <th>lastModified</th>
+            <td>クロールしたコンテンツの最終更新日時</td>
+          </tr>
+        </tbody>
+      </table>
+      <subsection name="ソート方法">
+        <p>ソートをする場合は、「sort:フィールド名」のように検索フォームに入力して検索します。</p>
+        <p>以下は Fess を検索語として、コンテンツサイズを昇順にソートします。</p>
+        <source><![CDATA[
+Fess sort:contentLength
+]]></source>
+        <p>降順にソートする場合は以下のようにします。</p>
+        <source><![CDATA[
+Fess sort:contentLength.desc
+]]></source>
+        <p>複数のフィールドでソートする場合は以下のように , 区切りで指定します。</p>
+        <source><![CDATA[
+Fess sort:contentLength.desc,lastModified
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>インデックスの設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、インデックスに関する設定について説明します。</p>
+    </section>
+    <section name="設定方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューのインデックスをクリックします。</p>
+        <img src="/images/ja/9.0/admin/document-1.png" alt="インデックスの設定"/>
+      </subsection>
+    </section>
+    <section name="設定項目">
+      <subsection name="Solr サーバーへのアクション">
+        <p>サーバーグループに対して、インデックスのコミット、最適化を発行することができます。</p>
+      </subsection>
+      <subsection name="インデックス削除">
+        <p>セッション ID を指定して、特定の検索対象を削除することができます。URL を指定することで特定のドキュメントだけを削除することもできます。</p>
+      </subsection>
+      <subsection name="追加されたドキュメント">
+        <p>各セッションで登録されたドキュメント数が多い順に表示されます。セッション名をクリックすることでその結果一覧を確認できます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

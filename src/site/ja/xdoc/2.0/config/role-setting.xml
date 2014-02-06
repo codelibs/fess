@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ロールベース検索の設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="ロールベース検索とは">
+      <p>Fess では任意の認証システムで認証されたユーザーの認証情報を元に検索結果を出し分けることができます。たとえば、ロールaを持つユーザーAは検索結果にロールaの情報が表示されるが、ロールaを持たないユーザーBは検索してもそれが表示されません。この機能を利用することで、ポータルやシングルサインオン環境でログインしているユーザーの所属する部門別や役職別などに検索を実現することができます。</p>
+      <p>Fess のロールベース検索ではロール情報を以下より取得できます。</p>
+      <ul>
+        <li>リクエストパラメータ</li>
+        <li>リクエストヘッダー</li>
+        <li>クッキー</li>
+        <li>J2EE の認証情報</li>
+      </ul>
+      <p>ポータルやエージェント型シングルサインオンシステムでは認証時に Fess の稼働しているドメインとパスに対してクッキーで認証情報を保存することで、ロール情報を取得することができます。また、リバースプロキシ型シングルサインオンシステムでは Fess へのアクセス時にリクエストパラメータやリクエストヘッダーに認証情報を付加することでロール情報を取得することができます。</p>
+    </section>
+    <section name="ロールベース検索の設定">
+      <p>ここでは J2EE の認証情報を利用したロールベース検索の設定方法を説明します。</p>
+      <subsection name="tomcat-users.xmlの設定">
+        <p>conf/tomcat-users.xml にロールとユーザーを追加します。今回は role1 ロールでロールベース検索を行います。ログインするユーザーは role1 になります。</p>
+      <source><![CDATA[
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="fess"/>
+  <role rolename="solr"/>
+  <role rolename="role1"/>
+  <user username="admin" password="admin" roles="fess"/>
+  <user username="solradmin" password="solradmin" roles="solr"/>
+  <user username="role1" password="role1" roles="role1"/>
+</tomcat-users>
+]]></source>
+      </subsection>
+      <subsection name="app.diconの設定">
+        <p>webapps/fess/WEB-INF/classes/app.dicon を以下のように設定します。</p>
+      <source><![CDATA[
+    :
+    <component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
+        <property name="authenticatedRoles">"role1"</property>
+    </component>
+    :
+    <component name="roleQueryHelper" class="jp.sf.fess.helper.impl.RoleQueryHelperImpl">
+        <property name="defaultRoleList">
+            {"guest"}
+        </property>
+    </component>
+    :
+]]></source>
+        <p>authenticatedRoles はカンマ (,) 区切りで複数記述することができます。defaultRoleList を設定することで、認証情報がない場合のロール情報を設定できます。設定することでログインしていないユーザーにはロールが必要な検索結果を表示させないようにできます。</p>
+      </subsection>
+      <subsection name="web.xmlの設定">
+        <p>webapps/fess/WEB-INF/web.xml を以下のように設定します。</p>
+      <source><![CDATA[
+  :
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Fess Authentication</web-resource-name>
+      <url-pattern>/login/login</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>fess</role-name>
+      <role-name>role1</role-name>
+    </auth-constraint>
+  </security-constraint>
+  :
+  <security-role>
+    <role-name>fess</role-name>
+  </security-role>
+
+  <security-role>
+    <role-name>role1</role-name>
+  </security-role>
+  :
+]]></source>
+      </subsection>
+      <subsection name="Fess の管理画面での設定">
+        <p>Fess を起動して管理者としてログインします。メニューのロールから設定名を Role1 (設定名は任意)、値を role1 でロールを登録します。あとは role1 を持つユーザーで利用したいクロール設定で、Role1 を選択してクロール設定を登録してクロールします。</p>
+      </subsection>
+      <subsection name="ロールでログイン">
+        <p>管理画面からログアウトします。role1 ユーザーでログインします。ログインに成功すると検索画面のトップにリダイレクトされます。</p>
+        <p>通常通り検索すると、クロール設定で Role1 のロール設定されたものだけが表示されます。</p>
+        <p>また、ログインしていない状態での検索は、guest ユーザーによる検索となります。</p>
+      </subsection>
+      <subsection name="ロールのログアウト">
+        <p>管理者以外のロールでログインした状態で http://localhost:8080/fess/admin にアクセスすると、ログアウトするかどうかの画面が表示されます。ログアウトボタンを押下することでログアウトされます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

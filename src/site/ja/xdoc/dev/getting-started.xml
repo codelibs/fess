@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>オープンソース全文検索サーバー - Fess 開発概要</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <head>
+    <meta name="keywords" content="全文検索,オープンソース,フリーソフト,OSS,開発"/>
+    <meta name="description" content="オープンソースの簡単に構築可能な全文検索サーバー"/>
+  </head>
+  <body>
+    <section name="概要">
+      <p>Fess を開発するために必要な情報をまとめます。</p>
+    </section>
+    <section name="必要な知識">
+      <p>Fess は Java 6 以上の環境で動作するアプリケーションとして開発されています。以下のような知識が必要になります。</p>
+      <ul>
+          <li>Java</li>
+          <li>Seasar 2</li>
+          <li>SAStruts (ウェブ画面を開発する場合)</li>
+          <li>DBFlute (DB 周りを開発する場合)</li>
+          <li>Solr (検索インデックス周りを開発する場合)</li>
+          <li>S2Robot (クローラー周りを開発する場合)</li>
+      </ul>
+      <p>開発する際には Eclipse および Maven 2 を利用する前提で進めます(fess-server のビルドには Ant が必要になります)。また、開発するにあたり、Fess も動作させるためにインストールしておきます。必要なものは事前にインストールしておいてください。</p>
+    </section>
+    <section name="ウェブ画面周りの開発について">
+      <p>管理画面や検索画面の開発方法をまとめます。</p>
+      <ol>
+        <li>Java, Eclipse, Maven 2.x, Fess をインストールして準備します。</li>
+        <li>Eclipse で Fess のソースコードを SVN からチェックアウトします。SVNのリポジトリは以下になります。
+      <source><![CDATA[
+http://svn.sourceforge.jp/svnroot/fess/fess/trunk/
+]]></source>
+</li>
+        <li>コマンドライン上でチェックアウトしたソースコードの pom.xml があるディレクトリに移動します。そこで mvn eclipse:eclipse を実行します。
+      <source><![CDATA[
+mvn eclipse:eclipse
+]]></source>
+.classpath が生成されますが、そのファイルの上部が以下であることを確認します(src/main が src/test より上位あることを確認)。
+      <source><![CDATA[
+<classpath>
+ <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
+ <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
+ <classpathentry kind="src" path="src/test/java" including="**/*.java"/>
+ <classpathentry kind="src" path="src/test/resources" excluding="**/*.java"/>
+]]></source>
+Fess が依存するライブラリが更新されたときには mvn eclipse:eclipse を再度行う必要があります。
+</li>
+        <li>Eclipse で Fess のプロジェクトをリロードします。</li>
+        <li>Eclipse で Fess のプロジェクトをビルドします。(自動ビルドになっていればクリーンすればビルドされます) src/main/webapp/WEB-INF/classes に生成されていることを確認します。</li>
+        <li>Eclipse で Tomcat プラグインを入れて、インストールした Fess を Tomcat 6 として設定します。Tomcat プラグインの JVM Setttings で Fess の bin/setenv.sh にある値を追加します。環境変数は展開する必要があります。 少なくても -Dsolr.solr.home -Dfess.solr.data.dir -Dfess.log.file があれば OK です。</li>
+        <li>Eclipse で Fess のプロジェクトを Tomcat プラグインのコンテキスト定義の更新をして配備します。</li>
+        <li>Tomcat プラグインで起動します。</li>
+      </ol>
+      <p>HOT Deploy で開発したい場合は、src/main/resources/env.txt を product から ct に変更します。これにより、Tomcat(Fess) を再起動することなく、ソースコードを変更することができます。</p>
+    </section>
+    <section name="クロール周りの開発について">
+      <p>クロールプロセスは Tomcat(Fess) からプロセスが起動されます。そのため、デバッガで追いたい場合などは Eclipse 上でデバッグ用の Java アプリケーションとして登録する必要があります。</p>
+      <ol>
+        <li>通常の Java Application として Eclipse でデバッグできるように登録します。main関数は jp.sf.fess.exec.Crawler になります。</li>
+        <li>1 の設定において、引数の設定では、まず、プログラムの設定は -sessionId 20100101000000 のように適当なセッション ID を渡します。VM Settings には Fess の bin/setenv.sh の内容を展開して登録します。</li>
+        <li>classpath の設定では、/fess/src/main/webapp/WEB-INF/cmd とgeronimo_servlet_2.4_spec-1.0.jar を追加します。</li>
+        <li>実行します。</li>
+      </ol>
+    </section>
+    <section name="Fess の配布物の作成について">
+      <p>Fess の配布物は、Tomcat に Fess の war ファイルおよび Solr を同梱したものになります。Fess の配布物は SVN の fess-server でビルドします。ビルドするためには Ant が必要になります。</p>
+      <source><![CDATA[
+$ svn co http://svn.sourceforge.jp/svnroot/fess/fess-server/trunk/ fess-server
+$ cd fess-server
+$ ant clean
+$ ant
+]]></source>
+    </section>
+    <section name="参考資料">
+      <ul>
+        <li><a href="http://www.amazon.co.jp/Seasar-%E5%BE%B9%E5%BA%95%E5%85%A5%E9%96%80-SAStruts-S2JDBC-%E5%AF%BE%E5%BF%9C/dp/4798121509">Seasar 2 徹底入門 SAStruts/S2JDBC 対応</a> (Seasar2, SAStrutsに関して参考になります。S2JDBC などは利用していないのでその辺などは不要です)</li>
+        <li><a href="http://dbflute.sandbox.seasar.org/">DBFlute</a></li>
+        <li><a href="http://s2robot.sandbox.seasar.org/ja/">S2Robot</a></li>
+        <li><a href="http://lucene.apache.org/solr/">Solr</a></li>
+      </ul>
+    </section>
+  </body>
+</document>

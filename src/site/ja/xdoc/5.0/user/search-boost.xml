@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ブースト検索</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="ブースト検索">
+      <p>
+        検索語のうち、特定の検索語を優先したい場合にはブースト検索を利用します。
+        たとえば、「りんご みかん」を検索したい場合に「りんご」がより含まれるページを検索したい場合は、「りんご^100 みかん」というように「^数値」という形式で検索します。
+        数値は 1 以上の整数を指定します。
+      </p>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>セッション情報の設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、セッション情報に関わる設定について説明します。 1 回のクロールした結果を 1 つのセッション情報として保存されます。 実行した時間やインデックスされた数を確認することができます。</p>
+    </section>
+    <section name="設定方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューのセッション情報をクリックします。</p>
+      </subsection>
+    </section>
+    <section name="設定項目">
+      <subsection name="セッション情報一覧">
+        <img src="/images/ja/8.0/admin/crawlingSession-1.png" alt="セッション情報一覧"/>
+        <p>すべて削除リンクをクリックすると実行中でないすべてのセッション情報を削除することができます。
+        期限が切れたセッションは次回クロール時に削除されます。</p>
+      </subsection>
+      <subsection name="セッション情報詳細">
+        <p>セッション ID のクロール内容を確認できます。クロールの開始や終了時間、インデックスされたドキュメント数などが一覧されます。</p>
+        <img src="/images/ja/8.0/admin/crawlingSession-2.png" alt="セッション情報詳細"/>
+      </subsection>
+    </section>
+  </body>
+</document>

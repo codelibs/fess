@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>人気URLログ</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、人気URLログについて説明します。人気URLログは利用者が検索画面で投票リンクをクリックしたときにお気に入りのリンクとして登録します。クロール全般の設定で本機能を無効にすることができます。</p>
+    </section>
+    <section name="利用方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューの人気URLをクリックします。</p>
+        <img src="/images/ja/9.0/admin/favoriteLog-1.png" alt="利用者一覧" />
+      </subsection>
+      <subsection name="利用者一覧">
+        <p>人気URLが一覧されます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>Fessのインストール</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <head>
+    <meta name="keywords" content="全文検索,オープンソース,フリーソフト,OSS,Solr,namazu,nutch"/>
+    <meta name="description" content="オープンソースの簡単に構築可能な全文検索サーバー"/>
+  </head>
+  <body>
+    <section name="インストール方法">
+      <p>Fess は Java 実行環境があればどの OS でも実行可能です。動作環境は以下のとおりです。</p>
+      <ul>
+        <li>Windows や Unix など Java が実行できる OS 環境</li>
+        <li>Java: Java 6 以上</li>
+      </ul>
+    </section>
+    <section name="Javaのインストール">
+      <p>Java がインストールされていない場合は以下の手順でJavaをインストールしてください。</p>
+      <subsection name="Java SE のダウンロードページへアクセス">
+        <p>JavaScriptが有効な状態でOracle社の<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank">「Java SE Downloads」ページ</a>にアクセスします。</p>
+        <p>JavaSE7の「Download JDK」をクリックします。(JavaScriptが無効になっているとダウンロードが有効となりません) </p>
+        <img src="/images/ja/install/java-1.png" alt="アクセス"/>
+        <blockquote>
+          <p>JavaScriptが有効になっているかどうかは、下記のように確認できます。(Internet Explorer 9 の場合)</p>
+          <ol>
+            <li>メニューバーで [ツール] をクリックします。</li>
+            <li>[インターネット オプション] をクリックします。</li>
+            <li>[セキュリティ] タブをクリックします。</li>
+            <li>[レベルのカスタマイズ] をクリックします。</li>
+            <li>[スクリプト] のセクションが表示されるまでスクロールします。</li>
+            <li>[アクティブ スクリプト] セクションで [有効にする] のラジオボタンがをオンなっているかを確認する。</li>
+            <li>オフになっている場合はオンにし、[OK] をクリックします。</li>
+          </ol>
+        </blockquote>
+      </subsection>
+      <subsection name="ライセンスの確認">
+        <p>「Oracle Binary Code License Agreement for Java SE 」を読んでライセンスに同意されたら「Accept License Agreement」にチェックを入れます。</p>
+        <img src="/images/ja/install/java-2.png" alt="ライセンス"/>
+      </subsection>
+      <subsection name="ダウンロードの開始">
+        <p>インストールを行うパソコンのOSに合わせてJDKのダウンロードを行います。
+        Windwos 64ビットの場合は「Windows x64」、Windows 32ビットの場合は「Windows x86」を選択します (以下はWindows 64ビット版の例です) 。</p>
+        <blockquote>
+          <p>使用しているパソコンがどちらなのかは、下記のように確認できます。(Windows 7の場合)</p>
+          <ol>
+            <li>[コントロールパネル]→[システムとセキュリティ]→[システム]で、「システムの種類」に表示されます。</li>
+          </ol>
+        </blockquote>
+        <img src="/images/ja/install/java-3.png" alt="ダウンロード"/>
+      </subsection>
+      <subsection name="JDKインストーラーの実行">
+        <p>ダウンロードしたJDKインストーラー (jdk-7u7-windows-x64.exe) を実行します。 (以下はWindows 64ビット版の例です) </p>
+        <img src="/images/ja/install/java-4.png" alt="実行"/>
+        <p>Windowsの設定によっては、「次のプログラムにこのコンピュータへの変更を許可しますか？」というダイアログが表示されることがあります。その場合、[はい]ボタンをクリックしてください。</p>
+      </subsection>
+      <subsection name="JDKのインストール">
+        <p>インストーラが起動します。[次へ]ボタンを押します。</p>
+        <img src="/images/ja/install/java-5.png" alt="実行"/>
+        <p>インストール先のフォルダが変更できます。デフォルトのままで問題なければ、[次へ]ボタンを押します。</p>
+        <img src="/images/ja/install/java-6.png" alt="ディレクトリ"/>
+        <p>JDKのインストールが開始されるので、しばらく待ちます。</p>
+        <img src="/images/ja/install/java-7.png" alt="JDKインストール"/>
+      </subsection>
+      <subsection name="JREのインストール">
+        <p>JDKのインストール後、使用のパソコンにJREがインストールされていなければ、JREのインストールが実行されます。        JDK同様にインストール先のフォルダの変更が可能ですが、基本的にはJDKと同フォルダで問題ありません。
+        [次へ]ボタンを押します。</p>
+        <img src="/images/ja/install/java-8.png" alt="JRE"/>
+        <p>JREのインストールが開始されるので、しばらく待ちます。</p>
+        <img src="/images/ja/install/java-9.png" alt="JREインストール"/>
+      </subsection>
+      <subsection name="インストール完了">
+        <p>インストール完了のメッセージが表示されます。 [閉じる]ボタンを押します。</p>
+        <img src="/images/ja/install/java-10.png" alt="JREインストール"/>
+        <p>インストール完了です。</p>
+        <blockquote>
+          <p>インストールされたコンポーネントは、以下の2つです。以下で確認できます。(Windows 7の場合)</p>
+          <ol>
+            <li>[コントロールパネル]→[プログラム]→[プログラムと機能]の一覧に表示されます。
+              <ul>
+                <li>Java SE Development Kit 7 Update 6 (64-bit)</li>
+                <li>Java(TM) 7 Update 6 (64-bit)</li>
+              </ul>
+            </li>
+          </ol>
+        </blockquote>
+      </subsection>
+      <subsection name="環境変数の設定">
+        <p>「環境変数」とは、プログラムに渡される設定情報です。コマンドプロンプトでJDKのコマンドを実行するために、Javaインストールの後、環境変数の設定が必要です。</p>
+<p>Windows 7 では以下のように設定します。[コントロールパネル]→[システムとセキュリティ]→[システム]→[システムの詳細設定]→[環境変数]を選択します>。</p>
+<img src="/images/ja/install/java-11.png" alt="コントロールパネル"/>
+<p>「システムとセキュリティ」をクリックします。</p>
+<img src="/images/ja/install/java-12.png" alt="システムとセキュリティ"/>
+<p>「システム」をクリックします。</p>
+<img src="/images/ja/install/java-13.png" alt="システム"/>
+<p>「詳細設定」をクリックします。</p>
+<img src="/images/ja/install/java-14.png" alt="システムの詳細設定"/>
+<p>「環境変数」をクリックします。</p>
+<img src="/images/ja/install/java-15.png" alt="環境変数"/>
+<p>「システム環境変数」の「新規」ボタン（画面下部）をクリックします。</p>
+<img src="/images/ja/install/java-16.png"/>
+<p>「変数名」には「JAVA_HOME」と入力します。</p>
+<img src="/images/ja/install/java-17.png"/>
+<p>「変数値」には、JDKがインストールしたディレクトリを記述します。</p>
+<p>エクスプローラで「C:\Program Files\Java」を開き、「jdk・・・」というフォルダを探して、そのアドレスを>記述します。</p>
+<p>たとえばjdkのバージョン1.7.0_07をインストールした場合は、「C:\Program Files\Java\jdk1.7.0_07」となり>ます。</p>
+<p>記述後、「OK」を押します。</p>
+<p>「システム環境変数」のリストから、「変数」が「Path」である行を探します。</p>
+<img src="/images/ja/install/java-18.png"/>
+<p>その行をクリックして編集ボタンを押して開き、「変数値」の末尾に「;%JAVA_HOME%\bin」という文字列を追加>し、「OK」をクリックします。</p>
+<img src="/images/ja/install/java-19.png"/>
+      </subsection>
+    </section>
+    <section name="Fessのインストール">
+      <subsection name="Fessのダウンロードページへアクセス">
+        <p><a href="http://sourceforge.jp/projects/fess/releases/" class="externalLink">http://sourceforge.jp/projects/fess/releases/</a> から最新の Fess パッケージをダウンロードします。</p>
+        <p>URL先のリリースファイル一覧から「fess-server-7.0.1.zip」をクリックします。</p>
+        <img src="/images/ja/install/Fess-1.png"/>
+      </subsection>
+      <subsection name="インストール">
+        <p>ダウンロードしたzipファイルを解凍します。Windows環境の場合はzip解凍ツールなどで展開してください。</p>
+        <blockquote>
+          <p> Unix 環境にインストールした場合、bin 以下にあるスクリプトに実行権を付加します。</p>
+        <source><![CDATA[
+$ unzip fess-server-x.y.zip
+$ cd fess-server-x.y
+$ chmod +x bin/*.sh   # (Unix環境のみ)
+]]></source>
+        </blockquote>
+        <img src="/images/ja/install/Fess-2.png"/>
+        <p> 解凍したフォルダーをダブルクリックで開きます。 </p>
+        <img src="/images/ja/install/Fess-3.png"/>
+        <p> binフォルダーをダブルクリックで開きます。 </p>
+        <img src="/images/ja/install/Fess-4.png"/>
+      </subsection>
+      <subsection name="Fess の起動">
+        <p>binフォルダにあるstartup.batファイルをダブルクリックして、Fessを起動させます。</p>
+        <blockquote>
+          <p>Unix環境の場合はstartup.shを実行します。</p>
+        <source><![CDATA[
+$ ./bin/startup.sh
+]]></source>
+        </blockquote>
+        <img src="/images/ja/install/Fess-5.png"/>
+        <p> コマンドプロンプトが表示され起動されます。最後の文に「Server startup...」が表示されればセットアップ完了です。 </p>
+        <img src="/images/ja/install/Fess-6.png"/>
+      </subsection>
+    </section>
+    <section name="動作確認">
+      <p>http://localhost:8080/fess/ にアクセスすることによって、起動を確認できます。</p>
+      <p>管理 UI は http://localhost:8080/fess/admin/ です。 デフォルトの管理者アカウントのユーザー名/パスワードは、admin/admin になります。 管理者アカウントはアプリケーションサーバーにより管理されています。 Fess の管理 UI では、アプリケーションサーバーで fess ロールで認証されたユーザーを管理者として判断しています。</p>
+    </section>
+    <section name="その他">
+      <subsection name="Fess の停止">
+        <p>binフォルダにあるshutdown.batファイルをダブルクリックして、Fessを停止させます。</p>
+        <blockquote>
+          <p>Unix環境の場合はshutdown.shを実行します。</p>
+        <source><![CDATA[
+$ ./bin/shutdown.sh
+]]></source>
+        </blockquote>
+      </subsection>
+      <subsection name="管理者パスワードの変更">
+        <p>管理者アカウントはアプリケーションサーバーにより管理されています。 標準の Fess サーバーは Tomcat を利用しているので、Tomcat のユーザー変更方法と同様になります。 変更する場合は、conf/tomcat-user.xml の admin アカウントのパスワードを修正してください。</p>
+        <source><![CDATA[
+  <user username="admin" password="admin" roles="fess"/>
+]]></source>
+      </subsection>
+      <subsection name="Solr サーバーのパスワード変更">
+        <p>Fess サーバーには Solr が組み込まれていますが、アクセスするためにはパスワードが必要になります。 実運用などにおいては、デフォルトのパスワードを変更してください。</p>
+        <p>パスワードの変更方法は、まず、conf/tomcat-user.xml の solradmin のパスワード属性を変更します。</p>
+        <source><![CDATA[
+  <user username="solradmin" password="solradmin" roles="solr"/>
+]]></source>
+        <p>次に webapps/fess/WEB-INF/classes/fess_solr.dicon の以下のパスワードの箇所を tomcat-user.xml で指定したものを記述します。</p>
+        <source><![CDATA[
+<component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+    <arg>"solradmin"</arg> <!-- Username -->
+    <arg>"solradmin"</arg> <!-- Password -->
+</component>
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

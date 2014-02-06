@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>インストール</title>
+    <authors>
+      <person name="菅谷信介" email="shinsuke@yahoo.co.jp"/>
+    </authors>
+  </properties>
+  <body>
+    <section name="インストール要件">
+<p>
+Fess は以下の環境で利用することができます。
+</p>
+<ul>
+<li>OS: Windows や Unix など Java が実行できる OS 環境</li>
+<li>Java: Java 6 以上</li>
+</ul>
+<p>
+Fess を利用したい環境に Java がインストールされていない場合は、http://java.sun.com/ より Java 6 以上の JDK を取得してインストールしてください。
+</p>
+    </section>
+    <section name="ダウンロード">
+<p>
+<a href="http://sourceforge.jp/projects/fess/releases/">http://sourceforge.jp/projects/fess/releases/</a> から最新の Fess パッケージをダウンロードします。
+</p>
+    </section>
+    <section name="インストール">
+<p>
+ダウンロードした fess-server-x.y.zip を展開します。 Unix 環境にインストールした場合、bin 以下にあるスクリプトに実行権を付加します。
+</p>
+<source><![CDATA[
+$ unzip fess-server-x.y.zip
+$ cd fess-server-x.y
+$ chmod +x bin/*.sh   # (Unix環境のみ)
+]]></source>
+    </section>
+    <section name="管理者パスワードの変更">
+<p>
+管理者アカウントはアプリケーションサーバーにより管理されています。 標準の Fess サーバーは Tomcat を利用しているので、Tomcat のユーザー変更方法と同様になります。 変更する場合は、conf/tomcat-user.xml の admin アカウントのパスワードを修正してください。
+</p>
+<source><![CDATA[
+<user username="admin" password="admin" roles="fess"/>
+]]></source>
+    </section>
+    <section name="Solr サーバーのパスワード変更">
+<p>
+Fess サーバーには Solr が組み込まれていますが、アクセスするためにはパスワードが必要になります。 実運用などにおいては、デフォルトのパスワードを変更してください。
+</p>
+<p>
+パスワードの変更方法は、まず、conf/tomcat-user.xml の solradmin のパスワード属性を変更します。
+</p>
+
+<source><![CDATA[
+  <user username="solradmin" password="solradmin" roles="solr"/>
+]]></source>
+<p>
+次に webapps/fess/WEB-INF/classes/fess_solr.dicon の以下のパスワードの箇所を tomcat-user.xml で指定したものを記述します。
+</p>
+
+<source><![CDATA[
+<component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+    <arg>"solradmin"</arg> <!-- Username -->
+    <arg>"solradmin"</arg> <!-- Password -->
+</component>
+]]></source>
+    </section>
+  </body>
+</document>

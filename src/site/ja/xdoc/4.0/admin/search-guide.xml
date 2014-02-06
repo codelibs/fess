@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>検索</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="検索">
+      <p>ここでは、管理用検索について説明します。</p>
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューの検索をクリックします。</p>
+        <img src="/images/ja/4.0/search-1.png" alt="管理用検索" />
+      </subsection>
+      <subsection name="検索一覧">
+        <p>指定した条件で検索することができます。通常の検索画面ではロールやブラウザの条件が暗黙的に付加されますが、この管理用検索では付加されません。表示された検索結果から特定なドキュメントをインデクスから削除することもできます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

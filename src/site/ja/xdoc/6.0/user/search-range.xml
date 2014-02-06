@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>範囲指定検索</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="範囲指定検索">
+      <p>数値など範囲指定が可能でデータをフィールドに格納している場合、そのフィールドに対して範囲指定検索が可能です。</p>
+      <subsection name="利用方法">
+        <p>範囲指定検索をするためには、「フィールド名:[値 TO 値]」 を検索フォームに入力します。</p>
+        <p>たとえば、contentLength フィールドに対して、1kバイトから10kバイトにあるドキュメントを検索する場合は以下のように検索フォームに入力します。 </p>
+        <source><![CDATA[
+contentLength:[1000 TO 10000]
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

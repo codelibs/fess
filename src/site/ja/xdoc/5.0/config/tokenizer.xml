@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>索引文字列抽出についての設定</title>
+    <author>曽根 孝明</author>
+  </properties>
+  <body>
+
+    <section name="索引文字列抽出について">
+      <p>検索のためのインデックスを作成する際、索引として登録するために文書を切り分ける必要があります。</p>
+      <p>このために使用されるのが、トークナイザーです。</p>
+      <p>基本的に、トークナイザーによって切り分けられた単位よりも小さいものは、検索を行ってもヒットしません。</p>
+      <p>例えば、「東京都に住む」という文を考えます。いま、この文が「東京都」「に」「住む」というようにトークナイザーによって分割されたとします。この場合、「東京都」という語で検索を行った場合はヒットします。しかし、「京都」という語で検索を行った場合はヒットしません。</p>
+      <p>そのためトークナイザーの選択は重要です。</p>
+      <p>Fess の場合デフォルトでは CJKTokenizer が使用されていますが、schema.xml の analyzer 部分を設定することでトークナイザを変更することができます。</p>
+    </section>
+
+    <subsection name="CJKTokenizerについて">
+      <p>CJKTokenizer 日本語のようなマルチバイトの文字列に対しては bi-gram 、つまり二文字ずつインデックスを作成します。この場合、1文字の語を検索することはできません。</p>
+    </subsection>
+
+    <subsection name="StandardTokenizerについて">
+      <p>StandardTokenizer は日本語のようなマルチバイトの文字列に対しては uni-gram 、つまり一文字ずつインデックスを作成します。そのため、検索漏れが少なくなります。また、CJKTokenizerの場合、1文字のクエリを検索することができませんが、StandardTokenizerを使用すると検索可能になります。</p>
+      <p>下記の例のように schema.xml の analyzer 部分を変更することで、StandardTokenizer を使用できます。</p>
+      <source><![CDATA[
+  :
+  <types>
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+  :
+]]></source>
+    </subsection>
+
+  </body>
+</document>

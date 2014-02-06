@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>Windowsサービスへの登録</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="Windowsサービスとしての登録">
+      <p>Windows 環境であれば Fess を Windows のサービスとして登録することができます。サービスの登録方法は Tomcat と同様です。</p>
+      <subsection name="事前準備">
+        <p>Windows のサービスとして登録する場合、クロールプロセスは Windows のシステムの環境変数を見にいくため、<b>Java の JAVA_HOME をシステムの環境変数に登録し</b>、同様に <b>%JAVA_HOME%\bin も Path に追加する</b>必要があります。</p>
+      </subsection>
+      <subsection name="設定">
+        <p>webapps\fess\WEB-INF\classes\fess.dicon を編集して、-server オプションを取り除きます。</p>
+      <source><![CDATA[
+    <component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
+        <!--
+        <property name="adminRole">"fess"</property>
+        <property name="authenticatedRoles">"role1"</property>
+        -->
+        <property name="crawlerJavaOptions">new String[] {
+            "-Djava.awt.headless=true", "-XX:+UseGCOverheadLimit",
+            "-XX:+UseConcMarkSweepGC", "-XX:+CMSIncrementalMode",
+            "-XX:+UseTLAB", "-Xmx512m", "-XX:MaxPermSize=128m"
+        }</property>
+    </component>
+]]></source>
+      </subsection>
+      <subsection name="登録方法">
+        <p>まず、Fess のインストール後、コマンドプロンプトから service.bat を実行します (Vista などでは管理者として起動する必要があります)。Fess は C:\Java\fess-server-5.0.0 にインストールしたものとします。</p>
+      <source><![CDATA[
+> cd C:\Java\fess-server-5.0.0\bin
+> service.bat install fess
+...
+The service 'fess' has been installed.
+]]></source>
+      </subsection>
+      <subsection name="設定の確認方法">
+        <p>以下のようにすることで Fess 用のプロパティを確認できます。以下を実行すると、Tomcat のプロパティ設定ウィンドウが表示されます。</p>
+      <source><![CDATA[
+> tomcat6w.exe //ES//fess
+]]></source>
+      </subsection>
+      <subsection name="サービスの設定">
+        <p>コントロールパネル - 管理ツール - サービスで管理ツールを表示して、通常の Windows のサービスと同様に自動起動などが設定できます。</p>
+      </subsection>
+    </section>
+    <section name="その他">
+      <subsection name="64bit環境での利用">
+        <p>Fess で配布しているものは 32bit Windows 用の Tomcat バイナリをベースにビルドされています。
+        64bit Windows で利用する場合は <a href="http://tomcat.apache.org/download-60.cgi">Tomcat</a> のサイトから 64bit Windows zip などを取得して、tomcat6.exe, tomcat6w.exe を差し替えてください。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

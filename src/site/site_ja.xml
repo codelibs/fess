@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="全文検索システム: Fess">
+  <skin>
+    <groupId>jp.sf.fess</groupId>
+    <artifactId>fess-skin</artifactId>
+    <version>3.0.1-SNAPSHOT</version>
+  </skin>
+  <bannerLeft>
+    <name>Fess: Full tExt Search System</name>
+    <src>../images/fess-logo.gif</src>
+    <href>http://fess.codelibs.org/</href>
+  </bannerLeft>
+  <bannerRight>
+    <src>http://sourceforge.jp/sflogo.php?group_id=4342&amp;type=3</src>
+    <href>http://sourceforge.jp/projects/fess/</href>
+  </bannerRight>
+  <version position="none"/>
+  <body>
+    <links>
+      <item name="English" href="../index.html"/>
+    </links>
+    <menu name="全般">
+      <item name="ホーム" href="index.html"/>
+      <item name="ダウンロード" href="downloads.html"/>
+      <item name="スクリーンショット" href="screenshot.html"/>
+      <item name="デモ" href="http://search.n2sm.co.jp/"/>
+    </menu>
+    <menu name="入門">
+      <item name="インストール" href="setup.html"/>
+      <item name="簡単構築ガイド" href="quick-start.html"/>
+      <item name="使い方" href="getting-started.html"/>
+    </menu>
+    <menu name="ドキュメント">
+      <item name="インストール" collapse="true" href="9.0/install/index.html">
+        <item name="インストール" href="9.0/install/install.html"/>
+        <item name="実行と停止" href="9.0/install/run.html"/>
+        <item name="アンインストール" href="9.0/install/uninstall.html"/>
+      </item>
+      <item name="検索" collapse="true" href="9.0/user/index.html">
+        <item name="AND検索" href="9.0/user/search-and.html"/>
+        <item name="OR検索" href="9.0/user/search-or.html"/>
+        <item name="NOT検索" href="9.0/user/search-not.html"/>
+        <item name="ラベルによる検索" href="9.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="9.0/user/search-field.html"/>
+        <item name="ソート" href="9.0/user/search-sort.html"/>
+        <item name="ワイルドカード" href="9.0/user/search-wildcard.html"/>
+        <item name="範囲指定検索" href="9.0/user/search-range.html"/>
+        <item name="ブースト検索" href="9.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="9.0/user/search-fuzzy.html"/>
+        <item name="拡張パラメータ検索" href="9.0/user/search-options.html"/>
+        <item name="ジオサーチ" href="9.0/user/search-geo.html"/>
+        <item name="非表示検索条件" href="9.0/user/search-additional.html"/>
+        <item name="XML応答" href="9.0/user/xml-response.html"/>
+        <item name="JSON応答" href="9.0/user/json-response.html"/>
+      </item>
+      <item name="管理" collapse="true" href="9.0/admin/index.html">
+        <item name="設定ウィザード" href="9.0/admin/wizard-guide.html"/>
+        <item name="クロール全般の設定" href="9.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="9.0/admin/system-guide.html"/>
+        <item name="インデックスの設定" href="9.0/admin/document-guide.html"/>
+        <item name="ジョブ管理の設定" href="9.0/admin/scheduledJob-guide.html"/>
+        <item name="デザインの設定" href="9.0/admin/design-guide.html"/>
+        <item name="辞書の設定" href="9.0/admin/dict-guide.html"/>
+        <item name="バックアップ/リストア" href="9.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="9.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="9.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="9.0/admin/dataCrawlingConfig-guide.html"/>
+        <item name="ラベルの設定" href="9.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="9.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="9.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="9.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="9.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="9.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="9.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="9.0/admin/browserType-guide.html"/>
+        <item name="設定情報" href="9.0/admin/systemInfo-guide.html"/>
+        <item name="ジョブログ" href="9.0/admin/jobLog-guide.html"/>
+        <item name="セッション情報" href="9.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="9.0/admin/log-guide.html"/>
+        <item name="障害URL" href="9.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="9.0/admin/searchList-guide.html"/>
+        <item name="検索ログ" href="9.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="9.0/admin/stats-guide.html"/>
+        <item name="利用者" href="9.0/admin/userInfo-guide.html"/>
+        <item name="人気URL" href="9.0/admin/favoriteLog-guide.html"/>
+      </item>
+      <item name="設定" collapse="true" href="9.0/config/index.html">
+        <item name="ポート変更" href="9.0/config/server-port.html"/>
+        <item name="メモリー関連" href="9.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="9.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="9.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="9.0/config/filesize.html"/>
+        <item name="ログ" href="9.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="9.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="9.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="9.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="9.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="9.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="9.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="9.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="9.0/config/index-backup.html"/>
+        <item name="Tomcatにインストール" href="9.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="9.0/config/pdf-with-password.html"/>
+        <item name="データベースの変更" href="9.0/config/db.html"/>
+        <item name="ジオサーチ" href="9.0/config/geosearch.html"/>
+        <item name="LibreOfficeの利用" href="9.0/config/use-libreoffice.html"/>
+      </item>
+    </menu>
+    <menu name="チュートリアル">
+      <item name="インストール編" href="articles/article-1.html"/>
+      <item name="モバイル編" href="articles/article-2.html"/>
+      <item name="ロールベース検索編" href="articles/article-3.html"/>
+      <item name="Ajax編" href="articles/article-4.html"/>
+    </menu>
+    <menu name="開発">
+      <item name="開発者ガイド" href="dev/getting-started.html"/>
+      <item name="ソースリポジトリ" href="source-repository.html"/>
+      <item name="JavaDoc" href="../apidocs/index.html"/>
+      <item name="ロードマップ" href="roadmap.html"/>
+      <item name="変更点" href="changes.html"/>
+      <item name="依存関係" href="dependencies.html"/>
+      <item name="課題追跡" href="issue-tracking.html"/>
+      <item name="開発者" href="team-list.html"/>
+      <item name="メーリングリスト" href="mail-lists.html"/>
+    </menu>
+    <menu name="その他">
+      <item name="ニュース" href="news.html"/>
+      <item name="掲載記事" href="articles.html"/>
+      <item name="利用サイト" href="users.html"/>
+      <item name="ライセンス" href="license.html"/>
+      <item name="FAQ" href="faq.html"/>
+      <item name="関連プロジェクト" href="supporting-projects.html"/>
+      <item name="商用サポート" href="support-services.html"/>
+      <item name="ASP/SaaS" href="asp.html"/>
+      <item name="広告" href="donation.html"/>
+    </menu>
+    <menu name="アーカイブ">
+      <item name="インストール" collapse="true" href="7.0/user/index.html">
+      <item name="8.0" collapse="true" href="8.0/install/index.html">
+        <item name="インストール" href="8.0/install/install.html"/>
+        <item name="実行と停止" href="8.0/install/run.html"/>
+        <item name="アンインストール" href="8.0/install/uninstall.html"/>
+      </item>
+      <item name="7.0" collapse="true" href="7.0/install/index.html">
+        <item name="インストール" href="7.0/install/install.html"/>
+        <item name="実行と停止" href="7.0/install/run.html"/>
+        <item name="アンインストール" href="7.0/install/uninstall.html"/>
+      </item>
+      <item name="6.0" collapse="true" href="6.0/install/index.html">
+        <item name="インストール" href="6.0/install/install.html"/>
+        <item name="実行と停止" href="6.0/install/run.html"/>
+        <item name="アンインストール" href="6.0/install/uninstall.html"/>
+      </item>
+      </item>
+      <item name="検索" collapse="true" href="7.0/user/index.html">
+      <item name="8.0" collapse="true" href="8.0/user/index.html">
+        <item name="AND検索" href="8.0/user/search-and.html"/>
+        <item name="OR検索" href="8.0/user/search-or.html"/>
+        <item name="NOT検索" href="8.0/user/search-not.html"/>
+        <item name="ラベルによる検索" href="8.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="8.0/user/search-field.html"/>
+        <item name="ソート" href="8.0/user/search-sort.html"/>
+        <item name="ワイルドカード" href="8.0/user/search-wildcard.html"/>
+        <item name="範囲指定検索" href="8.0/user/search-range.html"/>
+        <item name="ブースト検索" href="8.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="8.0/user/search-fuzzy.html"/>
+        <item name="拡張パラメータ検索" href="8.0/user/search-options.html"/>
+        <item name="ジオサーチ" href="8.0/user/search-geo.html"/>
+        <item name="非表示検索条件" href="8.0/user/search-additional.html"/>
+        <item name="XML応答" href="8.0/user/xml-response.html"/>
+        <item name="JSON応答" href="8.0/user/json-response.html"/>
+      </item>
+      <item name="7.0" collapse="true" href="7.0/user/index.html">
+        <item name="AND検索" href="7.0/user/search-and.html"/>
+        <item name="OR検索" href="7.0/user/search-or.html"/>
+        <item name="NOT検索" href="7.0/user/search-not.html"/>
+        <item name="ラベルによる検索" href="7.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="7.0/user/search-field.html"/>
+        <item name="ソート" href="7.0/user/search-sort.html"/>
+        <item name="ワイルドカード" href="7.0/user/search-wildcard.html"/>
+        <item name="範囲指定検索" href="7.0/user/search-range.html"/>
+        <item name="ブースト検索" href="7.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="7.0/user/search-fuzzy.html"/>
+        <item name="XML応答" href="7.0/user/xml-response.html"/>
+        <item name="JSON応答" href="7.0/user/json-response.html"/>
+      </item>
+      <item name="6.0" collapse="true" href="6.0/user/index.html">
+        <item name="ラベルによる検索" href="6.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="6.0/user/search-field.html"/>
+        <item name="ソート" href="6.0/user/search-sort.html"/>
+        <item name="OR検索" href="6.0/user/search-or.html"/>
+        <item name="NOT検索" href="6.0/user/search-not.html"/>
+        <item name="範囲指定検索" href="6.0/user/search-range.html"/>
+        <item name="ブースト検索" href="6.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="6.0/user/search-fuzzy.html"/>
+        <item name="XML応答" href="6.0/user/xml-response.html"/>
+        <item name="JSON応答" href="6.0/user/json-response.html"/>
+      </item>
+      <item name="5.0" collapse="true" href="5.0/user/index.html">
+        <item name="ラベルによる検索" href="5.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="5.0/user/search-field.html"/>
+        <item name="ソート" href="5.0/user/search-sort.html"/>
+        <item name="OR検索" href="5.0/user/search-or.html"/>
+        <item name="NOT検索" href="5.0/user/search-not.html"/>
+        <item name="範囲指定検索" href="5.0/user/search-range.html"/>
+        <item name="ブースト検索" href="5.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="5.0/user/search-fuzzy.html"/>
+        <item name="XML応答" href="5.0/user/xml-response.html"/>
+        <item name="JSON応答" href="5.0/user/json-response.html"/>
+      </item>
+      <item name="4.0" collapse="true" href="4.0/user/index.html">
+        <item name="ラベルによる検索" href="4.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="4.0/user/search-field.html"/>
+        <item name="ソート" href="4.0/user/search-sort.html"/>
+        <item name="OR検索" href="4.0/user/search-or.html"/>
+        <item name="NOT検索" href="4.0/user/search-not.html"/>
+        <item name="範囲指定検索" href="4.0/user/search-range.html"/>
+        <item name="ブースト検索" href="4.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="4.0/user/search-fuzzy.html"/>
+        <item name="XML応答" href="4.0/user/xml-response.html"/>
+        <item name="JSON応答" href="4.0/user/json-response.html"/>
+      </item>
+      <item name="3.0" collapse="true" href="3.0/user/index.html">
+        <item name="ラベルによる検索" href="3.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="3.0/user/search-field.html"/>
+        <item name="ソート" href="3.0/user/search-sort.html"/>
+        <item name="OR検索" href="3.0/user/search-or.html"/>
+        <item name="NOT検索" href="3.0/user/search-not.html"/>
+      </item>
+      <item name="2.0" collapse="true" href="2.0/user/index.html">
+        <item name="ラベルによる検索" href="2.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="2.0/user/search-field.html"/>
+        <item name="ソート" href="2.0/user/search-sort.html"/>
+      </item>
+      </item>
+      <item name="管理" collapse="true" href="7.0/admin/index.html">
+      <item name="8.0" collapse="true" href="8.0/admin/index.html">
+        <item name="設定ウィザード" href="8.0/admin/wizard-guide.html"/>
+        <item name="クロール全般の設定" href="8.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="8.0/admin/system-guide.html"/>
+        <item name="インデックスの設定" href="8.0/admin/document-guide.html"/>
+        <item name="デザインの設定" href="8.0/admin/design-guide.html"/>
+        <item name="バックアップ/リストア" href="8.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="8.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="8.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="8.0/admin/dataCrawlingConfig-guide.html"/>
+        <item name="ラベルの設定" href="8.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="8.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="8.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="8.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="8.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="8.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="8.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="8.0/admin/browserType-guide.html"/>
+        <item name="システム情報" href="8.0/admin/systemInfo-guide.html"/>
+        <item name="セッション情報" href="8.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="8.0/admin/log-guide.html"/>
+        <item name="障害URL" href="8.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="8.0/admin/searchList-guide.html"/>
+        <item name="検索ログ" href="8.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="8.0/admin/stats-guide.html"/>
+        <item name="利用者" href="8.0/admin/userInfo-guide.html"/>
+        <item name="人気URL" href="8.0/admin/favoriteLog-guide.html"/>
+      </item>
+      <item name="7.0" collapse="true" href="7.0/admin/index.html">
+        <item name="設定ウィザード" href="7.0/admin/wizard-guide.html"/>
+        <item name="クロール全般の設定" href="7.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="7.0/admin/system-guide.html"/>
+        <item name="デザインの設定" href="7.0/admin/design-guide.html"/>
+        <item name="バックアップ/リストア" href="7.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="7.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="7.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="7.0/admin/dataCrawlingConfig-guide.html"/>
+        <item name="ラベルの設定" href="7.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="7.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="7.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="7.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="7.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="7.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="7.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="7.0/admin/browserType-guide.html"/>
+        <item name="システム情報" href="7.0/admin/systemInfo-guide.html"/>
+        <item name="セッション情報" href="7.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="7.0/admin/log-guide.html"/>
+        <item name="障害URL" href="7.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="7.0/admin/searchList-guide.html"/>
+        <item name="検索ログ" href="7.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="7.0/admin/stats-guide.html"/>
+        <item name="利用者" href="7.0/admin/userInfo-guide.html"/>
+        <item name="人気URL" href="7.0/admin/favoriteLog-guide.html"/>
+      </item>
+      <item name="6.0" collapse="true" href="6.0/admin/index.html">
+        <item name="設定ウィザード" href="6.0/admin/wizard-guide.html"/>
+        <item name="クロール全般の設定" href="6.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="6.0/admin/system-guide.html"/>
+        <item name="デザインの設定" href="6.0/admin/design-guide.html"/>
+        <item name="バックアップ/リストア" href="6.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="6.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="6.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="6.0/admin/dataCrawlingConfig-guide.html"/>
+        <item name="ラベルの設定" href="6.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="6.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="6.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="6.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="6.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="6.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="6.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="6.0/admin/browserType-guide.html"/>
+        <item name="システム情報" href="6.0/admin/systemInfo-guide.html"/>
+        <item name="セッション情報" href="6.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="6.0/admin/log-guide.html"/>
+        <item name="検索ログ" href="6.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="6.0/admin/stats-guide.html"/>
+        <item name="障害URL" href="6.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="6.0/admin/searchList-guide.html"/>
+      </item>
+      <item name="5.0" collapse="true" href="5.0/admin/index.html">
+        <item name="設定ウィザード" href="5.0/admin/config-wizard.html"/>
+        <item name="クロール全般の設定" href="5.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="5.0/admin/system-guide.html"/>
+        <item name="デザインの設定" href="5.0/admin/design-guide.html"/>
+        <item name="バックアップ/リストア" href="5.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="5.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="5.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="5.0/admin/dataStoreCrawling-guide.html"/>
+        <item name="ラベルの設定" href="5.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="5.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="5.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="5.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="5.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="5.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="5.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="5.0/admin/browserType-guide.html"/>
+        <item name="システム情報" href="5.0/admin/systemInfo-guide.html"/>
+        <item name="セッション情報" href="5.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="5.0/admin/log-guide.html"/>
+        <item name="検索ログ" href="5.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="5.0/admin/stats-guide.html"/>
+        <item name="障害URL" href="5.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="5.0/admin/search-guide.html"/>
+      </item>
+      <item name="4.0" collapse="true" href="4.0/admin/index.html">
+        <item name="設定ウィザード" href="4.0/admin/config-wizard.html"/>
+        <item name="クロール全般の設定" href="4.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="4.0/admin/system-guide.html"/>
+        <item name="デザインの設定" href="4.0/admin/design-guide.html"/>
+        <item name="バックアップ/リストア" href="4.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="4.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="4.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="4.0/admin/dataStoreCrawling-guide.html"/>
+        <item name="ラベルの設定" href="4.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="4.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="4.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="4.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="4.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="4.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="4.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="4.0/admin/browserType-guide.html"/>
+        <item name="システム情報" href="4.0/admin/systemInfo-guide.html"/>
+        <item name="セッション情報" href="4.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="4.0/admin/log-guide.html"/>
+        <item name="検索ログ" href="4.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="4.0/admin/stats-guide.html"/>
+        <item name="障害URL" href="4.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="4.0/admin/search-guide.html"/>
+      </item>
+      <item name="3.0" collapse="true" href="3.0/admin/index.html">
+        <item name="設定ウィザード" href="3.0/admin/config-wizard.html"/>
+        <item name="クロール全般の設定" href="3.0/admin/crawl-guide.html"/>
+        <item name="デザインの設定" href="3.0/admin/design-guide.html"/>
+        <item name="ウェブクロールの設定" href="3.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="3.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="3.0/admin/dataStoreCrawling-guide.html"/>
+        <item name="パスマッピングの設定" href="3.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="3.0/admin/webAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="3.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="3.0/admin/overlappingHost-guide.html"/>
+        <item name="ラベルの設定" href="3.0/admin/labelType-guide.html"/>
+        <item name="ロールの設定" href="3.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="3.0/admin/browserType-guide.html"/>
+        <item name="システムの設定" href="3.0/admin/system-guide.html"/>
+        <item name="セッション情報の設定" href="3.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="3.0/admin/log-guide.html"/>
+        <item name="バックアップ/リストア" href="3.0/admin/data-guide.html"/>
+      </item>
+      <item name="2.0" collapse="true" href="2.0/admin/index.html">
+        <item name="クロール全般の設定" href="2.0/admin/crawl-guide.html"/>
+        <item name="デザインの設定" href="2.0/admin/design-guide.html"/>
+        <item name="ウェブクロールの設定" href="2.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="2.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="パスマッピングの設定" href="2.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="2.0/admin/webAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="2.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="2.0/admin/overlappingHost-guide.html"/>
+        <item name="ラベルの設定" href="2.0/admin/labelType-guide.html"/>
+        <item name="ロールの設定" href="2.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="2.0/admin/browserType-guide.html"/>
+        <item name="システムの設定" href="2.0/admin/system-guide.html"/>
+        <item name="セッション情報の設定" href="2.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="2.0/admin/log-guide.html"/>
+        <item name="バックアップ/リストア" href="2.0/admin/data-guide.html"/>
+      </item>
+      <item name="1.1" collapse="true" href="1.1/index.html">
+        <item name="クロール全般の設定" href="1.1/crawl-guide.html"/>
+        <item name="ウェブクロールの設定" href="1.1/web-crawl-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="1.1/file-crawl-guide.html"/>
+        <item name="パスマッピングの設定" href="1.1/pathmapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="1.1/web-auth-guide.html"/>
+        <item name="対応ブラウザの設定" href="1.1/browsertype-guide.html"/>
+        <item name="Solr の設定" href="1.1/solr-guide.html"/>
+        <item name="セッション情報の設定" href="1.1/sessioninfo-guide.html"/>
+        <item name="ログファイル" href="1.1/logfile-guide.html"/>
+        <item name="バックアップ/リストア" href="1.1/backup-restore-guide.html"/>
+      </item>
+      </item>
+      <item name="設定" collapse="true" href="7.0/config/index.html">
+      <item name="8.0" collapse="true" href="8.0/config/index.html">
+        <item name="ポート変更" href="8.0/config/server-port.html"/>
+        <item name="メモリー関連" href="8.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="8.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="8.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="8.0/config/filesize.html"/>
+        <item name="ログ" href="8.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="8.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="8.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="8.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="8.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="8.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="8.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="8.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="8.0/config/index-backup.html"/>
+        <item name="デスクトップ検索" href="8.0/config/desktop-search.html"/>
+        <item name="Tomcatにインストール" href="8.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="8.0/config/pdf-with-password.html"/>
+        <item name="データベースの変更" href="8.0/config/db.html"/>
+        <item name="ジオサーチ" href="8.0/config/geosearch.html"/>
+        <item name="LibreOfficeの利用" href="8.0/config/use-libreoffice.html"/>
+      </item>
+      <item name="7.0" collapse="true" href="7.0/config/index.html">
+        <item name="ポート変更" href="7.0/config/server-port.html"/>
+        <item name="メモリー関連" href="7.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="7.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="7.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="7.0/config/filesize.html"/>
+        <item name="ログ" href="7.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="7.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="7.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="7.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="7.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="7.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="7.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="7.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="7.0/config/index-backup.html"/>
+        <item name="デスクトップ検索" href="7.0/config/desktop-search.html"/>
+        <item name="Tomcatにインストール" href="7.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="7.0/config/pdf-with-password.html"/>
+        <item name="データベースの変更" href="7.0/config/db.html"/>
+        <item name="GEOサーチ" href="7.0/config/geosearch.html"/>
+        <item name="LibreOfficeの利用" href="7.0/config/use-libreoffice.html"/>
+      </item>
+      <item name="6.0" collapse="true" href="6.0/config/index.html">
+        <item name="ポート変更" href="6.0/config/server-port.html"/>
+        <item name="メモリー関連" href="6.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="6.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="6.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="6.0/config/filesize.html"/>
+        <item name="ログ" href="6.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="6.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="6.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="6.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="6.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="6.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="6.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="6.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="6.0/config/index-backup.html"/>
+        <item name="デスクトップ検索" href="6.0/config/desktop-search.html"/>
+        <item name="Tomcatにインストール" href="6.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="6.0/config/pdf-with-password.html"/>
+        <item name="データベースの変更" href="6.0/config/db.html"/>
+        <item name="GEOサーチ" href="6.0/config/geosearch.html"/>
+        <item name="LibreOfficeの利用" href="6.0/config/use-libreoffice.html"/>
+      </item>
+      <item name="5.0" collapse="true" href="5.0/config/index.html">
+        <item name="ポート変更" href="5.0/config/server-port.html"/>
+        <item name="メモリー関連" href="5.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="5.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="5.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="5.0/config/filesize.html"/>
+        <item name="ログ" href="5.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="5.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="5.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="5.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="5.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="5.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="5.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="5.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="5.0/config/index-backup.html"/>
+        <item name="デスクトップ検索" href="5.0/config/desktop-search.html"/>
+        <item name="Tomcatにインストール" href="5.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="5.0/config/pdf-with-password.html"/>
+        <item name="データベースの変更" href="5.0/config/db.html"/>
+        <item name="GEOサーチ" href="5.0/config/geosearch.html"/>
+      </item>
+      <item name="4.0" collapse="true" href="4.0/config/index.html">
+        <item name="ポート変更" href="4.0/config/server-port.html"/>
+        <item name="メモリー関連" href="4.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="4.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="4.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="4.0/config/filesize.html"/>
+        <item name="ログ" href="4.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="4.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="4.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="4.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="4.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="4.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="4.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="4.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="4.0/config/index-backup.html"/>
+        <item name="デスクトップ検索" href="4.0/config/desktop-search.html"/>
+        <item name="Tomcatにインストール" href="4.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="4.0/config/pdf-with-password.html"/>
+      </item>
+      <item name="3.0" collapse="true" href="3.0/config/index.html">
+        <item name="ポート変更" href="3.0/config/server-port.html"/>
+        <item name="メモリー関連" href="3.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="3.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="3.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="3.0/config/filesize.html"/>
+        <item name="ログ" href="3.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="3.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="3.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="3.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="3.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="3.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="3.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="3.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="3.0/config/index-backup.html"/>
+      </item>
+      <item name="2.0" collapse="true" href="2.0/config/index.html">
+        <item name="ポート変更" href="2.0/config/server-port.html"/>
+        <item name="メモリー関連" href="2.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="2.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="2.0/config/mobile-device.html"/>
+        <item name="ログ" href="2.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="2.0/config/solr-failure.html"/>
+        <item name="ロールの設定" href="2.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="2.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="2.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="2.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="2.0/config/protwords.html"/>
+      </item>
+      <item name="1.1" collapse="true" href="1.1/server-config.html">
+        <item name="サーバ設定" href="1.1/server-config.html"/>
+      </item>
+      </item>
+    </menu>
+  </body>
+</project>

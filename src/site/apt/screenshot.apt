@@ -1,0 +1,62 @@
+ ------------------
+ Screenshot
+ ------------------
+ Shinsuke Sugaya
+ ------------------
+ 2010-11-12
+ ------------------
+
+Screenshot
+
+* Search Results on Browser
+
+[./images/ja/screenshot/fess_search_result.png] Search Results on Browser
+
+* Search Results on Mobile Device
+
+[./images/ja/screenshot/fess_search_mobile_result.png] Search Results on Mobile Device
+
+* Crawling Setting
+
+[./images/ja/screenshot/fess_admin_crawler.png] Crawling Setting
+
+* Web Crawling Config
+
+[./images/ja/screenshot/fess_admin_webconfig.png] Web Crawling Config
+
+* File System Crawling Config
+
+[./images/ja/screenshot/fess_admin_fsconfig.png] File System Crawling Config
+
+* Web Authentication Setting
+
+[./images/ja/screenshot/fess_admin_webauth.png] Web Authentication Setting
+
+* Path Mapping Setting
+
+[./images/ja/screenshot/fess_admin_pathmapping.png] Path Mapping Setting
+
+* Browser Type Setting
+
+[./images/ja/screenshot/fess_admin_browsertype.png] Browser Type Setting
+
+* Solr Setting
+
+[./images/ja/screenshot/fess_admin_solr.png] Solr Setting
+
+* Session Info
+
+[./images/ja/screenshot/fess_admin_logfile.png] Session Info
+
+* Session Info List
+
+[./images/ja/screenshot/fess_admin_sessioninfo.png] Session Info List
+
+* Session Info Details
+
+[./images/ja/screenshot/fess_admin_sessioninfo2.png] Session Info Details
+
+* Backup/Restore
+
+[./images/ja/screenshot/fess_admin_backuprestore.png] Backup/Restore
+

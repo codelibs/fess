@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>Solr障害時の動作</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="Solr障害時の動作">
+      <p>Fess では Solr サーバーをグループ化して、複数のグループを管理することができます。Fess はサーバーおよびグループの情報を保持して、Solr サーバーにアクセスできなくなった場合はサーバー及びグループの状態を変更します。</p>
+      <p>Solr サーバーの状態情報は、管理画面のシステム設定で変更することができます。minActiveServer、maxErrorCount、maxRetryStatusCheckCount、maxRetryUpdateQueryCount は webapps/fess/WEB-INF/classes/fess_solr.dicon で定義することができます。</p>
+      <subsection name="障害の Solr グループの動作">
+        <ul>
+          <li>Solr グループ内に有効状態の Solr サーバー台数が minActiveServer 以下になった場合は Solr グループが無効状態になります。</li>
+          <li>Solr グループ内に有効状態の Solr サーバー台数が minActiveServer 以下になっているが Solr グループが無効状態になっていない場合、無効状態の Solr サーバーの状態を maxRetryStatusCheckCount 回確認して、Solr サーバーにアクセスできる場合は Solr サーバーの状態を無効状態から有効状態に変更します。インデックス破損状態の Solr サーバーはアクセスできたとしても有効状態に変更されません。</li>
+          <li>無効状態の Solr グループは利用されません。</li>
+          <li>Solr グループを有効状態にするためには、管理画面のシステム設定で Solr グループ内の Solr サーバーの状態を有効に変更します。</li>
+        </ul>
+      </subsection>
+      <subsection name="検索時の障害の動作">
+        <ul>
+          <li>検索クエリーは有効状態の Solr グループに送信できます。。</li>
+          <li>検索クエリーは有効状態の Solr サーバーだけに送信されます。</li>
+          <li>Solr グループ内に複数の Solr サーバーが登録されている場合は、利用している回数が少ない Solr サーバーに検索クエリーを送信します。</li>
+          <li>Solr サーバーに送信した検索クエリーが maxErrorCount 以上失敗した場合は Solr サーバーを無効状態に変更します。</li>
+        </ul>
+      </subsection>
+      <subsection name="更新時の障害の動作">
+        <ul>
+          <li>更新クエリーは有効状態の Solr グループに送信できます。。</li>
+          <li>更新クエリーは有効状態の Solr サーバーだけに送信されます。</li>
+          <li>Solr グループ内に複数の Solr サーバーが登録されている場合は、有効状態の Solr サーバーすべてに更新クエリーを送信します。</li>
+          <li>Solr サーバーに送信した更新クエリーが maxRetryUpdateQueryCount 以上失敗した場合は Solr サーバーをインデックス破損状態に変更します。</li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

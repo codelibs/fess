@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>データストアの設定</title>
+    <author>曽根 孝明</author>
+  </properties>
+  <body>
+    <section name="データストアの設定">
+      <p>fess ではデータベースもクロール対象とすることができます。ここでは、そのために必要なデータストアの設定について説明します。</p>
+      <subsection name="設定方法">
+        <p>管理者アカウントでログイン後、メニューのデータストアをクリックします。</p>
+        <img src="/images/ja/4.0/dataStoreCrawling-1.png" alt="データストアの設定"/>
+        <p>例として、以下のようなテーブルが MySQL の testdb というデータベースにあり、ユーザ名 hoge 、パスワード fuga で接続することができるとして、説明を行います。</p>
+        <source><![CDATA[
+CREATE TABLE job (
+       id BIGINT NOT NULL AUTO_INCREMENT
+     , title VARCHAR(100) NOT NULL
+     , content VARCHAR(255) NOT NULL
+     , versionNo INTEGER NOT NULL
+     , PRIMARY KEY (id)
+);
+]]></source>
+      </subsection>
+      <subsection name="パラメータ">
+        <p>パラメータの設定例は以下のようになります。</p>
+        <source><![CDATA[
+driver=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/testdb?useUnicode=true&characterEncoding=UTF-8
+username=hoge
+password=fuga
+sql=select * from job
+]]></source>
+        <p>パラメータは「キー=値」形式となっています。キーの説明は以下です。</p>
+        <table class="table table-striped table-bordered table-condensed">
+          <tbody>
+            <tr class="a">
+              <td align="left">driver</td>
+              <td align="left">ドライバクラス名</td>
+            </tr>
+            <tr class="b">
+              <td align="left">url</td>
+              <td align="left">URL</td>
+            </tr>
+            <tr class="a">
+              <td align="left">username</td>
+              <td align="left">DBに接続する際のユーザ名</td>
+            </tr>
+            <tr class="b">
+              <td align="left">password</td>
+              <td align="left">DBに接続する際のパスワード</td>
+            </tr>
+            <tr class="a">
+              <td align="left">sql</td>
+              <td align="left">クロール対象を得るための SQL 文</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+      <subsection name="スクリプト">
+        <p>スクリプトの設定例は以下のようになります。</p>
+        <source><![CDATA[
+url="http://localhost/" + id
+host="localhost"
+site="localhost"
+title=title
+content=content
+cache=content
+digest=content
+anchor=
+contentLength=content.length()
+lastModified=content.length()
+]]></source>
+        <p>
+          パラメータは「キー=値」形式になっています。キーの説明は以下です。
+        </p>
+        <p>
+          値の側は、OGNL で記述します。文字列はダブルクォーテーションでくくってください。データベースのカラム名でアクセスすれば、その値になります。
+        </p>
+        <table class="table table-striped table-bordered table-condensed">
+          <tbody>
+            <tr class="a">
+              <td align="left">url</td>
+              <td align="left">URL(検索結果に表示されるリンク)</td>
+            </tr>
+            <tr class="b">
+              <td align="left">host</td>
+              <td align="left">ホスト名</td>
+            </tr>
+            <tr class="a">
+              <td align="left">site</td>
+              <td align="left">サイトパス</td>
+            </tr>
+            <tr class="b">
+              <td align="left">title</td>
+              <td align="left">タイトル</td>
+            </tr>
+            <tr class="a">
+              <td align="left">content</td>
+              <td align="left">コンテンツ(インデックス対象文字列)</td>
+            </tr>
+            <tr class="b">
+              <td align="left">cache</td>
+              <td align="left">コンテンツのキャッシュ(インデックス対象ではない)</td>
+            </tr>
+            <tr class="a">
+              <td align="left">digest</td>
+              <td align="left">検索結果に表示されるダイジェスト部分</td>
+            </tr>
+            <tr class="b">
+              <td align="left">anchor</td>
+              <td align="left">コンテンツに含まれるリンク(普通は指定する必要はありません)</td>
+            </tr>
+            <tr class="a">
+              <td align="left">contentLength</td>
+              <td align="left">コンテンツの長さ</td>
+            </tr>
+            <tr class="b">
+              <td align="left">lastModified</td>
+              <td align="left">コンテンツの最終更新日</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+      <subsection name="ドライバ">
+        <p>データベースに接続する際にはドライバが必要となります。webapps/fess/WEB-INF/cmd/lib に jar ファイルを置いてください。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

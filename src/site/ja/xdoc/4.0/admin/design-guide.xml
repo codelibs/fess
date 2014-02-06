@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>デザインの設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="デザインの設定">
+      <p>ここでは、検索画面のデザインに関する設定について説明します。</p>
+      <subsection name="設定方法">
+        <p>管理者アカウントでログイン後、メニューのデザインをクリックします。</p>
+        <img src="/images/ja/4.0/design-1.png" alt="デザイン"/>
+        <p>以下の画面で検索画面を編集することができます。</p>
+        <img src="/images/ja/4.0/design-2.png" alt="JSP の編集画面"/>
+      </subsection>
+      <subsection name="画像ファイル">
+        <p>検索画面で使用する画像ファイルをアップロードすることができます。サポートしている画像ファイル名は jpg、gif、png です。</p>
+      </subsection>
+      <subsection name="画像ファイル名">
+        <p>アップロードする画像ファイルにファイル名を指定したい場合に利用します。省略した場合はアップロードしたファイル名が利用されます。</p>
+      </subsection>
+      <subsection name="デザイン JSP ファイル">
+        <p>検索画面の JSP ファイルを編集することができます。対象の JSP ファイルの編集ボタンを押下することで、現在の JSP ファイルを編集することができます。また、デフォルトを使用ボタンを押下すると、インストール時の JSP ファイルとして編集することができます。編集画面で更新ボタンで保存することで、変更が反映されます。</p>
+        <p>以下に記述方法の例を示します。</p>
+        <table class="table table-striped table-bordered table-condensed">
+          <tbody>
+            <tr class="a">
+              <td align="left">トップページ (フレーム)</td>
+              <td align="left">検索トップページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">トップページ (Headタグ内)</td>
+              <td align="left">検索トップページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">トップページ (コンテンツ)</td>
+              <td align="left">検索トップページの body タグ内を表現する JSP ファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">検索結果ページ (フレーム)</td>
+              <td align="left">検索結果一覧ページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">検索結果ページ (Headタグ内)</td>
+              <td align="left">検索結果一覧ページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">検索結果ページ (ヘッダー)</td>
+              <td align="left">検索結果一覧ページのヘッダー部分を表現する JSP ファイルです。ページ上部の検索フォームなどが含まれています。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">検索結果ページ (フッター)</td>
+              <td align="left">検索結果一覧ページのフッター部分を表現する JSP ファイルです。ページ下部のコピーライトが含まれています。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">検索結果ページ (コンテンツ)</td>
+              <td align="left">検索結果一覧ページの検索結果部分を表現する JSP ファイルです。検索結果があるときに利用される JSP ファイルです。検索結果の表現をカスタマイズしたい場合に変更します。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">検索結果ページ (結果なし)</td>
+              <td align="left">検索結果一覧ページの検索結果部分を表現する JSP ファイルです。検索結果がないときに利用される JSP ファイルです。</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>携帯用画面も PC 用と同様に編集することができます。</p>
+      </subsection>
+    </section>
+    <section name="設定方法">
+      <subsection name="登録日時や更新日時を表示する">
+        <p>Fess でクロールして登録した日時や取得するファイルの更新日時を検索結果に表示したい場合は、検索結果ページ (コンテンツ)に次のように記述します。</p>
+      <source><![CDATA[
+    :
+    :
+        <ol>
+<c:forEach var="doc" varStatus="s" items="${documentItems}">
+<%
+java.util.Map docMap = (java.util.Map)pageContext.getAttribute("doc");
+Long tstampValue = (Long)docMap.get("tstamp");
+java.util.Date tstampDate = new java.util.Date(tstampValue);
+Long lastModifiedValue = (Long)docMap.get("lastModified");
+java.util.Date lastModifiedDate = new java.util.Date(lastModifiedValue);
+java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm");
+%>
+            <li>
+                <h3 class="title">
+                    <a href="${doc.urlLink}">${f:h(doc.contentTitle)}</a>
+                </h3>
+                <div class="body">
+${doc.contentDescription}               
+                    <br/>
+                    <cite>${f:h(doc.site)}</cite>
+<br>Registered: <%= sdf.format(tstampDate) %>
+<br>Last Modified: <%= sdf.format(lastModifiedDate) %>
+    :
+    :
+]]></source>
+        <p>tstampDate が登録日時、lastModifiedDate が更新日時になります。出力する日付フォーマットは SimpeDateFormat で指定します。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

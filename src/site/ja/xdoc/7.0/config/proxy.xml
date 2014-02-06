@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>プロキシの設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+
+    <section name="クローラ用プロキシの設定">
+      <p>イントラネット内から外部サイトをクロールするような場合は、ファイアフォールにクロールがブロックされてしまうかもしれません。そのような場合にはクローラ用のプロキシを設定してください。</p>
+    </section>
+    <section name="設定方法">
+      <p>下記の内容で webapps/fess/WEB-INF/classes/s2robot_client.dicon を作成することでプロキシが設定されます。</p>
+      <source><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+    "http://www.seasar.org/dtd/components24.dtd">
+<components>
+    <include path="s2robot_robotstxt.dicon"/>
+    <include path="s2robot_contentlength.dicon"/>
+
+    <component name="httpClient" class="org.seasar.robot.client.http.HcHttpClient"
+        instance="prototype">
+        <property name="cookiePolicy">
+            @org.apache.http.client.params.CookiePolicy@BEST_MATCH</property>
+        <property name="clientConnectionManager">clientConnectionManager</property>
+        <property name="proxyHost">"プロキシサーバー名(ex. 192.168.1.1)"</property>
+        <property name="proxyPort">プロキシサーバーのポート(ex. 8080) (" は不要)</property>
+        <!-- プロキシに認証がある場合
+        <property name="proxyCredentials">
+            <component class="org.apache.http.auth.UsernamePasswordCredentials">
+                <arg>"プロキシ用ユーザー名"</arg>
+                <arg>"プロキシ用パスワード"</arg>
+            </component>
+        </property>
+        -->
+    </component>
+    
+    <component name="clientConnectionManager"
+        class="org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager">
+        <arg>
+            <component class="org.apache.http.conn.scheme.SchemeRegistry">
+                <initMethod name="register">
+                    <arg>
+                        <component class="org.apache.http.conn.scheme.Scheme">
+                            <arg>"http"</arg>
+                            <arg>80</arg>
+                            <arg>
+                            @org.apache.http.conn.scheme.PlainSocketFactory@getSocketFactory()
+                            </arg>
+                        </component>
+                    </arg>
+                </initMethod>
+                <initMethod name="register">
+                    <arg>
+                        <component class="org.apache.http.conn.scheme.Scheme">
+                            <arg>"https"</arg>
+                            <arg>443</arg>
+                            <arg>
+                            @org.apache.http.conn.ssl.SSLSocketFactory@getSocketFactory()
+                            </arg>
+                        </component>
+                    </arg>
+                </initMethod>
+            </component>
+        </arg>
+        <property name="maxTotalConnections">200</property>
+        <property name="defaultMaxPerRoute">200</property>
+        <destroyMethod name="shutdown"></destroyMethod>
+    </component>
+]]></source>
+
+      <source><![CDATA[
+    <component name="fsClient" class="org.seasar.robot.client.fs.FileSystemClient"
+        instance="prototype">
+        <property name="charset">"UTF-8"</property>
+    </component>
+
+    <component name="smbClient" class="org.seasar.robot.client.smb.SmbClient"
+        instance="prototype">
+        <property name="charset">"UTF-8"</property>
+        <!-- ntlmPasswordAuthentication -->
+    </component>
+
+    <component name="clientFactory" class="org.seasar.robot.client.S2RobotClientFactory"
+        instance="prototype">
+        <initMethod name="addClient">
+            <arg>{"http:.*", "https:.*"}</arg>
+            <arg>httpClient</arg>
+        </initMethod>
+        <initMethod name="addClient">
+            <arg>"file:.*"</arg>
+            <arg>fsClient</arg>
+        </initMethod>
+        <initMethod name="addClient">
+            <arg>"smb:.*"</arg>
+            <arg>smbClient</arg>
+        </initMethod>
+    </component>
+
+</components>
+
+]]></source>
+    </section>
+
+  </body>
+</document>

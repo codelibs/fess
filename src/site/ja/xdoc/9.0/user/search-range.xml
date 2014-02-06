@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>範囲指定検索</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="範囲指定検索">
+      <p>数値など範囲指定が可能でデータをフィールドに格納している場合、そのフィールドに対して範囲指定検索が可能です。</p>
+      <subsection name="利用方法">
+        <p>範囲指定検索をするためには、「フィールド名:[値 TO 値]」 を検索フォームに入力します。</p>
+        <p>たとえば、contentLength フィールドに対して、1kバイトから10kバイトにあるドキュメントを検索する場合は以下のように検索フォームに入力します。 </p>
+        <source><![CDATA[
+contentLength:[1000 TO 10000]
+]]></source>
+        <p>時間の範囲指定検索をするためには、「lastModified:[日時1 TO 日時2]」(日時1＜日時2) を検索フォームに入力します。</p>
+      	<p>日時はISO 8601を基準にしています。</p>
+      	<table>
+		  <tr>
+		    <td>年月日および時分秒および小数部分</td>
+		    <td>現在日時を基準にする場合</td>
+		  </tr>
+		  <tr>
+		    <td>YYYY-MM-DDThh:mm:ss.sZ（例：2013-08-02T10:45:23.5Z)</td>
+		    <td>NOW(現在の日時)、YEAR(今年)、MONTH(今月)、DAY(本日)</td>
+		  </tr>
+		</table>
+		<p>NOWやDAYなどの現在日時を基準にした場合には+、-(加算、減産)や/(丸め)といった記号を付けることができます。</p>
+		<p>/は/の後ろの単位で丸める記号です。NOW-1DAY/DAYは本日何時に実行したとしても、本日00:00から-1日した前日の00:00を表します。</p>
+        <p>たとえば、lastModified フィールドに対して、2012年2月21日20時(現在日時とする)から30日前までに更新されたドキュメントを検索する場合は以下のように検索フォームに入力します。 </p>
+        <source><![CDATA[
+lastModified:[NOW-30DAY TO NOW](=[2012-01-23T00:00:00Z+TO+2012-02-21T20:00:00Z(現在日時)])
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

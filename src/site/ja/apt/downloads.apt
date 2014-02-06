@@ -1,0 +1,23 @@
+ ------------------
+ ダウンロード
+ ------------------
+ Takaaki SONE
+ Shinsuke Sugaya
+ ------------------
+ 2009-10-10
+ ------------------
+
+安定版リリース
+
+    動作確認済の安定版リリースです。
+
+    {{{http://sourceforge.jp/projects/fess/releases/}http://sourceforge.jp/projects/fess/releases/}}
+
+スナップショット版リリース
+
+    最新ソースコードからの自動ビルドです。
+    (正常に動作することは保証していません)
+    最新機能を試してみたい場合などにご利用ください。
+
+    {{{http://fess.codelibs.org/snapshot/}http://fess.codelibs.org/snapshot/}}
+

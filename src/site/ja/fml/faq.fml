@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faqs xmlns="http://maven.apache.org/FML/1.0.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+  title="よくある質問"
+  toplink="false">
+
+  <part id="general">
+    <title>一般</title>
+    <faq id="whats-foo">
+      <question>
+Fess って何？
+      </question>
+      <answer>
+        <p>
+Fessは「5 分で簡単に構築可能な全文検索サーバー」です。
+        </p>
+      </answer>
+    </faq>
+    <faq id="whats-crawl">
+      <question>
+クロールとは？
+      </question>
+      <answer>
+        <p>
+Fess が対象ドキュメントに含まれる情報を元に次々とドキュメントをたどりながら、検索の索引（インデックス）を作成する処理のことです。
+        </p>
+        <p>
+ファイルシステムをクロールする場合は、対象ディレクトリ以下のディレクトリもたどりながら、インデックスを作成します。
+        </p>
+      </answer>
+    </faq>
+    <faq id="check-load">
+      <question>
+クロールによるサーバ負荷は大丈夫ですか？
+      </question>
+      <answer>
+        <p>
+Fess ではクロール設定ごとに、同時クロール数やクロール間隔を指定することができます。
+サーバの負荷状態を確認して、それらの値を調整してください。
+        </p>
+      </answer>
+    </faq>
+    <faq id="crawl-dynamic-page">
+      <question>
+動的に生成されるページも検索対象にできますか？
+      </question>
+      <answer>
+        <p>
+CGIなどで動的に生成されるようなページでも、クロールしてインデックスを作成することができます。
+Fess では URL を 1 つのドキュメントとして、検索結果を出力します。
+        </p>
+      </answer>
+    </faq>
+    <faq id="include-exclude-path">
+      <question>
+特定のパターンをもつ URLをクロール対象（または対象外）にできますか？
+      </question>
+      <answer>
+        <p>
+可能です。
+検索対象のパスを正規表現で指定することで、検索対象または非対象にすることができます。
+        </p>
+      </answer>
+    </faq>
+    <faq id="db-crawler">
+      <question>
+データベースはクロールできますか？
+      </question>
+      <answer>
+        <p>
+可能です。
+クロール可能なデータベースは、JDBC ドライバが利用可能なものになります。
+        </p>
+      </answer>
+    </faq>
+  </part>
+  <part id="search">
+    <title>検索</title>
+    <faq id="msoffice">
+      <question>
+Word、Excel、PowerPoint などのファイルは検索できますか？
+      </question>
+      <answer>
+        <p>
+可能です。
+        </p>
+      </answer>
+    </faq>
+    <faq id="pdf">
+      <question>
+PDFファイルは検索できますか？
+      </question>
+      <answer>
+        <p>
+可能です。
+        </p>
+      </answer>
+    </faq>
+    <faq id="search-field">
+      <question>
+ファイルの種類やサイトを指定した検索は可能ですか？
+      </question>
+      <answer>
+        <p>
+可能です。
+<a href="4.0/user/search-field.html">フィールド指定検索</a>を参照してください。
+        </p>
+      </answer>
+    </faq>
+    <faq id="design-customize">
+      <question>
+デザインをカスタマイズできますか？
+      </question>
+      <answer>
+        <p>
+管理画面からログインして、デザインから編集することができます。
+        </p>
+      </answer>
+    </faq>
+    <faq id="path-mapping">
+      <question>
+クロールした URL と検索結果の URL を、別のものにできますか？
+      </question>
+      <answer>
+        <p>
+パスマッピング機能を利用することで、インデックス生成時に指定された正規表現にマッチした箇所を置き換えて、検索結果に表示することができます。
+        </p>
+      </answer>
+    </faq>
+    <faq id="max-field-length">
+      <question>
+文量が多いドキュメントで文末の単語が検索対象にならないようですが…
+      </question>
+      <answer>
+        <p>
+Solr の設定で対応することができます。solr/core1/conf/solrconfig.xml の maxFieldLength を増やしてください。
+増やしすぎるとメモリを消費するので注意してください。
+        </p>
+      </answer>
+    </faq>
+    <faq id="max-field-length">
+      <question>
+ローカルファイル(file:/c:/hoge/...)の検索結果リンクをクリックしても表示されません。
+      </question>
+      <answer>
+        <p>
+ローカルファイルを検索するためには、<a href="6.0/config/desktop-search.html">デスクトップ検索機能</a>を利用してください。
+        </p>
+      </answer>
+    </faq>
+  </part>
+  <part id="crawling">
+    <title>クロール</title>
+    <faq id="license">
+      <question>
+共有フォルダクロール (smb://～) でクロールされません
+      </question>
+      <answer>
+        <p>
+smb://server/folder/ というようにフォルダを指定している場合に、最後に / が入っているでしょうか?
+フォルダ指定で / がない場合はクロールされません。
+        </p>
+      </answer>
+    </faq>
+  </part>
+  <part id="license">
+    <title>ライセンス</title>
+    <faq id="license">
+      <question>
+ライセンスは何ですか？
+      </question>
+      <answer>
+        <p>
+Apache ライセンスです。
+        </p>
+      </answer>
+    </faq>
+    <faq id="free">
+      <question>
+無料ですか？
+      </question>
+      <answer>
+        <p>
+無料でご利用いただけます。
+ただし、利用は自己責任でお願いいたします。
+サポートサービスが必要な場合は、<a href="support-services.html">商用サポート</a>をご検討ください。
+        </p>
+      </answer>
+    </faq>
+  </part>
+  <part id="configure">
+    <title>構成</title>
+    <faq id="install-on-tomcat">
+      <question>
+既に Tomcat を利用していますがそこに Fess をインストールできますか？
+      </question>
+      <answer>
+        <p>
+可能です。
+<a href="4.0/config/install-on-tomcat.html">既存の Tomcat にインストール</a>を参照してください。
+        </p>
+      </answer>
+    </faq>
+    <faq id="redundant">
+      <question>
+冗長化は可能ですか？
+      </question>
+      <answer>
+        <p>
+可能です。
+Fess が利用している検索サーバの Apache Solr は標準では同梱して配布しています。
+Fess と Apache Solr は疎結合であり、複数の Solr サーバの構成も可能です。
+クロール対象が多いような場合は、Fess を複数を置き同時にクロールさせて負荷分散することも可能です。
+        </p>
+      </answer>
+    </faq>
+  </part>
+  <part id="others">
+    <title>その他</title>
+    <faq id="i-have-question">
+      <question>
+質問はどこに投げれば良いですか？
+      </question>
+      <answer>
+        <p>
+Fessのメーリングリストをご利用ください。
+過去のやりとりの内容などは<a href="http://sourceforge.jp/projects/fess/lists/archive/user/">アーカイブ</a>をご覧ください。
+        </p>
+      </answer>
+    </faq>
+    <faq id="support-service">
+      <question>
+商用サポートはありますか？
+      </question>
+      <answer>
+        <p>
+<a href="http://fess.codelibs.org/ja/support-services.html">商用サポート</a>をご覧ください。
+        </p>
+      </answer>
+    </faq>
+  </part>
+
+</faqs>
+

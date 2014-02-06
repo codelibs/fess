@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ファイルシステム認証に関する設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="ファイルシステム認証に関する設定">
+      <p>ここでは、ファイルシステムを対象としたクロールに対してファイルシステム認証が必要な場合の設定方法について説明します。 Fess は Windows の共有フォルダに対するクロールに対応しています。</p>
+      <subsection name="設定方法">
+        <p>管理者アカウントでログイン後、メニューのファイルシステム認証をクリックします。</p>
+        <img src="/images/ja/4.0/fileAuthentication-1.png" alt="ファイルシステム認証の設定"/>
+      </subsection>
+      <subsection name="ホスト名">
+        <p>認証が必要なサイトのホスト名を指定します。 省略した場合は、指定したファイルシステムクロール設定において、任意のホスト名で適用されます。</p>
+      </subsection>
+      <subsection name="ポート">
+        <p>認証が必要なサイトのポートを指定します。 すべてのポートに対して適用したい場合は -1 を指定します。 その場合は、指定したファイルシステムクロール設定において、任意のポートで適用されます。</p>
+      </subsection>
+      <subsection name="認証方法">
+        <p>認証方法を選択します。 SAMBA (Windows共有フォルダ認証) を利用することができます。</p>
+      </subsection>
+      <subsection name="ユーザー名">
+        <p>認証サイトにログインするためのユーザー名を指定します。</p>
+      </subsection>
+      <subsection name="パスワード">
+        <p>認証サイトにログインするためのパスワードを指定します。</p>
+      </subsection>
+      <subsection name="パラメーター">
+        <p>認証サイトにログインするために必要な設定値がある場合に設定します。SAMBA の場合、domainの値を設定することができます。設定する場合には以下のように記述します。</p>
+        <source><![CDATA[
+domain=FUGA
+]]></source>
+      </subsection>
+      <subsection name="ファイルシステム設定名">
+        <p>上記の認証設定を適用するファイルシステム設定名を選択します。 ファイルシステムクロール設定を事前に登録しておく必要があります。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

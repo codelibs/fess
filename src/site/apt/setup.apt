@@ -1,0 +1,88 @@
+ ------------------
+ Installation
+ ------------------
+ Shinsuke Sugaya
+ ------------------
+ 2010-11-12
+ ------------------
+
+Installation
+
+    A system requirement to run Fess server is:
+
+    * OS: an operation system which has Java runtime environment, such as Windows and Unix.
+
+    * Java: Java 6 or the above
+
+    []
+
+    You can download Java 6 from {{{http://java.sun.com/}http://java.sun.com/}}.
+
+Download
+
+    Download the latest Fess package from {{{http://sourceforge.jp/projects/fess/releases/}http://sourceforge.jp/projects/fess/releases/}}.
+
+Installation
+
+    Unzip fess-server-x.y.zip.
+    Grant an execution permission to script files in bin directory if you install on Unix environment.
+
++---------------------------------+
+$ unzip fess-server-x.y.zip
+$ cd fess-server-x.y
+$ chmod +x bin/*.sh   # (Unix only)
++---------------------------------+
+
+Start Fess 
+
+    Run startup script to start Fess server.
+
++---------------------------------+
+$ ./bin/startup.sh   # (Use startup.bat on Windows)
++---------------------------------+
+
+    Access to {{{http://localhost:8080/fess/}http://localhost:8080/fess/}} to check if Fess is running.
+
+    The administrative UI is {{{http://localhost:8080/fess/admin/}http://localhost:8080/fess/admin/}}.
+    The default username/password is admin/admin.
+    admin account has fess role, which is used as an administrative role.
+
+Stop Fess 
+
+    Run shutdown script to stop Fess server.
+
++---------------------------------+
+$ ./bin/shutdown.sh   # (Use shutdown.bat on Windows)
++---------------------------------+
+
+Change Password for Administrator User
+
+    admin account is managed by an application server.
+    A default Fess server uses Tomcat as the app server.
+    Therefore, a password change is the same as Tomcat's steps.
+    If you want to change a password, modify a password of admin user in conf/tomcat-user.xml.
+
++---------------------------------+
+  <user username="admin" password="admin" roles="fess"/>
++---------------------------------+
+
+Change Password for Solr Server
+
+    Fess server contains Apache Solr as a search engine, and a password is needed to access to it.
+    In a production envrionment, CHANGE the password.
+
+    First, changing the password, change solradmin of a password attribute in conf/tomcat-user.xml.
+
++---------------------------------+
+  <user username="solradmin" password="solradmin" roles="solr"/>
++---------------------------------+
+
+    Second, set the same one to the following Password element in webapps/fess/WEB-INF/classes/fess_solr.dicon.
+
++---------------------------------+
+<component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+    <arg>"solradmin"</arg> <!-- Username -->
+    <arg>"solradmin"</arg> <!-- Password -->
+</component>
++---------------------------------+
+

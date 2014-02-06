@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>起動および停止方法</title>
+    <authors>
+      <person name="菅谷信介" email="shinsuke@yahoo.co.jp"/>
+    </authors>
+  </properties>
+  <body>
+    <section name="起動方法">
+<p>
+startup スクリプトを実行して Fess を起動します。
+</p>
+
+<source><![CDATA[
+$ ./bin/startup.sh   # (Windowsの場合 startup.bat)
+]]></source>
+<p>
+http://localhost:8080/fess/ にアクセスすることによって、起動を確認できます。
+</p>
+
+<p>
+管理 UI は http://localhost:8080/fess/admin/ です。
+デフォルトの管理者アカウントのユーザー名/パスワードは、admin/admin になります。
+管理者アカウントはアプリケーションサーバーにより管理されています。
+Fess の管理 UI では、アプリケーションサーバーで fess ロールで認証されたユーザーを管理者として判断しています。
+</p>
+    </section>
+    <section name="停止方法">
+<p>
+shutdown スクリプトを実行して Fess を停止します。
+</p>
+
+<source><![CDATA[
+$ ./bin/shutdown.sh   # (Windowsの場合 shutdown.bat)
+]]></source>
+<p>
+クロールまたはインデックス作成中にシャットダウンした場合、完全に停止するまで時間がかかる場合があります。
+</p>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>設定ウィザード</title>
+    <author>曽根 孝明</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、設定ウィザードの紹介をします。</p>
+      <p>設定ウィザードを利用することで、簡単に Fess をセットアップすることができます。</p>
+    </section>
+    <section name="設定方法">
+      <subsection name="ウィザードによる設定">
+        <p>管理者アカウントでログイン後、メニューの設定ウィザードをクリックします。</p>
+        <img src="/images/ja/9.0/admin/config-wizard-1.png" alt="設定ウィザード" />
+        <p>クロール設定を行います。
+        クロール設定は、検索対象するURIを登録するものです。
+        クロール設定名の部分は、識別しやすい任意の名前をいれてください。
+        クロールパスの部分には、検索対象としたい URI を入れてください。</p>
+        <img src="/images/ja/9.0/admin/config-wizard-3.png" alt="クロール設定" />
+        <p>例えば、http://fess.codelibs.org/ を検索対象としたい場合、以下のようになります。</p>
+        <img src="/images/ja/9.0/admin/config-wizard-4.png" alt="クロール設定例" />
+        <p>ファイルシステムであれば、c:\Users\taro などのように入力します。</p>
+        <p>これで設定は完了です。「クロール開始」ボタンを押下することで、クロールが開始されます。「完了」ボタンを押下した場合、スケジューリングの設定で指定した時間になるまでは、クロールが開始されません。</p>
+        <img src="/images/ja/9.0/admin/config-wizard-5.png" alt="クロール開始" />
+      </subsection>
+      <subsection name="設定内容の変更">
+        <p>設定ウィザードで設定した内容は、クロール全般、ウェブ、ファイルシステムから変更できます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>セッション情報の設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="セッション情報の設定">
+      <p>ここでは、セッション情報に関わる設定について説明します。 1 回のクロールした結果を 1 つのセッション情報として保存されます。 実行した時間やインデックスされた数を確認することができます。</p>
+      <subsection name="設定方法">
+        <p>管理者アカウントでログイン後、メニューのセッション情報をクリックします。</p>
+      </subsection>
+      <subsection name="セッション情報一覧">
+        <img src="/images/ja/3.0/crawlingSession-1.png" alt="セッション情報一覧"/>
+        <p>すべて削除リンクをクリックすると実行中でないすべてのセッション情報を削除することができます。</p>
+      </subsection>
+      <subsection name="セッション情報詳細">
+        <img src="/images/ja/3.0/crawlingSession-2.png" alt="セッション情報詳細"/>
+        <p>セッション ID を指定してクロール内容を確認できます。</p>
+        <ul>
+          <li>Cralwer*: クロール全体に関する情報</li>
+          <li>FsCrawl*: ファイルシステムのクロールに関する情報</li>
+          <li>WebCrawl*: ウェブのクロールに関する情報</li>
+          <li>Optimize*: Solr サーバーに発行した最適化に関する情報</li>
+          <li>Commit*: Solr サーバーに発行したコミットに関する情報</li>
+          <li>*StartTime: 開始時刻</li>
+          <li>*EndTime: 終了時刻</li>
+          <li>*ExecTime: 実行時間 (ミリ秒)</li>
+          <li>*IndexSize: インデックスしたドキュメント数</li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

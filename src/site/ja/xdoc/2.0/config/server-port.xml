@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ポート変更</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="ポートの変更">
+      <p>Fess がデフォルトで利用するポートは 8080 になります。 変更するには以下の手順で変更します。</p>
+      <subsection name="Tomcat のポート変更">
+        <p>Fess が利用している Tomcat のポートを変更します。 変更は conf/server.xml に記述されている以下のものを変更します。</p>
+        <ul>
+          <li>8080: HTTP アクセスポート</li>
+          <li>8005: シャットダウンポート</li>
+          <li>8009: AJP ポート</li>
+          <li>8443: SSL の HTTP アクセスポート (デフォルトは無効)</li>
+        </ul>
+      </subsection>
+      <subsection name="Solr の設定">
+        <p>標準構成では、Solr も同じ Tomcat の設定を利用しているので、Tomcat のポートを変更した場合は、Fess の Solr サーバーの参照先情報も変更する必要があります。 webapps/fess/WEB-INF/classes/fess_solr.dicon を変更します。</p>
+        <source><![CDATA[
+<arg>"http://localhost:8080/solr"</arg>
+]]></source>
+        <p>
+          <b>注: Tomcat のポートを変更した場合は上記のポートを同様に変更しないと、Solr サーバーにアクセスできないために検索画面やインデックス更新時にエラーが表示されます。</b>
+        </p>
+      </subsection>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>データベースの変更</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>標準の環境ではデータベースには H2 Database を利用しています。設定を変更することで他のデータベースを利用することができます。</p>
+    </section>
+    <section name="MySQLを利用する場合">
+      <subsection name="準備">
+        <p>MySQL の文字コードの設定をします。/etc/mysql/my.cnf などに以下の設定がなければ追加します。</p>
+      <source><![CDATA[
+[mysqld]
+character-set-server = utf8 # mysql 5.5 以降
+# default-character-set = utf8 mysql 5.1以下
+]]></source>
+      </subsection>
+      <subsection name="インストール">
+        <p>MySQL 用のバイナリを展開します。</p>
+      </subsection>
+      <subsection name="設定">
+        <p>データベースを作成します。</p>
+      <source><![CDATA[
+$ mysql -u root -p
+mysql> create database fess_db;
+mysql> grant all privileges on fess_db.* to fess_user@localhost identified by 'fess_pass';
+mysql> create database fess_robot;
+mysql> grant all privileges on fess_robot.* to s2robot@localhost identified by 's2robot';
+mysql> FLUSH PRIVILEGES;
+]]></source>
+        <p>作成したデータベースにテーブルを作成します。DDL ファイルは extension/mysql にあります。</p>
+      <source><![CDATA[
+$ mysql -u fess_user --password=fess_pass fess_db < extension/mysql/fess.ddl 
+$ mysql -u s2robot --password=s2robot fess_robot < extension/mysql/robot.ddl 
+]]></source>
+        <p>webapps/fess/WEB-INF/lib に mysql ドライバの jar を配置します。</p>
+      <source><![CDATA[
+$ cd webapps/fess/WEB-INF/lib/
+$ rm h2-1.*.jar 
+$ wget http://mirrors.ibiblio.org/pub/mirrors/maven2/mysql/mysql-connector-java/5.1.18/ \
+mysql-connector-java-5.1.18.jar
+$ cd ../../../../
+]]></source>
+        <p>webapps/fess/WEB-INF/classes/jdbc.dicon を編集します。</p>
+      <source><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR2.1//DTD S2Container//EN"
+    "http://www.seasar.org/dtd/components21.dtd">
+<components namespace="jdbc">
+    <include path="jta.dicon"/>
+
+    <!-- MySQL -->
+    <component name="xaDataSource"
+        class="org.seasar.extension.dbcp.impl.XADataSourceImpl">
+        <property name="driverClassName">
+            "com.mysql.jdbc.Driver"
+        </property>
+        <property name="URL">
+            "jdbc:mysql://localhost:3306/fess_db?" +
+            "noDatetimeStringSync=true&amp;" +
+            "zeroDateTimeBehavior=convertToNull&amp;" +
+            "useUnicode=true&amp;characterEncoding=UTF-8&amp;" +
+            "autoReconnect=true"
+        </property>
+        <property name="user">"fess_user"</property>
+        <property name="password">"fess_pass"</property>
+    </component>
+
+    <component name="connectionPool"
+        class="org.seasar.extension.dbcp.impl.ConnectionPoolImpl">
+        <property name="timeout">600</property>
+        <property name="maxPoolSize">10</property>
+        <property name="allowLocalTx">true</property>
+        <destroyMethod name="close"/>
+    </component>
+
+    <component name="DataSource"
+        class="org.seasar.extension.dbcp.impl.DataSourceImpl"
+    />
+</components>
+]]></source>
+        <p>webapps/fess/WEB-INF/classes/s2robot_jdbc.dicon を編集します。</p>
+      <source><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR2.1//DTD S2Container//EN"
+    "http://www.seasar.org/dtd/components21.dtd">
+<components namespace="jdbc">
+    <include path="jta.dicon"/>
+
+    <!-- for MySQL -->
+    <component name="xaDataSource"
+        class="org.seasar.extension.dbcp.impl.XADataSourceImpl">
+        <property name="driverClassName">
+            "com.mysql.jdbc.Driver"
+        </property>
+        <property name="URL">
+            "jdbc:mysql://localhost:3306/fess_robot?" +
+            "noDatetimeStringSync=true&amp;" +
+            "zeroDateTimeBehavior=convertToNull&amp;" +
+            "useUnicode=true&amp;characterEncoding=UTF-8&amp;" +
+            "autoReconnect=true"
+        </property>
+        <property name="user">"s2robot"</property>
+        <property name="password">"s2robot"</property>
+    </component>
+
+    <component name="connectionPool"
+        class="org.seasar.extension.dbcp.impl.ConnectionPoolImpl">
+        <property name="timeout">600</property>
+        <property name="maxPoolSize">10</property>
+        <property name="allowLocalTx">true</property>
+        <property name="transactionIsolationLevel">
+            @java.sql.Connection@TRANSACTION_REPEATABLE_READ</property>
+        <destroyMethod name="close"/>
+    </component>
+
+    <component name="DataSource"
+        class="org.seasar.extension.dbcp.impl.DataSourceImpl"
+    />
+
+</components>
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

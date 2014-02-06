@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>パスマッピングの設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="パスマッピングの設定">
+      <p>ここでは、パスマッピングに関する設定について説明します。 パスマッピングは検索結果に表示するリンクを置き換えたい場合などに利用することができます。</p>
+      <subsection name="設定方法">
+        <p>管理者アカウントでログイン後、メニューのパスマッピングをクリックします。</p>
+        <img src="/images/ja/2.0/pathMapping-1.png" alt="パスマッピングの一覧"/>
+        <img src="/images/ja/2.0/pathMapping-2.png" alt="パスマッピングの設定"/><!-- TODO -->
+      </subsection>
+      <subsection name="パスマッピング">
+        <p>パスマッピングは指定した正規表現でマッチする部分を置き換え文字列で置換します。 ローカルなファイルシステムをクロールした場合、環境によっては検索結果のリンクが有効でない場合があります。 そのような場合にパスマッピングを利用して、検索結果のリンクを制御できます。 パスマッピングは複数指定できます。</p>
+      </subsection>
+      <subsection name="正規表現">
+        <p>置換したい文字列を指定します。記述方法は <a href="http://java.sun.com/javase/ja/6/docs/ja/api/java/util/regex/Pattern.html">Java 6 の正規表現</a>に従います。</p>
+      </subsection>
+      <subsection name="置換文字">
+        <p>一致した正規表現を置き換える文字列を指定します。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

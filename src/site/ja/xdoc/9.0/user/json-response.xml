@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>JSONによる検索結果</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="JSON応答による検索">
+      <p>Fessの検索結果をJSONにより出力することができます。JSONにより出力するためには管理画面のクロール全般の設定でJSON応答を有効にしておく必要があります。</p>
+      <subsection name="リクエスト">
+        <p>JSONにより出力結果を得るためには <code>http://localhost:8080/fess/json?query=検索語</code> のようなリクエストを送ります。リクエストパラメータについては以下の通りです。</p>
+        <table columninfo="lp{10cm}">
+          <caption>リクエストパラメータ</caption>
+          <tbody>
+            <tr>
+              <th>query</th>
+              <td>検索語。URLエンコードして渡します。</td>
+            </tr>
+            <tr>
+              <th>start</th>
+              <td>開始する件数位置。0から始まります。</td>
+            </tr>
+            <tr>
+              <th>num</th>
+              <td>表示件数。デフォルトは20件です。100件まで表示できます。</td>
+            </tr>
+            <tr>
+              <th>fields.label</th>
+              <td>ラベル値。ラベルを指定する場合に利用します。</td>
+            </tr>
+            <tr>
+              <th>callback</th>
+              <td>JSONPを利用する場合のコールバック名。JSONPを利用しない場合は指定する必要はありません。</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+      <subsection name="レスポンス">
+        <p>以下のようなレスポンスが返ります。</p>
+        <source><![CDATA[
+{
+    "response": {
+        "version": 1,
+        "status": 0,
+        "query": "\u30C6\u30B9\u30C8",
+        "execTime": 0.59,
+        "pageSize": 20,
+        "pageNumber": 1,
+        "recordCount": 101,
+        "pageCount": 6,
+        "result": [
+            {
+                "site": "speedtest.goo.ne.jp\u002F",
+                "contentDescription": "goo \u306E\u63D0\u4F9B\u3059\u308B\u30B9\u30D4\u3C..",
+                "host": "speedtest.goo.ne.jp",
+                "lastModified": "1284739487873",
+                "cache": "\u9FA0-->\n<meta http-equiv=\u0022Content-Type\u0022 content=\..",
+                "score": "4.98744",
+                "digest": "goo \u306E\u63D0\u4F9B\u3059\u308B\u30B9\u30D4\u30FC\u30C9<em>..",
+                "tstamp": "1284739487887",
+                "url": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F",
+                "id": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F;type=au,docomo,pc,softbank",
+                "mimetype": "text\u002Fhtml",
+                "title": "\ngoo \u30B9\u30D4\u30FC\u30C9\u30C6\u30B9\u30C8\n",
+                "contentTitle": "\ngoo \u30B9\u30D4\u30FC\u30C9\u30C6\u30B9\u30C8\n",
+                "boost": "1.0",
+                "contentLength": "17810",
+                "urlLink": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F"
+            },
+...
+        ]
+    }
+}
+]]></source>
+        <p>各要素については以下の通りです。</p>
+        <table>
+          <caption>レスポンス情報</caption>
+          <tbody>
+            <tr>
+              <th>response</th>
+              <td>ルート要素。</td>
+            </tr>
+            <tr>
+              <th>version</th>
+              <td>フォーマットバージョン。</td>
+            </tr>
+            <tr>
+              <th>status</th>
+              <td>レスポンスのステータス。status値は、0:正常、1:検索エラー、2または3:リクエストパラメータエラー、9:サービス停止中、-1:API種別エラーです。</td>
+            </tr>
+            <tr>
+              <th>query</th>
+              <td>検索語。</td>
+            </tr>
+            <tr>
+              <th>execTime</th>
+              <td>応答時間。単位は秒。</td>
+            </tr>
+            <tr>
+              <th>pageSize</th>
+              <td>表示件数。</td>
+            </tr>
+            <tr>
+              <th>pageNumber</th>
+              <td>ページ番号。</td>
+            </tr>
+            <tr>
+              <th>recordCount</th>
+              <td>検索語に対してヒットした件数。</td>
+            </tr>
+            <tr>
+              <th>pageCount</th>
+              <td>検索語に対してヒットした件数のページ数。</td>
+            </tr>
+            <tr>
+              <th>result</th>
+              <td>検索結果の親要素。</td>
+            </tr>
+            <tr>
+              <th>site</th>
+              <td>サイト名。</td>
+            </tr>
+            <tr>
+              <th>contentDescription</th>
+              <td>コンテンツの説明。</td>
+            </tr>
+            <tr>
+              <th>host</th>
+              <td>ホスト名。</td>
+            </tr>
+            <tr>
+              <th>lastModified</th>
+              <td>最終更新日時。1970/01/01 00:00:00 から始まるミリ秒。</td>
+            </tr>
+            <tr>
+              <th>cache</th>
+              <td>コンテンツの内容。</td>
+            </tr>
+            <tr>
+              <th>score</th>
+              <td>ドキュメントのスコア値。</td>
+            </tr>
+            <tr>
+              <th>digest</th>
+              <td>ドキュメントのダイジェスト文字列。</td>
+            </tr>
+            <tr>
+              <th>tstamp</th>
+              <td>ドキュメントの生成日時。1970/01/01 00:00:00 から始まるミリ秒。</td>
+            </tr>
+            <tr>
+              <th>url</th>
+              <td>ドキュメントのURL。</td>
+            </tr>
+            <tr>
+              <th>id</th>
+              <td>ドキュメントのID。</td>
+            </tr>
+            <tr>
+              <th>mimetype</th>
+              <td>MIMEタイプ。</td>
+            </tr>
+            <tr>
+              <th>title</th>
+              <td>ドキュメントのタイトル。</td>
+            </tr>
+            <tr>
+              <th>contentTitle</th>
+              <td>表示用のドキュメントのタイトル。</td>
+            </tr>
+            <tr>
+              <th>contentLength</th>
+              <td>ドキュメントのサイズ。</td>
+            </tr>
+            <tr>
+              <th>urlLink</th>
+              <td>検索結果としてのURL。</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+    </section>
+  </body>
+</document>

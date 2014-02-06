@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ジョブログ</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>実行したジョブの結果を一覧として表示します。</p>
+    </section>
+    <section name="利用方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューの利用者をクリックします。</p>
+      </subsection>
+      <subsection name="ジョブログ一覧">
+        <img src="/images/ja/9.0/admin/jobLog-1.png" alt="ジョブログ一覧" />
+        <p>実行したジョブのログが一覧されます。ジョブ名、ステータス、開始・完了時刻を確認することができます。また、詳細を選択して、各ログの詳細を確認することができます。</p>
+      </subsection>
+      <subsection name="ジョブログ詳細">
+        <p>ジョブのログ内容を確認できます。ジョブ名、ステータス、開始・完了時刻、結果などを表示します。</p>
+        <img src="/images/ja/9.0/admin/jobLog-2.png" alt="ジョブログ詳細" />
+      </subsection>
+    </section>
+  </body>
+</document>
