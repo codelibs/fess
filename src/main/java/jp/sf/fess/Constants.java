@@ -23,7 +23,7 @@ import org.codelibs.core.CoreLibConstants;
 public class Constants extends CoreLibConstants {
     public static final int MAJOR_VERSION = 9;
 
-    public static final int MINOR_VERSION = 0;
+    public static final int MINOR_VERSION = 1;
 
     public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION)
             + "." + String.valueOf(MINOR_VERSION);
