@@ -47,8 +47,10 @@
         <li>検索ログおよびクリックログの集計</li>
         <li>ファセット・ドリルダウン対応</li>
         <li>オートコンプリート・サジェスト機能</li>
+        <li>ユーザー辞書および同義語辞書編集機能</li>
         <li>関連ドキュメント表示機能</li>
         <li>検索結果のスクリーンショット表示機能</li>
+        <li>検索結果のプロキシ機能</li>
         <li>デスクトップ検索やローカルファイルのクリックオープン機能</li>
         <li>スマートフォン対応 (Responsive Web Design)</li>
         <li>モバイル対応 (キャリアごとに検索可能)</li>
@@ -58,6 +60,10 @@
     </section>
     <section name="ニュース">
       <dl>
+        <dt>2014-02-07</dt>
+        <dd>
+          <a href="http://sourceforge.jp/projects/fess/news/24562" class="externalLink">Fess 9.0.0 リリース</a>
+        </dd>
         <dt>2013-09-07</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24407" class="externalLink">Fess 8.2.0 リリース</a>
@@ -65,10 +71,6 @@
         <dt>2013-05-13</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24242" class="externalLink">Fess 8.1.0 リリース</a>
-        </dd>
-        <dt>2013-02-23</dt>
-        <dd>
-          <a href="http://sourceforge.jp/projects/fess/news/24130" class="externalLink">Fess 8.0.0 リリース</a>
         </dd>
       </dl>
       <p>過去のニュースは<a href="news.html">こちら</a>をご覧ください。</p>

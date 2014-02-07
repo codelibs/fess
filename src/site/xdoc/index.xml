@@ -49,6 +49,10 @@
     </section>
     <section name="News">
       <dl>
+        <dt>2014-02-07</dt>
+        <dd>
+          <a href="http://sourceforge.jp/projects/fess/news/24562" class="externalLink">Fess 9.0.0 Released</a>
+        </dd>
         <dt>2013-09-07</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24407" class="externalLink">Fess 8.2.0 Released</a>
