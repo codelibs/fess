@@ -6,6 +6,7 @@
 	<include path="aop.dicon" />
 	<include path="dbflute.dicon" />
 	<include path="fess.dicon" />
+	<include path="fess_suggest.dicon"/>
 
 	<include path="s2robot_db.dicon" />
 
@@ -14,8 +15,6 @@
 	<component name="webFsIndexHelper" class="jp.sf.fess.helper.WebFsIndexHelper">
 	</component>
 	<component name="dataIndexHelper" class="jp.sf.fess.helper.DataIndexHelper">
-	</component>
-	<component name="crawlingConfigHelper" class="jp.sf.fess.helper.CrawlingConfigHelper">
 	</component>
 	<component name="overlappingHostHelper" class="jp.sf.fess.helper.OverlappingHostHelper">
 	</component>
@@ -34,7 +33,7 @@
 	<component name="indexUpdater" class="jp.sf.fess.solr.IndexUpdater"
 		instance="prototype">
 		<!-- 
-		<property name="maxDocumentCacheSize">10</property>
+		<property name="maxDocumentCacheSize">5</property>
 		<property name="unprocessedDocumentSize">100</property>
 		<property name="threadDump">false</property>
 		<initMethod name="addBoostDocumentRule">
