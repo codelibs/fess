@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>jp.sf.fess</groupId>
   <artifactId>fess</artifactId>
-  <version>9.0.1</version>
+  <version>9.0.2</version>
   <packaging>war</packaging>
   <name>Fess</name>
   <description>Fess is Full tExt Search System.</description>
@@ -472,7 +472,7 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.2.2</version>
+      <version>1.2.2.1</version>
     </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
