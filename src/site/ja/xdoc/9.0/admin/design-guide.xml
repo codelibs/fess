@@ -108,8 +108,8 @@
               <td align="left">携帯用検索結果ページの検索結果部分を表現する JSP ファイルです。検索結果がないときに利用される JSP ファイルです。</td>
             </tr>
             <tr class="b">
-              <td align="left">ファイル起動ページ</td> <!-- TODO -->
-              <td align="left">ファイル起動ページのJSPファイルです。</td>
+              <td align="left">ファイル起動ページ</td>
+              <td align="left">ファイル起動ページのJSPファイルです。ファイルシステムクロールを利用して検索結果の表示にJavaプラグインの表示を有効にした場合に利用される画面です。</td>
             </tr>
             <tr class="a">
               <td align="left">エラーページ(ヘッダー)</td>

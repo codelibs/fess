@@ -56,11 +56,10 @@ Fess サーバーには Solr が組み込まれていますが、アクセスす
   <user username="solradmin" password="solradmin" roles="solr"/>
 ]]></source>
 <p>
-次に webapps/fess/WEB-INF/classes/solrlib.dicon と fess_suggest.dicon
-	 solr/core1/conf/solrconfig.xml
-	 の3ファイルを変更します。以下のパスワードの箇所へ tomcat-user.xml で指定したものを記述します。
-
-solrlib.dicon
+次に webapps/fess/WEB-INF/classes/solrlib.dicon、fess_suggest.dicon および solr/core1/conf/solrconfig.xml の3ファイルを変更します。以下のパスワードの箇所へ tomcat-user.xml で指定したものを記述します。
+</p>
+<p>
+solrlib.dicon の対象箇所を以下のように修正します。
 </p>
 <source><![CDATA[
 <component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
@@ -69,7 +68,7 @@ solrlib.dicon
 </component>
 ]]></source>
 <p>
-fess_suggest.dicon
+fess_suggest.dicon は以下の箇所です。
 </p>
 <source><![CDATA[
 <component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
@@ -78,7 +77,7 @@ fess_suggest.dicon
 </component>
 ]]></source>
 <p>
-solr/core1/conf/solrconfig.xml
+solrconfig.xml は以下の箇所です。
 </p>
 <source><![CDATA[
 <!-- SuggestTranslogUpdateHandler settings -->
