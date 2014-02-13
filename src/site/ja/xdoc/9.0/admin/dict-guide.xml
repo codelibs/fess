@@ -14,7 +14,27 @@
         <img src="/images/ja/9.0/admin/dict-1.png" alt="辞書一覧"/>
       </subsection>
     </section>
-    <!-- TODO ユーザー辞書 -->
+    <section name="ユーザー辞書">
+      <p>人名、固有名詞、専門用語などの登録することができます。
+      ユーザー辞書のパスをクリックすると辞書に登録された単語一覧が表示されます。</p>
+      <img src="/images/ja/9.0/admin/dict-4.png" alt="ユーザー辞書一覧"/>
+      <p>編集したい単語をクリックすると編集画面が表示されます。</p>
+      <img src="/images/ja/9.0/admin/dict-5.png" alt="ユーザー辞書作成"/>
+      <subsection name="トークン">
+        <p>検索対象とする単語を入力します。</p>
+      </subsection>
+      <subsection name="分割">
+          <p>単語が複合語の場合、分割した単語で検索されてもヒットするようにできます。
+          　　たとえば、「全文検索エンジン」を「全文 検索 エンジン」と入力することで、分割した単語でも検索できるようにします。</p>
+      </subsection>
+      <subsection name="読み">
+          <p>単語の読みをカタカナで入力します。分割を行った場合は分割して入力します。
+          　　たとえば、「ゼンブン ケンサク エンジン」と入力します。</p>
+      </subsection>
+      <subsection name="品詞">
+          <p>入力した単語の品詞を入力します。</p>
+      </subsection>
+    </section>
     <section name="同義語辞書">
       <p>意味が同じ単語(GB、gigabyteなど)を登録することができます。
       同義語辞書のパスをクリックすると辞書に登録された単語一覧が表示されます。</p>

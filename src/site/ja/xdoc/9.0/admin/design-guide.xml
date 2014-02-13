@@ -44,38 +44,97 @@
               <td align="left">検索トップページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
             </tr>
             <tr class="b">
-              <td align="left">トップページ (Headタグ内)</td>
-              <td align="left">検索トップページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
+              <td align="left">ヘッダー</td>
+              <td align="left">ヘッダーのJSPファイルです。</td>
             </tr>
             <tr class="a">
-              <td align="left">トップページ (コンテンツ)</td>
-              <td align="left">検索トップページの body タグ内を表現する JSP ファイルです。</td>
+              <td align="left">フッター</td>
+              <td align="left">フッターのJSPファイルです。</td>
             </tr>
             <tr class="b">
               <td align="left">検索結果ページ (フレーム)</td>
               <td align="left">検索結果一覧ページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
             </tr>
             <tr class="a">
-              <td align="left">検索結果ページ (Headタグ内)</td>
-              <td align="left">検索結果一覧ページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
-            </tr>
-            <tr class="b">
-              <td align="left">検索結果ページ (ヘッダー)</td>
-              <td align="left">検索結果一覧ページのヘッダー部分を表現する JSP ファイルです。ページ上部の検索フォームなどが含まれています。</td>
-            </tr>
-            <tr class="a">
-              <td align="left">検索結果ページ (フッター)</td>
-              <td align="left">検索結果一覧ページのフッター部分を表現する JSP ファイルです。ページ下部のコピーライトが含まれています。</td>
-            </tr>
-            <tr class="b">
               <td align="left">検索結果ページ (コンテンツ)</td>
               <td align="left">検索結果一覧ページの検索結果部分を表現する JSP ファイルです。検索結果があるときに利用される JSP ファイルです。検索結果の表現をカスタマイズしたい場合に変更します。</td>
             </tr>
-            <tr class="a">
+            <tr class="b">
               <td align="left">検索結果ページ (結果なし)</td>
               <td align="left">検索結果一覧ページの検索結果部分を表現する JSP ファイルです。検索結果がないときに利用される JSP ファイルです。</td>
             </tr>
-            <!-- TODO 足りないものを追加 -->
+            <tr class="a">
+              <td align="left">ヘルプページ(フレーム)</td>
+              <td align="left">ヘルプページのJSPファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">検索エラーページ</td>
+              <td align="left">検索エラーページのJSPファイルです。検索エラーの表現をカスタマイズしたい場合に変更します。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">携帯用トップページ (フレーム)</td>
+              <td align="left">携帯用トップページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">携帯用トップページ (Headタグ内)</td>
+              <td align="left">携帯用トップページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">携帯用トップページ (コンテンツ)</td>
+              <td align="left">携帯用トップページの body タグ内を表現する JSP ファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">携帯用検索結果ページ (フレーム)</td>
+              <td align="left">携帯用検索結果ページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">携帯用検索結果ページ (Headタグ内)</td>
+              <td align="left">携帯用検索結果ページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">携帯用検索結果ページ (ヘッダー)</td>
+              <td align="left">携帯用検索結果ページのヘッダー部分を表現する JSP ファイルです。ページ上部の検索フォームなどが含まれています。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">携帯用検索結果ページ (フッター)</td>
+              <td align="left">携帯用検索結果ページのフッター部分を表現する JSP ファイルです。ページ下部のコピーライトが含まれています。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">携帯用検索結果ページ (コンテンツ)</td>
+              <td align="left">携帯用検索結果ページの検索結果部分を表現する JSP ファイルです。検索結果があるときに利用される JSP ファイルです。検索結果の表現をカスタマイズしたい場合に変更します。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">携帯用検索結果ページ (結果無し)</td>
+              <td align="left">携帯用検索結果ページの検索結果部分を表現する JSP ファイルです。検索結果がないときに利用される JSP ファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">ファイル起動ページ</td> <!-- TODO -->
+              <td align="left">ファイル起動ページのJSPファイルです。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">エラーページ(ヘッダー)</td>
+              <td align="left">エラーページのヘッダー部分を表現するJSPファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">エラーページ(フッター)</td>
+              <td align="left">エラーページのフッター部分を表現するJSPファイルです。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">エラーページ(ページが見つかりません)</td>
+              <td align="left">ページが見つからない場合に表示されるエラーページのJSPファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">エラーページ(システムエラー)</td>
+              <td align="left">システムエラーの場合に表示されるエラーページのJSPファイルです。</td>
+            </tr>
+            <tr class="a">
+              <td align="left">エラーページ(リダイレクト)</td>
+              <td align="left">HTTPリダイレクト発生時に表示されるエラーページのJSPファイルです。</td>
+            </tr>
+            <tr class="b">
+              <td align="left">エラーページ(不正なリクエスト)</td>
+              <td align="left">不正なリクエストが発生時に表示されるエラーページのJSPファイルです。</td>
+            </tr>
           </tbody>
         </table>
         <p>携帯用画面も PC 用と同様に編集することができます。</p>
