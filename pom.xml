@@ -809,9 +809,9 @@
       <version>3.10-beta2</version>
     </dependency>
     <dependency>
-      <groupId>javassist</groupId>
+      <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
-      <version>3.12.1.GA</version>
+      <version>3.18.1-GA</version>
     </dependency>
     <dependency>
       <groupId>net.arnx</groupId>
