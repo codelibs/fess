@@ -124,8 +124,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -216,7 +216,7 @@
           <docencoding>UTF-8</docencoding>
           <charset>UTF-8</charset>
           <links>
-            <link>http://docs.oracle.com/javase/6/docs/api/</link>
+            <link>http://docs.oracle.com/javase/7/docs/api/</link>
             <link>http://docs.oracle.com/javaee/6/api/</link>
             <link>http://aopalliance.sourceforge.net/doc/</link>
             <link>http://www.csg.is.titech.ac.jp/~chiba/javassist/html/</link>
