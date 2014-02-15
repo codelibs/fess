@@ -211,36 +211,37 @@ public class Crawler implements Serializable {
             return;
         }
 
-        final ServletContext servletContext = new MockServletContextImpl(
-                "/fess");
-        final HttpServletRequest request = new MockHttpServletRequestImpl(
-                servletContext, "/crawler");
-        final HttpServletResponse response = new MockHttpServletResponseImpl(
-                request);
-        final SingletonS2ContainerInitializer initializer = new SingletonS2ContainerInitializer();
-        initializer.setConfigPath("app.dicon");
-        initializer.setApplication(servletContext);
-        initializer.initialize();
-
-        final S2Container container = SingletonS2ContainerFactory
-                .getContainer();
-        final ExternalContext externalContext = container.getExternalContext();
-        externalContext.setRequest(request);
-        externalContext.setResponse(response);
-
-        final Thread shutdownCallback = new Thread("ShutdownHook") {
-            @Override
-            public void run() {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Destroying S2Container..");
-                }
-                SingletonS2ContainerFactory.destroy();
-            }
-        };
-        Runtime.getRuntime().addShutdownHook(shutdownCallback);
-
         int exitCode;
         try {
+            final ServletContext servletContext = new MockServletContextImpl(
+                    "/fess");
+            final HttpServletRequest request = new MockHttpServletRequestImpl(
+                    servletContext, "/crawler");
+            final HttpServletResponse response = new MockHttpServletResponseImpl(
+                    request);
+            final SingletonS2ContainerInitializer initializer = new SingletonS2ContainerInitializer();
+            initializer.setConfigPath("app.dicon");
+            initializer.setApplication(servletContext);
+            initializer.initialize();
+
+            final S2Container container = SingletonS2ContainerFactory
+                    .getContainer();
+            final ExternalContext externalContext = container
+                    .getExternalContext();
+            externalContext.setRequest(request);
+            externalContext.setResponse(response);
+
+            final Thread shutdownCallback = new Thread("ShutdownHook") {
+                @Override
+                public void run() {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Destroying S2Container..");
+                    }
+                    SingletonS2ContainerFactory.destroy();
+                }
+            };
+            Runtime.getRuntime().addShutdownHook(shutdownCallback);
+
             exitCode = process(options);
         } catch (final Throwable t) { // NOPMD
             logger.error("Crawler does not work correctly.", t);
