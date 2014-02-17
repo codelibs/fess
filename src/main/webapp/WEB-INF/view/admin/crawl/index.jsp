@@ -183,14 +183,6 @@
 				</tr>
 				<tr>
 					<th>
-						<bean:message key="labels.commit_per_count"/>
-					</th>
-					<td>
-						<html:text property="commitPerCount" styleClass="small"/>
-					</td>
-				</tr>
-				<tr>
-					<th>
 						<bean:message key="labels.crawling_thread_count"/>
 					</th>
 					<td>

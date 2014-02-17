@@ -41,10 +41,6 @@ public class CrawlForm implements Serializable {
     public String dayForCleanup;
 
     @Required
-    @LongRange(min = 0, max = Long.MAX_VALUE)
-    public String commitPerCount;
-
-    @Required
     @LongRange(min = 0, max = 100)
     public String crawlingThreadCount;
 

@@ -68,9 +68,6 @@ public class CrawlAction implements Serializable {
                 Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
         crawlForm.dayForCleanup = crawlerProperties.getProperty(
                 Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
-        crawlForm.commitPerCount = crawlerProperties.getProperty(
-                Constants.COMMIT_PER_COUNT_PROPERTY,
-                Long.toString(Constants.DEFAULT_COMMIT_PER_COUNT));
         crawlForm.crawlingThreadCount = crawlerProperties.getProperty(
                 Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         crawlForm.mobileTranscoder = crawlerProperties.getProperty(
@@ -155,8 +152,6 @@ public class CrawlAction implements Serializable {
                                 : Constants.FALSE);
         crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY,
                 crawlForm.dayForCleanup);
-        crawlerProperties.setProperty(Constants.COMMIT_PER_COUNT_PROPERTY,
-                crawlForm.commitPerCount);
         crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY,
                 crawlForm.crawlingThreadCount);
         crawlerProperties.setProperty(Constants.MOBILE_TRANSCODER_PROPERTY,
