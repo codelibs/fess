@@ -61,6 +61,7 @@ import org.seasar.robot.entity.ResponseData;
 import org.seasar.robot.entity.ResultData;
 import org.seasar.robot.entity.UrlQueue;
 import org.seasar.robot.util.CrawlingParameterUtil;
+import org.seasar.robot.util.ResponseDataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -102,7 +103,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     @Override
     protected void storeData(final ResponseData responseData,
             final ResultData resultData) {
-        final File tempFile = createResponseBodyFile(responseData);
+        final File tempFile = ResponseDataUtil
+                .createResponseBodyFile(responseData);
         try {
             final DOMParser parser = getDomParser();
             BufferedInputStream bis = null;
