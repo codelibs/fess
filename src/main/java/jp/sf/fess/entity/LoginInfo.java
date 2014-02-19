@@ -71,4 +71,11 @@ public class LoginInfo implements Serializable {
     public long getUpdatedTime() {
         return updatedTime;
     }
+
+    @Override
+    public String toString() {
+        return "LoginInfo [username=" + username + ", administrator="
+                + administrator + ", roleList=" + roleList + ", updatedTime="
+                + updatedTime + "]";
+    }
 }

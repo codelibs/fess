@@ -40,4 +40,10 @@ public class FacetQueryView {
         queryMap.put(key, query);
     }
 
+    @Override
+    public String toString() {
+        return "FacetQueryView [title=" + title + ", queryMap=" + queryMap
+                + "]";
+    }
+
 }

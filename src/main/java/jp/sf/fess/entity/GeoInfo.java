@@ -98,4 +98,10 @@ public class GeoInfo {
         return "{!geofilt pt=" + latitude + "," + longitude
                 + " sfield=location d=" + distance + "}";
     }
+
+    @Override
+    public String toString() {
+        return "GeoInfo [latitude=" + latitude + ", longitude=" + longitude
+                + ", distance=" + distance + ", isInit=" + isInit + "]";
+    }
 }

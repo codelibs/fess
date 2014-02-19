@@ -108,5 +108,17 @@ public class SearchQuery {
         public void setOrder(final String order) {
             this.order = order;
         }
+
+        @Override
+        public String toString() {
+            return "SortField [field=" + field + ", order=" + order + "]";
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "SearchQuery [query=" + query + ", filterQueryList="
+                + filterQueryList + ", sortFieldList=" + sortFieldList
+                + ", minimumShouldMatch=" + minimumShouldMatch + "]";
     }
 }

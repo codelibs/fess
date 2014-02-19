@@ -16,6 +16,8 @@
 
 package jp.sf.fess.entity;
 
+import java.util.Arrays;
+
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.Maxbytelength;
 
@@ -25,4 +27,10 @@ public class MoreLikeThisInfo {
 
     @IntegerType
     public String count;
+
+    @Override
+    public String toString() {
+        return "MoreLikeThisInfo [field=" + Arrays.toString(field) + ", count="
+                + count + "]";
+    }
 }

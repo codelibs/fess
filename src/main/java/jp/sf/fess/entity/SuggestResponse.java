@@ -316,6 +316,20 @@ public class SuggestResponse implements Map<String, List<String>> {
             return parent.subList(fromIndex, toIndex);
         }
 
+        @Override
+        public String toString() {
+            return "SuggestResponseList [parent=" + parent + ", frequencies="
+                    + frequencies + ", frequency=" + frequency + ", token="
+                    + token + ", startOffset=" + startOffset + ", endOffset="
+                    + endOffset + ", numFound=" + numFound + "]";
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        return "SuggestResponse [searchQuery=" + searchQuery + ", execTime="
+                + execTime + ", parent=" + parent + "]";
     }
 
 }
