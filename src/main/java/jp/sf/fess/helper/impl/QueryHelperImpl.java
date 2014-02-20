@@ -82,7 +82,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "created", "title", "digest", "url",
+            "mimetype", "filetype_s", "created", "title", "digest", "url",
             "clickCount_l_x_dv", "favoriteCount_l_x_dv", "screenshot_s_s",
             "cid_s_s" };
 
@@ -93,12 +93,12 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String[] searchFields = new String[] { "url", "docId", "host",
             "title", "content", "contentLength", "lastModified", "mimetype",
-            "label", "segment", "clickCount_l_x_dv", "favoriteCount_l_x_dv",
-            "inurl" };
+            "filetype_s", "label", "segment", "clickCount_l_x_dv",
+            "favoriteCount_l_x_dv", "inurl" };
 
     protected String[] facetFields = new String[] { "url", "host", "title",
-            "content", "contentLength", "lastModified", "mimetype", "label",
-            "segment" };
+            "content", "contentLength", "lastModified", "mimetype",
+            "filetype_s", "label", "segment" };
 
     protected String sortPrefix = "sort:";
 
@@ -1095,6 +1095,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         this.responseFields = responseFields;
     }
 
+    @Override
     public String[] getResponseDocValuesFields() {
         return responseDocValuesFields;
     }

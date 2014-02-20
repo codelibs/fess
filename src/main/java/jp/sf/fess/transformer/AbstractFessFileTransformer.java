@@ -34,6 +34,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.PathMappingHelper;
 import jp.sf.fess.helper.SambaHelper;
@@ -113,7 +114,8 @@ public abstract class AbstractFessFileTransformer extends
         final Map<String, String> params = new HashMap<String, String>();
         params.put(TikaMetadataKeys.RESOURCE_NAME_KEY,
                 getResourceName(responseData));
-        params.put(HttpHeaders.CONTENT_TYPE, responseData.getMimeType());
+        final String mimeType = responseData.getMimeType();
+        params.put(HttpHeaders.CONTENT_TYPE, mimeType);
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
         final StringBuilder contentBuf = new StringBuilder(1000);
         final StringBuilder contentMetaBuf = new StringBuilder(1000);
@@ -187,6 +189,8 @@ public abstract class AbstractFessFileTransformer extends
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
+
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -262,7 +266,12 @@ public abstract class AbstractFessFileTransformer extends
         // TODO anchor
         putResultDataBody(dataMap, "anchor", "");
         // mimetype
-        putResultDataBody(dataMap, "mimetype", responseData.getMimeType());
+        putResultDataBody(dataMap, "mimetype", mimeType);
+        if (fileTypeHelper != null) {
+            // filetype
+            putResultDataBody(dataMap, fileTypeHelper.getFieldName(),
+                    fileTypeHelper.get(mimeType));
+        }
         // contentLength
         putResultDataBody(dataMap, "contentLength",
                 Long.toString(responseData.getContentLength()));

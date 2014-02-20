@@ -41,7 +41,13 @@
 					"contentLength:[10000 TO 99999]",
 					"contentLength:[100000 TO 499999]",
 					"contentLength:[500000 TO 999999]",
-					"contentLength:[1000000 TO *]"
+					"contentLength:[1000000 TO *]",
+					"filetype_s:html",
+					"filetype_s:word",
+					"filetype_s:excel",
+					"filetype_s:powerpoint",
+					"filetype_s:pdf",
+					"filetype_s:others"
 				}</property>
 			</component>
 		</property>
@@ -63,22 +69,22 @@
 		</initMethod>
 		<initMethod name="setApiResponseFields">
 			<arg>new String[]{"id", "docId", "score", "boost",
-            "contentLength", "host", "site", "lastModified", "mimetype",
+            "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
             "created", "title", "digest", "url"}</arg>
 		</initMethod>
 		<!-- 
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{"id", "docId", "score", "boost",
-            "contentLength", "host", "site", "lastModified", "mimetype",
+            "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
             "created", "title", "digest", "url", "screenshot_s_s", "cid_s_s"}</property>
 		<property name="responseDocValuesFields">new String[]{
             "clickCount_l_x_dv", "favoriteCount_l_x_dv"}</property>
 		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
 		<property name="searchFields">new String[]{"url", "docId", "host", 
-            "title", "content", "contentLength", "lastModified", "mimetype",
+            "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
             "label", "segment" }</property>
 		<property name="facetFields">new String[]{"url", "host", 
-            "title", "content", "contentLength", "lastModified", "mimetype",
+            "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
             "label", "segment" }</property>
 		<property name="sortPrefix">"sort:"</property>
 		<property name="supportedSortFields">new String[]{"created",
@@ -157,6 +163,37 @@
 					<initMethod name="addQuery">
 						<arg>"label.facet_contentLength_1m"</arg>
 						<arg>"contentLength:[1000000 TO *]"</arg>
+					</initMethod>
+				</component>
+			</arg>
+		</initMethod>
+		<initMethod name="addFacetQueryView">
+			<arg>
+				<component class="jp.sf.fess.entity.FacetQueryView">
+					<property name="title">"label.facet_filetype_title"</property>
+					<initMethod name="addQuery">
+						<arg>"label.facet_filetype_html"</arg>
+						<arg>"filetype_s:html"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_filetype_word"</arg>
+						<arg>"filetype_s:word"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_filetype_excel"</arg>
+						<arg>"filetype_s:excel"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_filetype_powerpoint"</arg>
+						<arg>"filetype_s:powerpoint"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_filetype_pdf"</arg>
+						<arg>"filetype_s:pdf"</arg>
+					</initMethod>
+					<initMethod name="addQuery">
+						<arg>"label.facet_filetype_others"</arg>
+						<arg>"filetype_s:others"</arg>
 					</initMethod>
 				</component>
 			</arg>

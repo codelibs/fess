@@ -50,6 +50,40 @@
 		</initMethod>
 		 -->
 	</component>
+	<component name="fileTypeHelper" class="jp.sf.fess.helper.FileTypeHelper">
+		<initMethod name="add">
+			<arg>"text/html"</arg>
+			<arg>"html"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/msword"</arg>
+			<arg>"word"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</arg>
+			<arg>"word"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/vnd.ms-excel"</arg>
+			<arg>"excel"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</arg>
+			<arg>"excel"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/vnd.ms-powerpoint"</arg>
+			<arg>"powerpoint"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/vnd.openxmlformats-officedocument.presentationml.presentation"</arg>
+			<arg>"powerpoint"</arg>
+		</initMethod>
+		<initMethod name="add">
+			<arg>"application/pdf"</arg>
+			<arg>"pdf"</arg>
+		</initMethod>
+	</component>
 	<component name="databaseHelper" class="jp.sf.fess.helper.impl.DatabaseHelperImpl">
 		<aspect pointcut="optimize">
 			j2ee.requiresNewTx

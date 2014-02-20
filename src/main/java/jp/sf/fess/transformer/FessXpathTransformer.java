@@ -40,6 +40,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.OverlappingHostHelper;
 import jp.sf.fess.helper.PathMappingHelper;
@@ -224,6 +225,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
+
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -268,7 +271,13 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         putResultDataBody(dataMap, "anchor",
                 getAnchorList(document, responseData));
         // mimetype
-        putResultDataBody(dataMap, "mimetype", responseData.getMimeType());
+        final String mimeType = responseData.getMimeType();
+        putResultDataBody(dataMap, "mimetype", mimeType);
+        if (fileTypeHelper != null) {
+            // filetype
+            putResultDataBody(dataMap, fileTypeHelper.getFieldName(),
+                    fileTypeHelper.get(mimeType));
+        }
         // contentLength
         putResultDataBody(dataMap, "contentLength",
                 Long.toString(responseData.getContentLength()));

@@ -23,6 +23,7 @@ import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.DatabaseHelper;
 import jp.sf.fess.helper.DocumentHelper;
+import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.JobHelper;
@@ -52,6 +53,8 @@ public final class ComponentUtil {
     private static final String DATABASE_HELPER = "databaseHelper";
 
     private static final String MAIL_HELPER = "mailHelper";
+
+    private static final String FILE_TYPE_HELPER = "fileTypeHelper";
 
     private static final String EXTRACTOR_FACTORY = "extractorFactory";
 
@@ -201,6 +204,10 @@ public final class ComponentUtil {
 
     public static MailHelper getMailHelper() {
         return SingletonS2Container.getComponent(MAIL_HELPER);
+    }
+
+    public static FileTypeHelper getFileTypeHelper() {
+        return SingletonS2Container.getComponent(FILE_TYPE_HELPER);
     }
 
     public static DatabaseHelper getDatabaseHelper() {
