@@ -80,6 +80,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
 
     public String contentXpath = "//BODY";
 
+    public String langXpath = "//HTML/@lang";
+
     public String digestXpath = "//META[@name='description']/@content";
 
     public String canonicalXpath = "//LINK[@rel='canonical']/@href";
@@ -244,6 +246,12 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         if (documentExpires != null) {
             putResultDataBody(dataMap, systemHelper.expiresField,
                     FessFunctions.formatDate(documentExpires));
+        }
+        // lang
+        final String lang = systemHelper.normalizeLang(getSingleNodeValue(
+                document, langXpath, true));
+        if (lang != null) {
+            putResultDataBody(dataMap, systemHelper.langField, lang);
         }
         // title
         // content

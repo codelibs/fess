@@ -40,4 +40,30 @@ public class SystemHelperTest extends S2TestCase {
         path = "[]^$.*+?,{}|%\\";
         assertEquals(path, systemHelper.encodeUrlFilter(path));
     }
+
+    public void test_normalizeLang() {
+        String value = null;
+        assertNull(systemHelper.normalizeLang(value));
+
+        value = "";
+        assertNull(systemHelper.normalizeLang(value));
+
+        value = "ja";
+        assertEquals("ja", systemHelper.normalizeLang(value));
+
+        value = " ja ";
+        assertEquals("ja", systemHelper.normalizeLang(value));
+
+        value = "_ja";
+        assertEquals("ja", systemHelper.normalizeLang(value));
+
+        value = "ja-JP";
+        assertEquals("ja", systemHelper.normalizeLang(value));
+
+        value = "ja_JP";
+        assertEquals("ja", systemHelper.normalizeLang(value));
+
+        value = "ja_JP_AAA";
+        assertEquals("ja", systemHelper.normalizeLang(value));
+    }
 }

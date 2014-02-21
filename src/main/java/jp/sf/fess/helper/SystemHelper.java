@@ -123,6 +123,8 @@ public class SystemHelper implements Serializable {
 
     public String idField = "id";
 
+    public String langField = "lang_s";
+
     @InitMethod
     public void init() {
         final File[] files = ResourceUtil.getJarFiles(launcherFileNamePrefix);
@@ -428,6 +430,26 @@ public class SystemHelper implements Serializable {
 
     public String abbreviateLongText(final String str) {
         return StringUtils.abbreviate(str, maxTextLength);
+    }
+
+    public String normalizeLang(final String value) {
+        if (StringUtil.isBlank(value)) {
+            return null;
+        }
+
+        final StringBuilder buf = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            final char c = value.charAt(i);
+            if ('a' <= c && c <= 'z') {
+                buf.append(c);
+            } else if (buf.length() > 0) {
+                break;
+            }
+        }
+        if (buf.length() > 0) {
+            return buf.toString();
+        }
+        return null;
     }
 
 }
