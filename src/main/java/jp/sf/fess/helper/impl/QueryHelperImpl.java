@@ -52,6 +52,12 @@ import org.seasar.struts.util.RequestUtil;
 
 public class QueryHelperImpl implements QueryHelper, Serializable {
 
+    private static final String LABEL_FIELD = "label";
+
+    private static final String INURL_FIELD = "inurl";
+
+    private static final String TTTLE_FIELD = "title";
+
     private static final String CONTENT_FIELD = "content";
 
     private static final String NOT_ = "NOT ";
@@ -82,23 +88,23 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "filetype_s", "created", "title", "digest", "url",
+            "mimetype", "filetype_s", "created", TTTLE_FIELD, "digest", "url",
             "clickCount_l_x_dv", "favoriteCount_l_x_dv", "screenshot_s_s",
             "cid_s_s" };
 
     protected String[] responseDocValuesFields = new String[] {
             "clickCount_l_x_dv", "favoriteCount_l_x_dv" };
 
-    protected String[] highlightingFields = new String[] { "content" };
+    protected String[] highlightingFields = new String[] { CONTENT_FIELD };
 
     protected String[] searchFields = new String[] { "url", "docId", "host",
-            "title", "content", "contentLength", "lastModified", "mimetype",
-            "filetype_s", "label", "segment", "clickCount_l_x_dv",
-            "favoriteCount_l_x_dv", "inurl" };
+            TTTLE_FIELD, CONTENT_FIELD, "contentLength", "lastModified",
+            "mimetype", "filetype_s", LABEL_FIELD, "segment",
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv", INURL_FIELD };
 
-    protected String[] facetFields = new String[] { "url", "host", "title",
-            "content", "contentLength", "lastModified", "mimetype",
-            "filetype_s", "label", "segment" };
+    protected String[] facetFields = new String[] { "url", "host", TTTLE_FIELD,
+            CONTENT_FIELD, "contentLength", "lastModified", "mimetype",
+            "filetype_s", LABEL_FIELD, "segment" };
 
     protected String sortPrefix = "sort:";
 
@@ -106,13 +112,10 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
             "contentLength", "lastModified", "clickCount_l_x_dv",
             "favoriteCount_l_x_dv" };
 
-    protected String[] supportedMltFields = new String[] { "content",
+    protected String[] supportedMltFields = new String[] { CONTENT_FIELD,
             "content_ja" };
 
-    protected String[] supportedSuggestFields = new String[] { "content",
-            "content_ja", "content_ts", "title_ss" };
-
-    protected String[] supportedAnalysisFields = new String[] { "content",
+    protected String[] supportedAnalysisFields = new String[] { CONTENT_FIELD,
             "content_ja" };
 
     protected int highlightSnippetSize = 5;
@@ -173,7 +176,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
         final SearchQuery searchQuery = buildQuery(q);
         if (!searchQuery.queryExists()) {
-            return searchQuery.query("");
+            return searchQuery.query(Constants.EMPTY_STRING);
         }
 
         if (browserTypeHelper == null && roleQueryHelper == null
@@ -277,15 +280,21 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         if (query.startsWith("(") && query.endsWith(")")) {
             int count = 0;
             int depth = 0;
+            int escape = 0;
             for (int i = 0; i < query.length(); i++) {
                 final char c = query.charAt(i);
-                if (c == '(') {
-                    if (depth == 0) {
-                        count++;
+                if (c == '\\') {
+                    escape++;
+                } else {
+                    if (c == '(' && escape % 2 == 0) {
+                        if (depth == 0) {
+                            count++;
+                        }
+                        depth++;
+                    } else if (c == ')' && escape % 2 == 0) {
+                        depth--;
                     }
-                    depth++;
-                } else if (c == ')') {
-                    depth--;
+                    escape = 0;
                 }
             }
             if (depth == 0 && count == 1) {
@@ -333,7 +342,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
                     }
                     boolean isInUrl = false;
                     final String targetWord = value.substring(prefix.length());
-                    if ("inurl".equals(field)) {
+                    if (INURL_FIELD.equals(field)) {
                         prefix = "url:";
                         isInUrl = true;
                     }
@@ -365,7 +374,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
                     }
                     nonPrefix = true;
                     operator = _AND_;
-                    if (!"label".equals(field)) {
+                    if (!LABEL_FIELD.equals(field)) {
                         highLightQueryList.add(targetWord);
                     }
                     if (fieldLogMap != null) {
@@ -493,7 +502,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         if (useBigram && value.length() == 1
                 && !StringUtils.isAsciiPrintable(value)) {
             // if using bigram, add ?
-            value = value + "?";
+            value = value + '?';
         }
 
         String fuzzyValue = null;
@@ -533,10 +542,10 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
                         if (intValue <= 0) {
                             // fuzzy
                             buf1.append('.').append(buf2.toString());
-                            fuzzyValue = "~" + buf1.toString();
+                            fuzzyValue = '~' + buf1.toString();
                         } else {
                             // proximity
-                            proximityValue = "~" + Integer.toString(intValue);
+                            proximityValue = '~' + Integer.toString(intValue);
                         }
                     }
                 } else {
@@ -766,10 +775,8 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         String solrQuery;
         if (q == null || "()".equals(q)) {
             solrQuery = Constants.EMPTY_STRING;
-        } else if (q.startsWith("(") && q.endsWith(")")) {
-            solrQuery = q.substring(1, q.length() - 1);
         } else {
-            solrQuery = q;
+            solrQuery = unbracketQuery(q);
         }
         return solrQuery;
     }
@@ -890,20 +897,20 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected void buildContentQueryWithLang(final StringBuilder buf,
             final String value, final String queryLanguage) {
-        if (StringUtil.isBlank(queryLanguage)) {
-            buf.append("content:");
-            appendQueryValue(buf, value);
-        } else {
-            buf.append('(');
-            buf.append("content:");
-            appendQueryValue(buf, value);
+        buf.append('(');
+        buf.append(TTTLE_FIELD).append(':');
+        appendQueryValue(buf, value);
+        buf.append(_OR_);
+        buf.append(CONTENT_FIELD).append(':');
+        appendQueryValue(buf, value);
+        if (StringUtil.isNotBlank(queryLanguage)) {
             buf.append(_OR_);
             buf.append("content_");
             buf.append(queryLanguage);
             buf.append(':');
             appendQueryValue(buf, value);
-            buf.append(')');
         }
+        buf.append(')');
     }
 
     protected String getQueryLanguage() {
@@ -1337,14 +1344,6 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     public void setSupportedMltFields(final String[] supportedMltFields) {
         this.supportedMltFields = supportedMltFields;
-    }
-
-    public String[] getSupportedSuggestFields() {
-        return supportedSuggestFields;
-    }
-
-    public void setSupportedSuggestFields(final String[] supportedSuggestFields) {
-        this.supportedSuggestFields = supportedSuggestFields;
     }
 
     @Override

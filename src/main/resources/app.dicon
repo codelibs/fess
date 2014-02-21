@@ -91,8 +91,6 @@
             "contentLength", "lastModified", "clickCount_l_x_dv" }</property>
 		<property name="supportedMltFields">new String[]{"content",
             "content_ja" }</property>
-		<property name="supportedSuggestFields">new String[]{"content",
-            "content_ja", "content_ts", "title_ss" }</property>
 		<property name="shards">"localhost:8983/solr,localhost:7574/solr"</property>
 		<property name="useBigram">true</property>
 		<property name="additionalQuery">""</property>
