@@ -16,7 +16,7 @@
 
 package jp.sf.fess.helper.impl;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -194,7 +194,7 @@ public class QueryHelperImplTest extends S2TestCase {
         queryHelperImpl.roleQueryHelper = new RoleQueryHelper() {
             @Override
             public Set<String> build() {
-                final Set<String> list = new HashSet<>();
+                final Set<String> list = new LinkedHashSet<>();
                 list.add("guest");
                 return list;
             }
@@ -216,7 +216,7 @@ public class QueryHelperImplTest extends S2TestCase {
         queryHelperImpl.roleQueryHelper = new RoleQueryHelper() {
             @Override
             public Set<String> build() {
-                final Set<String> list = new HashSet<>();
+                final Set<String> list = new LinkedHashSet<>();
                 list.add("guest");
                 list.add("admin");
                 return list;
@@ -248,7 +248,7 @@ public class QueryHelperImplTest extends S2TestCase {
         queryHelperImpl.roleQueryHelper = new RoleQueryHelper() {
             @Override
             public Set<String> build() {
-                final Set<String> list = new HashSet<>();
+                final Set<String> list = new LinkedHashSet<>();
                 list.add("guest");
                 list.add("admin");
                 return list;

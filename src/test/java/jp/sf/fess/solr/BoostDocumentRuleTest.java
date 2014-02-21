@@ -23,11 +23,6 @@ import org.seasar.extension.unit.S2TestCase;
 
 public class BoostDocumentRuleTest extends S2TestCase {
 
-    @Override
-    protected String getRootDicon() throws Throwable {
-        return "jp/sf/fess/crypto/cipher.dicon"; // for ignoring dicon
-    }
-
     public void test_integer() {
         final BoostDocumentRule docRule = new BoostDocumentRule();
         docRule.setBoostExpression("10");

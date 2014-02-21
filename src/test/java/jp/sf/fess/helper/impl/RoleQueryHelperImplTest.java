@@ -20,9 +20,8 @@ import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
-import jp.sf.fess.FessSystemException;
-
 import org.codelibs.core.crypto.CachedCipher;
+import org.codelibs.core.exception.IllegalBlockSizeRuntimeException;
 import org.seasar.extension.unit.S2TestCase;
 
 public class RoleQueryHelperImplTest extends S2TestCase {
@@ -72,7 +71,7 @@ public class RoleQueryHelperImplTest extends S2TestCase {
         try {
             roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final IllegalBlockSizeRuntimeException e) {
             // ok
         }
 
@@ -134,7 +133,7 @@ public class RoleQueryHelperImplTest extends S2TestCase {
         try {
             roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final IllegalBlockSizeRuntimeException e) {
             // ok
         }
 
