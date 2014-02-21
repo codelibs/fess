@@ -84,8 +84,8 @@ public class LabelTypeHelper implements Serializable {
         }
 
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
-        final List<String> roleList = roleQueryHelper.build();
-        if (roleList.isEmpty()) {
+        final Set<String> roleSet = roleQueryHelper.build();
+        if (roleSet.isEmpty()) {
             for (final LabelTypeItem item : labelTypeItemList) {
                 final Map<String, String> map = new HashMap<String, String>(2);
                 map.put(Constants.ITEM_LABEL, item.getLabel());
@@ -94,7 +94,7 @@ public class LabelTypeHelper implements Serializable {
             }
         } else {
             for (final LabelTypeItem item : labelTypeItemList) {
-                for (final String roleValue : roleList) {
+                for (final String roleValue : roleSet) {
                     if (item.getRoleValueList().contains(roleValue)) {
                         final Map<String, String> map = new HashMap<String, String>(
                                 2);

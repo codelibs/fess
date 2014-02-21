@@ -60,7 +60,7 @@
 
   <filter>
     <filter-name>authenticationFilter</filter-name>
-    <filter-class>jp.sf.fess.filter.AuthenticationFilter</filter-class>
+    <filter-class>org.codelibs.sastruts.core.filter.AuthFilter</filter-class>
     <init-param>
       <param-name>urlPatterns</param-name>
       <param-value>/fess/admin.*</param-value>
@@ -241,16 +241,6 @@
       <form-error-page>/WEB-INF/view/login/error.jsp</form-error-page>
     </form-login-config>
   </login-config>
-
-  <security-role>
-  	<role-name>fess</role-name>
-  </security-role>
-
-  <!--
-  <security-role>
-  	<role-name>role1</role-name>
-  </security-role>
-  -->
 
   <error-page>
   	<error-code>400</error-code>

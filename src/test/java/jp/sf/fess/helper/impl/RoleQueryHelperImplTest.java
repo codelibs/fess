@@ -16,18 +16,18 @@
 
 package jp.sf.fess.helper.impl;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
 import jp.sf.fess.FessSystemException;
-import jp.sf.fess.crypto.FessCipher;
 
+import org.codelibs.core.crypto.CachedCipher;
 import org.seasar.extension.unit.S2TestCase;
 
 public class RoleQueryHelperImplTest extends S2TestCase {
 
-    public FessCipher fessCipher;
+    public CachedCipher cipher;
 
     @Override
     protected String getRootDicon() throws Throwable {
@@ -37,40 +37,40 @@ public class RoleQueryHelperImplTest extends S2TestCase {
     public void test_buildByParameter() {
         final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
 
-        List<String> roleList;
+        Set<String> roleSet;
 
-        roleList = roleQueryHelperImpl.buildByParameter(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.parameterKey = "fess1";
 
         getRequest().setParameter("aaa", "bbb");
-        roleList = roleQueryHelperImpl.buildByParameter(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedParameterValue = false;
         getRequest().setParameter("fess1", "xxx\nrole1,role2,role3");
-        roleList = roleQueryHelperImpl.buildByParameter(getRequest());
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
 
         roleQueryHelperImpl.parameterKey = "fess2";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedParameterValue = true;
         getRequest().setParameter("fess2",
-                fessCipher.encryptoText("xxx\nrole1,role2,role3"));
-        roleList = roleQueryHelperImpl.buildByParameter(getRequest());
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+                cipher.encryptoText("xxx\nrole1,role2,role3"));
+        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
 
         getRequest().setParameter("fess2", "fail");
         try {
-            roleList = roleQueryHelperImpl.buildByParameter(getRequest());
+            roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
             fail();
         } catch (final FessSystemException e) {
             // ok
@@ -79,25 +79,25 @@ public class RoleQueryHelperImplTest extends S2TestCase {
         roleQueryHelperImpl.parameterKey = "fess3";
 
         roleQueryHelperImpl.encryptedParameterValue = false;
-        roleList = roleQueryHelperImpl.buildByParameter(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.parameterKey = "fess4";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedParameterValue = true;
-        roleList = roleQueryHelperImpl.buildByParameter(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        assertEquals(0, roleSet.size());
 
     }
 
     public void test_buildByHeader() {
         final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
 
-        List<String> roleList;
+        Set<String> roleSet;
 
         try {
-            roleList = roleQueryHelperImpl.buildByHeader(getRequest());
+            roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
             fail();
         } catch (final NullPointerException e) {
             //ok
@@ -106,33 +106,33 @@ public class RoleQueryHelperImplTest extends S2TestCase {
         roleQueryHelperImpl.headerKey = "fess1";
 
         getRequest().addHeader("aaa", "bbb");
-        roleList = roleQueryHelperImpl.buildByHeader(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedHeaderValue = false;
         getRequest().addHeader("fess1", "xxx\nrole1,role2,role3");
-        roleList = roleQueryHelperImpl.buildByHeader(getRequest());
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
 
         roleQueryHelperImpl.headerKey = "fess2";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedHeaderValue = true;
         getRequest().addHeader("fess2",
-                fessCipher.encryptoText("xxx\nrole1,role2,role3"));
-        roleList = roleQueryHelperImpl.buildByHeader(getRequest());
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+                cipher.encryptoText("xxx\nrole1,role2,role3"));
+        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
 
         roleQueryHelperImpl.headerKey = "fess2x";
         getRequest().addHeader("fess2x", "fail");
         try {
-            roleList = roleQueryHelperImpl.buildByHeader(getRequest());
+            roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
             fail();
         } catch (final FessSystemException e) {
             // ok
@@ -141,30 +141,30 @@ public class RoleQueryHelperImplTest extends S2TestCase {
         roleQueryHelperImpl.headerKey = "fess3";
 
         roleQueryHelperImpl.encryptedHeaderValue = false;
-        roleList = roleQueryHelperImpl.buildByHeader(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.headerKey = "fess4";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedHeaderValue = true;
-        roleList = roleQueryHelperImpl.buildByHeader(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        assertEquals(0, roleSet.size());
     }
 
     public void test_buildByCookie() {
         final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
 
-        List<String> roleList;
+        Set<String> roleSet;
         Cookie cookie;
 
-        roleList = roleQueryHelperImpl.buildByCookie(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        assertEquals(0, roleSet.size());
 
         cookie = new Cookie("aaa", "bbb");
         getRequest().addCookie(cookie);
         try {
-            roleList = roleQueryHelperImpl.buildByCookie(getRequest());
+            roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
             fail();
         } catch (final NullPointerException e) {
             // ok
@@ -172,39 +172,39 @@ public class RoleQueryHelperImplTest extends S2TestCase {
 
         roleQueryHelperImpl.cookieKey = "fess1";
 
-        roleList = roleQueryHelperImpl.buildByCookie(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedCookieValue = false;
         cookie = new Cookie("fess1", "xxx\nrole1,role2,role3");
         getRequest().addCookie(cookie);
-        roleList = roleQueryHelperImpl.buildByCookie(getRequest());
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
 
         roleQueryHelperImpl.cookieKey = "fess2";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
         cookie = new Cookie("fess2",
-                fessCipher.encryptoText("xxx\nrole1,role2,role3"));
+                cipher.encryptoText("xxx\nrole1,role2,role3"));
         getRequest().addCookie(cookie);
-        roleList = roleQueryHelperImpl.buildByCookie(getRequest());
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
 
         roleQueryHelperImpl.cookieKey = "fess2x";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
         cookie = new Cookie("fess2x", "fail");
         getRequest().addCookie(cookie);
         try {
-            roleList = roleQueryHelperImpl.buildByCookie(getRequest());
+            roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
             fail();
         } catch (final Exception e) {
             // ok 
@@ -213,146 +213,146 @@ public class RoleQueryHelperImplTest extends S2TestCase {
         roleQueryHelperImpl.cookieKey = "fess3";
 
         roleQueryHelperImpl.encryptedCookieValue = false;
-        roleList = roleQueryHelperImpl.buildByCookie(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.cookieKey = "fess4";
 
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
-        roleList = roleQueryHelperImpl.buildByCookie(getRequest());
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        assertEquals(0, roleSet.size());
     }
 
     public void test_decodedRoleList() {
 
         final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
 
-        List<String> roleList;
+        Set<String> roleSet;
         boolean encrypted;
         String value;
 
         encrypted = false;
         value = "";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = false;
         value = "role1";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = false;
         value = "role1,role2";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = false;
         value = "xxx\nrole1";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(1, roleList.size());
-        assertEquals("role1", roleList.get(0));
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(1, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
 
         encrypted = false;
         value = "xxx\nrole1,role2";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(2, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(2, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
 
         roleQueryHelperImpl.valueSeparator = "";
 
         encrypted = false;
         value = "";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = false;
         value = "role1";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(1, roleList.size());
-        assertEquals("role1", roleList.get(0));
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(1, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
 
         encrypted = false;
         value = "role1,role2";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(2, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(2, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
 
         encrypted = false;
         value = "role1,role2,role3";
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
     }
 
     public void test_decodedRoleList_withCipher() {
 
         final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
-        roleQueryHelperImpl.fessCipher = fessCipher;
+        roleQueryHelperImpl.cipher = cipher;
 
-        List<String> roleList;
+        Set<String> roleSet;
         boolean encrypted;
         String value;
 
         encrypted = true;
-        value = fessCipher.encryptoText("");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        value = cipher.encryptoText("");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = true;
-        value = fessCipher.encryptoText("role1");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        value = cipher.encryptoText("role1");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = true;
-        value = fessCipher.encryptoText("role1,role2");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        value = cipher.encryptoText("role1,role2");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = true;
-        value = fessCipher.encryptoText("xxx\nrole1");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(1, roleList.size());
-        assertEquals("role1", roleList.get(0));
+        value = cipher.encryptoText("xxx\nrole1");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(1, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
 
         encrypted = true;
-        value = fessCipher.encryptoText("xxx\nrole1,role2");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(2, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
+        value = cipher.encryptoText("xxx\nrole1,role2");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(2, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
 
         roleQueryHelperImpl.valueSeparator = "";
 
         encrypted = true;
-        value = fessCipher.encryptoText("");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(0, roleList.size());
+        value = cipher.encryptoText("");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(0, roleSet.size());
 
         encrypted = true;
-        value = fessCipher.encryptoText("role1");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(1, roleList.size());
-        assertEquals("role1", roleList.get(0));
+        value = cipher.encryptoText("role1");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(1, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
 
         encrypted = true;
-        value = fessCipher.encryptoText("role1,role2");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(2, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
+        value = cipher.encryptoText("role1,role2");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(2, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
 
         encrypted = true;
-        value = fessCipher.encryptoText("role1,role2,role3");
-        roleList = roleQueryHelperImpl.decodedRoleList(value, encrypted);
-        assertEquals(3, roleList.size());
-        assertEquals("role1", roleList.get(0));
-        assertEquals("role2", roleList.get(1));
-        assertEquals("role3", roleList.get(2));
+        value = cipher.encryptoText("role1,role2,role3");
+        roleSet = roleQueryHelperImpl.decodedRoleList(value, encrypted);
+        assertEquals(3, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+        assertTrue(roleSet.contains("role3"));
     }
 
 }

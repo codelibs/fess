@@ -195,8 +195,8 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         }
 
         if (roleQueryHelper != null) {
-            final List<String> roleList = roleQueryHelper.build();
-            if (roleList.size() > maxFilterQueriesForRole) {
+            final Set<String> roleSet = roleQueryHelper.build();
+            if (roleSet.size() > maxFilterQueriesForRole) {
                 // add query
                 final String sq = queryBuf.toString();
                 queryBuf = new StringBuilder(255);
@@ -210,23 +210,23 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
                     queryBuf.append(')');
                 }
                 queryBuf.append(_AND_);
-                if (roleList.size() > 1) {
+                if (roleSet.size() > 1) {
                     queryBuf.append('(');
                 }
-                queryBuf.append(getRoleQuery(roleList));
-                if (roleList.size() > 1) {
+                queryBuf.append(getRoleQuery(roleSet));
+                if (roleSet.size() > 1) {
                     queryBuf.append(')');
                 }
-            } else if (!roleList.isEmpty()) {
+            } else if (!roleSet.isEmpty()) {
                 // add filter query
-                searchQuery.addFilterQuery(getRoleQuery(roleList));
+                searchQuery.addFilterQuery(getRoleQuery(roleSet));
             }
         }
 
         return searchQuery.query(queryBuf.toString());
     }
 
-    private String getRoleQuery(final List<String> roleList) {
+    private String getRoleQuery(final Set<String> roleList) {
         final StringBuilder queryBuf = new StringBuilder(255);
         boolean isFirst = true;
         for (final String role : roleList) {

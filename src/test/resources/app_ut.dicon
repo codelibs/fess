@@ -15,7 +15,7 @@
 	<!-- Web -->
 	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
 
-	<component name="authenticationCipher" class="jp.sf.fess.crypto.FessCipher">
+	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
 		<property name="key">"1234567890123456"</property>
 	</component>
 	<component name="browserTypeHelper" class="jp.sf.fess.helper.BrowserTypeHelper">
@@ -32,7 +32,7 @@
 		<property name="cookieKey">"fessRoles"</property>
 		<property name="encryptedCookieValue">true</property>
 		<property name="fessCipher">
-			<component class="jp.sf.fess.crypto.FessCipher">
+			<component class="org.codelibs.core.crypto.CachedCipher">
 				<property name="key">"1234567890123456"</property>
 			</component>
 		</property>

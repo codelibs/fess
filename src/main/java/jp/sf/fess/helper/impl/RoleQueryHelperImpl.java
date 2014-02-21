@@ -17,22 +17,23 @@
 package jp.sf.fess.helper.impl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import jp.sf.fess.Constants;
-import jp.sf.fess.crypto.FessCipher;
 import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.helper.SystemHelper;
 
+import org.codelibs.core.crypto.CachedCipher;
+import org.codelibs.sastruts.core.SSCConstants;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.util.RequestUtil;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
     private static final Logger logger = LoggerFactory
             .getLogger(RoleQueryHelperImpl.class);
 
-    public FessCipher fessCipher;
+    public CachedCipher cipher;
 
     public String valueSeparator = "\n";
 
@@ -81,8 +82,8 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
      * @see jp.sf.fess.helper.impl.RoleQueryHelper#build()
      */
     @Override
-    public List<String> build() {
-        final List<String> roleList = new ArrayList<String>();
+    public Set<String> build() {
+        final Set<String> roleList = new HashSet<>();
         final HttpServletRequest request = RequestUtil.getRequest();
 
         // request parameter
@@ -110,9 +111,9 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             final HttpSession session = request.getSession(false);
             if (session != null) {
                 final LoginInfo loginInfo = (LoginInfo) session
-                        .getAttribute(Constants.LOGIN_INFO);
+                        .getAttribute(SSCConstants.USER_INFO);
                 if (loginInfo != null) {
-                    roleList.addAll(loginInfo.getRoleList());
+                    roleList.addAll(loginInfo.getRoleSet());
                 }
             }
         }
@@ -128,7 +129,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         return roleList;
     }
 
-    protected List<String> buildByParameter(final HttpServletRequest request) {
+    protected Set<String> buildByParameter(final HttpServletRequest request) {
 
         final String parameter = request.getParameter(parameterKey);
         if (logger.isDebugEnabled()) {
@@ -138,10 +139,10 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             return decodedRoleList(parameter, encryptedParameterValue);
         }
 
-        return Collections.emptyList();
+        return Collections.emptySet();
     }
 
-    protected List<String> buildByHeader(final HttpServletRequest request) {
+    protected Set<String> buildByHeader(final HttpServletRequest request) {
 
         final String parameter = request.getHeader(headerKey);
         if (logger.isDebugEnabled()) {
@@ -151,11 +152,11 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             return decodedRoleList(parameter, encryptedHeaderValue);
         }
 
-        return Collections.emptyList();
+        return Collections.emptySet();
 
     }
 
-    protected List<String> buildByCookie(final HttpServletRequest request) {
+    protected Set<String> buildByCookie(final HttpServletRequest request) {
 
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -172,24 +173,24 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             }
         }
 
-        return Collections.emptyList();
+        return Collections.emptySet();
     }
 
-    protected List<String> buildByCookieNameMapping(
+    protected Set<String> buildByCookieNameMapping(
             final HttpServletRequest request) {
 
-        final List<String> roleNameList = new ArrayList<String>();
+        final Set<String> roleNameSet = new HashSet<>();
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
-                addRoleFromCookieMapping(roleNameList, cookie);
+                addRoleFromCookieMapping(roleNameSet, cookie);
             }
         }
 
-        return roleNameList;
+        return roleNameSet;
     }
 
-    protected void addRoleFromCookieMapping(final List<String> roleNameList,
+    protected void addRoleFromCookieMapping(final Set<String> roleNameList,
             final Cookie cookie) {
         final String roleName = cookieNameMap.get(cookie.getName());
         if (StringUtil.isNotBlank(roleName)) {
@@ -197,21 +198,21 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         }
     }
 
-    protected List<String> decodedRoleList(final String value,
+    protected Set<String> decodedRoleList(final String value,
             final boolean encrypted) {
         String rolesStr = value;
-        if (encrypted && fessCipher != null) {
-            rolesStr = fessCipher.decryptoText(rolesStr);
+        if (encrypted && cipher != null) {
+            rolesStr = cipher.decryptoText(rolesStr);
         }
 
-        final List<String> roleList = new ArrayList<String>();
+        final Set<String> roleSet = new HashSet<>();
         if (valueSeparator.length() > 0) {
             final String[] values = rolesStr.split(valueSeparator);
             if (values.length > 1) {
                 final String[] roles = values[1].split(roleSeparator);
                 for (final String role : roles) {
                     if (StringUtil.isNotEmpty(role)) {
-                        roleList.add(role);
+                        roleSet.add(role);
                     }
                 }
             }
@@ -219,11 +220,11 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             final String[] roles = rolesStr.split(roleSeparator);
             for (final String role : roles) {
                 if (StringUtil.isNotEmpty(role)) {
-                    roleList.add(role);
+                    roleSet.add(role);
                 }
             }
         }
-        return roleList;
+        return roleSet;
     }
 
     public void addCookieNameMapping(final String cookieName,

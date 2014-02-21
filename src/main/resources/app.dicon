@@ -19,7 +19,7 @@
 
 	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
 
-	<component name="authenticationCipher" class="jp.sf.fess.crypto.FessCipher">
+	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
         <!-- CHANGE THE FOLLOWING KEY -->
 		<property name="key">"1234567890123456"</property>
 	</component>

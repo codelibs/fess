@@ -20,8 +20,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -30,12 +31,14 @@ import javax.servlet.http.HttpSession;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
-import jp.sf.fess.crypto.FessCipher;
 import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.form.LoginForm;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.struts.Globals;
+import org.codelibs.core.crypto.CachedCipher;
+import org.codelibs.sastruts.core.SSCConstants;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -62,7 +65,7 @@ public class LoginAction implements Serializable {
         final HttpServletRequest request = RequestUtil.getRequest();
         final HttpSession session = request.getSession();
         // check login session
-        final Object obj = session.getAttribute(Constants.LOGIN_INFO);
+        final Object obj = session.getAttribute(SSCConstants.USER_INFO);
         if (obj instanceof LoginInfo) {
             final LoginInfo loginInfo = (LoginInfo) obj;
             if (loginInfo.isAdministrator()) {
@@ -83,13 +86,13 @@ public class LoginAction implements Serializable {
 
         String returnPath;
         if (StringUtil.isNotBlank(loginForm.returnPath)) {
-            final FessCipher fessCipher = FessCipher.class.cast(RequestUtil
-                    .getRequest().getAttribute(Constants.AUTH_CIPHER));
-            if (fessCipher == null) {
+            final CachedCipher cipher = ComponentUtil
+                    .getCipher(Constants.AUTH_CIPHER);
+            if (cipher == null) {
                 throw new FessSystemException(
                         "A cipher for authentication is null. Please check a filter setting.");
             }
-            final String value = fessCipher.decryptoText(loginForm.returnPath);
+            final String value = cipher.decryptoText(loginForm.returnPath);
             final int idx = value.indexOf('|');
             if (idx >= 0) {
                 returnPath = value.substring(idx + 1);
@@ -131,24 +134,23 @@ public class LoginAction implements Serializable {
         // create user info
         final LoginInfo loginInfo = new LoginInfo();
         loginInfo.setUsername(request.getRemoteUser());
-        session.setAttribute(Constants.LOGIN_INFO, loginInfo);
+        session.setAttribute(SSCConstants.USER_INFO, loginInfo);
 
         String returnPath;
-        final List<String> authenticatedRoleList = systemHelper
-                .getAuthenticatedRoleList();
-        if (request.isUserInRole(systemHelper.getAdminRole())) {
+        final Set<String> authenticatedRoleList = systemHelper
+                .getAuthenticatedRoleSet();
+        final Set<String> roleSet = new HashSet<>();
+        for (final String role : authenticatedRoleList) {
+            if (request.isUserInRole(role)) {
+                roleSet.add(role);
+            }
+        }
+        loginInfo.setRoleSet(roleSet);
+
+        if (loginInfo.isAdministrator()) {
             if (logger.isInfoEnabled()) {
                 logger.info("[LOGIN] ADMIN: " + "The usename is "
                         + request.getRemoteUser());
-            }
-            loginInfo.setAdministrator(true);
-
-            if (authenticatedRoleList != null) {
-                for (final String role : authenticatedRoleList) {
-                    if (request.isUserInRole(role)) {
-                        loginInfo.addRole(role);
-                    }
-                }
             }
 
             returnPath = (String) session.getAttribute(Constants.RETURN_PATH);
@@ -159,28 +161,18 @@ public class LoginAction implements Serializable {
                 returnPath = getAdminRootPath();
             }
         } else {
-            if (authenticatedRoleList != null) {
-                boolean authenticated = false;
-                for (final String role : authenticatedRoleList) {
-                    if (request.isUserInRole(role)) {
-                        loginInfo.addRole(role);
-                        authenticated = true;
-                    }
+            if (!loginInfo.getRoleSet().isEmpty()) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("[LOGIN] USER: " + "The usename is "
+                            + request.getRemoteUser());
                 }
-                if (authenticated) {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[LOGIN] USER: " + "The usename is "
-                                + request.getRemoteUser());
-                    }
-                    loginInfo.setAdministrator(false);
-                } else {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("Login Failure: " + request.getRemoteUser()
-                                + " does not have authenticated roles.");
-                    }
-                    // logout
-                    session.invalidate();
+            } else {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Login Failure: " + request.getRemoteUser()
+                            + " does not have authenticated roles.");
                 }
+                // logout
+                session.invalidate();
             }
             returnPath = RequestUtil.getRequest().getContextPath();
         }

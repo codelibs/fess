@@ -5,7 +5,7 @@
 	<component name="queryHelper" class="jp.sf.fess.helper.impl.QueryHelperImpl">
 	</component>
 
- 	<component name="fessCipher" class="jp.sf.fess.crypto.FessCipher">
+ 	<component name="cipher" class="org.codelibs.core.crypto.CachedCipher">
 		<property name="key">"1234567890123456"</property>
 	</component>
 

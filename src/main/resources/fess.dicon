@@ -25,7 +25,6 @@
 	</component>
 	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
 		<!--
-		<property name="adminRole">"fess"</property>
 		<property name="javaCommandPath">"java"</property>
 		<property name="filterPathEncoding">"UTF-8"</property>
 		<property name="useOwnTmpDir">true</property>
@@ -56,6 +55,9 @@
 "-Xdebug",
 "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
  -->
+ 		<initMethod name="addAdminRoles">
+ 			<arg>{"fess"}</arg>
+ 		</initMethod>
 		<initMethod name="addDesignJspFileName">
 			<arg>"index"</arg>
 			<arg>"index.jsp"</arg>
@@ -169,8 +171,8 @@
 		<property name="encryptedHeaderValue">true</property>
 		<property name="cookieKey">"fessRoles"</property>
 		<property name="encryptedCookieValue">true</property>
-		<property name="fessCipher">
-			<component class="jp.sf.fess.crypto.FessCipher">
+		<property name="cipher">
+			<component class="org.codelibs.core.crypto.CachedCipher">
 				<property name="key">"1234567890123456"</property>
 			</component>
 		</property>

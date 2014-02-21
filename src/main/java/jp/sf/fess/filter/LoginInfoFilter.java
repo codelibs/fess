@@ -17,8 +17,8 @@
 package jp.sf.fess.filter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,11 +29,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.codelibs.sastruts.core.SSCConstants;
+
+// TODO refactoring...
 public class LoginInfoFilter implements Filter {
     private long updateInterval = 60 * 60 * 1000L; // 1h
 
@@ -52,10 +54,10 @@ public class LoginInfoFilter implements Filter {
         final HttpServletRequest hRequest = (HttpServletRequest) request;
         final HttpSession session = hRequest.getSession();
         LoginInfo loginInfo = (LoginInfo) session
-                .getAttribute(Constants.LOGIN_INFO);
+                .getAttribute(SSCConstants.USER_INFO);
         if (loginInfo == null) {
             loginInfo = new LoginInfo();
-            session.setAttribute(Constants.LOGIN_INFO, loginInfo);
+            session.setAttribute(SSCConstants.USER_INFO, loginInfo);
 
             updateRoleList(hRequest, loginInfo);
         } else {
@@ -72,15 +74,15 @@ public class LoginInfoFilter implements Filter {
     private void updateRoleList(final HttpServletRequest hRequest,
             final LoginInfo loginInfo) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final List<String> authenticatedRoleList = systemHelper
-                .getAuthenticatedRoleList();
-        final List<String> roleList = new ArrayList<String>();
+        final Set<String> authenticatedRoleList = systemHelper
+                .getAuthenticatedRoleSet();
+        final Set<String> roleSet = new HashSet<>();
         for (final String role : authenticatedRoleList) {
             if (hRequest.isUserInRole(role)) {
-                roleList.add(role);
+                roleSet.add(role);
             }
         }
-        loginInfo.setRoleList(roleList);
+        loginInfo.setRoleSet(roleSet);
     }
 
     @Override

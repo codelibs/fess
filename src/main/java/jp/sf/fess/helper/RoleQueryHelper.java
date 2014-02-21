@@ -16,7 +16,7 @@
 
 package jp.sf.fess.helper;
 
-import java.util.List;
+import java.util.Set;
 
 public interface RoleQueryHelper {
 
@@ -25,6 +25,6 @@ public interface RoleQueryHelper {
      * 
      * @return a list of a role. (not null)
      */
-    List<String> build();
+    Set<String> build();
 
 }

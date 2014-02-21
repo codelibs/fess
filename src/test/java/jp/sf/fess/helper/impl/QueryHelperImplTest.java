@@ -16,10 +16,10 @@
 
 package jp.sf.fess.helper.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.InvalidQueryException;
@@ -193,8 +193,8 @@ public class QueryHelperImplTest extends S2TestCase {
     public void test_build_roleType() {
         queryHelperImpl.roleQueryHelper = new RoleQueryHelper() {
             @Override
-            public List<String> build() {
-                final List<String> list = new ArrayList<String>();
+            public Set<String> build() {
+                final Set<String> list = new HashSet<>();
                 list.add("guest");
                 return list;
             }
@@ -215,8 +215,8 @@ public class QueryHelperImplTest extends S2TestCase {
 
         queryHelperImpl.roleQueryHelper = new RoleQueryHelper() {
             @Override
-            public List<String> build() {
-                final List<String> list = new ArrayList<String>();
+            public Set<String> build() {
+                final Set<String> list = new HashSet<>();
                 list.add("guest");
                 list.add("admin");
                 return list;
@@ -247,8 +247,8 @@ public class QueryHelperImplTest extends S2TestCase {
         };
         queryHelperImpl.roleQueryHelper = new RoleQueryHelper() {
             @Override
-            public List<String> build() {
-                final List<String> list = new ArrayList<String>();
+            public Set<String> build() {
+                final Set<String> list = new HashSet<>();
                 list.add("guest");
                 list.add("admin");
                 return list;

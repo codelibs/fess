@@ -19,6 +19,7 @@ package jp.sf.fess.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -280,13 +281,14 @@ public class SearchService implements Serializable {
             final List<String> fieldNames, final List<String> labels,
             final int rows) {
 
-        final List<String> roleList;
+        final Set<String> roleSet;
         if (roleQueryHelper != null) {
-            roleList = roleQueryHelper.build();
+            roleSet = roleQueryHelper.build();
         } else {
-            roleList = new ArrayList<String>();
+            roleSet = new HashSet<>();
         }
 
+        final List<String> roleList = new ArrayList<>(roleSet); // TODO 
         final String suggestQuery = suggester.buildSuggestQuery(q, fieldNames,
                 labels, roleList);
 

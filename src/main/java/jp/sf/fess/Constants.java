@@ -35,8 +35,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_VERSION = "5";
 
-    public static final String LOGIN_INFO = "jp.sf.fess.LoginInfo";
-
     public static final String EMPTY_STRING = "";
 
     public static final String[] EMPTY_STRINGS = new String[0];
@@ -168,7 +166,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String NOTIFICATION_TO_PROPERTY = "notification.to";
 
-    public static final String AUTH_CIPHER = "jp.sf.fess.AuthCipher";
+    public static final String AUTH_CIPHER = "authenticationCipher";
 
     public static final String RETURN_PATH = "jp.sf.fess.ReturnPath";
 

@@ -22,11 +22,13 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -57,7 +59,7 @@ public class SystemHelper implements Serializable {
     private static final Logger logger = LoggerFactory
             .getLogger(SystemHelper.class);
 
-    private String adminRole = "fess";
+    private final Set<String> adminRoleSet = new HashSet<>();
 
     private String[] crawlerJavaOptions = new String[] {
             "-Djava.awt.headless=true", "-server", "-Xmx512m",
@@ -239,22 +241,28 @@ public class SystemHelper implements Serializable {
         return designJspFileNameMap.get(fileName);
     }
 
-    public String getAdminRole() {
-        return adminRole;
+    public Set<String> getAdminRoleSet() {
+        return adminRoleSet;
     }
 
-    public void setAdminRole(final String adminRole) {
-        this.adminRole = adminRole;
+    public void addAdminRoles(final Collection<String> adminRoles) {
+        adminRoleSet.addAll(adminRoles);
     }
 
-    public List<String> getAuthenticatedRoleList() {
+    public Set<String> getAuthenticatedRoleSet() {
         final RoleTypeService roleTypeService = SingletonS2Container
                 .getComponent(RoleTypeService.class);
         final List<RoleType> roleTypeList = roleTypeService.getRoleTypeList();
-        final List<String> roleList = new ArrayList<String>(roleTypeList.size());
+
+        final Set<String> roleList = new HashSet<>(roleTypeList.size()
+                + adminRoleSet.size());
         for (final RoleType roleType : roleTypeList) {
             roleList.add(roleType.getValue());
         }
+
+        // system roles
+        roleList.addAll(adminRoleSet);
+
         return roleList;
     }
 

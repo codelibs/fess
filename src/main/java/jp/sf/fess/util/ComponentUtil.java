@@ -17,7 +17,6 @@
 package jp.sf.fess.util;
 
 import jp.sf.fess.api.WebApiManagerFactory;
-import jp.sf.fess.crypto.FessCipher;
 import jp.sf.fess.ds.DataStoreFactory;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
@@ -40,6 +39,7 @@ import jp.sf.fess.helper.ViewHelper;
 import jp.sf.fess.job.JobExecutor;
 import jp.sf.fess.solr.IndexUpdater;
 
+import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.seasar.framework.container.SingletonS2Container;
@@ -105,7 +105,7 @@ public final class ComponentUtil {
     private ComponentUtil() {
     }
 
-    public static FessCipher getCipher(final String cipherName) {
+    public static CachedCipher getCipher(final String cipherName) {
         return SingletonS2Container.getComponent(cipherName);
     }
 

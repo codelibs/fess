@@ -16,53 +16,13 @@
 
 package jp.sf.fess.entity;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.sastruts.core.entity.UserInfo;
 
-public class LoginInfo implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    protected String username;
-
-    protected boolean administrator = false;
-
-    protected List<String> roleList = new ArrayList<String>();
+public class LoginInfo extends UserInfo {
 
     protected long updatedTime = System.currentTimeMillis();
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(final String username) {
-        this.username = username;
-    }
-
-    public boolean isAdministrator() {
-        return administrator;
-    }
-
-    public void setAdministrator(final boolean administrator) {
-        this.administrator = administrator;
-    }
-
-    public void addRole(final String role) {
-        if (StringUtil.isNotBlank(role)) {
-            roleList.add(role);
-        }
-    }
-
-    public void setRoleList(final List<String> roleList) {
-        this.roleList = roleList;
-    }
-
-    public List<String> getRoleList() {
-        return roleList;
-    }
 
     public void setUpdatedTime(final long updatedTime) {
         this.updatedTime = updatedTime;
@@ -72,10 +32,14 @@ public class LoginInfo implements Serializable {
         return updatedTime;
     }
 
-    @Override
-    public String toString() {
-        return "LoginInfo [username=" + username + ", administrator="
-                + administrator + ", roleList=" + roleList + ", updatedTime="
-                + updatedTime + "]";
+    public boolean isAdministrator() {
+        for (final String role : ComponentUtil.getSystemHelper()
+                .getAdminRoleSet()) {
+            if (isUserInRole(role)) {
+                return true;
+            }
+        }
+        return false;
     }
+
 }
