@@ -166,7 +166,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String NOTIFICATION_TO_PROPERTY = "notification.to";
 
-    public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.browser.locale";
+    public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";
 
     public static final String AUTH_CIPHER = "authenticationCipher";
 

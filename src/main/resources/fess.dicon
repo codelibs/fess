@@ -32,7 +32,7 @@
 		<property name="supportedLanguages">new String[] { "ar", "bg", "ca",
             "cz", "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
             "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
-            "ro", "ru", "sv", "th", "tr", "zh", "zh_CN", "zh_TW" }</property>
+            "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" }</property>
 		-->
 		<property name="logFilePath">@System@getProperty("fess.log.file").replaceAll(".out", "_crawler.out")</property>
         <property name="crawlerJavaOptions">new String[] {

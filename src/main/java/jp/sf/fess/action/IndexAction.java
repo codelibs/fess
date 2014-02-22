@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -799,26 +800,33 @@ public class IndexAction {
             }
         }
         if (indexForm.lang != null) {
+            final Set<String> langSet = new HashSet<>();
             for (final String lang : indexForm.lang) {
                 if (StringUtil.isNotBlank(lang) && lang.length() < 1000) {
                     final String normalizeLang = systemHelper
                             .normalizeLang(lang);
                     if (normalizeLang != null) {
-                        queryBuf.append(' ').append(systemHelper.langField)
-                                .append(':').append(normalizeLang);
+                        langSet.add(normalizeLang);
                     }
                 }
             }
+            appendLangQuery(queryBuf, langSet);
         } else if (Constants.TRUE.equals(crawlerProperties.getProperty(
                 Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY,
                 Constants.FALSE))) {
-            final Locale locale = request.getLocale();
-            if (locale != null) {
-                final String normalizeLang = systemHelper.normalizeLang(locale
-                        .getLanguage());
-                if (normalizeLang != null) {
-                    queryBuf.append(' ').append(systemHelper.langField)
-                            .append(':').append(normalizeLang);
+            final Set<String> langSet = new HashSet<>();
+            final Enumeration<Locale> locales = request.getLocales();
+            if (locales != null) {
+                while (locales.hasMoreElements()) {
+                    final Locale locale = locales.nextElement();
+                    final String normalizeLang = systemHelper
+                            .normalizeLang(locale.toString());
+                    if (normalizeLang != null) {
+                        langSet.add(normalizeLang);
+                    }
+                }
+                if (!langSet.isEmpty()) {
+                    appendLangQuery(queryBuf, langSet);
                 }
             }
         }
@@ -966,6 +974,27 @@ public class IndexAction {
                         "pageNumberList", "partialResults").execute();
 
         return query;
+    }
+
+    private void appendLangQuery(final StringBuilder queryBuf,
+            final Set<String> langSet) {
+        if (langSet.size() == 1) {
+            queryBuf.append(' ').append(systemHelper.langField).append(':')
+                    .append(langSet.iterator().next());
+        } else if (langSet.size() > 1) {
+            boolean first = true;
+            for (final String lang : langSet) {
+                if (first) {
+                    queryBuf.append(" (");
+                    first = false;
+                } else {
+                    queryBuf.append(" OR ");
+                }
+                queryBuf.append(systemHelper.langField).append(':')
+                        .append(lang);
+            }
+            queryBuf.append(')');
+        }
     }
 
     protected void updateSearchParams() {

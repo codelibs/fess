@@ -137,7 +137,7 @@ public class SystemHelper implements Serializable {
     protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
             "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
             "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
-            "ro", "ru", "sv", "th", "tr", "zh", "zh_CN", "zh_TW" };
+            "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" };
 
     protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
 
@@ -482,21 +482,13 @@ public class SystemHelper implements Serializable {
             return null;
         }
 
-        final StringBuilder buf = new StringBuilder(value.length());
-        for (int i = 0; i < value.length(); i++) {
-            final char c = value.charAt(i);
-            if ('a' <= c && c <= 'z') {
-                buf.append(c);
-            } else if (buf.length() > 0) {
-                break;
-            }
-        }
-        if (buf.length() > 0) {
-            final String lang = buf.toString();
-            for (final String supportedLang : supportedLanguages) {
-                if (supportedLang.equalsIgnoreCase(lang)) {
-                    return supportedLang;
-                }
+        final String localeName = value.trim().toLowerCase(Locale.ENGLISH)
+                .replace("-", "_");
+
+        for (final String supportedLang : supportedLanguages) {
+            if (localeName
+                    .startsWith(supportedLang.toLowerCase(Locale.ENGLISH))) {
+                return supportedLang;
             }
         }
         return null;

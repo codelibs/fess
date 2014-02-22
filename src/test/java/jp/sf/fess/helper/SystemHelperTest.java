@@ -23,7 +23,7 @@ public class SystemHelperTest extends S2TestCase {
 
     @Override
     protected String getRootDicon() throws Throwable {
-        return "app.dicon";
+        return "jp/sf/fess/helper/system.dicon";
     }
 
     public void test_encodeUrlFilter() {
@@ -48,13 +48,13 @@ public class SystemHelperTest extends S2TestCase {
         value = "";
         assertNull(systemHelper.normalizeLang(value));
 
+        value = "_ja";
+        assertNull(systemHelper.normalizeLang(value));
+
         value = "ja";
         assertEquals("ja", systemHelper.normalizeLang(value));
 
         value = " ja ";
-        assertEquals("ja", systemHelper.normalizeLang(value));
-
-        value = "_ja";
         assertEquals("ja", systemHelper.normalizeLang(value));
 
         value = "ja-JP";
@@ -65,5 +65,20 @@ public class SystemHelperTest extends S2TestCase {
 
         value = "ja_JP_AAA";
         assertEquals("ja", systemHelper.normalizeLang(value));
+
+        value = "zh";
+        assertEquals("zh", systemHelper.normalizeLang(value));
+
+        value = "zh-cn";
+        assertEquals("zh_CN", systemHelper.normalizeLang(value));
+
+        value = "zh_CN";
+        assertEquals("zh_CN", systemHelper.normalizeLang(value));
+
+        value = "zh-tw";
+        assertEquals("zh_TW", systemHelper.normalizeLang(value));
+
+        value = "zh_TW";
+        assertEquals("zh_TW", systemHelper.normalizeLang(value));
     }
 }
