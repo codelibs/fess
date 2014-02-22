@@ -40,6 +40,7 @@ import jp.sf.fess.entity.SearchQuery.SortField;
 import jp.sf.fess.helper.BrowserTypeHelper;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.RoleQueryHelper;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.QueryUtil;
 import jp.sf.fess.util.SearchParamMap;
 
@@ -84,13 +85,16 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     @Resource
     protected RoleQueryHelper roleQueryHelper;
 
+    @Resource
+    protected SystemHelper systemHelper;
+
     protected Set<String> apiResponseFieldSet;
 
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
             "mimetype", "filetype_s", "created", TTTLE_FIELD, "digest", "url",
             "clickCount_l_x_dv", "favoriteCount_l_x_dv", "screenshot_s_s",
-            "cid_s_s" };
+            "cid_s_s", "lang_s" };
 
     protected String[] responseDocValuesFields = new String[] {
             "clickCount_l_x_dv", "favoriteCount_l_x_dv" };
@@ -100,7 +104,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     protected String[] searchFields = new String[] { "url", "docId", "host",
             TTTLE_FIELD, CONTENT_FIELD, "contentLength", "lastModified",
             "mimetype", "filetype_s", LABEL_FIELD, "segment",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv", INURL_FIELD };
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv", INURL_FIELD, "lang_s" };
 
     protected String[] facetFields = new String[] { "url", "host", TTTLE_FIELD,
             CONTENT_FIELD, "contentLength", "lastModified", "mimetype",
@@ -133,11 +137,6 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     protected Map<String, String[]> requestParameterMap = new HashMap<String, String[]>();
 
     protected String additionalGeoQuery;
-
-    protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
-            "cz", "da", "de", "el", "es", "eu", "fa", "fi", "fr", "ga", "gl",
-            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
-            "ro", "ru", "sv", "th", "tr", "zh", "zh_CN", "zh_TW" };
 
     protected Map<String, String> fieldLanguageMap = new HashMap<String, String>();
 
@@ -914,6 +913,8 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     }
 
     protected String getQueryLanguage() {
+        final String[] supportedLanguages = systemHelper
+                .getSupportedLanguages();
         if (supportedLanguages.length == 0) {
             return null;
         }
@@ -1286,14 +1287,6 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     public void setAdditionalGeoQuery(final String additionalGeoQuery) {
         this.additionalGeoQuery = additionalGeoQuery;
-    }
-
-    public String[] getSupportedLanguages() {
-        return supportedLanguages;
-    }
-
-    public void setSupportedLanguages(final String[] supportedLanguages) {
-        this.supportedLanguages = supportedLanguages;
     }
 
     public void addFieldLanguage(final String lang, final String fieldLang) {

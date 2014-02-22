@@ -76,13 +76,13 @@
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{"id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
-            "created", "title", "digest", "url", "screenshot_s_s", "cid_s_s"}</property>
+            "created", "title", "digest", "url", "screenshot_s_s", "cid_s_s", "lang_s"}</property>
 		<property name="responseDocValuesFields">new String[]{
             "clickCount_l_x_dv", "favoriteCount_l_x_dv"}</property>
 		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
 		<property name="searchFields">new String[]{"url", "docId", "host", 
             "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
-            "label", "segment" }</property>
+            "label", "segment", "lang_s" }</property>
 		<property name="facetFields">new String[]{"url", "host", 
             "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
             "label", "segment" }</property>
@@ -100,10 +100,6 @@
 			<arg>"debug.explain.structured"</arg>
 			<arg>"true"</arg>
 		</initMethod>
-		<property name="supportedLanguages">new String[] { "ar", "bg", "ca",
-            "cz", "da", "de", "el", "es", "eu", "fa", "fi", "fr", "ga", "gl",
-            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
-            "ro", "ru", "sv", "th", "tr", "zh", "zh_CN", "zh_TW" }</property>
 		<initMethod name="addDefaultSortField">
 			<arg>"score"</arg>
 			<arg>"desc"</arg>

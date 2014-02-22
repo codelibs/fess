@@ -48,6 +48,8 @@ public class IndexForm implements Serializable {
     @IntegerType
     public String num;
 
+    public String[] lang;
+
     @Maxbytelength(maxbytelength = 1000)
     public String queryId;
 

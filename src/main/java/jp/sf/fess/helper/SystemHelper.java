@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jp.sf.fess.Constants;
@@ -38,6 +41,7 @@ import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.service.RoleTypeService;
 import jp.sf.fess.util.ResourceUtil;
 
+import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.policy.QueryType;
@@ -47,10 +51,15 @@ import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.FileUtil;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.CharUtil;
+import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class SystemHelper implements Serializable {
 
@@ -125,6 +134,13 @@ public class SystemHelper implements Serializable {
 
     public String langField = "lang_s";
 
+    protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
+            "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
+            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
+            "ro", "ru", "sv", "th", "tr", "zh", "zh_CN", "zh_TW" };
+
+    protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
+
     @InitMethod
     public void init() {
         final File[] files = ResourceUtil.getJarFiles(launcherFileNamePrefix);
@@ -176,6 +192,35 @@ public class SystemHelper implements Serializable {
                         + jnlpTemplateFile.getAbsolutePath(), e);
             }
         }
+
+        langItemsCache = CacheBuilder.newBuilder().maximumSize(20)
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build(new CacheLoader<String, List<Map<String, String>>>() {
+                    @Override
+                    public List<Map<String, String>> load(final String key)
+                            throws Exception {
+                        final Locale displayLocale = LocaleUtils.toLocale(key);
+                        final List<Map<String, String>> langItems = new ArrayList<>(
+                                supportedLanguages.length);
+                        final String msg = MessageResourcesUtil.getMessage(
+                                displayLocale, "labels.allLanguages");
+                        final Map<String, String> defaultMap = new HashMap<>(2);
+                        defaultMap.put(Constants.ITEM_LABEL, msg);
+                        defaultMap.put(Constants.ITEM_VALUE, "all");
+                        langItems.add(defaultMap);
+
+                        for (final String lang : supportedLanguages) {
+                            final Locale locale = LocaleUtils.toLocale(lang);
+                            final String label = locale
+                                    .getDisplayName(displayLocale);
+                            final Map<String, String> map = new HashMap<>(2);
+                            map.put(Constants.ITEM_LABEL, label);
+                            map.put(Constants.ITEM_VALUE, lang);
+                            langItems.add(map);
+                        }
+                        return langItems;
+                    }
+                });
     }
 
     public String getUsername() {
@@ -447,9 +492,37 @@ public class SystemHelper implements Serializable {
             }
         }
         if (buf.length() > 0) {
-            return buf.toString();
+            final String lang = buf.toString();
+            for (final String supportedLang : supportedLanguages) {
+                if (supportedLang.equalsIgnoreCase(lang)) {
+                    return supportedLang;
+                }
+            }
         }
         return null;
     }
 
+    public List<Map<String, String>> getLanguageItems(final Locale locale) {
+        try {
+            return langItemsCache.get(locale.toString());
+        } catch (final ExecutionException e) {
+            final List<Map<String, String>> langItems = new ArrayList<>(
+                    supportedLanguages.length);
+            final String msg = MessageResourcesUtil.getMessage(locale,
+                    "labels.allLanguages");
+            final Map<String, String> defaultMap = new HashMap<>(2);
+            defaultMap.put(Constants.ITEM_LABEL, msg);
+            defaultMap.put(Constants.ITEM_VALUE, "all");
+            langItems.add(defaultMap);
+            return langItems;
+        }
+    }
+
+    public String[] getSupportedLanguages() {
+        return supportedLanguages;
+    }
+
+    public void setSupportedLanguages(final String[] supportedLanguages) {
+        this.supportedLanguages = supportedLanguages;
+    }
 }

@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -96,6 +97,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexAction {
+
     private static final Logger logger = LoggerFactory
             .getLogger(IndexAction.class);
 
@@ -191,6 +193,8 @@ public class IndexAction {
 
     public List<Map<String, String>> labelTypeItems;
 
+    public List<Map<String, String>> langItems;
+
     public String errorMessage;
 
     protected String pagingQuery = null;
@@ -217,6 +221,27 @@ public class IndexAction {
             }
             if (StringUtil.isNotBlank(indexForm.sort)) {
                 buf.append("&sort=").append(S2Functions.u(indexForm.sort));
+            }
+            if (indexForm.lang != null) {
+                final Set<String> langSet = new HashSet<String>();
+                for (final String lang : indexForm.lang) {
+                    if (StringUtil.isNotBlank(lang) && lang.length() < 1000) {
+                        if (Constants.ALL_LANGUAGES.equals(lang)) {
+                            langSet.clear();
+                            break;
+                        }
+                        final String normalizeLang = systemHelper
+                                .normalizeLang(lang);
+                        if (normalizeLang != null) {
+                            langSet.add(normalizeLang);
+                        }
+                    }
+                }
+                if (!langSet.isEmpty()) {
+                    for (final String lang : langSet) {
+                        buf.append("&lang=").append(S2Functions.u(lang));
+                    }
+                }
             }
             if (!indexForm.fields.isEmpty()) {
                 for (final Map.Entry<String, String[]> entry : indexForm.fields
@@ -773,6 +798,30 @@ public class IndexAction {
                 }
             }
         }
+        if (indexForm.lang != null) {
+            for (final String lang : indexForm.lang) {
+                if (StringUtil.isNotBlank(lang) && lang.length() < 1000) {
+                    final String normalizeLang = systemHelper
+                            .normalizeLang(lang);
+                    if (normalizeLang != null) {
+                        queryBuf.append(' ').append(systemHelper.langField)
+                                .append(':').append(normalizeLang);
+                    }
+                }
+            }
+        } else if (Constants.TRUE.equals(crawlerProperties.getProperty(
+                Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY,
+                Constants.FALSE))) {
+            final Locale locale = request.getLocale();
+            if (locale != null) {
+                final String normalizeLang = systemHelper.normalizeLang(locale
+                        .getLanguage());
+                if (normalizeLang != null) {
+                    queryBuf.append(' ').append(systemHelper.langField)
+                            .append(':').append(normalizeLang);
+                }
+            }
+        }
 
         final String query = queryBuf.toString().trim();
 
@@ -1068,6 +1117,12 @@ public class IndexAction {
                 }
             }
         }
+
+        Locale locale = request.getLocale();
+        if (locale == null) {
+            locale = Locale.ENGLISH;
+        }
+        langItems = systemHelper.getLanguageItems(locale);
 
         searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
                 Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));

@@ -166,6 +166,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String NOTIFICATION_TO_PROPERTY = "notification.to";
 
+    public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.browser.locale";
+
     public static final String AUTH_CIPHER = "authenticationCipher";
 
     public static final String RETURN_PATH = "jp.sf.fess.ReturnPath";
@@ -324,5 +326,7 @@ public class Constants extends CoreLibConstants {
     public static final String DOC_ID = "docId";
 
     public static final String DCF = "dcf";
+
+    public static final String ALL_LANGUAGES = "all";
 
 }
