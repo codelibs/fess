@@ -40,7 +40,7 @@ import jp.sf.fess.entity.SearchQuery.SortField;
 import jp.sf.fess.helper.BrowserTypeHelper;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.RoleQueryHelper;
-import jp.sf.fess.util.ComponentUtil;
+import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.QueryUtil;
 import jp.sf.fess.util.SearchParamMap;
 
@@ -84,6 +84,9 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     @Binding(bindingType = BindingType.MAY)
     @Resource
     protected RoleQueryHelper roleQueryHelper;
+
+    @Resource
+    protected SystemHelper systemHelper;
 
     protected Set<String> apiResponseFieldSet;
 
@@ -910,7 +913,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     }
 
     protected String getQueryLanguage() {
-        final String[] supportedLanguages = ComponentUtil.getSystemHelper()
+        final String[] supportedLanguages = systemHelper
                 .getSupportedLanguages();
         if (supportedLanguages.length == 0) {
             return null;

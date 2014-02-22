@@ -1809,7 +1809,7 @@ public class QueryHelperImplTest extends S2TestCase {
         assertEquals("zh", queryHelperImpl.getQueryLanguage());
         request.setLocale(Locale.CANADA_FRENCH);
         assertEquals("fr", queryHelperImpl.getQueryLanguage());
-        request.setLocale(Locale.ENGLISH);
+        request.setLocale(new Locale("aa"));
         assertNull(queryHelperImpl.getQueryLanguage());
     }
 
