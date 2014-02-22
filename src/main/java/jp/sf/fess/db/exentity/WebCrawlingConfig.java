@@ -18,6 +18,7 @@ package jp.sf.fess.db.exentity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,8 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
     protected volatile Pattern[] includedDocUrlPatterns;
 
     protected volatile Pattern[] excludedDocUrlPatterns;
+
+    protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
     public WebCrawlingConfig() {
         super();
@@ -242,9 +245,9 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
         final Map<String, Object> paramMap = new HashMap<String, Object>();
         clientFactory.setInitParameterMap(paramMap);
 
-        final String configParam = getConfigParameter();
-        if (StringUtil.isNotBlank(configParam)) {
-            ParameterUtil.loadConfigParams(paramMap, configParam);
+        final Map<String, String> clientConfigMap = getConfigParameterMap(ConfigName.CLIENT);
+        if (clientConfigMap != null) {
+            paramMap.putAll(clientConfigMap);
         }
 
         final String userAgent = getUserAgent();
@@ -274,4 +277,38 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
 
     }
 
+    @Override
+    public Map<String, String> getConfigParameterMap(final ConfigName name) {
+        if (configParameterMap == null) {
+            final Map<ConfigName, Map<String, String>> map = new HashMap<>();
+            final Map<String, String> clientConfigMap = new HashMap<>();
+            final Map<String, String> xpathConfigMap = new HashMap<>();
+            final Map<String, String> scriptConfigMap = new HashMap<>();
+            map.put(ConfigName.CLIENT, clientConfigMap);
+            map.put(ConfigName.XPATH, xpathConfigMap);
+            map.put(ConfigName.SCRIPT, scriptConfigMap);
+            for (final Map.Entry<String, String> entry : ParameterUtil.parse(
+                    getConfigParameter()).entrySet()) {
+                final String key = entry.getKey();
+                if (key.startsWith(CLIENT_PREFIX)) {
+                    clientConfigMap.put(key.substring(CLIENT_PREFIX.length()),
+                            entry.getValue());
+                } else if (key.startsWith(XPATH_PREFIX)) {
+                    xpathConfigMap.put(key.substring(XPATH_PREFIX.length()),
+                            entry.getValue());
+                } else if (key.startsWith(SCRIPT_PREFIX)) {
+                    scriptConfigMap.put(key.substring(SCRIPT_PREFIX.length()),
+                            entry.getValue());
+                }
+            }
+
+            configParameterMap = map;
+        }
+
+        final Map<String, String> configMap = configParameterMap.get(name);
+        if (configMap == null) {
+            return Collections.emptyMap();
+        }
+        return configMap;
+    }
 }

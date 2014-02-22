@@ -16,9 +16,16 @@
 
 package jp.sf.fess.db.exentity;
 
+import java.util.Map;
+
 import org.seasar.robot.client.S2RobotClientFactory;
 
 public interface CrawlingConfig {
+    public static final String XPATH_PREFIX = "field.xpath.";
+
+    public static final String SCRIPT_PREFIX = "field.script.";
+
+    public static final String CLIENT_PREFIX = "client.";
 
     Long getId();
 
@@ -37,6 +44,8 @@ public interface CrawlingConfig {
     String getConfigId();
 
     void initializeClientFactory(S2RobotClientFactory s2RobotClientFactory);
+
+    Map<String, String> getConfigParameterMap(ConfigName name);
 
     public enum ConfigType {
         WEB("W"), FILE("F"), DATA("D");
@@ -59,4 +68,7 @@ public interface CrawlingConfig {
         }
     }
 
+    public enum ConfigName {
+        CLIENT, XPATH, SCRIPT;
+    }
 }

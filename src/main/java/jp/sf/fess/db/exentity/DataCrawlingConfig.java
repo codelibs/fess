@@ -18,6 +18,7 @@ package jp.sf.fess.db.exentity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -382,5 +383,10 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
             }
         }
 
+    }
+
+    @Override
+    public Map<String, String> getConfigParameterMap(final ConfigName name) {
+        return Collections.emptyMap();
     }
 }

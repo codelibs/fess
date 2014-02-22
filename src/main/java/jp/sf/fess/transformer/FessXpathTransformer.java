@@ -38,6 +38,7 @@ import javax.xml.transform.TransformerException;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.CrawlingConfig;
+import jp.sf.fess.db.exentity.CrawlingConfig.ConfigName;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.FileTypeHelper;
@@ -52,6 +53,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xpath.objects.XObject;
 import org.cyberneko.html.parsers.DOMParser;
+import org.seasar.framework.util.OgnlUtil;
 import org.seasar.framework.util.SerializeUtil;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.RobotCrawlAccessException;
@@ -331,6 +333,45 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             putResultDataBody(dataMap, "url", url); // set again
         }
 
+        // from config
+        final Map<String, String> xpathConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.XPATH);
+        final Map<String, String> scriptConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.SCRIPT);
+        for (final Map.Entry<String, String> entry : xpathConfigMap.entrySet()) {
+            String value = getSingleNodeValue(document, entry.getValue(), true);
+            final String key = entry.getKey();
+            final String template = scriptConfigMap.get(key);
+            if (template != null) {
+                final Map<String, Object> paramMap = new HashMap<>(
+                        dataMap.size());
+                paramMap.putAll(dataMap);
+                paramMap.put("value", value);
+                value = convertValue(template, paramMap);
+            }
+            if (value != null) {
+                putResultDataBody(dataMap, key, value);
+            }
+        }
+    }
+
+    protected String convertValue(final String template,
+            final Map<String, Object> paramMap) {
+        if (StringUtil.isEmpty(template)) {
+            return Constants.EMPTY_STRING;
+        }
+
+        try {
+            final Object exp = OgnlUtil.parseExpression(template);
+            final Object value = OgnlUtil.getValue(exp, paramMap);
+            if (value == null) {
+                return null;
+            }
+            return value.toString();
+        } catch (final Exception e) {
+            logger.warn("Invalid value format: " + template, e);
+            return null;
+        }
     }
 
     protected String getCanonicalUrl(final ResponseData responseData,
