@@ -35,6 +35,7 @@ import jp.sf.fess.dict.DictionaryFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.util.StringUtil;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";
@@ -131,8 +132,8 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     @Override
     public synchronized void delete(final SynonymItem item) {
         final SynonymItem synonymItem = item;
-        synonymItem.setNewInputs(new String[0]);
-        synonymItem.setNewOutputs(new String[0]);
+        synonymItem.setNewInputs(StringUtil.EMPTY_STRINGS);
+        synonymItem.setNewOutputs(StringUtil.EMPTY_STRINGS);
         SynonymUpdater updater = null;
         try {
             updater = new SynonymUpdater(file, synonymItem);

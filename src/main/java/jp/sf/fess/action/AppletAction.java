@@ -25,8 +25,8 @@ import jp.sf.fess.form.AppletForm;
 import jp.sf.fess.helper.SystemHelper;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
@@ -90,7 +90,7 @@ public class AppletAction {
 
         final String url = RequestUtil.getRequest().getHeader("REFERER");
         if (StringUtil.isBlank(url)) {
-            referrer = "";
+            referrer = StringUtil.EMPTY;
         } else {
             referrer = StringEscapeUtils.escapeJavaScript(url);
         }

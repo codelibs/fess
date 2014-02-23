@@ -30,7 +30,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.RobotSystemException;
 import org.seasar.robot.client.http.Authentication;
 import org.seasar.robot.client.http.impl.AuthenticationImpl;
@@ -101,12 +101,12 @@ public class WebAuthentication extends BsWebAuthentication {
             final String workstation = parameterMap.get("workstation");
             final String domain = parameterMap.get("domain");
             return new NTCredentials(getUsername(), getPassword(),
-                    workstation == null ? "" : workstation, domain == null ? ""
-                            : domain);
+                    workstation == null ? StringUtil.EMPTY : workstation,
+                    domain == null ? StringUtil.EMPTY : domain);
         }
 
         return new UsernamePasswordCredentials(getUsername(),
-                getPassword() == null ? "" : getPassword());
+                getPassword() == null ? StringUtil.EMPTY : getPassword());
     }
 
 }

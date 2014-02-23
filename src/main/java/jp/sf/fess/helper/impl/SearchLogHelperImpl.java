@@ -40,8 +40,8 @@ import jp.sf.fess.service.UserInfoService;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FessBeans;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,10 +73,10 @@ public class SearchLogHelperImpl extends SearchLogHelper {
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
         final List<SearchLog> searchLogList = new ArrayList<SearchLog>();
         final String value = crawlerProperties.getProperty(
-                Constants.PURGE_BY_BOTS_PROPERTY, Constants.EMPTY_STRING);
+                Constants.PURGE_BY_BOTS_PROPERTY, StringUtil.EMPTY);
         String[] botNames;
         if (StringUtil.isBlank(value)) {
-            botNames = new String[0];
+            botNames = StringUtil.EMPTY_STRINGS;
         } else {
             botNames = value.split(",");
         }

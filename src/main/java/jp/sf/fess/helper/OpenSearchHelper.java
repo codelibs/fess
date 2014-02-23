@@ -28,7 +28,7 @@ import jp.sf.fess.FessSystemException;
 import org.apache.commons.io.IOUtils;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.FileUtil;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.util.ServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

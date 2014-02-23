@@ -36,7 +36,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.client.http.Authentication;
 import org.seasar.robot.client.http.HcHttpClient;
@@ -298,12 +298,13 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
                     final String domain = paramMap.get(S2ROBOT_WEB_AUTH + "."
                             + webAuthName + ".domain");
                     credentials = new NTCredentials(username,
-                            password == null ? "" : password,
-                            workstation == null ? "" : workstation,
-                            domain == null ? "" : domain);
+                            password == null ? StringUtil.EMPTY : password,
+                            workstation == null ? StringUtil.EMPTY
+                                    : workstation,
+                            domain == null ? StringUtil.EMPTY : domain);
                 } else {
                     credentials = new UsernamePasswordCredentials(username,
-                            password == null ? "" : password);
+                            password == null ? StringUtil.EMPTY : password);
                 }
 
                 basicAuthList.add(new AuthenticationImpl(authScope,
@@ -362,7 +363,8 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
                     }
 
                     final SmbAuthentication smbAuth = new SmbAuthentication();
-                    smbAuth.setDomain(domain == null ? "" : domain);
+                    smbAuth.setDomain(domain == null ? StringUtil.EMPTY
+                            : domain);
                     smbAuth.setServer(hostname);
                     if (StringUtil.isNotBlank(port)) {
                         try {
@@ -372,7 +374,8 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
                         }
                     }
                     smbAuth.setUsername(username);
-                    smbAuth.setPassword(password == null ? "" : password);
+                    smbAuth.setPassword(password == null ? StringUtil.EMPTY
+                            : password);
                     smbAuthList.add(smbAuth);
                 }
             }

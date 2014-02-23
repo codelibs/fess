@@ -19,6 +19,7 @@ package jp.sf.fess.helper.impl;
 import jp.sf.fess.helper.DatabaseHelper;
 import jp.sf.fess.util.ResourceUtil;
 
+import org.codelibs.core.util.StringUtil;
 import org.h2.tools.DeleteDbFiles;
 import org.h2.tools.RunScript;
 import org.slf4j.Logger;
@@ -30,11 +31,11 @@ public class H2DatabaseHelperImpl implements DatabaseHelper {
 
     public String databaseName = "robot";
 
-    public String databasePath = ResourceUtil.getDbPath("");
+    public String databasePath = ResourceUtil.getDbPath(StringUtil.EMPTY);
 
     public String user = "sa";
 
-    public String password = "";
+    public String password = StringUtil.EMPTY;
 
     public String sqlFilePath = ResourceUtil.getClassesPath("sql/robot.ddl");
 

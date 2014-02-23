@@ -46,7 +46,7 @@ import jp.sf.fess.util.WebApiUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             processFavoritesRequest(request, response, chain);
             break;
         default:
-            writeJsonResponse(99, Constants.EMPTY_STRING, "Not found.");
+            writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
             break;
         }
     }
@@ -106,7 +106,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     protected void processSearchRequest(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         String query = null;
         final StringBuilder buf = new StringBuilder(1000);
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
@@ -302,7 +302,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     protected void processLabelRequest(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             final List<Map<String, String>> labelTypeItems = ComponentUtil
@@ -343,7 +343,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             chain.doFilter(new WebApiRequest(request, SUGGEST_API),
@@ -427,7 +427,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             chain.doFilter(new WebApiRequest(request, ANALYSIS_API),
@@ -517,7 +517,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             chain.doFilter(new WebApiRequest(request, HOT_SEARCH_WORD_API),
@@ -656,7 +656,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected String escapeCallbackName(final String callbackName) {
-        return callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", "");
+        return callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
     }
 
     protected String escapeJson(final Object obj) {

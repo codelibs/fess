@@ -19,6 +19,7 @@ package jp.sf.fess;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.util.StringUtil;
 
 public class Constants extends CoreLibConstants {
     public static final int MAJOR_VERSION = 9;
@@ -34,10 +35,6 @@ public class Constants extends CoreLibConstants {
     public static final int DEFAULT_ADMIN_PAGE_SIZE = 25;
 
     public static final String WEB_API_VERSION = "5";
-
-    public static final String EMPTY_STRING = "";
-
-    public static final String[] EMPTY_STRINGS = new String[0];
 
     public static final String TRUE = "true";
 
@@ -188,7 +185,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String SUPPORTED_SEARCH_NONE = "n";
 
-    public static final String DEFAULT_IGNORE_FAILURE_TYPE = "";
+    public static final String DEFAULT_IGNORE_FAILURE_TYPE = StringUtil.EMPTY;
 
     public static final String DEFAULT_FAILURE_COUNT = "-1";
 

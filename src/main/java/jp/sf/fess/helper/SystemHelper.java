@@ -43,13 +43,13 @@ import jp.sf.fess.util.ResourceUtil;
 
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.FileUtil;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
@@ -470,7 +470,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String generateDocId(final Map<String, Object> map) {
-        return UUID.randomUUID().toString().replace("-", "");
+        return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY);
     }
 
     public String abbreviateLongText(final String str) {

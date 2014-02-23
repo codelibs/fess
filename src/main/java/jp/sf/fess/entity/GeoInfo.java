@@ -16,7 +16,7 @@
 
 package jp.sf.fess.entity;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.Mask;
 import org.seasar.struts.annotation.Maxbytelength;
 

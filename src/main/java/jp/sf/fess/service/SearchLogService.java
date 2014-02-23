@@ -48,12 +48,12 @@ import net.arnx.jsonic.JSON;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
@@ -261,8 +261,8 @@ public class SearchLogService extends BsSearchLogService implements
                     final ListResultBean<SearchFieldLog> fieldLogList = SingletonS2Container
                             .getComponent(SearchFieldLogBhv.class).selectList(
                                     cb);
-                    String query = Constants.EMPTY_STRING;
-                    String solrQuery = Constants.EMPTY_STRING;
+                    String query = StringUtil.EMPTY;
+                    String solrQuery = StringUtil.EMPTY;
                     final List<Map<String, String>> jsonObjList = new ArrayList<Map<String, String>>(
                             fieldLogList.size());
                     for (final SearchFieldLog fieldLog : fieldLogList) {
@@ -308,7 +308,7 @@ public class SearchLogService extends BsSearchLogService implements
                 private void addToList(final List<String> list,
                         final Object value) {
                     if (value == null) {
-                        list.add(Constants.EMPTY_STRING);
+                        list.add(StringUtil.EMPTY);
                     } else if (value instanceof Timestamp) {
                         list.add(sdf.format((Date) value));
                     } else {

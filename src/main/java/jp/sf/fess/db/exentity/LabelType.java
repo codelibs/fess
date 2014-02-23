@@ -21,7 +21,7 @@ import java.util.List;
 
 import jp.sf.fess.db.bsentity.BsLabelType;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 /**
  * The entity of LABEL_TYPE.

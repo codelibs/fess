@@ -29,6 +29,7 @@ import jp.sf.fess.form.admin.SystemInfoForm;
 import jp.sf.fess.helper.SystemHelper;
 
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 
@@ -118,9 +119,9 @@ public class SystemInfoAction implements Serializable {
             final Object value) {
         final Map<String, String> map = new HashMap<String, String>(2);
         map.put(Constants.ITEM_LABEL, label != null ? label.toString()
-                : Constants.EMPTY_STRING);
+                : StringUtil.EMPTY);
         map.put(Constants.ITEM_VALUE, value != null ? value.toString()
-                : Constants.EMPTY_STRING);
+                : StringUtil.EMPTY);
         return map;
     }
 }

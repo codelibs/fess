@@ -43,7 +43,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

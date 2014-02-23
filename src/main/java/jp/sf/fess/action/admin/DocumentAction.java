@@ -45,7 +45,7 @@ import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.SolrLibConstants;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.taglib.S2Functions;

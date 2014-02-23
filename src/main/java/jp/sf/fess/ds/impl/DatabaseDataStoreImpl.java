@@ -32,7 +32,7 @@ import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

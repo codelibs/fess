@@ -29,7 +29,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.crud.service.BsFavoriteLogService;
 import jp.sf.fess.db.cbean.FavoriteLogCB;
 import jp.sf.fess.db.cbean.UserInfoCB;
@@ -43,10 +42,10 @@ import jp.sf.orangesignal.csv.CsvWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
-import org.seasar.framework.util.StringUtil;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
@@ -249,7 +248,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
                                     .selectEntity(cb);
                             String userCode;
                             if (userInfo == null) {
-                                userCode = Constants.EMPTY_STRING;
+                                userCode = StringUtil.EMPTY;
                             } else {
                                 userCode = userInfo.getCode();
                             }
@@ -269,7 +268,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
                         private void addToList(final List<String> list,
                                 final Object value) {
                             if (value == null) {
-                                list.add(Constants.EMPTY_STRING);
+                                list.add(StringUtil.EMPTY);
                             } else if (value instanceof Timestamp) {
                                 list.add(sdf.format((Date) value));
                             } else {

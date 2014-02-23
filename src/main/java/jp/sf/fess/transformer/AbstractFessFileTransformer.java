@@ -47,9 +47,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.RobotCrawlAccessException;
 import org.seasar.robot.RobotSystemException;
 import org.seasar.robot.client.smb.SmbClient;
@@ -226,7 +226,7 @@ public abstract class AbstractFessFileTransformer extends
         if (StringUtil.isNotBlank(body)) {
             putResultDataBody(dataMap, "content", body);
         } else {
-            putResultDataBody(dataMap, "content", "");
+            putResultDataBody(dataMap, "content", StringUtil.EMPTY);
         }
         final String cache = normalizeContent(content);
         if (enableCache) {
@@ -264,7 +264,7 @@ public abstract class AbstractFessFileTransformer extends
         // created
         putResultDataBody(dataMap, "created", "NOW");
         // TODO anchor
-        putResultDataBody(dataMap, "anchor", "");
+        putResultDataBody(dataMap, "anchor", StringUtil.EMPTY);
         // mimetype
         putResultDataBody(dataMap, "mimetype", mimeType);
         if (fileTypeHelper != null) {
@@ -365,7 +365,7 @@ public abstract class AbstractFessFileTransformer extends
             return null;
         }
 
-        name = name.replaceAll("/+$", "");
+        name = name.replaceAll("/+$", StringUtil.EMPTY);
         final int idx = name.lastIndexOf('/');
         if (idx >= 0) {
             name = name.substring(idx + 1);
@@ -435,7 +435,7 @@ public abstract class AbstractFessFileTransformer extends
     @Override
     protected String getHost(final String url) {
         if (StringUtil.isBlank(url)) {
-            return ""; // empty
+            return StringUtil.EMPTY; // empty
         }
 
         if (url.startsWith("file:////")) {
@@ -458,7 +458,7 @@ public abstract class AbstractFessFileTransformer extends
     @Override
     protected String getSite(final String url, final String encoding) {
         if (StringUtil.isBlank(url)) {
-            return ""; // empty
+            return StringUtil.EMPTY; // empty
         }
 
         if (url.startsWith("file:////")) {

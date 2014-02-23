@@ -31,8 +31,8 @@ import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.util.OgnlUtil;
-import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     protected Object convertValue(final String template,
             final Map<String, String> paramMap) {
         if (StringUtil.isEmpty(template)) {
-            return Constants.EMPTY_STRING;
+            return StringUtil.EMPTY;
         }
 
         try {

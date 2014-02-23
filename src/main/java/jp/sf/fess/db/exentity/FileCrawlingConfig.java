@@ -31,8 +31,8 @@ import jp.sf.fess.service.FileAuthenticationService;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ParameterUtil;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.client.smb.SmbAuthentication;
 import org.seasar.robot.client.smb.SmbClient;
@@ -254,7 +254,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
                 final Map<String, String> map = ParameterUtil.parse(fileAuth
                         .getParameters());
                 final String domain = map.get("domain");
-                smbAuth.setDomain(domain == null ? "" : domain);
+                smbAuth.setDomain(domain == null ? StringUtil.EMPTY : domain);
                 smbAuth.setServer(fileAuth.getHostname());
                 smbAuth.setPort(fileAuth.getPort());
                 smbAuth.setUsername(fileAuth.getUsername());

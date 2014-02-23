@@ -79,6 +79,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
 import org.seasar.framework.beans.util.Beans;
@@ -86,7 +87,6 @@ import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
 import org.seasar.framework.util.InputStreamUtil;
 import org.seasar.framework.util.OutputStreamUtil;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.taglib.S2Functions;
@@ -1107,8 +1107,7 @@ public class IndexAction {
         if (!labelTypeItems.isEmpty()
                 && !indexForm.fields.containsKey(LABEL_FIELD)) {
             final String defaultLabelValue = crawlerProperties.getProperty(
-                    Constants.DEFAULT_LABEL_VALUE_PROPERTY,
-                    Constants.EMPTY_STRING);
+                    Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
             if (StringUtil.isNotBlank(defaultLabelValue)) {
                 final String[] values = defaultLabelValue.split("\n");
                 if (values != null && values.length > 0) {

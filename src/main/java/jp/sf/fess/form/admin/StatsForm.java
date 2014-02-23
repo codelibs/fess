@@ -22,7 +22,7 @@ import java.util.Map;
 
 import jp.sf.fess.Constants;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.IntegerType;
 
 public class StatsForm implements Serializable {

@@ -34,7 +34,7 @@ import jp.sf.fess.pager.UserInfoPager;
 
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.UpdateOption;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class UserInfoService extends BsUserInfoService implements Serializable {
 

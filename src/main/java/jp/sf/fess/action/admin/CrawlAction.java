@@ -30,6 +30,7 @@ import jp.sf.fess.form.admin.CrawlForm;
 import jp.sf.fess.helper.SystemHelper;
 
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.ActionForm;
@@ -71,7 +72,7 @@ public class CrawlAction implements Serializable {
         crawlForm.crawlingThreadCount = crawlerProperties.getProperty(
                 Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         crawlForm.mobileTranscoder = crawlerProperties.getProperty(
-                Constants.MOBILE_TRANSCODER_PROPERTY, Constants.EMPTY_STRING);
+                Constants.MOBILE_TRANSCODER_PROPERTY, StringUtil.EMPTY);
         crawlForm.searchLog = crawlerProperties.getProperty(
                 Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
         crawlForm.userInfo = crawlerProperties.getProperty(
@@ -83,7 +84,7 @@ public class CrawlAction implements Serializable {
         crawlForm.webApiJson = crawlerProperties.getProperty(
                 Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
         crawlForm.defaultLabelValue = crawlerProperties.getProperty(
-                Constants.DEFAULT_LABEL_VALUE_PROPERTY, "");
+                Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
         crawlForm.appendQueryParameter = crawlerProperties.getProperty(
                 Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
         crawlForm.supportedSearch = crawlerProperties.getProperty(
@@ -112,7 +113,7 @@ public class CrawlAction implements Serializable {
                 Constants.PURGE_BY_BOTS_PROPERTY,
                 Constants.DEFAULT_PURGE_BY_BOTS);
         crawlForm.notificationTo = crawlerProperties.getProperty(
-                Constants.NOTIFICATION_TO_PROPERTY, Constants.EMPTY_STRING);
+                Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
         if (redirect) {
             return "index?redirect=true";
         } else {
@@ -252,7 +253,7 @@ public class CrawlAction implements Serializable {
 
     public List<Map<String, String>> getMobileTranscoderItems() {
         final List<Map<String, String>> mobileTranscoderList = new ArrayList<Map<String, String>>();
-        mobileTranscoderList.add(createItem("-", Constants.EMPTY_STRING));
+        mobileTranscoderList.add(createItem("-", StringUtil.EMPTY));
         mobileTranscoderList.add(createItem(MessageResourcesUtil.getMessage(
                 RequestUtil.getRequest().getLocale(),
                 "labels.mobile_transcoder_google"),

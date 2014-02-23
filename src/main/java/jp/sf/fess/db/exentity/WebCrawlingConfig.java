@@ -31,7 +31,7 @@ import jp.sf.fess.service.WebAuthenticationService;
 import jp.sf.fess.util.ParameterUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.client.http.Authentication;
 import org.seasar.robot.client.http.HcHttpClient;

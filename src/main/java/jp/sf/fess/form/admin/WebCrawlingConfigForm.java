@@ -24,7 +24,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.crud.form.admin.BsWebCrawlingConfigForm;
 import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements
         Serializable {

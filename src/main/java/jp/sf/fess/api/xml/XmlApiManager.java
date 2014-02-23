@@ -45,7 +45,7 @@ import jp.sf.fess.util.WebApiUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +86,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             processAnalysisRequest(request, response, chain);
             break;
         default:
-            writeXmlResponse(-1, Constants.EMPTY_STRING, "Not found.");
+            writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
             break;
         }
 
@@ -95,7 +95,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     protected void processSearchRequest(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(1000);
         String query = null;
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
@@ -255,7 +255,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     protected void processLabelRequest(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             final List<Map<String, String>> labelTypeItems = ComponentUtil
@@ -291,7 +291,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             chain.doFilter(new WebApiRequest(request, SUGGEST_API),
@@ -371,7 +371,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
-        String errMsg = Constants.EMPTY_STRING;
+        String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
             chain.doFilter(new WebApiRequest(request, ANALYSIS_API),

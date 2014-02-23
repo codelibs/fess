@@ -28,9 +28,9 @@ import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
-import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,7 +178,7 @@ public class FessStatusPolicy extends StatusPolicyImpl {
             }
 
             final FileTemplateLoader loader = new FileTemplateLoader(new File(
-                    ResourceUtil.getMailTemplatePath("")));
+                    ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
             final Handlebars handlebars = new Handlebars(loader);
 
             try {

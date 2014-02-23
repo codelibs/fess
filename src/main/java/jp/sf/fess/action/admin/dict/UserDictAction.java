@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
@@ -35,10 +34,10 @@ import jp.sf.fess.service.UserDictService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
@@ -337,9 +336,8 @@ public class UserDictAction {
 
             }
         } else {
-            userDictItem = new UserDictItem(0, Constants.EMPTY_STRING,
-                    Constants.EMPTY_STRING, Constants.EMPTY_STRING,
-                    Constants.EMPTY_STRING);
+            userDictItem = new UserDictItem(0, StringUtil.EMPTY,
+                    StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
         }
 
         userDictItem.setNewToken(userDictForm.token);

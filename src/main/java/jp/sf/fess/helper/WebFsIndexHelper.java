@@ -35,9 +35,9 @@ import jp.sf.fess.solr.IndexUpdater;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.S2Robot;
 import org.seasar.robot.S2RobotContext;
 import org.seasar.robot.service.DataService;
@@ -183,9 +183,9 @@ public class WebFsIndexHelper implements Serializable {
                     .setDelayMillisForWaitingNewUrl(intervalTime);
 
             final String includedUrlsStr = webCrawlingConfig.getIncludedUrls() != null ? webCrawlingConfig
-                    .getIncludedUrls() : "";
+                    .getIncludedUrls() : StringUtil.EMPTY;
             final String excludedUrlsStr = webCrawlingConfig.getExcludedUrls() != null ? webCrawlingConfig
-                    .getExcludedUrls() : "";
+                    .getExcludedUrls() : StringUtil.EMPTY;
 
             // num of threads
             final S2RobotContext robotContext = s2Robot.getRobotContext();
@@ -299,10 +299,10 @@ public class WebFsIndexHelper implements Serializable {
 
             final String includedPathsStr = fileCrawlingConfig
                     .getIncludedPaths() != null ? fileCrawlingConfig
-                    .getIncludedPaths() : "";
+                    .getIncludedPaths() : StringUtil.EMPTY;
             final String excludedPathsStr = fileCrawlingConfig
                     .getExcludedPaths() != null ? fileCrawlingConfig
-                    .getExcludedPaths() : "";
+                    .getExcludedPaths() : StringUtil.EMPTY;
 
             // num of threads
             final S2RobotContext robotContext = s2Robot.getRobotContext();

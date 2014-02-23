@@ -43,7 +43,7 @@ import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.S2Robot;
 import org.seasar.robot.db.cbean.AccessResultCB;
 import org.seasar.robot.db.exbhv.AccessResultBhv;

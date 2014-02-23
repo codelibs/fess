@@ -18,10 +18,8 @@ package jp.sf.fess.transformer;
 
 import java.net.URLDecoder;
 
-import jp.sf.fess.Constants;
-
 import org.apache.commons.lang.StringUtils;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.transformer.impl.XpathTransformer;
 
 public abstract class AbstractFessXpathTransformer extends XpathTransformer {
@@ -35,7 +33,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
     protected String getHost(final String u) {
         if (StringUtil.isBlank(u)) {
-            return Constants.EMPTY_STRING; // empty
+            return StringUtil.EMPTY; // empty
         }
 
         String url = u;
@@ -60,7 +58,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
     protected String getSite(final String u, final String encoding) {
         if (StringUtil.isBlank(u)) {
-            return Constants.EMPTY_STRING; // empty
+            return StringUtil.EMPTY; // empty
         }
 
         String url = u;
@@ -102,7 +100,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
     protected String normalizeContent(final String content) {
         if (content == null) {
-            return Constants.EMPTY_STRING; // empty
+            return StringUtil.EMPTY; // empty
         }
         return content.replaceAll("\\s+", " ");
     }

@@ -53,6 +53,7 @@ import jp.sf.fess.util.ResourceUtil;
 
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
@@ -72,7 +73,6 @@ import org.seasar.framework.container.servlet.SingletonS2ContainerInitializer;
 import org.seasar.framework.mock.servlet.MockHttpServletRequestImpl;
 import org.seasar.framework.mock.servlet.MockHttpServletResponseImpl;
 import org.seasar.framework.mock.servlet.MockServletContextImpl;
-import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -362,7 +362,7 @@ public class Crawler implements Serializable {
             }
 
             final FileTemplateLoader loader = new FileTemplateLoader(new File(
-                    ResourceUtil.getMailTemplatePath("")));
+                    ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
             final Handlebars handlebars = new Handlebars(loader);
 
             try {

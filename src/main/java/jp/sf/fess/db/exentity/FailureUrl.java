@@ -22,6 +22,8 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsFailureUrl;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.codelibs.core.util.StringUtil;
+
 /**
  * The entity of FAILURE_URL.
  * <p>
@@ -50,7 +52,7 @@ public class FailureUrl extends BsFailureUrl {
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
-        return Constants.EMPTY_STRING;
+        return StringUtil.EMPTY;
     }
 
     public String getFileConfigName() {
@@ -59,7 +61,7 @@ public class FailureUrl extends BsFailureUrl {
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
-        return Constants.EMPTY_STRING;
+        return StringUtil.EMPTY;
     }
 
     public String getDataConfigName() {
@@ -68,6 +70,6 @@ public class FailureUrl extends BsFailureUrl {
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
-        return Constants.EMPTY_STRING;
+        return StringUtil.EMPTY;
     }
 }

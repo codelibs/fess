@@ -34,7 +34,7 @@ import jp.sf.fess.db.exbhv.pmbean.HotSearchWordPmb;
 
 import org.seasar.dbflute.jdbc.CursorHandler;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class HotSearchWordHelper {
 

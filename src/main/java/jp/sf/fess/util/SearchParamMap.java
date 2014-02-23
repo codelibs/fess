@@ -18,6 +18,8 @@ package jp.sf.fess.util;
 
 import java.util.HashMap;
 
+import org.codelibs.core.util.StringUtil;
+
 public class SearchParamMap extends HashMap<String, String[]> {
 
     private static final long serialVersionUID = 1L;
@@ -27,7 +29,7 @@ public class SearchParamMap extends HashMap<String, String[]> {
     @Override
     public String[] get(final Object key) {
         if (CLASS_NAME.equals(key)) {
-            return new String[0];
+            return StringUtil.EMPTY_STRINGS;
         }
         return super.get(key);
     }

@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.bsentity.BsSearchLog;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 /**
  * The entity of SEARCH_LOG.
