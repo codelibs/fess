@@ -17,13 +17,9 @@
 package jp.sf.fess.transformer;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -54,6 +50,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.xpath.objects.XObject;
 import org.codelibs.core.util.StringUtil;
 import org.cyberneko.html.parsers.DOMParser;
+import org.seasar.framework.util.InputStreamUtil;
 import org.seasar.framework.util.OgnlUtil;
 import org.seasar.framework.util.SerializeUtil;
 import org.seasar.robot.RobotCrawlAccessException;
@@ -231,6 +228,9 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
 
+        final Map<String, String> fieldConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.FIELD);
+
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -259,10 +259,25 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // content
         putResultDataBody(dataMap, "content",
                 getDocumentContent(responseData, document));
-        if (enableCache) {
-            // cache 
-            putResultDataBody(dataMap, "cache",
-                    getDocumentCache(responseData, document));
+        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get("cache"))
+                || enableCache) {
+            String charSet = responseData.getCharSet();
+            if (charSet == null) {
+                charSet = Constants.UTF_8;
+            }
+            try {
+                // cache 
+                putResultDataBody(
+                        dataMap,
+                        "cache",
+                        new String(InputStreamUtil.getBytes(responseData
+                                .getResponseBody()), charSet));
+                putResultDataBody(dataMap, systemHelper.hasCacheField,
+                        Constants.TRUE);
+            } catch (final Exception e) {
+                logger.warn("Failed to write a cache: " + sessionId + ":"
+                        + responseData, e);
+            }
         }
         // digest
         putResultDataBody(dataMap, "digest",
@@ -422,38 +437,6 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     private String getDocumentContent(final ResponseData responseData,
             final Document document) {
         return normalizeContent(getSingleNodeValue(document, contentXpath, true));
-    }
-
-    private String getDocumentCache(final ResponseData responseData,
-            final Document document) {
-        final InputStream is = responseData.getResponseBody();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        byte[] bytes = new byte[1024];
-        try {
-            int length = is.read(bytes);
-            while (length != -1) {
-                if (length != 0) {
-                    baos.write(bytes, 0, length);
-                }
-                if (baos.size() > maxCacheLength) {
-                    break;
-                }
-                length = is.read(bytes);
-            }
-        } catch (final IOException e) {
-            logger.warn("Could not create a cache data.", e);
-        } finally {
-            bytes = null;
-            IOUtils.closeQuietly(is);
-        }
-
-        try {
-            return baos.toString(responseData.getCharSet());
-        } catch (final UnsupportedEncodingException e) {
-            logger.warn("Unsupported encoding: " + responseData.getCharSet(), e);
-            return baos.toString();
-        }
     }
 
     protected String getSingleNodeValue(final Document document,

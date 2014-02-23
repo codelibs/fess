@@ -47,6 +47,10 @@ h3 {
 	color: #093;
 }
 
+#result .body a.cache {
+	color: #093;
+}
+
 #result .favorited {
 	display: none;
 }

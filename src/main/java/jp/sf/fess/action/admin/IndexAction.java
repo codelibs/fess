@@ -24,12 +24,8 @@ import jp.sf.fess.helper.SystemHelper;
 import org.codelibs.sastruts.core.util.ActivityUtil;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IndexAction {
-    private static final Logger logger = LoggerFactory
-            .getLogger(IndexAction.class);
 
     @Resource
     protected SystemHelper systemHelper;

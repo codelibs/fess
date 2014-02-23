@@ -21,11 +21,6 @@ import java.util.Map;
 import org.seasar.robot.client.S2RobotClientFactory;
 
 public interface CrawlingConfig {
-    public static final String XPATH_PREFIX = "field.xpath.";
-
-    public static final String SCRIPT_PREFIX = "field.script.";
-
-    public static final String CLIENT_PREFIX = "client.";
 
     Long getId();
 
@@ -69,6 +64,6 @@ public interface CrawlingConfig {
     }
 
     public enum ConfigName {
-        CLIENT, XPATH, SCRIPT;
+        CLIENT, XPATH, SCRIPT, FIELD;
     }
 }

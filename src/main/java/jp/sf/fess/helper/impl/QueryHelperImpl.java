@@ -56,7 +56,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     private static final String INURL_FIELD = "inurl";
 
-    private static final String TTTLE_FIELD = "title";
+    private static final String TITLE_FIELD = "title";
 
     private static final String CONTENT_FIELD = "content";
 
@@ -91,9 +91,9 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "filetype_s", "created", TTTLE_FIELD, "digest", "url",
+            "mimetype", "filetype_s", "created", TITLE_FIELD, "digest", "url",
             "clickCount_l_x_dv", "favoriteCount_l_x_dv", "screenshot_s_s",
-            "cid_s_s", "lang_s" };
+            "cid_s_s", "lang_s", "hasCache_s_s" };
 
     protected String[] responseDocValuesFields = new String[] {
             "clickCount_l_x_dv", "favoriteCount_l_x_dv" };
@@ -101,11 +101,11 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     protected String[] highlightingFields = new String[] { CONTENT_FIELD };
 
     protected String[] searchFields = new String[] { "url", "docId", "host",
-            TTTLE_FIELD, CONTENT_FIELD, "contentLength", "lastModified",
+            TITLE_FIELD, CONTENT_FIELD, "contentLength", "lastModified",
             "mimetype", "filetype_s", LABEL_FIELD, "segment",
             "clickCount_l_x_dv", "favoriteCount_l_x_dv", INURL_FIELD, "lang_s" };
 
-    protected String[] facetFields = new String[] { "url", "host", TTTLE_FIELD,
+    protected String[] facetFields = new String[] { "url", "host", TITLE_FIELD,
             CONTENT_FIELD, "contentLength", "lastModified", "mimetype",
             "filetype_s", LABEL_FIELD, "segment" };
 
@@ -896,7 +896,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     protected void buildContentQueryWithLang(final StringBuilder buf,
             final String value, final String queryLanguage) {
         buf.append('(');
-        buf.append(TTTLE_FIELD).append(':');
+        buf.append(TITLE_FIELD).append(':');
         appendQueryValue(buf, value);
         buf.append(_OR_);
         buf.append(CONTENT_FIELD).append(':');

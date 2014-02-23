@@ -32,6 +32,7 @@ import jcifs.smb.ACE;
 import jcifs.smb.SID;
 import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.CrawlingConfig;
+import jp.sf.fess.db.exentity.CrawlingConfig.ConfigName;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.FileTypeHelper;
@@ -191,6 +192,9 @@ public abstract class AbstractFessFileTransformer extends
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
 
+        final Map<String, String> fieldConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.FIELD);
+
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
@@ -228,14 +232,22 @@ public abstract class AbstractFessFileTransformer extends
         } else {
             putResultDataBody(dataMap, "content", StringUtil.EMPTY);
         }
-        final String cache = normalizeContent(content);
-        if (enableCache) {
-            // cache 
+        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get("cache"))
+                || enableCache) {
+            String cache;
+            if (content == null) {
+                cache = StringUtil.EMPTY;
+            } else {
+                cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
+            }
+            // text cache 
             putResultDataBody(dataMap, "cache", cache);
+            putResultDataBody(dataMap, systemHelper.hasCacheField,
+                    Constants.TRUE);
         }
         // digest
         putResultDataBody(dataMap, "digest", Constants.DIGEST_PREFIX
-                + abbreviate(cache, maxDigestLength));
+                + abbreviate(normalizeContent(content), maxDigestLength));
         // title
         if (!dataMap.containsKey("title")) {
             if (url.endsWith("/")) {

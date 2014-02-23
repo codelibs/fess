@@ -30,8 +30,8 @@ import jp.sf.fess.service.RequestHeaderService;
 import jp.sf.fess.service.WebAuthenticationService;
 import jp.sf.fess.util.ParameterUtil;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.client.http.Authentication;
 import org.seasar.robot.client.http.HcHttpClient;
@@ -280,29 +280,8 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
         if (configParameterMap == null) {
-            final Map<ConfigName, Map<String, String>> map = new HashMap<>();
-            final Map<String, String> clientConfigMap = new HashMap<>();
-            final Map<String, String> xpathConfigMap = new HashMap<>();
-            final Map<String, String> scriptConfigMap = new HashMap<>();
-            map.put(ConfigName.CLIENT, clientConfigMap);
-            map.put(ConfigName.XPATH, xpathConfigMap);
-            map.put(ConfigName.SCRIPT, scriptConfigMap);
-            for (final Map.Entry<String, String> entry : ParameterUtil.parse(
-                    getConfigParameter()).entrySet()) {
-                final String key = entry.getKey();
-                if (key.startsWith(CLIENT_PREFIX)) {
-                    clientConfigMap.put(key.substring(CLIENT_PREFIX.length()),
-                            entry.getValue());
-                } else if (key.startsWith(XPATH_PREFIX)) {
-                    xpathConfigMap.put(key.substring(XPATH_PREFIX.length()),
-                            entry.getValue());
-                } else if (key.startsWith(SCRIPT_PREFIX)) {
-                    scriptConfigMap.put(key.substring(SCRIPT_PREFIX.length()),
-                            entry.getValue());
-                }
-            }
-
-            configParameterMap = map;
+            configParameterMap = ParameterUtil
+                    .createConfigParameterMap(getConfigParameter());
         }
 
         final Map<String, String> configMap = configParameterMap.get(name);
@@ -311,4 +290,5 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
         }
         return configMap;
     }
+
 }

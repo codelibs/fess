@@ -134,6 +134,8 @@ public class SystemHelper implements Serializable {
 
     public String langField = "lang_s";
 
+    public String hasCacheField = "hasCache_s_s";
+
     protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
             "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
             "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
