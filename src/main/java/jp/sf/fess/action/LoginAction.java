@@ -38,8 +38,9 @@ import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.struts.Globals;
 import org.codelibs.core.crypto.CachedCipher;
-import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.sastruts.core.SSCConstants;
+import org.codelibs.sastruts.core.util.ActivityUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
@@ -148,10 +149,7 @@ public class LoginAction implements Serializable {
         loginInfo.setRoleSet(roleSet);
 
         if (loginInfo.isAdministrator()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("[LOGIN] ADMIN: " + "The usename is "
-                        + request.getRemoteUser());
-            }
+            ActivityUtil.login(request.getRemoteUser(), request);
 
             returnPath = (String) session.getAttribute(Constants.RETURN_PATH);
             if (returnPath != null) {
@@ -162,10 +160,7 @@ public class LoginAction implements Serializable {
             }
         } else {
             if (!loginInfo.getRoleSet().isEmpty()) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("[LOGIN] USER: " + "The usename is "
-                            + request.getRemoteUser());
-                }
+                ActivityUtil.login(request.getRemoteUser(), request);
             } else {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Login Failure: " + request.getRemoteUser()
@@ -205,10 +200,8 @@ public class LoginAction implements Serializable {
     @Execute(validator = false, input = "../index")
     public String logout() {
         final HttpServletRequest request = RequestUtil.getRequest();
-        if (logger.isInfoEnabled()) {
-            logger.info("[LOGOUT] " + "The usename is "
-                    + request.getRemoteUser());
-        }
+        ActivityUtil.logout(request.getRemoteUser(), request);
+
         final HttpSession session = request.getSession();
         session.invalidate();
 

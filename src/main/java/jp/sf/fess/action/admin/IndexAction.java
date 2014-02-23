@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import jp.sf.fess.helper.SystemHelper;
 
+import org.codelibs.sastruts.core.util.ActivityUtil;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
 import org.slf4j.Logger;
@@ -45,10 +46,8 @@ public class IndexAction {
     @Execute(validator = false)
     public String logout() {
         final HttpServletRequest request = RequestUtil.getRequest();
-        if (logger.isInfoEnabled()) {
-            logger.info("[LOGOUT] " + "The usename is "
-                    + request.getRemoteUser());
-        }
+        ActivityUtil.logout(request.getRemoteUser(), request);
+
         request.getSession().invalidate();
         return "/admin/wizard/index?redirect=true";
     }
