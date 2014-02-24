@@ -309,10 +309,39 @@ public class IndexAction {
     }
 
     @Execute(validator = true, input = "index")
+    public String cache() {
+        Map<String, Object> doc = null;
+        try {
+            doc = searchService.getDocument("docId:" + indexForm.docId,
+                    queryHelper.getCacheResponseFields(), null);
+        } catch (final Exception e) {
+            logger.warn("Failed to request: " + indexForm.docId, e);
+        }
+        if (doc == null) {
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
+                    .getRequest().getLocale(), "errors.docid_not_found",
+                    indexForm.docId);
+            return "error.jsp";
+        }
+
+        final String content = viewHelper.createCacheContent(doc);
+        if (content == null) {
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
+                    .getRequest().getLocale(), "errors.docid_not_found",
+                    indexForm.docId);
+            return "error.jsp";
+        }
+        ResponseUtil.write(content, "text/html", Constants.UTF_8);
+
+        return null;
+    }
+
+    @Execute(validator = true, input = "index")
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
             doc = searchService.getDocument("docId:" + indexForm.docId,
+                    queryHelper.getResponseFields(),
                     new String[] { systemHelper.clickCountField });
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
@@ -632,6 +661,7 @@ public class IndexAction {
         try {
             final Map<String, Object> doc = indexForm.docId == null ? null
                     : searchService.getDocument("docId:" + indexForm.docId,
+                            queryHelper.getResponseFields(),
                             new String[] { systemHelper.favoriteCountField });
             final String userCode = userInfoHelper.getUserCode();
             final String favoriteUrl = doc == null ? null : (String) doc
@@ -711,6 +741,7 @@ public class IndexAction {
                     .getResultDocIds(indexForm.queryId);
             final List<Map<String, Object>> docList = searchService
                     .getDocumentListByDocIds(docIds,
+                            queryHelper.getResponseFields(),
                             new String[] { systemHelper.favoriteCountField },
                             MAX_PAGE_SIZE);
             List<String> urlList = new ArrayList<String>(docList.size());
@@ -853,6 +884,7 @@ public class IndexAction {
         try {
             documentItems = searchService.getDocumentList(query, pageStart,
                     pageNum, indexForm.facet, indexForm.geo, indexForm.mlt,
+                    queryHelper.getResponseFields(),
                     queryHelper.getResponseDocValuesFields());
         } catch (final SolrLibQueryException e) {
             if (logger.isDebugEnabled()) {

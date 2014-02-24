@@ -27,7 +27,7 @@
 	</component>
 	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
 	</component>
-	<component name="queryHelper" class="jp.sf.fess.helper.impl.QueryHelperImpl">
+	<component name="queryHelper" class="jp.sf.fess.helper.QueryHelper">
 		<property name="defaultFacetInfo">
 			<component class="jp.sf.fess.entity.FacetInfo">
 				<property name="minCount">1</property>

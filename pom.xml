@@ -826,7 +826,7 @@
     <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
-      <version>1.1.2</version>
+      <version>1.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>

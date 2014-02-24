@@ -36,6 +36,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.entity.FacetQueryView;
 import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
+import jp.sf.fess.util.ResourceUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
@@ -45,10 +46,20 @@ import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.taglib.S2Functions;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ServletContextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.jknack.handlebars.Context;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.FileTemplateLoader;
 
 public class ViewHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(ViewHelper.class);
 
     protected static final String GOOGLE_MOBILE_TRANSCODER_LINK = "http://www.google.co.jp/gwt/n?u=";
 
@@ -93,6 +104,8 @@ public class ViewHelper implements Serializable {
     private final Map<String, String> initGeoParamMap = new HashMap<String, String>();
 
     private final List<FacetQueryView> facetQueryViewList = new ArrayList<FacetQueryView>();
+
+    public String cacheTemplateName = "cache";
 
     private String getString(final Map<String, Object> doc, final String key) {
         final Object value = doc.get(key);
@@ -396,6 +409,23 @@ public class ViewHelper implements Serializable {
         return file.isFile();
     }
 
+    public String createCacheContent(final Map<String, Object> doc) {
+
+        final FileTemplateLoader loader = new FileTemplateLoader(new File(
+                ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
+        final Handlebars handlebars = new Handlebars(loader);
+
+        try {
+            final Template template = handlebars.compile(cacheTemplateName);
+            final Context hbsContext = Context.newContext(doc);
+            return template.apply(hbsContext);
+        } catch (final Exception e) {
+            logger.warn("Failed to create a cache response.", e);
+        }
+
+        return null;
+    }
+
     public boolean isUseSession() {
         return useSession;
     }
@@ -435,4 +465,5 @@ public class ViewHelper implements Serializable {
     public List<FacetQueryView> getFacetQueryViewList() {
         return facetQueryViewList;
     }
+
 }

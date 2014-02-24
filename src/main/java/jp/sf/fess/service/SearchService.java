@@ -49,10 +49,10 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.request.FieldAnalysisRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.util.NamedList;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
-import org.codelibs.core.util.StringUtil;
 
 public class SearchService implements Serializable {
 
@@ -74,13 +74,13 @@ public class SearchService implements Serializable {
     protected Suggester suggester;
 
     public Map<String, Object> getDocument(final String query) {
-        return getDocument(query, null);
+        return getDocument(query, queryHelper.getResponseFields(), null);
     }
 
     public Map<String, Object> getDocument(final String query,
-            final String[] docValuesFields) {
+            final String[] responseFields, final String[] docValuesFields) {
         final List<Map<String, Object>> docList = getDocumentList(query, 0, 1,
-                null, null, null, docValuesFields);
+                null, null, null, responseFields, docValuesFields);
         if (!docList.isEmpty()) {
             return docList.get(0);
         }
@@ -88,8 +88,8 @@ public class SearchService implements Serializable {
     }
 
     public List<Map<String, Object>> getDocumentListByDocIds(
-            final String[] docIds, final String[] docValuesFields,
-            final int pageSize) {
+            final String[] docIds, final String[] responseFields,
+            final String[] docValuesFields, final int pageSize) {
         if (docIds == null || docIds.length == 0) {
             return Collections.emptyList();
         }
@@ -102,21 +102,22 @@ public class SearchService implements Serializable {
             buf.append("docId:").append(docIds[i]);
         }
         return getDocumentList(buf.toString(), 0, pageSize, null, null, null,
-                docValuesFields);
+                responseFields, docValuesFields);
     }
 
     public List<Map<String, Object>> getDocumentList(final String query,
             final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
-            final String[] docValuesFields) {
+            final String[] responseFields, final String[] docValuesFields) {
         return getDocumentList(query, start, rows, facetInfo, geoInfo, mltInfo,
-                docValuesFields, true);
+                responseFields, docValuesFields, true);
     }
 
     public List<Map<String, Object>> getDocumentList(final String query,
             final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
-            final String[] docValuesFields, final boolean forUser) {
+            final String[] responseFields, final String[] docValuesFields,
+            final boolean forUser) {
         if (start > queryHelper.getMaxSearchResultOffset()) {
             throw new ResultOffsetExceededException(
                     "The number of result size is exceeded.");
@@ -133,7 +134,7 @@ public class SearchService implements Serializable {
         final String q = searchQuery.getQuery();
         if (StringUtil.isNotBlank(q)) {
             // fields
-            solrQuery.setFields(queryHelper.getResponseFields());
+            solrQuery.setFields(responseFields);
             // query
             solrQuery.setQuery(q);
             solrQuery.setStart(start);
@@ -152,7 +153,7 @@ public class SearchService implements Serializable {
             if (sortFields.length != 0) {
                 for (final SortField sortField : sortFields) {
                     solrQuery
-                            .setSortField(
+                            .addSort(
                                     sortField.getField(),
                                     Constants.DESC.equals(sortField.getOrder()) ? SolrQuery.ORDER.desc
                                             : SolrQuery.ORDER.asc);
@@ -161,7 +162,7 @@ public class SearchService implements Serializable {
                 for (final SortField sortField : queryHelper
                         .getDefaultSortFields()) {
                     solrQuery
-                            .setSortField(
+                            .addSort(
                                     sortField.getField(),
                                     Constants.DESC.equals(sortField.getOrder()) ? SolrQuery.ORDER.desc
                                             : SolrQuery.ORDER.asc);

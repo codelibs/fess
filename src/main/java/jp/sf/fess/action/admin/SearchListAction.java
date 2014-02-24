@@ -29,18 +29,19 @@ import jp.sf.fess.ResultOffsetExceededException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.form.admin.SearchListForm;
 import jp.sf.fess.helper.JobHelper;
+import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.SearchService;
 import jp.sf.fess.util.QueryResponseList;
 
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.seasar.framework.beans.util.Beans;
-import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.taglib.S2Functions;
@@ -76,6 +77,9 @@ public class SearchListAction implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected QueryHelper queryHelper;
 
     @Resource
     protected JobHelper jobHelper;
@@ -155,8 +159,8 @@ public class SearchListAction implements Serializable {
         final int size = Integer.parseInt(searchListForm.num);
         try {
             documentItems = searchService.getDocumentList(query, offset, size,
-                    null, null, null, new String[] {
-                            systemHelper.clickCountField,
+                    null, null, null, queryHelper.getResponseFields(),
+                    new String[] { systemHelper.clickCountField,
                             systemHelper.favoriteCountField }, false);
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {

@@ -23,8 +23,8 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
-import org.seasar.framework.container.SingletonS2Container;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.struts.util.ServletContextUtil;
 
 public class ResourceUtil {
@@ -50,6 +50,10 @@ public class ResourceUtil {
 
     public static String getMailTemplatePath(final String name) {
         return getBasePath("WEB-INF/mail/", name);
+    }
+
+    public static String getViewTemplatePath(final String name) {
+        return getBasePath("WEB-INF/view/", name);
     }
 
     protected static String getBasePath(final String baseName, final String name) {

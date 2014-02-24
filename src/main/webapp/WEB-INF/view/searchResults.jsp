@@ -35,10 +35,10 @@
 						<div class="description">${doc.contentDescription}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.site)}</cite>
-<!--							<c:if test="${doc.hasCache_s_s=='true'}">
-								<a href="#${doc.docId}" class="cache"><bean:message
+							<c:if test="${doc.hasCache_s_s=='true'}">
+								<a href="cache?docId=${doc.docId}" class="cache"><bean:message
 										key="labels.search_result_cache" /></a>
-							</c:if> -->
+							</c:if>
 						</div>
 						<div class="more visible-phone">
 							<a href="#result${s.index}"><bean:message key="labels.search_result_more" /></a>

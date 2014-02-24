@@ -41,9 +41,9 @@ import jp.sf.fess.util.QueryResponseList;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
@@ -150,6 +150,7 @@ public class MobileAction {
         try {
             documentItems = searchService.getDocumentList(mobileForm.query,
                     pageStart, pageNum, null, null, null,
+                    queryHelper.getResponseFields(),
                     queryHelper.getResponseDocValuesFields());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
