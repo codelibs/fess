@@ -61,7 +61,7 @@ public class IndexForm implements Serializable {
     @Maxbytelength(maxbytelength = 4000)
     public String rt;
 
-    @Required(target = "go")
+    @Required(target = "go,cache")
     @Maxbytelength(maxbytelength = 100)
     public String docId;
 
