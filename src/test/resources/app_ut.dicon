@@ -20,7 +20,7 @@
 	</component>
 	<component name="browserTypeHelper" class="jp.sf.fess.helper.BrowserTypeHelper">
 	</component>
-	<component name="queryHelper" class="jp.sf.fess.helper.impl.QueryHelperImpl">
+	<component name="queryHelper" class="jp.sf.fess.helper.QueryHelper">
 	</component>
 	<component name="roleQueryHelper" class="jp.sf.fess.helper.impl.RoleQueryHelperImpl">
 		<!-- ex. parameter: fessRoles=123%0aadmin -->

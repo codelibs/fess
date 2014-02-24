@@ -4,7 +4,7 @@
 <components>
 	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
 	</component>
-	<component name="queryHelper" class="jp.sf.fess.helper.impl.QueryHelperImpl">
+	<component name="queryHelper" class="jp.sf.fess.helper.QueryHelper">
 	</component>
 
  	<component name="cipher" class="org.codelibs.core.crypto.CachedCipher">
