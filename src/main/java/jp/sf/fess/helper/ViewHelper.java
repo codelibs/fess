@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -39,11 +40,13 @@ import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.apache.commons.lang.StringUtils;
+import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.util.URLUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.taglib.S2Functions;
+import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ServletContextUtil;
 import org.slf4j.Logger;
@@ -53,6 +56,7 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper implements Serializable {
 
@@ -414,6 +418,27 @@ public class ViewHelper implements Serializable {
         final FileTemplateLoader loader = new FileTemplateLoader(new File(
                 ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
         final Handlebars handlebars = new Handlebars(loader);
+
+        Locale locale = RequestUtil.getRequest().getLocale();
+        if (locale == null) {
+            locale = Locale.ENGLISH;
+        }
+        String url = (String) doc.get("url");
+        if (url == null) {
+            url = MessageResourcesUtil.getMessage(locale,
+                    "labels.search_unknown");
+        }
+        Object created = doc.get("created");
+        if (created instanceof Date) {
+            final SimpleDateFormat sdf = new SimpleDateFormat(
+                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            created = sdf.format((Date) created);
+        } else {
+            created = MessageResourcesUtil.getMessage(locale,
+                    "labels.search_unknown");
+        }
+        doc.put("cacheMsg", MessageResourcesUtil.getMessage(locale,
+                "labels.search_cache_msg", url, created));
 
         try {
             final Template template = handlebars.compile(cacheTemplateName);
