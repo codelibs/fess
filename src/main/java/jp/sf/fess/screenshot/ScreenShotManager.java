@@ -36,8 +36,8 @@ import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.FileUtils;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.robot.util.LruHashMap;
 import org.seasar.struts.util.RequestUtil;
 import org.slf4j.Logger;

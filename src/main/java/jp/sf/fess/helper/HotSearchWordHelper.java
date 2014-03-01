@@ -32,9 +32,9 @@ import jp.sf.fess.db.bsbhv.BsSearchLogBhv;
 import jp.sf.fess.db.exbhv.SearchLogBhv;
 import jp.sf.fess.db.exbhv.pmbean.HotSearchWordPmb;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.dbflute.jdbc.CursorHandler;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.codelibs.core.util.StringUtil;
 
 public class HotSearchWordHelper {
 

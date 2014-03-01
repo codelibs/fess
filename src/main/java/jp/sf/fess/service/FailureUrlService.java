@@ -39,11 +39,11 @@ import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
 import org.seasar.framework.container.SingletonS2Container;
-import org.codelibs.core.util.StringUtil;
 
 public class FailureUrlService extends BsFailureUrlService implements
         Serializable {

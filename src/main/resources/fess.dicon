@@ -36,6 +36,8 @@
 		-->
 		<property name="logFilePath">@System@getProperty("fess.log.file").replaceAll(".out", "_crawler.out")</property>
         <property name="crawlerJavaOptions">new String[] {
+"-Xdebug",
+"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
 "-Djava.awt.headless=true",
 "-server",
 "-Xmx512m",

@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.extension.timer.TimeoutManager;
 import org.seasar.extension.timer.TimeoutTarget;
 import org.seasar.extension.timer.TimeoutTask;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

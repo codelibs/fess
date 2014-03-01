@@ -33,8 +33,8 @@ import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.helper.SystemHelper;
 
 import org.codelibs.core.crypto.CachedCipher;
-import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.sastruts.core.SSCConstants;
 import org.seasar.struts.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

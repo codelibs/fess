@@ -32,9 +32,9 @@ import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.pager.UserInfoPager;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.UpdateOption;
-import org.codelibs.core.util.StringUtil;
 
 public class UserInfoService extends BsUserInfoService implements Serializable {
 

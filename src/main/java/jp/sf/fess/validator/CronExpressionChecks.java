@@ -22,8 +22,8 @@ import org.apache.commons.validator.Field;
 import org.apache.commons.validator.Validator;
 import org.apache.commons.validator.ValidatorAction;
 import org.apache.struts.action.ActionMessages;
-import org.quartz.CronExpression;
 import org.codelibs.core.util.StringUtil;
+import org.quartz.CronExpression;
 import org.seasar.struts.validator.S2FieldChecks;
 
 public class CronExpressionChecks extends S2FieldChecks {

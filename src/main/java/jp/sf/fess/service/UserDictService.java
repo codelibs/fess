@@ -30,8 +30,8 @@ import jp.sf.fess.dict.userdict.UserDictFile;
 import jp.sf.fess.dict.userdict.UserDictItem;
 import jp.sf.fess.pager.UserDictPager;
 
-import org.seasar.framework.beans.util.Beans;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.beans.util.Beans;
 
 public class UserDictService {
     @Resource

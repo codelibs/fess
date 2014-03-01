@@ -71,29 +71,7 @@
 		</initMethod>
 	</component>
 
-	<component name="clientConnectionManager" class="org.apache.http.impl.conn.PoolingClientConnectionManager">
-		<arg>
-			<component class="org.apache.http.conn.scheme.SchemeRegistry">
-				<initMethod name="register">
-					<arg>
-						<component class="org.apache.http.conn.scheme.Scheme">
-							<arg>"http"</arg>
-							<arg>80</arg>
-							<arg>@org.apache.http.conn.scheme.PlainSocketFactory@getSocketFactory()</arg>
-						</component>
-					</arg>
-				</initMethod>
-				<initMethod name="register">
-					<arg>
-						<component class="org.apache.http.conn.scheme.Scheme">
-							<arg>"https"</arg>
-							<arg>443</arg>
-							<arg>@org.apache.http.conn.ssl.SSLSocketFactory@getSocketFactory()</arg>
-						</component>
-					</arg>
-				</initMethod>
-			</component>
-		</arg>
+	<component name="clientConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
 		<arg>10</arg><!-- timeToLive -->
 		<arg>@java.util.concurrent.TimeUnit@MINUTES</arg><!-- tunit -->
 		<property name="maxTotal">50</property>
@@ -114,30 +92,29 @@
 	</component>
 
 	<!-- Solr Server Configuration -->
-	<component name="suggestInterceptor" class="org.codelibs.solr.lib.server.interceptor.PreemptiveAuthInterceptor"
-		autoBinding="none">
-	</component>
-	<component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
-		<arg>"solradmin"</arg><!-- Username -->
-		<arg>"solradmin"</arg><!-- Password -->
-	</component>
-	<component name="suggestHttpClient" class="org.apache.http.impl.client.DefaultHttpClient" autoBinding="none">
-		<arg>clientConnectionManager</arg>
-	</component>
-	<component name="suggestSolrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer">
+	<component name="suggestSolrServer" class="org.codelibs.solr.lib.server.SolrLibHttpSolrServer">
 		<!-- Solr Server URL -->
 		<arg>"http://localhost:8080/solr/core1-suggest"</arg>
-		<arg>suggestHttpClient</arg>
 		<property name="requestWriter">new org.apache.solr.client.solrj.impl.BinaryRequestWriter()</property>
-		<property name="useMultiPartPost">true</property>
-		<property name="soTimeout">900000</property><!-- 15min -->
-		<initMethod>
-			suggestHttpClient.getCredentialsProvider()
-				.setCredentials(@org.apache.http.auth.AuthScope@ANY, suggestCredentials)
+		<property name="soTimeout">15000</property><!-- 15sec -->
+		<initMethod name="addRequestInterceptor">
+			<arg>
+				<component class="org.codelibs.solr.lib.server.interceptor.PreemptiveAuthInterceptor"
+					autoBinding="none">
+				</component>
+			</arg>
 		</initMethod>
-		<initMethod>
-			suggestHttpClient.addRequestInterceptor(suggestInterceptor)
+		<initMethod name="setCredentials">
+			<arg>@org.apache.http.auth.AuthScope@ANY</arg>
+			<arg>
+				<component class="org.apache.http.auth.UsernamePasswordCredentials">
+					<arg>"solradmin"</arg><!-- Username -->
+					<arg>"solradmin"</arg><!-- Password -->
+				</component>
+			</arg>
 		</initMethod>
+		<initMethod name="init"></initMethod>
+		<destroyMethod name="shutdown"></destroyMethod>
 	</component>
 
 </components>

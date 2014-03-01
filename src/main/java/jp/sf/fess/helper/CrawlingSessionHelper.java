@@ -37,9 +37,9 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
-import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -187,6 +187,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             final Object docValuesObj = queryResponse.getResponse().get(
                     DOC_VALUES);
             if (docValuesObj instanceof SimpleOrderedMap) {
+                @SuppressWarnings("unchecked")
                 final SimpleOrderedMap<List<Long>> docValuesMap = (SimpleOrderedMap<List<Long>>) docValuesObj;
                 for (int i = 0; i < docValuesMap.size(); i++) {
                     final String name = docValuesMap.getName(i);

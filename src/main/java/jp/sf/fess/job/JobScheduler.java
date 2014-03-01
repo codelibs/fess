@@ -31,6 +31,7 @@ import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.codelibs.core.util.StringUtil;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -43,7 +44,6 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

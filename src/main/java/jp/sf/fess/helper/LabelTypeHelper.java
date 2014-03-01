@@ -32,9 +32,9 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.LabelType;
 import jp.sf.fess.service.LabelTypeService;
 
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

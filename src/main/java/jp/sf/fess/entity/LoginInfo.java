@@ -22,6 +22,8 @@ import org.codelibs.sastruts.core.entity.UserInfo;
 
 public class LoginInfo extends UserInfo {
 
+    private static final long serialVersionUID = 1L;
+
     protected long updatedTime = System.currentTimeMillis();
 
     public void setUpdatedTime(final long updatedTime) {

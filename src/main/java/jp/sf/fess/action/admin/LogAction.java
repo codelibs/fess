@@ -39,8 +39,8 @@ import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.codec.binary.Base64;
-import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.ResponseUtil;

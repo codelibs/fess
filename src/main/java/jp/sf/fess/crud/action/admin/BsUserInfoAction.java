@@ -34,9 +34,9 @@ import jp.sf.fess.service.UserInfoService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.seasar.framework.beans.util.Beans;
-import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;

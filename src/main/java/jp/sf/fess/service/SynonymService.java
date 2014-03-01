@@ -30,8 +30,8 @@ import jp.sf.fess.dict.synonym.SynonymFile;
 import jp.sf.fess.dict.synonym.SynonymItem;
 import jp.sf.fess.pager.SynonymPager;
 
-import org.seasar.framework.beans.util.Beans;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.beans.util.Beans;
 
 public class SynonymService {
     @Resource

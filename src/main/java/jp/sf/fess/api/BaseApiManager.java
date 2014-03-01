@@ -16,7 +16,6 @@
 
 package jp.sf.fess.api;
 
-
 public class BaseApiManager {
     protected static final String FAVORITES_API = "/favoritesApi";
 
