@@ -38,8 +38,8 @@ import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.RobotCrawlAccessException;
 import org.seasar.robot.RobotMultipleCrawlAccessException;
 import org.slf4j.Logger;
@@ -214,7 +214,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     String key = null;
                     String value = list.get(i);
                     if (value == null) {
-                        value = Constants.EMPTY_STRING;
+                        value = StringUtil.EMPTY;
                     }
                     if (headerList != null && headerList.size() > i) {
                         key = headerList.get(i);

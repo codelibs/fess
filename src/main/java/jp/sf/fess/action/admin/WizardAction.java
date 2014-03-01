@@ -44,9 +44,9 @@ import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -167,17 +167,13 @@ public class WizardAction implements Serializable {
                     wConfig.setDepth(Integer.parseInt(wizardForm.depth));
                 }
                 wConfig.setExcludedDocUrls(getDefaultString(
-                        "default.config.web.excludedDocUrls",
-                        Constants.EMPTY_STRING));
+                        "default.config.web.excludedDocUrls", StringUtil.EMPTY));
                 wConfig.setExcludedUrls(getDefaultString(
-                        "default.config.web.excludedUrls",
-                        Constants.EMPTY_STRING));
+                        "default.config.web.excludedUrls", StringUtil.EMPTY));
                 wConfig.setIncludedDocUrls(getDefaultString(
-                        "default.config.web.includedDocUrls",
-                        Constants.EMPTY_STRING));
+                        "default.config.web.includedDocUrls", StringUtil.EMPTY));
                 wConfig.setIncludedUrls(getDefaultString(
-                        "default.config.web.includedUrls",
-                        Constants.EMPTY_STRING));
+                        "default.config.web.includedUrls", StringUtil.EMPTY));
                 wConfig.setIntervalTime(getDefaultInteger(
                         "default.config.web.intervalTime",
                         Constants.DEFAULT_INTERVAL_TIME_FOR_WEB));
@@ -217,16 +213,14 @@ public class WizardAction implements Serializable {
                 }
                 fConfig.setExcludedDocPaths(getDefaultString(
                         "default.config.file.excludedDocPaths",
-                        Constants.EMPTY_STRING));
+                        StringUtil.EMPTY));
                 fConfig.setExcludedPaths(getDefaultString(
-                        "default.config.file.excludedPaths",
-                        Constants.EMPTY_STRING));
+                        "default.config.file.excludedPaths", StringUtil.EMPTY));
                 fConfig.setIncludedDocPaths(getDefaultString(
                         "default.config.file.includedDocPaths",
-                        Constants.EMPTY_STRING));
+                        StringUtil.EMPTY));
                 fConfig.setIncludedPaths(getDefaultString(
-                        "default.config.file.includedPaths",
-                        Constants.EMPTY_STRING));
+                        "default.config.file.includedPaths", StringUtil.EMPTY));
                 fConfig.setIntervalTime(getDefaultInteger(
                         "default.config.file.intervalTime",
                         Constants.DEFAULT_INTERVAL_TIME_FOR_FS));

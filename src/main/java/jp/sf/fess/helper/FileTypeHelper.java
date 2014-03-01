@@ -3,7 +3,7 @@ package jp.sf.fess.helper;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class FileTypeHelper {
     protected String fieldName = "filetype_s";

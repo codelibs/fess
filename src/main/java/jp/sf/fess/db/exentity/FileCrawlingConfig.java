@@ -32,7 +32,7 @@ import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ParameterUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.client.smb.SmbAuthentication;
 import org.seasar.robot.client.smb.SmbClient;

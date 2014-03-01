@@ -39,7 +39,7 @@ import jp.sf.fess.util.ComponentUtil;
 import org.apache.struts.Globals;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.sastruts.core.SSCConstants;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;

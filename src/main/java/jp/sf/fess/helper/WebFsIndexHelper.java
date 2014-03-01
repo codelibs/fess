@@ -37,7 +37,7 @@ import jp.sf.fess.util.ComponentUtil;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.S2Robot;
 import org.seasar.robot.S2RobotContext;
 import org.seasar.robot.service.DataService;

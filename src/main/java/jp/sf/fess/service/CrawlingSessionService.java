@@ -29,7 +29,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.crud.service.BsCrawlingSessionService;
 import jp.sf.fess.db.cbean.CrawlingSessionCB;
@@ -45,11 +44,11 @@ import jp.sf.orangesignal.csv.CsvWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
-import org.seasar.framework.util.StringUtil;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
@@ -263,7 +262,7 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
                         private void addToList(final List<String> list,
                                 final Object value) {
                             if (value == null) {
-                                list.add(Constants.EMPTY_STRING);
+                                list.add(StringUtil.EMPTY);
                             } else if (value instanceof Timestamp) {
                                 list.add(sdf.format((Date) value));
                             } else {

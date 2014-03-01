@@ -72,7 +72,7 @@ import org.seasar.framework.container.servlet.SingletonS2ContainerInitializer;
 import org.seasar.framework.mock.servlet.MockHttpServletRequestImpl;
 import org.seasar.framework.mock.servlet.MockHttpServletResponseImpl;
 import org.seasar.framework.mock.servlet.MockServletContextImpl;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

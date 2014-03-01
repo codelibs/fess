@@ -49,7 +49,7 @@ import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.FileUtil;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;

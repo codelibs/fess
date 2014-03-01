@@ -35,10 +35,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_VERSION = "5";
 
-    public static final String EMPTY_STRING = "";
-
-    public static final String[] EMPTY_STRINGS = new String[0];
-
     public static final String TRUE = "true";
 
     public static final String FALSE = "false";

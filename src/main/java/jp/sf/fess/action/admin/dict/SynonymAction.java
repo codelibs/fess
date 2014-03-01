@@ -23,7 +23,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
@@ -37,10 +36,10 @@ import jp.sf.fess.service.SynonymService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
@@ -337,8 +336,8 @@ public class SynonymAction {
 
             }
         } else {
-            synonymItem = new SynonymItem(0, Constants.EMPTY_STRINGS,
-                    Constants.EMPTY_STRINGS);
+            synonymItem = new SynonymItem(0, StringUtil.EMPTY_STRINGS,
+                    StringUtil.EMPTY_STRINGS);
         }
 
         final String[] newInputs = splitLine(synonymForm.inputs);
@@ -351,7 +350,7 @@ public class SynonymAction {
 
     private String[] splitLine(final String value) {
         if (StringUtil.isBlank(value)) {
-            return Constants.EMPTY_STRINGS;
+            return StringUtil.EMPTY_STRINGS;
         }
         final String[] values = value.split("[\r\n]");
         final List<String> list = new ArrayList<String>(values.length);

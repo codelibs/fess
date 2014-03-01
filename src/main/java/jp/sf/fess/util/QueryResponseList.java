@@ -33,7 +33,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.SimpleOrderedMap;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,6 +187,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             final Object docValuesObj = queryResponse.getResponse().get(
                     DOC_VALUES);
             if (docValuesObj instanceof SimpleOrderedMap) {
+                @SuppressWarnings("unchecked")
                 final SimpleOrderedMap<List<Long>> docValuesMap = (SimpleOrderedMap<List<Long>>) docValuesObj;
                 for (int i = 0; i < docValuesMap.size(); i++) {
                     final String name = docValuesMap.getName(i);

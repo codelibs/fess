@@ -37,13 +37,13 @@ import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.S2Robot;
 import org.seasar.robot.db.cbean.AccessResultCB;
 import org.seasar.robot.db.exbhv.AccessResultBhv;
@@ -171,28 +171,28 @@ public class IndexUpdater extends Thread {
         executeTime = 0;
         documentSize = 0;
 
-        final AccessResultCB cb = new AccessResultCB();
-        cb.setupSelect_AccessResultDataAsOne();
-        cb.query().setSessionId_InScope(sessionIdList);
-        cb.query().addOrderBy_CreateTime_Asc();
-        cb.query().setStatus_Equal(org.seasar.robot.Constants.OK_STATUS);
-        if (maxDocumentCacheSize <= 0) {
-            maxDocumentCacheSize = 1;
-        }
-        cb.fetchFirst(maxDocumentCacheSize);
-        cb.fetchPage(1);
-
-        final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
-        final List<org.seasar.robot.entity.AccessResult> accessResultList = new ArrayList<org.seasar.robot.entity.AccessResult>();
-        final List<org.seasar.robot.db.exentity.AccessResultData> accessResultDataList = new ArrayList<org.seasar.robot.db.exentity.AccessResultData>();
-
-        long updateTime = System.currentTimeMillis();
-        int solrErrorCount = 0;
-        int errorCount = 0;
-        int emptyListCount = 0;
         final IntervalControlHelper intervalControlHelper = ComponentUtil
                 .getIntervalControlHelper();
         try {
+            final AccessResultCB cb = new AccessResultCB();
+            cb.setupSelect_AccessResultDataAsOne();
+            cb.query().setSessionId_InScope(sessionIdList);
+            cb.query().addOrderBy_CreateTime_Asc();
+            cb.query().setStatus_Equal(org.seasar.robot.Constants.OK_STATUS);
+            if (maxDocumentCacheSize <= 0) {
+                maxDocumentCacheSize = 1;
+            }
+            cb.fetchFirst(maxDocumentCacheSize);
+            cb.fetchPage(1);
+
+            final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
+            final List<org.seasar.robot.entity.AccessResult> accessResultList = new ArrayList<org.seasar.robot.entity.AccessResult>();
+            final List<org.seasar.robot.db.exentity.AccessResultData> accessResultDataList = new ArrayList<org.seasar.robot.db.exentity.AccessResultData>();
+
+            long updateTime = System.currentTimeMillis();
+            int solrErrorCount = 0;
+            int errorCount = 0;
+            int emptyListCount = 0;
             while (!finishCrawling || !accessResultList.isEmpty()) {
                 try {
                     final int sessionIdListSize = finishedSessionIdList.size();
@@ -367,6 +367,7 @@ public class IndexUpdater extends Thread {
                                 + accessResultData.getTransformerName());
                         continue;
                     }
+                    @SuppressWarnings("unchecked")
                     final Map<String, Object> map = (Map<String, Object>) transformer
                             .getData(accessResultData);
                     if (map.isEmpty()) {

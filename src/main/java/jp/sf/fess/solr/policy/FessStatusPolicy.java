@@ -30,7 +30,7 @@ import jp.sf.fess.util.ResourceUtil;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

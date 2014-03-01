@@ -34,9 +34,9 @@ import jp.sf.fess.helper.SystemHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
@@ -60,7 +60,7 @@ public class SearchLogAction extends BsSearchLogAction {
     public String search() {
         final Map<String, String> searchParams = searchLogForm.searchParams;
         if (!searchParams.containsKey("startPage")) {
-            searchParams.put("startPage", Constants.EMPTY_STRING);
+            searchParams.put("startPage", StringUtil.EMPTY);
         }
         Beans.copy(searchParams, searchLogPager)
                 .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();

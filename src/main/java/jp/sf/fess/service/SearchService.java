@@ -52,7 +52,7 @@ import org.apache.solr.common.util.NamedList;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class SearchService implements Serializable {
 

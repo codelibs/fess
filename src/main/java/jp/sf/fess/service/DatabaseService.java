@@ -115,7 +115,7 @@ import jp.sf.fess.util.ComponentUtil;
 import org.codelibs.core.util.DynamicProperties;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,10 +19,9 @@ package jp.sf.fess.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class ParameterUtil {
     protected ParameterUtil() {
@@ -45,10 +44,10 @@ public class ParameterUtil {
                                     .substring(pos + 1).trim());
                         } else {
                             paramMap.put(line.substring(0, pos).trim(),
-                                    Constants.EMPTY_STRING);
+                                    StringUtil.EMPTY);
                         }
                     } else {
-                        paramMap.put(line.trim(), Constants.EMPTY_STRING);
+                        paramMap.put(line.trim(), StringUtil.EMPTY);
                     }
                 }
             }

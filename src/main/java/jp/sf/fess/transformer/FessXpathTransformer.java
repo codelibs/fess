@@ -52,10 +52,10 @@ import jp.sf.fess.util.ComponentUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xpath.objects.XObject;
+import org.codelibs.core.util.StringUtil;
 import org.cyberneko.html.parsers.DOMParser;
 import org.seasar.framework.util.OgnlUtil;
 import org.seasar.framework.util.SerializeUtil;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.robot.RobotCrawlAccessException;
 import org.seasar.robot.RobotSystemException;
 import org.seasar.robot.client.fs.ChildUrlsException;
@@ -358,7 +358,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     protected String convertValue(final String template,
             final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
-            return Constants.EMPTY_STRING;
+            return StringUtil.EMPTY;
         }
 
         try {

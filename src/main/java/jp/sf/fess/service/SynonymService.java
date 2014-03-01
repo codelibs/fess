@@ -31,7 +31,7 @@ import jp.sf.fess.dict.synonym.SynonymItem;
 import jp.sf.fess.pager.SynonymPager;
 
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class SynonymService {
     @Resource

@@ -49,7 +49,7 @@ import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.util.DynamicProperties;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.RobotCrawlAccessException;
 import org.seasar.robot.RobotSystemException;
 import org.seasar.robot.client.smb.SmbClient;

@@ -39,7 +39,7 @@ import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.util.URLUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.taglib.S2Functions;
@@ -281,8 +281,7 @@ public class ViewHelper implements Serializable {
 
         if (browserTypeHelper.isMobile()) {
             final String mobileTrasncoder = crawlerProperties.getProperty(
-                    Constants.MOBILE_TRANSCODER_PROPERTY,
-                    Constants.EMPTY_STRING);
+                    Constants.MOBILE_TRANSCODER_PROPERTY, StringUtil.EMPTY);
             if (Constants.GOOGLE_MOBILE_TRANSCODER.equals(mobileTrasncoder)) {
                 return getGoogleMobileTranscoderLink(appendQueryParameter(
                         document, url));

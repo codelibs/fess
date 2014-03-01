@@ -44,11 +44,10 @@ import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.QueryUtil;
 import jp.sf.fess.util.SearchParamMap;
 
-import org.apache.commons.lang.StringUtils;
-import org.codelibs.core.CoreLibConstants;
+import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.util.RequestUtil;
 
 public class QueryHelperImpl implements QueryHelper, Serializable {
@@ -175,7 +174,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
 
         final SearchQuery searchQuery = buildQuery(q);
         if (!searchQuery.queryExists()) {
-            return searchQuery.query(Constants.EMPTY_STRING);
+            return searchQuery.query(StringUtil.EMPTY);
         }
 
         if (browserTypeHelper == null && roleQueryHelper == null
@@ -251,7 +250,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
                 fieldLogMap);
         String solrQuery;
         if (q == null || "()".equals(q)) {
-            solrQuery = Constants.EMPTY_STRING;
+            solrQuery = StringUtil.EMPTY;
             // } else if (q.startsWith("(") && q.endsWith(")")) {
             // solrQuery = q.substring(1, q.length() - 1);
         } else {
@@ -447,7 +446,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
             searchQueryBuf.append(queryBuf.toString());
             operator = _AND_;
         } else {
-            operator = Constants.EMPTY_STRING;
+            operator = StringUtil.EMPTY;
         }
         if (!notOperatorList.isEmpty()) {
             final String q = searchQueryBuf.toString();
@@ -773,7 +772,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
         final String q = buildFacetQueryInternal(query);
         String solrQuery;
         if (q == null || "()".equals(q)) {
-            solrQuery = Constants.EMPTY_STRING;
+            solrQuery = StringUtil.EMPTY;
         } else {
             solrQuery = unbracketQuery(q);
         }
@@ -870,7 +869,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
             searchQueryBuf.append(queryBuf.toString());
             operator = _AND_;
         } else {
-            operator = Constants.EMPTY_STRING;
+            operator = StringUtil.EMPTY;
         }
         if (!notOperatorList.isEmpty()) {
             final String q = searchQueryBuf.toString();
@@ -967,7 +966,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
     @Override
     public String buildOptionQuery(final SearchParamMap optionMap) {
         if (optionMap == null) {
-            return CoreLibConstants.EMPTY_STRING;
+            return StringUtil.EMPTY;
         }
 
         final StringBuilder buf = new StringBuilder();
@@ -1047,7 +1046,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
             for (final String nq : nqs) {
                 if (StringUtil.isNotBlank(nq)) {
                     buf.append(' ');
-                    String split = CoreLibConstants.EMPTY_STRING;
+                    String split = StringUtil.EMPTY;
                     final List<QueryPart> partList = splitQuery(nq, null, null,
                             null);
                     for (final QueryPart part : partList) {
@@ -1438,7 +1437,7 @@ public class QueryHelperImpl implements QueryHelper, Serializable {
                     if (StringUtil.isNotBlank(param)) {
                         newValues[i] = param;
                     } else {
-                        newValues[i] = CoreLibConstants.EMPTY_STRING;
+                        newValues[i] = StringUtil.EMPTY;
                     }
                 } else {
                     newValues[i] = value;

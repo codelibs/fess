@@ -24,7 +24,7 @@ import java.util.List;
 
 import jp.sf.fess.Constants;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 
 import com.ibm.icu.text.SimpleDateFormat;
 

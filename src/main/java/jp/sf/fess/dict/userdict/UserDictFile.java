@@ -36,6 +36,7 @@ import jp.sf.fess.dict.DictionaryFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.ja.util.CSVUtil;
+import org.codelibs.core.util.StringUtil;
 
 public class UserDictFile extends DictionaryFile<UserDictItem> {
     private static final String USERDICT = "userDict";
@@ -133,7 +134,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
     @Override
     public synchronized void delete(final UserDictItem item) {
         final UserDictItem userDictItem = item;
-        userDictItem.setNewToken(Constants.EMPTY_STRING);
+        userDictItem.setNewToken(StringUtil.EMPTY);
         UserDictUpdater updater = null;
         try {
             updater = new UserDictUpdater(file, userDictItem);

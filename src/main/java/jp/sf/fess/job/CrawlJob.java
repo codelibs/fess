@@ -37,7 +37,7 @@ import jp.sf.fess.util.InputStreamThread;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

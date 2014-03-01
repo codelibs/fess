@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.util.ServletContextUtil;
 
 public class ResourceUtil {

@@ -30,7 +30,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.UserInfoHelper;
 
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.util.LruHashMap;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
@@ -137,7 +137,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
                 return queryId;
             }
         }
-        return Constants.EMPTY_STRING;
+        return StringUtil.EMPTY;
     }
 
     @Override

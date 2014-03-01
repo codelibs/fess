@@ -30,7 +30,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
-import org.seasar.framework.util.StringUtil;
+import org.codelibs.core.util.StringUtil;
 import org.seasar.robot.RobotSystemException;
 import org.seasar.robot.client.http.Authentication;
 import org.seasar.robot.client.http.impl.AuthenticationImpl;
