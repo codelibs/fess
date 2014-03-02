@@ -249,4 +249,46 @@
 	<component name="userAgentName" class="java.lang.String">
 		<arg>"Mozilla/5.0 (compatible; Fess/" + @jp.sf.fess.Constants@FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
 	</component>
+
+	<component name="adProperties" class="java.util.Properties">
+		<initMethod name="put">
+			<arg>@javax.naming.Context@INITIAL_CONTEXT_FACTORY</arg>
+			<arg>"com.sun.jndi.ldap.LdapCtxFactory"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>@javax.naming.directory.DirContext@PROVIDER_URL</arg>
+			<arg>"ldap://[host]:[port]"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>@javax.naming.directory.DirContext@SECURITY_PRINCIPAL</arg>
+			<arg>"[loginId]@[domain]"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>@javax.naming.directory.DirContext@SECURITY_CREDENTIALS</arg>
+			<arg>"password"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>"com.sun.jndi.ldap.connect.timeout"</arg>
+			<arg>"10000"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>"com.sun.jndi.ldap.connect.pool"</arg>
+			<arg>"true"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>"com.sun.jndi.connect.pool.timeout"</arg>
+			<arg>"30000"</arg>
+		</initMethod>
+		<initMethod name="put">
+			<arg>"com.sun.jndi.connect.pool.debug"</arg>
+			<arg>"all"</arg>
+		</initMethod>
+	</component>
+
+	<component name="adRoleHelper" class="jp.sf.fess.helper.AdRoleHelper">
+		<initMethod name="setAdProperties">
+			<arg>adProperties</arg>
+		</initMethod>
+	</component>
+
 </components>

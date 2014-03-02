@@ -18,6 +18,7 @@ package jp.sf.fess.util;
 
 import jp.sf.fess.api.WebApiManagerFactory;
 import jp.sf.fess.ds.DataStoreFactory;
+import jp.sf.fess.helper.AdRoleHelper;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.DatabaseHelper;
@@ -91,6 +92,8 @@ public final class ComponentUtil {
     private static final String VIEW_HELPER = "viewHelper";
 
     private static final String SYSTEM_HELPER = "systemHelper";
+
+    private static final String AD_ROLE_HELPER = "adRoleHelper";
 
     private static final String SOLR_GROUP_MANAGER = "solrGroupManager";
 
@@ -212,6 +215,10 @@ public final class ComponentUtil {
 
     public static DatabaseHelper getDatabaseHelper() {
         return SingletonS2Container.getComponent(DATABASE_HELPER);
+    }
+
+    public static AdRoleHelper getAdRoleHelper() {
+        return SingletonS2Container.getComponent(AD_ROLE_HELPER);
     }
 
     public static IndexUpdater getIndexUpdater() {
