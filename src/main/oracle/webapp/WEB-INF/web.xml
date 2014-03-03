@@ -60,7 +60,7 @@
 
   <filter>
     <filter-name>authenticationFilter</filter-name>
-    <filter-class>jp.sf.fess.filter.AuthenticationFilter</filter-class>
+    <filter-class>jp.sf.fess.filter.AdminAuthFilter</filter-class>
     <init-param>
       <param-name>urlPatterns</param-name>
       <param-value>/fess/admin.*</param-value>
@@ -88,6 +88,89 @@
       <param-value>false</param-value>
     </init-param>
   </filter>
+
+  <!--
+  <filter>
+    <filter-name>adLoginInfoFilter</filter-name>
+    <filter-class>jp.sf.fess.filter.AdLoginInfoFilter</filter-class>
+    <init-param>
+      <param-name>redirectLoginError</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>useTestUser</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <init-param>
+      <param-name>testUserName</param-name>
+      <param-value>testUser</param-value>
+    </init-param>
+  </filter>
+  -->
+
+  <!-- SPNEGO    -->
+  <!--
+  <filter>
+      <filter-name>SpnegoHttpFilter</filter-name>
+      <filter-class>net.sourceforge.spnego.SpnegoHttpFilter</filter-class>
+
+      <init-param>
+          <param-name>spnego.allow.basic</param-name>
+          <param-value>false</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.allow.localhost</param-name>
+          <param-value>true</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.allow.unsecure.basic</param-name>
+          <param-value>false</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.login.client.module</param-name>
+          <param-value>spnego-client</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.krb5.conf</param-name>
+          <param-value>krb5.conf</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.login.conf</param-name>
+          <param-value>login.conf</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.preauth.username</param-name>
+          <param-value>knldguser</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.preauth.password</param-name>
+          <param-value>zaq12wsx</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.login.server.module</param-name>
+          <param-value>spnego-server</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.prompt.ntlm</param-name>
+          <param-value>false</param-value>
+      </init-param>
+
+      <init-param>
+          <param-name>spnego.logger.level</param-name>
+          <param-value>1</param-value>
+      </init-param>
+  </filter>
+-->
+
 
 <!--
   <filter-mapping>
@@ -134,6 +217,19 @@
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
+
+  <!--
+  <filter-mapping>
+      <filter-name>SpnegoHttpFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>adLoginInfoFilter</filter-name>
+    <url-pattern>*.do</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+-->
 
   <servlet>
     <servlet-name>action</servlet-name>
@@ -241,16 +337,6 @@
       <form-error-page>/WEB-INF/view/login/error.jsp</form-error-page>
     </form-login-config>
   </login-config>
-
-  <security-role>
-  	<role-name>fess</role-name>
-  </security-role>
-
-  <!--
-  <security-role>
-  	<role-name>role1</role-name>
-  </security-role>
-  -->
 
   <error-page>
   	<error-code>400</error-code>
