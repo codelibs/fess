@@ -21,7 +21,62 @@
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="row">
-			<c:if test="${fe:hswsize(null) != 0}">
+			<div class="span9">
+				<p id="searchOptionMenu" class="ellipsis">
+					<span>
+						<bean:message key="labels.searchoptions_menu_sort" />
+						<c:if test="${empty sort}"><bean:message key="labels.searchoptions_score" /></c:if>
+						<c:if test="${sort=='created.asc'}"><bean:message key="labels.search_result_sort_created_asc" /></c:if>
+						<c:if test="${sort=='created.desc'}"><bean:message key="labels.search_result_sort_created_desc" /></c:if>
+						<c:if test="${sort=='contentLength.asc'}"><bean:message key="labels.search_result_sort_contentLength_asc" /></c:if>
+						<c:if test="${sort=='contentLength.desc'}"><bean:message key="labels.search_result_sort_contentLength_desc" /></c:if>
+						<c:if test="${sort=='lastModified.asc'}"><bean:message key="labels.search_result_sort_lastModified_asc" /></c:if>
+						<c:if test="${sort=='lastModified.desc'}"><bean:message key="labels.search_result_sort_lastModified_desc" /></c:if>
+						<c:if test="${sort=='clickCount_l_x_dv.asc'}"><bean:message key="labels.search_result_sort_clickCount_asc" /></c:if>
+						<c:if test="${sort=='clickCount_l_x_dv.desc'}"><bean:message key="labels.search_result_sort_clickCount_desc" /></c:if>
+						<c:if test="${sort=='favoriteCount_l_x_dv.asc'}"><bean:message key="labels.search_result_sort_favoriteCount_asc" /></c:if>
+						<c:if test="${sort=='favoriteCount_l_x_dv.desc'}"><bean:message key="labels.search_result_sort_favoriteCount_desc" /></c:if>
+					</span>
+					<span>
+						<bean:message key="labels.searchoptions_menu_num" />
+						<bean:message key="labels.searchoptions_num" arg0="${f:h(num)}" />
+					</span>
+					<span>
+						<bean:message key="labels.searchoptions_menu_lang" />
+						<c:if test="${empty lang}"><bean:message key="labels.searchoptions_all" /></c:if>
+						<c:if test="${!empty lang}">
+							<c:forEach var="sLang" items="${lang}">
+								<c:forEach var="item" items="${langItems}">
+									<c:if test="${item.value==sLang}">${f:h(item.label)}</c:if>
+								</c:forEach>
+							</c:forEach>
+						</c:if>
+					</span>
+					<c:if test="${displayLabelTypeItems}">
+					<span>
+						<bean:message key="labels.searchoptions_menu_labels" />
+						<c:if test="${empty fields.label}"><bean:message key="labels.searchoptions_all" /></c:if>
+						<c:if test="${!empty fields.label}">
+							<c:forEach var="sLabel" items="${fields.label}">
+								<c:forEach var="item" items="${labelTypeItems}">
+									<c:if test="${item.value==sLabel}">${f:h(item.label)}</c:if>
+								</c:forEach>
+							</c:forEach>
+						</c:if>
+					</span>
+					</c:if>
+				</p>
+			</div>
+			<div class="span3">
+				<c:if test="${!empty username}">
+				<p class="username">
+					<bean:message key="labels.searchheader_username" arg0="${f:h(username)}" />
+				</p>
+				</c:if>
+			</div>
+		</div>
+		<c:if test="${fe:hswsize(null) != 0}">
+			<div class="row">
 				<div class="span12">
 					<p class="hotSearchWordBody ellipsis">
 						<bean:message key="labels.search_hot_search_word" />
@@ -30,8 +85,8 @@
 						</c:forEach>
 					</p>
 				</div>
-			</c:if>
-		</div>
+			</div>
+		</c:if>
 		<c:choose>
 			<c:when test="${f:h(allRecordCount) != 0}">
 				<jsp:include page="searchResults.jsp" />

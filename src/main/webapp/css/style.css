@@ -4,6 +4,10 @@
 	min-height: 500px;
 }
 
+body {
+  padding-top:55px;
+}
+
 h1,
 h2,
 h3 {
@@ -93,6 +97,18 @@ h3 {
     text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis;
     -o-text-overflow: ellipsis;
+}
+
+.searchResultForm {
+    margin:0;
+}
+
+#searchOptionMenu span {
+    margin-right:10px;
+}
+
+.username {
+    text-align:right;
 }
 
 /* Large desktop */

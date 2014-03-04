@@ -51,6 +51,7 @@ import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.entity.FieldAnalysisResponse;
+import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.BrowserTypeHelper;
@@ -80,6 +81,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
 import org.seasar.framework.beans.util.Beans;
@@ -205,6 +207,8 @@ public class IndexAction {
     public boolean favoriteSupport;
 
     public boolean screenShotSupport;
+
+    public String username;
 
     public String getPagingQuery() {
         if (pagingQuery == null) {
@@ -1189,6 +1193,14 @@ public class IndexAction {
         favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
                 Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
 
+        final HttpSession session = request.getSession(false);
+        if (session != null) {
+            final Object obj = session.getAttribute(SSCConstants.USER_INFO);
+            if (obj instanceof LoginInfo) {
+                final LoginInfo loginInfo = (LoginInfo) obj;
+                username = loginInfo.getUsername();
+            }
+        }
     }
 
     protected void buildInitParams() {
