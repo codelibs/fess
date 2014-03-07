@@ -139,6 +139,9 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 			<button class="btn" data-dismiss="modal" aria-hidden="true">
 				<bean:message key="labels.search_options_close" />
 			</button>
+			<button class="btn btn-primary" type="submit">
+				<bean:message key="labels.search" />
+			</button>
 		</div>
 	</div>
 </s:form>
