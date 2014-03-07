@@ -838,12 +838,22 @@ public class IndexAction {
             final Set<String> langSet = new HashSet<>();
             for (final String lang : indexForm.lang) {
                 if (StringUtil.isNotBlank(lang) && lang.length() < 1000) {
-                    final String normalizeLang = systemHelper
-                            .normalizeLang(lang);
-                    if (normalizeLang != null) {
-                        langSet.add(normalizeLang);
+                    if (Constants.ALL_LANGUAGES.equalsIgnoreCase(lang)) {
+                        langSet.add(Constants.ALL_LANGUAGES);
+                    } else {
+                        final String normalizeLang = systemHelper
+                                .normalizeLang(lang);
+                        if (normalizeLang != null) {
+                            langSet.add(normalizeLang);
+                        }
                     }
                 }
+            }
+            if (langSet.size() > 1 && langSet.contains(Constants.ALL_LANGUAGES)) {
+                langSet.clear();
+                indexForm.lang = new String[] { Constants.ALL_LANGUAGES };
+            } else {
+                langSet.remove(Constants.ALL_LANGUAGES);
             }
             appendLangQuery(queryBuf, langSet);
         } else if (Constants.TRUE.equals(crawlerProperties.getProperty(

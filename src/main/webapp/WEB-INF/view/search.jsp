@@ -25,6 +25,7 @@
 				<p id="searchOptionMenu" class="ellipsis">
 					<span>
 						<bean:message key="labels.searchoptions_menu_sort" />
+						<a href="#searchOptions" data-toggle="modal">
 						<c:if test="${empty sort}"><bean:message key="labels.searchoptions_score" /></c:if>
 						<c:if test="${sort=='created.asc'}"><bean:message key="labels.search_result_sort_created_asc" /></c:if>
 						<c:if test="${sort=='created.desc'}"><bean:message key="labels.search_result_sort_created_desc" /></c:if>
@@ -36,13 +37,17 @@
 						<c:if test="${sort=='clickCount_l_x_dv.desc'}"><bean:message key="labels.search_result_sort_clickCount_desc" /></c:if>
 						<c:if test="${sort=='favoriteCount_l_x_dv.asc'}"><bean:message key="labels.search_result_sort_favoriteCount_asc" /></c:if>
 						<c:if test="${sort=='favoriteCount_l_x_dv.desc'}"><bean:message key="labels.search_result_sort_favoriteCount_desc" /></c:if>
+						</a>
 					</span>
 					<span>
 						<bean:message key="labels.searchoptions_menu_num" />
+						<a href="#searchOptions" data-toggle="modal">
 						<bean:message key="labels.searchoptions_num" arg0="${f:h(num)}" />
+						</a>
 					</span>
 					<span>
 						<bean:message key="labels.searchoptions_menu_lang" />
+						<a href="#searchOptions" data-toggle="modal">
 						<c:if test="${empty lang}"><bean:message key="labels.searchoptions_all" /></c:if>
 						<c:if test="${!empty lang}">
 							<c:forEach var="sLang" items="${lang}">
@@ -51,10 +56,12 @@
 								</c:forEach>
 							</c:forEach>
 						</c:if>
+						</a>
 					</span>
 					<c:if test="${displayLabelTypeItems}">
 					<span>
 						<bean:message key="labels.searchoptions_menu_labels" />
+						<a href="#searchOptions" data-toggle="modal">
 						<c:if test="${empty fields.label}"><bean:message key="labels.searchoptions_all" /></c:if>
 						<c:if test="${!empty fields.label}">
 							<c:forEach var="sLabel" items="${fields.label}">
@@ -63,6 +70,7 @@
 								</c:forEach>
 							</c:forEach>
 						</c:if>
+						</a>
 					</span>
 					</c:if>
 				</p>
