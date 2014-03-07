@@ -19,7 +19,10 @@ package jp.sf.fess.db.exbhv.pmbean;
 import jp.sf.fess.db.bsbhv.pmbean.BsSearchWordRankingPmb;
 
 /**
- * The parameter-bean of SearchWordRankingPmb.
+ * <!-- df:beginClassDescription -->
+ * The typed parameter-bean of SearchWordRanking. <span style="color: #AD4747">(typed to entity, auto-paging)</span><br />
+ * This is related to "<span style="color: #AD4747">selectSearchWordRanking</span>" on SearchLogBhv.
+ * <!-- df:endClassDescription -->
  * <p>
  * You can implement your original methods here.
  * This class remains when re-generating.

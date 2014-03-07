@@ -138,50 +138,6 @@ public class QueryHelperTest extends S2TestCase {
 
     }
 
-    public void test_build_browserType() {
-        queryHelper.browserTypeHelper = new BrowserTypeHelper() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String getBrowserType() {
-                return PC;
-            }
-        };
-
-        assertEquals("", queryHelper.build("", true).getQuery());
-
-        assertEquals("title:QUERY OR content:QUERY",
-                queryHelper.build("QUERY", true).getQuery());
-        assertEquals("type:pc", queryHelper.build("QUERY", true)
-                .getFilterQueries()[0]);
-
-        assertEquals(
-                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2)",
-                queryHelper.build("QUERY1 QUERY2", true).getQuery());
-        assertEquals("type:pc", queryHelper.build("QUERY1 QUERY2", true)
-                .getFilterQueries()[0]);
-
-        queryHelper.browserTypeHelper = new BrowserTypeHelper() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String getBrowserType() {
-                return DOCOMO;
-            }
-        };
-
-        assertEquals("title:QUERY OR content:QUERY",
-                queryHelper.build("QUERY", true).getQuery());
-        assertEquals("type:docomo", queryHelper.build("QUERY", true)
-                .getFilterQueries()[0]);
-
-        assertEquals(
-                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2)",
-                queryHelper.build("QUERY1 QUERY2", true).getQuery());
-        assertEquals("type:docomo", queryHelper.build("QUERY1 QUERY2", true)
-                .getFilterQueries()[0]);
-    }
-
     public void test_build_roleType() {
         queryHelper.roleQueryHelper = new RoleQueryHelper() {
             @Override
@@ -225,43 +181,6 @@ public class QueryHelperTest extends S2TestCase {
                 queryHelper.build("QUERY1 QUERY2", true).getQuery());
         assertEquals("role:guest OR role:admin",
                 queryHelper.build("QUERY1 QUERY2", true).getFilterQueries()[0]);
-    }
-
-    public void test_build_browserType_and_roleType() {
-        queryHelper.browserTypeHelper = new BrowserTypeHelper() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String getBrowserType() {
-                return PC;
-            }
-        };
-        queryHelper.roleQueryHelper = new RoleQueryHelper() {
-            @Override
-            public Set<String> build() {
-                final Set<String> list = new LinkedHashSet<>();
-                list.add("guest");
-                list.add("admin");
-                return list;
-            }
-        };
-
-        assertEquals("", queryHelper.build("", true).getQuery());
-
-        assertEquals("title:QUERY OR content:QUERY",
-                queryHelper.build("QUERY", true).getQuery());
-        assertEquals("type:pc", queryHelper.build("QUERY", true)
-                .getFilterQueries()[0]);
-        assertEquals("role:guest OR role:admin",
-                queryHelper.build("QUERY", true).getFilterQueries()[1]);
-
-        assertEquals(
-                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2)",
-                queryHelper.build("QUERY1 QUERY2", true).getQuery());
-        assertEquals("type:pc", queryHelper.build("QUERY1 QUERY2", true)
-                .getFilterQueries()[0]);
-        assertEquals("role:guest OR role:admin",
-                queryHelper.build("QUERY1 QUERY2", true).getFilterQueries()[1]);
     }
 
     public void test_sortField() {

@@ -22,7 +22,6 @@ import jp.sf.fess.db.allcommon.ImplementedInvokerAssistant;
 import jp.sf.fess.db.allcommon.ImplementedSqlClauseCreator;
 import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
-import jp.sf.fess.db.cbean.WebConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
@@ -626,42 +625,6 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
                                 final DerivedReferrerOption option) {
                             cq.xsderiveWebAuthenticationList(function,
                                     subQuery, aliasName, option);
-                        }
-                    }, _dbmetaProvider);
-        }
-
-        /**
-         * Prepare for (Specify)DerivedReferrer. <br />
-         * {select max(FOO) from WEB_CONFIG_TO_BROWSER_TYPE_MAPPING where ...) as FOO_MAX} <br />
-         * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingList'.
-         * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedWebConfigToBrowserTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebConfigToBrowserTypeMappingCB&gt;() {
-         *     public void query(WebConfigToBrowserTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-         *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-         *     }
-         * }, WebConfigToBrowserTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
-         * </pre>
-         * @return The object to set up a function for referrer table. (NotNull)
-         */
-        public HpSDRFunction<WebConfigToBrowserTypeMappingCB, WebCrawlingConfigCQ> derivedWebConfigToBrowserTypeMappingList() {
-            assertDerived("webConfigToBrowserTypeMappingList");
-            if (xhasSyncQyCall()) {
-                xsyncQyCall().qy();
-            } // for sync (for example, this in ColumnQuery)
-            return new HpSDRFunction<WebConfigToBrowserTypeMappingCB, WebCrawlingConfigCQ>(
-                    _baseCB,
-                    _qyCall.qy(),
-                    new HpSDRSetupper<WebConfigToBrowserTypeMappingCB, WebCrawlingConfigCQ>() {
-                        @Override
-                        public void setup(
-                                final String function,
-                                final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery,
-                                final WebCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveWebConfigToBrowserTypeMappingList(
-                                    function, subQuery, aliasName, option);
                         }
                     }, _dbmetaProvider);
         }

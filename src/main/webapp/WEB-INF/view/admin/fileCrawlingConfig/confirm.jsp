@@ -108,23 +108,6 @@
                     <td>${f:h(boost)}<html:hidden property="boost"/></td>
                 </tr>
                 <tr>
-                	<th><bean:message key="labels.browser_type"/></th>
-                	<td>
-<c:forEach var="bt" varStatus="s" items="${browserTypeItems}">
-<c:forEach var="btid" varStatus="s" items="${browserTypeIds}">
-<c:if test="${btid==bt.id}">
-${f:h(bt.name)}<br/>
-</c:if>
-</c:forEach>
-</c:forEach>
-<html:select property="browserTypeIds" multiple="true" style="display:none;">
-<c:forEach var="bt" varStatus="s" items="${browserTypeItems}">
-	<html:option value="${f:u(bt.id)}">${f:h(bt.name)}</html:option>
-</c:forEach>
-</html:select>
-                	</td>
-                </tr>
-                <tr>
                 	<th><bean:message key="labels.role_type" /></th>
                 	<td>
 <c:forEach var="rt" varStatus="s" items="${roleTypeItems}">

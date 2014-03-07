@@ -48,15 +48,11 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
     protected static final Map<String, String> _tableDbNameClassNameMap;
     static {
         final Map<String, String> tmpMap = newHashMap();
-        tmpMap.put("BROWSER_TYPE",
-                "jp.sf.fess.db.bsentity.dbmeta.BrowserTypeDbm");
         tmpMap.put("CLICK_LOG", "jp.sf.fess.db.bsentity.dbmeta.ClickLogDbm");
         tmpMap.put("CRAWLING_SESSION",
                 "jp.sf.fess.db.bsentity.dbmeta.CrawlingSessionDbm");
         tmpMap.put("CRAWLING_SESSION_INFO",
                 "jp.sf.fess.db.bsentity.dbmeta.CrawlingSessionInfoDbm");
-        tmpMap.put("DATA_CONFIG_TO_BROWSER_TYPE_MAPPING",
-                "jp.sf.fess.db.bsentity.dbmeta.DataConfigToBrowserTypeMappingDbm");
         tmpMap.put("DATA_CONFIG_TO_LABEL_TYPE_MAPPING",
                 "jp.sf.fess.db.bsentity.dbmeta.DataConfigToLabelTypeMappingDbm");
         tmpMap.put("DATA_CONFIG_TO_ROLE_TYPE_MAPPING",
@@ -68,8 +64,6 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
                 "jp.sf.fess.db.bsentity.dbmeta.FavoriteLogDbm");
         tmpMap.put("FILE_AUTHENTICATION",
                 "jp.sf.fess.db.bsentity.dbmeta.FileAuthenticationDbm");
-        tmpMap.put("FILE_CONFIG_TO_BROWSER_TYPE_MAPPING",
-                "jp.sf.fess.db.bsentity.dbmeta.FileConfigToBrowserTypeMappingDbm");
         tmpMap.put("FILE_CONFIG_TO_LABEL_TYPE_MAPPING",
                 "jp.sf.fess.db.bsentity.dbmeta.FileConfigToLabelTypeMappingDbm");
         tmpMap.put("FILE_CONFIG_TO_ROLE_TYPE_MAPPING",
@@ -95,8 +89,6 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
         tmpMap.put("USER_INFO", "jp.sf.fess.db.bsentity.dbmeta.UserInfoDbm");
         tmpMap.put("WEB_AUTHENTICATION",
                 "jp.sf.fess.db.bsentity.dbmeta.WebAuthenticationDbm");
-        tmpMap.put("WEB_CONFIG_TO_BROWSER_TYPE_MAPPING",
-                "jp.sf.fess.db.bsentity.dbmeta.WebConfigToBrowserTypeMappingDbm");
         tmpMap.put("WEB_CONFIG_TO_LABEL_TYPE_MAPPING",
                 "jp.sf.fess.db.bsentity.dbmeta.WebConfigToLabelTypeMappingDbm");
         tmpMap.put("WEB_CONFIG_TO_ROLE_TYPE_MAPPING",

@@ -20,17 +20,14 @@ import java.util.List;
 
 import jp.sf.fess.db.bsentity.dbmeta.FileCrawlingConfigDbm;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
-import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
 import jp.sf.fess.db.exbhv.FileAuthenticationBhv;
-import jp.sf.fess.db.exbhv.FileConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileCrawlingConfigBhv;
 import jp.sf.fess.db.exentity.FileAuthentication;
-import jp.sf.fess.db.exentity.FileConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
@@ -73,13 +70,13 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *     
  * 
  * [referrer table]
- *     FILE_AUTHENTICATION, FILE_CONFIG_TO_BROWSER_TYPE_MAPPING, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     FILE_AUTHENTICATION, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     fileAuthenticationList, fileConfigToBrowserTypeMappingList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
+ *     fileAuthenticationList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
@@ -625,144 +622,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
                     @Override
                     public String getRfPrNm() {
                         return "fileAuthenticationList";
-                    }
-                });
-    }
-
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param fileCrawlingConfig The entity of fileCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadFileConfigToBrowserTypeMappingList(
-            final FileCrawlingConfig fileCrawlingConfig,
-            final ConditionBeanSetupper<FileConfigToBrowserTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(fileCrawlingConfig, conditionBeanSetupper);
-        loadFileConfigToBrowserTypeMappingList(xnewLRLs(fileCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of fileConfigToBrowserTypeMappingList with the set-upper for condition-bean of referrer. <br />
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingList'.
-     * <pre>
-     * fileCrawlingConfigBhv.<span style="color: #FD4747">loadFileConfigToBrowserTypeMappingList</span>(fileCrawlingConfigList, new ConditionBeanSetupper&lt;FileConfigToBrowserTypeMappingCB&gt;() {
-     *     public void setup(FileConfigToBrowserTypeMappingCB cb) {
-     *         cb.setupSelect...();
-     *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
-     *     }
-     * });
-     * for (FileCrawlingConfig fileCrawlingConfig : fileCrawlingConfigList) {
-     *     ... = fileCrawlingConfig.<span style="color: #FD4747">getFileConfigToBrowserTypeMappingList()</span>;
-     * }
-     * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
-     * <pre>
-     * cb.query().setFileConfigId_InScope(pkList);
-     * cb.query().addOrderBy_FileConfigId_Asc();
-     * </pre>
-     * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadFileConfigToBrowserTypeMappingList(
-            final List<FileCrawlingConfig> fileCrawlingConfigList,
-            final ConditionBeanSetupper<FileConfigToBrowserTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(fileCrawlingConfigList, conditionBeanSetupper);
-        loadFileConfigToBrowserTypeMappingList(
-                fileCrawlingConfigList,
-                new LoadReferrerOption<FileConfigToBrowserTypeMappingCB, FileConfigToBrowserTypeMapping>()
-                        .xinit(conditionBeanSetupper));
-    }
-
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param fileCrawlingConfig The entity of fileCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadFileConfigToBrowserTypeMappingList(
-            final FileCrawlingConfig fileCrawlingConfig,
-            final LoadReferrerOption<FileConfigToBrowserTypeMappingCB, FileConfigToBrowserTypeMapping> loadReferrerOption) {
-        xassLRArg(fileCrawlingConfig, loadReferrerOption);
-        loadFileConfigToBrowserTypeMappingList(xnewLRLs(fileCrawlingConfig),
-                loadReferrerOption);
-    }
-
-    /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
-     * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadFileConfigToBrowserTypeMappingList(
-            final List<FileCrawlingConfig> fileCrawlingConfigList,
-            final LoadReferrerOption<FileConfigToBrowserTypeMappingCB, FileConfigToBrowserTypeMapping> loadReferrerOption) {
-        xassLRArg(fileCrawlingConfigList, loadReferrerOption);
-        if (fileCrawlingConfigList.isEmpty()) {
-            return;
-        }
-        final FileConfigToBrowserTypeMappingBhv referrerBhv = xgetBSFLR()
-                .select(FileConfigToBrowserTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                fileCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<FileCrawlingConfig, Long, FileConfigToBrowserTypeMappingCB, FileConfigToBrowserTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final FileCrawlingConfig e) {
-                        return e.getId();
-                    }
-
-                    @Override
-                    public void setRfLs(final FileCrawlingConfig e,
-                            final List<FileConfigToBrowserTypeMapping> ls) {
-                        e.setFileConfigToBrowserTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public FileConfigToBrowserTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(
-                            final FileConfigToBrowserTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setFileConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(
-                            final FileConfigToBrowserTypeMappingCB cb) {
-                        cb.query().addOrderBy_FileConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(
-                            final FileConfigToBrowserTypeMappingCB cb) {
-                        cb.specify().columnFileConfigId();
-                    }
-
-                    @Override
-                    public List<FileConfigToBrowserTypeMapping> selRfLs(
-                            final FileConfigToBrowserTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final FileConfigToBrowserTypeMapping e) {
-                        return e.getFileConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(
-                            final FileConfigToBrowserTypeMapping re,
-                            final FileCrawlingConfig le) {
-                        re.setFileCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "fileConfigToBrowserTypeMappingList";
                     }
                 });
     }

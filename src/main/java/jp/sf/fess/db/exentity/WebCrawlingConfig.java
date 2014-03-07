@@ -50,8 +50,6 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;
 
-    private String[] browserTypeIds;
-
     private String[] labelTypeIds;
 
     private String[] roleTypeIds;
@@ -65,32 +63,6 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
     public WebCrawlingConfig() {
         super();
         setBoost(BigDecimal.ONE);
-    }
-
-    /* (non-Javadoc)
-     * @see jp.sf.fess.db.exentity.CrawlingConfig#getBrowserTypeIds()
-     */
-    public String[] getBrowserTypeIds() {
-        if (browserTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return browserTypeIds;
-    }
-
-    public void setBrowserTypeIds(final String[] browserTypeIds) {
-        this.browserTypeIds = browserTypeIds;
-    }
-
-    @Override
-    public String[] getBrowserTypeValues() {
-        final List<String> values = new ArrayList<String>();
-        final List<WebConfigToBrowserTypeMapping> list = getWebConfigToBrowserTypeMappingList();
-        if (list != null && !list.isEmpty()) {
-            for (final WebConfigToBrowserTypeMapping mapping : list) {
-                values.add(mapping.getBrowserType().getValue());
-            }
-        }
-        return values.toArray(new String[values.size()]);
     }
 
     /* (non-Javadoc)

@@ -65,11 +65,6 @@ public class ViewHelper implements Serializable {
     private static final Logger logger = LoggerFactory
             .getLogger(ViewHelper.class);
 
-    protected static final String GOOGLE_MOBILE_TRANSCODER_LINK = "http://www.google.co.jp/gwt/n?u=";
-
-    @Resource
-    protected BrowserTypeHelper browserTypeHelper;
-
     @Resource
     protected PathMappingHelper pathMappingHelper;
 
@@ -79,11 +74,7 @@ public class ViewHelper implements Serializable {
     @Resource
     protected DynamicProperties crawlerProperties;
 
-    public int mobileDescriptionLength = 50;
-
     public int pcDescriptionLength = 200;
-
-    public int mobileTitleLength = 50;
 
     public int pcTitleLength = 50;
 
@@ -120,12 +111,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String getContentTitle(final Map<String, Object> document) {
-        int size;
-        if (browserTypeHelper.isMobile()) {
-            size = mobileTitleLength;
-        } else {
-            size = pcTitleLength;
-        }
+        final int size = pcTitleLength;
 
         String title;
         if (StringUtil.isNotBlank(getString(document, "title"))) {
@@ -140,12 +126,7 @@ public class ViewHelper implements Serializable {
         final HttpServletRequest request = RequestUtil.getRequest();
         final String[] queries = request == null ? StringUtil.EMPTY_STRINGS
                 : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
-        int size;
-        if (browserTypeHelper.isMobile()) {
-            size = mobileDescriptionLength;
-        } else {
-            size = pcDescriptionLength;
-        }
+        final int size = pcDescriptionLength;
 
         for (final String field : highlightingFields) {
             final String text = getString(document, field);
@@ -297,15 +278,6 @@ public class ViewHelper implements Serializable {
             }
         }
 
-        if (browserTypeHelper.isMobile()) {
-            final String mobileTrasncoder = crawlerProperties.getProperty(
-                    Constants.MOBILE_TRANSCODER_PROPERTY, StringUtil.EMPTY);
-            if (Constants.GOOGLE_MOBILE_TRANSCODER.equals(mobileTrasncoder)) {
-                return getGoogleMobileTranscoderLink(appendQueryParameter(
-                        document, url));
-            }
-        }
-
         return appendQueryParameter(document, url);
     }
 
@@ -341,17 +313,6 @@ public class ViewHelper implements Serializable {
 
         }
         return url;
-    }
-
-    protected String getGoogleMobileTranscoderLink(final String url) {
-        final StringBuilder buf = new StringBuilder(255);
-        buf.append(GOOGLE_MOBILE_TRANSCODER_LINK);
-        try {
-            buf.append(URLEncoder.encode(url, Constants.UTF_8));
-        } catch (final UnsupportedEncodingException e) {
-            return url;
-        }
-        return buf.toString();
     }
 
     public String getPagePath(final String page) {

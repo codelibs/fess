@@ -25,14 +25,11 @@ import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.service.BsWebCrawlingConfigService;
-import jp.sf.fess.db.cbean.WebConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.WebConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
-import jp.sf.fess.db.exentity.WebConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
@@ -46,16 +43,13 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
     private static final long serialVersionUID = 1L;
 
     @Resource
-    protected WebConfigToBrowserTypeMappingBhv webConfigToBrowserTypeMappingBhv;
-
-    @Resource
     protected WebConfigToLabelTypeMappingBhv webConfigToLabelTypeMappingBhv;
 
     @Resource
     protected WebConfigToRoleTypeMappingBhv webConfigToRoleTypeMappingBhv;
 
     public List<WebCrawlingConfig> getAllWebCrawlingConfigList() {
-        return getAllWebCrawlingConfigList(true, true, true, true, null);
+        return getAllWebCrawlingConfigList(true, true, true, null);
     }
 
     public List<WebCrawlingConfig> getWebCrawlingConfigListByIds(
@@ -63,14 +57,13 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
         if (idList == null) {
             return getAllWebCrawlingConfigList();
         } else {
-            return getAllWebCrawlingConfigList(true, true, true, false, idList);
+            return getAllWebCrawlingConfigList(true, true, false, idList);
         }
     }
 
     public List<WebCrawlingConfig> getAllWebCrawlingConfigList(
-            final boolean withBrowserType, final boolean withLabelType,
-            final boolean withRoleType, final boolean available,
-            final List<Long> idList) {
+            final boolean withLabelType, final boolean withRoleType,
+            final boolean available, final List<Long> idList) {
         final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
         cb.query().setDeletedBy_IsNull();
         if (available) {
@@ -81,19 +74,6 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
         }
         final List<WebCrawlingConfig> list = webCrawlingConfigBhv
                 .selectList(cb);
-        if (withBrowserType) {
-            final ConditionBeanSetupper<WebConfigToBrowserTypeMappingCB> setupper = new ConditionBeanSetupper<WebConfigToBrowserTypeMappingCB>() {
-                @Override
-                public void setup(final WebConfigToBrowserTypeMappingCB cb) {
-                    cb.setupSelect_BrowserType();
-                    cb.query().queryBrowserType().setDeletedBy_IsNull();
-                    cb.query().queryBrowserType().addOrderBy_SortOrder_Asc();
-                }
-
-            };
-            webCrawlingConfigBhv.loadWebConfigToBrowserTypeMappingList(list,
-                    setupper);
-        }
         if (withLabelType) {
             final ConditionBeanSetupper<WebConfigToLabelTypeMappingCB> setupper = new ConditionBeanSetupper<WebConfigToLabelTypeMappingCB>() {
                 @Override
@@ -129,22 +109,6 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
                 .getWebCrawlingConfig(keys);
 
         if (webCrawlingConfig != null) {
-            final WebConfigToBrowserTypeMappingCB wctbtmCb = new WebConfigToBrowserTypeMappingCB();
-            wctbtmCb.query().setWebConfigId_Equal(webCrawlingConfig.getId());
-            wctbtmCb.query().queryBrowserType().setDeletedBy_IsNull();
-            wctbtmCb.query().queryWebCrawlingConfig().setDeletedBy_IsNull();
-            final List<WebConfigToBrowserTypeMapping> wctbtmList = webConfigToBrowserTypeMappingBhv
-                    .selectList(wctbtmCb);
-            if (!wctbtmList.isEmpty()) {
-                final List<String> browserTypeIds = new ArrayList<String>(
-                        wctbtmList.size());
-                for (final WebConfigToBrowserTypeMapping mapping : wctbtmList) {
-                    browserTypeIds
-                            .add(Long.toString(mapping.getBrowserTypeId()));
-                }
-                webCrawlingConfig.setBrowserTypeIds(browserTypeIds
-                        .toArray(new String[browserTypeIds.size()]));
-            }
 
             final WebConfigToLabelTypeMappingCB wctltmCb = new WebConfigToLabelTypeMappingCB();
             wctltmCb.query().setWebConfigId_Equal(webCrawlingConfig.getId());
@@ -185,23 +149,12 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
     @Override
     public void store(final WebCrawlingConfig webCrawlingConfig) {
         final boolean isNew = webCrawlingConfig.getId() == null;
-        final String[] browserTypeIds = webCrawlingConfig.getBrowserTypeIds();
         final String[] labelTypeIds = webCrawlingConfig.getLabelTypeIds();
         final String[] roleTypeIds = webCrawlingConfig.getRoleTypeIds();
         super.store(webCrawlingConfig);
         final Long webConfigId = webCrawlingConfig.getId();
         if (isNew) {
             // Insert
-            if (browserTypeIds != null) {
-                final List<WebConfigToBrowserTypeMapping> wctbtmList = new ArrayList<WebConfigToBrowserTypeMapping>();
-                for (final String id : browserTypeIds) {
-                    final WebConfigToBrowserTypeMapping mapping = new WebConfigToBrowserTypeMapping();
-                    mapping.setWebConfigId(webConfigId);
-                    mapping.setBrowserTypeId(Long.parseLong(id));
-                    wctbtmList.add(mapping);
-                }
-                webConfigToBrowserTypeMappingBhv.batchInsert(wctbtmList);
-            }
             if (labelTypeIds != null) {
                 final List<WebConfigToLabelTypeMapping> wctltmList = new ArrayList<WebConfigToLabelTypeMapping>();
                 for (final String id : labelTypeIds) {
@@ -224,35 +177,6 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
             }
         } else {
             // Update
-            if (browserTypeIds != null) {
-                final WebConfigToBrowserTypeMappingCB wctbtmCb = new WebConfigToBrowserTypeMappingCB();
-                wctbtmCb.query().setWebConfigId_Equal(webConfigId);
-                final List<WebConfigToBrowserTypeMapping> list = webConfigToBrowserTypeMappingBhv
-                        .selectList(wctbtmCb);
-                final List<WebConfigToBrowserTypeMapping> newList = new ArrayList<WebConfigToBrowserTypeMapping>();
-                final List<WebConfigToBrowserTypeMapping> matchedList = new ArrayList<WebConfigToBrowserTypeMapping>();
-                for (final String id : browserTypeIds) {
-                    final Long browserTypeId = Long.parseLong(id);
-                    boolean exist = false;
-                    for (final WebConfigToBrowserTypeMapping mapping : list) {
-                        if (mapping.getBrowserTypeId().equals(browserTypeId)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final WebConfigToBrowserTypeMapping mapping = new WebConfigToBrowserTypeMapping();
-                        mapping.setWebConfigId(webConfigId);
-                        mapping.setBrowserTypeId(Long.parseLong(id));
-                        newList.add(mapping);
-                    }
-                }
-                list.removeAll(matchedList);
-                webConfigToBrowserTypeMappingBhv.batchInsert(newList);
-                webConfigToBrowserTypeMappingBhv.batchDelete(list);
-            }
             if (labelTypeIds != null) {
                 final WebConfigToLabelTypeMappingCB wctltmCb = new WebConfigToLabelTypeMappingCB();
                 wctltmCb.query().setWebConfigId_Equal(webConfigId);

@@ -17,13 +17,19 @@
 package jp.sf.fess.helper;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
-
-import org.mobylet.mail.MobyletMailer;
-import org.mobylet.mail.message.MessageBody;
-import org.mobylet.mail.message.MobyletMessage;
 
 public class MailHelper implements Serializable {
 
@@ -31,22 +37,47 @@ public class MailHelper implements Serializable {
 
     public String from = Constants.DEFAULT_FROM_EMAIL;
 
+    private final boolean debug = false;
+
+    Properties props = new Properties();
+
+    public void addProperty(final String key, final String value) {
+        props.put(key, value);
+    }
+
     public void send(final String[] toAddresses, final String subject,
             final String text) {
         if (toAddresses == null || toAddresses.length == 0) {
             throw new FessSystemException("TO address is empty.");
         }
-        final MobyletMessage message = MobyletMailer
-                .createMessage(toAddresses[0].trim());
-        if (toAddresses.length > 1) {
-            for (int i = 1; i < toAddresses.length; i++) {
-                message.to(toAddresses[i].trim());
-            }
+
+        if (debug) {
+            props.put("mail.debug", Constants.TRUE);
         }
-        final MessageBody body = new MessageBody();
-        body.setText(text);
-        message.from(from).subject(subject).setBody(body);
-        MobyletMailer.send(message);
+
+        final Session session = Session.getInstance(props, null);
+        session.setDebug(debug);
+
+        try {
+            // create a message
+            final MimeMessage msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(from));
+            final InternetAddress[] address = new InternetAddress[toAddresses.length];
+            if (toAddresses.length > 1) {
+                for (int i = 1; i < toAddresses.length; i++) {
+                    address[i] = new InternetAddress(toAddresses[i]);
+                }
+            }
+            msg.setRecipients(Message.RecipientType.TO, address);
+            msg.setSubject(subject);
+            msg.setSentDate(new Date());
+            msg.setText(text);
+
+            Transport.send(msg);
+        } catch (final MessagingException e) {
+            throw new FessSystemException("Failed to send "
+                    + Arrays.toString(toAddresses), e);
+        }
     }
 
 }

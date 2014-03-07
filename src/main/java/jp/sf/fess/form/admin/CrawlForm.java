@@ -44,9 +44,6 @@ public class CrawlForm implements Serializable {
     @LongRange(min = 0, max = 100)
     public String crawlingThreadCount;
 
-    @Maxbytelength(maxbytelength = 1000)
-    public String mobileTranscoder;
-
     @Maxbytelength(maxbytelength = 10)
     public String searchLog;
 

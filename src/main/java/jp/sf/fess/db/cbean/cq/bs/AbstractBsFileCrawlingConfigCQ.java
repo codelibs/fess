@@ -20,12 +20,10 @@ import java.util.Collection;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
-import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.FileAuthenticationCQ;
-import jp.sf.fess.db.cbean.cq.FileConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
@@ -215,35 +213,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     /**
      * Set up ExistsReferrer (co-related sub-query). <br />
-     * {exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">existsFileConfigToBrowserTypeMappingList</span>(new SubQuery&lt;FileConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of FileConfigToBrowserTypeMappingList for 'exists'. (NotNull)
-     */
-    public void existsFileConfigToBrowserTypeMappingList(
-            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_FileConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_ExistsReferrer_FileConfigToBrowserTypeMappingList(
-            FileConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
      * {exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
@@ -329,35 +298,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     /**
      * Set up NotExistsReferrer (co-related sub-query). <br />
-     * {not exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsFileConfigToBrowserTypeMappingList</span>(new SubQuery&lt;FileConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of Id_NotExistsReferrer_FileConfigToBrowserTypeMappingList for 'not exists'. (NotNull)
-     */
-    public void notExistsFileConfigToBrowserTypeMappingList(
-            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_FileConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_NotExistsReferrer_FileConfigToBrowserTypeMappingList(
-            FileConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
      * {not exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
@@ -436,28 +376,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     /**
      * Set up InScopeRelation (sub-query). <br />
-     * {in (select FILE_CONFIG_ID from FILE_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingAsOne'.
-     * @param subQuery The sub-query of FileConfigToBrowserTypeMappingList for 'in-scope'. (NotNull)
-     */
-    public void inScopeFileConfigToBrowserTypeMappingList(
-            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_FileConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_InScopeRelation_FileConfigToBrowserTypeMappingList(
-            FileConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up InScopeRelation (sub-query). <br />
      * {in (select FILE_CONFIG_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * @param subQuery The sub-query of FileConfigToLabelTypeMappingList for 'in-scope'. (NotNull)
@@ -522,28 +440,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
-     * {not in (select FILE_CONFIG_ID from FILE_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingAsOne'.
-     * @param subQuery The sub-query of FileConfigToBrowserTypeMappingList for 'not in-scope'. (NotNull)
-     */
-    public void notInScopeFileConfigToBrowserTypeMappingList(
-            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_FileConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_NotInScopeRelation_FileConfigToBrowserTypeMappingList(
-            FileConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotInScopeRelation (sub-query). <br />
      * {not in (select FILE_CONFIG_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * @param subQuery The sub-query of FileConfigToLabelTypeMappingList for 'not in-scope'. (NotNull)
@@ -601,25 +497,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     public abstract String keepId_SpecifyDerivedReferrer_FileAuthenticationList(
             FileAuthenticationCQ subQuery);
-
-    public void xsderiveFileConfigToBrowserTypeMappingList(
-            final String function,
-            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName,
-                "fileConfigToBrowserTypeMappingList", aliasName, option);
-    }
-
-    public abstract String keepId_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingList(
-            FileConfigToBrowserTypeMappingCQ subQuery);
 
     public void xsderiveFileConfigToLabelTypeMappingList(final String function,
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
@@ -709,64 +586,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
             FileAuthenticationCQ subQuery);
 
     public abstract String keepId_QueryDerivedReferrer_FileAuthenticationListParameter(
-            Object parameterValue);
-
-    /**
-     * Prepare for (Query)DerivedReferrer. <br />
-     * {FOO &lt;= (select max(BAR) from FILE_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">derivedFileConfigToBrowserTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(FileConfigToBrowserTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-     *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-     *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
-     * </pre>
-     * @return The object to set up a function for referrer table. (NotNull)
-     */
-    public HpQDRFunction<FileConfigToBrowserTypeMappingCB> derivedFileConfigToBrowserTypeMappingList() {
-        return xcreateQDRFunctionFileConfigToBrowserTypeMappingList();
-    }
-
-    protected HpQDRFunction<FileConfigToBrowserTypeMappingCB> xcreateQDRFunctionFileConfigToBrowserTypeMappingList() {
-        return new HpQDRFunction<FileConfigToBrowserTypeMappingCB>(
-                new HpQDRSetupper<FileConfigToBrowserTypeMappingCB>() {
-                    @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveFileConfigToBrowserTypeMappingList(function,
-                                subQuery, operand, value, option);
-                    }
-                });
-    }
-
-    public void xqderiveFileConfigToBrowserTypeMappingList(
-            final String function,
-            final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName,
-                "fileConfigToBrowserTypeMappingList", operand, value,
-                parameterPropertyName, option);
-    }
-
-    public abstract String keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingList(
-            FileConfigToBrowserTypeMappingCQ subQuery);
-
-    public abstract String keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameter(
             Object parameterValue);
 
     /**

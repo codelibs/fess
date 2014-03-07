@@ -71,8 +71,6 @@ public class CrawlAction implements Serializable {
                 Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
         crawlForm.crawlingThreadCount = crawlerProperties.getProperty(
                 Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
-        crawlForm.mobileTranscoder = crawlerProperties.getProperty(
-                Constants.MOBILE_TRANSCODER_PROPERTY, StringUtil.EMPTY);
         crawlForm.searchLog = crawlerProperties.getProperty(
                 Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
         crawlForm.userInfo = crawlerProperties.getProperty(
@@ -89,7 +87,7 @@ public class CrawlAction implements Serializable {
                 Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
         crawlForm.supportedSearch = crawlerProperties.getProperty(
                 Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                Constants.SUPPORTED_SEARCH_WEB_MOBILE);
+                Constants.SUPPORTED_SEARCH_WEB);
         crawlForm.ignoreFailureType = crawlerProperties.getProperty(
                 Constants.IGNORE_FAILURE_TYPE_PROPERTY,
                 Constants.DEFAULT_IGNORE_FAILURE_TYPE);
@@ -155,8 +153,6 @@ public class CrawlAction implements Serializable {
                 crawlForm.dayForCleanup);
         crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY,
                 crawlForm.crawlingThreadCount);
-        crawlerProperties.setProperty(Constants.MOBILE_TRANSCODER_PROPERTY,
-                crawlForm.mobileTranscoder);
         crawlerProperties
                 .setProperty(
                         Constants.SEARCH_LOG_PROPERTY,
@@ -251,36 +247,15 @@ public class CrawlAction implements Serializable {
         return items;
     }
 
-    public List<Map<String, String>> getMobileTranscoderItems() {
-        final List<Map<String, String>> mobileTranscoderList = new ArrayList<Map<String, String>>();
-        mobileTranscoderList.add(createItem("-", StringUtil.EMPTY));
-        mobileTranscoderList.add(createItem(MessageResourcesUtil.getMessage(
-                RequestUtil.getRequest().getLocale(),
-                "labels.mobile_transcoder_google"),
-                Constants.GOOGLE_MOBILE_TRANSCODER));
-        return mobileTranscoderList;
-    }
-
     public List<Map<String, String>> getSupportedSearchItems() {
-        final List<Map<String, String>> mobileTranscoderList = new ArrayList<Map<String, String>>();
-        mobileTranscoderList.add(createItem(MessageResourcesUtil.getMessage(
-                RequestUtil.getRequest().getLocale(),
-                "labels.supported_search_web_mobile"),
-                Constants.SUPPORTED_SEARCH_WEB_MOBILE));
-        mobileTranscoderList
-                .add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                        .getRequest().getLocale(),
-                        "labels.supported_search_web"),
-                        Constants.SUPPORTED_SEARCH_WEB));
-        mobileTranscoderList.add(createItem(MessageResourcesUtil.getMessage(
-                RequestUtil.getRequest().getLocale(),
-                "labels.supported_search_mobile"),
-                Constants.SUPPORTED_SEARCH_MOBILE));
-        mobileTranscoderList.add(createItem(MessageResourcesUtil.getMessage(
-                RequestUtil.getRequest().getLocale(),
-                "labels.supported_search_none"),
+        final List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
+                .getRequest().getLocale(), "labels.supported_search_web"),
+                Constants.SUPPORTED_SEARCH_WEB));
+        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
+                .getRequest().getLocale(), "labels.supported_search_none"),
                 Constants.SUPPORTED_SEARCH_NONE));
-        return mobileTranscoderList;
+        return list;
     }
 
     private Map<String, String> createItem(final String label,

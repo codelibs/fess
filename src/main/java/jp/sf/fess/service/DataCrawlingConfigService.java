@@ -25,14 +25,11 @@ import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.service.BsDataCrawlingConfigService;
-import jp.sf.fess.db.cbean.DataConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.DataConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
-import jp.sf.fess.db.exentity.DataConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
@@ -46,16 +43,13 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
     private static final long serialVersionUID = 1L;
 
     @Resource
-    protected DataConfigToBrowserTypeMappingBhv dataConfigToBrowserTypeMappingBhv;
-
-    @Resource
     protected DataConfigToRoleTypeMappingBhv dataConfigToRoleTypeMappingBhv;
 
     @Resource
     protected DataConfigToLabelTypeMappingBhv dataConfigToLabelTypeMappingBhv;
 
     public List<DataCrawlingConfig> getAllDataCrawlingConfigList() {
-        return getAllDataCrawlingConfigList(true, true, true, true, null);
+        return getAllDataCrawlingConfigList(true, true, true, null);
     }
 
     public List<DataCrawlingConfig> getDataCrawlingConfigListByIds(
@@ -63,14 +57,13 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
         if (idList == null) {
             return getAllDataCrawlingConfigList();
         } else {
-            return getAllDataCrawlingConfigList(true, true, true, false, idList);
+            return getAllDataCrawlingConfigList(true, true, false, idList);
         }
     }
 
     public List<DataCrawlingConfig> getAllDataCrawlingConfigList(
-            final boolean withBrowserType, final boolean withLabelType,
-            final boolean withRoleType, final boolean available,
-            final List<Long> idList) {
+            final boolean withLabelType, final boolean withRoleType,
+            final boolean available, final List<Long> idList) {
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.query().setDeletedBy_IsNull();
         if (available) {
@@ -81,20 +74,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
         }
         final List<DataCrawlingConfig> list = dataCrawlingConfigBhv
                 .selectList(cb);
-        if (withBrowserType) {
-            final ConditionBeanSetupper<DataConfigToBrowserTypeMappingCB> setupper1 = new ConditionBeanSetupper<DataConfigToBrowserTypeMappingCB>() {
-                @Override
-                public void setup(final DataConfigToBrowserTypeMappingCB cb) {
-                    cb.setupSelect_BrowserType();
-                    cb.query().queryBrowserType().setDeletedBy_IsNull();
-                    cb.query().queryBrowserType().addOrderBy_SortOrder_Asc();
-                }
-
-            };
-            dataCrawlingConfigBhv.loadDataConfigToBrowserTypeMappingList(list,
-                    setupper1);
-        }
-        if (withBrowserType) {
+        if (withRoleType) {
             final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> setupper2 = new ConditionBeanSetupper<DataConfigToRoleTypeMappingCB>() {
                 @Override
                 public void setup(final DataConfigToRoleTypeMappingCB cb) {
@@ -107,7 +87,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
             dataCrawlingConfigBhv.loadDataConfigToRoleTypeMappingList(list,
                     setupper2);
         }
-        if (withRoleType) {
+        if (withLabelType) {
             final ConditionBeanSetupper<DataConfigToLabelTypeMappingCB> setupper3 = new ConditionBeanSetupper<DataConfigToLabelTypeMappingCB>() {
                 @Override
                 public void setup(final DataConfigToLabelTypeMappingCB cb) {
@@ -130,22 +110,6 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
                 .getDataCrawlingConfig(keys);
 
         if (dataCrawlingConfig != null) {
-            final DataConfigToBrowserTypeMappingCB fctbtmCb = new DataConfigToBrowserTypeMappingCB();
-            fctbtmCb.query().setDataConfigId_Equal(dataCrawlingConfig.getId());
-            fctbtmCb.query().queryBrowserType().setDeletedBy_IsNull();
-            fctbtmCb.query().queryDataCrawlingConfig().setDeletedBy_IsNull();
-            final List<DataConfigToBrowserTypeMapping> fctbtmList = dataConfigToBrowserTypeMappingBhv
-                    .selectList(fctbtmCb);
-            if (!fctbtmList.isEmpty()) {
-                final List<String> browserTypeIds = new ArrayList<String>(
-                        fctbtmList.size());
-                for (final DataConfigToBrowserTypeMapping mapping : fctbtmList) {
-                    browserTypeIds
-                            .add(Long.toString(mapping.getBrowserTypeId()));
-                }
-                dataCrawlingConfig.setBrowserTypeIds(browserTypeIds
-                        .toArray(new String[browserTypeIds.size()]));
-            }
 
             final DataConfigToRoleTypeMappingCB fctrtmCb = new DataConfigToRoleTypeMappingCB();
             fctrtmCb.query().setDataConfigId_Equal(dataCrawlingConfig.getId());
@@ -187,23 +151,12 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
     @Override
     public void store(final DataCrawlingConfig dataCrawlingConfig) {
         final boolean isNew = dataCrawlingConfig.getId() == null;
-        final String[] browserTypeIds = dataCrawlingConfig.getBrowserTypeIds();
         final String[] labelTypeIds = dataCrawlingConfig.getLabelTypeIds();
         final String[] roleTypeIds = dataCrawlingConfig.getRoleTypeIds();
         super.store(dataCrawlingConfig);
         final Long dataConfigId = dataCrawlingConfig.getId();
         if (isNew) {
             // Insert
-            if (browserTypeIds != null) {
-                final List<DataConfigToBrowserTypeMapping> fctbtmList = new ArrayList<DataConfigToBrowserTypeMapping>();
-                for (final String browserTypeId : browserTypeIds) {
-                    final DataConfigToBrowserTypeMapping mapping = new DataConfigToBrowserTypeMapping();
-                    mapping.setDataConfigId(dataConfigId);
-                    mapping.setBrowserTypeId(Long.parseLong(browserTypeId));
-                    fctbtmList.add(mapping);
-                }
-                dataConfigToBrowserTypeMappingBhv.batchInsert(fctbtmList);
-            }
             if (labelTypeIds != null) {
                 final List<DataConfigToLabelTypeMapping> fctltmList = new ArrayList<DataConfigToLabelTypeMapping>();
                 for (final String labelTypeId : labelTypeIds) {
@@ -226,35 +179,6 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
             }
         } else {
             // Update
-            if (browserTypeIds != null) {
-                final DataConfigToBrowserTypeMappingCB fctbtmCb = new DataConfigToBrowserTypeMappingCB();
-                fctbtmCb.query().setDataConfigId_Equal(dataConfigId);
-                final List<DataConfigToBrowserTypeMapping> fctbtmList = dataConfigToBrowserTypeMappingBhv
-                        .selectList(fctbtmCb);
-                final List<DataConfigToBrowserTypeMapping> newList = new ArrayList<DataConfigToBrowserTypeMapping>();
-                final List<DataConfigToBrowserTypeMapping> matchedList = new ArrayList<DataConfigToBrowserTypeMapping>();
-                for (final String id : browserTypeIds) {
-                    final Long browserTypeId = Long.parseLong(id);
-                    boolean exist = false;
-                    for (final DataConfigToBrowserTypeMapping mapping : fctbtmList) {
-                        if (mapping.getBrowserTypeId().equals(browserTypeId)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final DataConfigToBrowserTypeMapping mapping = new DataConfigToBrowserTypeMapping();
-                        mapping.setDataConfigId(dataConfigId);
-                        mapping.setBrowserTypeId(Long.parseLong(id));
-                        newList.add(mapping);
-                    }
-                }
-                fctbtmList.removeAll(matchedList);
-                dataConfigToBrowserTypeMappingBhv.batchInsert(newList);
-                dataConfigToBrowserTypeMappingBhv.batchDelete(fctbtmList);
-            }
             if (labelTypeIds != null) {
                 final DataConfigToLabelTypeMappingCB fctltmCb = new DataConfigToLabelTypeMappingCB();
                 fctltmCb.query().setDataConfigId_Equal(dataConfigId);

@@ -45,7 +45,6 @@ import javax.servlet.http.HttpSession;
 import jp.sf.fess.Constants;
 import jp.sf.fess.InvalidQueryException;
 import jp.sf.fess.ResultOffsetExceededException;
-import jp.sf.fess.UnsupportedSearchException;
 import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
@@ -54,7 +53,6 @@ import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.form.IndexForm;
-import jp.sf.fess.helper.BrowserTypeHelper;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.DocumentHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
@@ -132,9 +130,6 @@ public class IndexAction {
     @Binding(bindingType = BindingType.MAY)
     @Resource
     protected ScreenShotManager screenShotManager;
-
-    @Resource
-    protected BrowserTypeHelper browserTypeHelper;
 
     @Resource
     protected LabelTypeHelper labelTypeHelper;
@@ -271,9 +266,6 @@ public class IndexAction {
 
     @Execute(validator = false, input = "index.jsp")
     public String index() {
-        if (isMobile()) {
-            return "/mobile/?redirect=true";
-        }
 
         buildViewParams();
         buildInitParams();
@@ -282,9 +274,6 @@ public class IndexAction {
     }
 
     protected String doSearch() {
-        if (isMobile()) {
-            return "/mobile/?redirect=true";
-        }
 
         if (StringUtil.isBlank(indexForm.query)) {
             try {
@@ -1089,24 +1078,6 @@ public class IndexAction {
         }
 
         return doSearch();
-    }
-
-    protected boolean isMobile() {
-        final String supportedSearch = crawlerProperties.getProperty(
-                Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                Constants.SUPPORTED_SEARCH_WEB_MOBILE);
-        if (Constants.SUPPORTED_SEARCH_MOBILE.equals(supportedSearch)) {
-            return true;
-        } else if (Constants.SUPPORTED_SEARCH_NONE.equals(supportedSearch)) {
-            throw new UnsupportedSearchException("A search is not supported: "
-                    + RequestUtil.getRequest().getRequestURL());
-        }
-
-        if (browserTypeHelper == null) {
-            return false;
-        }
-
-        return browserTypeHelper.isMobile();
     }
 
     public List<Map<String, String>> getLabelTypeItems() {

@@ -37,15 +37,12 @@ import javax.transaction.UserTransaction;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
-import jp.sf.fess.db.cbean.BrowserTypeCB;
 import jp.sf.fess.db.cbean.CrawlingSessionCB;
 import jp.sf.fess.db.cbean.CrawlingSessionInfoCB;
-import jp.sf.fess.db.cbean.DataConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
-import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
@@ -57,19 +54,15 @@ import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.RoleTypeCB;
 import jp.sf.fess.db.cbean.ScheduledJobCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
-import jp.sf.fess.db.cbean.WebConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.BrowserTypeBhv;
 import jp.sf.fess.db.exbhv.CrawlingSessionBhv;
 import jp.sf.fess.db.exbhv.CrawlingSessionInfoBhv;
-import jp.sf.fess.db.exbhv.DataConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataCrawlingConfigBhv;
 import jp.sf.fess.db.exbhv.FileAuthenticationBhv;
-import jp.sf.fess.db.exbhv.FileConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileCrawlingConfigBhv;
@@ -81,19 +74,15 @@ import jp.sf.fess.db.exbhv.RequestHeaderBhv;
 import jp.sf.fess.db.exbhv.RoleTypeBhv;
 import jp.sf.fess.db.exbhv.ScheduledJobBhv;
 import jp.sf.fess.db.exbhv.WebAuthenticationBhv;
-import jp.sf.fess.db.exbhv.WebConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebCrawlingConfigBhv;
-import jp.sf.fess.db.exentity.BrowserType;
 import jp.sf.fess.db.exentity.CrawlingSession;
 import jp.sf.fess.db.exentity.CrawlingSessionInfo;
-import jp.sf.fess.db.exentity.DataConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.db.exentity.FileAuthentication;
-import jp.sf.fess.db.exentity.FileConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
@@ -105,7 +94,6 @@ import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.db.exentity.WebAuthentication;
-import jp.sf.fess.db.exentity.WebConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
@@ -132,8 +120,6 @@ public class DatabaseService {
 
     private static final String SCHEDULED_JOB_KEY = "scheduledJob";
 
-    private static final String BROWSER_TYPE_KEY = "browserType";
-
     private static final String LABEL_TYPE_KEY = "labelType";
 
     private static final String ROLE_TYPE_KEY = "roleType";
@@ -149,12 +135,6 @@ public class DatabaseService {
     private static final String PATH_MAPPING_KEY = "pathMapping";
 
     private static final String WEB_CRAWLING_CONFIG_KEY = "webCrawlingConfig";
-
-    private static final String FILE_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY = "fileConfigToBrowserTypeMapping";
-
-    private static final String DATA_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY = "dataConfigToBrowserTypeMapping";
-
-    private static final String WEB_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY = "webConfigToBrowserTypeMapping";
 
     private static final String FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY = "fileConfigToLabelTypeMapping";
 
@@ -182,9 +162,6 @@ public class DatabaseService {
     protected ScheduledJobBhv scheduledJobBhv;
 
     @Resource
-    protected BrowserTypeBhv browserTypeBhv;
-
-    @Resource
     protected LabelTypeBhv labelTypeBhv;
 
     @Resource
@@ -207,15 +184,6 @@ public class DatabaseService {
 
     @Resource
     protected WebCrawlingConfigBhv webCrawlingConfigBhv;
-
-    @Resource
-    protected FileConfigToBrowserTypeMappingBhv fileConfigToBrowserTypeMappingBhv;
-
-    @Resource
-    protected DataConfigToBrowserTypeMappingBhv dataConfigToBrowserTypeMappingBhv;
-
-    @Resource
-    protected WebConfigToBrowserTypeMappingBhv webConfigToBrowserTypeMappingBhv;
 
     @Resource
     protected FileConfigToLabelTypeMappingBhv fileConfigToLabelTypeMappingBhv;
@@ -281,11 +249,6 @@ public class DatabaseService {
         scheduledJobCB.query().setDeletedBy_IsNull();
         dataSet.put(SCHEDULED_JOB_KEY + LIST_SUFFIX,
                 scheduledJobBhv.selectList(scheduledJobCB));
-        // browserType
-        final BrowserTypeCB browserTypeCB = new BrowserTypeCB();
-        browserTypeCB.query().setDeletedBy_IsNull();
-        dataSet.put(BROWSER_TYPE_KEY + LIST_SUFFIX,
-                browserTypeBhv.selectList(browserTypeCB));
         // labelType
         final LabelTypeCB labelTypeCB = new LabelTypeCB();
         labelTypeCB.query().setDeletedBy_IsNull();
@@ -321,18 +284,6 @@ public class DatabaseService {
         webCrawlingConfigCB.query().setDeletedBy_IsNull();
         dataSet.put(WEB_CRAWLING_CONFIG_KEY + LIST_SUFFIX,
                 webCrawlingConfigBhv.selectList(webCrawlingConfigCB));
-        // fileConfigToBrowserTypeMapping
-        dataSet.put(FILE_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                fileConfigToBrowserTypeMappingBhv
-                        .selectList(new FileConfigToBrowserTypeMappingCB()));
-        // dataConfigToBrowserTypeMapping
-        dataSet.put(DATA_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                dataConfigToBrowserTypeMappingBhv
-                        .selectList(new DataConfigToBrowserTypeMappingCB()));
-        // webConfigToBrowserTypeMapping
-        dataSet.put(WEB_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                webConfigToBrowserTypeMappingBhv
-                        .selectList(new WebConfigToBrowserTypeMappingCB()));
         // fileConfigToLabelTypeMapping
         dataSet.put(FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX,
                 fileConfigToLabelTypeMappingBhv
@@ -474,45 +425,7 @@ public class DatabaseService {
                 }
                 userTransaction.commit();
             } catch (final Exception e) {
-                rollback(BROWSER_TYPE_KEY, e);
-            }
-            // browserType
-            try {
-                userTransaction.begin();
-
-                final List<BrowserType> browserTypeList = (List<BrowserType>) dataSet
-                        .get(BROWSER_TYPE_KEY + LIST_SUFFIX);
-                if (browserTypeList != null) {
-                    for (BrowserType browserType : browserTypeList) {
-                        final Long id = browserType.getId();
-
-                        final BrowserTypeCB cb = new BrowserTypeCB();
-                        cb.query().setValue_Equal(browserType.getValue());
-                        cb.query().setDeletedBy_IsNull();
-                        final BrowserType entity = browserTypeBhv
-                                .selectEntity(cb);
-                        browserType.setId(null);
-                        if (entity == null) {
-                            browserTypeBhv.insert(browserType);
-                        } else {
-                            // always overwrite
-                            // if (overwrite) {
-                            browserType.setVersionNo(null);
-                            Beans.copy(browserType, entity).excludesNull()
-                                    .execute();
-                            browserType = entity;
-                            browserTypeBhv.update(browserType);
-                            // } else {
-                            // browserTypeBhv.insert(browserType);
-                            // }
-                        }
-                        idMap.put(BROWSER_TYPE_KEY + ":" + id.toString(),
-                                browserType.getId());
-                    }
-                }
-                userTransaction.commit();
-            } catch (final Exception e) {
-                rollback(BROWSER_TYPE_KEY, e);
+                rollback(SCHEDULED_JOB_KEY, e);
             }
             // labelType
             try {
@@ -856,150 +769,6 @@ public class DatabaseService {
                 userTransaction.commit();
             } catch (final Exception e) {
                 rollback(WEB_CRAWLING_CONFIG_KEY, e);
-            }
-            // fileConfigToBrowserTypeMapping
-            try {
-                userTransaction.begin();
-
-                final List<FileConfigToBrowserTypeMapping> fileConfigToBrowserTypeMappingList = (List<FileConfigToBrowserTypeMapping>) dataSet
-                        .get(FILE_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY
-                                + LIST_SUFFIX);
-                if (fileConfigToBrowserTypeMappingList != null) {
-                    for (FileConfigToBrowserTypeMapping fileConfigToBrowserTypeMapping : fileConfigToBrowserTypeMappingList) {
-                        final Long id = fileConfigToBrowserTypeMapping.getId();
-
-                        final Long browserTypeId = idMap.get(BROWSER_TYPE_KEY
-                                + ":"
-                                + fileConfigToBrowserTypeMapping
-                                        .getBrowserTypeId());
-                        final Long fileConfigId = idMap
-                                .get(FILE_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + fileConfigToBrowserTypeMapping
-                                                .getFileConfigId());
-                        if (browserTypeId == null || fileConfigId == null) {
-                            // skip
-                            continue;
-                        }
-
-                        final FileConfigToBrowserTypeMappingCB cb = new FileConfigToBrowserTypeMappingCB();
-                        cb.query().setBrowserTypeId_Equal(browserTypeId);
-                        cb.query().setFileConfigId_Equal(fileConfigId);
-                        final FileConfigToBrowserTypeMapping entity = fileConfigToBrowserTypeMappingBhv
-                                .selectEntity(cb);
-                        if (entity == null) {
-                            fileConfigToBrowserTypeMapping = new FileConfigToBrowserTypeMapping();
-                            fileConfigToBrowserTypeMapping
-                                    .setBrowserTypeId(browserTypeId);
-                            fileConfigToBrowserTypeMapping
-                                    .setFileConfigId(fileConfigId);
-                            fileConfigToBrowserTypeMappingBhv
-                                    .insert(fileConfigToBrowserTypeMapping);
-                        }
-                        idMap.put(FILE_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                fileConfigToBrowserTypeMapping.getId());
-                    }
-                }
-                userTransaction.commit();
-            } catch (final Exception e) {
-                rollback(FILE_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY, e);
-            }
-            // dataConfigToBrowserTypeMapping
-            try {
-                userTransaction.begin();
-
-                final List<DataConfigToBrowserTypeMapping> dataConfigToBrowserTypeMappingList = (List<DataConfigToBrowserTypeMapping>) dataSet
-                        .get(DATA_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY
-                                + LIST_SUFFIX);
-                if (dataConfigToBrowserTypeMappingList != null) {
-                    for (DataConfigToBrowserTypeMapping dataConfigToBrowserTypeMapping : dataConfigToBrowserTypeMappingList) {
-                        final Long id = dataConfigToBrowserTypeMapping.getId();
-
-                        final Long browserTypeId = idMap.get(BROWSER_TYPE_KEY
-                                + ":"
-                                + dataConfigToBrowserTypeMapping
-                                        .getBrowserTypeId());
-                        final Long dataConfigId = idMap
-                                .get(DATA_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + dataConfigToBrowserTypeMapping
-                                                .getDataConfigId());
-                        if (browserTypeId == null || dataConfigId == null) {
-                            // skip
-                            continue;
-                        }
-
-                        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-                        cb.query().setBrowserTypeId_Equal(browserTypeId);
-                        cb.query().setDataConfigId_Equal(dataConfigId);
-                        final DataConfigToBrowserTypeMapping entity = dataConfigToBrowserTypeMappingBhv
-                                .selectEntity(cb);
-                        if (entity == null) {
-                            dataConfigToBrowserTypeMapping = new DataConfigToBrowserTypeMapping();
-                            dataConfigToBrowserTypeMapping
-                                    .setBrowserTypeId(browserTypeId);
-                            dataConfigToBrowserTypeMapping
-                                    .setDataConfigId(dataConfigId);
-                            dataConfigToBrowserTypeMappingBhv
-                                    .insert(dataConfigToBrowserTypeMapping);
-                        }
-                        idMap.put(DATA_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                dataConfigToBrowserTypeMapping.getId());
-                    }
-                }
-                userTransaction.commit();
-            } catch (final Exception e) {
-                rollback(DATA_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY, e);
-            }
-            // webConfigToBrowserTypeMapping
-            try {
-                userTransaction.begin();
-
-                final List<WebConfigToBrowserTypeMapping> webConfigToBrowserTypeMappingList = (List<WebConfigToBrowserTypeMapping>) dataSet
-                        .get(WEB_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY
-                                + LIST_SUFFIX);
-                if (webConfigToBrowserTypeMappingList != null) {
-                    for (WebConfigToBrowserTypeMapping webConfigToBrowserTypeMapping : webConfigToBrowserTypeMappingList) {
-                        final Long id = webConfigToBrowserTypeMapping.getId();
-
-                        final Long browserTypeId = idMap.get(BROWSER_TYPE_KEY
-                                + ":"
-                                + webConfigToBrowserTypeMapping
-                                        .getBrowserTypeId());
-                        final Long webConfigId = idMap
-                                .get(WEB_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + webConfigToBrowserTypeMapping
-                                                .getWebConfigId());
-                        if (browserTypeId == null || webConfigId == null) {
-                            // skip
-                            continue;
-                        }
-
-                        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-                        cb.query().setBrowserTypeId_Equal(browserTypeId);
-                        cb.query().setWebConfigId_Equal(webConfigId);
-                        final WebConfigToBrowserTypeMapping entity = webConfigToBrowserTypeMappingBhv
-                                .selectEntity(cb);
-                        if (entity == null) {
-                            webConfigToBrowserTypeMapping = new WebConfigToBrowserTypeMapping();
-                            webConfigToBrowserTypeMapping
-                                    .setBrowserTypeId(browserTypeId);
-                            webConfigToBrowserTypeMapping
-                                    .setWebConfigId(webConfigId);
-                            webConfigToBrowserTypeMappingBhv
-                                    .insert(webConfigToBrowserTypeMapping);
-                        }
-                        idMap.put(WEB_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                webConfigToBrowserTypeMapping.getId());
-                    }
-                }
-                userTransaction.commit();
-            } catch (final Exception e) {
-                rollback(WEB_CONFIG_TO_BROWSER_TYPE_MAPPING_KEY, e);
             }
             // fileConfigToLabelTypeMapping
             try {

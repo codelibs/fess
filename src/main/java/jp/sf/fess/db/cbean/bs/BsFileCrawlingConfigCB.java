@@ -21,7 +21,6 @@ import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.allcommon.ImplementedInvokerAssistant;
 import jp.sf.fess.db.allcommon.ImplementedSqlClauseCreator;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
-import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
@@ -583,42 +582,6 @@ public class BsFileCrawlingConfigCB extends AbstractConditionBean {
                                 final DerivedReferrerOption option) {
                             cq.xsderiveFileAuthenticationList(function,
                                     subQuery, aliasName, option);
-                        }
-                    }, _dbmetaProvider);
-        }
-
-        /**
-         * Prepare for (Specify)DerivedReferrer. <br />
-         * {select max(FOO) from FILE_CONFIG_TO_BROWSER_TYPE_MAPPING where ...) as FOO_MAX} <br />
-         * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingList'.
-         * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedFileConfigToBrowserTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileConfigToBrowserTypeMappingCB&gt;() {
-         *     public void query(FileConfigToBrowserTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-         *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-         *     }
-         * }, FileConfigToBrowserTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
-         * </pre>
-         * @return The object to set up a function for referrer table. (NotNull)
-         */
-        public HpSDRFunction<FileConfigToBrowserTypeMappingCB, FileCrawlingConfigCQ> derivedFileConfigToBrowserTypeMappingList() {
-            assertDerived("fileConfigToBrowserTypeMappingList");
-            if (xhasSyncQyCall()) {
-                xsyncQyCall().qy();
-            } // for sync (for example, this in ColumnQuery)
-            return new HpSDRFunction<FileConfigToBrowserTypeMappingCB, FileCrawlingConfigCQ>(
-                    _baseCB,
-                    _qyCall.qy(),
-                    new HpSDRSetupper<FileConfigToBrowserTypeMappingCB, FileCrawlingConfigCQ>() {
-                        @Override
-                        public void setup(
-                                final String function,
-                                final SubQuery<FileConfigToBrowserTypeMappingCB> subQuery,
-                                final FileCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveFileConfigToBrowserTypeMappingList(
-                                    function, subQuery, aliasName, option);
                         }
                     }, _dbmetaProvider);
         }

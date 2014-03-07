@@ -310,12 +310,9 @@ public class DataCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D4F0A908_257C_465E_9D16_46C7676E0EE9",
-            false,
-            null,
-            null,
-            null,
-            "dataConfigToBrowserTypeMappingList,dataConfigToLabelTypeMappingList,dataConfigToRoleTypeMappingList",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_02C04861_586E_4C7A_A3D7_55E169DBE22D",
+            false, null, null, null,
+            "dataConfigToLabelTypeMappingList,dataConfigToRoleTypeMappingList",
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
@@ -497,15 +494,6 @@ public class DataCrawlingConfigDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
-    public ReferrerInfo referrerDataConfigToBrowserTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
-                DataConfigToBrowserTypeMappingDbm.getInstance()
-                        .columnDataConfigId());
-        return cri("CONSTRAINT_FA09", "dataConfigToBrowserTypeMappingList",
-                this, DataConfigToBrowserTypeMappingDbm.getInstance(), map,
-                false, "dataCrawlingConfig");
-    }
-
     public ReferrerInfo referrerDataConfigToLabelTypeMappingList() {
         final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
                 DataConfigToLabelTypeMappingDbm.getInstance()

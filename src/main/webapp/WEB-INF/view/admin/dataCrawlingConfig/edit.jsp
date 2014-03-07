@@ -91,27 +91,6 @@
 								<td><html:text property="boost" styleClass="xlarge" /></td>
 							</tr>
 							<tr>
-								<th><bean:message key="labels.browser_type" /></th>
-								<td><html:select property="browserTypeIds" multiple="true"
-										styleClass="xlarge">
-										<c:forEach var="bt" varStatus="s" items="${browserTypeItems}">
-											<html:option value="${f:u(bt.id)}">${f:h(bt.name)}</html:option>
-										</c:forEach>
-									</html:select> <c:if test="${crudMode==1}">
-										<script type="text/javascript">
-											$(
-													"select[name='browserTypeIds'] option")
-													.each(
-															function() {
-																$(this)
-																		.attr(
-																				'selected',
-																				'selected');
-															});
-										</script>
-									</c:if></td>
-							</tr>
-							<tr>
 								<th><bean:message key="labels.role_type" /></th>
 								<td><html:select property="roleTypeIds" multiple="true"
 										styleClass="xlarge">

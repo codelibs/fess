@@ -155,13 +155,13 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
 
     public boolean isDisplayCreateLink() {
         return !fileCrawlingConfigService.getAllFileCrawlingConfigList(false,
-                false, false, false, null).isEmpty();
+                false, false, null).isEmpty();
     }
 
     public List<Map<String, String>> getFileCrawlingConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
         final List<FileCrawlingConfig> fileCrawlingConfigList = fileCrawlingConfigService
-                .getAllFileCrawlingConfigList(false, false, false, false, null);
+                .getAllFileCrawlingConfigList(false, false, false, null);
         for (final FileCrawlingConfig fileCrawlingConfig : fileCrawlingConfigList) {
             items.add(createItem(fileCrawlingConfig.getName(),
                     fileCrawlingConfig.getId().toString()));

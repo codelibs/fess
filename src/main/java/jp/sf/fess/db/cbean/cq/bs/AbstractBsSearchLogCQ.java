@@ -1876,14 +1876,6 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     }
 
     /**
-     * Equal(=). As Mobile (M). And OnlyOnceRegistered. <br />
-     * Mobile: Mobile
-     */
-    public void setAccessType_Equal_Mobile() {
-        setAccessType_Equal_AsAccessType(CDef.AccessType.Mobile);
-    }
-
-    /**
      * Equal(=). As Xml (X). And OnlyOnceRegistered. <br />
      * Xml: Xml
      */
@@ -1897,6 +1889,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      */
     public void setAccessType_Equal_Json() {
         setAccessType_Equal_AsAccessType(CDef.AccessType.Json);
+    }
+
+    /**
+     * Equal(=). As Others (O). And OnlyOnceRegistered. <br />
+     * Others: Others
+     */
+    public void setAccessType_Equal_Others() {
+        setAccessType_Equal_AsAccessType(CDef.AccessType.Others);
     }
 
     protected void doSetAccessType_Equal(final String accessType) {
@@ -1931,14 +1931,6 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     }
 
     /**
-     * NotEqual(&lt;&gt;). As Mobile (M). And OnlyOnceRegistered. <br />
-     * Mobile: Mobile
-     */
-    public void setAccessType_NotEqual_Mobile() {
-        setAccessType_NotEqual_AsAccessType(CDef.AccessType.Mobile);
-    }
-
-    /**
      * NotEqual(&lt;&gt;). As Xml (X). And OnlyOnceRegistered. <br />
      * Xml: Xml
      */
@@ -1952,6 +1944,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      */
     public void setAccessType_NotEqual_Json() {
         setAccessType_NotEqual_AsAccessType(CDef.AccessType.Json);
+    }
+
+    /**
+     * NotEqual(&lt;&gt;). As Others (O). And OnlyOnceRegistered. <br />
+     * Others: Others
+     */
+    public void setAccessType_NotEqual_Others() {
+        setAccessType_NotEqual_AsAccessType(CDef.AccessType.Others);
     }
 
     protected void doSetAccessType_NotEqual(final String accessType) {

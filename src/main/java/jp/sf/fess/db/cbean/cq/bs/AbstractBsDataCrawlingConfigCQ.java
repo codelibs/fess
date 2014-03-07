@@ -19,11 +19,9 @@ package jp.sf.fess.db.cbean.cq.bs;
 import java.util.Collection;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
-import jp.sf.fess.db.cbean.DataConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
-import jp.sf.fess.db.cbean.cq.DataConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataCrawlingConfigCQ;
@@ -185,35 +183,6 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
 
     /**
      * Set up ExistsReferrer (co-related sub-query). <br />
-     * {exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">existsDataConfigToBrowserTypeMappingList</span>(new SubQuery&lt;DataConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(DataCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of DataConfigToBrowserTypeMappingList for 'exists'. (NotNull)
-     */
-    public void existsDataConfigToBrowserTypeMappingList(
-            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_DataConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_ExistsReferrer_DataConfigToBrowserTypeMappingList(
-            DataConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
      * {exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
@@ -268,35 +237,6 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
 
     public abstract String keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(
             DataConfigToRoleTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
-     * {not exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsDataConfigToBrowserTypeMappingList</span>(new SubQuery&lt;DataConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(DataCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of Id_NotExistsReferrer_DataConfigToBrowserTypeMappingList for 'not exists'. (NotNull)
-     */
-    public void notExistsDataConfigToBrowserTypeMappingList(
-            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_DataConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_NotExistsReferrer_DataConfigToBrowserTypeMappingList(
-            DataConfigToBrowserTypeMappingCQ subQuery);
 
     /**
      * Set up NotExistsReferrer (co-related sub-query). <br />
@@ -357,28 +297,6 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
 
     /**
      * Set up InScopeRelation (sub-query). <br />
-     * {in (select DATA_CONFIG_ID from DATA_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingAsOne'.
-     * @param subQuery The sub-query of DataConfigToBrowserTypeMappingList for 'in-scope'. (NotNull)
-     */
-    public void inScopeDataConfigToBrowserTypeMappingList(
-            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_DataConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_InScopeRelation_DataConfigToBrowserTypeMappingList(
-            DataConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up InScopeRelation (sub-query). <br />
      * {in (select DATA_CONFIG_ID from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * @param subQuery The sub-query of DataConfigToLabelTypeMappingList for 'in-scope'. (NotNull)
@@ -419,28 +337,6 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
 
     public abstract String keepId_InScopeRelation_DataConfigToRoleTypeMappingList(
             DataConfigToRoleTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotInScopeRelation (sub-query). <br />
-     * {not in (select DATA_CONFIG_ID from DATA_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingAsOne'.
-     * @param subQuery The sub-query of DataConfigToBrowserTypeMappingList for 'not in-scope'. (NotNull)
-     */
-    public void notInScopeDataConfigToBrowserTypeMappingList(
-            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_DataConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_NotInScopeRelation_DataConfigToBrowserTypeMappingList(
-            DataConfigToBrowserTypeMappingCQ subQuery);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -485,25 +381,6 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     public abstract String keepId_NotInScopeRelation_DataConfigToRoleTypeMappingList(
             DataConfigToRoleTypeMappingCQ subQuery);
 
-    public void xsderiveDataConfigToBrowserTypeMappingList(
-            final String function,
-            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_DataConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "DATA_CONFIG_ID", subQueryPropertyName,
-                "dataConfigToBrowserTypeMappingList", aliasName, option);
-    }
-
-    public abstract String keepId_SpecifyDerivedReferrer_DataConfigToBrowserTypeMappingList(
-            DataConfigToBrowserTypeMappingCQ subQuery);
-
     public void xsderiveDataConfigToLabelTypeMappingList(final String function,
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
             final String aliasName, final DerivedReferrerOption option) {
@@ -538,64 +415,6 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
 
     public abstract String keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(
             DataConfigToRoleTypeMappingCQ subQuery);
-
-    /**
-     * Prepare for (Query)DerivedReferrer. <br />
-     * {FOO &lt;= (select max(BAR) from DATA_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">derivedDataConfigToBrowserTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;DataConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(DataConfigToBrowserTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-     *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-     *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
-     * </pre>
-     * @return The object to set up a function for referrer table. (NotNull)
-     */
-    public HpQDRFunction<DataConfigToBrowserTypeMappingCB> derivedDataConfigToBrowserTypeMappingList() {
-        return xcreateQDRFunctionDataConfigToBrowserTypeMappingList();
-    }
-
-    protected HpQDRFunction<DataConfigToBrowserTypeMappingCB> xcreateQDRFunctionDataConfigToBrowserTypeMappingList() {
-        return new HpQDRFunction<DataConfigToBrowserTypeMappingCB>(
-                new HpQDRSetupper<DataConfigToBrowserTypeMappingCB>() {
-                    @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveDataConfigToBrowserTypeMappingList(function,
-                                subQuery, operand, value, option);
-                    }
-                });
-    }
-
-    public void xqderiveDataConfigToBrowserTypeMappingList(
-            final String function,
-            final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final DataConfigToBrowserTypeMappingCB cb = new DataConfigToBrowserTypeMappingCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_DataConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_DataConfigToBrowserTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "DATA_CONFIG_ID", subQueryPropertyName,
-                "dataConfigToBrowserTypeMappingList", operand, value,
-                parameterPropertyName, option);
-    }
-
-    public abstract String keepId_QueryDerivedReferrer_DataConfigToBrowserTypeMappingList(
-            DataConfigToBrowserTypeMappingCQ subQuery);
-
-    public abstract String keepId_QueryDerivedReferrer_DataConfigToBrowserTypeMappingListParameter(
-            Object parameterValue);
 
     /**
      * Prepare for (Query)DerivedReferrer. <br />

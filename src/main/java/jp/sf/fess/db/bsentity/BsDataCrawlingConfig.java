@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
-import jp.sf.fess.db.exentity.DataConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
@@ -52,13 +51,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     
  * 
  * [referrer table]
- *     DATA_CONFIG_TO_BROWSER_TYPE_MAPPING, DATA_CONFIG_TO_LABEL_TYPE_MAPPING, DATA_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     DATA_CONFIG_TO_LABEL_TYPE_MAPPING, DATA_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     dataConfigToBrowserTypeMappingList, dataConfigToLabelTypeMappingList, dataConfigToRoleTypeMappingList
+ *     dataConfigToLabelTypeMappingList, dataConfigToRoleTypeMappingList
  * 
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -212,29 +211,6 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     // ===================================================================================
     //                                                                   Referrer Property
     //                                                                   =================
-    /** DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingList'. */
-    protected List<DataConfigToBrowserTypeMapping> _dataConfigToBrowserTypeMappingList;
-
-    /**
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingList'.
-     * @return The entity list of referrer property 'dataConfigToBrowserTypeMappingList'. (NotNull: even if no loading, returns empty list)
-     */
-    public List<DataConfigToBrowserTypeMapping> getDataConfigToBrowserTypeMappingList() {
-        if (_dataConfigToBrowserTypeMappingList == null) {
-            _dataConfigToBrowserTypeMappingList = newReferrerList();
-        }
-        return _dataConfigToBrowserTypeMappingList;
-    }
-
-    /**
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingList'.
-     * @param dataConfigToBrowserTypeMappingList The entity list of referrer property 'dataConfigToBrowserTypeMappingList'. (NullAllowed)
-     */
-    public void setDataConfigToBrowserTypeMappingList(
-            final List<DataConfigToBrowserTypeMapping> dataConfigToBrowserTypeMappingList) {
-        _dataConfigToBrowserTypeMappingList = dataConfigToBrowserTypeMappingList;
-    }
-
     /** DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'. */
     protected List<DataConfigToLabelTypeMapping> _dataConfigToLabelTypeMappingList;
 
@@ -382,14 +358,6 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
         final String l = "\n  ";
-        if (_dataConfigToBrowserTypeMappingList != null) {
-            for (final Entity e : _dataConfigToBrowserTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "dataConfigToBrowserTypeMappingList"));
-                }
-            }
-        }
         if (_dataConfigToLabelTypeMappingList != null) {
             for (final Entity e : _dataConfigToLabelTypeMappingList) {
                 if (e != null) {
@@ -461,10 +429,6 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
         final String c = ",";
-        if (_dataConfigToBrowserTypeMappingList != null
-                && !_dataConfigToBrowserTypeMappingList.isEmpty()) {
-            sb.append(c).append("dataConfigToBrowserTypeMappingList");
-        }
         if (_dataConfigToLabelTypeMappingList != null
                 && !_dataConfigToLabelTypeMappingList.isEmpty()) {
             sb.append(c).append("dataConfigToLabelTypeMappingList");

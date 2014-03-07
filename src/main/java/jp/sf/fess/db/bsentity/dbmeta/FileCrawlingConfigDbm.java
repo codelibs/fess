@@ -401,12 +401,12 @@ public class FileCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_2B960FF6_C5A8_4126_9DFC_5B2862E189E9",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_E7294A41_D9FD_419C_BD76_AD51E1DE37A4",
             false,
             null,
             null,
             null,
-            "fileAuthenticationList,fileConfigToBrowserTypeMappingList,fileConfigToLabelTypeMappingList,fileConfigToRoleTypeMappingList",
+            "fileAuthenticationList,fileConfigToLabelTypeMappingList,fileConfigToRoleTypeMappingList",
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
@@ -663,15 +663,6 @@ public class FileCrawlingConfigDbm extends AbstractDBMeta {
         return cri("CONSTRAINT_F90", "fileAuthenticationList", this,
                 FileAuthenticationDbm.getInstance(), map, false,
                 "fileCrawlingConfig");
-    }
-
-    public ReferrerInfo referrerFileConfigToBrowserTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
-                FileConfigToBrowserTypeMappingDbm.getInstance()
-                        .columnFileConfigId());
-        return cri("CONSTRAINT_F85", "fileConfigToBrowserTypeMappingList",
-                this, FileConfigToBrowserTypeMappingDbm.getInstance(), map,
-                false, "fileCrawlingConfig");
     }
 
     public ReferrerInfo referrerFileConfigToLabelTypeMappingList() {

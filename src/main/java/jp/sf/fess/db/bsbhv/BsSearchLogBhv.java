@@ -84,21 +84,21 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     //                                                                          Definition
     //                                                                          ==========
     /*df:beginQueryPath*/
-    public static final String PATH_selectSearchFieldRanking = "selectSearchFieldRanking";
-
-    public static final String PATH_selectUserAgentRanking = "selectUserAgentRanking";
-
-    public static final String PATH_selectRefererRanking = "selectRefererRanking";
-
-    public static final String PATH_selectSearchQueryRanking = "selectSearchQueryRanking";
-
     public static final String PATH_selectClientIpRanking = "selectClientIpRanking";
 
     public static final String PATH_selectHotSearchWord = "selectHotSearchWord";
 
+    public static final String PATH_selectRefererRanking = "selectRefererRanking";
+
+    public static final String PATH_selectSearchFieldRanking = "selectSearchFieldRanking";
+
+    public static final String PATH_selectSearchQueryRanking = "selectSearchQueryRanking";
+
     public static final String PATH_selectSearchWordRanking = "selectSearchWordRanking";
 
     public static final String PATH_selectSolrQueryRanking = "selectSolrQueryRanking";
+
+    public static final String PATH_selectUserAgentRanking = "selectUserAgentRanking";
 
     /*df:endQueryPath*/
 

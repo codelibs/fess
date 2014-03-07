@@ -147,7 +147,7 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
     public List<Map<String, String>> getWebCrawlingConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
         final List<WebCrawlingConfig> webCrawlingConfigList = webCrawlingConfigService
-                .getAllWebCrawlingConfigList(false, false, false, false, null);
+                .getAllWebCrawlingConfigList(false, false, false, null);
         for (final WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
             items.add(createItem(webCrawlingConfig.getName(), webCrawlingConfig
                     .getId().toString()));
@@ -176,6 +176,6 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
 
     public boolean isDisplayCreateLink() {
         return !webCrawlingConfigService.getAllWebCrawlingConfigList(false,
-                false, false, false, null).isEmpty();
+                false, false, null).isEmpty();
     }
 }

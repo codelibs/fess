@@ -154,7 +154,7 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_8E852A30_BA83_4197_9E9B_1CB2E195010D",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_938A49A8_58DA_4010_93C9_00C7B2CFA6D2",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnLabelTypeId = cci("LABEL_TYPE_ID",
@@ -222,7 +222,7 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
     public ForeignInfo foreignLabelType() {
         final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
                 columnLabelTypeId(), LabelTypeDbm.getInstance().columnId());
-        return cfi("CONSTRAINT_2C8", "labelType", this,
+        return cfi("CONSTRAINT_2C", "labelType", this,
                 LabelTypeDbm.getInstance(), map, 0, false, false, false, false,
                 null, null, false, "labelTypeToRoleTypeMappingList");
     }
@@ -230,7 +230,7 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
     public ForeignInfo foreignRoleType() {
         final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
                 columnRoleTypeId(), RoleTypeDbm.getInstance().columnId());
-        return cfi("CONSTRAINT_2C8D", "roleType", this,
+        return cfi("CONSTRAINT_2C8", "roleType", this,
                 RoleTypeDbm.getInstance(), map, 1, false, false, false, false,
                 null, null, false, "labelTypeToRoleTypeMappingList");
     }

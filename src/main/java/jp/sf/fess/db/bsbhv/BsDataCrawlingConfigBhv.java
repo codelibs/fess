@@ -19,15 +19,12 @@ package jp.sf.fess.db.bsbhv;
 import java.util.List;
 
 import jp.sf.fess.db.bsentity.dbmeta.DataCrawlingConfigDbm;
-import jp.sf.fess.db.cbean.DataConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.DataConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataCrawlingConfigBhv;
-import jp.sf.fess.db.exentity.DataConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.DataCrawlingConfig;
@@ -70,13 +67,13 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *     
  * 
  * [referrer table]
- *     DATA_CONFIG_TO_BROWSER_TYPE_MAPPING, DATA_CONFIG_TO_LABEL_TYPE_MAPPING, DATA_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     DATA_CONFIG_TO_LABEL_TYPE_MAPPING, DATA_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     dataConfigToBrowserTypeMappingList, dataConfigToLabelTypeMappingList, dataConfigToRoleTypeMappingList
+ *     dataConfigToLabelTypeMappingList, dataConfigToRoleTypeMappingList
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
@@ -492,144 +489,6 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                       Load Referrer
     //                                                                       =============
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadDataConfigToBrowserTypeMappingList(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final ConditionBeanSetupper<DataConfigToBrowserTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(dataCrawlingConfig, conditionBeanSetupper);
-        loadDataConfigToBrowserTypeMappingList(xnewLRLs(dataCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of dataConfigToBrowserTypeMappingList with the set-upper for condition-bean of referrer. <br />
-     * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingList'.
-     * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">loadDataConfigToBrowserTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToBrowserTypeMappingCB&gt;() {
-     *     public void setup(DataConfigToBrowserTypeMappingCB cb) {
-     *         cb.setupSelect...();
-     *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
-     *     }
-     * });
-     * for (DataCrawlingConfig dataCrawlingConfig : dataCrawlingConfigList) {
-     *     ... = dataCrawlingConfig.<span style="color: #FD4747">getDataConfigToBrowserTypeMappingList()</span>;
-     * }
-     * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
-     * <pre>
-     * cb.query().setDataConfigId_InScope(pkList);
-     * cb.query().addOrderBy_DataConfigId_Asc();
-     * </pre>
-     * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadDataConfigToBrowserTypeMappingList(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final ConditionBeanSetupper<DataConfigToBrowserTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(dataCrawlingConfigList, conditionBeanSetupper);
-        loadDataConfigToBrowserTypeMappingList(
-                dataCrawlingConfigList,
-                new LoadReferrerOption<DataConfigToBrowserTypeMappingCB, DataConfigToBrowserTypeMapping>()
-                        .xinit(conditionBeanSetupper));
-    }
-
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadDataConfigToBrowserTypeMappingList(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final LoadReferrerOption<DataConfigToBrowserTypeMappingCB, DataConfigToBrowserTypeMapping> loadReferrerOption) {
-        xassLRArg(dataCrawlingConfig, loadReferrerOption);
-        loadDataConfigToBrowserTypeMappingList(xnewLRLs(dataCrawlingConfig),
-                loadReferrerOption);
-    }
-
-    /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
-     * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadDataConfigToBrowserTypeMappingList(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final LoadReferrerOption<DataConfigToBrowserTypeMappingCB, DataConfigToBrowserTypeMapping> loadReferrerOption) {
-        xassLRArg(dataCrawlingConfigList, loadReferrerOption);
-        if (dataCrawlingConfigList.isEmpty()) {
-            return;
-        }
-        final DataConfigToBrowserTypeMappingBhv referrerBhv = xgetBSFLR()
-                .select(DataConfigToBrowserTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                dataCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<DataCrawlingConfig, Long, DataConfigToBrowserTypeMappingCB, DataConfigToBrowserTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final DataCrawlingConfig e) {
-                        return e.getId();
-                    }
-
-                    @Override
-                    public void setRfLs(final DataCrawlingConfig e,
-                            final List<DataConfigToBrowserTypeMapping> ls) {
-                        e.setDataConfigToBrowserTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public DataConfigToBrowserTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(
-                            final DataConfigToBrowserTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setDataConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(
-                            final DataConfigToBrowserTypeMappingCB cb) {
-                        cb.query().addOrderBy_DataConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(
-                            final DataConfigToBrowserTypeMappingCB cb) {
-                        cb.specify().columnDataConfigId();
-                    }
-
-                    @Override
-                    public List<DataConfigToBrowserTypeMapping> selRfLs(
-                            final DataConfigToBrowserTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final DataConfigToBrowserTypeMapping e) {
-                        return e.getDataConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(
-                            final DataConfigToBrowserTypeMapping re,
-                            final DataCrawlingConfig le) {
-                        re.setDataCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "dataConfigToBrowserTypeMappingList";
-                    }
-                });
-    }
-
     /**
      * {Refer to overload method that has an argument of the list of entity.}
      * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)

@@ -61,8 +61,6 @@ import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.mobylet.core.launcher.LaunchConfig;
-import org.mobylet.core.launcher.MobyletLauncher;
 import org.seasar.framework.container.ExternalContext;
 import org.seasar.framework.container.S2Container;
 import org.seasar.framework.container.SingletonS2Container;
@@ -256,15 +254,6 @@ public class Crawler implements Serializable {
     }
 
     private static int process(final Options options) {
-        // initialize mobylet
-        final LaunchConfig launchConfig = new LaunchConfig();
-        launchConfig.addParameter("mobylet.logger.class",
-                "jp.sf.fess.log.MobyletLoggerImpl");
-        MobyletLauncher.initSingletonContainer();
-        MobyletLauncher.initLogger(launchConfig);
-        MobyletLauncher.initDefaultCharset(launchConfig);
-        MobyletLauncher.initInitializer(launchConfig);
-
         final Crawler crawler = SingletonS2Container
                 .getComponent(Crawler.class);
 

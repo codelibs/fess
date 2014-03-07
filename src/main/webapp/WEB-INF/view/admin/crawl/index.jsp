@@ -71,18 +71,6 @@
 				</tr>
 				<tr>
 					<th>
-						<bean:message key="labels.mobile_transcoder"/>
-					</th>
-					<td>
-						<html:select property="mobileTranscoder">
-							<c:forEach var="item" items="${mobileTranscoderItems}">
-								<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
-							</c:forEach>
-						</html:select>
-					</td>
-				</tr>
-				<tr>
-					<th>
 						<bean:message key="labels.default_label_value"/>
 					</th>
 					<td>

@@ -25,14 +25,11 @@ import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.service.BsFileCrawlingConfigService;
-import jp.sf.fess.db.cbean.FileConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.FileConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
-import jp.sf.fess.db.exentity.FileConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
@@ -46,16 +43,13 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
     private static final long serialVersionUID = 1L;
 
     @Resource
-    protected FileConfigToBrowserTypeMappingBhv fileConfigToBrowserTypeMappingBhv;
-
-    @Resource
     protected FileConfigToRoleTypeMappingBhv fileConfigToRoleTypeMappingBhv;
 
     @Resource
     protected FileConfigToLabelTypeMappingBhv fileConfigToLabelTypeMappingBhv;
 
     public List<FileCrawlingConfig> getAllFileCrawlingConfigList() {
-        return getAllFileCrawlingConfigList(true, true, true, true, null);
+        return getAllFileCrawlingConfigList(true, true, true, null);
     }
 
     public List<FileCrawlingConfig> getFileCrawlingConfigListByIds(
@@ -63,14 +57,13 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
         if (idList == null) {
             return getAllFileCrawlingConfigList();
         } else {
-            return getAllFileCrawlingConfigList(true, true, true, false, idList);
+            return getAllFileCrawlingConfigList(true, true, false, idList);
         }
     }
 
     public List<FileCrawlingConfig> getAllFileCrawlingConfigList(
-            final boolean withBrowserType, final boolean withLabelType,
-            final boolean withRoleType, final boolean available,
-            final List<Long> idList) {
+            final boolean withLabelType, final boolean withRoleType,
+            final boolean available, final List<Long> idList) {
         final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
         cb.query().setDeletedBy_IsNull();
         if (available) {
@@ -81,20 +74,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
         }
         final List<FileCrawlingConfig> list = fileCrawlingConfigBhv
                 .selectList(cb);
-        if (withBrowserType) {
-            final ConditionBeanSetupper<FileConfigToBrowserTypeMappingCB> setupper1 = new ConditionBeanSetupper<FileConfigToBrowserTypeMappingCB>() {
-                @Override
-                public void setup(final FileConfigToBrowserTypeMappingCB cb) {
-                    cb.setupSelect_BrowserType();
-                    cb.query().queryBrowserType().setDeletedBy_IsNull();
-                    cb.query().queryBrowserType().addOrderBy_SortOrder_Asc();
-                }
-
-            };
-            fileCrawlingConfigBhv.loadFileConfigToBrowserTypeMappingList(list,
-                    setupper1);
-        }
-        if (withBrowserType) {
+        if (withRoleType) {
             final ConditionBeanSetupper<FileConfigToRoleTypeMappingCB> setupper2 = new ConditionBeanSetupper<FileConfigToRoleTypeMappingCB>() {
                 @Override
                 public void setup(final FileConfigToRoleTypeMappingCB cb) {
@@ -107,7 +87,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
             fileCrawlingConfigBhv.loadFileConfigToRoleTypeMappingList(list,
                     setupper2);
         }
-        if (withRoleType) {
+        if (withLabelType) {
             final ConditionBeanSetupper<FileConfigToLabelTypeMappingCB> setupper3 = new ConditionBeanSetupper<FileConfigToLabelTypeMappingCB>() {
                 @Override
                 public void setup(final FileConfigToLabelTypeMappingCB cb) {
@@ -130,22 +110,6 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
                 .getFileCrawlingConfig(keys);
 
         if (fileCrawlingConfig != null) {
-            final FileConfigToBrowserTypeMappingCB fctbtmCb = new FileConfigToBrowserTypeMappingCB();
-            fctbtmCb.query().setFileConfigId_Equal(fileCrawlingConfig.getId());
-            fctbtmCb.query().queryBrowserType().setDeletedBy_IsNull();
-            fctbtmCb.query().queryFileCrawlingConfig().setDeletedBy_IsNull();
-            final List<FileConfigToBrowserTypeMapping> fctbtmList = fileConfigToBrowserTypeMappingBhv
-                    .selectList(fctbtmCb);
-            if (!fctbtmList.isEmpty()) {
-                final List<String> browserTypeIds = new ArrayList<String>(
-                        fctbtmList.size());
-                for (final FileConfigToBrowserTypeMapping mapping : fctbtmList) {
-                    browserTypeIds
-                            .add(Long.toString(mapping.getBrowserTypeId()));
-                }
-                fileCrawlingConfig.setBrowserTypeIds(browserTypeIds
-                        .toArray(new String[browserTypeIds.size()]));
-            }
 
             final FileConfigToRoleTypeMappingCB fctrtmCb = new FileConfigToRoleTypeMappingCB();
             fctrtmCb.query().setFileConfigId_Equal(fileCrawlingConfig.getId());
@@ -187,23 +151,12 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
     @Override
     public void store(final FileCrawlingConfig fileCrawlingConfig) {
         final boolean isNew = fileCrawlingConfig.getId() == null;
-        final String[] browserTypeIds = fileCrawlingConfig.getBrowserTypeIds();
         final String[] labelTypeIds = fileCrawlingConfig.getLabelTypeIds();
         final String[] roleTypeIds = fileCrawlingConfig.getRoleTypeIds();
         super.store(fileCrawlingConfig);
         final Long fileConfigId = fileCrawlingConfig.getId();
         if (isNew) {
             // Insert
-            if (browserTypeIds != null) {
-                final List<FileConfigToBrowserTypeMapping> fctbtmList = new ArrayList<FileConfigToBrowserTypeMapping>();
-                for (final String browserTypeId : browserTypeIds) {
-                    final FileConfigToBrowserTypeMapping mapping = new FileConfigToBrowserTypeMapping();
-                    mapping.setFileConfigId(fileConfigId);
-                    mapping.setBrowserTypeId(Long.parseLong(browserTypeId));
-                    fctbtmList.add(mapping);
-                }
-                fileConfigToBrowserTypeMappingBhv.batchInsert(fctbtmList);
-            }
             if (labelTypeIds != null) {
                 final List<FileConfigToLabelTypeMapping> fctltmList = new ArrayList<FileConfigToLabelTypeMapping>();
                 for (final String labelTypeId : labelTypeIds) {
@@ -226,35 +179,6 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
             }
         } else {
             // Update
-            if (browserTypeIds != null) {
-                final FileConfigToBrowserTypeMappingCB fctbtmCb = new FileConfigToBrowserTypeMappingCB();
-                fctbtmCb.query().setFileConfigId_Equal(fileConfigId);
-                final List<FileConfigToBrowserTypeMapping> fctbtmList = fileConfigToBrowserTypeMappingBhv
-                        .selectList(fctbtmCb);
-                final List<FileConfigToBrowserTypeMapping> newList = new ArrayList<FileConfigToBrowserTypeMapping>();
-                final List<FileConfigToBrowserTypeMapping> matchedList = new ArrayList<FileConfigToBrowserTypeMapping>();
-                for (final String id : browserTypeIds) {
-                    final Long browserTypeId = Long.parseLong(id);
-                    boolean exist = false;
-                    for (final FileConfigToBrowserTypeMapping mapping : fctbtmList) {
-                        if (mapping.getBrowserTypeId().equals(browserTypeId)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final FileConfigToBrowserTypeMapping mapping = new FileConfigToBrowserTypeMapping();
-                        mapping.setFileConfigId(fileConfigId);
-                        mapping.setBrowserTypeId(Long.parseLong(id));
-                        newList.add(mapping);
-                    }
-                }
-                fctbtmList.removeAll(matchedList);
-                fileConfigToBrowserTypeMappingBhv.batchInsert(newList);
-                fileConfigToBrowserTypeMappingBhv.batchDelete(fctbtmList);
-            }
             if (labelTypeIds != null) {
                 final FileConfigToLabelTypeMappingCB fctltmCb = new FileConfigToLabelTypeMappingCB();
                 fctltmCb.query().setFileConfigId_Equal(fileConfigId);

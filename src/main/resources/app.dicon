@@ -12,8 +12,6 @@
 	<include path="fess_api.dicon"/>
 	<include path="fess_dict.dicon"/>
 
-	<include path="mobylet.dicon"/>
-
 	<include path="s2robot_client.dicon" />
 	<include path="s2robot_mimetype.dicon" />
 
@@ -22,8 +20,6 @@
 	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
         <!-- CHANGE THE FOLLOWING KEY -->
 		<property name="key">"1234567890123456"</property>
-	</component>
-	<component name="browserTypeHelper" class="jp.sf.fess.helper.BrowserTypeHelper">
 	</component>
 	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
 	</component>
@@ -196,9 +192,7 @@
 		</initMethod>
 		<!-- 
 		<property name="encodeUrlLink">false</property>
-		<property name="mobileDescriptionLength">50</property>
 		<property name="pcDescriptionLength">200</property>
-		<property name="mobileTitleLength">50</property>
 		<property name="pcTitleLength">50</property>
 		<property name="urlLinkEncoding">"UTF-8"</property>
 		<property name="highlightingFields">new String[] { "hl_content", "digest" }</property>

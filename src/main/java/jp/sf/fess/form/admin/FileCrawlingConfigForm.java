@@ -28,8 +28,6 @@ public class FileCrawlingConfigForm extends BsFileCrawlingConfigForm implements
 
     private static final long serialVersionUID = 1L;
 
-    public String[] browserTypeIds;
-
     public String[] roleTypeIds;
 
     public String[] labelTypeIds;

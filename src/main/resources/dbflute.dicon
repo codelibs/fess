@@ -13,18 +13,15 @@
     <component name="behaviorCommandInvoker" class="org.seasar.dbflute.bhv.core.BehaviorCommandInvoker"/>
 
     <!-- The components of Behavior. -->
-    <component name="browserTypeBhv" class="jp.sf.fess.db.exbhv.BrowserTypeBhv"/>
     <component name="clickLogBhv" class="jp.sf.fess.db.exbhv.ClickLogBhv"/>
     <component name="crawlingSessionBhv" class="jp.sf.fess.db.exbhv.CrawlingSessionBhv"/>
     <component name="crawlingSessionInfoBhv" class="jp.sf.fess.db.exbhv.CrawlingSessionInfoBhv"/>
-    <component name="dataConfigToBrowserTypeMappingBhv" class="jp.sf.fess.db.exbhv.DataConfigToBrowserTypeMappingBhv"/>
     <component name="dataConfigToLabelTypeMappingBhv" class="jp.sf.fess.db.exbhv.DataConfigToLabelTypeMappingBhv"/>
     <component name="dataConfigToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv"/>
     <component name="dataCrawlingConfigBhv" class="jp.sf.fess.db.exbhv.DataCrawlingConfigBhv"/>
     <component name="failureUrlBhv" class="jp.sf.fess.db.exbhv.FailureUrlBhv"/>
     <component name="favoriteLogBhv" class="jp.sf.fess.db.exbhv.FavoriteLogBhv"/>
     <component name="fileAuthenticationBhv" class="jp.sf.fess.db.exbhv.FileAuthenticationBhv"/>
-    <component name="fileConfigToBrowserTypeMappingBhv" class="jp.sf.fess.db.exbhv.FileConfigToBrowserTypeMappingBhv"/>
     <component name="fileConfigToLabelTypeMappingBhv" class="jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv"/>
     <component name="fileConfigToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv"/>
     <component name="fileCrawlingConfigBhv" class="jp.sf.fess.db.exbhv.FileCrawlingConfigBhv"/>
@@ -40,7 +37,6 @@
     <component name="searchLogBhv" class="jp.sf.fess.db.exbhv.SearchLogBhv"/>
     <component name="userInfoBhv" class="jp.sf.fess.db.exbhv.UserInfoBhv"/>
     <component name="webAuthenticationBhv" class="jp.sf.fess.db.exbhv.WebAuthenticationBhv"/>
-    <component name="webConfigToBrowserTypeMappingBhv" class="jp.sf.fess.db.exbhv.WebConfigToBrowserTypeMappingBhv"/>
     <component name="webConfigToLabelTypeMappingBhv" class="jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv"/>
     <component name="webConfigToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv"/>
     <component name="webCrawlingConfigBhv" class="jp.sf.fess.db.exbhv.WebCrawlingConfigBhv"/>

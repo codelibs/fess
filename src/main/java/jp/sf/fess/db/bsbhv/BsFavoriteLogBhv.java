@@ -76,9 +76,9 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     //                                                                          Definition
     //                                                                          ==========
     /*df:beginQueryPath*/
-    public static final String PATH_selectFavoriteUrlRanking = "selectFavoriteUrlRanking";
-
     public static final String PATH_selectFavoriteUrlCount = "selectFavoriteUrlCount";
+
+    public static final String PATH_selectFavoriteUrlRanking = "selectFavoriteUrlRanking";
 
     /*df:endQueryPath*/
 

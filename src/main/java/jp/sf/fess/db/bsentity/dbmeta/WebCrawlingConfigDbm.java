@@ -414,12 +414,12 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_853D1307_E292_48A2_B130_C0D28306B556",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_9B631798_6685_4707_8CAC_0DC16580CF42",
             false,
             null,
             null,
             null,
-            "requestHeaderList,webAuthenticationList,webConfigToBrowserTypeMappingList,webConfigToLabelTypeMappingList,webConfigToRoleTypeMappingList",
+            "requestHeaderList,webAuthenticationList,webConfigToLabelTypeMappingList,webConfigToRoleTypeMappingList",
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
@@ -690,15 +690,6 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
                 WebAuthenticationDbm.getInstance().columnWebCrawlingConfigId());
         return cri("CONSTRAINT_A31", "webAuthenticationList", this,
                 WebAuthenticationDbm.getInstance(), map, false,
-                "webCrawlingConfig");
-    }
-
-    public ReferrerInfo referrerWebConfigToBrowserTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
-                WebConfigToBrowserTypeMappingDbm.getInstance()
-                        .columnWebConfigId());
-        return cri("CONSTRAINT_27", "webConfigToBrowserTypeMappingList", this,
-                WebConfigToBrowserTypeMappingDbm.getInstance(), map, false,
                 "webCrawlingConfig");
     }
 

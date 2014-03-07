@@ -89,10 +89,6 @@ public class QueryHelper implements Serializable {
 
     @Binding(bindingType = BindingType.MAY)
     @Resource
-    protected BrowserTypeHelper browserTypeHelper;
-
-    @Binding(bindingType = BindingType.MAY)
-    @Resource
     protected RoleQueryHelper roleQueryHelper;
 
     @Resource
@@ -193,20 +189,12 @@ public class QueryHelper implements Serializable {
             return searchQuery.query(StringUtil.EMPTY);
         }
 
-        if (browserTypeHelper == null && roleQueryHelper == null
-                || !envCondition) {
+        if (roleQueryHelper == null || !envCondition) {
             return searchQuery;
         }
 
         StringBuilder queryBuf = new StringBuilder(255);
         queryBuf.append(searchQuery.getQuery());
-
-        if (browserTypeHelper != null) {
-            searchQuery
-                    .addFilterQuery("type:"
-                            + QueryUtil.escapeValue(browserTypeHelper
-                                    .getBrowserType()));
-        }
 
         if (roleQueryHelper != null) {
             final Set<String> roleSet = roleQueryHelper.build();

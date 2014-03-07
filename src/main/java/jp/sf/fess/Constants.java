@@ -100,8 +100,6 @@ public class Constants extends CoreLibConstants {
     /** Solr Status: Inactive */
     public static final String INACTIVE = "INACTIVE";
 
-    public static final String GOOGLE_MOBILE_TRANSCODER = "google";
-
     // fess properties
     public static final String USER_INFO_PROPERTY = "user.info";
 
@@ -122,8 +120,6 @@ public class Constants extends CoreLibConstants {
     public static final String COMMIT_PER_COUNT_PROPERTY = "commit.count";
 
     public static final String SERVER_ROTATION_PROPERTY = "server.rotation";
-
-    public static final String MOBILE_TRANSCODER_PROPERTY = "mobile.transcoder";
 
     public static final String WEB_API_XML_PROPERTY = "web.api.xml";
 
@@ -177,11 +173,7 @@ public class Constants extends CoreLibConstants {
 
     public static final int DONE_STATUS = 9999;
 
-    public static final String SUPPORTED_SEARCH_WEB_MOBILE = "WM";
-
     public static final String SUPPORTED_SEARCH_WEB = "W";
-
-    public static final String SUPPORTED_SEARCH_MOBILE = "M";
 
     public static final String SUPPORTED_SEARCH_NONE = "n";
 

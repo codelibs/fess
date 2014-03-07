@@ -23,7 +23,6 @@ import java.util.Set;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.exentity.FileAuthentication;
-import jp.sf.fess.db.exentity.FileConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
@@ -53,13 +52,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     
  * 
  * [referrer table]
- *     FILE_AUTHENTICATION, FILE_CONFIG_TO_BROWSER_TYPE_MAPPING, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     FILE_AUTHENTICATION, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     fileAuthenticationList, fileConfigToBrowserTypeMappingList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
+ *     fileAuthenticationList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
  * 
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -271,29 +270,6 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
         _fileAuthenticationList = fileAuthenticationList;
     }
 
-    /** FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingList'. */
-    protected List<FileConfigToBrowserTypeMapping> _fileConfigToBrowserTypeMappingList;
-
-    /**
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingList'.
-     * @return The entity list of referrer property 'fileConfigToBrowserTypeMappingList'. (NotNull: even if no loading, returns empty list)
-     */
-    public List<FileConfigToBrowserTypeMapping> getFileConfigToBrowserTypeMappingList() {
-        if (_fileConfigToBrowserTypeMappingList == null) {
-            _fileConfigToBrowserTypeMappingList = newReferrerList();
-        }
-        return _fileConfigToBrowserTypeMappingList;
-    }
-
-    /**
-     * FILE_CONFIG_TO_BROWSER_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToBrowserTypeMappingList'.
-     * @param fileConfigToBrowserTypeMappingList The entity list of referrer property 'fileConfigToBrowserTypeMappingList'. (NullAllowed)
-     */
-    public void setFileConfigToBrowserTypeMappingList(
-            final List<FileConfigToBrowserTypeMapping> fileConfigToBrowserTypeMappingList) {
-        _fileConfigToBrowserTypeMappingList = fileConfigToBrowserTypeMappingList;
-    }
-
     /** FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingList'. */
     protected List<FileConfigToLabelTypeMapping> _fileConfigToLabelTypeMappingList;
 
@@ -448,14 +424,6 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
                 }
             }
         }
-        if (_fileConfigToBrowserTypeMappingList != null) {
-            for (final Entity e : _fileConfigToBrowserTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "fileConfigToBrowserTypeMappingList"));
-                }
-            }
-        }
         if (_fileConfigToLabelTypeMappingList != null) {
             for (final Entity e : _fileConfigToLabelTypeMappingList) {
                 if (e != null) {
@@ -537,10 +505,6 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
         if (_fileAuthenticationList != null
                 && !_fileAuthenticationList.isEmpty()) {
             sb.append(c).append("fileAuthenticationList");
-        }
-        if (_fileConfigToBrowserTypeMappingList != null
-                && !_fileConfigToBrowserTypeMappingList.isEmpty()) {
-            sb.append(c).append("fileConfigToBrowserTypeMappingList");
         }
         if (_fileConfigToLabelTypeMappingList != null
                 && !_fileConfigToLabelTypeMappingList.isEmpty()) {

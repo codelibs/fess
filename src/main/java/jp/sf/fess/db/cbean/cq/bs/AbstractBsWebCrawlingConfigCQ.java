@@ -21,13 +21,11 @@ import java.util.Collection;
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
-import jp.sf.fess.db.cbean.WebConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.RequestHeaderCQ;
 import jp.sf.fess.db.cbean.cq.WebAuthenticationCQ;
-import jp.sf.fess.db.cbean.cq.WebConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
@@ -244,35 +242,6 @@ public abstract class AbstractBsWebCrawlingConfigCQ extends
 
     /**
      * Set up ExistsReferrer (co-related sub-query). <br />
-     * {exists (select WEB_CONFIG_ID from WEB_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">existsWebConfigToBrowserTypeMappingList</span>(new SubQuery&lt;WebConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(WebCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of WebConfigToBrowserTypeMappingList for 'exists'. (NotNull)
-     */
-    public void existsWebConfigToBrowserTypeMappingList(
-            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_WebConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "WEB_CONFIG_ID",
-                subQueryPropertyName, "webConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_ExistsReferrer_WebConfigToBrowserTypeMappingList(
-            WebConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
      * {exists (select WEB_CONFIG_ID from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * <pre>
@@ -385,35 +354,6 @@ public abstract class AbstractBsWebCrawlingConfigCQ extends
 
     /**
      * Set up NotExistsReferrer (co-related sub-query). <br />
-     * {not exists (select WEB_CONFIG_ID from WEB_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsWebConfigToBrowserTypeMappingList</span>(new SubQuery&lt;WebConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(WebCrawlingConfigCB subCB) {
-     *         subCB.query().setXxx...
-     *     }
-     * });
-     * </pre>
-     * @param subQuery The sub-query of Id_NotExistsReferrer_WebConfigToBrowserTypeMappingList for 'not exists'. (NotNull)
-     */
-    public void notExistsWebConfigToBrowserTypeMappingList(
-            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-        cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_WebConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "WEB_CONFIG_ID",
-                subQueryPropertyName, "webConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_NotExistsReferrer_WebConfigToBrowserTypeMappingList(
-            WebConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
      * {not exists (select WEB_CONFIG_ID from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * <pre>
@@ -512,28 +452,6 @@ public abstract class AbstractBsWebCrawlingConfigCQ extends
 
     /**
      * Set up InScopeRelation (sub-query). <br />
-     * {in (select WEB_CONFIG_ID from WEB_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingAsOne'.
-     * @param subQuery The sub-query of WebConfigToBrowserTypeMappingList for 'in-scope'. (NotNull)
-     */
-    public void inScopeWebConfigToBrowserTypeMappingList(
-            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_WebConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "WEB_CONFIG_ID",
-                subQueryPropertyName, "webConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_InScopeRelation_WebConfigToBrowserTypeMappingList(
-            WebConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up InScopeRelation (sub-query). <br />
      * {in (select WEB_CONFIG_ID from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * @param subQuery The sub-query of WebConfigToLabelTypeMappingList for 'in-scope'. (NotNull)
@@ -618,28 +536,6 @@ public abstract class AbstractBsWebCrawlingConfigCQ extends
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
-     * {not in (select WEB_CONFIG_ID from WEB_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingAsOne'.
-     * @param subQuery The sub-query of WebConfigToBrowserTypeMappingList for 'not in-scope'. (NotNull)
-     */
-    public void notInScopeWebConfigToBrowserTypeMappingList(
-            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-        cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_WebConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "WEB_CONFIG_ID",
-                subQueryPropertyName, "webConfigToBrowserTypeMappingList");
-    }
-
-    public abstract String keepId_NotInScopeRelation_WebConfigToBrowserTypeMappingList(
-            WebConfigToBrowserTypeMappingCQ subQuery);
-
-    /**
-     * Set up NotInScopeRelation (sub-query). <br />
      * {not in (select WEB_CONFIG_ID from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * @param subQuery The sub-query of WebConfigToLabelTypeMappingList for 'not in-scope'. (NotNull)
@@ -713,25 +609,6 @@ public abstract class AbstractBsWebCrawlingConfigCQ extends
 
     public abstract String keepId_SpecifyDerivedReferrer_WebAuthenticationList(
             WebAuthenticationCQ subQuery);
-
-    public void xsderiveWebConfigToBrowserTypeMappingList(
-            final String function,
-            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<WebConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "WEB_CONFIG_ID", subQueryPropertyName,
-                "webConfigToBrowserTypeMappingList", aliasName, option);
-    }
-
-    public abstract String keepId_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingList(
-            WebConfigToBrowserTypeMappingCQ subQuery);
 
     public void xsderiveWebConfigToLabelTypeMappingList(final String function,
             final SubQuery<WebConfigToLabelTypeMappingCB> subQuery,
@@ -873,64 +750,6 @@ public abstract class AbstractBsWebCrawlingConfigCQ extends
             WebAuthenticationCQ subQuery);
 
     public abstract String keepId_QueryDerivedReferrer_WebAuthenticationListParameter(
-            Object parameterValue);
-
-    /**
-     * Prepare for (Query)DerivedReferrer. <br />
-     * {FOO &lt;= (select max(BAR) from WEB_CONFIG_TO_BROWSER_TYPE_MAPPING where ...)} <br />
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingAsOne'.
-     * <pre>
-     * cb.query().<span style="color: #FD4747">derivedWebConfigToBrowserTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebConfigToBrowserTypeMappingCB&gt;() {
-     *     public void query(WebConfigToBrowserTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-     *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-     *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
-     * </pre>
-     * @return The object to set up a function for referrer table. (NotNull)
-     */
-    public HpQDRFunction<WebConfigToBrowserTypeMappingCB> derivedWebConfigToBrowserTypeMappingList() {
-        return xcreateQDRFunctionWebConfigToBrowserTypeMappingList();
-    }
-
-    protected HpQDRFunction<WebConfigToBrowserTypeMappingCB> xcreateQDRFunctionWebConfigToBrowserTypeMappingList() {
-        return new HpQDRFunction<WebConfigToBrowserTypeMappingCB>(
-                new HpQDRSetupper<WebConfigToBrowserTypeMappingCB>() {
-                    @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveWebConfigToBrowserTypeMappingList(function,
-                                subQuery, operand, value, option);
-                    }
-                });
-    }
-
-    public void xqderiveWebConfigToBrowserTypeMappingList(
-            final String function,
-            final SubQuery<WebConfigToBrowserTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<WebConfigToBrowserTypeMappingCB>",
-                subQuery);
-        final WebConfigToBrowserTypeMappingCB cb = new WebConfigToBrowserTypeMappingCB();
-        cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "WEB_CONFIG_ID", subQueryPropertyName,
-                "webConfigToBrowserTypeMappingList", operand, value,
-                parameterPropertyName, option);
-    }
-
-    public abstract String keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingList(
-            WebConfigToBrowserTypeMappingCQ subQuery);
-
-    public abstract String keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameter(
             Object parameterValue);
 
     /**

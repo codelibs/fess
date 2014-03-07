@@ -258,7 +258,7 @@ public class RoleTypeDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_B5EB0F7F_F5B4_4F0C_AAD3_ECF2AAEA8D9A",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_48B353CB_186B_46CA_8570_3F4A5223505A",
             false,
             null,
             null,
@@ -425,7 +425,7 @@ public class RoleTypeDbm extends AbstractDBMeta {
     public ReferrerInfo referrerLabelTypeToRoleTypeMappingList() {
         final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
                 LabelTypeToRoleTypeMappingDbm.getInstance().columnRoleTypeId());
-        return cri("CONSTRAINT_2C8D", "labelTypeToRoleTypeMappingList", this,
+        return cri("CONSTRAINT_2C8", "labelTypeToRoleTypeMappingList", this,
                 LabelTypeToRoleTypeMappingDbm.getInstance(), map, false,
                 "roleType");
     }

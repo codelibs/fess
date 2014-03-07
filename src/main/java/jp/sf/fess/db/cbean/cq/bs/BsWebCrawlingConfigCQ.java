@@ -21,7 +21,6 @@ import java.util.Map;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.RequestHeaderCQ;
 import jp.sf.fess.db.cbean.cq.WebAuthenticationCQ;
-import jp.sf.fess.db.cbean.cq.WebConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
@@ -155,26 +154,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return "id_ExistsReferrer_WebAuthenticationList." + key;
     }
 
-    protected Map<String, WebConfigToBrowserTypeMappingCQ> _id_ExistsReferrer_WebConfigToBrowserTypeMappingListMap;
-
-    public Map<String, WebConfigToBrowserTypeMappingCQ> getId_ExistsReferrer_WebConfigToBrowserTypeMappingList() {
-        return _id_ExistsReferrer_WebConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_ExistsReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_WebConfigToBrowserTypeMappingListMap == null) {
-            _id_ExistsReferrer_WebConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_WebConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_ExistsReferrer_WebConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_ExistsReferrer_WebConfigToBrowserTypeMappingList." + key;
-    }
-
     protected Map<String, WebConfigToLabelTypeMappingCQ> _id_ExistsReferrer_WebConfigToLabelTypeMappingListMap;
 
     public Map<String, WebConfigToLabelTypeMappingCQ> getId_ExistsReferrer_WebConfigToLabelTypeMappingList() {
@@ -246,26 +225,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
                 + (_id_NotExistsReferrer_WebAuthenticationListMap.size() + 1);
         _id_NotExistsReferrer_WebAuthenticationListMap.put(key, subQuery);
         return "id_NotExistsReferrer_WebAuthenticationList." + key;
-    }
-
-    protected Map<String, WebConfigToBrowserTypeMappingCQ> _id_NotExistsReferrer_WebConfigToBrowserTypeMappingListMap;
-
-    public Map<String, WebConfigToBrowserTypeMappingCQ> getId_NotExistsReferrer_WebConfigToBrowserTypeMappingList() {
-        return _id_NotExistsReferrer_WebConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_WebConfigToBrowserTypeMappingListMap == null) {
-            _id_NotExistsReferrer_WebConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_WebConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_WebConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_WebConfigToBrowserTypeMappingList." + key;
     }
 
     protected Map<String, WebConfigToLabelTypeMappingCQ> _id_NotExistsReferrer_WebConfigToLabelTypeMappingListMap;
@@ -342,27 +301,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
                 + (_id_SpecifyDerivedReferrer_WebAuthenticationListMap.size() + 1);
         _id_SpecifyDerivedReferrer_WebAuthenticationListMap.put(key, subQuery);
         return "id_SpecifyDerivedReferrer_WebAuthenticationList." + key;
-    }
-
-    protected Map<String, WebConfigToBrowserTypeMappingCQ> _id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingListMap;
-
-    public Map<String, WebConfigToBrowserTypeMappingCQ> getId_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingListMap.put(
-                key, subQuery);
-        return "id_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingList."
-                + key;
     }
 
     protected Map<String, WebConfigToLabelTypeMappingCQ> _id_SpecifyDerivedReferrer_WebConfigToLabelTypeMappingListMap;
@@ -443,26 +381,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return "id_InScopeRelation_WebAuthenticationList." + key;
     }
 
-    protected Map<String, WebConfigToBrowserTypeMappingCQ> _id_InScopeRelation_WebConfigToBrowserTypeMappingListMap;
-
-    public Map<String, WebConfigToBrowserTypeMappingCQ> getId_InScopeRelation_WebConfigToBrowserTypeMappingList() {
-        return _id_InScopeRelation_WebConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_InScopeRelation_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_WebConfigToBrowserTypeMappingListMap == null) {
-            _id_InScopeRelation_WebConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_WebConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_WebConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_WebConfigToBrowserTypeMappingList." + key;
-    }
-
     protected Map<String, WebConfigToLabelTypeMappingCQ> _id_InScopeRelation_WebConfigToLabelTypeMappingListMap;
 
     public Map<String, WebConfigToLabelTypeMappingCQ> getId_InScopeRelation_WebConfigToLabelTypeMappingList() {
@@ -536,26 +454,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
                 + (_id_NotInScopeRelation_WebAuthenticationListMap.size() + 1);
         _id_NotInScopeRelation_WebAuthenticationListMap.put(key, subQuery);
         return "id_NotInScopeRelation_WebAuthenticationList." + key;
-    }
-
-    protected Map<String, WebConfigToBrowserTypeMappingCQ> _id_NotInScopeRelation_WebConfigToBrowserTypeMappingListMap;
-
-    public Map<String, WebConfigToBrowserTypeMappingCQ> getId_NotInScopeRelation_WebConfigToBrowserTypeMappingList() {
-        return _id_NotInScopeRelation_WebConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_NotInScopeRelation_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_WebConfigToBrowserTypeMappingListMap == null) {
-            _id_NotInScopeRelation_WebConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_WebConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_WebConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_WebConfigToBrowserTypeMappingList." + key;
     }
 
     protected Map<String, WebConfigToLabelTypeMappingCQ> _id_NotInScopeRelation_WebConfigToLabelTypeMappingListMap;
@@ -672,48 +570,6 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         _id_QueryDerivedReferrer_WebAuthenticationListParameterMap.put(key,
                 parameterValue);
         return "id_QueryDerivedReferrer_WebAuthenticationListParameter." + key;
-    }
-
-    protected Map<String, WebConfigToBrowserTypeMappingCQ> _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListMap;
-
-    public Map<String, WebConfigToBrowserTypeMappingCQ> getId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingList() {
-        return _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingList."
-                + key;
-    }
-
-    protected Map<String, Object> _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameterMap;
-
-    public Map<String, Object> getId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameterMap;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameter."
-                + key;
     }
 
     protected Map<String, WebConfigToLabelTypeMappingCQ> _id_QueryDerivedReferrer_WebConfigToLabelTypeMappingListMap;

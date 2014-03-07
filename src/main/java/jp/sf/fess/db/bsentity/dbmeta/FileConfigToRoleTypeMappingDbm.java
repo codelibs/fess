@@ -154,7 +154,7 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_3378BA5C_C67A_4A90_9235_4D81E1B7081A",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_5E357576_153F_4321_9ADB_CA67AA5618FC",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnFileConfigId = cci("FILE_CONFIG_ID",

@@ -98,12 +98,6 @@ public class FessS2RobotThread extends S2RobotThread {
                         .get(robotContext.getSessionId());
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put("url", urlQueue.getUrl());
-                final List<String> browserTypeList = new ArrayList<String>();
-                for (final String browserType : crawlingConfig
-                        .getBrowserTypeValues()) {
-                    browserTypeList.add(browserType);
-                }
-                dataMap.put("type", browserTypeList);
                 final List<String> roleTypeList = new ArrayList<String>();
                 for (final String roleType : crawlingConfig.getRoleTypeValues()) {
                     roleTypeList.add(roleType);

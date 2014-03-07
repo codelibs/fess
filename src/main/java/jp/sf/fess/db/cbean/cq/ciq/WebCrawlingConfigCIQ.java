@@ -21,7 +21,6 @@ import java.util.Map;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.RequestHeaderCQ;
 import jp.sf.fess.db.cbean.cq.WebAuthenticationCQ;
-import jp.sf.fess.db.cbean.cq.WebConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
@@ -121,13 +120,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_ExistsReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("ExistsReferrer");
-        return null;
-    }
-
-    @Override
     public String keepId_ExistsReferrer_WebConfigToLabelTypeMappingList(
             final WebConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("ExistsReferrer");
@@ -151,13 +143,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     @Override
     public String keepId_NotExistsReferrer_WebAuthenticationList(
             final WebAuthenticationCQ sq) {
-        throwIICBOE("NotExistsReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ sq) {
         throwIICBOE("NotExistsReferrer");
         return null;
     }
@@ -189,13 +174,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_InScopeRelation_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ sq) {
-        return _myCQ
-                .keepId_InScopeRelation_WebConfigToBrowserTypeMappingList(sq);
-    }
-
-    @Override
     public String keepId_InScopeRelation_WebConfigToLabelTypeMappingList(
             final WebConfigToLabelTypeMappingCQ sq) {
         return _myCQ.keepId_InScopeRelation_WebConfigToLabelTypeMappingList(sq);
@@ -217,13 +195,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     public String keepId_NotInScopeRelation_WebAuthenticationList(
             final WebAuthenticationCQ sq) {
         return _myCQ.keepId_NotInScopeRelation_WebAuthenticationList(sq);
-    }
-
-    @Override
-    public String keepId_NotInScopeRelation_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ sq) {
-        return _myCQ
-                .keepId_NotInScopeRelation_WebConfigToBrowserTypeMappingList(sq);
     }
 
     @Override
@@ -250,13 +221,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
     @Override
     public String keepId_SpecifyDerivedReferrer_WebAuthenticationList(
             final WebAuthenticationCQ sq) {
-        throwIICBOE("(Specify)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_SpecifyDerivedReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ sq) {
         throwIICBOE("(Specify)DerivedReferrer");
         return null;
     }
@@ -298,20 +262,6 @@ public class WebCrawlingConfigCIQ extends AbstractBsWebCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_WebAuthenticationListParameter(
-            final Object pv) {
-        throwIICBOE("(Query)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingList(
-            final WebConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("(Query)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_WebConfigToBrowserTypeMappingListParameter(
             final Object pv) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;

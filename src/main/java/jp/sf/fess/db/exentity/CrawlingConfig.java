@@ -26,8 +26,6 @@ public interface CrawlingConfig {
 
     String getName();
 
-    String[] getBrowserTypeValues();
-
     String[] getRoleTypeValues();
 
     String[] getLabelTypeValues();

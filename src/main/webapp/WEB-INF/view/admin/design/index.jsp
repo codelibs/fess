@@ -108,16 +108,6 @@
 									<html:option value="searchNoResult"><bean:message key="labels.design_file_searchNoResult" /></html:option>
 									<html:option value="help"><bean:message key="labels.design_file_help" /></html:option>
 									<html:option value="error"><bean:message key="labels.design_file_error" /></html:option>
-									<%-- Mobile --%>
-									<html:option value="mobileIndex"><bean:message key="labels.design_file_mobileIndex" /></html:option>
-									<html:option value="mobileIndexHtmlHead"><bean:message key="labels.design_file_mobileIndexHtmlHead" /></html:option>
-									<html:option value="mobileIndexMain"><bean:message key="labels.design_file_mobileIndexMain" /></html:option>
-									<html:option value="mobileSearch"><bean:message key="labels.design_file_mobileSearch" /></html:option>
-									<html:option value="mobileSearchHtmlHead"><bean:message key="labels.design_file_mobileSearchHtmlHead" /></html:option>
-									<html:option value="mobileSearchHeader"><bean:message key="labels.design_file_mobileSearchHeader" /></html:option>
-									<html:option value="mobileSearchFooter"><bean:message key="labels.design_file_mobileSearchFooter" /></html:option>
-									<html:option value="mobileSearchResults"><bean:message key="labels.design_file_mobileSearchResults" /></html:option>
-									<html:option value="mobileSearchNoResult"><bean:message key="labels.design_file_mobileSearchNoResult" /></html:option>
 									<%-- Applet --%>
 									<html:option value="appletLauncher"><bean:message key="labels.design_file_appletLauncher" /></html:option>
 									<%-- Error --%>

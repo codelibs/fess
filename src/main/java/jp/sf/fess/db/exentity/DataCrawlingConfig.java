@@ -74,8 +74,6 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
 
     private static final Object S2ROBOT_FILE_AUTH = "s2robot.file.auth";
 
-    private String[] browserTypeIds;
-
     private String[] labelTypeIds;
 
     private String[] roleTypeIds;
@@ -91,29 +89,6 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
     public DataCrawlingConfig() {
         super();
         setBoost(BigDecimal.ONE);
-    }
-
-    public String[] getBrowserTypeIds() {
-        if (browserTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return browserTypeIds;
-    }
-
-    public void setBrowserTypeIds(final String[] browserTypeIds) {
-        this.browserTypeIds = browserTypeIds;
-    }
-
-    @Override
-    public String[] getBrowserTypeValues() {
-        final List<String> values = new ArrayList<String>();
-        final List<DataConfigToBrowserTypeMapping> list = getDataConfigToBrowserTypeMappingList();
-        if (list != null && !list.isEmpty()) {
-            for (final DataConfigToBrowserTypeMapping mapping : list) {
-                values.add(mapping.getBrowserType().getValue());
-            }
-        }
-        return values.toArray(new String[values.size()]);
     }
 
     public String[] getLabelTypeIds() {

@@ -232,14 +232,6 @@ public abstract class BsSearchLog implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * Set the value of accessType as Mobile (M). <br />
-     * Mobile: Mobile
-     */
-    public void setAccessType_Mobile() {
-        setAccessTypeAsAccessType(CDef.AccessType.Mobile);
-    }
-
-    /**
      * Set the value of accessType as Xml (X). <br />
      * Xml: Xml
      */
@@ -255,6 +247,14 @@ public abstract class BsSearchLog implements Entity, Serializable, Cloneable {
         setAccessTypeAsAccessType(CDef.AccessType.Json);
     }
 
+    /**
+     * Set the value of accessType as Others (O). <br />
+     * Others: Others
+     */
+    public void setAccessType_Others() {
+        setAccessTypeAsAccessType(CDef.AccessType.Others);
+    }
+
     // ===================================================================================
     //                                                        Classification Determination
     //                                                        ============================
@@ -267,17 +267,6 @@ public abstract class BsSearchLog implements Entity, Serializable, Cloneable {
     public boolean isAccessTypeWeb() {
         final CDef.AccessType cdef = getAccessTypeAsAccessType();
         return cdef != null ? cdef.equals(CDef.AccessType.Web) : false;
-    }
-
-    /**
-     * Is the value of accessType Mobile? <br />
-     * Mobile: Mobile
-     * <p>It's treated as case insensitive and if the code value is null, it returns false.</p>
-     * @return The determination, true or false.
-     */
-    public boolean isAccessTypeMobile() {
-        final CDef.AccessType cdef = getAccessTypeAsAccessType();
-        return cdef != null ? cdef.equals(CDef.AccessType.Mobile) : false;
     }
 
     /**
@@ -300,6 +289,17 @@ public abstract class BsSearchLog implements Entity, Serializable, Cloneable {
     public boolean isAccessTypeJson() {
         final CDef.AccessType cdef = getAccessTypeAsAccessType();
         return cdef != null ? cdef.equals(CDef.AccessType.Json) : false;
+    }
+
+    /**
+     * Is the value of accessType Others? <br />
+     * Others: Others
+     * <p>It's treated as case insensitive and if the code value is null, it returns false.</p>
+     * @return The determination, true or false.
+     */
+    public boolean isAccessTypeOthers() {
+        final CDef.AccessType cdef = getAccessTypeAsAccessType();
+        return cdef != null ? cdef.equals(CDef.AccessType.Others) : false;
     }
 
     // ===================================================================================

@@ -51,8 +51,6 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;
 
-    private String[] browserTypeIds;
-
     private String[] labelTypeIds;
 
     private String[] roleTypeIds;
@@ -66,29 +64,6 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
     public FileCrawlingConfig() {
         super();
         setBoost(BigDecimal.ONE);
-    }
-
-    public String[] getBrowserTypeIds() {
-        if (browserTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return browserTypeIds;
-    }
-
-    public void setBrowserTypeIds(final String[] browserTypeIds) {
-        this.browserTypeIds = browserTypeIds;
-    }
-
-    @Override
-    public String[] getBrowserTypeValues() {
-        final List<String> values = new ArrayList<String>();
-        final List<FileConfigToBrowserTypeMapping> list = getFileConfigToBrowserTypeMappingList();
-        if (list != null && !list.isEmpty()) {
-            for (final FileConfigToBrowserTypeMapping mapping : list) {
-                values.add(mapping.getBrowserType().getValue());
-            }
-        }
-        return values.toArray(new String[values.size()]);
     }
 
     public String[] getLabelTypeIds() {

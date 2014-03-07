@@ -20,7 +20,6 @@ import java.util.Map;
 
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.FileAuthenticationCQ;
-import jp.sf.fess.db.cbean.cq.FileConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
@@ -113,13 +112,6 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_ExistsReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("ExistsReferrer");
-        return null;
-    }
-
-    @Override
     public String keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(
             final FileConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("ExistsReferrer");
@@ -136,13 +128,6 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     @Override
     public String keepId_NotExistsReferrer_FileAuthenticationList(
             final FileAuthenticationCQ sq) {
-        throwIICBOE("NotExistsReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ sq) {
         throwIICBOE("NotExistsReferrer");
         return null;
     }
@@ -168,13 +153,6 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_InScopeRelation_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ sq) {
-        return _myCQ
-                .keepId_InScopeRelation_FileConfigToBrowserTypeMappingList(sq);
-    }
-
-    @Override
     public String keepId_InScopeRelation_FileConfigToLabelTypeMappingList(
             final FileConfigToLabelTypeMappingCQ sq) {
         return _myCQ
@@ -194,13 +172,6 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_NotInScopeRelation_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ sq) {
-        return _myCQ
-                .keepId_NotInScopeRelation_FileConfigToBrowserTypeMappingList(sq);
-    }
-
-    @Override
     public String keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(
             final FileConfigToLabelTypeMappingCQ sq) {
         return _myCQ
@@ -217,13 +188,6 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     @Override
     public String keepId_SpecifyDerivedReferrer_FileAuthenticationList(
             final FileAuthenticationCQ sq) {
-        throwIICBOE("(Specify)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ sq) {
         throwIICBOE("(Specify)DerivedReferrer");
         return null;
     }
@@ -251,20 +215,6 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_FileAuthenticationListParameter(
-            final Object pv) {
-        throwIICBOE("(Query)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("(Query)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameter(
             final Object pv) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;

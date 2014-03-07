@@ -295,12 +295,6 @@ public abstract class AbstractFessFileTransformer extends
                 crawlingConfig.getIndexingTarget(url));
         //  boost
         putResultDataBody(dataMap, "boost", crawlingConfig.getDocumentBoost());
-        // type: browserType
-        final List<String> browserTypeList = new ArrayList<String>();
-        for (final String browserType : crawlingConfig.getBrowserTypeValues()) {
-            browserTypeList.add(browserType);
-        }
-        putResultDataBody(dataMap, "type", browserTypeList);
         // label: labelType
         final Set<String> labelTypeSet = new HashSet<String>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {

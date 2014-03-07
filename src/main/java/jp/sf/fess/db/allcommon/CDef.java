@@ -162,12 +162,12 @@ public interface CDef extends Classification {
     public enum AccessType implements CDef {
         /** Web: Web */
         Web("W", "Web", EMPTY_SISTERS),
-        /** Mobile: Mobile */
-        Mobile("M", "Mobile", EMPTY_SISTERS),
         /** Xml: Xml */
         Xml("X", "Xml", EMPTY_SISTERS),
         /** Json: Json */
-        Json("J", "Json", EMPTY_SISTERS);
+        Json("J", "Json", EMPTY_SISTERS),
+        /** Others: Others */
+        Others("O", "Others", EMPTY_SISTERS);
         private static final Map<String, AccessType> _codeValueMap = new HashMap<String, AccessType>();
         static {
             for (final AccessType value : values()) {

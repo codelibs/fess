@@ -85,12 +85,6 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         defaultDataMap.put("created", "NOW");
         // boost
         defaultDataMap.put("boost", config.getBoost().toString());
-        // type: browserType
-        final List<String> browserTypeList = new ArrayList<String>();
-        for (final String browserType : config.getBrowserTypeValues()) {
-            browserTypeList.add(browserType);
-        }
-        defaultDataMap.put("type", browserTypeList);
         // label: labelType
         final List<String> labelTypeList = new ArrayList<String>();
         for (final String labelType : config.getLabelTypeValues()) {

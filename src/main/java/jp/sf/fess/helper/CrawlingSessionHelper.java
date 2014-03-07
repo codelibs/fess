@@ -153,10 +153,8 @@ public class CrawlingSessionHelper implements Serializable {
     public String generateId(final Map<String, Object> dataMap) {
         final String url = (String) dataMap.get("url");
         @SuppressWarnings("unchecked")
-        final List<String> browserTypeList = (List<String>) dataMap.get("type");
-        @SuppressWarnings("unchecked")
         final List<String> roleTypeList = (List<String>) dataMap.get("role");
-        return generateId(url, browserTypeList, roleTypeList);
+        return generateId(url, roleTypeList);
     }
 
     public List<Map<String, String>> getSessionIdList(
@@ -186,20 +184,9 @@ public class CrawlingSessionHelper implements Serializable {
         return sessionIdList;
     }
 
-    private String generateId(final String url,
-            final List<String> browserTypeList, final List<String> roleTypeList) {
+    private String generateId(final String url, final List<String> roleTypeList) {
         final StringBuilder buf = new StringBuilder(1000);
         buf.append(url);
-        if (browserTypeList != null && !browserTypeList.isEmpty()) {
-            Collections.sort(browserTypeList);
-            buf.append(";type=");
-            for (int i = 0; i < browserTypeList.size(); i++) {
-                if (i != 0) {
-                    buf.append(',');
-                }
-                buf.append(browserTypeList.get(i));
-            }
-        }
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
             Collections.sort(roleTypeList);
             buf.append(";role=");

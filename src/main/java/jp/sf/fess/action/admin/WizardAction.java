@@ -21,14 +21,12 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
-import jp.sf.fess.db.exentity.BrowserType;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
 import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
@@ -36,7 +34,6 @@ import jp.sf.fess.form.admin.WizardForm;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.TriggeredJob;
-import jp.sf.fess.service.BrowserTypeService;
 import jp.sf.fess.service.FileCrawlingConfigService;
 import jp.sf.fess.service.ScheduledJobService;
 import jp.sf.fess.service.WebCrawlingConfigService;
@@ -71,9 +68,6 @@ public class WizardAction implements Serializable {
 
     @Resource
     protected FileCrawlingConfigService fileCrawlingConfigService;
-
-    @Resource
-    protected BrowserTypeService browserTypeService;
 
     @Resource
     protected SystemHelper systemHelper;
@@ -148,12 +142,6 @@ public class WizardAction implements Serializable {
 
         final String username = systemHelper.getUsername();
         final Timestamp now = new Timestamp(System.currentTimeMillis());
-        final List<BrowserType> browserTypeList = browserTypeService
-                .getBrowserTypeList();
-        final List<String> browserTypeIdList = new ArrayList<String>();
-        for (final BrowserType browserType : browserTypeList) {
-            browserTypeIdList.add(browserType.getId().toString());
-        }
 
         try {
             if (isWebCrawlingPath(configPath)) {
@@ -194,11 +182,6 @@ public class WizardAction implements Serializable {
                         "default.config.web.userAgent",
                         ComponentUtil.getUserAgentName()));
 
-                if (!browserTypeIdList.isEmpty()) {
-                    wConfig.setBrowserTypeIds(browserTypeIdList
-                            .toArray(new String[browserTypeIdList.size()]));
-                }
-
                 webCrawlingConfigService.store(wConfig);
 
             } else {
@@ -237,11 +220,6 @@ public class WizardAction implements Serializable {
                 fConfig.setUpdatedBy(username);
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
-
-                if (!browserTypeIdList.isEmpty()) {
-                    fConfig.setBrowserTypeIds(browserTypeIdList
-                            .toArray(new String[browserTypeIdList.size()]));
-                }
 
                 fileCrawlingConfigService.store(fConfig);
             }

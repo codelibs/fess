@@ -24,7 +24,6 @@ import java.util.Set;
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.WebAuthentication;
-import jp.sf.fess.db.exentity.WebConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
@@ -54,13 +53,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *     
  * 
  * [referrer table]
- *     REQUEST_HEADER, WEB_AUTHENTICATION, WEB_CONFIG_TO_BROWSER_TYPE_MAPPING, WEB_CONFIG_TO_LABEL_TYPE_MAPPING, WEB_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     REQUEST_HEADER, WEB_AUTHENTICATION, WEB_CONFIG_TO_LABEL_TYPE_MAPPING, WEB_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     requestHeaderList, webAuthenticationList, webConfigToBrowserTypeMappingList, webConfigToLabelTypeMappingList, webConfigToRoleTypeMappingList
+ *     requestHeaderList, webAuthenticationList, webConfigToLabelTypeMappingList, webConfigToRoleTypeMappingList
  * 
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -299,29 +298,6 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
         _webAuthenticationList = webAuthenticationList;
     }
 
-    /** WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingList'. */
-    protected List<WebConfigToBrowserTypeMapping> _webConfigToBrowserTypeMappingList;
-
-    /**
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingList'.
-     * @return The entity list of referrer property 'webConfigToBrowserTypeMappingList'. (NotNull: even if no loading, returns empty list)
-     */
-    public List<WebConfigToBrowserTypeMapping> getWebConfigToBrowserTypeMappingList() {
-        if (_webConfigToBrowserTypeMappingList == null) {
-            _webConfigToBrowserTypeMappingList = newReferrerList();
-        }
-        return _webConfigToBrowserTypeMappingList;
-    }
-
-    /**
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingList'.
-     * @param webConfigToBrowserTypeMappingList The entity list of referrer property 'webConfigToBrowserTypeMappingList'. (NullAllowed)
-     */
-    public void setWebConfigToBrowserTypeMappingList(
-            final List<WebConfigToBrowserTypeMapping> webConfigToBrowserTypeMappingList) {
-        _webConfigToBrowserTypeMappingList = webConfigToBrowserTypeMappingList;
-    }
-
     /** WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'. */
     protected List<WebConfigToLabelTypeMapping> _webConfigToLabelTypeMappingList;
 
@@ -483,14 +459,6 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
                 }
             }
         }
-        if (_webConfigToBrowserTypeMappingList != null) {
-            for (final Entity e : _webConfigToBrowserTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "webConfigToBrowserTypeMappingList"));
-                }
-            }
-        }
         if (_webConfigToLabelTypeMappingList != null) {
             for (final Entity e : _webConfigToLabelTypeMappingList) {
                 if (e != null) {
@@ -575,10 +543,6 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
         }
         if (_webAuthenticationList != null && !_webAuthenticationList.isEmpty()) {
             sb.append(c).append("webAuthenticationList");
-        }
-        if (_webConfigToBrowserTypeMappingList != null
-                && !_webConfigToBrowserTypeMappingList.isEmpty()) {
-            sb.append(c).append("webConfigToBrowserTypeMappingList");
         }
         if (_webConfigToLabelTypeMappingList != null
                 && !_webConfigToLabelTypeMappingList.isEmpty()) {

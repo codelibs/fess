@@ -190,16 +190,6 @@
 			</span>
 		</c:if>
 		<br />
-		<c:if test="${menuType=='browserType'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="${contextPath}/admin/browserType/index">
-			<bean:message key="labels.menu.supported_browser" />
-		</s:link>
-		<c:if test="${menuType=='browserType'}">
-			</span>
-		</c:if>
-		<br />
 	</p>
 	<h3>
 		<bean:message key="labels.menu_system_log" />

@@ -61,9 +61,9 @@ map:{
     ; AccessType = list:{
         ; map:{topComment=Access Type}
         ; map:{code=W;name=Web;alias=Web;comment=Web}
-        ; map:{code=M;name=Mobile;alias=Mobile;comment=Mobile}
         ; map:{code=X;name=Xml;alias=Xml;comment=Xml}
         ; map:{code=J;name=Json;alias=Json;comment=Json}
+        ; map:{code=O;name=Others;alias=Others;comment=Others}
     }
 }
 # ----------------/

@@ -21,19 +21,16 @@ import java.util.List;
 import jp.sf.fess.db.bsentity.dbmeta.WebCrawlingConfigDbm;
 import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
-import jp.sf.fess.db.cbean.WebConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.exbhv.RequestHeaderBhv;
 import jp.sf.fess.db.exbhv.WebAuthenticationBhv;
-import jp.sf.fess.db.exbhv.WebConfigToBrowserTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebCrawlingConfigBhv;
 import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.WebAuthentication;
-import jp.sf.fess.db.exentity.WebConfigToBrowserTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
@@ -76,13 +73,13 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *     
  * 
  * [referrer table]
- *     REQUEST_HEADER, WEB_AUTHENTICATION, WEB_CONFIG_TO_BROWSER_TYPE_MAPPING, WEB_CONFIG_TO_LABEL_TYPE_MAPPING, WEB_CONFIG_TO_ROLE_TYPE_MAPPING
+ *     REQUEST_HEADER, WEB_AUTHENTICATION, WEB_CONFIG_TO_LABEL_TYPE_MAPPING, WEB_CONFIG_TO_ROLE_TYPE_MAPPING
  * 
  * [foreign property]
  *     
  * 
  * [referrer property]
- *     requestHeaderList, webAuthenticationList, webConfigToBrowserTypeMappingList, webConfigToLabelTypeMappingList, webConfigToRoleTypeMappingList
+ *     requestHeaderList, webAuthenticationList, webConfigToLabelTypeMappingList, webConfigToRoleTypeMappingList
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
@@ -759,142 +756,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
                     @Override
                     public String getRfPrNm() {
                         return "webAuthenticationList";
-                    }
-                });
-    }
-
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadWebConfigToBrowserTypeMappingList(
-            final WebCrawlingConfig webCrawlingConfig,
-            final ConditionBeanSetupper<WebConfigToBrowserTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfig, conditionBeanSetupper);
-        loadWebConfigToBrowserTypeMappingList(xnewLRLs(webCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of webConfigToBrowserTypeMappingList with the set-upper for condition-bean of referrer. <br />
-     * WEB_CONFIG_TO_BROWSER_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToBrowserTypeMappingList'.
-     * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">loadWebConfigToBrowserTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToBrowserTypeMappingCB&gt;() {
-     *     public void setup(WebConfigToBrowserTypeMappingCB cb) {
-     *         cb.setupSelect...();
-     *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
-     *     }
-     * });
-     * for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-     *     ... = webCrawlingConfig.<span style="color: #FD4747">getWebConfigToBrowserTypeMappingList()</span>;
-     * }
-     * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
-     * <pre>
-     * cb.query().setWebConfigId_InScope(pkList);
-     * cb.query().addOrderBy_WebConfigId_Asc();
-     * </pre>
-     * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadWebConfigToBrowserTypeMappingList(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final ConditionBeanSetupper<WebConfigToBrowserTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfigList, conditionBeanSetupper);
-        loadWebConfigToBrowserTypeMappingList(
-                webCrawlingConfigList,
-                new LoadReferrerOption<WebConfigToBrowserTypeMappingCB, WebConfigToBrowserTypeMapping>()
-                        .xinit(conditionBeanSetupper));
-    }
-
-    /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadWebConfigToBrowserTypeMappingList(
-            final WebCrawlingConfig webCrawlingConfig,
-            final LoadReferrerOption<WebConfigToBrowserTypeMappingCB, WebConfigToBrowserTypeMapping> loadReferrerOption) {
-        xassLRArg(webCrawlingConfig, loadReferrerOption);
-        loadWebConfigToBrowserTypeMappingList(xnewLRLs(webCrawlingConfig),
-                loadReferrerOption);
-    }
-
-    /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
-     * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
-     * @param loadReferrerOption The option of load-referrer. (NotNull)
-     */
-    public void loadWebConfigToBrowserTypeMappingList(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final LoadReferrerOption<WebConfigToBrowserTypeMappingCB, WebConfigToBrowserTypeMapping> loadReferrerOption) {
-        xassLRArg(webCrawlingConfigList, loadReferrerOption);
-        if (webCrawlingConfigList.isEmpty()) {
-            return;
-        }
-        final WebConfigToBrowserTypeMappingBhv referrerBhv = xgetBSFLR()
-                .select(WebConfigToBrowserTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                webCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<WebCrawlingConfig, Long, WebConfigToBrowserTypeMappingCB, WebConfigToBrowserTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final WebCrawlingConfig e) {
-                        return e.getId();
-                    }
-
-                    @Override
-                    public void setRfLs(final WebCrawlingConfig e,
-                            final List<WebConfigToBrowserTypeMapping> ls) {
-                        e.setWebConfigToBrowserTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public WebConfigToBrowserTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(
-                            final WebConfigToBrowserTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setWebConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(
-                            final WebConfigToBrowserTypeMappingCB cb) {
-                        cb.query().addOrderBy_WebConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final WebConfigToBrowserTypeMappingCB cb) {
-                        cb.specify().columnWebConfigId();
-                    }
-
-                    @Override
-                    public List<WebConfigToBrowserTypeMapping> selRfLs(
-                            final WebConfigToBrowserTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final WebConfigToBrowserTypeMapping e) {
-                        return e.getWebConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final WebConfigToBrowserTypeMapping re,
-                            final WebCrawlingConfig le) {
-                        re.setWebCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "webConfigToBrowserTypeMappingList";
                     }
                 });
     }

@@ -20,7 +20,6 @@ import java.util.Map;
 
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.FileAuthenticationCQ;
-import jp.sf.fess.db.cbean.cq.FileConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
@@ -136,26 +135,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return "id_ExistsReferrer_FileAuthenticationList." + key;
     }
 
-    protected Map<String, FileConfigToBrowserTypeMappingCQ> _id_ExistsReferrer_FileConfigToBrowserTypeMappingListMap;
-
-    public Map<String, FileConfigToBrowserTypeMappingCQ> getId_ExistsReferrer_FileConfigToBrowserTypeMappingList() {
-        return _id_ExistsReferrer_FileConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_ExistsReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_FileConfigToBrowserTypeMappingListMap == null) {
-            _id_ExistsReferrer_FileConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_FileConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_ExistsReferrer_FileConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_ExistsReferrer_FileConfigToBrowserTypeMappingList." + key;
-    }
-
     protected Map<String, FileConfigToLabelTypeMappingCQ> _id_ExistsReferrer_FileConfigToLabelTypeMappingListMap;
 
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_ExistsReferrer_FileConfigToLabelTypeMappingList() {
@@ -211,26 +190,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
                 + (_id_NotExistsReferrer_FileAuthenticationListMap.size() + 1);
         _id_NotExistsReferrer_FileAuthenticationListMap.put(key, subQuery);
         return "id_NotExistsReferrer_FileAuthenticationList." + key;
-    }
-
-    protected Map<String, FileConfigToBrowserTypeMappingCQ> _id_NotExistsReferrer_FileConfigToBrowserTypeMappingListMap;
-
-    public Map<String, FileConfigToBrowserTypeMappingCQ> getId_NotExistsReferrer_FileConfigToBrowserTypeMappingList() {
-        return _id_NotExistsReferrer_FileConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_FileConfigToBrowserTypeMappingListMap == null) {
-            _id_NotExistsReferrer_FileConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_FileConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_FileConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_FileConfigToBrowserTypeMappingList." + key;
     }
 
     protected Map<String, FileConfigToLabelTypeMappingCQ> _id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap;
@@ -289,27 +248,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
                 + (_id_SpecifyDerivedReferrer_FileAuthenticationListMap.size() + 1);
         _id_SpecifyDerivedReferrer_FileAuthenticationListMap.put(key, subQuery);
         return "id_SpecifyDerivedReferrer_FileAuthenticationList." + key;
-    }
-
-    protected Map<String, FileConfigToBrowserTypeMappingCQ> _id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingListMap;
-
-    public Map<String, FileConfigToBrowserTypeMappingCQ> getId_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingListMap.put(
-                key, subQuery);
-        return "id_SpecifyDerivedReferrer_FileConfigToBrowserTypeMappingList."
-                + key;
     }
 
     protected Map<String, FileConfigToLabelTypeMappingCQ> _id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap;
@@ -372,26 +310,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return "id_InScopeRelation_FileAuthenticationList." + key;
     }
 
-    protected Map<String, FileConfigToBrowserTypeMappingCQ> _id_InScopeRelation_FileConfigToBrowserTypeMappingListMap;
-
-    public Map<String, FileConfigToBrowserTypeMappingCQ> getId_InScopeRelation_FileConfigToBrowserTypeMappingList() {
-        return _id_InScopeRelation_FileConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_InScopeRelation_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_FileConfigToBrowserTypeMappingListMap == null) {
-            _id_InScopeRelation_FileConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_FileConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_FileConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_FileConfigToBrowserTypeMappingList." + key;
-    }
-
     protected Map<String, FileConfigToLabelTypeMappingCQ> _id_InScopeRelation_FileConfigToLabelTypeMappingListMap;
 
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_InScopeRelation_FileConfigToLabelTypeMappingList() {
@@ -448,27 +366,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
                 + (_id_NotInScopeRelation_FileAuthenticationListMap.size() + 1);
         _id_NotInScopeRelation_FileAuthenticationListMap.put(key, subQuery);
         return "id_NotInScopeRelation_FileAuthenticationList." + key;
-    }
-
-    protected Map<String, FileConfigToBrowserTypeMappingCQ> _id_NotInScopeRelation_FileConfigToBrowserTypeMappingListMap;
-
-    public Map<String, FileConfigToBrowserTypeMappingCQ> getId_NotInScopeRelation_FileConfigToBrowserTypeMappingList() {
-        return _id_NotInScopeRelation_FileConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_NotInScopeRelation_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_FileConfigToBrowserTypeMappingListMap == null) {
-            _id_NotInScopeRelation_FileConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_FileConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_FileConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_FileConfigToBrowserTypeMappingList."
-                + key;
     }
 
     protected Map<String, FileConfigToLabelTypeMappingCQ> _id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap;
@@ -547,48 +444,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         _id_QueryDerivedReferrer_FileAuthenticationListParameterMap.put(key,
                 parameterValue);
         return "id_QueryDerivedReferrer_FileAuthenticationListParameter." + key;
-    }
-
-    protected Map<String, FileConfigToBrowserTypeMappingCQ> _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListMap;
-
-    public Map<String, FileConfigToBrowserTypeMappingCQ> getId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingList() {
-        return _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListMap;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingList(
-            final FileConfigToBrowserTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingList."
-                + key;
-    }
-
-    protected Map<String, Object> _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameterMap;
-
-    public Map<String, Object> getId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameterMap;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_FileConfigToBrowserTypeMappingListParameter."
-                + key;
     }
 
     protected Map<String, FileConfigToLabelTypeMappingCQ> _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap;

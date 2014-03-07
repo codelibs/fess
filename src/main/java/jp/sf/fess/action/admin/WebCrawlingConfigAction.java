@@ -25,13 +25,11 @@ import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.action.admin.BsWebCrawlingConfigAction;
 import jp.sf.fess.crud.util.SAStrutsUtil;
-import jp.sf.fess.db.exentity.BrowserType;
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.db.exentity.LabelType;
 import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
 import jp.sf.fess.helper.SystemHelper;
-import jp.sf.fess.service.BrowserTypeService;
 import jp.sf.fess.service.FailureUrlService;
 import jp.sf.fess.service.LabelTypeService;
 import jp.sf.fess.service.RoleTypeService;
@@ -49,9 +47,6 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
 
     private static final Log log = LogFactory
             .getLog(WebCrawlingConfigAction.class);
-
-    @Resource
-    protected BrowserTypeService browserTypeService;
 
     @Resource
     protected RoleTypeService roleTypeService;
@@ -162,10 +157,6 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
             throw new SSCActionMessagesException(e,
                     "errors.crud_failed_to_delete_crud_table");
         }
-    }
-
-    public List<BrowserType> getBrowserTypeItems() {
-        return browserTypeService.getBrowserTypeList();
     }
 
     public List<RoleType> getRoleTypeItems() {

@@ -7,6 +7,5 @@
  --%><%@taglib prefix="tiles" uri="http://jakarta.apache.org/struts/tags-tiles"%><%--
  --%><%@taglib prefix="s" uri="http://sastruts.seasar.org" %><%--
  --%><%@taglib prefix="f" uri="http://sastruts.seasar.org/functions" %><%--
- --%><%@taglib prefix="m" uri="http://taglibs.mobylet.org/" %><%--
  --%><%@taglib prefix="fe" uri="http://fess.codelibs.org/functions" %><%--
  --%><c:set var="contextPath" value="${request.contextPath}"/>

@@ -25,26 +25,12 @@
     <param-value>/WEB-INF/view</param-value>
   </context-param>
 
-<!--
   <filter>
     <filter-name>encodingfilter</filter-name>
     <filter-class>org.seasar.extension.filter.EncodingFilter</filter-class>
     <init-param>
       <param-name>encoding</param-name>
       <param-value>UTF-8</param-value>
-    </init-param>
-  </filter>
--->
-  <filter>
-    <filter-name>mobyletfilter</filter-name>
-    <filter-class>org.seasar.mobylet.http.S2MobyletFilter</filter-class>
-    <init-param>
-      <param-name>encoding</param-name>
-      <param-value>UTF-8</param-value>
-    </init-param>
-    <init-param>
-      <param-name>mobylet.logger.class</param-name>
-      <param-value>jp.sf.fess.log.MobyletLoggerImpl</param-value>
     </init-param>
   </filter>
 
@@ -171,15 +157,8 @@
   </filter>
 -->
 
-
-<!--
   <filter-mapping>
     <filter-name>encodingfilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
--->
-  <filter-mapping>
-    <filter-name>mobyletfilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
     <dispatcher>FORWARD</dispatcher>
@@ -269,12 +248,6 @@
     <load-on-startup>4</load-on-startup>
   </servlet>
 
-  <servlet>
-    <servlet-name>imageScaleServlet</servlet-name>
-    <servlet-class>org.mobylet.core.http.image.MobyletImageScaleServlet</servlet-class>
-    <load-on-startup>6</load-on-startup>
-  </servlet>
-
   <servlet-mapping>
     <servlet-name>action</servlet-name>
     <url-pattern>*.do</url-pattern>
@@ -286,11 +259,6 @@
     <url-pattern>/s2container</url-pattern>
   </servlet-mapping>
 -->
-
-  <servlet-mapping>
-    <servlet-name>imageScaleServlet</servlet-name>
-    <url-pattern>/imageScaler</url-pattern>
-  </servlet-mapping>
 
   <listener>
   	<listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>

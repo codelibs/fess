@@ -95,42 +95,6 @@
 			<arg>"error.jsp"</arg>
 		</initMethod>
 		<initMethod name="addDesignJspFileName">
-			<arg>"mobileIndex"</arg>
-			<arg>"mobile/index.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileIndexHtmlHead"</arg>
-			<arg>"mobile/indexHtmlHead.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileIndexMain"</arg>
-			<arg>"mobile/indexMain.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileSearch"</arg>
-			<arg>"mobile/search.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileSearchHtmlHead"</arg>
-			<arg>"mobile/searchHtmlHead.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileSearchHeader"</arg>
-			<arg>"mobile/searchHeader.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileSearchFooter"</arg>
-			<arg>"mobile/searchFooter.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileSearchResults"</arg>
-			<arg>"mobile/searchResults.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
-			<arg>"mobileSearchNoResult"</arg>
-			<arg>"mobile/searchNoResult.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
 			<arg>"appletLauncher"</arg>
 			<arg>"applet/launcher.jsp"</arg>
 		</initMethod>
@@ -162,6 +126,10 @@
 	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
 	</component>
 	<component name="mailHelper" class="jp.sf.fess.helper.MailHelper">
+		<initMethod name="addProperty">
+			<arg>"mail.smtp.host"</arg>
+			<arg>"localhost"</arg>
+		</initMethod>
 		<!--
 		<property name="from">"Administrator &lt;root@localhost&gt;"</property>
 		-->

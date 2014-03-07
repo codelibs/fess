@@ -20,7 +20,6 @@ import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.allcommon.ImplementedInvokerAssistant;
 import jp.sf.fess.db.allcommon.ImplementedSqlClauseCreator;
-import jp.sf.fess.db.cbean.DataConfigToBrowserTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
@@ -493,42 +492,6 @@ public class BsDataCrawlingConfigCB extends AbstractConditionBean {
         @Override
         protected String getTableDbName() {
             return "DATA_CRAWLING_CONFIG";
-        }
-
-        /**
-         * Prepare for (Specify)DerivedReferrer. <br />
-         * {select max(FOO) from DATA_CONFIG_TO_BROWSER_TYPE_MAPPING where ...) as FOO_MAX} <br />
-         * DATA_CONFIG_TO_BROWSER_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToBrowserTypeMappingList'.
-         * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedDataConfigToBrowserTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;DataConfigToBrowserTypeMappingCB&gt;() {
-         *     public void query(DataConfigToBrowserTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
-         *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
-         *     }
-         * }, DataConfigToBrowserTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
-         * </pre>
-         * @return The object to set up a function for referrer table. (NotNull)
-         */
-        public HpSDRFunction<DataConfigToBrowserTypeMappingCB, DataCrawlingConfigCQ> derivedDataConfigToBrowserTypeMappingList() {
-            assertDerived("dataConfigToBrowserTypeMappingList");
-            if (xhasSyncQyCall()) {
-                xsyncQyCall().qy();
-            } // for sync (for example, this in ColumnQuery)
-            return new HpSDRFunction<DataConfigToBrowserTypeMappingCB, DataCrawlingConfigCQ>(
-                    _baseCB,
-                    _qyCall.qy(),
-                    new HpSDRSetupper<DataConfigToBrowserTypeMappingCB, DataCrawlingConfigCQ>() {
-                        @Override
-                        public void setup(
-                                final String function,
-                                final SubQuery<DataConfigToBrowserTypeMappingCB> subQuery,
-                                final DataCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveDataConfigToBrowserTypeMappingList(
-                                    function, subQuery, aliasName, option);
-                        }
-                    }, _dbmetaProvider);
         }
 
         /**

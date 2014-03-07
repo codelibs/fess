@@ -19,7 +19,6 @@ package jp.sf.fess.db.cbean.cq.ciq;
 import java.util.Map;
 
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
-import jp.sf.fess.db.cbean.cq.DataConfigToBrowserTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataCrawlingConfigCQ;
@@ -105,13 +104,6 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_ExistsReferrer_DataConfigToBrowserTypeMappingList(
-            final DataConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("ExistsReferrer");
-        return null;
-    }
-
-    @Override
     public String keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(
             final DataConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("ExistsReferrer");
@@ -122,13 +114,6 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     public String keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(
             final DataConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("ExistsReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_NotExistsReferrer_DataConfigToBrowserTypeMappingList(
-            final DataConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("NotExistsReferrer");
         return null;
     }
 
@@ -147,13 +132,6 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_InScopeRelation_DataConfigToBrowserTypeMappingList(
-            final DataConfigToBrowserTypeMappingCQ sq) {
-        return _myCQ
-                .keepId_InScopeRelation_DataConfigToBrowserTypeMappingList(sq);
-    }
-
-    @Override
     public String keepId_InScopeRelation_DataConfigToLabelTypeMappingList(
             final DataConfigToLabelTypeMappingCQ sq) {
         return _myCQ
@@ -164,13 +142,6 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     public String keepId_InScopeRelation_DataConfigToRoleTypeMappingList(
             final DataConfigToRoleTypeMappingCQ sq) {
         return _myCQ.keepId_InScopeRelation_DataConfigToRoleTypeMappingList(sq);
-    }
-
-    @Override
-    public String keepId_NotInScopeRelation_DataConfigToBrowserTypeMappingList(
-            final DataConfigToBrowserTypeMappingCQ sq) {
-        return _myCQ
-                .keepId_NotInScopeRelation_DataConfigToBrowserTypeMappingList(sq);
     }
 
     @Override
@@ -188,13 +159,6 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     }
 
     @Override
-    public String keepId_SpecifyDerivedReferrer_DataConfigToBrowserTypeMappingList(
-            final DataConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("(Specify)DerivedReferrer");
-        return null;
-    }
-
-    @Override
     public String keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(
             final DataConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("(Specify)DerivedReferrer");
@@ -205,20 +169,6 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     public String keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(
             final DataConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("(Specify)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_DataConfigToBrowserTypeMappingList(
-            final DataConfigToBrowserTypeMappingCQ sq) {
-        throwIICBOE("(Query)DerivedReferrer");
-        return null;
-    }
-
-    @Override
-    public String keepId_QueryDerivedReferrer_DataConfigToBrowserTypeMappingListParameter(
-            final Object pv) {
-        throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
 
