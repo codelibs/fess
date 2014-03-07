@@ -15,9 +15,10 @@ $(function(){
 	});
 
 	$('#searchOptionsClearButton').on('click', function(e) {
-		$('#labelTypeSearchOption option').removeProp('selected');
-		$('#sortSearchOption option').removeProp('selected');
-		$('#numSearchOption option').removeProp('selected');
+		$('#labelTypeSearchOption').prop('selectedIndex', -1);
+		$('#langSearchOption').prop('selectedIndex', 0);
+		$('#sortSearchOption').prop('selectedIndex', 0);
+		$('#numSearchOption').prop('selectedIndex', 0);
 		return false;
 	});
 
