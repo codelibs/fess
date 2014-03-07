@@ -31,11 +31,9 @@
 		<initMethod name="addPrunedTag">
 			<arg>"noscript"</arg>
 		</initMethod>
-		<!--
 		<initMethod name="addPrunedTag">
 			<arg>"script"</arg>
 		</initMethod>
-		-->
 	</component>
 
 	<component name="fessFileTransformer" class="jp.sf.fess.transformer.FessFileTransformer" instance="singleton">
