@@ -48,30 +48,6 @@ public class CrawlingSessionHelperTest extends S2TestCase {
                 crawlingSessionHelper.generateId(dataMap));
     }
 
-    public void test_generateId_browserType() {
-        final Map<String, Object> dataMap = new HashMap<String, Object>();
-        dataMap.put("url", "http://hoge.com/");
-        final List<String> browserTypeList = new ArrayList<String>();
-        browserTypeList.add("pc");
-        dataMap.put("type", browserTypeList);
-
-        assertEquals("http://hoge.com/;type=pc",
-                crawlingSessionHelper.generateId(dataMap));
-
-        browserTypeList.add("docomo");
-        browserTypeList.add("softbank");
-        browserTypeList.add("au");
-
-        assertEquals("http://hoge.com/;type=au,docomo,pc,softbank",
-                crawlingSessionHelper.generateId(dataMap));
-
-        final List<String> roleTypeList = new ArrayList<String>();
-        dataMap.put("role", roleTypeList);
-
-        assertEquals("http://hoge.com/;type=au,docomo,pc,softbank",
-                crawlingSessionHelper.generateId(dataMap));
-    }
-
     public void test_generateId_roleType() {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://hoge.com/");
@@ -94,19 +70,4 @@ public class CrawlingSessionHelperTest extends S2TestCase {
                 crawlingSessionHelper.generateId(dataMap));
     }
 
-    public void test_generateId_browserType_roleType() {
-        final Map<String, Object> dataMap = new HashMap<String, Object>();
-        dataMap.put("url", "http://hoge.com/");
-        final List<String> browserTypeList = new ArrayList<String>();
-        browserTypeList.add("pc");
-        browserTypeList.add("docomo");
-        dataMap.put("type", browserTypeList);
-        final List<String> roleTypeList = new ArrayList<String>();
-        roleTypeList.add("admin");
-        roleTypeList.add("guest");
-        dataMap.put("role", roleTypeList);
-
-        assertEquals("http://hoge.com/;type=docomo,pc;role=admin,guest",
-                crawlingSessionHelper.generateId(dataMap));
-    }
 }
