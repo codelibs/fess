@@ -27,6 +27,8 @@ import org.codelibs.core.util.StringUtil;
 public class ParameterUtil {
     protected static final String XPATH_PREFIX = "field.xpath.";
 
+    protected static final String VALUE_PREFIX = "field.value.";
+
     protected static final String SCRIPT_PREFIX = "field.script.";
 
     protected static final String CLIENT_PREFIX = "client.";
@@ -77,10 +79,12 @@ public class ParameterUtil {
         final Map<ConfigName, Map<String, String>> map = new HashMap<>();
         final Map<String, String> clientConfigMap = new HashMap<>();
         final Map<String, String> xpathConfigMap = new HashMap<>();
+        final Map<String, String> valueConfigMap = new HashMap<>();
         final Map<String, String> scriptConfigMap = new HashMap<>();
         final Map<String, String> fieldConfigMap = new HashMap<>();
         map.put(ConfigName.CLIENT, clientConfigMap);
         map.put(ConfigName.XPATH, xpathConfigMap);
+        map.put(ConfigName.VALUE, valueConfigMap);
         map.put(ConfigName.SCRIPT, scriptConfigMap);
         map.put(ConfigName.FIELD, fieldConfigMap);
         for (final Map.Entry<String, String> entry : ParameterUtil.parse(
@@ -91,6 +95,9 @@ public class ParameterUtil {
                         entry.getValue());
             } else if (key.startsWith(XPATH_PREFIX)) {
                 xpathConfigMap.put(key.substring(XPATH_PREFIX.length()),
+                        entry.getValue());
+            } else if (key.startsWith(VALUE_PREFIX)) {
+                valueConfigMap.put(key.substring(VALUE_PREFIX.length()),
                         entry.getValue());
             } else if (key.startsWith(SCRIPT_PREFIX)) {
                 scriptConfigMap.put(key.substring(SCRIPT_PREFIX.length()),

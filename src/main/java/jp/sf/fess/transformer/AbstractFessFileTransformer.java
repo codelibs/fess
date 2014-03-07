@@ -97,13 +97,6 @@ public abstract class AbstractFessFileTransformer extends
 
     protected abstract Extractor getExtractor(ResponseData responseData);
 
-    protected void putResultDataBody(final Map<String, Object> dataMap,
-            final String key, final Object value) {
-        if (!dataMap.containsKey(key)) {
-            dataMap.put(key, value);
-        }
-    }
-
     @Override
     public ResultData transform(final ResponseData responseData) {
         if (responseData == null || responseData.getResponseBody() == null) {
@@ -337,6 +330,17 @@ public abstract class AbstractFessFileTransformer extends
             putResultDataBody(dataMap, "parentId",
                     crawlingSessionHelper.generateId(dataMap));
             putResultDataBody(dataMap, "url", url); // set again
+        }
+
+        // from config
+        final Map<String, String> scriptConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.SCRIPT);
+        final Map<String, String> valueConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.VALUE);
+        for (final Map.Entry<String, String> entry : valueConfigMap.entrySet()) {
+            final String key = entry.getKey();
+            putResultDataWithTemplate(dataMap, key, entry.getValue(),
+                    scriptConfigMap.get(key));
         }
 
         try {

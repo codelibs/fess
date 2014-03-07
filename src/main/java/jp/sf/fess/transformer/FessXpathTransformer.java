@@ -51,7 +51,6 @@ import org.apache.xpath.objects.XObject;
 import org.codelibs.core.util.StringUtil;
 import org.cyberneko.html.parsers.DOMParser;
 import org.seasar.framework.util.InputStreamUtil;
-import org.seasar.framework.util.OgnlUtil;
 import org.seasar.framework.util.SerializeUtil;
 import org.seasar.robot.RobotCrawlAccessException;
 import org.seasar.robot.RobotSystemException;
@@ -96,11 +95,6 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     public boolean enableCache = false;
 
     public Map<String, String> convertUrlMap = new HashMap<String, String>();
-
-    protected void putResultDataBody(final Map<String, Object> dataMap,
-            final String key, final Object value) {
-        dataMap.put(key, value);
-    }
 
     @Override
     protected void storeData(final ResponseData responseData,
@@ -348,38 +342,18 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final Map<String, String> scriptConfigMap = crawlingConfig
                 .getConfigParameterMap(ConfigName.SCRIPT);
         for (final Map.Entry<String, String> entry : xpathConfigMap.entrySet()) {
-            String value = getSingleNodeValue(document, entry.getValue(), true);
             final String key = entry.getKey();
-            final String template = scriptConfigMap.get(key);
-            if (template != null) {
-                final Map<String, Object> paramMap = new HashMap<>(
-                        dataMap.size());
-                paramMap.putAll(dataMap);
-                paramMap.put("value", value);
-                value = convertValue(template, paramMap);
-            }
-            if (value != null) {
-                putResultDataBody(dataMap, key, value);
-            }
+            final String value = getSingleNodeValue(document, entry.getValue(),
+                    true);
+            putResultDataWithTemplate(dataMap, key, value,
+                    scriptConfigMap.get(key));
         }
-    }
-
-    protected String convertValue(final String template,
-            final Map<String, Object> paramMap) {
-        if (StringUtil.isEmpty(template)) {
-            return StringUtil.EMPTY;
-        }
-
-        try {
-            final Object exp = OgnlUtil.parseExpression(template);
-            final Object value = OgnlUtil.getValue(exp, paramMap);
-            if (value == null) {
-                return null;
-            }
-            return value.toString();
-        } catch (final Exception e) {
-            logger.warn("Invalid value format: " + template, e);
-            return null;
+        final Map<String, String> valueConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.VALUE);
+        for (final Map.Entry<String, String> entry : valueConfigMap.entrySet()) {
+            final String key = entry.getKey();
+            putResultDataWithTemplate(dataMap, key, entry.getValue(),
+                    scriptConfigMap.get(key));
         }
     }
 

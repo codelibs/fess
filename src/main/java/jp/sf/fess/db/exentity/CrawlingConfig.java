@@ -62,6 +62,6 @@ public interface CrawlingConfig {
     }
 
     public enum ConfigName {
-        CLIENT, XPATH, SCRIPT, FIELD;
+        CLIENT, XPATH, VALUE, SCRIPT, FIELD;
     }
 }

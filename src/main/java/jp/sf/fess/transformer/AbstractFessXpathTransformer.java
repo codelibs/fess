@@ -17,12 +17,20 @@
 package jp.sf.fess.transformer;
 
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.util.OgnlUtil;
 import org.seasar.robot.transformer.impl.XpathTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFessXpathTransformer extends XpathTransformer {
+    private static final Logger logger = LoggerFactory
+            .getLogger(AbstractFessXpathTransformer.class);
+
     public int maxSiteLength = 50;
 
     public String unknownHostname = "unknown";
@@ -103,5 +111,42 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
             return StringUtil.EMPTY; // empty
         }
         return content.replaceAll("\\s+", " ");
+    }
+
+    protected void putResultDataBody(final Map<String, Object> dataMap,
+            final String key, final Object value) {
+        dataMap.put(key, value);
+    }
+
+    protected void putResultDataWithTemplate(final Map<String, Object> dataMap,
+            final String key, String value, final String template) {
+        if (template != null) {
+            final Map<String, Object> paramMap = new HashMap<>(dataMap.size());
+            paramMap.putAll(dataMap);
+            paramMap.put("value", value);
+            value = convertValue(template, paramMap);
+        }
+        if (value != null) {
+            putResultDataBody(dataMap, key, value);
+        }
+    }
+
+    protected String convertValue(final String template,
+            final Map<String, Object> paramMap) {
+        if (StringUtil.isEmpty(template)) {
+            return StringUtil.EMPTY;
+        }
+
+        try {
+            final Object exp = OgnlUtil.parseExpression(template);
+            final Object value = OgnlUtil.getValue(exp, paramMap);
+            if (value == null) {
+                return null;
+            }
+            return value.toString();
+        } catch (final Exception e) {
+            logger.warn("Invalid value format: " + template, e);
+            return null;
+        }
     }
 }
