@@ -108,6 +108,14 @@
 						</c:forEach>
 					</c:forEach>
 				</ul>
+				<c:if test="${!empty additional}">
+				<ul class="nav nav-list">
+					<li class="reset">
+						<s:link
+							href="search?query=${f:u(query)}"><bean:message key="label.facet_label_reset" /></s:link>
+					</li>
+				</ul>
+				</c:if>
 			</div>
 		</c:if>
 	</div>
