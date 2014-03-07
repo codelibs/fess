@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>利用者ログ</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、利用者ログについて説明します。利用者ログは利用者が検索画面で検索を行ったときに利用者を識別します。検索ログや人気URLの情報と結びつけて利用することができます。クロール全般の設定で本機能を無効にすることができます。</p>
+    </section>
+    <section name="利用方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューの利用者をクリックします。</p>
+        <img src="/images/ja/9.1/admin/userInfo-1.png" alt="利用者一覧" />
+      </subsection>
+      <subsection name="利用者一覧">
+        <p>利用者のIDが一覧されます。検索ログまたは人気URLのリンクを選択して、各ログの一覧を確認することができます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

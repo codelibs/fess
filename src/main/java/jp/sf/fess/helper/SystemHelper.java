@@ -89,7 +89,8 @@ public class SystemHelper implements Serializable {
     private boolean useOwnTmpDir = true;
 
     private String baseHelpLink = "http://fess.codelibs.org/{lang}/"
-            + Constants.MAJOR_VERSION + ".0/admin/";
+            + Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION
+            + "/admin/";
 
     private String[] supportedHelpLangs = new String[] { "ja" };
 

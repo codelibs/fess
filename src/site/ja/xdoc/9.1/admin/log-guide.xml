@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ログファイルのダウンロード</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、Fess で出力されるログファイルのダウンロードについて説明します。</p>
+    </section>
+    <section name="設定方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューのログファイルをクリックします。</p>
+        <img src="/images/ja/9.1/admin/log-1.png" alt="セッション情報"/>
+      </subsection>
+      <subsection name="ダウンロード">
+        <p>表示されているログファイル名をクリックすると、ログファイルをダウンロードすることができます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>

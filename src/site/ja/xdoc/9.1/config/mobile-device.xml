@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>携帯端末情報の設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="携帯端末情報の更新">
+      <p>携帯端末情報は<a class="externalLink" href="http://valueengine.jp/">ValueEngine社</a>より提供されるものを利用しています。最新の携帯端末情報を利用したい場合は、端末プロファイルをダウンロードして、webapps/fess/WEB-INF/classes/device / に _YYYY-MM-DD を取り除いて保存します。 再起動後に変更が有効になります。</p>
+      <source><![CDATA[
+ProfileData_YYYY-MM-DD.csv -> ProfileData.csv
+UserAgent_YYYY-MM-DD.csv -> UserAgent.csv
+DisplayInfo_YYYY-MM-DD.csv -> DisplayInfo.csv
+]]></source>
+    </section>
+  </body>
+</document>
