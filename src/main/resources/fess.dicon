@@ -35,7 +35,9 @@
             "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" }</property>
 		-->
 		<property name="logFilePath">@System@getProperty("fess.log.file").replaceAll(".out", "_crawler.out")</property>
-        <property name="crawlerJavaOptions">new String[] {
+        <property name="crawlerJavaOptions">
+@System@getProperty("java.version").startsWith("1.7") ?
+new String[] {
 "-Djava.awt.headless=true",
 "-server",
 "-Xmx512m",
@@ -50,7 +52,26 @@
 "-XX:+UseStringCache",
 "-XX:+UseTLAB",
 "-XX:+DisableExplicitGC"
-}</property>
+}
+:
+new String[] {
+"-Djava.awt.headless=true",
+"-server",
+"-Xmx512m",
+"-XX:MaxMetaspaceSize=128m",
+"-XX:+UseG1GC",
+"-XX:InitiatingHeapOccupancyPercent=45",
+"-XX:MaxGCPauseMillis=200",
+"-XX:+UseTLAB",
+"-XX:+DisableExplicitGC"
+}
+<!-- G1GC Options
+"-XX:NewRatio=2",
+"-XX:SurvivorRatio=8",
+"-XX:MaxTenuringThreshold=15",
+"-XX:G1ReservePercent=10",
+ -->
+</property>
 <!--
 "-XX:+OptimizeStringConcat",
 "-XX:+UseCompressedStrings",
