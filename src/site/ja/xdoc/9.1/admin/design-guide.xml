@@ -71,42 +71,6 @@
               <td align="left">検索エラーページ</td>
               <td align="left">検索エラーページのJSPファイルです。検索エラーの表現をカスタマイズしたい場合に変更します。</td>
             </tr>
-            <tr class="a">
-              <td align="left">携帯用トップページ (フレーム)</td>
-              <td align="left">携帯用トップページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
-            </tr>
-            <tr class="b">
-              <td align="left">携帯用トップページ (Headタグ内)</td>
-              <td align="left">携帯用トップページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
-            </tr>
-            <tr class="a">
-              <td align="left">携帯用トップページ (コンテンツ)</td>
-              <td align="left">携帯用トップページの body タグ内を表現する JSP ファイルです。</td>
-            </tr>
-            <tr class="b">
-              <td align="left">携帯用検索結果ページ (フレーム)</td>
-              <td align="left">携帯用検索結果ページの JSP ファイルです。この JSP ファイルが各部分の JSP ファイルを include しています。</td>
-            </tr>
-            <tr class="a">
-              <td align="left">携帯用検索結果ページ (Headタグ内)</td>
-              <td align="left">携帯用検索結果ページの head タグ内を表現する JSP ファイルです。meta タグ、title タグ、script タグなどを編集したい場合に変更します。</td>
-            </tr>
-            <tr class="b">
-              <td align="left">携帯用検索結果ページ (ヘッダー)</td>
-              <td align="left">携帯用検索結果ページのヘッダー部分を表現する JSP ファイルです。ページ上部の検索フォームなどが含まれています。</td>
-            </tr>
-            <tr class="a">
-              <td align="left">携帯用検索結果ページ (フッター)</td>
-              <td align="left">携帯用検索結果ページのフッター部分を表現する JSP ファイルです。ページ下部のコピーライトが含まれています。</td>
-            </tr>
-            <tr class="b">
-              <td align="left">携帯用検索結果ページ (コンテンツ)</td>
-              <td align="left">携帯用検索結果ページの検索結果部分を表現する JSP ファイルです。検索結果があるときに利用される JSP ファイルです。検索結果の表現をカスタマイズしたい場合に変更します。</td>
-            </tr>
-            <tr class="a">
-              <td align="left">携帯用検索結果ページ (結果無し)</td>
-              <td align="left">携帯用検索結果ページの検索結果部分を表現する JSP ファイルです。検索結果がないときに利用される JSP ファイルです。</td>
-            </tr>
             <tr class="b">
               <td align="left">ファイル起動ページ</td>
               <td align="left">ファイル起動ページのJSPファイルです。ファイルシステムクロールを利用して検索結果の表示にJavaプラグインの表示を有効にした場合に利用される画面です。</td>
@@ -137,7 +101,6 @@
             </tr>
           </tbody>
         </table>
-        <p>携帯用画面も PC 用と同様に編集することができます。</p>
       </subsection>
     </section>
   </body>
