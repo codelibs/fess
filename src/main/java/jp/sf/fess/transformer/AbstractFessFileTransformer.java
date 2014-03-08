@@ -114,17 +114,22 @@ public abstract class AbstractFessFileTransformer extends
         final StringBuilder contentBuf = new StringBuilder(1000);
         final StringBuilder contentMetaBuf = new StringBuilder(1000);
         final Map<String, Object> dataMap = new HashMap<String, Object>();
+        final Map<String, Object> metaDataMap = new HashMap<>();
         try {
             final ExtractData extractData = extractor.getText(in, params);
             if (ignoreEmptyContent
                     && StringUtil.isBlank(extractData.getContent())) {
                 return null;
             }
+            if (logger.isDebugEnabled()) {
+                logger.debug("ExtractData: " + extractData);
+            }
             contentBuf.append(extractData.getContent());
             // meta
             for (final String key : extractData.getKeySet()) {
                 final String[] values = extractData.getValues(key);
                 if (values != null) {
+                    metaDataMap.put(key, values);
                     if (contentMetaBuf.length() > 0) {
                         contentMetaBuf.append(' ');
                     }
@@ -335,6 +340,16 @@ public abstract class AbstractFessFileTransformer extends
         // from config
         final Map<String, String> scriptConfigMap = crawlingConfig
                 .getConfigParameterMap(ConfigName.SCRIPT);
+        final Map<String, String> metaConfigMap = crawlingConfig
+                .getConfigParameterMap(ConfigName.META);
+        for (final Map.Entry<String, String> entry : metaConfigMap.entrySet()) {
+            final String key = entry.getKey();
+            final String[] values = entry.getValue().split(",");
+            for (final String value : values) {
+                putResultDataWithTemplate(dataMap, key, metaDataMap.get(value),
+                        scriptConfigMap.get(key));
+            }
+        }
         final Map<String, String> valueConfigMap = crawlingConfig
                 .getConfigParameterMap(ConfigName.VALUE);
         for (final Map.Entry<String, String> entry : valueConfigMap.entrySet()) {

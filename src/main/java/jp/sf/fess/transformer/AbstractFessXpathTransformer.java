@@ -17,6 +17,7 @@
 package jp.sf.fess.transformer;
 
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,8 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
     public String siteEncoding;
 
     public boolean replaceSiteEncodingWhenEnglish = false;
+
+    public boolean appendResultData = true;
 
     protected String getHost(final String u) {
         if (StringUtil.isBlank(u)) {
@@ -115,23 +118,65 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
     protected void putResultDataBody(final Map<String, Object> dataMap,
             final String key, final Object value) {
-        dataMap.put(key, value);
+        if (dataMap.containsKey(key)) {
+            if (appendResultData) {
+                final Object oldValue = dataMap.get(key);
+                if (key.endsWith("_m")) {
+                    final Object[] oldValues = (Object[]) oldValue;
+                    if (value.getClass().isArray()) {
+                        final Object[] newValues = (Object[]) value;
+                        final Object[] values = Arrays.copyOf(oldValues,
+                                oldValues.length + newValues.length);
+                        for (int i = 0; i < newValues.length; i++) {
+                            values[values.length - 1 + i] = newValues[i];
+                        }
+                        dataMap.put(key, values);
+                    } else {
+                        final Object[] values = Arrays.copyOf(oldValues,
+                                oldValues.length + 1);
+                        values[values.length - 1] = value;
+                        dataMap.put(key, values);
+                    }
+                } else {
+                    dataMap.put(key, oldValue + " " + value);
+                }
+            } else {
+                dataMap.put(key, value);
+            }
+        } else {
+            dataMap.put(key, value);
+        }
     }
 
     protected void putResultDataWithTemplate(final Map<String, Object> dataMap,
-            final String key, String value, final String template) {
+            final String key, final Object value, final String template) {
+        Object target = value;
         if (template != null) {
-            final Map<String, Object> paramMap = new HashMap<>(dataMap.size());
+            final Map<String, Object> paramMap = new HashMap<>(
+                    dataMap.size() + 1);
             paramMap.putAll(dataMap);
-            paramMap.put("value", value);
-            value = convertValue(template, paramMap);
+            paramMap.put("value", target);
+            target = evaluateValue(template, paramMap);
         }
-        if (value != null) {
-            putResultDataBody(dataMap, key, value);
+        if (key != null && target != null) {
+            if (target.getClass().isArray()) {
+                if (key.endsWith("_m")) {
+                    putResultDataBody(dataMap, key, target);
+                } else {
+                    putResultDataBody(dataMap, key,
+                            Arrays.toString((Object[]) target));
+                }
+            } else {
+                if (key.endsWith("_m")) {
+                    putResultDataBody(dataMap, key, new Object[] { target });
+                } else {
+                    putResultDataBody(dataMap, key, target);
+                }
+            }
         }
     }
 
-    protected String convertValue(final String template,
+    protected String evaluateValue(final String template,
             final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
