@@ -36,7 +36,7 @@
 						<div class="site ellipsis">
 							<cite>${f:h(doc.site)}</cite>
 							<c:if test="${doc.hasCache_s_s=='true'}">
-								<a href="cache?docId=${doc.docId}" class="cache"><bean:message
+								<a href="cache?docId=${doc.docId}${appendHighlightQueries}" class="cache"><bean:message
 										key="labels.search_result_cache" /></a>
 							</c:if>
 						</div>

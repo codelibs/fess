@@ -96,6 +96,8 @@ public class QueryHelper implements Serializable {
 
     protected Set<String> apiResponseFieldSet;
 
+    protected Set<String> highlightFieldSet = new HashSet<>();
+
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
             "mimetype", "filetype_s", "created", TITLE_FIELD, "digest", "url",
@@ -376,7 +378,7 @@ public class QueryHelper implements Serializable {
                     }
                     nonPrefix = true;
                     operator = _AND_;
-                    if (!LABEL_FIELD.equals(field)) {
+                    if (highlightFieldSet.contains(field)) {
                         highLightQueryList.add(targetWord);
                     }
                     if (fieldLogMap != null) {
@@ -1185,6 +1187,10 @@ public class QueryHelper implements Serializable {
      */
     public void setSupportedSortFields(final String[] supportedSortFields) {
         this.supportedSortFields = supportedSortFields;
+    }
+
+    public void addHighlightField(final String field) {
+        highlightFieldSet.add(field);
     }
 
     /**

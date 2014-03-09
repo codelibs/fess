@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+	<component name="viewHelper" class="jp.sf.fess.helper.ViewHelper">
+	</component>
+	<component name="pathMappingHelper" class="jp.sf.fess.helper.PathMappingHelper">
+	</component>
+	<component name="userAgentHelper" class="jp.sf.fess.helper.UserAgentHelper">
+	</component>
+	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
+		<arg>
+			@org.seasar.framework.util.ResourceUtil@getBuildDir(@jp.sf.fess.FessClass@class).getCanonicalPath()
+			+ "/conf/crawler.properties"
+		</arg>
+	</component>
+
+</components>

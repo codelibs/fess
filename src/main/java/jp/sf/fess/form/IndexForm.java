@@ -65,6 +65,8 @@ public class IndexForm implements Serializable {
     @Maxbytelength(maxbytelength = 100)
     public String docId;
 
+    public String[] hq;
+
     // xml/json
 
     @Maxbytelength(maxbytelength = 20)

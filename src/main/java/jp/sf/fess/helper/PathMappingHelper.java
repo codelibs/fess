@@ -30,14 +30,19 @@ import jp.sf.fess.db.exentity.PathMapping;
 
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PathMappingHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger logger = LoggerFactory
+            .getLogger(PathMappingHelper.class);
+
     private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<String, List<PathMapping>>();
 
-    private List<PathMapping> cachedPathMappingList = null;
+    private volatile List<PathMapping> cachedPathMappingList = null;
 
     @InitMethod
     public void init() {
@@ -45,14 +50,19 @@ public class PathMappingHelper implements Serializable {
         ptList.add(CDef.ProcessType.Displaying);
         ptList.add(CDef.ProcessType.Both);
 
-        final PathMappingCB cb = new PathMappingCB();
+        try {
+            final PathMappingBhv pathMappingBhv = SingletonS2Container
+                    .getComponent(PathMappingBhv.class);
+            final PathMappingCB cb = new PathMappingCB();
 
-        cb.query().setDeletedBy_IsNull();
-        cb.query().addOrderBy_SortOrder_Asc();
-        cb.query().setProcessType_InScope_AsProcessType(ptList);
+            cb.query().setDeletedBy_IsNull();
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().setProcessType_InScope_AsProcessType(ptList);
 
-        cachedPathMappingList = SingletonS2Container.getComponent(
-                PathMappingBhv.class).selectList(cb);
+            cachedPathMappingList = pathMappingBhv.selectList(cb);
+        } catch (final Exception e) {
+            logger.warn("Failed to load path mappings.", e);
+        }
     }
 
     public void setPathMappingList(final String sessionId,
@@ -86,6 +96,13 @@ public class PathMappingHelper implements Serializable {
     }
 
     public String replaceUrl(final String url) {
+        if (cachedPathMappingList == null) {
+            synchronized (this) {
+                if (cachedPathMappingList == null) {
+                    init();
+                }
+            }
+        }
         return replaceUrl(cachedPathMappingList, url);
     }
 

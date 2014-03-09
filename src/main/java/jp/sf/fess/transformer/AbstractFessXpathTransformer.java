@@ -118,7 +118,9 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
     protected void putResultDataBody(final Map<String, Object> dataMap,
             final String key, final Object value) {
-        if (dataMap.containsKey(key)) {
+        if ("url".equals(key)) {
+            dataMap.put(key, value);
+        } else if (dataMap.containsKey(key)) {
             if (appendResultData) {
                 final Object oldValue = dataMap.get(key);
                 if (key.endsWith("_m")) {

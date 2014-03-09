@@ -205,6 +205,8 @@ public class IndexAction {
 
     public String username;
 
+    public String appendHighlightQueries;
+
     public String getPagingQuery() {
         if (pagingQuery == null) {
             final StringBuilder buf = new StringBuilder();
@@ -317,7 +319,7 @@ public class IndexAction {
             return "error.jsp";
         }
 
-        final String content = viewHelper.createCacheContent(doc);
+        final String content = viewHelper.createCacheContent(doc, indexForm.hq);
         if (content == null) {
             errorMessage = MessageResourcesUtil.getMessage(RequestUtil
                     .getRequest().getLocale(), "errors.docid_not_found",
@@ -1002,6 +1004,16 @@ public class IndexAction {
             searchLogHelper.addSearchLog(searchLog);
         }
 
+        final String[] highlightQueries = (String[]) request
+                .getAttribute(Constants.HIGHLIGHT_QUERIES);
+        if (highlightQueries != null) {
+            final StringBuilder buf = new StringBuilder(100);
+            for (final String q : highlightQueries) {
+                buf.append("&hq=").append(q);
+            }
+            appendHighlightQueries = buf.toString();
+        }
+
         Beans.copy(documentItems, this)
                 .includes("pageSize", "currentPageNumber", "allRecordCount",
                         "allPageCount", "existNextPage", "existPrevPage",
@@ -1182,6 +1194,7 @@ public class IndexAction {
                 username = loginInfo.getUsername();
             }
         }
+
     }
 
     protected void buildInitParams() {

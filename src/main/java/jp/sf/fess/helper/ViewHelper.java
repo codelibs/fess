@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
@@ -374,7 +375,8 @@ public class ViewHelper implements Serializable {
         return file.isFile();
     }
 
-    public String createCacheContent(final Map<String, Object> doc) {
+    public String createCacheContent(final Map<String, Object> doc,
+            final String[] queries) {
 
         final FileTemplateLoader loader = new FileTemplateLoader(new File(
                 ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
@@ -401,6 +403,20 @@ public class ViewHelper implements Serializable {
         doc.put("cacheMsg", MessageResourcesUtil.getMessage(locale,
                 "labels.search_cache_msg", url, created));
 
+        doc.put("queries", queries);
+
+        final String cache = (String) doc.get("cache");
+        if (cache != null) {
+            if (queries != null && queries.length > 0) {
+                doc.put("hlCache", replaceHighlightQueries(cache, queries));
+            } else {
+                doc.put("hlCache", cache);
+            }
+        } else {
+            doc.put("cache", StringUtil.EMPTY);
+            doc.put("hlCache", StringUtil.EMPTY);
+        }
+
         try {
             final Template template = handlebars.compile(cacheTemplateName);
             final Context hbsContext = Context.newContext(doc);
@@ -410,6 +426,42 @@ public class ViewHelper implements Serializable {
         }
 
         return null;
+    }
+
+    protected String replaceHighlightQueries(final String cache,
+            final String[] queries) {
+        final StringBuffer buf = new StringBuffer(cache.length() + 100);
+        final StringBuffer segBuf = new StringBuffer(1000);
+        final Pattern p = Pattern.compile("<[^>]+>");
+        final Matcher m = p.matcher(cache);
+        final String[] regexQueries = new String[queries.length];
+        final String[] hlQueries = new String[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            regexQueries[i] = Pattern.quote(queries[i]);
+            hlQueries[i] = highlightTagPre + queries[i] + highlightTagPost;
+        }
+        while (m.find()) {
+            segBuf.setLength(0);
+            m.appendReplacement(segBuf, StringUtil.EMPTY);
+            String segment = segBuf.toString();
+            for (int i = 0; i < queries.length; i++) {
+                segment = Pattern
+                        .compile(regexQueries[i], Pattern.CASE_INSENSITIVE)
+                        .matcher(segment).replaceAll(hlQueries[i]);
+            }
+            buf.append(segment);
+            buf.append(m.group(0));
+        }
+        segBuf.setLength(0);
+        m.appendTail(segBuf);
+        String segment = segBuf.toString();
+        for (int i = 0; i < queries.length; i++) {
+            segment = Pattern
+                    .compile(regexQueries[i], Pattern.CASE_INSENSITIVE)
+                    .matcher(segment).replaceAll(hlQueries[i]);
+        }
+        buf.append(segment);
+        return buf.toString();
     }
 
     public boolean isUseSession() {

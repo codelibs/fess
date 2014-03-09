@@ -68,6 +68,12 @@
             "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
             "created", "title", "digest", "url"}</arg>
 		</initMethod>
+		<initMethod name="addHighlightField">
+			<arg>"title"</arg>
+		</initMethod>
+		<initMethod name="addHighlightField">
+			<arg>"content"</arg>
+		</initMethod>
 		<!-- 
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{ "id", "docId", "score",
