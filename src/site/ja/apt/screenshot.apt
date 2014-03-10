@@ -12,10 +12,6 @@
 
 [../images/ja/screenshot/fess_search_result.png] ブラウザによる検索結果の表示
 
-* 携帯用検索結果の表示
-
-[../images/ja/screenshot/fess_search_mobile_result.png] 携帯用検索結果の表示
-
 * クロール全般
 
 [../images/ja/screenshot/fess_admin_crawler.png] クロール全般
@@ -36,17 +32,13 @@
 
 [../images/ja/screenshot/fess_admin_pathmapping.png] パスマッピングの設定
 
-* ブラウザタイプの設定
-
-[../images/ja/screenshot/fess_admin_browsertype.png] ブラウザタイプの設定
-
 * Solr の設定
 
 [../images/ja/screenshot/fess_admin_solr.png] Solr の設定
 
-* セッション情報
+* ログファイル一覧
 
-[../images/ja/screenshot/fess_admin_logfile.png] セッション情報
+[../images/ja/screenshot/fess_admin_logfile.png] ログファイル一覧
 
 * セッション情報一覧
 

@@ -12,10 +12,6 @@ Screenshot
 
 [./images/ja/screenshot/fess_search_result.png] Search Results on Browser
 
-* Search Results on Mobile Device
-
-[./images/ja/screenshot/fess_search_mobile_result.png] Search Results on Mobile Device
-
 * Crawling Setting
 
 [./images/ja/screenshot/fess_admin_crawler.png] Crawling Setting
@@ -36,15 +32,11 @@ Screenshot
 
 [./images/ja/screenshot/fess_admin_pathmapping.png] Path Mapping Setting
 
-* Browser Type Setting
-
-[./images/ja/screenshot/fess_admin_browsertype.png] Browser Type Setting
-
 * Solr Setting
 
 [./images/ja/screenshot/fess_admin_solr.png] Solr Setting
 
-* Session Info
+* Logfile List
 
 [./images/ja/screenshot/fess_admin_logfile.png] Session Info
 
