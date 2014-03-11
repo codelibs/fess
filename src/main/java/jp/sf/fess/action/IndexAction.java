@@ -45,6 +45,7 @@ import javax.servlet.http.HttpSession;
 import jp.sf.fess.Constants;
 import jp.sf.fess.InvalidQueryException;
 import jp.sf.fess.ResultOffsetExceededException;
+import jp.sf.fess.UnsupportedSearchException;
 import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
@@ -268,6 +269,7 @@ public class IndexAction {
 
     @Execute(validator = false, input = "index.jsp")
     public String index() {
+        searchAvailable();
 
         buildViewParams();
         buildInitParams();
@@ -275,7 +277,18 @@ public class IndexAction {
         return "index.jsp";
     }
 
+    protected void searchAvailable() {
+        final String supportedSearch = crawlerProperties.getProperty(
+                Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
+                Constants.SUPPORTED_SEARCH_WEB);
+        if (Constants.SUPPORTED_SEARCH_NONE.equals(supportedSearch)) {
+            throw new UnsupportedSearchException("A search is not supported: "
+                    + RequestUtil.getRequest().getRequestURL());
+        }
+    }
+
     protected String doSearch() {
+        searchAvailable();
 
         if (StringUtil.isBlank(indexForm.query)) {
             try {
