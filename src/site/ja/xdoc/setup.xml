@@ -20,6 +20,7 @@
       <p>Java がインストールされていない場合は以下の手順でJavaをインストールしてください。</p>
       <subsection name="Java SE のダウンロードページへアクセス">
         <p>JavaScriptが有効な状態でOracle社の<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank">「Java SE Downloads」ページ</a>にアクセスします。</p>
+        <p>スクリーンショットのバージョンとは異なりますが、<a href="http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html#jdk-7u25-oth-JPR" target="_blank">「Java 7u25」</a>をインストールしてください(推奨)。[2014/3/13]</p>
         <p>JavaSE7の「Download JDK」をクリックします。(JavaScriptが無効になっているとダウンロードが有効となりません) </p>
         <img src="/images/ja/install/java-1.png" alt="アクセス"/>
         <blockquote>
@@ -115,7 +116,7 @@
     <section name="Fessのインストール">
       <subsection name="Fessのダウンロードページへアクセス">
         <p><a href="http://sourceforge.jp/projects/fess/releases/" class="externalLink">http://sourceforge.jp/projects/fess/releases/</a> から最新の Fess パッケージをダウンロードします。</p>
-        <p>URL先のリリースファイル一覧から「fess-server-7.0.1.zip」をクリックします。</p>
+        <p>URL先のリリースファイル一覧から「fess-server-9.x.y.zip」をクリックします。</p>
         <img src="/images/ja/install/Fess-1.png"/>
       </subsection>
       <subsection name="インストール">
@@ -167,18 +168,50 @@ $ ./bin/shutdown.sh
   <user username="admin" password="admin" roles="fess"/>
 ]]></source>
       </subsection>
-      <subsection name="Solr サーバーのパスワード変更">
-        <p>Fess サーバーには Solr が組み込まれていますが、アクセスするためにはパスワードが必要になります。 実運用などにおいては、デフォルトのパスワードを変更してください。</p>
-        <p>パスワードの変更方法は、まず、conf/tomcat-user.xml の solradmin のパスワード属性を変更します。</p>
-        <source><![CDATA[
+    <subsection name="Solr サーバーのパスワード変更">
+<p>
+Fess サーバーには Solr が組み込まれていますが、アクセスするためにはパスワードが必要になります。実運用などにおいては、デフォルトのパスワードを変更してください。
+</p>
+<p>
+パスワードの変更方法は、まず、conf/tomcat-user.xml の solradmin のパスワード属性を変更します。
+</p>
+<source><![CDATA[
   <user username="solradmin" password="solradmin" roles="solr"/>
 ]]></source>
-        <p>次に webapps/fess/WEB-INF/classes/fess_solr.dicon の以下のパスワードの箇所を tomcat-user.xml で指定したものを記述します。</p>
-        <source><![CDATA[
+<p>
+次に webapps/fess/WEB-INF/classes/solrlib.dicon と fess_suggest.dicon
+	 solr/core1/conf/solrconfig.xml
+	 の3ファイルを変更します。以下のパスワードの箇所へ tomcat-user.xml で指定したものを記述します。
+
+solrlib.dicon
+</p>
+<source><![CDATA[
 <component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
-    <arg>"solradmin"</arg> <!-- Username -->
-    <arg>"solradmin"</arg> <!-- Password -->
+    <arg>"solradmin"</arg> <!-- ユーザー名 -->
+    <arg>"solradmin"</arg> <!-- パスワード -->
 </component>
+]]></source>
+<p>
+fess_suggest.dicon
+</p>
+<source><![CDATA[
+<component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
+	<arg>"solradmin"</arg> <!-- ユーザー名 -->
+	<arg>"solradmin"</arg> <!-- パスワード -->
+</component>
+]]></source>
+<p>
+solr/core1/conf/solrconfig.xml
+</p>
+<source><![CDATA[
+<!-- SuggestTranslogUpdateHandler settings -->
+<suggest>
+  <solrServer class="org.codelibs.solr.lib.server.SolrLibHttpSolrServer">
+    <arg>http://localhost:8080/solr/core1-suggest</arg>
+    <credentials>
+      <username>solradmin</username> <!-- ユーザー名 -->
+      <password>solradmin</password> <!-- パスワード -->
+    </credentials>
 ]]></source>
       </subsection>
     </section>
