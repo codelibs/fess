@@ -19,6 +19,8 @@ package jp.sf.fess.pager;
 import java.io.Serializable;
 import java.util.List;
 
+import jp.sf.fess.Constants;
+
 public class SynonymPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -47,7 +49,7 @@ public class SynonymPager implements Serializable {
     }
 
     protected int getDefaultPageSize() {
-        return 20;
+        return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }
 
     protected int getDefaultCurrentPageNumber() {
