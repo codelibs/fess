@@ -20,9 +20,9 @@ import java.util.Map;
 
 import jp.sf.fess.util.SearchParamMap;
 
-import org.seasar.struts.action.S2RequestProcessor;
+import org.codelibs.sastruts.core.struts.action.SSCRequestProcessor;
 
-public class FessRequestProcessor extends S2RequestProcessor {
+public class FessRequestProcessor extends SSCRequestProcessor {
     @Override
     @SuppressWarnings("unchecked")
     protected void setMapProperty(final Map map, final String name,
