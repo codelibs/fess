@@ -20,7 +20,7 @@
       <p>Java がインストールされていない場合は以下の手順でJavaをインストールしてください。</p>
       <subsection name="Java SE のダウンロードページへアクセス">
         <p>JavaScriptが有効な状態でOracle社の<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank">「Java SE Downloads」ページ</a>にアクセスします。</p>
-        <p>スクリーンショットのバージョンとは異なりますが、<a href="http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html#jdk-7u25-oth-JPR" target="_blank">「Java 7u25」</a>をインストールしてください(推奨)。[2014/3/13]</p>
+        <p>※以下の手順とはバージョンが異なりますが、<a href="http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html#jdk-7u25-oth-JPR" target="_blank">「Java 7u25」</a>をインストールしてください(推奨)。[2014/3/13]</p>
         <p>JavaSE7の「Download JDK」をクリックします。(JavaScriptが無効になっているとダウンロードが有効となりません) </p>
         <img src="/images/ja/install/java-1.png" alt="アクセス"/>
         <blockquote>
@@ -65,7 +65,7 @@
         <img src="/images/ja/install/java-7.png" alt="JDKインストール"/>
       </subsection>
       <subsection name="JREのインストール">
-        <p>JDKのインストール後、使用のパソコンにJREがインストールされていなければ、JREのインストールが実行されます。        JDK同様にインストール先のフォルダの変更が可能ですが、基本的にはJDKと同フォルダで問題ありません。
+        <p>JDKのインストール後、使用のパソコンにJREがインストールされていなければ、JREのインストールが実行されます。        JDK同様にインストール先のフォルダの変更が可能ですが、基本的にはJDKと同じフォルダで問題ありません。
         [次へ]ボタンを押します。</p>
         <img src="/images/ja/install/java-8.png" alt="JRE"/>
         <p>JREのインストールが開始されるので、しばらく待ちます。</p>
@@ -104,12 +104,12 @@
 <p>「変数名」には「JAVA_HOME」と入力します。</p>
 <img src="/images/ja/install/java-17.png"/>
 <p>「変数値」には、JDKがインストールしたディレクトリを記述します。</p>
-<p>エクスプローラで「C:\Program Files\Java」を開き、「jdk・・・」というフォルダを探して、そのアドレスを>記述します。</p>
-<p>たとえばjdkのバージョン1.7.0_07をインストールした場合は、「C:\Program Files\Java\jdk1.7.0_07」となり>ます。</p>
+<p>エクスプローラで「C:\Program Files\Java」を開き、「jdk・・・」というフォルダを探して、そのアドレスを記述します。</p>
+<p>たとえばjdkのバージョン1.7.0_07をインストールした場合は、「C:\Program Files\Java\jdk1.7.0_07」となります。</p>
 <p>記述後、「OK」を押します。</p>
 <p>「システム環境変数」のリストから、「変数」が「Path」である行を探します。</p>
 <img src="/images/ja/install/java-18.png"/>
-<p>その行をクリックして編集ボタンを押して開き、「変数値」の末尾に「;%JAVA_HOME%\bin」という文字列を追加>し、「OK」をクリックします。</p>
+<p>その行をクリックして編集ボタンを押して開き、「変数値」の末尾に「;%JAVA_HOME%\bin」という文字列を追加し、「OK」をクリックします。</p>
 <img src="/images/ja/install/java-19.png"/>
       </subsection>
     </section>
@@ -179,11 +179,10 @@ Fess サーバーには Solr が組み込まれていますが、アクセスす
   <user username="solradmin" password="solradmin" roles="solr"/>
 ]]></source>
 <p>
-次に webapps/fess/WEB-INF/classes/solrlib.dicon と fess_suggest.dicon
-	 solr/core1/conf/solrconfig.xml
-	 の3ファイルを変更します。以下のパスワードの箇所へ tomcat-user.xml で指定したものを記述します。
-
-solrlib.dicon
+次に webapps/fess/WEB-INF/classes/solrlib.dicon、fess_suggest.dicon および solr/core1/conf/solrconfig.xml の3ファイルを変更します。以下のパスワードの箇所へ tomcat-user.xml で指定したものを記述します。
+</p>
+<p>
+solrlib.dicon の対象箇所を以下のように修正します。
 </p>
 <source><![CDATA[
 <component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
@@ -192,7 +191,7 @@ solrlib.dicon
 </component>
 ]]></source>
 <p>
-fess_suggest.dicon
+fess_suggest.dicon は以下の箇所です。
 </p>
 <source><![CDATA[
 <component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
@@ -201,7 +200,7 @@ fess_suggest.dicon
 </component>
 ]]></source>
 <p>
-solr/core1/conf/solrconfig.xml
+solr/core1/conf/solrconfig.xml は以下の箇所です。
 </p>
 <source><![CDATA[
 <!-- SuggestTranslogUpdateHandler settings -->
