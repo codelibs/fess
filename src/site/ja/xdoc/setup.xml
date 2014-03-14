@@ -13,7 +13,7 @@
       <p>Fess は Java 実行環境があればどの OS でも実行可能です。動作環境は以下のとおりです。</p>
       <ul>
         <li>Windows や Unix など Java が実行できる OS 環境</li>
-        <li>Java: Java 6 以上</li>
+        <li>Java: Java 7 以上</li>
       </ul>
     </section>
     <section name="Javaのインストール">
@@ -52,7 +52,7 @@
         <img src="/images/ja/install/java-3.png" alt="ダウンロード"/>
       </subsection>
       <subsection name="JDKインストーラーの実行">
-        <p>ダウンロードしたJDKインストーラー (jdk-7u7-windows-x64.exe) を実行します。 (以下はWindows 64ビット版の例です) </p>
+        <p>ダウンロードしたJDKインストーラー (jdk-7uXX-windows-x64.exe) を実行します(XXはダウンロードしたアップデートリリースのバージョン)。以下はWindows 64ビット版の例です。</p>
         <img src="/images/ja/install/java-4.png" alt="実行"/>
         <p>Windowsの設定によっては、「次のプログラムにこのコンピュータへの変更を許可しますか？」というダイアログが表示されることがあります。その場合、[はい]ボタンをクリックしてください。</p>
       </subsection>
@@ -65,8 +65,7 @@
         <img src="/images/ja/install/java-7.png" alt="JDKインストール"/>
       </subsection>
       <subsection name="JREのインストール">
-        <p>JDKのインストール後、使用のパソコンにJREがインストールされていなければ、JREのインストールが実行されます。        JDK同様にインストール先のフォルダの変更が可能ですが、基本的にはJDKと同じフォルダで問題ありません。
-        [次へ]ボタンを押します。</p>
+        <p>JDKのインストール後、使用のパソコンにJREがインストールされていなければ、JREのインストールが実行されます。JDK同様にインストール先のフォルダの変更が可能ですが、基本的にはJDKと同じフォルダで問題ありません。[次へ]ボタンを押します。</p>
         <img src="/images/ja/install/java-8.png" alt="JRE"/>
         <p>JREのインストールが開始されるので、しばらく待ちます。</p>
         <img src="/images/ja/install/java-9.png" alt="JREインストール"/>
@@ -80,8 +79,8 @@
           <ol>
             <li>[コントロールパネル]→[プログラム]→[プログラムと機能]の一覧に表示されます。
               <ul>
-                <li>Java SE Development Kit 7 Update 6 (64-bit)</li>
-                <li>Java(TM) 7 Update 6 (64-bit)</li>
+                <li>Java SE Development Kit 7 Update XX (64-bit)</li>
+                <li>Java(TM) 7 Update XX (64-bit)</li>
               </ul>
             </li>
           </ol>
@@ -89,7 +88,7 @@
       </subsection>
       <subsection name="環境変数の設定">
         <p>「環境変数」とは、プログラムに渡される設定情報です。コマンドプロンプトでJDKのコマンドを実行するために、Javaインストールの後、環境変数の設定が必要です。</p>
-<p>Windows 7 では以下のように設定します。[コントロールパネル]→[システムとセキュリティ]→[システム]→[システムの詳細設定]→[環境変数]を選択します>。</p>
+<p>Windows 7 では以下のように設定します。[コントロールパネル]→[システムとセキュリティ]→[システム]→[システムの詳細設定]→[環境変数]を選択します。</p>
 <img src="/images/ja/install/java-11.png" alt="コントロールパネル"/>
 <p>「システムとセキュリティ」をクリックします。</p>
 <img src="/images/ja/install/java-12.png" alt="システムとセキュリティ"/>
@@ -105,7 +104,7 @@
 <img src="/images/ja/install/java-17.png"/>
 <p>「変数値」には、JDKがインストールしたディレクトリを記述します。</p>
 <p>エクスプローラで「C:\Program Files\Java」を開き、「jdk・・・」というフォルダを探して、そのアドレスを記述します。</p>
-<p>たとえばjdkのバージョン1.7.0_07をインストールした場合は、「C:\Program Files\Java\jdk1.7.0_07」となります。</p>
+<p>たとえばjdkのバージョン1.7.0_XXをインストールした場合は、「C:\Program Files\Java\jdk1.7.0_XX」となります。(XXの部分にはインストールしたバージョンが入ります)</p>
 <p>記述後、「OK」を押します。</p>
 <p>「システム環境変数」のリストから、「変数」が「Path」である行を探します。</p>
 <img src="/images/ja/install/java-18.png"/>
@@ -124,8 +123,8 @@
         <blockquote>
           <p> Unix 環境にインストールした場合、bin 以下にあるスクリプトに実行権を付加します。</p>
         <source><![CDATA[
-$ unzip fess-server-x.y.zip
-$ cd fess-server-x.y
+$ unzip fess-server-9.x.y.zip
+$ cd fess-server-9.x.y
 $ chmod +x bin/*.sh   # (Unix環境のみ)
 ]]></source>
         </blockquote>
@@ -163,7 +162,7 @@ $ ./bin/shutdown.sh
         </blockquote>
       </subsection>
       <subsection name="管理者パスワードの変更">
-        <p>管理者アカウントはアプリケーションサーバーにより管理されています。 標準の Fess サーバーは Tomcat を利用しているので、Tomcat のユーザー変更方法と同様になります。 変更する場合は、conf/tomcat-user.xml の admin アカウントのパスワードを修正してください。</p>
+        <p>管理者アカウントはアプリケーションサーバーにより管理されています。標準の Fess サーバーは Tomcat を利用しているので、Tomcat のユーザー変更方法と同様になります。変更する場合は、conf/tomcat-user.xml の admin アカウントのパスワードを修正してください。</p>
         <source><![CDATA[
   <user username="admin" password="admin" roles="fess"/>
 ]]></source>

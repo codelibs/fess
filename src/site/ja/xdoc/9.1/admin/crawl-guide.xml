@@ -40,7 +40,7 @@
         <p>検索画面を表示するかどうかを指定できます。利用不可とした場合は、検索画面を利用できません。インデックス作成専用サーバーとする場合などに利用不可を選択します。</p>
       </subsection>
       <subsection name="注目キーワード応答">
-        <p>JSON形式で検索が多い検索語が取得可能になります。http://localhost:8080/fess/hotsearchword にアクセスすることで取得できます。</p>
+        <p>JSON形式で検索が多い検索語が取得可能になります。http://localhost:8080/fess/json?type=hotsearchword にアクセスすることで取得できます。</p>
       </subsection>
       <subsection name="指定日数以前の検索ログ削除">
         <p>指定した日数以前の検索ログを削除します。一日一回のログパージで古いログは削除されます。</p>
