@@ -52,6 +52,7 @@ import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.LoginInfo;
+import jp.sf.fess.entity.SpellCheckResponse;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.CrawlingConfigHelper;
@@ -114,6 +115,8 @@ public class IndexAction {
     protected static final int MAX_PAGE_SIZE = 100;
 
     protected static final int DEFAULT_SUGGEST_PAGE_SIZE = 5;
+
+    protected static final int DEFAULT_SPELLCHECK_PAGE_SIZE = 5;
 
     protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern
             .compile("^([a-zA-Z0-9_]+):.*");
@@ -584,6 +587,65 @@ public class IndexAction {
             }
 
             WebApiUtil.setObject("suggestRecordCount", 1);
+        } catch (final Exception e) {
+            WebApiUtil.setError(1, e);
+        }
+        return null;
+    }
+
+    @Execute(validator = false)
+    public String spellCheckApi() {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(
+                Constants.WEB_API_SPELLCHECK_PROPERTY, Constants.TRUE))) {
+            WebApiUtil.setError(9, "Unsupported operation.");
+            return null;
+        }
+
+        if (indexForm.fn == null || indexForm.fn.length == 0) {
+            WebApiUtil.setError(2, "The field name is empty.");
+            return null;
+        }
+
+        if (StringUtil.isBlank(indexForm.query)) {
+            WebApiUtil.setError(3, "Your query is empty.");
+            return null;
+        }
+
+        if (StringUtil.isBlank(indexForm.num)) {
+            indexForm.num = String.valueOf(DEFAULT_SPELLCHECK_PAGE_SIZE);
+        }
+
+        int num = Integer.parseInt(indexForm.num);
+        if (num > getMaxPageSize()) {
+            num = getMaxPageSize();
+        }
+
+        final String[] fieldNames = indexForm.fn;
+        final String[] labels = indexForm.fields.get("label");
+
+        final List<SpellCheckResponse> spellCheckResultList = new ArrayList<SpellCheckResponse>();
+        WebApiUtil.setObject("spellCheckResultList", spellCheckResultList);
+
+        final List<String> spellCheckFieldName = Arrays.asList(fieldNames);
+        WebApiUtil.setObject("spellCheckFieldName", spellCheckFieldName);
+
+        final List<String> labelList;
+        if (labels == null) {
+            labelList = new ArrayList<String>();
+        } else {
+            labelList = Arrays.asList(labels);
+        }
+
+        try {
+            final SpellCheckResponse spellCheckResponse = searchService
+                    .getSpellCheckResponse(indexForm.query,
+                            spellCheckFieldName, labelList, num);
+
+            if (!spellCheckResponse.isEmpty()) {
+                spellCheckResultList.add(spellCheckResponse);
+            }
+
+            WebApiUtil.setObject("spellCheckRecordCount", 1);
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
         }

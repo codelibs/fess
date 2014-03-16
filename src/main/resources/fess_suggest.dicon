@@ -35,6 +35,15 @@
 		</initMethod>
 	</component>
 
+	<component name="spellchecker" class="jp.sf.fess.suggest.SpellChecker">
+		<property name="fuzzyValue">0.5</property>
+		<initMethod name="setConverter">
+			<arg>suggestIntegrateConverter</arg>
+		</initMethod>
+		<initMethod name="setNormalizer">
+			<arg>suggestIntegrateNormalizer</arg>
+		</initMethod>
+	</component>
 
 	<!-- Solr Group Configuration -->
 	<component name="suggestSolrProperties" class="org.codelibs.core.util.DynamicProperties">

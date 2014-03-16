@@ -127,6 +127,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_SUGGEST_PROPERTY = "web.api.suggest";
 
+    public static final String WEB_API_SPELLCHECK_PROPERTY = "web.api.spellcheck";
+
     public static final String WEB_API_ANALYSIS_PROPERTY = "web.api.analysis";
 
     public static final String WEB_DESIGN_EDITOR_PROPERTY = "design.editor";
