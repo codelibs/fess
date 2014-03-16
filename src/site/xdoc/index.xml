@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
   <properties>
-    <title>Open Source Full Text Search Server - Fess</title>
+    <title>Enterprise Search Server - Fess</title>
     <author>Shinsuke Sugaya</author>
   </properties>
   <head>
-    <meta name="keywords" content="Full Text Search,OSS,Free Software,Solr,namazu,nutch"/>
+    <meta name="keywords" content="Full Text Search,Enterprise Search,Free Software,Solr,OSS,namazu,nutch"/>
     <meta name="description" content="Fess is OSS Full Text Search Server."/>
   </head>
   <body>
     <section name="What is Fess?">
-      <p>Fess is Java based full text search server provided as OSS product. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.</p>
-      <img src="./images/ja/fess_search_result_mini.png" alt="Fess Screen Shot"/>
-      <p>Fess is built on <a href="http://www.seasar.org/" class="externalLink">Seasar2</a> framework, and contains <a href="http://lucene.apache.org/solr/" class="externalLink">Apache Solr</a>. A crawler used by Fess is <a href="http://s2robot.sandbox.seasar.org/" class="externalLink">S2Robot</a>, which can crawl documents on Web/Local File System and support many file formats, such as MS Office, pdf and zip.</p>
+      <p>Fess is very easily deployable and powerful Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.</p>
+      <img src="./images/en/fess_search_result_mini.png" alt="Fess Screen Shot"/>
+      <p>Fess is <a href="http://lucene.apache.org/solr/" class="externalLink">Solr</a> based search server, but knowledge/experience about Solr is NOT needed. Fess provides Administration GUI feature to configure the system on your browser. A crawler used by Fess is <a href="http://s2robot.sandbox.seasar.org/" class="externalLink">S2Robot</a>, which can crawl documents on Web/Local File System and support many file formats, such as MS Office, pdf and zip.</p>
     </section>
     <section name="Features">
       <ul>
-        <li>Easy Installation/Configuration</li>
+        <li>Very Easy Installation/Configuration</li>
         <li>Apache License (OSS)</li>
         <li>OS-independent (Runs on Java)</li>
         <li>Crawl documents on Web/File System/DB/Windows Shared Folder</li>
-        <li>Support documents of MS Office, PDF,...</li>
-        <li>Use Apache Solr as a search engine</li>
-        <li>Support Japanese mobile devices</li>
-        <li>Provide a browser based administative page</li>
+        <li>Support many document types, such as MS Office, PDF, Zip archive,...</li>
         <li>Support a web page for BASIC/DIGEST/NTLM authentication</li>
+        <li>Contain Apache Solr as a search engine</li>
+        <li>Provide UI as a responsive web design</li>
+        <li>Provide a browser based administative page</li>
         <li>Support a role authentication</li>
         <li>Support XML/JSON/JSONP format</li>
-        <li>Provide a search log and statistics</li>
+        <li>Provide a search/click log and statistics</li>
+        <li>Provide auto-complete(suggest)</li>
       </ul>
     </section>
     <section name="Demo Site">
@@ -61,12 +62,9 @@
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24242" class="externalLink">Fess 8.1.0 Released</a>
         </dd>
-        <dt>2013-02-23</dt>
-        <dd>
-          <a href="http://sourceforge.jp/projects/fess/news/24130" class="externalLink">Fess 8.0.0 Released</a>
-        </dd>
       </dl>
       <p><a href="news.html">More news...</a></p>
     </section>
+<!-- Commercial Support -->
   </body>
 </document>
