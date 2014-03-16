@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
   <properties>
-    <title>Enterprise Search Server - Fess</title>
+    <title>Fess: Open Source Enterprise Search Server</title>
     <author>Shinsuke Sugaya</author>
   </properties>
   <head>
@@ -10,9 +10,9 @@
   </head>
   <body>
     <section name="What is Fess?">
-      <p>Fess is very easily deployable and powerful Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.</p>
+      <p>Fess is very powerful and easily deployable Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.</p>
       <img src="./images/en/fess_search_result_mini.png" alt="Fess Screen Shot"/>
-      <p>Fess is <a href="http://lucene.apache.org/solr/" class="externalLink">Solr</a> based search server, but knowledge/experience about Solr is NOT needed. Fess provides Administration GUI feature to configure the system on your browser. A crawler used by Fess is <a href="http://s2robot.sandbox.seasar.org/" class="externalLink">S2Robot</a>, which can crawl documents on Web/Local File System and support many file formats, such as MS Office, pdf and zip.</p>
+      <p>Fess is <a href="http://lucene.apache.org/solr/" class="externalLink">Solr</a> based search server, but knowledge/experience about Solr is NOT needed. Fess provides Administration GUI feature to configure the system on your browser. Fess also contains a crawler, which can crawl documents on Web/Local File System and support many file formats, such as MS Office, pdf and zip.</p>
     </section>
     <section name="Features">
       <ul>
