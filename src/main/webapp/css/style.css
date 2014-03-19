@@ -4,10 +4,6 @@
 	min-height: 500px;
 }
 
-body {
-  padding-top:55px;
-}
-
 h1,
 h2,
 h3 {
@@ -145,7 +141,7 @@ h3 {
 /* Landscape phone to portrait tablet */
 @media (max-width: 767px) {
     #query {
-	    width: 500px;
+	    width: 300px;
     }
 
     #contentQuery {
@@ -156,7 +152,7 @@ h3 {
 /* Portrait Garaxly */
 @media (max-width: 640px) {
     #query {
-	    width: 400px;
+	    width: 300px;
     }
 
     #contentQuery {
