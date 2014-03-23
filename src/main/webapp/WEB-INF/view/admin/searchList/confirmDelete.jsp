@@ -38,9 +38,9 @@
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="2"><input type="submit" class="btn mini" name="delete"
+							<td colspan="2"><input type="submit" class="btn small" name="delete"
 								value="<bean:message key="labels.crud_button_delete"/>" /> <input
-								type="submit" class="btn mini" name="search"
+								type="submit" class="btn small" name="search"
 								value="<bean:message key="labels.crud_button_back"/>" /></td>
 						</tr>
 					</tfoot>

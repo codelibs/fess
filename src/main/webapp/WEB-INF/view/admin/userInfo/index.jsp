@@ -33,7 +33,7 @@
 </table>
 <div class="row">
 	<div class="span8 offset4">
-				<input class="btn mini primary" type="submit" name="search" value="<bean:message key="labels.crud_button_search"/>"/>
+				<input class="btn small primary" type="submit" name="search" value="<bean:message key="labels.crud_button_search"/>"/>
 				<input class="btn small" type="submit" name="reset" value="<bean:message key="labels.crud_button_reset"/>"/>
 	</div>
 </div>

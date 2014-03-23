@@ -108,14 +108,14 @@
 					<tfoot>
 						<tr>
 							<td colspan="2"><c:if test="${crudMode == 3}">
-									<input type="submit" class="btn mini" name="delete"
+									<input type="submit" class="btn small" name="delete"
 										value="<bean:message key="labels.crud_button_delete"/>" />
-									<input type="submit" class="btn mini" name="back"
+									<input type="submit" class="btn small" name="back"
 										value="<bean:message key="labels.crud_button_back"/>" />
 								</c:if> <c:if test="${crudMode == 4}">
-									<input type="submit" class="btn mini" name="back"
+									<input type="submit" class="btn small" name="back"
 										value="<bean:message key="labels.crud_button_back"/>" />
-									<input type="submit" class="btn mini" name="deletefromconfirm"
+									<input type="submit" class="btn small" name="deletefromconfirm"
 										value="<bean:message key="labels.crud_button_delete"/>" />
 								</c:if></td>
 						</tr>

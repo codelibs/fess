@@ -30,9 +30,9 @@
 								property="content" style="width:98%" rows="20"></html:textarea>
 					</div>
 					<div style="margin-top:5px;">
-						<input type="submit" class="btn mini" name="update"
+						<input type="submit" class="btn small" name="update"
 							value="<bean:message key="labels.design_button_update"/>" />
-						<input type="submit" class="btn mini" name="back"
+						<input type="submit" class="btn small" name="back"
 							value="<bean:message key="labels.design_button_back"/>" />
 					</div>
 				</div>

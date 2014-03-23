@@ -155,21 +155,21 @@ ${f:h(l.name)}<br/>
 				<tr>
 					<td colspan="2">
         <c:if test="${crudMode == 1}">
-            <input type="submit" class="btn mini" name="create" value="<bean:message key="labels.file_crawling_button_create"/>"/>
-            <input type="submit" class="btn mini" name="editagain" value="<bean:message key="labels.file_crawling_button_back"/>"/>
+            <input type="submit" class="btn small" name="create" value="<bean:message key="labels.file_crawling_button_create"/>"/>
+            <input type="submit" class="btn small" name="editagain" value="<bean:message key="labels.file_crawling_button_back"/>"/>
         </c:if>
         <c:if test="${crudMode == 2}">
-            <input type="submit" class="btn mini" name="update" value="<bean:message key="labels.file_crawling_button_update"/>"/>
-            <input type="submit" class="btn mini" name="editagain" value="<bean:message key="labels.file_crawling_button_back"/>"/>
+            <input type="submit" class="btn small" name="update" value="<bean:message key="labels.file_crawling_button_update"/>"/>
+            <input type="submit" class="btn small" name="editagain" value="<bean:message key="labels.file_crawling_button_back"/>"/>
         </c:if>
         <c:if test="${crudMode == 3}">
-            <input type="submit" class="btn mini" name="delete" value="<bean:message key="labels.file_crawling_button_delete"/>"/>
-            <input type="submit" class="btn mini" name="back" value="<bean:message key="labels.file_crawling_button_back"/>"/>
+            <input type="submit" class="btn small" name="delete" value="<bean:message key="labels.file_crawling_button_delete"/>"/>
+            <input type="submit" class="btn small" name="back" value="<bean:message key="labels.file_crawling_button_back"/>"/>
         </c:if>
         <c:if test="${crudMode == 4}">
-            <input type="submit" class="btn mini" name="back" value="<bean:message key="labels.file_crawling_button_back"/>"/>
-            <input type="submit" class="btn mini" name="editfromconfirm" value="<bean:message key="labels.file_crawling_button_edit"/>"/>
-            <input type="submit" class="btn mini" name="deletefromconfirm" value="<bean:message key="labels.file_crawling_button_delete"/>"/>
+            <input type="submit" class="btn small" name="back" value="<bean:message key="labels.file_crawling_button_back"/>"/>
+            <input type="submit" class="btn small" name="editfromconfirm" value="<bean:message key="labels.file_crawling_button_edit"/>"/>
+            <input type="submit" class="btn small" name="deletefromconfirm" value="<bean:message key="labels.file_crawling_button_delete"/>"/>
         </c:if>
 					</td>
 				</tr>

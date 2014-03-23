@@ -94,7 +94,7 @@
 				</table>
 				<div class="row">
 					<div class="span8 offset4">
-						<input type="submit" class="btn mini primary" name="search"
+						<input type="submit" class="btn small primary" name="search"
 							value="<bean:message key="labels.search_log_button_search"/>" />
 						<input type="submit" class="btn small" name="reset"
 							value="<bean:message key="labels.search_log_button_reset"/>" />

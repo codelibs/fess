@@ -29,10 +29,10 @@
 			<div class="row">
 				<div class="span12">
 					<label for="sessionIdSearchBtn"><bean:message
-							key="labels.crawling_session_session_id_search" /> </label>
+							key="labels.crawling_session_session_id_search" /></label>
 					<html:text styleId="sessionIdSearchBtn"
 						property="searchParams.sessionId"></html:text>
-					<input type="submit" class="btn mini primary" name="search"
+					<input type="submit" class="btn small primary" name="search"
 						value="<bean:message key="labels.crawling_session_search"/>" /> <input
 						type="submit" class="btn small" name="reset"
 						value="<bean:message key="labels.crawling_session_reset"/>" />

@@ -53,20 +53,20 @@
 				<tr>
 					<td colspan="2">
         <c:if test="${crudMode == 1}">
-            <input class="btn mini primary" type="submit" name="create" value="<bean:message key="labels.crud_button_create"/>"/>
+            <input class="btn small primary" type="submit" name="create" value="<bean:message key="labels.crud_button_create"/>"/>
             <input class="btn small" type="submit" name="editagain" value="<bean:message key="labels.crud_button_back"/>"/>
         </c:if>
         <c:if test="${crudMode == 2}">
-            <input class="btn mini primary" type="submit" name="update" value="<bean:message key="labels.crud_button_update"/>"/>
+            <input class="btn small primary" type="submit" name="update" value="<bean:message key="labels.crud_button_update"/>"/>
             <input class="btn small" type="submit" name="editagain" value="<bean:message key="labels.crud_button_back"/>"/>
         </c:if>
         <c:if test="${crudMode == 3}">
-            <input class="btn mini primary" type="submit" name="delete" value="<bean:message key="labels.crud_button_delete"/>"/>
+            <input class="btn small primary" type="submit" name="delete" value="<bean:message key="labels.crud_button_delete"/>"/>
             <input class="btn small" type="submit" name="back" value="<bean:message key="labels.crud_button_back"/>"/>
         </c:if>
         <c:if test="${crudMode == 4}">
-            <input class="btn mini primary" type="submit" name="back" value="<bean:message key="labels.crud_button_back"/>"/>
-            <input class="btn mini primary" type="submit" name="editfromconfirm" value="<bean:message key="labels.crud_button_edit"/>"/>
+            <input class="btn small primary" type="submit" name="back" value="<bean:message key="labels.crud_button_back"/>"/>
+            <input class="btn small primary" type="submit" name="editfromconfirm" value="<bean:message key="labels.crud_button_edit"/>"/>
             <input class="btn small" type="submit" name="deletefromconfirm" value="<bean:message key="labels.crud_button_delete"/>"/>
         </c:if>
 					</td>

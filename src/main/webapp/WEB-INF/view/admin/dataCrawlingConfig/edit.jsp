@@ -124,14 +124,14 @@
 						<tfoot>
 							<tr>
 								<td colspan="2"><c:if test="${crudMode == 1}">
-										<input type="submit" class="btn mini" name="confirmfromcreate"
+										<input type="submit" class="btn small" name="confirmfromcreate"
 											value="<bean:message key="labels.data_crawling_button_create"/>" />
-										<input type="submit" class="btn mini" name="back"
+										<input type="submit" class="btn small" name="back"
 											value="<bean:message key="labels.data_crawling_button_back"/>" />
 									</c:if> <c:if test="${crudMode == 2}">
-										<input type="submit" class="btn mini" name="confirmfromupdate"
+										<input type="submit" class="btn small" name="confirmfromupdate"
 											value="<bean:message key="labels.data_crawling_button_confirm"/>" />
-										<input type="submit" class="btn mini" name="back"
+										<input type="submit" class="btn small" name="back"
 											value="<bean:message key="labels.data_crawling_button_back"/>" />
 									</c:if></td>
 							</tr>

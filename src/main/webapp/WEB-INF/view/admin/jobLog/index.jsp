@@ -11,7 +11,7 @@
 	<tiles:put name="body" type="string">
 
 		<h3>
-			<bean:message key="labels.joblog_title_details" />
+			<bean:message key="labels.joblog_title_list" />
 		</h3>
 
 		<%-- Message: BEGIN --%>
