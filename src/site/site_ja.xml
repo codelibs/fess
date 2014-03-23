@@ -22,12 +22,12 @@
     <menu name="全般">
       <item name="ホーム" href="index.html"/>
       <item name="ダウンロード" href="downloads.html"/>
+      <item name="簡単構築ガイド" href="quick-start.html"/>
       <item name="スクリーンショット" href="screenshot.html"/>
       <item name="デモ" href="http://search.n2sm.co.jp/"/>
     </menu>
     <menu name="入門">
       <item name="インストール" href="setup.html"/>
-      <item name="簡単構築ガイド" href="quick-start.html"/>
       <item name="使い方" href="getting-started.html"/>
     </menu>
     <menu name="ドキュメント">
@@ -119,7 +119,7 @@
       <item name="ロードマップ" href="roadmap.html"/>
       <item name="変更点" href="changes.html"/>
       <item name="依存関係" href="dependencies.html"/>
-      <item name="課題追跡" href="issue-tracking.html"/>
+      <item name="課題追跡" href="https://github.com/codelibs/fess/issues?state=open"/>
       <item name="開発者" href="team-list.html"/>
       <item name="メーリングリスト" href="mail-lists.html"/>
     </menu>

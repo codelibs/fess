@@ -6,7 +6,7 @@
     <version>3.0.1-SNAPSHOT</version>
   </skin>
   <bannerLeft>
-    <name>Fess: Full tExt Search System</name>
+    <name>Fess: Enterprise Search Server</name>
     <src>/images/fess-logo.gif</src>
     <href>http://fess.codelibs.org/</href>
   </bannerLeft>
@@ -20,22 +20,115 @@
     </links>
     <menu name="Overview">
       <item name="Home" href="index.html"/>
-      <item name="License" href="license.html"/>
-      <item name="Downloads" href="downloads.html"/>
+      <item name="Download" href="downloads.html"/>
+      <item name="Demo" href="http://search.n2sm.co.jp/"/>
       <item name="Screenshot" href="screenshot.html"/>
+      <item name="Quick Startup" href="quick-start.html"/>
     </menu>
     <menu name="Basic">
       <item name="Installation" href="setup.html"/>
       <item name="Getting Started" href="getting-started.html"/>
-      <item name="Quick Startup" href="quick-start.html"/>
     </menu>
-    <menu name="Documentation">
 <!--
-      <item name="Setup" href="setup.html"/>
+    <menu name="Documentation">
+      <item name="インストール" collapse="true" href="9.0/install/index.html">
+        <item name="インストール" href="9.0/install/install.html"/>
+        <item name="実行と停止" href="9.0/install/run.html"/>
+        <item name="アンインストール" href="9.0/install/uninstall.html"/>
+      </item>
+      <item name="検索" collapse="true" href="9.0/user/index.html">
+        <item name="AND検索" href="9.0/user/search-and.html"/>
+        <item name="OR検索" href="9.0/user/search-or.html"/>
+        <item name="NOT検索" href="9.0/user/search-not.html"/>
+        <item name="ラベルによる検索" href="9.0/user/search-label.html"/>
+        <item name="フィールド指定検索" href="9.0/user/search-field.html"/>
+        <item name="ソート" href="9.0/user/search-sort.html"/>
+        <item name="ワイルドカード" href="9.0/user/search-wildcard.html"/>
+        <item name="範囲指定検索" href="9.0/user/search-range.html"/>
+        <item name="ブースト検索" href="9.0/user/search-boost.html"/>
+        <item name="曖昧検索" href="9.0/user/search-fuzzy.html"/>
+        <item name="拡張パラメータ検索" href="9.0/user/search-options.html"/>
+        <item name="ジオサーチ" href="9.0/user/search-geo.html"/>
+        <item name="非表示検索条件" href="9.0/user/search-additional.html"/>
+        <item name="XML応答" href="9.0/user/xml-response.html"/>
+        <item name="JSON応答" href="9.0/user/json-response.html"/>
+      </item>
+      <item name="管理" collapse="true" href="9.0/admin/index.html">
+        <item name="設定ウィザード" href="9.0/admin/wizard-guide.html"/>
+        <item name="クロール全般の設定" href="9.0/admin/crawl-guide.html"/>
+        <item name="システムの設定" href="9.0/admin/system-guide.html"/>
+        <item name="インデックスの設定" href="9.0/admin/document-guide.html"/>
+        <item name="ジョブ管理の設定" href="9.0/admin/scheduledJob-guide.html"/>
+        <item name="デザインの設定" href="9.0/admin/design-guide.html"/>
+        <item name="辞書の設定" href="9.0/admin/dict-guide.html"/>
+        <item name="バックアップ/リストア" href="9.0/admin/data-guide.html"/>
+        <item name="ウェブクロールの設定" href="9.0/admin/webCrawlingConfig-guide.html"/>
+        <item name="ファイルシステムクロールの設定" href="9.0/admin/fileCrawlingConfig-guide.html"/>
+        <item name="データストアクロールの設定" href="9.0/admin/dataCrawlingConfig-guide.html"/>
+        <item name="ラベルの設定" href="9.0/admin/labelType-guide.html"/>
+        <item name="パスマッピングの設定" href="9.0/admin/pathMapping-guide.html"/>
+        <item name="ウェブ認証の設定" href="9.0/admin/webAuthentication-guide.html"/>
+        <item name="ファイルシステム認証の設定" href="9.0/admin/fileAuthentication-guide.html"/>
+        <item name="リクエストヘッダーの設定" href="9.0/admin/requestHeader-guide.html"/>
+        <item name="重複ホストの設定" href="9.0/admin/overlappingHost-guide.html"/>
+        <item name="ロールの設定" href="9.0/admin/roleType-guide.html"/>
+        <item name="対応ブラウザの設定" href="9.0/admin/browserType-guide.html"/>
+        <item name="設定情報" href="9.0/admin/systemInfo-guide.html"/>
+        <item name="ジョブログ" href="9.0/admin/jobLog-guide.html"/>
+        <item name="セッション情報" href="9.0/admin/crawlingSession-guide.html"/>
+        <item name="ログファイル" href="9.0/admin/log-guide.html"/>
+        <item name="障害URL" href="9.0/admin/failureUrl-guide.html"/>
+        <item name="検索" href="9.0/admin/searchList-guide.html"/>
+        <item name="検索ログ" href="9.0/admin/searchLog-guide.html"/>
+        <item name="統計" href="9.0/admin/stats-guide.html"/>
+        <item name="利用者" href="9.0/admin/userInfo-guide.html"/>
+        <item name="人気URL" href="9.0/admin/favoriteLog-guide.html"/>
+      </item>
+      <item name="設定" collapse="true" href="9.0/config/index.html">
+        <item name="ポート変更" href="9.0/config/server-port.html"/>
+        <item name="メモリー関連" href="9.0/config/memory-config.html"/>
+        <item name="プロキシ設定" href="9.0/config/proxy.html"/>
+        <item name="携帯端末情報" href="9.0/config/mobile-device.html"/>
+        <item name="ファイルサイズの設定" href="9.0/config/filesize.html"/>
+        <item name="ログ" href="9.0/config/logging.html"/>
+        <item name="Solr障害時の動作" href="9.0/config/solr-failure.html"/>
+        <item name="ダイナミックフィールド" href="9.0/config/solr-dynamic-field.html"/>
+        <item name="ロールの設定" href="9.0/config/role-setting.html"/>
+        <item name="レプリケーションの設定" href="9.0/config/replication.html"/>
+        <item name="Windowsサービスの設定" href="9.0/config/windows-service.html"/>
+        <item name="索引文字列抽出の設定" href="9.0/config/tokenizer.html"/>
+        <item name="ステミングの設定" href="9.0/config/protwords.html"/>
+        <item name="インデックスの保存" href="9.0/config/index-backup.html"/>
+        <item name="Tomcatにインストール" href="9.0/config/install-on-tomcat.html"/>
+        <item name="パスワード付きPDF" href="9.0/config/pdf-with-password.html"/>
+        <item name="データベースの変更" href="9.0/config/db.html"/>
+        <item name="ジオサーチ" href="9.0/config/geosearch.html"/>
+        <item name="LibreOfficeの利用" href="9.0/config/use-libreoffice.html"/>
+      </item>
+    </menu>
 -->
-      <item name="JavaDoc" href="apidocs/index.html"/>
+    <menu name="Development">
+      <!-- <item name="開発者ガイド" href="dev/getting-started.html"/> -->
+      <item name="Source Repository" href="source-repository.html"/>
+      <item name="Java Docs" href="apidocs/index.html"/>
+      <!-- <item name="ロードマップ" href="roadmap.html"/> -->
+      <!-- <item name="変更点" href="changes.html"/> -->
+      <item name="Dependencies" href="dependencies.html"/>
+      <item name="Issues" href="https://github.com/codelibs/fess/issues?state=open"/>
+      <item name="Team" href="team-list.html"/>
+      <!-- <item name="メーリングリスト" href="mail-lists.html"/> -->
+    </menu>
+    <menu name="Othres">
+      <item name="News" href="news.html"/>
+      <!-- <item name="掲載記事" href="articles.html"/> -->
+      <!-- <item name="利用サイト" href="users.html"/> -->
+      <item name="License" href="license.html"/>
+      <!-- <item name="FAQ" href="faq.html"/> -->
+      <item name="Supporting Projects" href="supporting-projects.html"/>
+      <!-- <item name="商用サポート" href="support-services.html"/> -->
+      <!-- <item name="ASP/SaaS" href="asp.html"/> -->
+      <!-- <item name="広告" href="donation.html"/> -->
     </menu>
 
-    ${reports}
   </body>
 </project>
