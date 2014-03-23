@@ -12,8 +12,6 @@ About Fess UI
 
     * Search Form/Results UI for Browser
 
-    * Search Form/Results UI for Mobile Device
-
     * Administration UI on Browser
 
     []
@@ -25,16 +23,7 @@ Search Form/Results UI for Browser
     A search form and button are displayed to access to {{{http://localhost:8080/fess/}http://localhost:8080/fess/}}.
     To input a search word into the search form and click the search button, you can get the search results on the following page.
 
-[./images/ja/fess_search_result.png] Display the search result on a browser
-
-Search Form/Results UI for Mobile Device
-
-    This UI allows an user to search target documents of Fess on a mobile device.
-
-    If you access a search page of Fess by a mobile device, you are redirected to {{{http://localhost:8080/fess/mobile/}http://localhost:8080/fess/mobile/}}.
-    To input a search word into the search form and click the search button, you can get the search results on the following page.
-
-[./images/ja/fess_search_mobile_result.png] Display the search results on a mobile device
+[./images/en/fess_search_result.png] Display the search result on a browser
 
 Administration UI on Browser
 
