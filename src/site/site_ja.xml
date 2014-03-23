@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="全文検索システム: Fess">
+<project name="Fess">
   <skin>
     <groupId>jp.sf.fess</groupId>
     <artifactId>fess-skin</artifactId>

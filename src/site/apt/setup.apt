@@ -12,11 +12,11 @@ Installation
 
     * OS: an operation system which has Java runtime environment, such as Windows and Unix.
 
-    * Java: Java 6 or the above
+    * Java: Java 7 or the above
 
     []
 
-    You can download Java 6 from {{{http://java.sun.com/}http://java.sun.com/}}.
+    You can download Java 7 from {{{http://java.sun.com/}http://java.sun.com/}}.
 
 Download
 
@@ -45,7 +45,7 @@ $ ./bin/startup.sh   # (Use startup.bat on Windows)
 
     The administrative UI is {{{http://localhost:8080/fess/admin/}http://localhost:8080/fess/admin/}}.
     The default username/password is admin/admin.
-    admin account has fess role, which is used as an administrative role.
+    "admin" account has fess role, which is used as an administrative role.
 
 Stop Fess 
 
@@ -57,9 +57,9 @@ $ ./bin/shutdown.sh   # (Use shutdown.bat on Windows)
 
 Change Password for Administrator User
 
-    admin account is managed by an application server.
-    A default Fess server uses Tomcat as the app server.
-    Therefore, a password change is the same as Tomcat's steps.
+    "admin" account is managed by an application server.
+    Fess server contains Tomcat as the app server.
+    Therefore, changing password is the same as Tomcat's steps.
     If you want to change a password, modify a password of admin user in conf/tomcat-user.xml.
 
 +---------------------------------+
@@ -77,12 +77,35 @@ Change Password for Solr Server
   <user username="solradmin" password="solradmin" roles="solr"/>
 +---------------------------------+
 
-    Second, set the same one to the following Password element in webapps/fess/WEB-INF/classes/fess_solr.dicon.
+    Next, set the same one to the following Password element in webapps/fess/WEB-INF/classes/solrlib.dicon, webapps/fess/WEB-INF/classes/fess_suggest.dicon and solr/core1/conf/solrconfig.xml.
+
+    solrlib.dicon:
 
 +---------------------------------+
 <component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
     <arg>"solradmin"</arg> <!-- Username -->
     <arg>"solradmin"</arg> <!-- Password -->
 </component>
++---------------------------------+
+
+    fess_suggest.dicon:
+
++---------------------------------+
+<component name="suggestCredentials" class="org.apache.http.auth.UsernamePasswordCredentials">
+    <arg>"solradmin"</arg> <!-- Username -->
+    <arg>"solradmin"</arg> <!-- Password -->
+</component>
++---------------------------------+
+
+    solrconfig.xml:
+
++---------------------------------+
+<suggest>
+  <solrServer class="org.codelibs.solr.lib.server.SolrLibHttpSolrServer">
+    <arg>http://localhost:8080/solr/core1-suggest</arg>
+    <credentials>
+      <username>solradmin</username> <!-- Username -->
+      <password>solradmin</password> <!-- Password -->
+    </credentials>
 +---------------------------------+
 
