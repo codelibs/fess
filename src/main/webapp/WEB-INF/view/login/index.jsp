@@ -18,7 +18,7 @@
 			<form id="login" method="post"
 				action="<%=response.encodeURL("j_security_check")%>">
 				<div class="row">
-					<div class="modal">
+					<div class="modal" style="top:320px;">
 						<div class="modal-header">
 							<h3>
 								<bean:message key="labels.login" />

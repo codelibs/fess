@@ -20,6 +20,7 @@ h2 {
 
 h3 {
   font-size: 18px;
+  overflow-x: scroll;
 }
 
 .navbar .help-link {
@@ -93,7 +94,7 @@ h3 {
 }
 
 .ellipsis {
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis;
@@ -231,4 +232,19 @@ h3 {
     #result .info {
         display: none;
     }
+}
+
+@media (max-width: 767px) and (min-width: 481px){
+	.modal {
+		height: 285px;
+	}
+	.visible-phone {
+		display: none!important;
+	}
+}
+
+@media (max-width: 480px){
+	.modal {
+		height: 420px;
+	}
 }

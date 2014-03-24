@@ -75,7 +75,7 @@
 									key="labels.index_form_option_btn" /></a>
 						</div>
 					</fieldset>
-					<div class="modal hide fade" id="searchOptions">
+					<div class="modal hide fade" id="searchOptions" style="overflow-y:scroll;">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal"
 								aria-hidden="true">&times;</button>

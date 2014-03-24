@@ -77,7 +77,7 @@
 			</c:forEach>
 		</ol>
 	</div>
-	<div class="span4 visible-desktop">
+	<div class="span4 visible-desktop visible-tablet">
 		<%-- Side Content --%>
 		<c:if test="${screenShotSupport}">
 			<div id="screenshot"></div>
