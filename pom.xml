@@ -108,7 +108,7 @@
   </profiles>
   <properties>
     <dbflute.version>1.0.4K</dbflute.version>
-    <s2robot.version>0.7.0-SNAPSHOT</s2robot.version>
+    <s2robot.version>0.7.0</s2robot.version>
     <solr.version>4.7.0</solr.version>
   </properties>
   <build>
@@ -433,7 +433,7 @@
     <dependency>
       <groupId>jp.sf.fess</groupId>
       <artifactId>fess-suggest</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>jp.sf.fess</groupId>
@@ -599,17 +599,17 @@
     <dependency>
       <groupId>org.codelibs</groupId>
       <artifactId>corelib</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.codelibs.solr</groupId>
       <artifactId>solrlib</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.codelibs.sastruts</groupId>
       <artifactId>sastruts-core</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.codelibs.sastruts</groupId>
