@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<s:form action="search" method="get" styleId="searchForm">
+<s:form action="search" method="get" styleId="searchForm" styleClass="searchResultForm">
 ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
@@ -33,27 +33,24 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 		</div>
 		<div class="modal-body">
 			<fieldset>
-				<c:if test="${displayLabelTypeItems}">
-					<div class="clearfix">
-						<label for="contentLabelType"><bean:message
-								key="labels.index_label" /></label>
-						<div class="input">
-							<html:select property="fields.label"
-								styleId="labelTypeSearchOption" multiple="true"
-								styleClass="span4">
-								<c:forEach var="item" items="${labelTypeItems}">
-									<html:option value="${f:u(item.value)}">
-														${f:h(item.label)}
-													</html:option>
-								</c:forEach>
-							</html:select>
-							<span id="contentLabelTypeNoneSelectedText" class="hide"><bean:message
-									key="labels.search_result_noneselect_label" /></span> <span
-								id="contentLabelTypeSelectedText" class="hide"><bean:message
-									key="labels.search_result_select_label" /></span>
-						</div>
+				<div class="clearfix">
+					<label for="contentNum"><bean:message
+							key="labels.index_num" /></label>
+					<div class="input">
+						<html:select property="num" styleId="numSearchOption"
+							styleClass="span4" style="display:block;">
+							<option value="">
+								<bean:message key="labels.search_result_select_num" />
+							</option>
+							<html:option value="10">10</html:option>
+							<html:option value="20">20</html:option>
+							<html:option value="30">30</html:option>
+							<html:option value="40">40</html:option>
+							<html:option value="50">50</html:option>
+							<html:option value="100">100</html:option>
+						</html:select>
 					</div>
-				</c:if>
+				</div>
 				<div class="clearfix">
 					<label for="contentSort"><bean:message
 							key="labels.index_sort" /></label>
@@ -102,23 +99,37 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 					</div>
 				</div>
 				<div class="clearfix">
-					<label for="contentNum"><bean:message
-							key="labels.index_num" /></label>
+					<label for="contentLang"><bean:message
+							key="labels.index_lang" /></label>
 					<div class="input">
-						<html:select property="num" styleId="numSearchOption"
-							styleClass="span4" style="display:block;">
-							<option value="">
-								<bean:message key="labels.search_result_select_num" />
-							</option>
-							<html:option value="10">10</html:option>
-							<html:option value="20">20</html:option>
-							<html:option value="30">30</html:option>
-							<html:option value="40">40</html:option>
-							<html:option value="50">50</html:option>
-							<html:option value="100">100</html:option>
+						<html:select property="lang"
+							styleId="langSearchOption" multiple="true"
+							styleClass="span4">
+							<c:forEach var="item" items="${langItems}">
+								<html:option value="${f:u(item.value)}">
+													${f:h(item.label)}
+												</html:option>
+							</c:forEach>
 						</html:select>
 					</div>
 				</div>
+				<c:if test="${displayLabelTypeItems}">
+					<div class="clearfix">
+						<label for="contentLabelType"><bean:message
+								key="labels.index_label" /></label>
+						<div class="input">
+							<html:select property="fields.label"
+								styleId="labelTypeSearchOption" multiple="true"
+								styleClass="span4">
+								<c:forEach var="item" items="${labelTypeItems}">
+									<html:option value="${f:u(item.value)}">
+														${f:h(item.label)}
+													</html:option>
+								</c:forEach>
+							</html:select>
+						</div>
+					</div>
+				</c:if>
 			</fieldset>
 		</div>
 		<div class="modal-footer">
@@ -127,6 +138,9 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 			</button>
 			<button class="btn" data-dismiss="modal" aria-hidden="true">
 				<bean:message key="labels.search_options_close" />
+			</button>
+			<button class="btn btn-primary" type="submit">
+				<bean:message key="labels.search" />
 			</button>
 		</div>
 	</div>

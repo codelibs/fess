@@ -35,6 +35,10 @@
 						<div class="description">${doc.contentDescription}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.site)}</cite>
+							<c:if test="${doc.hasCache_s_s=='true'}">
+								<a href="cache?docId=${doc.docId}${appendHighlightQueries}" class="cache"><bean:message
+										key="labels.search_result_cache" /></a>
+							</c:if>
 						</div>
 						<div class="more visible-phone">
 							<a href="#result${s.index}"><bean:message key="labels.search_result_more" /></a>
@@ -73,7 +77,7 @@
 			</c:forEach>
 		</ol>
 	</div>
-	<div class="span4 visible-desktop">
+	<div class="span4 visible-desktop visible-tablet">
 		<%-- Side Content --%>
 		<c:if test="${screenShotSupport}">
 			<div id="screenshot"></div>
@@ -104,6 +108,14 @@
 						</c:forEach>
 					</c:forEach>
 				</ul>
+				<c:if test="${!empty additional}">
+				<ul class="nav nav-list">
+					<li class="reset">
+						<s:link
+							href="search?query=${f:u(query)}"><bean:message key="label.facet_label_reset" /></s:link>
+					</li>
+				</ul>
+				</c:if>
 			</div>
 		</c:if>
 	</div>

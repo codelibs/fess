@@ -11,7 +11,7 @@
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet"
 	type="text/css" />
-<script type="text/javascript" src="${f:url('/js/jquery-1.8.3.min.js')}"></script>
+<script type="text/javascript" src="${f:url('/js/jquery-1.11.0.min.js')}"></script>
 </head>
 <body>
 	<jsp:include page="/WEB-INF/view/header.jsp" />

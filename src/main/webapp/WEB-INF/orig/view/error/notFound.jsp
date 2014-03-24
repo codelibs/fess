@@ -30,7 +30,7 @@
 		<jsp:include page="footer.jsp" />
 	</div>
 	<script type="text/javascript"
-		src="${f:url('/js/jquery-1.8.3.min.js')}"></script>
+		src="${f:url('/js/jquery-1.11.0.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
 </body>
 </html>
