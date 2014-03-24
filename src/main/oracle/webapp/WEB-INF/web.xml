@@ -298,6 +298,10 @@
     </auth-constraint>
   </security-constraint>
 
+  <security-role>
+    <role-name>fess</role-name>
+  </security-role>
+
   <login-config>
     <auth-method>FORM</auth-method>
     <form-login-config>
