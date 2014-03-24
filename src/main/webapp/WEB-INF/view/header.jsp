@@ -23,7 +23,7 @@ ${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
 			</div>
 		</div>
 	</div>
-	<div class="modal hide fade" id="searchOptions" style="overflow-y:scroll;">
+	<div class="modal hide fade" id="searchOptions">
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal"
 				aria-hidden="true">&times;</button>

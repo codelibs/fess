@@ -20,7 +20,6 @@ h2 {
 
 h3 {
   font-size: 18px;
-  overflow-x: scroll;
 }
 
 .navbar .help-link {
@@ -94,7 +93,7 @@ h3 {
 }
 
 .ellipsis {
-    white-space: normal;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis;
@@ -235,16 +234,22 @@ h3 {
 }
 
 @media (max-width: 767px) and (min-width: 481px){
-	.modal {
-		height: 285px;
-	}
 	.visible-phone {
 		display: none!important;
 	}
 }
 
-@media (max-width: 480px){
-	.modal {
-		height: 420px;
+@media (max-height: 480px){
+	#searchOptions {
+		max-height: 450px;
+        overflow-y:scroll;
 	}
 }
+
+@media (max-height: 390px){
+	#searchOptions {
+		max-height: 300px;
+        overflow-y:scroll;
+	}
+}
+

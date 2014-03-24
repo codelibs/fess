@@ -22,7 +22,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="span9">
-				<p id="searchOptionMenu" class="ellipsis">
+				<p id="searchOptionMenu">
 					<span>
 						<bean:message key="labels.searchoptions_menu_sort" />
 						<a href="#searchOptions" data-toggle="modal">
