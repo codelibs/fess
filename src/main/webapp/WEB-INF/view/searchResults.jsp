@@ -28,7 +28,7 @@
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
-					<h3 class="title">
+					<h3 class="title ellipsis">
 						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.docId}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
