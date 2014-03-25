@@ -433,7 +433,7 @@
     <dependency>
       <groupId>jp.sf.fess</groupId>
       <artifactId>fess-suggest</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1</version>
     </dependency>
     <dependency>
       <groupId>jp.sf.fess</groupId>
