@@ -33,17 +33,17 @@
     </section>
     <section name="News">
       <dl>
+        <dt>2014-03-26</dt>
+        <dd>
+          <a href="https://sourceforge.jp/projects/fess/releases/?package_id=9987" class="externalLink">Fess 9.1 Released</a>
+        </dd>
         <dt>2014-02-07</dt>
         <dd>
-          <a href="http://sourceforge.jp/projects/fess/news/24562" class="externalLink">Fess 9.0.0 Released</a>
+          <a href="https://sourceforge.jp/projects/fess/releases/?package_id=9987" class="externalLink">Fess 9.0.0 Released</a>
         </dd>
         <dt>2013-09-07</dt>
         <dd>
-          <a href="http://sourceforge.jp/projects/fess/news/24407" class="externalLink">Fess 8.2.0 Released</a>
-        </dd>
-        <dt>2013-05-13</dt>
-        <dd>
-          <a href="http://sourceforge.jp/projects/fess/news/24242" class="externalLink">Fess 8.1.0 Released</a>
+          <a href="https://sourceforge.jp/projects/fess/releases/?package_id=9987" class="externalLink">Fess 8.2.0 Released</a>
         </dd>
       </dl>
       <p><a href="news.html">More news...</a></p>

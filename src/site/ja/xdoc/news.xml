@@ -11,6 +11,10 @@
   <body>
     <section name="ニュース一覧">
       <dl>
+        <dt>2014-03-26</dt>
+        <dd>
+          <a href="http://sourceforge.jp/projects/fess/news/24607" class="externalLink">Fess 9.1 リリース</a>
+        </dd>
         <dt>2014-02-07</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24562" class="externalLink">Fess 9.0.0 リリース</a>

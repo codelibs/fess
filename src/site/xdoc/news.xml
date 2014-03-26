@@ -9,46 +9,12 @@
     <meta name="description" content="Fess is OSS Full Text Search Server."/>
   </head>
   <body>
-    <section name="What is Fess?">
-      <p>Fess is Java based full text search server provided as OSS product. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.</p>
-      <img src="./images/ja/fess_search_result_mini.png" alt="Fess Screen Shot"/>
-      <p>Fess is built on <a href="http://www.seasar.org/" class="externalLink">Seasar2</a> framework, and contains <a href="http://lucene.apache.org/solr/" class="externalLink">Apache Solr</a>. A crawler used by Fess is <a href="http://s2robot.sandbox.seasar.org/" class="externalLink">S2Robot</a>, which can crawl documents on Web/Local File System and support many file formats, such as MS Office, pdf and zip.</p>
-    </section>
-    <section name="Features">
-      <ul>
-        <li>Easy Installation/Configuration</li>
-        <li>Apache License (OSS)</li>
-        <li>OS-independent (Runs on Java)</li>
-        <li>Crawl documents on Web/File System/DB/Windows Shared Folder</li>
-        <li>Support documents of MS Office, PDF,...</li>
-        <li>Use Apache Solr as a search engine</li>
-        <li>Support Japanese mobile devices</li>
-        <li>Provide a browser based administative page</li>
-        <li>Support a web page for BASIC/DIGEST/NTLM authentication</li>
-        <li>Support a role authentication</li>
-        <li>Support XML/JSON/JSONP format</li>
-        <li>Provide a search log and statistics</li>
-      </ul>
-    </section>
-    <section name="Demo Site">
-      <div >
-        <div style="width:220px;float:left;">
-          <a href="http://search.n2sm.co.jp/" target="_blank"><img src="/images/ja/demo-1.png"/></a>
-          <div>Standard</div>
-        </div>
-        <div style="width:220px;float:left;">
-          <a href="http://demo.n2search.net/aspdemo/" target="_blank"><img src="/images/ja/demo-2.png"/></a>
-          <div>Enterprice Search</div>
-        </div>
-        <div style="width:220px;float:left;">
-          <a href="http://demo.n2search.net/ecdemo/" target="_blank"><img src="/images/ja/demo-3.png"/></a>
-          <div>EC Site</div>
-        </div>
-        <div style="clear:both;"></div>
-      </div>
-    </section>
     <section name="News">
       <dl>
+        <dt>2014-03-26</dt>
+        <dd>
+          <a href="https://sourceforge.jp/projects/fess/releases/?package_id=9987" class="externalLink">Fess 9.1 Released</a>
+        </dd>
         <dt>2014-02-07</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24562" class="externalLink">Fess 9.0.0 Released</a>
