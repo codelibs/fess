@@ -39,6 +39,8 @@
 		<property name="responseProcessor">
 			<component class="org.seasar.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessXpathTransformer</property>
+				<property name="successfulHttpCodes">new int[] {200}</property>
+				<property name="notModifiedHttpCodes">new int[] {304}</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
@@ -58,6 +60,8 @@
 		<property name="responseProcessor">
 			<component class="org.seasar.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
+				<property name="successfulHttpCodes">new int[] {200}</property>
+				<property name="notModifiedHttpCodes">new int[] {304}</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
@@ -85,6 +89,8 @@
 		<property name="responseProcessor">
 			<component class="org.seasar.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
+				<property name="successfulHttpCodes">new int[] {200}</property>
+				<property name="notModifiedHttpCodes">new int[] {304}</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
@@ -114,6 +120,8 @@
 		<property name="responseProcessor">
 			<component class="org.seasar.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessTikaTransformer</property>
+				<property name="successfulHttpCodes">new int[] {200}</property>
+				<property name="notModifiedHttpCodes">new int[] {304}</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
