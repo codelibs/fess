@@ -85,6 +85,8 @@ public class QueryHelper implements Serializable {
 
     private static final String _AND_ = " AND ";
 
+    private static final String _DEFAULT_ = " ";
+
     private static final long serialVersionUID = 1L;
 
     @Binding(bindingType = BindingType.MAY)
@@ -174,7 +176,7 @@ public class QueryHelper implements Serializable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see jp.sf.fess.helper.QueryHelper#build(java.lang.String)
      */
     public SearchQuery build(final String query, final boolean envCondition) {
@@ -321,7 +323,7 @@ public class QueryHelper implements Serializable {
 
         final StringBuilder queryBuf = new StringBuilder(255);
         final List<String> notOperatorList = new ArrayList<String>();
-        String operator = _AND_;
+        String operator = _DEFAULT_;
         boolean notOperatorFlag = false;
         int queryOperandCount = 0;
         int contentOperandCount = 0;
@@ -377,7 +379,7 @@ public class QueryHelper implements Serializable {
                         fieldLogWord = targetWord;
                     }
                     nonPrefix = true;
-                    operator = _AND_;
+                    operator = _DEFAULT_;
                     if (highlightFieldSet.contains(field)) {
                         highLightQueryList.add(targetWord);
                     }
@@ -421,7 +423,7 @@ public class QueryHelper implements Serializable {
                     buildContentQueryWithLang(buf, value, queryLanguage);
                     notOperatorList.add(buf.toString());
 
-                    operator = _AND_;
+                    operator = _DEFAULT_;
                     notOperatorFlag = false;
                     highLightQueryList.add(value);
 
@@ -437,7 +439,7 @@ public class QueryHelper implements Serializable {
                     buildContentQueryWithLang(queryBuf, value, queryLanguage);
                     contentOperandCount++;
 
-                    operator = _AND_;
+                    operator = _DEFAULT_;
                     highLightQueryList.add(value);
 
                     if (fieldLogMap != null) {
@@ -450,7 +452,7 @@ public class QueryHelper implements Serializable {
         StringBuilder searchQueryBuf = new StringBuilder(255);
         if (queryBuf.length() > 0) {
             searchQueryBuf.append(queryBuf.toString());
-            operator = _AND_;
+            operator = _DEFAULT_;
         } else {
             operator = StringUtil.EMPTY;
         }
@@ -469,7 +471,7 @@ public class QueryHelper implements Serializable {
                 searchQueryBuf.append(operator);
                 searchQueryBuf.append(NOT_);
                 searchQueryBuf.append(notOperator);
-                operator = _AND_;
+                operator = _DEFAULT_;
             }
         }
 
@@ -792,7 +794,7 @@ public class QueryHelper implements Serializable {
 
         final StringBuilder queryBuf = new StringBuilder(255);
         final List<String> notOperatorList = new ArrayList<String>();
-        String operator = _AND_;
+        String operator = _DEFAULT_;
         boolean notOperatorFlag = false;
         int queryOperandCount = 0;
         int contentOperandCount = 0;
@@ -828,7 +830,7 @@ public class QueryHelper implements Serializable {
                         queryOperandCount++;
                     }
                     nonPrefix = true;
-                    operator = _AND_;
+                    operator = _DEFAULT_;
                     break;
                 }
             }
@@ -853,7 +855,7 @@ public class QueryHelper implements Serializable {
                     buildContentQueryWithLang(buf, value, queryLanguage);
                     notOperatorList.add(buf.toString());
 
-                    operator = _AND_;
+                    operator = _DEFAULT_;
                     notOperatorFlag = false;
                 } else {
                     // content
@@ -863,7 +865,7 @@ public class QueryHelper implements Serializable {
                     buildContentQueryWithLang(queryBuf, value, queryLanguage);
                     contentOperandCount++;
 
-                    operator = _AND_;
+                    operator = _DEFAULT_;
                 }
             }
         }
@@ -871,7 +873,7 @@ public class QueryHelper implements Serializable {
         StringBuilder searchQueryBuf = new StringBuilder(255);
         if (queryBuf.length() > 0) {
             searchQueryBuf.append(queryBuf.toString());
-            operator = _AND_;
+            operator = _DEFAULT_;
         } else {
             operator = StringUtil.EMPTY;
         }
@@ -890,7 +892,7 @@ public class QueryHelper implements Serializable {
                 searchQueryBuf.append(operator);
                 searchQueryBuf.append(NOT_);
                 searchQueryBuf.append(notOperator);
-                operator = _AND_;
+                operator = _DEFAULT_;
             }
         }
 
@@ -1478,7 +1480,7 @@ public class QueryHelper implements Serializable {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Object#toString()
          */
         @Override
