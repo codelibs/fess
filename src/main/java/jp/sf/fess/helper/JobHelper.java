@@ -25,8 +25,13 @@ import jp.sf.fess.job.JobExecutor;
 
 import org.apache.commons.io.IOUtils;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JobHelper {
+    private static final Logger logger = LoggerFactory
+            .getLogger(JobHelper.class);
+
     private final ConcurrentHashMap<String, Process> runningProcessMap = new ConcurrentHashMap<String, Process>();
 
     private final ConcurrentHashMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<Long, JobExecutor>();
@@ -66,18 +71,22 @@ public class JobHelper {
             try {
                 IOUtils.closeQuietly(process.getInputStream());
             } catch (final Exception e) {
+                logger.warn("Could not close a process input stream.", e);
             }
             try {
                 IOUtils.closeQuietly(process.getErrorStream());
             } catch (final Exception e) {
+                logger.warn("Could not close a process error stream.", e);
             }
             try {
                 IOUtils.closeQuietly(process.getOutputStream());
             } catch (final Exception e) {
+                logger.warn("Could not close a process output stream.", e);
             }
             try {
                 process.destroy();
             } catch (final Exception e) {
+                logger.error("Could not destroy a process correctly.", e);
             }
         }
     }
