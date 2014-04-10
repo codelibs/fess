@@ -92,7 +92,7 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "(title:QUERY1\\\u3000QUERY2 OR content:QUERY1\\\u3000QUERY2) (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("\"QUERY1\u3000QUERY2\"\u3000QUERY3")
-                        .getQuery());
+                .getQuery());
 
     }
 
@@ -104,15 +104,15 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "mimetype:QUERY1 (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("mimetype:QUERY1 QUERY2 QUERY3")
-                        .getQuery());
+                .getQuery());
         assertEquals(
                 "mimetype:QUERY1 host:QUERY2 (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("mimetype:QUERY1 host:QUERY2 QUERY3")
-                        .getQuery());
+                .getQuery());
         assertEquals(
                 "mimetype:QUERY1\\ QUERY2 (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("mimetype:\"QUERY1 QUERY2\" QUERY3")
-                        .getQuery());
+                .getQuery());
 
     }
 
@@ -130,11 +130,11 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "(title:hoge\\:QUERY1 OR content:hoge\\:QUERY1) host:QUERY2 (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("hoge:QUERY1 host:QUERY2 QUERY3")
-                        .getQuery());
+                .getQuery());
         assertEquals(
                 "(title:hoge\\:QUERY1\\ QUERY2 OR content:hoge\\:QUERY1\\ QUERY2) (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("hoge:\"QUERY1 QUERY2\" QUERY3")
-                        .getQuery());
+                .getQuery());
 
     }
 
@@ -437,22 +437,22 @@ public class QueryHelperTest extends S2TestCase {
                 queryHelper.buildQuery("{Aida TO Carmen}").getQuery());
         assertEquals("lastModified:{Aida TO Carmen}",
                 queryHelper.buildQuery("lastModified:{Aida TO Carmen}")
-                        .getQuery());
+                .getQuery());
         assertEquals("(title:QUERY OR content:QUERY) title:{Aida TO Carmen}",
                 queryHelper.buildQuery("QUERY title:{Aida TO Carmen}")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:[20020101 TO abc]",
                 queryHelper.buildQuery("lastModified:[20020101 TO abc]")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:[abc TO 20020101]",
                 queryHelper.buildQuery("lastModified:[abc TO 20020101]")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:[20020101 TO *]",
                 queryHelper.buildQuery("lastModified:[20020101 TO *]")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:[* TO 20020101]",
                 queryHelper.buildQuery("lastModified:[* TO 20020101]")
-                        .getQuery());
+                .getQuery());
 
         rangeQuery = "(content:[1 TO 2] OR content:[3 TO 4]) (content:[5 TO 6] OR content:[7 TO 8])";
         assertEquals(rangeQuery, queryHelper.buildQuery(rangeQuery).getQuery());
@@ -492,22 +492,22 @@ public class QueryHelperTest extends S2TestCase {
                 queryHelper.buildQuery("{Aida TO Carmen}").getQuery());
         assertEquals("lastModified:{Aida TO Carmen}",
                 queryHelper.buildQuery("lastModified:{Aida TO Carmen}")
-                        .getQuery());
+                .getQuery());
         assertEquals("(title:QUERY OR content:QUERY) title:{Aida TO Carmen}",
                 queryHelper.buildQuery("QUERY title:{Aida TO Carmen}")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:{20020101 TO abc}",
                 queryHelper.buildQuery("lastModified:{20020101 TO abc}")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:{abc TO 20020101}",
                 queryHelper.buildQuery("lastModified:{abc TO 20020101}")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:{20020101 TO *}",
                 queryHelper.buildQuery("lastModified:{20020101 TO *}")
-                        .getQuery());
+                .getQuery());
         assertEquals("lastModified:{* TO 20020101}",
                 queryHelper.buildQuery("lastModified:{* TO 20020101}")
-                        .getQuery());
+                .getQuery());
 
         rangeQuery = "(content:{1 TO 2} OR content:{3 TO 4}) (content:{5 TO 6} OR content:{7 TO 8})";
         assertEquals(rangeQuery, queryHelper.buildQuery(rangeQuery).getQuery());
@@ -552,7 +552,7 @@ public class QueryHelperTest extends S2TestCase {
                 queryHelper.buildQuery("mimetype:QUERY1^1000").getQuery());
         assertEquals("mimetype:QUERY1^1000 (title:QUERY2 OR content:QUERY2)",
                 queryHelper.buildQuery("mimetype:QUERY1^1000 QUERY2")
-                        .getQuery());
+                .getQuery());
 
         assertEquals(
                 "title:QUERY1\\ QUERY2^1000 OR content:QUERY1\\ QUERY2^1000",
@@ -574,8 +574,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals("title:\\" + Constants.RESERVED[i]
                             + " OR content:\\" + Constants.RESERVED[i],
                             queryHelper
-                                    .buildQuery("\\" + Constants.RESERVED[i])
-                                    .getQuery());
+                            .buildQuery("\\" + Constants.RESERVED[i])
+                            .getQuery());
                     continue;
                 } else if (Constants.RESERVED[i].equals("{")
                         && e.getMessageCode().equals(
@@ -583,8 +583,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals("title:\\" + Constants.RESERVED[i]
                             + " OR content:\\" + Constants.RESERVED[i],
                             queryHelper
-                                    .buildQuery("\\" + Constants.RESERVED[i])
-                                    .getQuery());
+                            .buildQuery("\\" + Constants.RESERVED[i])
+                            .getQuery());
                     continue;
                 } else if (Constants.RESERVED[i].equals("[")
                         && e.getMessageCode().equals(
@@ -592,8 +592,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals("title:\\" + Constants.RESERVED[i]
                             + " OR content:\\" + Constants.RESERVED[i],
                             queryHelper
-                                    .buildQuery("\\" + Constants.RESERVED[i])
-                                    .getQuery());
+                            .buildQuery("\\" + Constants.RESERVED[i])
+                            .getQuery());
                     continue;
                 } else if (Constants.RESERVED[i].equals("(")
                         && e.getMessageCode().equals(
@@ -601,8 +601,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals("title:\\" + Constants.RESERVED[i]
                             + " OR content:\\" + Constants.RESERVED[i],
                             queryHelper
-                                    .buildQuery("\\" + Constants.RESERVED[i])
-                                    .getQuery());
+                            .buildQuery("\\" + Constants.RESERVED[i])
+                            .getQuery());
                     continue;
                 }
             }
@@ -621,12 +621,12 @@ public class QueryHelperTest extends S2TestCase {
                 .getQuery());
         assertEquals("title:QUERY1 OR title:QUERY2",
                 queryHelper.buildQuery("title:QUERY1 OR title:QUERY2")
-                        .getQuery());
+                .getQuery());
         assertEquals("(title:QUERY1 OR content:QUERY1) OR title:QUERY2",
                 queryHelper.buildQuery("QUERY1 OR title:QUERY2").getQuery());
         assertEquals("mimetype:QUERY1 OR title:QUERY2",
                 queryHelper.buildQuery("mimetype:QUERY1 OR title:QUERY2")
-                        .getQuery());
+                .getQuery());
         assertEquals(
                 "(title:QUERY1 OR content:QUERY1) OR (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("QUERY1 OR QUERY2 QUERY3").getQuery());
@@ -639,23 +639,27 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals("title:QUERY OR content:QUERY",
                 queryHelper.buildQuery("AND QUERY").getQuery());
         assertEquals(
-                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2)",
-                queryHelper.buildQuery("QUERY1 QUERY2").getQuery());
+                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2)",
+                queryHelper.buildQuery("QUERY1 AND QUERY2").getQuery());
         assertEquals("title:QUERY", queryHelper.buildQuery("AND title:QUERY")
                 .getQuery());
-        assertEquals("title:QUERY1 title:QUERY2",
-                queryHelper.buildQuery("title:QUERY1 title:QUERY2").getQuery());
-        assertEquals("(title:QUERY1 OR content:QUERY1) title:QUERY2",
-                queryHelper.buildQuery("QUERY1 title:QUERY2").getQuery());
-        assertEquals("mimetype:QUERY1 title:QUERY2",
-                queryHelper.buildQuery("mimetype:QUERY1 title:QUERY2")
+        assertEquals("title:QUERY1 AND title:QUERY2",
+                queryHelper.buildQuery("title:QUERY1 AND title:QUERY2")
                         .getQuery());
+        assertEquals("(title:QUERY1 OR content:QUERY1) AND title:QUERY2",
+                queryHelper.buildQuery("QUERY1 AND title:QUERY2").getQuery());
+        assertEquals("mimetype:QUERY1 AND title:QUERY2", queryHelper
+                .buildQuery("mimetype:QUERY1 AND title:QUERY2").getQuery());
         assertEquals(
-                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
-                queryHelper.buildQuery("QUERY1 QUERY2 QUERY3").getQuery());
+                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
+                queryHelper.buildQuery("QUERY1 AND QUERY2 QUERY3").getQuery());
         assertEquals(
-                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
-                queryHelper.buildQuery("QUERY1 QUERY2 QUERY3").getQuery());
+                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2) AND (title:QUERY3 OR content:QUERY3)",
+                queryHelper.buildQuery("QUERY1 QUERY2 AND QUERY3").getQuery());
+        assertEquals(
+                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2) AND (title:QUERY3 OR content:QUERY3)",
+                queryHelper.buildQuery("QUERY1 AND QUERY2 AND QUERY3")
+                        .getQuery());
     }
 
     public void test_not() {
@@ -678,7 +682,7 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "(title:QUERY2 OR content:QUERY2) NOT (title:QUERY1 OR content:QUERY1) NOT (title:QUERY3 OR content:QUERY3)",
                 queryHelper.buildQuery("NOT QUERY1 QUERY2 NOT QUERY3")
-                        .getQuery());
+                .getQuery());
         assertEquals("NOT mimetype:QUERY",
                 queryHelper.buildQuery("NOT mimetype:QUERY").getQuery());
         assertEquals("NOT mimetype:QUERY1 NOT title:QUERY2", queryHelper
@@ -693,7 +697,7 @@ public class QueryHelperTest extends S2TestCase {
     public void test_escapeValue() {
         final String[] targets = new String[] { "+", "-", "&&", "||", "!", "(",
                 ")", "{", "}", "[", "]", "^", "\"", "~", ":", "\\", " ",
-                "\u3000" };
+        "\u3000" };
         for (final String target : targets) {
             assertEquals("abc\\" + target + "123",
                     QueryUtil.escapeValue("abc" + target + "123"));
@@ -788,7 +792,7 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "(title:QUERY1\\\u3000QUERY2 OR content:QUERY1\\\u3000QUERY2) (title:QUERY3 OR content:QUERY3)",
                 queryHelper
-                        .buildFacetQuery("\"QUERY1\u3000QUERY2\"\u3000QUERY3"));
+                .buildFacetQuery("\"QUERY1\u3000QUERY2\"\u3000QUERY3"));
 
     }
 
@@ -803,11 +807,11 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "mimetype:QUERY1 host:QUERY2 (title:QUERY3 OR content:QUERY3)",
                 queryHelper
-                        .buildFacetQuery("mimetype:QUERY1 host:QUERY2 QUERY3"));
+                .buildFacetQuery("mimetype:QUERY1 host:QUERY2 QUERY3"));
         assertEquals(
                 "mimetype:QUERY1\\ QUERY2 (title:QUERY3 OR content:QUERY3)",
                 queryHelper
-                        .buildFacetQuery("mimetype:\"QUERY1 QUERY2\" QUERY3"));
+                .buildFacetQuery("mimetype:\"QUERY1 QUERY2\" QUERY3"));
 
     }
 
@@ -1047,11 +1051,11 @@ public class QueryHelperTest extends S2TestCase {
                 queryHelper.buildFacetQuery("[20020101 TO 20030101]"));
         assertEquals("lastModified:[20020101 TO 20030101]",
                 queryHelper
-                        .buildFacetQuery("lastModified:[20020101 TO 20030101]"));
+                .buildFacetQuery("lastModified:[20020101 TO 20030101]"));
         assertEquals(
                 "(title:QUERY OR content:QUERY) lastModified:[20020101 TO 20030101]",
                 queryHelper
-                        .buildFacetQuery("QUERY lastModified:[20020101 TO 20030101]"));
+                .buildFacetQuery("QUERY lastModified:[20020101 TO 20030101]"));
 
         // TODO more..
 
@@ -1102,8 +1106,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals(
                             "title:\\" + Constants.RESERVED[i]
                                     + " OR content:\\" + Constants.RESERVED[i],
-                            queryHelper.buildFacetQuery("\\"
-                                    + Constants.RESERVED[i]));
+                                    queryHelper.buildFacetQuery("\\"
+                                            + Constants.RESERVED[i]));
                     continue;
                 } else if (Constants.RESERVED[i].equals("{")
                         && e.getMessageCode().equals(
@@ -1111,8 +1115,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals(
                             "title:\\" + Constants.RESERVED[i]
                                     + " OR content:\\" + Constants.RESERVED[i],
-                            queryHelper.buildFacetQuery("\\"
-                                    + Constants.RESERVED[i]));
+                                    queryHelper.buildFacetQuery("\\"
+                                            + Constants.RESERVED[i]));
                     continue;
                 } else if (Constants.RESERVED[i].equals("[")
                         && e.getMessageCode().equals(
@@ -1120,8 +1124,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals(
                             "title:\\" + Constants.RESERVED[i]
                                     + " OR content:\\" + Constants.RESERVED[i],
-                            queryHelper.buildFacetQuery("\\"
-                                    + Constants.RESERVED[i]));
+                                    queryHelper.buildFacetQuery("\\"
+                                            + Constants.RESERVED[i]));
                     continue;
                 } else if (Constants.RESERVED[i].equals("(")
                         && e.getMessageCode().equals(
@@ -1129,8 +1133,8 @@ public class QueryHelperTest extends S2TestCase {
                     assertEquals(
                             "title:\\" + Constants.RESERVED[i]
                                     + " OR content:\\" + Constants.RESERVED[i],
-                            queryHelper.buildFacetQuery("\\"
-                                    + Constants.RESERVED[i]));
+                                    queryHelper.buildFacetQuery("\\"
+                                            + Constants.RESERVED[i]));
                     continue;
                 }
             }
@@ -1165,22 +1169,25 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals("title:QUERY OR content:QUERY",
                 queryHelper.buildFacetQuery("AND QUERY"));
         assertEquals(
-                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2)",
-                queryHelper.buildFacetQuery("QUERY1 QUERY2"));
+                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2)",
+                queryHelper.buildFacetQuery("QUERY1 AND QUERY2"));
         assertEquals("title:QUERY",
                 queryHelper.buildFacetQuery("AND title:QUERY"));
-        assertEquals("title:QUERY1 title:QUERY2",
-                queryHelper.buildFacetQuery("title:QUERY1 title:QUERY2"));
-        assertEquals("(title:QUERY1 OR content:QUERY1) title:QUERY2",
-                queryHelper.buildFacetQuery("QUERY1 title:QUERY2"));
-        assertEquals("mimetype:QUERY1 title:QUERY2",
-                queryHelper.buildFacetQuery("mimetype:QUERY1 title:QUERY2"));
+        assertEquals("title:QUERY1 AND title:QUERY2",
+                queryHelper.buildFacetQuery("title:QUERY1 AND title:QUERY2"));
+        assertEquals("(title:QUERY1 OR content:QUERY1) AND title:QUERY2",
+                queryHelper.buildFacetQuery("QUERY1 AND title:QUERY2"));
+        assertEquals("mimetype:QUERY1 AND title:QUERY2",
+                queryHelper.buildFacetQuery("mimetype:QUERY1 AND title:QUERY2"));
         assertEquals(
-                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
-                queryHelper.buildFacetQuery("QUERY1 QUERY2 QUERY3"));
+                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
+                queryHelper.buildFacetQuery("QUERY1 AND QUERY2 QUERY3"));
         assertEquals(
-                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2) (title:QUERY3 OR content:QUERY3)",
-                queryHelper.buildFacetQuery("QUERY1 QUERY2 QUERY3"));
+                "(title:QUERY1 OR content:QUERY1) (title:QUERY2 OR content:QUERY2) AND (title:QUERY3 OR content:QUERY3)",
+                queryHelper.buildFacetQuery("QUERY1 QUERY2 AND QUERY3"));
+        assertEquals(
+                "(title:QUERY1 OR content:QUERY1) AND (title:QUERY2 OR content:QUERY2) AND (title:QUERY3 OR content:QUERY3)",
+                queryHelper.buildFacetQuery("QUERY1 AND QUERY2 AND QUERY3"));
     }
 
     public void test_buildFacet_not() {
@@ -1208,7 +1215,7 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "NOT mimetype:QUERY1 NOT title:QUERY2",
                 queryHelper
-                        .buildFacetQuery("NOT mimetype:QUERY1 NOT title:QUERY2"));
+                .buildFacetQuery("NOT mimetype:QUERY1 NOT title:QUERY2"));
         assertEquals("(title:QUERY2 OR content:QUERY2) NOT mimetype:QUERY1",
                 queryHelper.buildFacetQuery("NOT mimetype:QUERY1 QUERY2"));
         assertEquals("mimetype:QUERY2 NOT (title:QUERY1 OR content:QUERY1)",
@@ -1222,28 +1229,29 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "(title:bbb OR content:bbb) OR (title:ccc OR content:ccc)",
                 queryHelper.buildQuery("(bbb OR ccc)").getQuery());
-        assertEquals("(title:bbb OR content:bbb) (title:ccc OR content:ccc)",
-                queryHelper.buildQuery("(bbb ccc)").getQuery());
+        assertEquals(
+                "(title:bbb OR content:bbb) AND (title:ccc OR content:ccc)",
+                queryHelper.buildQuery("(bbb AND ccc)").getQuery());
 
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
                 queryHelper.buildQuery("aaa (bbb ccc)").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
-                queryHelper.buildQuery("aaa (bbb ccc)").getQuery());
+                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc))",
+                queryHelper.buildQuery("aaa (bbb AND ccc)").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
-                queryHelper.buildQuery("aaa (bbb ccc)").getQuery());
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc))",
+                queryHelper.buildQuery("aaa AND (bbb AND ccc)").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
-                queryHelper.buildQuery("aaa OR (bbb ccc)").getQuery());
+                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc))",
+                queryHelper.buildQuery("aaa OR (bbb AND ccc)").getQuery());
 
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
                 queryHelper.buildQuery("aaa (bbb OR ccc)").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
-                queryHelper.buildQuery("aaa (bbb OR ccc)").getQuery());
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
+                queryHelper.buildQuery("aaa AND (bbb OR ccc)").getQuery());
         assertEquals(
                 "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
                 queryHelper.buildQuery("aaa OR (bbb OR ccc)").getQuery());
@@ -1252,21 +1260,21 @@ public class QueryHelperTest extends S2TestCase {
                 "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildQuery("(bbb ccc) ddd").getQuery());
         assertEquals(
-                "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("(bbb ccc) ddd").getQuery());
+                "((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("(bbb AND ccc) ddd").getQuery());
         assertEquals(
-                "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("(bbb ccc) ddd").getQuery());
+                "((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("(bbb AND ccc) AND ddd").getQuery());
         assertEquals(
-                "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("(bbb ccc) OR ddd").getQuery());
+                "((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("(bbb AND ccc) OR ddd").getQuery());
 
         assertEquals(
                 "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildQuery("(bbb OR ccc) ddd").getQuery());
         assertEquals(
-                "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("(bbb OR ccc) ddd").getQuery());
+                "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("(bbb OR ccc) AND ddd").getQuery());
         assertEquals(
                 "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
                 queryHelper.buildQuery("(bbb OR ccc) OR ddd").getQuery());
@@ -1275,21 +1283,24 @@ public class QueryHelperTest extends S2TestCase {
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildQuery("aaa (bbb ccc) ddd").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("aaa (bbb ccc) ddd").getQuery());
+                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("aaa (bbb AND ccc) ddd").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("aaa (bbb ccc) ddd").getQuery());
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("aaa AND (bbb AND ccc) AND ddd")
+                .getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("aaa OR (bbb ccc) OR ddd").getQuery());
+                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("aaa OR (bbb AND ccc) OR ddd")
+                .getQuery());
 
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildQuery("aaa (bbb OR ccc) ddd").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildQuery("aaa (bbb OR ccc) ddd").getQuery());
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildQuery("aaa AND (bbb OR ccc) AND ddd")
+                .getQuery());
         assertEquals(
                 "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
                 queryHelper.buildQuery("aaa OR (bbb OR ccc) OR ddd").getQuery());
@@ -1298,8 +1309,8 @@ public class QueryHelperTest extends S2TestCase {
                 "(title:aaa OR content:aaa) (label:bbb (title:ccc OR content:ccc))",
                 queryHelper.buildQuery("aaa (label:bbb ccc)").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) (label:bbb (title:ccc OR content:ccc))",
-                queryHelper.buildQuery("aaa (label:bbb ccc)").getQuery());
+                "(title:aaa OR content:aaa) (label:bbb AND (title:ccc OR content:ccc))",
+                queryHelper.buildQuery("aaa (label:bbb AND ccc)").getQuery());
         assertEquals(
                 "(title:aaa OR content:aaa) (label:bbb OR (title:ccc OR content:ccc))",
                 queryHelper.buildQuery("aaa (label:bbb OR ccc)").getQuery());
@@ -1308,8 +1319,8 @@ public class QueryHelperTest extends S2TestCase {
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) label:ccc)",
                 queryHelper.buildQuery("aaa (bbb label:ccc)").getQuery());
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) label:ccc)",
-                queryHelper.buildQuery("aaa (bbb label:ccc)").getQuery());
+                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) AND label:ccc)",
+                queryHelper.buildQuery("aaa (bbb AND label:ccc)").getQuery());
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR label:ccc)",
                 queryHelper.buildQuery("aaa (bbb OR label:ccc)").getQuery());
@@ -1335,28 +1346,29 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals(
                 "(title:bbb OR content:bbb) OR (title:ccc OR content:ccc)",
                 queryHelper.buildFacetQuery("(bbb OR ccc)"));
-        assertEquals("(title:bbb OR content:bbb) (title:ccc OR content:ccc)",
-                queryHelper.buildFacetQuery("(bbb ccc)"));
+        assertEquals(
+                "(title:bbb OR content:bbb) AND (title:ccc OR content:ccc)",
+                queryHelper.buildFacetQuery("(bbb AND ccc)"));
 
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
                 queryHelper.buildFacetQuery("aaa (bbb ccc)"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
-                queryHelper.buildFacetQuery("aaa (bbb ccc)"));
+                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc))",
+                queryHelper.buildFacetQuery("aaa (bbb AND ccc)"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
-                queryHelper.buildFacetQuery("aaa (bbb ccc)"));
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc))",
+                queryHelper.buildFacetQuery("aaa AND (bbb AND ccc)"));
         assertEquals(
-                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) (title:ccc OR content:ccc))",
-                queryHelper.buildFacetQuery("aaa OR (bbb ccc)"));
+                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc))",
+                queryHelper.buildFacetQuery("aaa OR (bbb AND ccc)"));
 
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
                 queryHelper.buildFacetQuery("aaa (bbb OR ccc)"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
-                queryHelper.buildFacetQuery("aaa (bbb OR ccc)"));
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
+                queryHelper.buildFacetQuery("aaa AND (bbb OR ccc)"));
         assertEquals(
                 "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc))",
                 queryHelper.buildFacetQuery("aaa OR (bbb OR ccc)"));
@@ -1365,21 +1377,21 @@ public class QueryHelperTest extends S2TestCase {
                 "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildFacetQuery("(bbb ccc) ddd"));
         assertEquals(
-                "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("(bbb ccc) ddd"));
+                "((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("(bbb AND ccc) ddd"));
         assertEquals(
-                "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("(bbb ccc) ddd"));
+                "((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("(bbb AND ccc) AND ddd"));
         assertEquals(
-                "((title:bbb OR content:bbb) (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("(bbb ccc) OR ddd"));
+                "((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("(bbb AND ccc) OR ddd"));
 
         assertEquals(
                 "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildFacetQuery("(bbb OR ccc) ddd"));
         assertEquals(
-                "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("(bbb OR ccc) ddd"));
+                "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("(bbb OR ccc) AND ddd"));
         assertEquals(
                 "((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
                 queryHelper.buildFacetQuery("(bbb OR ccc) OR ddd"));
@@ -1388,21 +1400,21 @@ public class QueryHelperTest extends S2TestCase {
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildFacetQuery("aaa (bbb ccc) ddd"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("aaa (bbb ccc) ddd"));
+                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("aaa (bbb AND ccc) ddd"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("aaa (bbb ccc) ddd"));
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("aaa AND (bbb AND ccc) AND ddd"));
         assertEquals(
-                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("aaa OR (bbb ccc) OR ddd"));
+                "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) AND (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("aaa OR (bbb AND ccc) OR ddd"));
 
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
                 queryHelper.buildFacetQuery("aaa (bbb OR ccc) ddd"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) (title:ddd OR content:ddd)",
-                queryHelper.buildFacetQuery("aaa (bbb OR ccc) ddd"));
+                "(title:aaa OR content:aaa) AND ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) AND (title:ddd OR content:ddd)",
+                queryHelper.buildFacetQuery("aaa AND (bbb OR ccc) AND ddd"));
         assertEquals(
                 "(title:aaa OR content:aaa) OR ((title:bbb OR content:bbb) OR (title:ccc OR content:ccc)) OR (title:ddd OR content:ddd)",
                 queryHelper.buildFacetQuery("aaa OR (bbb OR ccc) OR ddd"));
@@ -1411,8 +1423,8 @@ public class QueryHelperTest extends S2TestCase {
                 "(title:aaa OR content:aaa) (label:bbb (title:ccc OR content:ccc))",
                 queryHelper.buildFacetQuery("aaa (label:bbb ccc)"));
         assertEquals(
-                "(title:aaa OR content:aaa) (label:bbb (title:ccc OR content:ccc))",
-                queryHelper.buildFacetQuery("aaa (label:bbb ccc)"));
+                "(title:aaa OR content:aaa) (label:bbb AND (title:ccc OR content:ccc))",
+                queryHelper.buildFacetQuery("aaa (label:bbb AND ccc)"));
         assertEquals(
                 "(title:aaa OR content:aaa) (label:bbb OR (title:ccc OR content:ccc))",
                 queryHelper.buildFacetQuery("aaa (label:bbb OR ccc)"));
@@ -1421,8 +1433,8 @@ public class QueryHelperTest extends S2TestCase {
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) label:ccc)",
                 queryHelper.buildFacetQuery("aaa (bbb label:ccc)"));
         assertEquals(
-                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) label:ccc)",
-                queryHelper.buildFacetQuery("aaa (bbb label:ccc)"));
+                "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) AND label:ccc)",
+                queryHelper.buildFacetQuery("aaa (bbb AND label:ccc)"));
         assertEquals(
                 "(title:aaa OR content:aaa) ((title:bbb OR content:bbb) OR label:ccc)",
                 queryHelper.buildFacetQuery("aaa (bbb OR label:ccc)"));
@@ -1800,7 +1812,7 @@ public class QueryHelperTest extends S2TestCase {
                 queryHelper.buildQuery("inurl:QUERY1 inurl:QUERY2").getQuery());
         assertEquals("(title:aaa OR content:aaa) url:*QUERY1* url:*QUERY2*",
                 queryHelper.buildQuery("aaa inurl:QUERY1 inurl:QUERY2")
-                        .getQuery());
+                .getQuery());
         assertEquals("url:*QUERY*", queryHelper.buildQuery("inurl:\"QUERY\"")
                 .getQuery());
     }
