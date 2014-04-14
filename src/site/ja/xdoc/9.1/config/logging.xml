@@ -51,6 +51,11 @@
 </logger>
 ]]></source>
       </subsection>
+      <subsection name="debugログの出力方法">
+        <p>priorityタグのvalue属性をinfoからdebugに変更しクロールする事で、全てのdebugログを出力する事ができます。</p>
+        <source><![CDATA[
+<priority value="info"/>]]></source>
+      </subsection>
     </section>
   </body>
 </document>
