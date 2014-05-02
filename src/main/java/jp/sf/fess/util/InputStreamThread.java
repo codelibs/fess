@@ -39,6 +39,8 @@ public class InputStreamThread extends Thread {
     private final List<String> list = new LinkedList<String>();
 
     public InputStreamThread(final InputStream is, final String charset) {
+        super("InputStreamThread");
+
         try {
             br = new BufferedReader(new InputStreamReader(is, charset));
         } catch (final UnsupportedEncodingException e) {

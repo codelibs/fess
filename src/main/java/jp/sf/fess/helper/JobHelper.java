@@ -19,6 +19,8 @@ package jp.sf.fess.helper;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.job.JobExecutor;
@@ -77,21 +79,38 @@ public class JobHelper {
                 logger.warn("Could not interrupt a thread of an input stream.",
                         e);
             }
-            Process process = jobProcess.getProcess();
+
+            final CountDownLatch latch = new CountDownLatch(1);
+            final Process process = jobProcess.getProcess();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        IOUtils.closeQuietly(process.getInputStream());
+                    } catch (final Exception e) {
+                        logger.warn("Could not close a process input stream.",
+                                e);
+                    }
+                    try {
+                        IOUtils.closeQuietly(process.getErrorStream());
+                    } catch (final Exception e) {
+                        logger.warn("Could not close a process error stream.",
+                                e);
+                    }
+                    try {
+                        IOUtils.closeQuietly(process.getOutputStream());
+                    } catch (final Exception e) {
+                        logger.warn("Could not close a process output stream.",
+                                e);
+                    }
+                    latch.countDown();
+                }
+            }, "ProcessCloser").start();
+
             try {
-                IOUtils.closeQuietly(process.getInputStream());
-            } catch (final Exception e) {
-                logger.warn("Could not close a process input stream.", e);
-            }
-            try {
-                IOUtils.closeQuietly(process.getErrorStream());
-            } catch (final Exception e) {
-                logger.warn("Could not close a process error stream.", e);
-            }
-            try {
-                IOUtils.closeQuietly(process.getOutputStream());
-            } catch (final Exception e) {
-                logger.warn("Could not close a process output stream.", e);
+                latch.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted to wait a process.", e);
             }
             try {
                 process.destroy();
