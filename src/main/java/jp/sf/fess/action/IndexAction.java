@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -89,6 +91,8 @@ import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
 import org.seasar.framework.util.InputStreamUtil;
 import org.seasar.framework.util.OutputStreamUtil;
+import org.seasar.framework.util.URLUtil;
+import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.taglib.S2Functions;
@@ -396,6 +400,27 @@ public class IndexAction {
             }
         }
 
+        String hash;
+        if (StringUtil.isNotBlank(indexForm.hash)) {
+            String value = URLUtil.decode(indexForm.hash, Constants.UTF_8);
+            final StringBuilder buf = new StringBuilder(value.length() + 100);
+            for (final char c : value.toCharArray()) {
+                if (CharUtil.isUrlChar(c) || c == ' ') {
+                    buf.append(c);
+                } else {
+                    try {
+                        buf.append(URLEncoder.encode(String.valueOf(c),
+                                Constants.UTF_8));
+                    } catch (final UnsupportedEncodingException e) {
+                        // NOP
+                    }
+                }
+            }
+            hash = buf.toString();
+        } else {
+            hash = StringUtil.EMPTY;
+        }
+
         if (isFileSystemPath(url)) {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(
                     Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
@@ -441,10 +466,10 @@ public class IndexAction {
                         RequestUtil.getRequest().getContextPath()
                                 + "/applet/launcher?uri=" + S2Functions.u(url));
             } else {
-                ResponseUtil.getResponse().sendRedirect(url);
+                ResponseUtil.getResponse().sendRedirect(url + hash);
             }
         } else {
-            ResponseUtil.getResponse().sendRedirect(url);
+            ResponseUtil.getResponse().sendRedirect(url + hash);
         }
         return null;
     }

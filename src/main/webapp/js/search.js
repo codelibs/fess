@@ -25,11 +25,21 @@ $(function(){
 	$result.on('mousedown', 'a.link', function(e){
 		var docId = $(this).attr('data-id'),
 			rt = $('#rt').val(),
+			url = $(this).attr('href'),
 			buf = [];
 		buf.push('go?rt=');
 		buf.push(rt);
 		buf.push('&docId=');
 		buf.push(docId);
+
+		var hashIndex = url.indexOf('#');
+		if (hashIndex >= 0) {
+			var hashStr = url.substring(hashIndex);
+			buf.push('&hash=');
+			buf.push(encodeURIComponent(hashStr));
+			buf.push(hashStr);
+		}
+
 		$(this).attr('href', buf.join(''));
 	});
 
@@ -37,12 +47,21 @@ $(function(){
 		if($screenshot.size() > 0) {
 			var docId = $(this).attr('data-id'),
 				rt = $('#rt').val(),
+				url = $(this).attr('href'),
 				queryId = $queryId.val(),
 				buf = [];
 			buf.push('go?rt=');
 			buf.push(rt);
 			buf.push('&docId=');
 			buf.push(docId);
+
+			var hashIndex = url.indexOf('#');
+			if (hashIndex >= 0) {
+				var hashStr = url.substring(hashIndex);
+				buf.push('&hash=');
+				buf.push(encodeURIComponent(hashStr));
+				buf.push(hashStr);
+			}
 
 			$screenshot.children().remove();
 			

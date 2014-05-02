@@ -67,6 +67,9 @@ public class IndexForm implements Serializable {
 
     public String[] hq;
 
+    @Maxbytelength(maxbytelength = 1000)
+    public String hash;
+
     // xml/json
 
     @Maxbytelength(maxbytelength = 20)

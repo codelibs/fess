@@ -289,7 +289,7 @@ public class ViewHelper implements Serializable {
             final String mimetype = getString(document, "mimetype");
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
-                    return appendSearchWord(url, "search");
+                    return appendPDFSearchWord(url);
                 } else {
                     // TODO others..
                     return url;
@@ -299,19 +299,20 @@ public class ViewHelper implements Serializable {
         return url;
     }
 
-    protected String appendSearchWord(final String url,
-            final String searchWordKey) {
-        final String query = RequestUtil.getRequest().getParameter("query");
-        if (StringUtil.isNotBlank(query)) {
-            String separator;
-            if (url.indexOf('?') >= 0) {
-                separator = "&";
-            } else {
-                separator = "?";
+    protected String appendPDFSearchWord(final String url) {
+        final String[] queries = (String[]) RequestUtil.getRequest()
+                .getAttribute(Constants.HIGHLIGHT_QUERIES);
+        if (queries != null) {
+            StringBuilder buf = new StringBuilder(url.length() + 100);
+            buf.append(url).append("#search=%22");
+            for (int i = 0; i < queries.length; i++) {
+                if (i != 0) {
+                    buf.append(' ');
+                }
+                buf.append(URLUtil.encode(queries[i], urlLinkEncoding));
             }
-            return url + separator + searchWordKey + "="
-                    + URLUtil.encode(query, urlLinkEncoding);
-
+            buf.append("%22");
+            return buf.toString();
         }
         return url;
     }
