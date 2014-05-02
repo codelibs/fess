@@ -33,6 +33,7 @@ import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.job.JobExecutor.ShutdownListener;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.InputStreamThread;
+import jp.sf.fess.util.JobProcess;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -303,13 +304,13 @@ public class CrawlJob {
         pb.redirectErrorStream(true);
 
         try {
-            final Process currentProcess = jobHelper.startCrawlerProcess(
+            final JobProcess jobProcess = jobHelper.startCrawlerProcess(
                     sessionId, pb);
 
-            final InputStreamThread it = new InputStreamThread(
-                    currentProcess.getInputStream(), Constants.UTF_8);
+            InputStreamThread it = jobProcess.getInputStreamThread();
             it.start();
 
+            Process currentProcess = jobProcess.getProcess();
             currentProcess.waitFor();
             it.join(5000);
 

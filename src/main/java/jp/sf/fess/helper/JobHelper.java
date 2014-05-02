@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.job.JobExecutor;
+import jp.sf.fess.util.InputStreamThread;
+import jp.sf.fess.util.JobProcess;
 
 import org.apache.commons.io.IOUtils;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
@@ -32,9 +34,9 @@ public class JobHelper {
     private static final Logger logger = LoggerFactory
             .getLogger(JobHelper.class);
 
-    private final ConcurrentHashMap<String, Process> runningProcessMap = new ConcurrentHashMap<String, Process>();
+    private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<Long, JobExecutor>();
+    private final ConcurrentHashMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<>();
 
     @DestroyMethod
     public void destroy() {
@@ -43,31 +45,39 @@ public class JobHelper {
         }
     }
 
-    public Process startCrawlerProcess(final String sessionId,
+    public JobProcess startCrawlerProcess(final String sessionId,
             final ProcessBuilder processBuilder) {
         destroyCrawlerProcess(sessionId);
-        Process currentProcess;
+        JobProcess jobProcess;
         try {
-            currentProcess = processBuilder.start();
+            jobProcess = new JobProcess(processBuilder.start());
             destroyCrawlerProcess(runningProcessMap.putIfAbsent(sessionId,
-                    currentProcess));
-            return currentProcess;
+                    jobProcess));
+            return jobProcess;
         } catch (final IOException e) {
             throw new FessSystemException("Crawler Process terminated.", e);
         }
     }
 
     public void destroyCrawlerProcess(final String sessionId) {
-        final Process process = runningProcessMap.remove(sessionId);
-        destroyCrawlerProcess(process);
+        final JobProcess jobProcess = runningProcessMap.remove(sessionId);
+        destroyCrawlerProcess(jobProcess);
     }
 
     public boolean isCrawlProcessRunning() {
         return !runningProcessMap.isEmpty();
     }
 
-    protected void destroyCrawlerProcess(final Process process) {
-        if (process != null) {
+    protected void destroyCrawlerProcess(final JobProcess jobProcess) {
+        if (jobProcess != null) {
+            InputStreamThread ist = jobProcess.getInputStreamThread();
+            try {
+                ist.interrupt();
+            } catch (Exception e) {
+                logger.warn("Could not interrupt a thread of an input stream.",
+                        e);
+            }
+            Process process = jobProcess.getProcess();
             try {
                 IOUtils.closeQuietly(process.getInputStream());
             } catch (final Exception e) {

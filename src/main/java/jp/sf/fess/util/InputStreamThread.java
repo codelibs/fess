@@ -17,7 +17,6 @@
 package jp.sf.fess.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -49,21 +48,24 @@ public class InputStreamThread extends Thread {
 
     @Override
     public void run() {
-        for (;;) {
+        boolean running = true;
+        while (running) {
             try {
                 final String line = br.readLine();
                 if (line == null) {
-                    break;
+                    running = false;
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(line);
+                    }
+                    list.add(line);
+                    if (list.size() > MAX_BUFFER_SIZE) {
+                        list.remove(0);
+                    }
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug(line);
-                }
-                list.add(line);
-                if (list.size() > MAX_BUFFER_SIZE) {
-                    list.remove(0);
-                }
-            } catch (final IOException e) {
-                throw new FessSystemException(e);
+            } catch (final Exception e) {
+                running = false;
+                logger.error("Failed to process an input stream.", e);
             }
         }
     }
