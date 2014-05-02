@@ -1452,7 +1452,7 @@ public class QueryHelper implements Serializable {
         additionalQueryParamMap.put(key, values);
     }
 
-    protected String getDefaultOperator(){
+    protected String getDefaultOperator() {
         return DEFAULT_OPERATOR;
     }
 
