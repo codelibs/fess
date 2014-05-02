@@ -110,7 +110,7 @@
     <dbflute.version>1.0.4K</dbflute.version>
     <s2robot.version>0.7.1-SNAPSHOT</s2robot.version>
     <solr.version>4.8.0</solr.version>
-    <slf4j.version>1.7.6</slf4j.version>
+    <slf4j.version>1.7.7</slf4j.version>
     <poi.version>3.10-FINAL</poi.version>
   </properties>
   <build>
@@ -449,7 +449,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>16.0.1</version>
+      <version>17.0</version>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
@@ -579,7 +579,7 @@
     <dependency>
       <groupId>org.codelibs.struts</groupId>
       <artifactId>cl-struts</artifactId>
-      <version>1.2.9.1-SNAPSHOT</version>
+      <version>1.2.9.1</version>
     </dependency>
     <dependency>
       <groupId>org.seasar.sastruts</groupId>
@@ -748,7 +748,7 @@
     <dependency>
       <groupId>com.ibm.icu</groupId>
       <artifactId>icu4j</artifactId>
-      <version>52.1</version>
+      <version>53.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.pdfbox</groupId>
