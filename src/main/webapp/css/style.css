@@ -22,11 +22,15 @@ h3 {
   font-size: 18px;
 }
 
-.navbar .help-link {
+.navbar .logout-link {
+    margin-right: 10px;
+}
+
+.navbar .logout-link, .navbar .help-link {
 	color: #ffffff;
 }
 
-.navbar .help-link:hover {
+.navbar .logout-link:hover, .navbar .help-link:hover {
 	color: #08c;
 	text-decoration: none;
 }

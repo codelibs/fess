@@ -79,6 +79,10 @@
 				<c:if test="${!empty username}">
 				<p class="username">
 					<bean:message key="labels.searchheader_username" arg0="${f:h(username)}" />
+					|
+					<s:link href="/login/logout" styleClass="logout-link">
+						<bean:message key="labels.logout" />
+					</s:link>
 				</p>
 				</c:if>
 			</div>

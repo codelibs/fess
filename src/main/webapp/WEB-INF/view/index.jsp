@@ -21,6 +21,11 @@
 		<div class="navbar-inner">
 			<div class="container">
 				<p class="navbar-text pull-right">
+					<c:if test="${!empty username}">
+					<s:link href="/login/logout" styleClass="logout-link">
+						<bean:message key="labels.logout" />
+					</s:link>
+					</c:if>
 					<s:link href="/help" styleClass="help-link">
 						<bean:message key="labels.index_help" />
 					</s:link>
