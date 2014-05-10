@@ -32,6 +32,8 @@ public class SearchQuery {
 
     private String minimumShouldMatch;
 
+    private String defType;
+
     public String getQuery() {
         return query;
     }
@@ -86,6 +88,14 @@ public class SearchQuery {
 
     public void setMinimumShouldMatch(final String minimumShouldMatch) {
         this.minimumShouldMatch = minimumShouldMatch;
+    }
+
+    public String getDefType() {
+        return defType;
+    }
+
+    public void setDefType(String defType) {
+        this.defType = defType;
     }
 
     public static class SortField {

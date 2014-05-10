@@ -145,6 +145,7 @@ public class SearchService implements Serializable {
             solrQuery.setStart(start);
             solrQuery.setRows(rows);
             solrQuery.set("mm", searchQuery.getMinimumShouldMatch());
+            solrQuery.set("defType", searchQuery.getDefType());
             for (final Map.Entry<String, String[]> entry : queryHelper
                     .getQueryParamMap().entrySet()) {
                 solrQuery.set(entry.getKey(), entry.getValue());

@@ -85,7 +85,7 @@ public class QueryHelper implements Serializable {
 
     private static final String _AND_ = " AND ";
 
-    private static final String DEFAULT_OPERATOR = " ";
+    private static final String DEFAULT_OPERATOR = _AND_;
 
     private static final long serialVersionUID = 1L;
 
@@ -146,7 +146,7 @@ public class QueryHelper implements Serializable {
 
     protected String additionalQuery;
 
-    protected int maxFilterQueriesForRole = 3;
+    protected int maxFilterQueriesForRole = Integer.MAX_VALUE;
 
     protected int timeAllowed = -1;
 
@@ -163,6 +163,8 @@ public class QueryHelper implements Serializable {
     protected String highlightingPrefix = "hl_";
 
     protected String minimumShouldMatch = "100%";
+
+    protected String defType = "edismax";
 
     protected FacetInfo defaultFacetInfo;
 
@@ -267,6 +269,7 @@ public class QueryHelper implements Serializable {
         searchQuery.setQuery(solrQuery);
 
         searchQuery.setMinimumShouldMatch(minimumShouldMatch);
+        searchQuery.setDefType(defType);
 
         for (final Map.Entry<String, String> entry : sortFieldMap.entrySet()) {
             searchQuery.addSortField(entry.getKey(), entry.getValue());
@@ -1372,6 +1375,14 @@ public class QueryHelper implements Serializable {
 
     public void setMinimumShouldMatch(final String minimumShouldMatch) {
         this.minimumShouldMatch = minimumShouldMatch;
+    }
+
+    public String getDefType() {
+        return defType;
+    }
+
+    public void setDefType(String defType) {
+        this.defType = defType;
     }
 
     public boolean isAnalysisFieldName(final String fieldName) {
