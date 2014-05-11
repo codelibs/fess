@@ -13,7 +13,7 @@
       <p>Fess を開発するために必要な情報をまとめます。</p>
     </section>
     <section name="必要な知識">
-      <p>Fess は Java 6 以上の環境で動作するアプリケーションとして開発されています。以下のような知識が必要になります。</p>
+      <p>Fess は Java 7 以上の環境で動作するアプリケーションとして開発されています。以下のような知識が必要になります。</p>
       <ul>
           <li>Java</li>
           <li>Seasar 2</li>
@@ -22,25 +22,26 @@
           <li>Solr (検索インデックス周りを開発する場合)</li>
           <li>S2Robot (クローラー周りを開発する場合)</li>
       </ul>
-      <p>開発する際には Eclipse および Maven 2 を利用する前提で進めます(fess-server のビルドには Ant が必要になります)。また、開発するにあたり、Fess も動作させるためにインストールしておきます。必要なものは事前にインストールしておいてください。</p>
+      <p>開発する際には Eclipse および Maven を利用する前提で進めます(fess-server のビルドには Ant が必要になります)。また、開発するにあたり、Fess も動作させるためにインストールしておきます。必要なものは事前にインストールしておいてください。</p>
     </section>
     <section name="ウェブ画面周りの開発について">
       <p>管理画面や検索画面の開発方法をまとめます。</p>
       <ol>
-        <li>Java, Eclipse, Maven 2.x, Fess をインストールして準備します。</li>
-        <li>Eclipse で Fess のソースコードを SVN からチェックアウトします。SVNのリポジトリは以下になります。
+        <li>Java, Eclipse, Maven 3.x, Fess をインストールして準備します。</li>
+        <li>Eclipse で Fess のソースコードを github から clone します。gitのリポジトリは以下になります。
       <source><![CDATA[
-http://svn.sourceforge.jp/svnroot/fess/fess/trunk/
+https://github.com/codelibs/fess.git
 ]]></source>
 </li>
         <li>コマンドライン上でチェックアウトしたソースコードの pom.xml があるディレクトリに移動します。そこで mvn eclipse:eclipse を実行します。
       <source><![CDATA[
 mvn eclipse:eclipse
 ]]></source>
-.classpath が生成されますが、そのファイルの上部が以下であることを確認します(src/main が src/test より上位あることを確認)。
+.classpath が生成されますが、そのファイルの上部が以下であることを確認します(src/main が src/test より上位あることを確認し、異なる場合は順序を修正してください)。
       <source><![CDATA[
 <classpath>
  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
+ <classpathentry kind="src" path="src/main/h2/resources" excluding="**/*.java"/>
  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
  <classpathentry kind="src" path="src/test/java" including="**/*.java"/>
  <classpathentry kind="src" path="src/test/resources" excluding="**/*.java"/>
@@ -49,7 +50,7 @@ Fess が依存するライブラリが更新されたときには mvn eclipse:ec
 </li>
         <li>Eclipse で Fess のプロジェクトをリロードします。</li>
         <li>Eclipse で Fess のプロジェクトをビルドします。(自動ビルドになっていればクリーンすればビルドされます) src/main/webapp/WEB-INF/classes に生成されていることを確認します。</li>
-        <li>Eclipse で Tomcat プラグインを入れて、インストールした Fess を Tomcat 6 として設定します。Tomcat プラグインの JVM Setttings で Fess の bin/setenv.sh にある値を追加します。環境変数は展開する必要があります。 少なくても -Dsolr.solr.home -Dfess.solr.data.dir -Dfess.log.file があれば OK です。</li>
+        <li>Eclipse で Tomcat プラグインを入れて、インストールした Fess を Tomcat 7 として設定します。Tomcat プラグインの JVM Setttings で Fess の bin/setenv.sh にある値を追加します。環境変数は展開する必要があります。 少なくても -Dsolr.solr.home -Dfess.log.file -Dsolr.log.file があれば OK です。</li>
         <li>Eclipse で Fess のプロジェクトを Tomcat プラグインのコンテキスト定義の更新をして配備します。</li>
         <li>Tomcat プラグインで起動します。</li>
       </ol>
@@ -67,7 +68,7 @@ Fess が依存するライブラリが更新されたときには mvn eclipse:ec
     <section name="Fess の配布物の作成について">
       <p>Fess の配布物は、Tomcat に Fess の war ファイルおよび Solr を同梱したものになります。Fess の配布物は SVN の fess-server でビルドします。ビルドするためには Ant が必要になります。</p>
       <source><![CDATA[
-$ svn co http://svn.sourceforge.jp/svnroot/fess/fess-server/trunk/ fess-server
+$ git clone https://github.com/codelibs/fess-server.git
 $ cd fess-server
 $ ant clean
 $ ant
