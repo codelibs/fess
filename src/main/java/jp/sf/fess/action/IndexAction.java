@@ -205,9 +205,11 @@ public class IndexAction {
 
     protected String pagingQuery = null;
 
-    public boolean searchLogSupport;
+    public boolean searchLogSupport = Constants.TRUE.equals(crawlerProperties
+            .getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
 
-    public boolean favoriteSupport;
+    public boolean favoriteSupport = Constants.TRUE.equals(crawlerProperties
+            .getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
 
     public boolean screenShotSupport;
 
@@ -1280,11 +1282,6 @@ public class IndexAction {
             locale = Locale.ENGLISH;
         }
         langItems = systemHelper.getLanguageItems(locale);
-
-        searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
-        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
 
         final HttpSession session = request.getSession(false);
         if (session != null) {
