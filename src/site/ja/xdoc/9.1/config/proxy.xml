@@ -21,7 +21,7 @@
 
     <component name="internalHttpClient"
         class="org.seasar.robot.client.http.HcHttpClient" instance="prototype">
-        <property name="cookiePolicy">@org.apache.http.client.params.CookiePolicy@BEST_MATCH</property>
+        <property name="cookieSpec">@org.apache.http.client.params.CookiePolicy@BEST_MATCH</property>
         <property name="clientConnectionManager">clientConnectionManager</property>
         <property name="proxyHost">"プロキシサーバー名(ex. 192.168.1.1)"</property>
         <property name="proxyPort">プロキシサーバーのポート(ex. 8080) (" は不要)</property>
@@ -42,29 +42,7 @@
     </component>
     
     <component name="clientConnectionManager"
-        class="org.apache.http.impl.conn.PoolingClientConnectionManager">
-        <arg>
-            <component class="org.apache.http.conn.scheme.SchemeRegistry">
-                <initMethod name="register">
-                    <arg>
-                        <component class="org.apache.http.conn.scheme.Scheme">
-                            <arg>"http"</arg>
-                            <arg>80</arg>
-                            <arg>@org.apache.http.conn.scheme.PlainSocketFactory@getSocketFactory()</arg>
-                        </component>
-                    </arg>
-                </initMethod>
-                <initMethod name="register">
-                    <arg>
-                        <component class="org.apache.http.conn.scheme.Scheme">
-                            <arg>"https"</arg>
-                            <arg>443</arg>
-                            <arg>@org.apache.http.conn.ssl.SSLSocketFactory@getSocketFactory()</arg>
-                        </component>
-                    </arg>
-                </initMethod>
-            </component>
-        </arg>
+        class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
         <arg>5</arg><!-- timeToLive -->
         <arg>@java.util.concurrent.TimeUnit@MINUTES</arg><!-- tunit -->
         <!-- Increase max total connection to 200 -->
@@ -74,27 +52,15 @@
         <destroyMethod name="shutdown"></destroyMethod>
     </component>
 
-    <component name="internalFsClient"
+    <component name="fsClient"
         class="org.seasar.robot.client.fs.FileSystemClient" instance="prototype">
         <property name="charset">"UTF-8"</property>
     </component>
-    <component name="fsClient"
-        class="org.seasar.robot.client.FaultTolerantClient" instance="prototype">
-        <property name="robotClient">internalFsClient</property>
-        <property name="maxRetryCount">5</property>
-        <property name="retryInterval">500</property>
-    </component>
 
-    <component name="internalSmbClient"
+    <component name="smbClient"
         class="org.seasar.robot.client.smb.SmbClient" instance="prototype">
         <property name="charset">"UTF-8"</property>
         <!-- ntlmPasswordAuthentication -->
-    </component>
-    <component name="smbClient"
-        class="org.seasar.robot.client.FaultTolerantClient" instance="prototype">
-        <property name="robotClient">internalSmbClient</property>
-        <property name="maxRetryCount">5</property>
-        <property name="retryInterval">500</property>
     </component>
 
     <component name="clientFactory"
@@ -112,6 +78,7 @@
             <arg>smbClient</arg>
         </initMethod>
     </component>
+
 </components>
 ]]></source>
     </section>
