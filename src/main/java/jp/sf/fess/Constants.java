@@ -34,7 +34,7 @@ public class Constants extends CoreLibConstants {
 
     public static final int DEFAULT_ADMIN_PAGE_SIZE = 25;
 
-    public static final String WEB_API_VERSION = "5";
+    public static final String WEB_API_VERSION = FESS_VERSION;
 
     public static final String TRUE = "true";
 
