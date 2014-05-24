@@ -156,7 +156,7 @@ public class BsSearchFieldLogCB extends AbstractConditionBean {
      * cb.query().setBirthdate_DateFromTo(fromDate, toDate);
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
-     * 
+     *
      * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
@@ -165,7 +165,7 @@ public class BsSearchFieldLogCB extends AbstractConditionBean {
      *     }
      * });
      * cb.query().notExistsPurchaseList...
-     * 
+     *
      * <span style="color: #3F7E5E">// InScopeRelation: (sub-query)</span>
      * <span style="color: #3F7E5E">// {where MEMBER_STATUS_CODE in (select MEMBER_STATUS_CODE from MEMBER_STATUS where ...)}</span>
      * cb.query().inScopeMemberStatus(new SubQuery&lt;MemberStatusCB&gt;() {
@@ -174,7 +174,7 @@ public class BsSearchFieldLogCB extends AbstractConditionBean {
      *     }
      * });
      * cb.query().notInScopeMemberStatus...
-     * 
+     *
      * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -182,7 +182,7 @@ public class BsSearchFieldLogCB extends AbstractConditionBean {
      *         subCB.query().setXxx... <span style="color: #3F7E5E">// referrer sub-query condition</span>
      *     }
      * }).greaterEqual(value);
-     * 
+     *
      * <span style="color: #3F7E5E">// ScalarCondition: (self-table sub-query)</span>
      * cb.query().scalar_Equal().max(new SubQuery&lt;MemberCB&gt;() {
      *     public void query(MemberCB subCB) {
@@ -190,14 +190,14 @@ public class BsSearchFieldLogCB extends AbstractConditionBean {
      *         subCB.query().setXxx... <span style="color: #3F7E5E">// scalar sub-query condition</span>
      *     }
      * });
-     * 
+     *
      * <span style="color: #3F7E5E">// OrderBy</span>
      * cb.query().addOrderBy_MemberName_Asc();
      * cb.query().addOrderBy_MemberName_Desc().withManualOrder(valueList);
      * cb.query().addOrderBy_MemberName_Desc().withNullsFirst();
      * cb.query().addOrderBy_MemberName_Desc().withNullsLast();
      * cb.query().addSpecifiedDerivedOrderBy_Desc(aliasName);
-     * 
+     *
      * <span style="color: #3F7E5E">// Query(Relation)</span>
      * cb.query().queryMemberStatus()...;
      * cb.query().queryMemberAddressAsValid(targetDate)...;
@@ -205,7 +205,7 @@ public class BsSearchFieldLogCB extends AbstractConditionBean {
      * @return The instance of condition-query for base-point table to set up query. (NotNull)
      */
     public SearchFieldLogCQ query() {
-        assertQueryPurpose(); // assert only when user-public query 
+        assertQueryPurpose(); // assert only when user-public query
         return getConditionQuery();
     }
 

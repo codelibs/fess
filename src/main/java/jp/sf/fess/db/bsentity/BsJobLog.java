@@ -32,31 +32,31 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * <pre>
  * [primary-key]
  *     ID
- * 
+ *
  * [column]
  *     ID, JOB_NAME, JOB_STATUS, TARGET, SCRIPT_TYPE, SCRIPT_DATA, SCRIPT_RESULT, START_TIME, END_TIME
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
- *     
- * 
+ *
+ *
  * [referrer table]
- *     
- * 
+ *
+ *
  * [foreign property]
- *     
- * 
+ *
+ *
  * [referrer property]
- *     
- * 
+ *
+ *
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  * Long id = entity.getId();
@@ -325,7 +325,7 @@ public abstract class BsJobLog implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * Clone entity instance using super.clone(). (shallow copy) 
+     * Clone entity instance using super.clone(). (shallow copy)
      * @return The cloned instance of this entity. (NotNull)
      */
     @Override

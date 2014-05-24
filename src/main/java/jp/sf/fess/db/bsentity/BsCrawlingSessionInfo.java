@@ -33,31 +33,31 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * <pre>
  * [primary-key]
  *     ID
- * 
+ *
  * [column]
  *     ID, CRAWLING_SESSION_ID, KEY, VALUE, CREATED_TIME
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
  *     CRAWLING_SESSION
- * 
+ *
  * [referrer table]
- *     
- * 
+ *
+ *
  * [foreign property]
  *     crawlingSession
- * 
+ *
  * [referrer property]
- *     
- * 
+ *
+ *
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  * Long id = entity.getId();
@@ -338,7 +338,7 @@ public abstract class BsCrawlingSessionInfo implements Entity, Serializable,
     }
 
     /**
-     * Clone entity instance using super.clone(). (shallow copy) 
+     * Clone entity instance using super.clone(). (shallow copy)
      * @return The cloned instance of this entity. (NotNull)
      */
     @Override

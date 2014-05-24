@@ -529,7 +529,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
                 + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -563,7 +563,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NAME: {NotNull, VARCHAR(200)}
      * @return this. (NotNull)
@@ -597,7 +597,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PATHS: {NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
@@ -631,7 +631,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getIncludedPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INCLUDED_PATHS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -665,7 +665,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getExcludedPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * EXCLUDED_PATHS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -699,7 +699,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getIncludedDocPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INCLUDED_DOC_PATHS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -733,7 +733,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getExcludedDocPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * EXCLUDED_DOC_PATHS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -767,7 +767,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getConfigParameter();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CONFIG_PARAMETER: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -801,7 +801,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getDepth();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DEPTH: {INTEGER(10)}
      * @return this. (NotNull)
@@ -835,7 +835,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getMaxAccessCount();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * MAX_ACCESS_COUNT: {BIGINT(19)}
      * @return this. (NotNull)
@@ -869,7 +869,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getNumOfThread();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NUM_OF_THREAD: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -903,7 +903,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getIntervalTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INTERVAL_TIME: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -937,7 +937,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getBoost();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * BOOST: {NotNull, DOUBLE(17)}
      * @return this. (NotNull)
@@ -971,7 +971,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getAvailable();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * AVAILABLE: {NotNull, VARCHAR(1)}
      * @return this. (NotNull)
@@ -1005,7 +1005,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getSortOrder();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SORT_ORDER: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -1039,7 +1039,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -1073,7 +1073,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1107,7 +1107,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -1141,7 +1141,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1175,7 +1175,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -1209,7 +1209,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1243,7 +1243,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

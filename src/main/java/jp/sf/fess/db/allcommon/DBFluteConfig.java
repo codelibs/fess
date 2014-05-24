@@ -146,7 +146,7 @@ public class DBFluteConfig {
 
         if (isCurrentDBDef(DBDef.Oracle)) {
             // date formatting has two points:
-            //   o the DATE type of Oracle has seconds  
+            //   o the DATE type of Oracle has seconds
             //   o it uses a date literal of Oracle
             _logDateFormat = "timestamp $df:{yyyy-MM-dd HH:mm:ss}";
             _logTimestampFormat = "timestamp $df:{"
@@ -629,7 +629,7 @@ public class DBFluteConfig {
     //                                                                          ==========
     /**
      * Register the basic value type. <br />
-     * This setting is shared per DBMS in the same class loader. 
+     * This setting is shared per DBMS in the same class loader.
      * @param keyType The type as key. (NotNull)
      * @param valueType The basic value type. (NotNull)
      */

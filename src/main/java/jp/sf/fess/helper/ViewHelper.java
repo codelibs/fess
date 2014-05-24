@@ -303,7 +303,7 @@ public class ViewHelper implements Serializable {
         final String[] queries = (String[]) RequestUtil.getRequest()
                 .getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (queries != null) {
-            StringBuilder buf = new StringBuilder(url.length() + 100);
+            final StringBuilder buf = new StringBuilder(url.length() + 100);
             buf.append(url).append("#search=%22");
             for (int i = 0; i < queries.length; i++) {
                 if (i != 0) {

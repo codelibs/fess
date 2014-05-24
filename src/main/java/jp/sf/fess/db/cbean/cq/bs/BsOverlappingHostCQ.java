@@ -114,7 +114,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -148,7 +148,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getRegularName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * REGULAR_NAME: {IX, NotNull, VARCHAR(1000)}
      * @return this. (NotNull)
@@ -182,7 +182,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getOverlappingName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * OVERLAPPING_NAME: {NotNull, VARCHAR(1000)}
      * @return this. (NotNull)
@@ -216,7 +216,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getSortOrder();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SORT_ORDER: {IX+, NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -250,7 +250,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -284,7 +284,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -318,7 +318,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -352,7 +352,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -386,7 +386,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -420,7 +420,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -454,7 +454,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

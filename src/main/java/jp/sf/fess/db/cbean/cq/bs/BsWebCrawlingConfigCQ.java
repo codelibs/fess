@@ -654,7 +654,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
                 + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -688,7 +688,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NAME: {NotNull, VARCHAR(200)}
      * @return this. (NotNull)
@@ -722,7 +722,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getUrls();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * URLS: {NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
@@ -756,7 +756,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getIncludedUrls();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INCLUDED_URLS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -790,7 +790,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getExcludedUrls();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * EXCLUDED_URLS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -824,7 +824,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getIncludedDocUrls();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INCLUDED_DOC_URLS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -858,7 +858,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getExcludedDocUrls();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * EXCLUDED_DOC_URLS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -892,7 +892,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getConfigParameter();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CONFIG_PARAMETER: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -926,7 +926,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getDepth();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DEPTH: {INTEGER(10)}
      * @return this. (NotNull)
@@ -960,7 +960,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getMaxAccessCount();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * MAX_ACCESS_COUNT: {BIGINT(19)}
      * @return this. (NotNull)
@@ -994,7 +994,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getUserAgent();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USER_AGENT: {NotNull, VARCHAR(200)}
      * @return this. (NotNull)
@@ -1028,7 +1028,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getNumOfThread();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NUM_OF_THREAD: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -1062,7 +1062,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getIntervalTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INTERVAL_TIME: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -1096,7 +1096,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getBoost();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * BOOST: {NotNull, DOUBLE(17)}
      * @return this. (NotNull)
@@ -1130,7 +1130,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getAvailable();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * AVAILABLE: {NotNull, VARCHAR(1)}
      * @return this. (NotNull)
@@ -1164,7 +1164,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getSortOrder();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SORT_ORDER: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -1198,7 +1198,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -1232,7 +1232,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1266,7 +1266,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -1300,7 +1300,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1334,7 +1334,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -1368,7 +1368,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1402,7 +1402,7 @@ public class BsWebCrawlingConfigCQ extends AbstractBsWebCrawlingConfigCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

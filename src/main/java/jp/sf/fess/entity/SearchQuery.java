@@ -94,7 +94,7 @@ public class SearchQuery {
         return defType;
     }
 
-    public void setDefType(String defType) {
+    public void setDefType(final String defType) {
         this.defType = defType;
     }
 

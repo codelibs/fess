@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * This class returns a list of a role from a request parameter,
  * a request header and a cookie. The format of the default value
  * is "[\d]+\nrole1,role2,role3", which you can encrypt.
- * 
+ *
  * @author shinsuke
  *
  */

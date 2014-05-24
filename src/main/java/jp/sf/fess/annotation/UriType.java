@@ -35,21 +35,21 @@ public @interface UriType {
 
     /**
      * A validation message.
-     * 
+     *
      * @return
      */
     Msg msg() default @Msg(key = "errors.cronexpression");
 
     /**
      * Argument for a message
-     * 
+     *
      * @return
      */
     Arg arg0() default @Arg(key = StringUtil.EMPTY);
 
     /**
      * a target name for this validation
-     * 
+     *
      * @return
      */
     String target() default StringUtil.EMPTY;

@@ -115,7 +115,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -184,7 +184,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
         return "userId_NotInScopeRelation_UserInfo." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USER_ID: {UQ, IX, NotNull, BIGINT(19), FK to USER_INFO}
      * @return this. (NotNull)
@@ -218,7 +218,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
         return getUrl();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * URL: {UQ+, NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
@@ -252,7 +252,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)

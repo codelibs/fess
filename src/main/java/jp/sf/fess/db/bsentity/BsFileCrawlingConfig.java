@@ -35,31 +35,31 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * <pre>
  * [primary-key]
  *     ID
- * 
+ *
  * [column]
  *     ID, NAME, PATHS, INCLUDED_PATHS, EXCLUDED_PATHS, INCLUDED_DOC_PATHS, EXCLUDED_DOC_PATHS, CONFIG_PARAMETER, DEPTH, MAX_ACCESS_COUNT, NUM_OF_THREAD, INTERVAL_TIME, BOOST, AVAILABLE, SORT_ORDER, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, DELETED_BY, DELETED_TIME, VERSION_NO
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
  *     VERSION_NO
- * 
+ *
  * [foreign table]
- *     
- * 
+ *
+ *
  * [referrer table]
  *     FILE_AUTHENTICATION, FILE_CONFIG_TO_LABEL_TYPE_MAPPING, FILE_CONFIG_TO_ROLE_TYPE_MAPPING
- * 
+ *
  * [foreign property]
- *     
- * 
+ *
+ *
  * [referrer property]
  *     fileAuthenticationList, fileConfigToLabelTypeMappingList, fileConfigToRoleTypeMappingList
- * 
+ *
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  * Long id = entity.getId();
@@ -521,7 +521,7 @@ public abstract class BsFileCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * Clone entity instance using super.clone(). (shallow copy) 
+     * Clone entity instance using super.clone(). (shallow copy)
      * @return The cloned instance of this entity. (NotNull)
      */
     @Override

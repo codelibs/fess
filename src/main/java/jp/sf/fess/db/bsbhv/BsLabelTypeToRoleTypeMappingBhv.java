@@ -44,30 +44,30 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * <pre>
  * [primary key]
  *     ID
- * 
+ *
  * [column]
  *     ID, LABEL_TYPE_ID, ROLE_TYPE_ID
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
  *     LABEL_TYPE, ROLE_TYPE
- * 
+ *
  * [referrer table]
- *     
- * 
+ *
+ *
  * [foreign property]
  *     labelType, roleType
- * 
+ *
  * [referrer property]
- *     
+ *
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
@@ -146,7 +146,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return doSelectCountUniquely(cb);
     }
 
-    protected int doSelectCountUniquely(final LabelTypeToRoleTypeMappingCB cb) { // called by selectCount(cb) 
+    protected int doSelectCountUniquely(final LabelTypeToRoleTypeMappingCB cb) { // called by selectCount(cb)
         assertCBStateValid(cb);
         return delegateSelectCountUniquely(cb);
     }
@@ -639,7 +639,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      *     labelTypeToRoleTypeMappingBhv.<span style="color: #FD4747">update</span>(labelTypeToRoleTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
-     * } 
+     * }
      * </pre>
      * @param labelTypeToRoleTypeMapping The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
      * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
@@ -789,7 +789,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      *     labelTypeToRoleTypeMappingBhv.<span style="color: #FD4747">delete</span>(labelTypeToRoleTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
-     * } 
+     * }
      * </pre>
      * @param labelTypeToRoleTypeMapping The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
      * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
@@ -935,14 +935,14 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
-     * <span style="color: #3F7E5E">// e.g. update two columns only</span> 
+     * <span style="color: #3F7E5E">// e.g. update two columns only</span>
      * labelTypeToRoleTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(labelTypeToRoleTypeMappingList, new SpecifyQuery<LabelTypeToRoleTypeMappingCB>() {
      *     public void specify(LabelTypeToRoleTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
      *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
-     * <span style="color: #3F7E5E">// e.g. update every column in the table</span> 
+     * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
      * labelTypeToRoleTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(labelTypeToRoleTypeMappingList, new SpecifyQuery<LabelTypeToRoleTypeMappingCB>() {
      *     public void specify(LabelTypeToRoleTypeMappingCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
      *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
@@ -1019,7 +1019,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      *     public ConditionBean setup(labelTypeToRoleTypeMapping entity, LabelTypeToRoleTypeMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
-     * 
+     *
      *         <span style="color: #3F7E5E">// mapping</span>
      *         intoCB.specify().columnMyName().mappedFrom(cb.specify().columnFooName());
      *         intoCB.specify().columnMyCount().mappedFrom(cb.specify().columnFooCount());
@@ -1030,7 +1030,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      *         <span style="color: #3F7E5E">//entity.set...;</span>
      *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
-     * 
+     *
      *         return cb;
      *     }
      * });
@@ -1316,7 +1316,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     /**
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
-     * Other specifications are same as queryInsert(entity, setupper). 
+     * Other specifications are same as queryInsert(entity, setupper).
      * @param setupper The setup-per of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
@@ -1332,7 +1332,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      * Update the several entities by query with varying requests non-strictly modified-only. {NonExclusiveControl} <br />
      * For example, self(selfCalculationSpecification), specify(updateColumnSpecification)
      * , disableCommonColumnAutoSetup(), allowNonQueryUpdate(). <br />
-     * Other specifications are same as queryUpdate(entity, cb). 
+     * Other specifications are same as queryUpdate(entity, cb).
      * <pre>
      * <span style="color: #3F7E5E">// ex) you can update by self calculation values</span>
      * LabelTypeToRoleTypeMapping labelTypeToRoleTypeMapping = new LabelTypeToRoleTypeMapping();
@@ -1393,27 +1393,27 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      *   o selectList()
      *   o execute()
      *   o call()
-     * 
+     *
      * {Entity}
      *   o entityHandling().selectEntity()
      *   o entityHandling().selectEntityWithDeletedCheck()
-     * 
+     *
      * {Paging}
      *   o autoPaging().selectList()
      *   o autoPaging().selectPage()
      *   o manualPaging().selectList()
      *   o manualPaging().selectPage()
-     * 
+     *
      * {Cursor}
      *   o cursorHandling().selectCursor()
-     * 
+     *
      * {Option}
      *   o dynamicBinding().selectList()
      *   o removeBlockComment().selectList()
      *   o removeLineComment().selectList()
      *   o formatSql().selectList()
      * </pre>
-     * @return The basic executor of outside-SQL. (NotNull) 
+     * @return The basic executor of outside-SQL. (NotNull)
      */
     public OutsideSqlBasicExecutor<LabelTypeToRoleTypeMappingBhv> outsideSql() {
         return doOutsideSql();

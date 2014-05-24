@@ -34,31 +34,31 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * <pre>
  * [primary-key]
  *     ID
- * 
+ *
  * [column]
  *     ID, DATA_CONFIG_ID, LABEL_TYPE_ID
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
  *     DATA_CRAWLING_CONFIG, LABEL_TYPE
- * 
+ *
  * [referrer table]
- *     
- * 
+ *
+ *
  * [foreign property]
  *     dataCrawlingConfig, labelType
- * 
+ *
  * [referrer property]
- *     
- * 
+ *
+ *
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  * Long id = entity.getId();
@@ -354,7 +354,7 @@ public abstract class BsDataConfigToLabelTypeMapping implements Entity,
     }
 
     /**
-     * Clone entity instance using super.clone(). (shallow copy) 
+     * Clone entity instance using super.clone(). (shallow copy)
      * @return The cloned instance of this entity. (NotNull)
      */
     @Override

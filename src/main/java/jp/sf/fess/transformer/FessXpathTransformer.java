@@ -260,7 +260,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 charSet = Constants.UTF_8;
             }
             try {
-                // cache 
+                // cache
                 putResultDataBody(
                         dataMap,
                         "cache",

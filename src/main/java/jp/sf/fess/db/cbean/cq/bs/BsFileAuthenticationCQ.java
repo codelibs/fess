@@ -115,7 +115,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -149,7 +149,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getHostname();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * HOSTNAME: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -183,7 +183,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getPort();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PORT: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -217,7 +217,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getProtocolScheme();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PROTOCOL_SCHEME: {VARCHAR(10)}
      * @return this. (NotNull)
@@ -251,7 +251,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getUsername();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USERNAME: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -285,7 +285,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getPassword();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PASSWORD: {VARCHAR(100)}
      * @return this. (NotNull)
@@ -319,7 +319,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getParameters();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PARAMETERS: {VARCHAR(1000)}
      * @return this. (NotNull)
@@ -394,7 +394,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
                 + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * FILE_CRAWLING_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
      * @return this. (NotNull)
@@ -428,7 +428,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -462,7 +462,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -496,7 +496,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -530,7 +530,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -564,7 +564,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -598,7 +598,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -632,7 +632,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

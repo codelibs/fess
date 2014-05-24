@@ -44,30 +44,30 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * <pre>
  * [primary key]
  *     ID
- * 
+ *
  * [column]
  *     ID, DATA_CONFIG_ID, LABEL_TYPE_ID
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
  *     DATA_CRAWLING_CONFIG, LABEL_TYPE
- * 
+ *
  * [referrer table]
- *     
- * 
+ *
+ *
  * [foreign property]
  *     dataCrawlingConfig, labelType
- * 
+ *
  * [referrer property]
- *     
+ *
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
@@ -146,7 +146,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
         return doSelectCountUniquely(cb);
     }
 
-    protected int doSelectCountUniquely(final DataConfigToLabelTypeMappingCB cb) { // called by selectCount(cb) 
+    protected int doSelectCountUniquely(final DataConfigToLabelTypeMappingCB cb) { // called by selectCount(cb)
         assertCBStateValid(cb);
         return delegateSelectCountUniquely(cb);
     }
@@ -641,7 +641,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      *     dataConfigToLabelTypeMappingBhv.<span style="color: #FD4747">update</span>(dataConfigToLabelTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
-     * } 
+     * }
      * </pre>
      * @param dataConfigToLabelTypeMapping The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
      * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
@@ -791,7 +791,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      *     dataConfigToLabelTypeMappingBhv.<span style="color: #FD4747">delete</span>(dataConfigToLabelTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
-     * } 
+     * }
      * </pre>
      * @param dataConfigToLabelTypeMapping The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
      * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
@@ -937,14 +937,14 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
-     * <span style="color: #3F7E5E">// e.g. update two columns only</span> 
+     * <span style="color: #3F7E5E">// e.g. update two columns only</span>
      * dataConfigToLabelTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(dataConfigToLabelTypeMappingList, new SpecifyQuery<DataConfigToLabelTypeMappingCB>() {
      *     public void specify(DataConfigToLabelTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
      *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
-     * <span style="color: #3F7E5E">// e.g. update every column in the table</span> 
+     * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
      * dataConfigToLabelTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(dataConfigToLabelTypeMappingList, new SpecifyQuery<DataConfigToLabelTypeMappingCB>() {
      *     public void specify(DataConfigToLabelTypeMappingCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
      *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
@@ -1021,7 +1021,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      *     public ConditionBean setup(dataConfigToLabelTypeMapping entity, DataConfigToLabelTypeMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
-     * 
+     *
      *         <span style="color: #3F7E5E">// mapping</span>
      *         intoCB.specify().columnMyName().mappedFrom(cb.specify().columnFooName());
      *         intoCB.specify().columnMyCount().mappedFrom(cb.specify().columnFooCount());
@@ -1032,7 +1032,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      *         <span style="color: #3F7E5E">//entity.set...;</span>
      *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
-     * 
+     *
      *         return cb;
      *     }
      * });
@@ -1319,7 +1319,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
     /**
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
-     * Other specifications are same as queryInsert(entity, setupper). 
+     * Other specifications are same as queryInsert(entity, setupper).
      * @param setupper The setup-per of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
@@ -1335,7 +1335,7 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      * Update the several entities by query with varying requests non-strictly modified-only. {NonExclusiveControl} <br />
      * For example, self(selfCalculationSpecification), specify(updateColumnSpecification)
      * , disableCommonColumnAutoSetup(), allowNonQueryUpdate(). <br />
-     * Other specifications are same as queryUpdate(entity, cb). 
+     * Other specifications are same as queryUpdate(entity, cb).
      * <pre>
      * <span style="color: #3F7E5E">// ex) you can update by self calculation values</span>
      * DataConfigToLabelTypeMapping dataConfigToLabelTypeMapping = new DataConfigToLabelTypeMapping();
@@ -1396,27 +1396,27 @@ public abstract class BsDataConfigToLabelTypeMappingBhv extends
      *   o selectList()
      *   o execute()
      *   o call()
-     * 
+     *
      * {Entity}
      *   o entityHandling().selectEntity()
      *   o entityHandling().selectEntityWithDeletedCheck()
-     * 
+     *
      * {Paging}
      *   o autoPaging().selectList()
      *   o autoPaging().selectPage()
      *   o manualPaging().selectList()
      *   o manualPaging().selectPage()
-     * 
+     *
      * {Cursor}
      *   o cursorHandling().selectCursor()
-     * 
+     *
      * {Option}
      *   o dynamicBinding().selectList()
      *   o removeBlockComment().selectList()
      *   o removeLineComment().selectList()
      *   o formatSql().selectList()
      * </pre>
-     * @return The basic executor of outside-SQL. (NotNull) 
+     * @return The basic executor of outside-SQL. (NotNull)
      */
     public OutsideSqlBasicExecutor<DataConfigToLabelTypeMappingBhv> outsideSql() {
         return doOutsideSql();

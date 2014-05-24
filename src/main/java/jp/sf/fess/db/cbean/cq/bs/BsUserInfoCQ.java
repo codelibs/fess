@@ -369,7 +369,7 @@ public class BsUserInfoCQ extends AbstractBsUserInfoCQ {
         return "id_QueryDerivedReferrer_SearchLogListParameter." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -403,7 +403,7 @@ public class BsUserInfoCQ extends AbstractBsUserInfoCQ {
         return getCode();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CODE: {NotNull, VARCHAR(1000)}
      * @return this. (NotNull)
@@ -437,7 +437,7 @@ public class BsUserInfoCQ extends AbstractBsUserInfoCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -471,7 +471,7 @@ public class BsUserInfoCQ extends AbstractBsUserInfoCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)

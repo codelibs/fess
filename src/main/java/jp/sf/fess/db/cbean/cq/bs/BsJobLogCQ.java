@@ -114,7 +114,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -148,7 +148,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getJobName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * JOB_NAME: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -182,7 +182,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getJobStatus();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * JOB_STATUS: {NotNull, VARCHAR(10)}
      * @return this. (NotNull)
@@ -216,7 +216,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getTarget();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * TARGET: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -250,7 +250,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getScriptType();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SCRIPT_TYPE: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -284,7 +284,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getScriptData();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SCRIPT_DATA: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -318,7 +318,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getScriptResult();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SCRIPT_RESULT: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -352,7 +352,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getStartTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * START_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -386,7 +386,7 @@ public class BsJobLogCQ extends AbstractBsJobLogCQ {
         return getEndTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * END_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)

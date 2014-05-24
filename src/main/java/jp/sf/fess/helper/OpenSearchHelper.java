@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for Open Search Description Document.
- * 
+ *
  * @author shinsuke
  *
  */

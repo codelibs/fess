@@ -114,7 +114,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -148,7 +148,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NAME: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -182,7 +182,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getTarget();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * TARGET: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -216,7 +216,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getCronExpression();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CRON_EXPRESSION: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -250,7 +250,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getScriptType();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SCRIPT_TYPE: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -284,7 +284,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getScriptData();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SCRIPT_DATA: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -318,7 +318,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getCrawler();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CRAWLER: {NotNull, VARCHAR(1)}
      * @return this. (NotNull)
@@ -352,7 +352,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getJobLogging();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * JOB_LOGGING: {NotNull, VARCHAR(1)}
      * @return this. (NotNull)
@@ -386,7 +386,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getAvailable();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * AVAILABLE: {NotNull, VARCHAR(1)}
      * @return this. (NotNull)
@@ -420,7 +420,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getSortOrder();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SORT_ORDER: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -454,7 +454,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -488,7 +488,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -522,7 +522,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -556,7 +556,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -590,7 +590,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -624,7 +624,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -658,7 +658,7 @@ public class BsScheduledJobCQ extends AbstractBsScheduledJobCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

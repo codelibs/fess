@@ -115,7 +115,7 @@ public class BsClickLogCQ extends AbstractBsClickLogCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -185,7 +185,7 @@ public class BsClickLogCQ extends AbstractBsClickLogCQ {
         return "searchId_NotInScopeRelation_SearchLog." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SEARCH_ID: {IX, NotNull, BIGINT(19), FK to SEARCH_LOG}
      * @return this. (NotNull)
@@ -219,7 +219,7 @@ public class BsClickLogCQ extends AbstractBsClickLogCQ {
         return getUrl();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * URL: {IX, NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
@@ -253,7 +253,7 @@ public class BsClickLogCQ extends AbstractBsClickLogCQ {
         return getRequestedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * REQUESTED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)

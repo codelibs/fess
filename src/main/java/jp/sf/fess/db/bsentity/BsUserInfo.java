@@ -34,31 +34,31 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * <pre>
  * [primary-key]
  *     ID
- * 
+ *
  * [column]
  *     ID, CODE, CREATED_TIME, UPDATED_TIME
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
  *     ID
- * 
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
- *     
- * 
+ *
+ *
  * [referrer table]
  *     FAVORITE_LOG, SEARCH_LOG
- * 
+ *
  * [foreign property]
- *     
- * 
+ *
+ *
  * [referrer property]
  *     favoriteLogList, searchLogList
- * 
+ *
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  * Long id = entity.getId();
@@ -371,7 +371,7 @@ public abstract class BsUserInfo implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * Clone entity instance using super.clone(). (shallow copy) 
+     * Clone entity instance using super.clone(). (shallow copy)
      * @return The cloned instance of this entity. (NotNull)
      */
     @Override

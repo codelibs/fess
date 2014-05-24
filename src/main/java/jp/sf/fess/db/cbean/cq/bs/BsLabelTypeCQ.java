@@ -684,7 +684,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
                 + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -718,7 +718,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NAME: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -752,7 +752,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getValue();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VALUE: {NotNull, VARCHAR(20)}
      * @return this. (NotNull)
@@ -786,7 +786,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getIncludedPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * INCLUDED_PATHS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -820,7 +820,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getExcludedPaths();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * EXCLUDED_PATHS: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -854,7 +854,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getSortOrder();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SORT_ORDER: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -888,7 +888,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -922,7 +922,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -956,7 +956,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -990,7 +990,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1024,7 +1024,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -1058,7 +1058,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -1092,7 +1092,7 @@ public class BsLabelTypeCQ extends AbstractBsLabelTypeCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

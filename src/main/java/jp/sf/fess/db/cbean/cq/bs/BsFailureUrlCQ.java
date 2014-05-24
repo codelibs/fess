@@ -114,7 +114,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -148,7 +148,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getUrl();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * URL: {IX, NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
@@ -182,7 +182,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getThreadName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * THREAD_NAME: {NotNull, VARCHAR(30)}
      * @return this. (NotNull)
@@ -216,7 +216,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getErrorName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ERROR_NAME: {IX+, VARCHAR(255)}
      * @return this. (NotNull)
@@ -250,7 +250,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getErrorLog();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ERROR_LOG: {VARCHAR(4000)}
      * @return this. (NotNull)
@@ -284,7 +284,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getErrorCount();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ERROR_COUNT: {IX+, NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -318,7 +318,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getLastAccessTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * LAST_ACCESS_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -352,7 +352,7 @@ public class BsFailureUrlCQ extends AbstractBsFailureUrlCQ {
         return getConfigId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CONFIG_ID: {IX, VARCHAR(100)}
      * @return this. (NotNull)

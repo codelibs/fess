@@ -115,7 +115,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -149,7 +149,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getHostname();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * HOSTNAME: {VARCHAR(100)}
      * @return this. (NotNull)
@@ -183,7 +183,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getPort();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PORT: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -217,7 +217,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getAuthRealm();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * AUTH_REALM: {VARCHAR(100)}
      * @return this. (NotNull)
@@ -251,7 +251,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getProtocolScheme();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PROTOCOL_SCHEME: {VARCHAR(10)}
      * @return this. (NotNull)
@@ -285,7 +285,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getUsername();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USERNAME: {NotNull, VARCHAR(100)}
      * @return this. (NotNull)
@@ -319,7 +319,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getPassword();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PASSWORD: {VARCHAR(100)}
      * @return this. (NotNull)
@@ -353,7 +353,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getParameters();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * PARAMETERS: {VARCHAR(1000)}
      * @return this. (NotNull)
@@ -428,7 +428,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
                 + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * WEB_CRAWLING_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
      * @return this. (NotNull)
@@ -462,7 +462,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getCreatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -496,7 +496,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -530,7 +530,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getUpdatedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -564,7 +564,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getUpdatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -598,7 +598,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getDeletedBy();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_BY: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -632,7 +632,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getDeletedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -666,7 +666,7 @@ public class BsWebAuthenticationCQ extends AbstractBsWebAuthenticationCQ {
         return getVersionNo();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VERSION_NO: {NotNull, INTEGER(10)}
      * @return this. (NotNull)

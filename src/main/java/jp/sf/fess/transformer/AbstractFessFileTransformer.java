@@ -238,7 +238,7 @@ public abstract class AbstractFessFileTransformer extends
             } else {
                 cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
             }
-            // text cache 
+            // text cache
             putResultDataBody(dataMap, "cache", cache);
             putResultDataBody(dataMap, systemHelper.hasCacheField,
                     Constants.TRUE);

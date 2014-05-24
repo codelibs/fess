@@ -117,7 +117,7 @@ public class BsWebConfigToRoleTypeMappingCQ extends
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -187,7 +187,7 @@ public class BsWebConfigToRoleTypeMappingCQ extends
         return "webConfigId_NotInScopeRelation_WebCrawlingConfig." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * WEB_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
      * @return this. (NotNull)
@@ -257,7 +257,7 @@ public class BsWebConfigToRoleTypeMappingCQ extends
         return "roleTypeId_NotInScopeRelation_RoleType." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ROLE_TYPE_ID: {IX, NotNull, BIGINT(19), FK to ROLE_TYPE}
      * @return this. (NotNull)

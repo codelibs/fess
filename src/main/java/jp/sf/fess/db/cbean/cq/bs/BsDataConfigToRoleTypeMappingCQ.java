@@ -117,7 +117,7 @@ public class BsDataConfigToRoleTypeMappingCQ extends
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -189,7 +189,7 @@ public class BsDataConfigToRoleTypeMappingCQ extends
         return "dataConfigId_NotInScopeRelation_DataCrawlingConfig." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * DATA_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to DATA_CRAWLING_CONFIG}
      * @return this. (NotNull)
@@ -259,7 +259,7 @@ public class BsDataConfigToRoleTypeMappingCQ extends
         return "roleTypeId_NotInScopeRelation_RoleType." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ROLE_TYPE_ID: {IX, NotNull, BIGINT(19), FK to ROLE_TYPE}
      * @return this. (NotNull)

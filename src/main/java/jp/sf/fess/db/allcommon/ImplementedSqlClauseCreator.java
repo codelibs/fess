@@ -47,7 +47,7 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
     //                                                                      ==============
     /**
      * Create SQL clause. {for condition-bean}
-     * @param cb Condition-bean. (NotNull) 
+     * @param cb Condition-bean. (NotNull)
      * @return SQL clause. (NotNull)
      */
     @Override
@@ -59,7 +59,7 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
 
     /**
      * Create SQL clause.
-     * @param tableDbName The DB name of table. (NotNull) 
+     * @param tableDbName The DB name of table. (NotNull)
      * @return SQL clause. (NotNull)
      */
     @Override

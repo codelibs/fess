@@ -22,7 +22,7 @@ public interface RoleQueryHelper {
 
     /**
      * Returns roles.
-     * 
+     *
      * @return a list of a role. (not null)
      */
     Set<String> build();

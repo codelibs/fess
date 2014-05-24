@@ -115,7 +115,7 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -185,7 +185,7 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
         return "searchId_NotInScopeRelation_SearchLog." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SEARCH_ID: {IX, NotNull, BIGINT(19), FK to SEARCH_LOG}
      * @return this. (NotNull)
@@ -219,7 +219,7 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
         return getName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NAME: {IX, NotNull, VARCHAR(255)}
      * @return this. (NotNull)
@@ -253,7 +253,7 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
         return getValue();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * VALUE: {NotNull, VARCHAR(1000)}
      * @return this. (NotNull)

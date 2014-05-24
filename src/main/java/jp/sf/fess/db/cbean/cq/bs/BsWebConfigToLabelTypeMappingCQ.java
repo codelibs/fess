@@ -117,7 +117,7 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return getId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -187,7 +187,7 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return "webConfigId_NotInScopeRelation_WebCrawlingConfig." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * WEB_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
      * @return this. (NotNull)
@@ -257,7 +257,7 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return "labelTypeId_NotInScopeRelation_LabelType." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * LABEL_TYPE_ID: {IX, NotNull, BIGINT(19), FK to LABEL_TYPE}
      * @return this. (NotNull)

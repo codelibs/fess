@@ -245,7 +245,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
                 + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -279,7 +279,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
         return getSessionId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SESSION_ID: {NotNull, VARCHAR(20)}
      * @return this. (NotNull)
@@ -313,7 +313,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
         return getName();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * NAME: {IX, VARCHAR(20)}
      * @return this. (NotNull)
@@ -347,7 +347,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
         return getExpiredTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * EXPIRED_TIME: {IX+, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -381,7 +381,7 @@ public class BsCrawlingSessionCQ extends AbstractBsCrawlingSessionCQ {
         return getCreatedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)

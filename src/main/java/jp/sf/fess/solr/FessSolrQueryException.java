@@ -20,7 +20,7 @@ import org.codelibs.solr.lib.exception.SolrLibQueryException;
 
 public class FessSolrQueryException extends SolrLibQueryException {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 

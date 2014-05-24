@@ -106,7 +106,7 @@ public class DBFluteInitializer {
         }
     }
 
-    protected void loadCoolClasses() { // for S2Container 
+    protected void loadCoolClasses() { // for S2Container
         ConditionBeanContext.loadCoolClasses(); // against the ClassLoader Headache!
     }
 

@@ -30,32 +30,32 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  * The entity of HotSearchWord. <br />
  * <pre>
  * [primary-key]
- *     
- * 
+ *
+ *
  * [column]
  *     NAME
- * 
+ *
  * [sequence]
- *     
- * 
+ *
+ *
  * [identity]
- *     
- * 
+ *
+ *
  * [version-no]
- *     
- * 
+ *
+ *
  * [foreign table]
- *     
- * 
+ *
+ *
  * [referrer table]
- *     
- * 
+ *
+ *
  * [foreign property]
- *     
- * 
+ *
+ *
  * [referrer property]
- *     
- * 
+ *
+ *
  * [get/set template]
  * /= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  * String name = entity.getName();
@@ -275,7 +275,7 @@ public abstract class BsHotSearchWord implements Entity, Serializable,
     }
 
     /**
-     * Clone entity instance using super.clone(). (shallow copy) 
+     * Clone entity instance using super.clone(). (shallow copy)
      * @return The cloned instance of this entity. (NotNull)
      */
     @Override

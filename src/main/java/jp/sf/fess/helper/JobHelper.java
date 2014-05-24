@@ -72,10 +72,10 @@ public class JobHelper {
 
     protected void destroyCrawlerProcess(final JobProcess jobProcess) {
         if (jobProcess != null) {
-            InputStreamThread ist = jobProcess.getInputStreamThread();
+            final InputStreamThread ist = jobProcess.getInputStreamThread();
             try {
                 ist.interrupt();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Could not interrupt a thread of an input stream.",
                         e);
             }
@@ -109,7 +109,7 @@ public class JobHelper {
 
             try {
                 latch.await(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 logger.warn("Interrupted to wait a process.", e);
             }
             try {

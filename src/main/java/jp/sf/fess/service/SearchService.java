@@ -295,7 +295,7 @@ public class SearchService implements Serializable {
             roleSet = new HashSet<>();
         }
 
-        final List<String> roleList = new ArrayList<>(roleSet); // TODO 
+        final List<String> roleList = new ArrayList<>(roleSet); // TODO
         final String suggestQuery = suggester.buildSuggestQuery(q, fieldNames,
                 labels, roleList);
 

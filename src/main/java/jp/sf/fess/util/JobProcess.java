@@ -7,10 +7,10 @@ public class JobProcess {
 
     protected InputStreamThread inputStreamThread;
 
-    public JobProcess(Process process) {
+    public JobProcess(final Process process) {
         this.process = process;
-        this.inputStreamThread = new InputStreamThread(
-                process.getInputStream(), Constants.UTF_8);
+        inputStreamThread = new InputStreamThread(process.getInputStream(),
+                Constants.UTF_8);
     }
 
     public Process getProcess() {

@@ -307,10 +307,10 @@ public class CrawlJob {
             final JobProcess jobProcess = jobHelper.startCrawlerProcess(
                     sessionId, pb);
 
-            InputStreamThread it = jobProcess.getInputStreamThread();
+            final InputStreamThread it = jobProcess.getInputStreamThread();
             it.start();
 
-            Process currentProcess = jobProcess.getProcess();
+            final Process currentProcess = jobProcess.getProcess();
             currentProcess.waitFor();
             it.join(5000);
 

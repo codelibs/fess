@@ -370,7 +370,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return "id_QueryDerivedReferrer_SearchFieldLogListParameter." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -404,7 +404,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getSearchWord();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * SEARCH_WORD: {IX, VARCHAR(1000)}
      * @return this. (NotNull)
@@ -438,7 +438,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getRequestedTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
@@ -472,7 +472,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getResponseTime();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * RESPONSE_TIME: {IX, NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -506,7 +506,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getHitCount();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * HIT_COUNT: {IX, NotNull, BIGINT(19)}
      * @return this. (NotNull)
@@ -540,7 +540,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getQueryOffset();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * QUERY_OFFSET: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -574,7 +574,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getQueryPageSize();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * QUERY_PAGE_SIZE: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
@@ -608,7 +608,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getUserAgent();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USER_AGENT: {VARCHAR(255)}
      * @return this. (NotNull)
@@ -642,7 +642,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getReferer();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * REFERER: {VARCHAR(1000)}
      * @return this. (NotNull)
@@ -676,7 +676,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getClientIp();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * CLIENT_IP: {VARCHAR(50)}
      * @return this. (NotNull)
@@ -710,7 +710,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getUserSessionId();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USER_SESSION_ID: {IX+, VARCHAR(100)}
      * @return this. (NotNull)
@@ -744,7 +744,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getAccessType();
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * ACCESS_TYPE: {NotNull, VARCHAR(1), classification=AccessType}
      * @return this. (NotNull)
@@ -813,7 +813,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return "userId_NotInScopeRelation_UserInfo." + key;
     }
 
-    /** 
+    /**
      * Add order-by as ascend. <br />
      * USER_ID: {IX, BIGINT(19), FK to USER_INFO}
      * @return this. (NotNull)

@@ -70,7 +70,7 @@ public class FessStatusPolicy extends StatusPolicyImpl {
         case ROLLBACK:
             if (StringUtil.isNotBlank(indexValue)
                     && UNFINISHED.equals(indexValue)) {
-                // index: UNFINISHED -> COMPLETED             
+                // index: UNFINISHED -> COMPLETED
                 dataMap.put("indexBefore", UNFINISHED.toUpperCase());
                 dataMap.put("indexAfter", COMPLETED.toUpperCase());
             }
@@ -79,7 +79,7 @@ public class FessStatusPolicy extends StatusPolicyImpl {
         case DELETE:
             if (StringUtil.isNotBlank(indexValue)
                     && UNFINISHED.equals(indexValue)) {
-                // index: UNFINISHED -> READY             
+                // index: UNFINISHED -> READY
                 dataMap.put("indexBefore", UNFINISHED.toUpperCase());
                 dataMap.put("indexAfter", READY.toUpperCase());
             }
