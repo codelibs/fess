@@ -85,4 +85,24 @@ public class ViewHelperTest extends S2TestCase {
                 viewHelper.replaceHighlightQueries(text, queries));
     }
 
+    public void test_escapeHighlight() {
+        viewHelper = new ViewHelper();
+        viewHelper.useSolrHighlight = true;
+        viewHelper.init();
+
+        String text = "";
+        assertEquals("", viewHelper.escapeHighlight(text));
+
+        text = "aaa";
+        assertEquals("aaa", viewHelper.escapeHighlight(text));
+
+        text = "<em>aaa</em>";
+        assertEquals("<em>aaa</em>", viewHelper.escapeHighlight(text));
+
+        text = "<em>aaa</em><b>bbb</b>";
+        assertEquals("<em>aaa</em>&lt;b&gt;bbb&lt;/b&gt;",
+                viewHelper.escapeHighlight(text));
+
+    }
+
 }

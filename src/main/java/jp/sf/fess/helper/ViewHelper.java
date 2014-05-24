@@ -44,6 +44,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.URLUtil;
 import org.seasar.robot.util.CharUtil;
 import org.seasar.struts.taglib.S2Functions;
@@ -75,15 +76,21 @@ public class ViewHelper implements Serializable {
     @Resource
     protected DynamicProperties crawlerProperties;
 
-    public int pcDescriptionLength = 200;
+    public int descriptionLength = 200;
 
-    public int pcTitleLength = 50;
+    public int titleLength = 50;
 
     public boolean encodeUrlLink = false;
 
     public String urlLinkEncoding = Constants.UTF_8;
 
     public String[] highlightingFields = new String[] { "hl_content", "digest" };
+
+    public boolean useSolrHighlight = false;
+
+    public String solrHighlightTagPre = "<em>";
+
+    public String solrHighlightTagPost = "</em>";
 
     public String highlightTagPre = "<em>";
 
@@ -103,6 +110,18 @@ public class ViewHelper implements Serializable {
 
     public String cacheTemplateName = "cache";
 
+    private String escapedSolrHighlightPre = null;
+
+    private String escapedSolrHighlightPost = null;
+
+    @InitMethod
+    public void init() {
+        if (useSolrHighlight) {
+            escapedSolrHighlightPre = S2Functions.h(solrHighlightTagPre);
+            escapedSolrHighlightPost = S2Functions.h(solrHighlightTagPost);
+        }
+    }
+
     private String getString(final Map<String, Object> doc, final String key) {
         final Object value = doc.get(key);
         if (value == null) {
@@ -112,7 +131,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String getContentTitle(final Map<String, Object> document) {
-        final int size = pcTitleLength;
+        final int size = titleLength;
 
         String title;
         if (StringUtil.isNotBlank(getString(document, "title"))) {
@@ -127,22 +146,32 @@ public class ViewHelper implements Serializable {
         final HttpServletRequest request = RequestUtil.getRequest();
         final String[] queries = request == null ? StringUtil.EMPTY_STRINGS
                 : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
-        final int size = pcDescriptionLength;
+        final int size = descriptionLength;
 
         for (final String field : highlightingFields) {
             final String text = getString(document, field);
             if (StringUtil.isNotBlank(text)) {
-                return highlight(S2Functions.h(StringUtils.abbreviate(
-                        removeEmTag(text), size)), queries);
+                if (useSolrHighlight) {
+                    return escapeHighlight(text);
+                } else {
+                    return highlight(S2Functions.h(StringUtils.abbreviate(
+                            removeSolrHighlightTag(text), size)), queries);
+                }
             }
         }
 
         return StringUtil.EMPTY;
     }
 
-    protected String removeEmTag(final String str) {
-        return str.replaceAll("<em>", StringUtil.EMPTY).replaceAll("</em>",
-                StringUtil.EMPTY);
+    protected String escapeHighlight(String text) {
+        return S2Functions.h(text)
+                .replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
+                .replaceAll(escapedSolrHighlightPost, solrHighlightTagPost);
+    }
+
+    protected String removeSolrHighlightTag(final String str) {
+        return str.replaceAll(solrHighlightTagPre, StringUtil.EMPTY)
+                .replaceAll(solrHighlightTagPost, StringUtil.EMPTY);
     }
 
     protected String highlight(final String content, final String[] queries) {

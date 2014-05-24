@@ -198,8 +198,9 @@
 		</initMethod>
 		<!-- 
 		<property name="encodeUrlLink">false</property>
-		<property name="pcDescriptionLength">200</property>
-		<property name="pcTitleLength">50</property>
+		<property name="useSolrHighlight">false</property>
+		<property name="descriptionLength">200</property>
+		<property name="titleLength">50</property>
 		<property name="urlLinkEncoding">"UTF-8"</property>
 		<property name="highlightingFields">new String[] { "hl_content", "digest" }</property>
 		<initMethod name="addInitFacetParam">
