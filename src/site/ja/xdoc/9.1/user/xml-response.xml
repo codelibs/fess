@@ -38,7 +38,7 @@
 <response>
   <version>1</version>
   <status>0</status>
-  <query>テスト</query>
+  <query>Fess</query>
   <exec-time>0.64</exec-time>
   <page-size>20</page-size>
   <page-number>1</page-number>
@@ -46,51 +46,22 @@
   <page-count>6</page-count>
   <result>
     <doc>
-      <site>speedtest.goo.ne.jp/</site>
-      <content-description>goo の提供するスピード&lt;em&gt;テスト&lt;/em&gt;
-        ページです</content-description>
-      <host>speedtest.goo.ne.jp</host>
-      <last-modified>1284739487873</last-modified>
-      <cache>--&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"&gt;
-&lt;title&gt;
-goo スピード&lt;em&gt;テスト&lt;/em&gt;
-&lt;/title&gt;
-&lt;meta..."&gt;
-
-&lt;meta name="description" content="goo の提供するスピード&lt;em&gt;テスト
-&lt;/em&gt;ページです"&gt;
-&lt;meta name="keywords" content="ADSL,ブロードバンド,フレ...ッツ,BB,無線LAN,
-CATV,ISDN,スピード&lt;em&gt;
-テスト&lt;/em&gt;"&gt;
-&lt;meta name="Copyright" content="Copyright &amp;copy; ...://speedtest.goo.ne.jp/"
-&gt;&lt;img src="/img/h1/h1_76.gif" width="129" height="22" border="0"
-alt="スピード&lt;em&gt;テスト
-&lt;/em&gt;"&gt;&lt;img src..." color="#ffffff"&gt;goo スピード&lt;em&gt;テスト
-&lt;/em&gt;&lt;/font
-&gt;&lt;/a&gt;&lt;/b&gt;&lt;/td&gt;
-&lt;!--/NAME SERVICE--&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td</cache>
-      <score>4.98744</score>
-      <digest>goo の提供するスピード&lt;em&gt;テスト&lt;/em&gt;ページです</digest>
-      <tstamp>1284739487887</tstamp>
-      <url>http://speedtest.goo.ne.jp/</url>
-      <id>http://speedtest.goo.ne.jp/;type=au,docomo,pc,softbank</id>
+      <created>2014-05-24T15:13:27.692+0900</created>
+      <doc-id>d55275b552da44999cafe118aa8fed62</doc-id>
+      <title>Fess&#12398;&#12452;&#12531;...</title>
+      <url>http://fess.codelibs.org/ja/setup.html</url>
+      <score>0.83177954</score>
+      <site>fess.codelibs.org/ja/setup.html</site>
+      <filetype-s>html</filetype-s>
+      <content-description> &lt;em&gt;fess&lt;/em&gt;...</content-description>
+      <digest>&#12458;&#12540;&#12503;&#12531;&#12477;...</digest>
+      <host>fess.codelibs.org</host>
       <mimetype>text/html</mimetype>
-      <title>
-goo スピードテスト
-</title>
-      <content-title>
-goo スピードテスト
-</content-title>
+      <content-length>49702</content-length>
       <boost>1.0</boost>
-      <content-length>17810</content-length>
-      <url-link>http://speedtest.goo.ne.jp/</url-link>
+      <last-modified>2014-05-22T11:09:07.000+0900</last-modified>
+      <id>http://fess.codelibs.org/ja/setup.html</id>
+      <url-link>http://fess.codelibs.org/ja/setup.html</url-link>
     </doc>
 ...
   </result>
@@ -158,7 +129,7 @@ goo スピードテスト
             </tr>
             <tr>
               <th>last-modified</th>
-              <td>最終更新日時。1970/01/01 00:00:00 から始まるミリ秒。</td>
+              <td>最終更新日時。</td>
             </tr>
             <tr>
               <th>cache</th>
@@ -173,8 +144,8 @@ goo スピードテスト
               <td>ドキュメントのダイジェスト文字列。</td>
             </tr>
             <tr>
-              <th>tstamp</th>
-              <td>ドキュメントの生成日時。1970/01/01 00:00:00 から始まるミリ秒。</td>
+              <th>created</th>
+              <td>ドキュメントの生成日時。</td>
             </tr>
             <tr>
               <th>url</th>

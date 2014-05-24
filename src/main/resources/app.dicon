@@ -66,7 +66,7 @@
 		<initMethod name="setApiResponseFields">
 			<arg>new String[]{"id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
-            "created", "title", "digest", "url"}</arg>
+            "created", "title", "digest", "url", "urlLink", "contentDescription"}</arg>
 		</initMethod>
 		<initMethod name="addHighlightField">
 			<arg>"title"</arg>

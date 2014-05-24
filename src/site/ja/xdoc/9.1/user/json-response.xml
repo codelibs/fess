@@ -42,7 +42,7 @@
     "response": {
         "version": 1,
         "status": 0,
-        "query": "\u30C6\u30B9\u30C8",
+        "query": "Fess",
         "execTime": 0.59,
         "pageSize": 20,
         "pageNumber": 1,
@@ -50,22 +50,22 @@
         "pageCount": 6,
         "result": [
             {
-                "site": "speedtest.goo.ne.jp\u002F",
-                "contentDescription": "goo \u306E\u63D0\u4F9B\u3059\u308B\u30B9\u30D4\u3C..",
-                "host": "speedtest.goo.ne.jp",
-                "lastModified": "1284739487873",
-                "cache": "\u9FA0-->\n<meta http-equiv=\u0022Content-Type\u0022 content=\..",
-                "score": "4.98744",
-                "digest": "goo \u306E\u63D0\u4F9B\u3059\u308B\u30B9\u30D4\u30FC\u30C9<em>..",
-                "tstamp": "1284739487887",
-                "url": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F",
-                "id": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F;type=au,docomo,pc,softbank",
-                "mimetype": "text\u002Fhtml",
-                "title": "\ngoo \u30B9\u30D4\u30FC\u30C9\u30C6\u30B9\u30C8\n",
-                "contentTitle": "\ngoo \u30B9\u30D4\u30FC\u30C9\u30C6\u30B9\u30C8\n",
-                "boost": "1.0",
-                "contentLength": "17810",
-                "urlLink": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F"
+            "created":"2014-05-24T15:13:29.096+0900",
+            "docId":"0592263c6cae4141b3a276894e8e326d",
+            "title":"Fess \u3092\u5229\u7528\u3057\u3066\u3044\u308B\u30B5\u30A4\u30C8",
+            "url":"http:\u002F\u002Ffess.codelibs.org\u002Fja\u002Fusers.html",
+            "score":0.7036715,
+            "site":"fess.codelibs.org\u002Fja\u002Fusers.html",
+            "filetype_s":"html",
+            "contentDescription":" <em>fess<\u002Fem> \u5168\u822C \u5165\u9580...",
+            "digest":" Fess \u5168\u822C \u5165\u9580 \u30C9\u30AD\u30E5\u30E1\u30F3 Jav...",
+            "host":"fess.codelibs.org",
+            "mimetype":"text\u002Fhtml",
+            "contentLength":22788,
+            "boost":1.0,
+            "lastModified":"2014-05-22T11:09:07.000+0900",
+            "id":"http:\u002F\u002Ffess.codelibs.org\u002Fja\u002Fusers.html",
+            "urlLink":"http:\u002F\u002Ffess.codelibs.org\u002Fja\u002Fusers.html"
             },
 ...
         ]
@@ -130,7 +130,7 @@
             </tr>
             <tr>
               <th>lastModified</th>
-              <td>最終更新日時。1970/01/01 00:00:00 から始まるミリ秒。</td>
+              <td>最終更新日時。</td>
             </tr>
             <tr>
               <th>cache</th>
@@ -145,8 +145,8 @@
               <td>ドキュメントのダイジェスト文字列。</td>
             </tr>
             <tr>
-              <th>tstamp</th>
-              <td>ドキュメントの生成日時。1970/01/01 00:00:00 から始まるミリ秒。</td>
+              <th>created</th>
+              <td>ドキュメントの生成日時。</td>
             </tr>
             <tr>
               <th>url</th>
