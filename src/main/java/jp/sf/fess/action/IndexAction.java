@@ -89,6 +89,7 @@ import org.codelibs.solr.lib.exception.SolrLibQueryException;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
+import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.framework.util.InputStreamUtil;
 import org.seasar.framework.util.OutputStreamUtil;
 import org.seasar.framework.util.URLUtil;
@@ -205,17 +206,23 @@ public class IndexAction {
 
     protected String pagingQuery = null;
 
-    public boolean searchLogSupport = Constants.TRUE.equals(crawlerProperties
-            .getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+    public boolean searchLogSupport;
 
-    public boolean favoriteSupport = Constants.TRUE.equals(crawlerProperties
-            .getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
+    public boolean favoriteSupport;
 
     public boolean screenShotSupport;
 
     public String username;
 
     public String appendHighlightQueries;
+
+    @InitMethod
+    public void init() {
+        searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
+                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
+                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
+    }
 
     public String getPagingQuery() {
         if (pagingQuery == null) {
@@ -404,7 +411,8 @@ public class IndexAction {
 
         String hash;
         if (StringUtil.isNotBlank(indexForm.hash)) {
-            String value = URLUtil.decode(indexForm.hash, Constants.UTF_8);
+            final String value = URLUtil
+                    .decode(indexForm.hash, Constants.UTF_8);
             final StringBuilder buf = new StringBuilder(value.length() + 100);
             for (final char c : value.toCharArray()) {
                 if (CharUtil.isUrlChar(c) || c == ' ') {
