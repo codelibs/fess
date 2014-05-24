@@ -226,7 +226,7 @@ public class IndexAction {
 
     public String getPagingQuery() {
         if (pagingQuery == null) {
-            final StringBuilder buf = new StringBuilder();
+            final StringBuilder buf = new StringBuilder(200);
             if (indexForm.additional != null) {
                 final Set<String> fieldSet = new HashSet<String>();
                 for (final String additional : indexForm.additional) {
@@ -240,6 +240,9 @@ public class IndexAction {
             }
             if (StringUtil.isNotBlank(indexForm.sort)) {
                 buf.append("&sort=").append(S2Functions.u(indexForm.sort));
+            }
+            if (StringUtil.isNotBlank(indexForm.op)) {
+                buf.append("&op=").append(S2Functions.u(indexForm.op));
             }
             if (indexForm.lang != null) {
                 final Set<String> langSet = new HashSet<String>();
@@ -893,6 +896,9 @@ public class IndexAction {
         final StringBuilder queryBuf = new StringBuilder(255);
         if (StringUtil.isNotBlank(indexForm.query)) {
             queryBuf.append(indexForm.query);
+        }
+        if (StringUtil.isNotBlank(indexForm.op)) {
+            request.setAttribute(Constants.DEFAULT_OPERATOR, indexForm.op);
         }
         if (!indexForm.fields.isEmpty()) {
             for (final Map.Entry<String, String[]> entry : indexForm.fields

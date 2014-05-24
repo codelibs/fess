@@ -320,4 +320,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String ALL_LANGUAGES = "all";
 
+    public static final String DEFAULT_OPERATOR = "defaultOperator";
+
 }

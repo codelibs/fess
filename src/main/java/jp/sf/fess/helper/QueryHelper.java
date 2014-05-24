@@ -326,7 +326,7 @@ public class QueryHelper implements Serializable {
 
         final StringBuilder queryBuf = new StringBuilder(255);
         final List<String> notOperatorList = new ArrayList<String>();
-        String defaultOperator = getDefaultOperator();
+        final String defaultOperator = getDefaultOperator();
         String operator = defaultOperator;
         boolean notOperatorFlag = false;
         int queryOperandCount = 0;
@@ -798,7 +798,7 @@ public class QueryHelper implements Serializable {
 
         final StringBuilder queryBuf = new StringBuilder(255);
         final List<String> notOperatorList = new ArrayList<String>();
-        String defaultOperator = getDefaultOperator();
+        final String defaultOperator = getDefaultOperator();
         String operator = defaultOperator;
         boolean notOperatorFlag = false;
         int queryOperandCount = 0;
@@ -1464,6 +1464,16 @@ public class QueryHelper implements Serializable {
     }
 
     protected String getDefaultOperator() {
+        final HttpServletRequest request = RequestUtil.getRequest();
+        if (request != null) {
+            final String defaultOperator = (String) request
+                    .getAttribute(Constants.DEFAULT_OPERATOR);
+            if (AND.equalsIgnoreCase(defaultOperator)) {
+                return _AND_;
+            } else if (OR.equalsIgnoreCase(defaultOperator)) {
+                return _OR_;
+            }
+        }
         return DEFAULT_OPERATOR;
     }
 

@@ -39,6 +39,9 @@ public class IndexForm implements Serializable {
     @Maxbytelength(maxbytelength = 1000)
     public String sort;
 
+    @Maxbytelength(maxbytelength = 10)
+    public String op;
+
     @IntegerType
     public String start;
 
