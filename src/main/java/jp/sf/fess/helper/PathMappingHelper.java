@@ -42,7 +42,7 @@ public class PathMappingHelper implements Serializable {
 
     private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<String, List<PathMapping>>();
 
-    private volatile List<PathMapping> cachedPathMappingList = null;
+    volatile List<PathMapping> cachedPathMappingList = null;
 
     @InitMethod
     public void init() {
@@ -93,6 +93,22 @@ public class PathMappingHelper implements Serializable {
             return url;
         }
         return replaceUrl(pathMappingList, url);
+    }
+
+    public String replaceUrls(final String text) {
+        if (cachedPathMappingList == null) {
+            synchronized (this) {
+                if (cachedPathMappingList == null) {
+                    init();
+                }
+            }
+        }
+        String result = text;
+        for (final PathMapping pathMapping : cachedPathMappingList) {
+            result = result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex()
+                    + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
+        }
+        return result;
     }
 
     public String replaceUrl(final String url) {

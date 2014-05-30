@@ -61,4 +61,31 @@ public class PathMappingHelperTest extends S2TestCase {
         assertEquals("http://localhost/taro/",
                 pathMappingHelper.replaceUrl(sessionId, url));
     }
+
+    public void test_replaceUrls() {
+        final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("file:///home/");
+        pathMapping.setReplacement("http://localhost/");
+        pathMappingList.add(pathMapping);
+
+        pathMappingHelper.cachedPathMappingList = pathMappingList;
+
+        String text = "\"file:///home/\"";
+        assertEquals("\"http://localhost/\"",
+                pathMappingHelper.replaceUrls(text));
+
+        text = "\"file:///home/taro/\"";
+        assertEquals("\"http://localhost/taro/\"",
+                pathMappingHelper.replaceUrls(text));
+
+        text = "\"aaafile:///home/taro/\"";
+        assertEquals("\"aaahttp://localhost/taro/\"",
+                pathMappingHelper.replaceUrls(text));
+
+        text = "aaa\"file:///home/taro/\"bbb";
+        assertEquals("aaa\"http://localhost/taro/\"bbb",
+                pathMappingHelper.replaceUrls(text));
+
+    }
 }

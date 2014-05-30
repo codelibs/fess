@@ -416,7 +416,7 @@ public class ViewHelper implements Serializable {
         if (locale == null) {
             locale = Locale.ENGLISH;
         }
-        String url = (String) doc.get("url");
+        String url = (String) doc.get("urlLink");
         if (url == null) {
             url = MessageResourcesUtil.getMessage(locale,
                     "labels.search_unknown");
@@ -435,8 +435,9 @@ public class ViewHelper implements Serializable {
 
         doc.put("queries", queries);
 
-        final String cache = (String) doc.get("cache");
+        String cache = (String) doc.get("cache");
         if (cache != null) {
+            cache = pathMappingHelper.replaceUrls(cache);
             if (queries != null && queries.length > 0) {
                 doc.put("hlCache", replaceHighlightQueries(cache, queries));
             } else {
