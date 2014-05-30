@@ -21,8 +21,6 @@ import java.util.Map;
 
 public interface ScreenShotGenerator {
 
-    String getPath(Map<String, Object> docMap);
-
     void generate(String url, File outputFile);
 
     boolean isTarget(Map<String, Object> docMap);

@@ -21,46 +21,28 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
-
-import jp.sf.fess.screenshot.ScreenShotGenerator;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.Base64Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandGenerator implements ScreenShotGenerator {
+public class CommandGenerator extends BaseScreenShotGenerator {
     private static final Logger logger = LoggerFactory
             .getLogger(CommandGenerator.class);
-
-    @Resource
-    protected ServletContext application;
-
-    public String imageExtention = "png";
-
-    public int directoryNameLength = 5;
 
     @Binding(bindingType = BindingType.MUST)
     public List<String> commandList;
 
-    public File baseDir;
-
     public long commandTimeout = 10 * 1000;// 10sec
 
-    private final Map<String, String> conditionMap = new HashMap<String, String>();
+    public File baseDir;
 
     private volatile Timer destoryTimer;
 
@@ -80,39 +62,17 @@ public class CommandGenerator implements ScreenShotGenerator {
     }
 
     @Override
-    public String getPath(final Map<String, Object> docMap) {
-        final String url = (String) docMap.get("url");
-
-        final StringBuilder buf = new StringBuilder(50);
-        buf.append(RandomStringUtils.randomNumeric(directoryNameLength));
-        buf.append('/');
-        buf.append(Base64Util.encode(Integer.toString(url.hashCode()).getBytes(
-                Charset.defaultCharset())));
-        buf.append('.');
-        buf.append(imageExtention);
-        return buf.toString();
-    }
-
-    @Override
-    public boolean isTarget(final Map<String, Object> docMap) {
-        for (final Map.Entry<String, String> entry : conditionMap.entrySet()) {
-            final Object value = docMap.get(entry.getKey());
-            if (value instanceof String
-                    && !((String) value).matches(entry.getValue())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void addCondition(final String key, final String regex) {
-        conditionMap.put(key, regex);
-    }
-
-    @Override
     public void generate(final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
             logger.debug("Generate ScreenShot: " + url);
+        }
+
+        if (outputFile.exists()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("The screenshot file exists: "
+                        + outputFile.getAbsolutePath());
+            }
+            return;
         }
 
         final File parentFile = outputFile.getParentFile();

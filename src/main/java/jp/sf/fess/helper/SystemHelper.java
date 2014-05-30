@@ -121,8 +121,6 @@ public class SystemHelper implements Serializable {
 
     public String clickCountField = "clickCount_l_x_dv";
 
-    public String screenshotField = "screenshot_s_s";
-
     public String configIdField = "cid_s_s";
 
     public String expiresField = "expires_dt";

@@ -531,10 +531,11 @@ public class IndexAction {
             }
 
             final File screenShotFile = screenShotManager.getScreenShotFile(
-                    indexForm.queryId, url);
+                    indexForm.queryId, indexForm.docId);
             if (screenShotFile == null) {
                 // 404
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                screenShotManager.generate(doc);
                 return null;
             }
 

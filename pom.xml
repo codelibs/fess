@@ -796,6 +796,11 @@
       <artifactId>groovy-all</artifactId>
       <version>2.2.2</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.detro</groupId>
+      <artifactId>phantomjsdriver</artifactId>
+      <version>1.2.0</version>
+    </dependency>
     <!-- Removed from war -->
     <dependency>
       <groupId>junit</groupId>

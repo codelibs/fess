@@ -33,7 +33,6 @@ import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
 import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.SystemHelper;
-import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.common.SolrInputDocument;
@@ -89,10 +88,6 @@ public class IndexUpdater extends Thread {
 
     @Resource
     protected SystemHelper systemHelper;
-
-    @Binding(bindingType = BindingType.MAY)
-    @Resource
-    protected ScreenShotManager screenShotManager;
 
     public int maxDocumentCacheSize = 5;
 
@@ -309,9 +304,6 @@ public class IndexUpdater extends Thread {
             forceStop();
         } finally {
             intervalControlHelper.setCrawlerRunning(true);
-            if (screenShotManager != null) {
-                screenShotManager.shutdown();
-            }
         }
 
         if (logger.isInfoEnabled()) {
@@ -385,10 +377,6 @@ public class IndexUpdater extends Thread {
                         continue;
                     } else {
                         map.remove(Constants.INDEXING_TARGET);
-                    }
-
-                    if (screenShotManager != null) {
-                        screenShotManager.generate(map);
                     }
 
                     final SolrInputDocument doc = createSolrDocument(map);
