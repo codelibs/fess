@@ -74,6 +74,12 @@ $(function(){
 		}
 	});
 
+	$result.on('mouseout', 'a.link', function(e){
+		if($screenshot.size() > 0) {
+			$screenshot.children().remove();
+		}
+	});
+
 	$result.on('click', 'a.favorite', function(e){
 		var $favorite = $(this);
 		var values = $favorite.attr('href').split('#');
