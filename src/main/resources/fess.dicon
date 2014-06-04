@@ -59,6 +59,7 @@ new String[] {
 "-server",
 "-Xmx512m",
 "-XX:MaxMetaspaceSize=128m",
+"-XX:CompressedClassSpaceSize=32m",
 "-XX:+UseG1GC",
 "-XX:InitiatingHeapOccupancyPercent=45",
 "-XX:MaxGCPauseMillis=200",
