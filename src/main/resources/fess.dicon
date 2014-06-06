@@ -60,18 +60,16 @@ new String[] {
 "-Xmx512m",
 "-XX:MaxMetaspaceSize=128m",
 "-XX:CompressedClassSpaceSize=32m",
-"-XX:+UseG1GC",
-"-XX:InitiatingHeapOccupancyPercent=45",
-"-XX:MaxGCPauseMillis=200",
+"-XX:-UseGCOverheadLimit",
+"-XX:+UseConcMarkSweepGC",
+"-XX:CMSInitiatingOccupancyFraction=75",
+"-XX:+CMSIncrementalMode",
+"-XX:+CMSIncrementalPacing",
+"-XX:CMSIncrementalDutyCycleMin=0",
+"-XX:+UseParNewGC",
 "-XX:+UseTLAB",
 "-XX:+DisableExplicitGC"
 }
-<!-- G1GC Options
-"-XX:NewRatio=2",
-"-XX:SurvivorRatio=8",
-"-XX:MaxTenuringThreshold=15",
-"-XX:G1ReservePercent=10",
- -->
 </property>
 <!-- remote debug
 "-Xdebug",
