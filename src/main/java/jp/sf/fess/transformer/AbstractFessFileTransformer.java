@@ -175,8 +175,6 @@ public abstract class AbstractFessFileTransformer extends
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = ComponentUtil
                 .getPathMappingHelper();
-        final String url = pathMappingHelper.replaceUrl(sessionId,
-                responseData.getUrl());
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
         final DynamicProperties crawlerProperties = ComponentUtil
                 .getCrawlerProperties();
@@ -189,6 +187,9 @@ public abstract class AbstractFessFileTransformer extends
                 .get(responseData.getSessionId());
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
+        String url = responseData.getUrl();
+        final String indexingTarget = crawlingConfig.getIndexingTarget(url);
+        url = pathMappingHelper.replaceUrl(sessionId, url);
 
         final Map<String, String> fieldConfigMap = crawlingConfig
                 .getConfigParameterMap(ConfigName.FIELD);
@@ -289,8 +290,7 @@ public abstract class AbstractFessFileTransformer extends
         putResultDataBody(dataMap, "lastModified",
                 FessFunctions.formatDate(responseData.getLastModified()));
         // indexingTarget
-        putResultDataBody(dataMap, Constants.INDEXING_TARGET,
-                crawlingConfig.getIndexingTarget(url));
+        putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
         putResultDataBody(dataMap, "boost", crawlingConfig.getDocumentBoost());
         // label: labelType
