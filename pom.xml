@@ -108,7 +108,7 @@
   </profiles>
   <properties>
     <dbflute.version>1.0.4K</dbflute.version>
-    <s2robot.version>0.7.1-SNAPSHOT</s2robot.version>
+    <s2robot.version>0.7.2-SNAPSHOT</s2robot.version>
     <solr.version>4.8.1</solr.version>
     <slf4j.version>1.7.7</slf4j.version>
     <poi.version>3.10-FINAL</poi.version>
