@@ -38,6 +38,7 @@ import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.UserAgentHelper;
 import jp.sf.fess.helper.ViewHelper;
 import jp.sf.fess.job.JobExecutor;
+import jp.sf.fess.service.SearchService;
 import jp.sf.fess.solr.IndexUpdater;
 
 import org.codelibs.core.crypto.CachedCipher;
@@ -104,6 +105,8 @@ public final class ComponentUtil {
     private static final String QUERY_RESPONSE_LIST = "queryResponseList";
 
     private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
+
+    private static final String SEARCH_SERVICE = "searchService";
 
     private ComponentUtil() {
     }
@@ -227,5 +230,10 @@ public final class ComponentUtil {
 
     public static String getUserAgentName() {
         return SingletonS2Container.getComponent(USER_AGENT_NAME);
+    }
+
+    public static SearchService getSearchService() {
+        return SingletonS2Container.getComponent(SEARCH_SERVICE);
+
     }
 }

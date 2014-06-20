@@ -36,9 +36,12 @@ import jp.sf.fess.api.WebApiRequest;
 import jp.sf.fess.api.WebApiResponse;
 import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
+import jp.sf.fess.entity.PingResponse;
+import jp.sf.fess.entity.PingResponse.Target;
 import jp.sf.fess.entity.SpellCheckResponse;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
+import jp.sf.fess.service.SearchService;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
@@ -101,10 +104,54 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         case FAVORITES:
             processFavoritesRequest(request, response, chain);
             break;
+        case PING:
+            processPingRequest(request, response, chain);
+            break;
         default:
             writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
             break;
         }
+    }
+
+    protected void processPingRequest(HttpServletRequest request,
+            HttpServletResponse response, FilterChain chain) {
+        SearchService searchService = ComponentUtil.getSearchService();
+        int status;
+        final StringBuilder buf = new StringBuilder(1000);
+        String errMsg = null;
+        try {
+            PingResponse pingResponse = searchService.ping();
+            status = pingResponse.getStatus();
+            buf.append("\"result\":[");
+            boolean appended = false;
+            for (Target target : pingResponse.getTargets()) {
+                if (!appended) {
+                    buf.append(',');
+                    appended = true;
+                }
+                buf.append("{\"status\":");
+                buf.append(target.getStatus());
+                buf.append(",\"url\":\"");
+                buf.append(escapeJson(target.getRequestUrl()));
+                buf.append("\",\"qTime\":");
+                buf.append(target.getqTime());
+                buf.append(",\"searchTime\":");
+                buf.append(target.getElapsedTime());
+                buf.append("}");
+            }
+            buf.append(']');
+        } catch (Exception e) {
+            status = 9;
+            errMsg = e.getMessage();
+            if (errMsg == null) {
+                errMsg = e.getClass().getName();
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to process a ping request.", e);
+            }
+        }
+
+        writeJsonResponse(status, buf.toString(), errMsg);
     }
 
     protected void processSearchRequest(final HttpServletRequest request,
@@ -122,6 +169,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             WebApiUtil.validate();
             query = WebApiUtil.getObject("searchQuery");
             final String execTime = WebApiUtil.getObject("execTime");
+            final String qTime = WebApiUtil.getObject("qTime");
+            final String elapsedTime = WebApiUtil.getObject("elapsedTime");
             final String pageSize = WebApiUtil.getObject("pageSize");
             final String currentPageNumber = WebApiUtil
                     .getObject("currentPageNumber");
@@ -139,6 +188,10 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append(escapeJson(query));
             buf.append(",\"execTime\":");
             buf.append(execTime);
+            buf.append(",\"qTime\":");
+            buf.append(qTime);
+            buf.append(",\"searchTime\":");
+            buf.append(elapsedTime);
             buf.append(',');
             if (StringUtil.isNotBlank(queryId)) {
                 buf.append("\"queryId\":");

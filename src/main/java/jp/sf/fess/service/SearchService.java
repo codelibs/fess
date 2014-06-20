@@ -33,6 +33,7 @@ import jp.sf.fess.entity.FacetInfo;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.GeoInfo;
 import jp.sf.fess.entity.MoreLikeThisInfo;
+import jp.sf.fess.entity.PingResponse;
 import jp.sf.fess.entity.SearchQuery;
 import jp.sf.fess.entity.SearchQuery.SortField;
 import jp.sf.fess.entity.SpellCheckResponse;
@@ -77,6 +78,12 @@ public class SearchService implements Serializable {
 
     @Resource
     protected SpellChecker spellChecker;
+
+    public PingResponse ping( ) {
+        final SolrGroup solrGroup = solrGroupManager
+                .getSolrGroup(QueryType.QUERY);
+        return new PingResponse(solrGroup.ping());
+    }
 
     public Map<String, Object> getDocument(final String query) {
         return getDocument(query, queryHelper.getResponseFields(), null);

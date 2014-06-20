@@ -35,9 +35,12 @@ import jp.sf.fess.api.WebApiRequest;
 import jp.sf.fess.api.WebApiResponse;
 import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
+import jp.sf.fess.entity.PingResponse;
+import jp.sf.fess.entity.PingResponse.Target;
 import jp.sf.fess.entity.SpellCheckResponse;
 import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
+import jp.sf.fess.service.SearchService;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
@@ -89,11 +92,50 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         case ANALYSIS:
             processAnalysisRequest(request, response, chain);
             break;
+        case PING:
+            processPingRequest(request, response, chain);
+            break;
         default:
             writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
             break;
         }
 
+    }
+
+    protected void processPingRequest(HttpServletRequest request,
+            HttpServletResponse response, FilterChain chain) {
+        SearchService searchService = ComponentUtil.getSearchService();
+        int status;
+        final StringBuilder buf = new StringBuilder(1000);
+        String errMsg = null;
+        try {
+            PingResponse pingResponse = searchService.ping();
+            status = pingResponse.getStatus();
+            buf.append("<result>");
+            for (Target target : pingResponse.getTargets()) {
+                buf.append("<server><status>");
+                buf.append(target.getStatus());
+                buf.append("</status><url>");
+                buf.append(escapeXml(target.getRequestUrl()));
+                buf.append("</url><q-time>");
+                buf.append(target.getqTime());
+                buf.append("</q-time><search-time>");
+                buf.append(target.getElapsedTime());
+                buf.append("</search-time></server>");
+            }
+            buf.append("</result>");
+        } catch (Exception e) {
+            status = 9;
+            errMsg = e.getMessage();
+            if (errMsg == null) {
+                errMsg = e.getClass().getName();
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to process a ping request.", e);
+            }
+        }
+
+        writeXmlResponse(status, buf.toString(), errMsg);
     }
 
     protected void processSearchRequest(final HttpServletRequest request,
@@ -111,6 +153,8 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             WebApiUtil.validate();
             query = WebApiUtil.getObject("searchQuery");
             final String execTime = WebApiUtil.getObject("execTime");
+            final String qTime = WebApiUtil.getObject("qTime");
+            final String elapsedTime = WebApiUtil.getObject("elapsedTime");
             final String pageSize = WebApiUtil.getObject("pageSize");
             final String currentPageNumber = WebApiUtil
                     .getObject("currentPageNumber");
@@ -130,6 +174,12 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<exec-time>");
             buf.append(execTime);
             buf.append("</exec-time>");
+            buf.append("<q-time>");
+            buf.append(qTime);
+            buf.append("</q-time>");
+            buf.append("<search-time>");
+            buf.append(elapsedTime);
+            buf.append("</search-time>");
             if (StringUtil.isNotBlank(queryId)) {
                 buf.append("<query-id>");
                 buf.append(escapeXml(queryId));

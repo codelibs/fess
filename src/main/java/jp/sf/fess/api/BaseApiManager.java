@@ -32,7 +32,7 @@ public class BaseApiManager {
     protected static final String SEARCH_API = "/searchApi";
 
     protected static enum FormatType {
-        SEARCH, LABEL, SUGGEST, SPELLCHECK, ANALYSIS, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER;
+        SEARCH, LABEL, SUGGEST, SPELLCHECK, ANALYSIS, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
     public BaseApiManager() {
@@ -60,6 +60,8 @@ public class BaseApiManager {
             return FormatType.FAVORITE;
         } else if (FormatType.FAVORITES.name().equals(type)) {
             return FormatType.FAVORITES;
+        } else if (FormatType.PING.name().equals(type)) {
+            return FormatType.PING;
         } else {
             // default
             return FormatType.OTHER;

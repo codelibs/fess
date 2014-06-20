@@ -83,6 +83,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     protected boolean partialResults = false;
 
+    protected int qTime;
+
+    protected long elapsedTime;
+
     public QueryResponseList() {
         parent = new ArrayList<Map<String, Object>>();
     }
@@ -99,6 +103,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
             final SolrDocumentList sdList = queryResponse.getResults();
             start = sdList.getStart();
             numFound = sdList.getNumFound();
+            qTime = queryResponse.getQTime();
+            elapsedTime = queryResponse.getElapsedTime();
 
             final Object partialResultsValue = queryResponse
                     .getResponseHeader().get(PARTIAL_RESULTS);
@@ -363,72 +369,36 @@ public class QueryResponseList implements List<Map<String, Object>> {
         return pageSize;
     }
 
-    public void setPageSize(final int pageSize) {
-        this.pageSize = pageSize;
-    }
-
     public int getCurrentPageNumber() {
         return currentPageNumber;
-    }
-
-    public void setCurrentPageNumber(final int currentPageNumber) {
-        this.currentPageNumber = currentPageNumber;
     }
 
     public long getAllRecordCount() {
         return allRecordCount;
     }
 
-    public void setAllRecordCount(final long allRecordCount) {
-        this.allRecordCount = allRecordCount;
-    }
-
     public int getAllPageCount() {
         return allPageCount;
-    }
-
-    public void setAllPageCount(final int allPageCount) {
-        this.allPageCount = allPageCount;
     }
 
     public boolean isExistNextPage() {
         return existNextPage;
     }
 
-    public void setExistNextPage(final boolean existNextPage) {
-        this.existNextPage = existNextPage;
-    }
-
     public boolean isExistPrevPage() {
         return existPrevPage;
-    }
-
-    public void setExistPrevPage(final boolean existPrevPage) {
-        this.existPrevPage = existPrevPage;
     }
 
     public long getCurrentStartRecordNumber() {
         return currentStartRecordNumber;
     }
 
-    public void setCurrentStartRecordNumber(final long currentStartRecordRange) {
-        currentStartRecordNumber = currentStartRecordRange;
-    }
-
     public long getCurrentEndRecordNumber() {
         return currentEndRecordNumber;
     }
 
-    public void setCurrentEndRecordNumber(final long currentEndRecordRange) {
-        currentEndRecordNumber = currentEndRecordRange;
-    }
-
     public List<String> getPageNumberList() {
         return pageNumberList;
-    }
-
-    public void setPageNumberList(final List<String> pageNumberList) {
-        this.pageNumberList = pageNumberList;
     }
 
     public String getSearchQuery() {
@@ -455,9 +425,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
         this.execTime = execTime;
     }
 
-    /**
-     * @return the facetResponse
-     */
     public FacetResponse getFacetResponse() {
         return facetResponse;
     }
@@ -466,18 +433,16 @@ public class QueryResponseList implements List<Map<String, Object>> {
         return moreLikeThisResponse;
     }
 
-    /**
-     * @return the partialResults
-     */
     public boolean isPartialResults() {
         return partialResults;
     }
 
-    /**
-     * @param partialResults the partialResults to set
-     */
-    public void setPartialResults(final boolean partialResults) {
-        this.partialResults = partialResults;
+    public int getQTime() {
+        return qTime;
+    }
+
+    public long getElapsedTime() {
+        return elapsedTime;
     }
 
 }
