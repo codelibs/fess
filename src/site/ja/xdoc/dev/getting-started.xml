@@ -22,37 +22,24 @@
           <li>Solr (検索インデックス周りを開発する場合)</li>
           <li>S2Robot (クローラー周りを開発する場合)</li>
       </ul>
-      <p>開発する際には Eclipse および Maven を利用する前提で進めます(fess-server のビルドには Ant が必要になります)。また、開発するにあたり、Fess も動作させるためにインストールしておきます。必要なものは事前にインストールしておいてください。</p>
+      <p>開発する際には Eclipse および Maven を利用する前提で進めます(fess-server でのリリース物を生成するためのビルドには Ant が必要になります)。また、開発するにあたり、Fess サーバも動作させるためにダウンロードおよびインストールしておきます。必要なものは事前にインストールしておいてください。</p>
     </section>
     <section name="ウェブ画面周りの開発について">
-      <p>管理画面や検索画面の開発方法をまとめます。</p>
+      <p>管理画面や検索画面の開発方法をまとめます。ここでは、Eclipseを用いた開発方法を説明します。Eclipse上でWTPで開発できる状態にしておく必要があります(J2EE版をインストールしておくなど)。</p>
       <ol>
-        <li>Java, Eclipse, Maven 3.x, Fess をインストールして準備します。</li>
-        <li>Eclipse で Fess のソースコードを github から clone します。gitのリポジトリは以下になります。
+        <li>Java, Eclipse, Maven 3.x, Fess をインストールして準備します。Fessのzipファイルは&lt;FESS_HOME&gt;ディレクトリに展開したと仮定します。</li>
+        <li>Fess のソースコードを github から clone します。
       <source><![CDATA[
-https://github.com/codelibs/fess.git
+git clone https://github.com/codelibs/fess.git
 ]]></source>
 </li>
-        <li>コマンドライン上でチェックアウトしたソースコードの pom.xml があるディレクトリに移動します。そこで mvn eclipse:eclipse を実行します。
-      <source><![CDATA[
-mvn eclipse:eclipse
-]]></source>
-.classpath が生成されますが、そのファイルの上部が以下であることを確認します(src/main が src/test より上位あることを確認し、異なる場合は順序を修正してください)。
-      <source><![CDATA[
-<classpath>
- <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
- <classpathentry kind="src" path="src/main/h2/resources" excluding="**/*.java"/>
- <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
- <classpathentry kind="src" path="src/test/java" including="**/*.java"/>
- <classpathentry kind="src" path="src/test/resources" excluding="**/*.java"/>
-]]></source>
-Fess が依存するライブラリが更新されたときには mvn eclipse:eclipse を再度行う必要があります。
-</li>
-        <li>Eclipse で Fess のプロジェクトをリロードします。</li>
-        <li>Eclipse で Fess のプロジェクトをビルドします。(自動ビルドになっていればクリーンすればビルドされます) src/main/webapp/WEB-INF/classes に生成されていることを確認します。</li>
-        <li>Eclipse で Tomcat プラグインを入れて、インストールした Fess を Tomcat 7 として設定します。Tomcat プラグインの JVM Setttings で Fess の bin/setenv.sh にある値を追加します。環境変数は展開する必要があります。 少なくても -Dsolr.solr.home -Dfess.log.file -Dsolr.log.file があれば OK です。</li>
-        <li>Eclipse で Fess のプロジェクトを Tomcat プラグインのコンテキスト定義の更新をして配備します。</li>
-        <li>Tomcat プラグインで起動します。</li>
+        <li>EclipseにMavenプロジェクトとしてインポートします。</li>
+        <li>Serversビューを表示します。表示されていない場合は、Window &gt; Show View &gt; Other... でダイアログを表示して、Server &gt; Servers を選択して OK ボタンを押下します。</li>
+        <li>Serversビューで新規サーバを追加します。Tomcat v7.0 Server を選択して、サーバ名は適当に設定して、Nextボタンを押下します。次にfessをConfiguredに追加して、Finishボタンを押下します。Serversビューに登録したサーバが表示されるので、ダブルクリックをして設定情報(Overview)を表示します。</li>
+        <li>Server LocationsでUse Tomcat Installationを選択します。</li>
+        <li>TimeoutsでStartを180秒、Stopを60秒に変更します。</li>
+        <li>General InformationのOpen Launch Configurationをクリックします。Argumentsタグをクリックします。VM argumentsに「-Dsolr.solr.home=&lt;FESS_HOME&gt;/solr -Dfess.log.file=&lt;FESS_HOME&gt;/logs/fess.out -Dsolr.log.file=&lt;FESS_HOME&gt;/logs/solr.log -Djava.awt.headless=true -server -Xmx1g -XX:+UseTLAB -XX:+DisableExplicitGC -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=32m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:CMSIncrementalDutyCycleMin=0 -XX:+UseParNewGC -XX:+OptimizeStringConcat」を追加します。&lt;FESS_HOME&gt;は環境にあわせて変更してください。OKボタンを押下します。</li>
+        <li>Serversビューから登録したサーバを起動します。</li>
       </ol>
       <p>HOT Deploy で開発したい場合は、src/main/resources/env.txt を product から ct に変更します。これにより、Tomcat(Fess) を再起動することなく、ソースコードを変更することができます。</p>
     </section>

@@ -160,107 +160,9 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <locales>en,ja</locales>
-          <inputEncoding>UTF-8</inputEncoding>
-          <outputEncoding>UTF-8</outputEncoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>src/main/webapp/WEB-INF/classes</directory>
-            </fileset>
-            <fileset>
-              <directory>src/main/webapp/WEB-INF/lib</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>delete-lib-dir</id>
-            <phase>initialize</phase>
-            <configuration>
-              <tasks>
-                <delete dir="${basedir}/src/main/webapp/WEB-INF/lib" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>compile-test-resources</id>
-            <phase>test-compile</phase>
-            <configuration>
-              <tasks>
-                <mkdir dir="${basedir}/target/test-classes/db" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <encoding>UTF-8</encoding>
-          <docencoding>UTF-8</docencoding>
-          <charset>UTF-8</charset>
-          <links>
-            <link>http://docs.oracle.com/javase/7/docs/api/</link>
-            <link>http://docs.oracle.com/javaee/6/api/</link>
-            <link>http://aopalliance.sourceforge.net/doc/</link>
-            <link>http://www.csg.is.titech.ac.jp/~chiba/javassist/html/</link>
-            <link>http://s2container.seasar.org/2.4/s2-framework/ja/apidocs/</link>
-            <link>http://s2container.seasar.org/2.4/s2-extension/ja/apidocs/</link>
-            <link>http://s2container.seasar.org/2.4/s2-tiger/ja/apidocs/</link>
-            <link>http://s2robot.sandbox.seasar.org/apidocs/</link>
-          </links>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>site</phase>
-            <goals>
-              <goal>javadoc</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>src/main/webapp/WEB-INF/lib</outputDirectory>
-              <excludeScope>provided</excludeScope>
-              <overWriteIfNewer>true</overWriteIfNewer>
-              <overWriteReleases>true</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <configuration>
-          <buildOutputDirectory>src/main/webapp/WEB-INF/classes</buildOutputDirectory>
-          <downloadSources>true</downloadSources>
-        </configuration>
+        <groupId>org.apache.tomcat.maven</groupId>
+        <artifactId>tomcat7-maven-plugin</artifactId>
+        <version>2.2</version>
       </plugin>
       <plugin>
         <groupId>org.seasar.dbflute</groupId>
@@ -309,6 +211,32 @@
           <inputEncoding>UTF-8</inputEncoding>
           <outputEncoding>UTF-8</outputEncoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <docencoding>UTF-8</docencoding>
+          <charset>UTF-8</charset>
+          <links>
+            <link>http://docs.oracle.com/javase/7/docs/api/</link>
+            <link>http://docs.oracle.com/javaee/6/api/</link>
+            <link>http://aopalliance.sourceforge.net/doc/</link>
+            <link>http://www.csg.is.titech.ac.jp/~chiba/javassist/html/</link>
+            <link>http://s2container.seasar.org/2.4/s2-framework/ja/apidocs/</link>
+            <link>http://s2container.seasar.org/2.4/s2-extension/ja/apidocs/</link>
+            <link>http://s2container.seasar.org/2.4/s2-tiger/ja/apidocs/</link>
+            <link>http://s2robot.sandbox.seasar.org/apidocs/</link>
+          </links>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>site</phase>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
