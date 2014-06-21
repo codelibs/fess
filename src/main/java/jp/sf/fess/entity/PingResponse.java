@@ -28,33 +28,33 @@ public class PingResponse {
 
         private int status;
 
-        private String requestUrl;
+        private String url;
 
-        private long elapsedTime;
+        private long searchTime;
 
-        private int qTime;
+        private int queryTime;
 
-        public Target(int status, String requestUrl, long elapsedTime, int qTime) {
+        public Target(int status, String url, long elapsedTime, int qTime) {
             this.status = status;
-            this.requestUrl = requestUrl;
-            this.elapsedTime = elapsedTime;
-            this.qTime = qTime;
+            this.url = url;
+            this.searchTime = elapsedTime;
+            this.queryTime = qTime;
         }
 
         public int getStatus() {
             return status;
         }
 
-        public String getRequestUrl() {
-            return requestUrl;
+        public String getUrl() {
+            return url;
         }
 
-        public long getElapsedTime() {
-            return elapsedTime;
+        public long getSearchTime() {
+            return searchTime;
         }
 
-        public int getqTime() {
-            return qTime;
+        public int getQueryTime() {
+            return queryTime;
         }
 
     }

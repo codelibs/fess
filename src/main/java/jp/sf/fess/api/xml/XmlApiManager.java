@@ -116,11 +116,11 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                 buf.append("<server><status>");
                 buf.append(target.getStatus());
                 buf.append("</status><url>");
-                buf.append(escapeXml(target.getRequestUrl()));
-                buf.append("</url><q-time>");
-                buf.append(target.getqTime());
-                buf.append("</q-time><search-time>");
-                buf.append(target.getElapsedTime());
+                buf.append(escapeXml(target.getUrl()));
+                buf.append("</url><query-time>");
+                buf.append(target.getQueryTime());
+                buf.append("</query-time><search-time>");
+                buf.append(target.getSearchTime());
                 buf.append("</search-time></server>");
             }
             buf.append("</result>");
@@ -153,8 +153,8 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             WebApiUtil.validate();
             query = WebApiUtil.getObject("searchQuery");
             final String execTime = WebApiUtil.getObject("execTime");
-            final String qTime = WebApiUtil.getObject("qTime");
-            final String elapsedTime = WebApiUtil.getObject("elapsedTime");
+            final String queryTime = WebApiUtil.getObject("queryTime");
+            final String searchTime = WebApiUtil.getObject("searchTime");
             final String pageSize = WebApiUtil.getObject("pageSize");
             final String currentPageNumber = WebApiUtil
                     .getObject("currentPageNumber");
@@ -174,11 +174,11 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<exec-time>");
             buf.append(execTime);
             buf.append("</exec-time>");
-            buf.append("<q-time>");
-            buf.append(qTime);
-            buf.append("</q-time>");
+            buf.append("<query-time>");
+            buf.append(queryTime);
+            buf.append("</query-time>");
             buf.append("<search-time>");
-            buf.append(elapsedTime);
+            buf.append(searchTime);
             buf.append("</search-time>");
             if (StringUtil.isNotBlank(queryId)) {
                 buf.append("<query-id>");

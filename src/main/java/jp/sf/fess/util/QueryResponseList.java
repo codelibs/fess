@@ -83,9 +83,9 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     protected boolean partialResults = false;
 
-    protected int qTime;
+    protected int queryTime;
 
-    protected long elapsedTime;
+    protected long searchTime;
 
     public QueryResponseList() {
         parent = new ArrayList<Map<String, Object>>();
@@ -103,8 +103,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
             final SolrDocumentList sdList = queryResponse.getResults();
             start = sdList.getStart();
             numFound = sdList.getNumFound();
-            qTime = queryResponse.getQTime();
-            elapsedTime = queryResponse.getElapsedTime();
+            queryTime = queryResponse.getQTime();
+            searchTime = queryResponse.getElapsedTime();
 
             final Object partialResultsValue = queryResponse
                     .getResponseHeader().get(PARTIAL_RESULTS);
@@ -437,12 +437,12 @@ public class QueryResponseList implements List<Map<String, Object>> {
         return partialResults;
     }
 
-    public int getQTime() {
-        return qTime;
+    public int getQueryTime() {
+        return queryTime;
     }
 
-    public long getElapsedTime() {
-        return elapsedTime;
+    public long getSearchTime() {
+        return searchTime;
     }
 
 }

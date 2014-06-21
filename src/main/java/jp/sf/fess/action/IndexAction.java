@@ -196,6 +196,10 @@ public class IndexAction {
 
     public String execTime;
 
+    public String queryTime = Constants.INVALID_NUMERIC_PARAMETER;
+
+    public String searchTime = Constants.INVALID_NUMERIC_PARAMETER;
+
     public boolean partialResults;
 
     public List<Map<String, String>> labelTypeItems;
@@ -559,6 +563,8 @@ public class IndexAction {
     public String searchApi() {
         try {
             WebApiUtil.setObject("searchQuery", doSearchInternal());
+            WebApiUtil.setObject("searchTime", searchTime);
+            WebApiUtil.setObject("queryTime", queryTime);
             WebApiUtil.setObject("execTime", execTime);
             WebApiUtil.setObject("pageSize", pageSize);
             WebApiUtil.setObject("currentPageNumber", currentPageNumber);
@@ -1135,7 +1141,8 @@ public class IndexAction {
                 .includes("pageSize", "currentPageNumber", "allRecordCount",
                         "allPageCount", "existNextPage", "existPrevPage",
                         "currentStartRecordNumber", "currentEndRecordNumber",
-                        "pageNumberList", "partialResults").execute();
+                        "pageNumberList", "partialResults", "queryTime",
+                        "searchTime").execute();
 
         return query;
     }

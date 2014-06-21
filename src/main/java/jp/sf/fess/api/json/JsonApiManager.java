@@ -125,18 +125,19 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append("\"result\":[");
             boolean appended = false;
             for (Target target : pingResponse.getTargets()) {
-                if (!appended) {
+                if (appended) {
                     buf.append(',');
+                } else {
                     appended = true;
                 }
                 buf.append("{\"status\":");
                 buf.append(target.getStatus());
                 buf.append(",\"url\":\"");
-                buf.append(escapeJson(target.getRequestUrl()));
-                buf.append("\",\"qTime\":");
-                buf.append(target.getqTime());
+                buf.append(escapeJson(target.getUrl()));
+                buf.append("\",\"queryTime\":");
+                buf.append(target.getQueryTime());
                 buf.append(",\"searchTime\":");
-                buf.append(target.getElapsedTime());
+                buf.append(target.getSearchTime());
                 buf.append("}");
             }
             buf.append(']');
@@ -169,8 +170,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             WebApiUtil.validate();
             query = WebApiUtil.getObject("searchQuery");
             final String execTime = WebApiUtil.getObject("execTime");
-            final String qTime = WebApiUtil.getObject("qTime");
-            final String elapsedTime = WebApiUtil.getObject("elapsedTime");
+            final String queryTime = WebApiUtil.getObject("queryTime");
+            final String searchTime = WebApiUtil.getObject("searchTime");
             final String pageSize = WebApiUtil.getObject("pageSize");
             final String currentPageNumber = WebApiUtil
                     .getObject("currentPageNumber");
@@ -188,10 +189,10 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append(escapeJson(query));
             buf.append(",\"execTime\":");
             buf.append(execTime);
-            buf.append(",\"qTime\":");
-            buf.append(qTime);
+            buf.append(",\"queryTime\":");
+            buf.append(queryTime);
             buf.append(",\"searchTime\":");
-            buf.append(elapsedTime);
+            buf.append(searchTime);
             buf.append(',');
             if (StringUtil.isNotBlank(queryId)) {
                 buf.append("\"queryId\":");

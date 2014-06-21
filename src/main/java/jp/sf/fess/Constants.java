@@ -322,4 +322,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_OPERATOR = "defaultOperator";
 
+    public static final String INVALID_NUMERIC_PARAMETER = "-1";
+
 }
