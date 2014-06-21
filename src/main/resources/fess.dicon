@@ -186,6 +186,7 @@ new String[] {
 				</initMethod>
 			</component>
 		</arg>
+		<destroyMethod name="quit"></destroyMethod>
 	</component>
 	<component name="htmlScreenShotGenerator" class="jp.sf.fess.screenshot.impl.WebDriverGenerator">
 		<property name="webDriver">webDriver</property>
