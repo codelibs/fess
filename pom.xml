@@ -74,7 +74,7 @@
         <databaseUrl>jdbc:h2:file:${basedir}/src/main/webapp/WEB-INF/db/fess</databaseUrl>
         <databaseTestUrl>jdbc:h2:file:${basedir}/target/test-classes/db/fess</databaseTestUrl>
         <databaseUsername>sa</databaseUsername>
-        <databasePassword />
+        <databasePassword/>
       </properties>
     </profile>
     <profile>
@@ -416,6 +416,12 @@
       <version>2.6</version>
     </dependency>
     <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>commons-validator</groupId>
       <artifactId>commons-validator</artifactId>
       <version>1.2.0</version>
@@ -723,6 +729,32 @@
       <groupId>com.github.detro</groupId>
       <artifactId>phantomjsdriver</artifactId>
       <version>1.2.0</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>selenium-chrome-driver</artifactId>
+          <groupId>org.seleniumhq.selenium</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>selenium-htmlunit-driver</artifactId>
+          <groupId>org.seleniumhq.selenium</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>selenium-firefox-driver</artifactId>
+          <groupId>org.seleniumhq.selenium</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>selenium-ie-driver</artifactId>
+          <groupId>org.seleniumhq.selenium</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>selenium-safari-driver</artifactId>
+          <groupId>org.seleniumhq.selenium</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>webbit</artifactId>
+          <groupId>org.webbitserver</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Removed from war -->
     <dependency>
