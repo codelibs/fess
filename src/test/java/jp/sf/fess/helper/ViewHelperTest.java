@@ -16,6 +16,9 @@
 
 package jp.sf.fess.helper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.seasar.extension.unit.S2TestCase;
 
 public class ViewHelperTest extends S2TestCase {
@@ -103,6 +106,42 @@ public class ViewHelperTest extends S2TestCase {
         assertEquals("<em>aaa</em>&lt;b&gt;bbb&lt;/b&gt;",
                 viewHelper.escapeHighlight(text));
 
+    }
+
+    public void test_getSitePath() {
+        String urlLink;
+        String sitePath;
+        final Map<String, Object> docMap = new HashMap<>();
+
+        urlLink = "http://www.yahoo.co.jp";
+        sitePath = "www.yahoo.co.jp";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "https://www.jp.websecurity.symantec.com/";
+        sitePath = "www.jp.websecurity.symantec.com/";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "http://www.dfasdfaskdfkakdfadfsd.jp";
+        sitePath = "www.dfasdfaskdfkakdfadfsd.jp";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "www.yahoo.co.jp";
+        sitePath = "www.yahoo.co.jp";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "smb://123.45.678.91/kyoyu1";
+        sitePath = "123.45.678.91/kyoyu1";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "file://home/taro/";
+        sitePath = "home/taro/";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
     }
 
 }

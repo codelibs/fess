@@ -151,6 +151,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
                     docMap.put("contentDescription",
                             viewHelper.getContentDescription(docMap));
                     docMap.put("urlLink", viewHelper.getUrlLink(docMap));
+                    docMap.put("sitePath", viewHelper.getSitePath(docMap));
                 }
 
                 parent.add(docMap);

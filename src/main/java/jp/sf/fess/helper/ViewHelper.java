@@ -80,6 +80,8 @@ public class ViewHelper implements Serializable {
 
     public int titleLength = 50;
 
+    public int sitePathLength = 50;
+
     public boolean encodeUrlLink = false;
 
     public String urlLinkEncoding = Constants.UTF_8;
@@ -163,7 +165,7 @@ public class ViewHelper implements Serializable {
         return StringUtil.EMPTY;
     }
 
-    protected String escapeHighlight(String text) {
+    protected String escapeHighlight(final String text) {
         return S2Functions.h(text)
                 .replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
                 .replaceAll(escapedSolrHighlightPost, solrHighlightTagPost);
@@ -493,6 +495,16 @@ public class ViewHelper implements Serializable {
         }
         buf.append(segment);
         return buf.toString();
+    }
+
+    public Object getSitePath(final Map<String, Object> docMap) {
+        final Object urlLink = docMap.get("urlLink");
+        if (urlLink != null) {
+            return StringUtils.abbreviate(
+                    urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""),
+                    sitePathLength);
+        }
+        return null;
     }
 
     public boolean isUseSession() {
