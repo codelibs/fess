@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>jp.sf.fess</groupId>
   <artifactId>fess</artifactId>
-  <version>9.2.0-SNAPSHOT</version>
+  <version>9.2.0</version>
   <packaging>war</packaging>
   <name>Fess</name>
   <description>Fess is Full tExt Search System.</description>
@@ -74,7 +74,7 @@
         <databaseUrl>jdbc:h2:file:${basedir}/src/main/webapp/WEB-INF/db/fess</databaseUrl>
         <databaseTestUrl>jdbc:h2:file:${basedir}/target/test-classes/db/fess</databaseTestUrl>
         <databaseUsername>sa</databaseUsername>
-        <databasePassword/>
+        <databasePassword />
       </properties>
     </profile>
     <profile>
