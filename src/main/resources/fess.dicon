@@ -63,9 +63,6 @@ new String[] {
 "-XX:-UseGCOverheadLimit",
 "-XX:+UseConcMarkSweepGC",
 "-XX:CMSInitiatingOccupancyFraction=75",
-"-XX:+CMSIncrementalMode",
-"-XX:+CMSIncrementalPacing",
-"-XX:CMSIncrementalDutyCycleMin=0",
 "-XX:+UseParNewGC",
 "-XX:+UseTLAB",
 "-XX:+DisableExplicitGC"
