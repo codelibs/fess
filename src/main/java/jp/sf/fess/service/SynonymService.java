@@ -55,7 +55,7 @@ public class SynonymService {
 
     }
 
-    protected SynonymFile getSynonymFile(final String dictId) {
+    public SynonymFile getSynonymFile(final String dictId) {
         final DictionaryFile<?> dictionaryFile = dictionaryManager
                 .getDictionaryFile(dictId);
         if (dictionaryFile instanceof SynonymFile) {

@@ -56,7 +56,7 @@ public class UserDictService {
 
     }
 
-    protected UserDictFile getUserDictFile(final String dictId) {
+    public UserDictFile getUserDictFile(final String dictId) {
         final DictionaryFile<?> dictionaryFile = dictionaryManager
                 .getDictionaryFile(dictId);
         if (dictionaryFile instanceof UserDictFile) {

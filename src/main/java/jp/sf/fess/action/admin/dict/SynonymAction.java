@@ -16,6 +16,8 @@
 
 package jp.sf.fess.action.admin.dict;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,7 @@ import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.dict.DictionaryExpiredException;
+import jp.sf.fess.dict.synonym.SynonymFile;
 import jp.sf.fess.dict.synonym.SynonymItem;
 import jp.sf.fess.form.admin.dict.SynonymForm;
 import jp.sf.fess.helper.SystemHelper;
@@ -43,6 +46,7 @@ import org.seasar.framework.beans.util.Beans;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
+import org.seasar.struts.util.ResponseUtil;
 
 public class SynonymAction {
 
@@ -62,6 +66,8 @@ public class SynonymAction {
     protected SystemHelper systemHelper;
 
     public List<SynonymItem> synonymItemItems;
+
+    public String filename;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("dict");
@@ -303,6 +309,72 @@ public class SynonymAction {
             throw new SSCActionMessagesException(e,
                     "errors.crud_failed_to_delete_crud_table");
         }
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "downloadpage")
+    public String downloadpage() {
+        SynonymFile synonymFile = synonymService
+                .getSynonymFile(synonymForm.dictId);
+        if (synonymFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.synonym_file_is_not_found");
+        }
+        filename = synonymFile.getSimpleName();
+        return "download.jsp";
+    }
+
+    @Token(save = true, validate = true)
+    @Execute(validator = false, input = "downloadpage")
+    public String download() {
+        SynonymFile synonymFile = synonymService
+                .getSynonymFile(synonymForm.dictId);
+        if (synonymFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.synonym_file_is_not_found");
+        }
+        try (InputStream in = synonymFile.getInputStream()) {
+            ResponseUtil.download(synonymFile.getSimpleName(), in);
+        } catch (IOException e) {
+            throw new SSCActionMessagesException(
+                    "errors.failed_to_download_synonym_file");
+        }
+
+        return null;
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "uploadpage")
+    public String uploadpage() {
+        SynonymFile synonymFile = synonymService
+                .getSynonymFile(synonymForm.dictId);
+        if (synonymFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.synonym_file_is_not_found");
+        }
+        filename = synonymFile.getName();
+        return "upload.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "uploadpage")
+    public String upload() {
+        SynonymFile synonymFile = synonymService
+                .getSynonymFile(synonymForm.dictId);
+        if (synonymFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.synonym_file_is_not_found");
+        }
+        try (InputStream in = synonymForm.synonymFile.getInputStream()) {
+            synonymFile.update(in);
+        } catch (IOException e) {
+            throw new SSCActionMessagesException(
+                    "errors.failed_to_upload_synonym_file");
+        }
+
+        SAStrutsUtil.addSessionMessage("success.upload_synonym_file");
+
+        return "uploadpage?dictId=" + synonymForm.dictId + "&redirect=true";
     }
 
     protected void loadSynonym() {

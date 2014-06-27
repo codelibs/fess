@@ -16,12 +16,15 @@
 
 package jp.sf.fess.dict.synonym;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -36,6 +39,8 @@ import jp.sf.fess.dict.DictionaryFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.framework.util.FileUtil;
+import org.seasar.robot.util.StreamUtil;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";
@@ -382,4 +387,16 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         }
     }
 
+    public String getSimpleName() {
+        return file.getName();
+    }
+
+    public InputStream getInputStream() throws IOException {
+        return new BufferedInputStream(new FileInputStream(file));
+    }
+
+    public void update(InputStream in) throws IOException {
+        StreamUtil.drain(in, file);
+        reload(null);
+    }
 }

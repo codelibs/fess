@@ -16,12 +16,14 @@
 
 package jp.sf.fess.dict.userdict;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -37,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.ja.util.CSVUtil;
 import org.codelibs.core.util.StringUtil;
+import org.seasar.robot.util.StreamUtil;
 
 public class UserDictFile extends DictionaryFile<UserDictItem> {
     private static final String USERDICT = "userDict";
@@ -309,4 +312,16 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         }
     }
 
+    public String getSimpleName() {
+        return file.getName();
+    }
+
+    public InputStream getInputStream() throws IOException {
+        return new BufferedInputStream(new FileInputStream(file));
+    }
+
+    public void update(InputStream in) throws IOException {
+        StreamUtil.drain(in, file);
+        reload(null);
+    }
 }

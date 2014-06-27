@@ -19,6 +19,7 @@ package jp.sf.fess.form.admin.dict;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.struts.upload.FormFile;
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.LongType;
 import org.seasar.struts.annotation.Maxbytelength;
@@ -51,6 +52,9 @@ public class SynonymForm {
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @Maxbytelength(maxbytelength = 1000)
     public String outputs;
+
+    @Required(target = "upload")
+    public FormFile synonymFile;
 
     public void initialize() {
         id = null;

@@ -35,6 +35,12 @@
 					<li><s:link href="createpage?dictId=${f:u(dictId)}">
 							<bean:message key="labels.dict_userdict_link_create" />
 						</s:link></li>
+					<li><s:link href="downloadpage?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_userdict_link_download" />
+						</s:link></li>
+					<li><s:link href="uploadpage?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_userdict_link_upload" />
+						</s:link></li>
 				</ul>
 			</div>
 

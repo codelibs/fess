@@ -16,6 +16,8 @@
 
 package jp.sf.fess.action.admin.dict;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.dict.DictionaryExpiredException;
+import jp.sf.fess.dict.userdict.UserDictFile;
 import jp.sf.fess.dict.userdict.UserDictItem;
 import jp.sf.fess.form.admin.dict.UserDictForm;
 import jp.sf.fess.helper.SystemHelper;
@@ -41,6 +44,7 @@ import org.seasar.framework.beans.util.Beans;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
+import org.seasar.struts.util.ResponseUtil;
 
 public class UserDictAction {
 
@@ -60,6 +64,8 @@ public class UserDictAction {
     protected SystemHelper systemHelper;
 
     public List<UserDictItem> userDictItemItems;
+
+    public String filename;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("dict");
@@ -301,6 +307,72 @@ public class UserDictAction {
             throw new SSCActionMessagesException(e,
                     "errors.crud_failed_to_delete_crud_table");
         }
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "downloadpage")
+    public String downloadpage() {
+        UserDictFile userdictFile = userDictService
+                .getUserDictFile(userDictForm.dictId);
+        if (userdictFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.userdict_file_is_not_found");
+        }
+        filename = userdictFile.getSimpleName();
+        return "download.jsp";
+    }
+
+    @Token(save = true, validate = true)
+    @Execute(validator = false, input = "downloadpage")
+    public String download() {
+        UserDictFile userdictFile = userDictService
+                .getUserDictFile(userDictForm.dictId);
+        if (userdictFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.userdict_file_is_not_found");
+        }
+        try (InputStream in = userdictFile.getInputStream()) {
+            ResponseUtil.download(userdictFile.getSimpleName(), in);
+        } catch (IOException e) {
+            throw new SSCActionMessagesException(
+                    "errors.failed_to_download_userdict_file");
+        }
+
+        return null;
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "uploadpage")
+    public String uploadpage() {
+        UserDictFile userdictFile = userDictService
+                .getUserDictFile(userDictForm.dictId);
+        if (userdictFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.userdict_file_is_not_found");
+        }
+        filename = userdictFile.getName();
+        return "upload.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "uploadpage")
+    public String upload() {
+        UserDictFile userdictFile = userDictService
+                .getUserDictFile(userDictForm.dictId);
+        if (userdictFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.userdict_file_is_not_found");
+        }
+        try (InputStream in = userDictForm.userDictFile.getInputStream()) {
+            userdictFile.update(in);
+        } catch (IOException e) {
+            throw new SSCActionMessagesException(
+                    "errors.failed_to_upload_userdict_file");
+        }
+
+        SAStrutsUtil.addSessionMessage("success.upload_userdict_file");
+
+        return "uploadpage?dictId=" + userDictForm.dictId + "&redirect=true";
     }
 
     protected void loadUserDict() {
