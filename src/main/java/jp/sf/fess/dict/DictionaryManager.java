@@ -18,7 +18,7 @@ package jp.sf.fess.dict;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -91,7 +91,7 @@ public class DictionaryManager {
                 return dicFileMap;
             }
 
-            final Map<String, DictionaryFile<? extends DictionaryItem>> newFileMap = new HashMap<String, DictionaryFile<? extends DictionaryItem>>();
+            final Map<String, DictionaryFile<? extends DictionaryItem>> newFileMap = new LinkedHashMap<>();
             for (final DictionaryLocator locator : locatorList) {
                 for (final DictionaryFile<? extends DictionaryItem> dictFile : locator
                         .find()) {
