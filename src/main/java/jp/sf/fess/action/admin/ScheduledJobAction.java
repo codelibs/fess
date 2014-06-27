@@ -30,6 +30,7 @@ import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.db.exentity.ScheduledJob;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.job.JobExecutor;
 import jp.sf.fess.service.RoleTypeService;
 import jp.sf.fess.util.FessBeans;
 
@@ -166,7 +167,8 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     public String stop() {
         final ScheduledJob scheduledJob = getScheduledJob();
         try {
-            jobHelper.getJobExecutoer(scheduledJob.getId());
+            JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
+            jobExecutoer.shutdown();
             SAStrutsUtil.addSessionMessage("success.job_stopped",
                     scheduledJob.getName());
             return displayList(true);
