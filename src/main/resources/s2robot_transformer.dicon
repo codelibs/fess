@@ -16,10 +16,10 @@
 			#{"feed:" : "http:"}
 		</property>
 		<!-- 
-		<property name="cacheXpath">"/HTML/BODY"</property>
-		<property name="contentXpath">"/HTML/BODY"</property>
+		<property name="cacheXpath">"//BODY"</property>
+		<property name="contentXpath">"//BODY"</property>
 		<property name="anchorXpath">"//A/@href"</property>
-		<property name="digestXpath">"/HTML/HEAD/META[@name='description']/@content"</property>
+		<property name="digestXpath">"//META[@name='description']/@content"</property>
 		 -->
 		<property name="replaceSiteEncodingWhenEnglish">true</property>
 		<property name="siteEncoding">"UTF-8"</property>

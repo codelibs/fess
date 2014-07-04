@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.NodeIterator;
 import org.xml.sax.InputSource;
 
 public class FessXpathTransformer extends AbstractFessXpathTransformer {
@@ -409,21 +410,31 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
 
     protected String getSingleNodeValue(final Document document,
             final String xpath, final boolean pruned) {
-        Node value = null;
+        StringBuilder buf = null;
+        NodeList list = null;
         try {
-            value = getXPathAPI().selectSingleNode(document, xpath);
+            list = getXPathAPI().selectNodeList(document, xpath);
+            for (int i = 0; i < list.getLength(); i++) {
+                if (buf == null) {
+                    buf = new StringBuilder(1000);
+                } else {
+                    buf.append(' ');
+                }
+                Node node = list.item(i);
+                if (pruned) {
+                    final Node n = pruneNode(node.cloneNode(true));
+                    buf.append(n.getTextContent());
+                } else {
+                    buf.append(node.getTextContent());
+                }
+            }
         } catch (final Exception e) {
             logger.warn("Could not parse a value of " + xpath);
         }
-        if (value == null) {
+        if (buf == null) {
             return null;
         }
-        if (pruned) {
-            final Node node = pruneNode(value.cloneNode(true));
-            return node.getTextContent();
-        } else {
-            return value.getTextContent();
-        }
+        return buf.toString();
     }
 
     protected Node pruneNode(final Node node) {

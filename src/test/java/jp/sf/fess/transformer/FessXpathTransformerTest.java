@@ -295,4 +295,22 @@ public class FessXpathTransformerTest extends S2TestCase {
                     .next());
         }
     }
+
+    public void test_contentXpath() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        String data = "<html><head><meta name=\"keywords\" content=\"bbb\"></head><body>aaa</body></html>";
+        Document document = getDocument(data);
+        String value = transformer
+                .getSingleNodeValue(document, "//BODY", false);
+        assertEquals("aaa", value);
+
+        value = transformer.getSingleNodeValue(document,
+                "//META[@name='keywords']/@content", false);
+        assertEquals("bbb", value);
+
+        value = transformer.getSingleNodeValue(document,
+                "//META[@name='keywords']/@content|//BODY", false);
+        assertEquals("bbb aaa", value);
+    }
 }
