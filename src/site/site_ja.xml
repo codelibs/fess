@@ -117,7 +117,7 @@
       <item name="ソースリポジトリ" href="source-repository.html"/>
       <item name="JavaDoc" href="../apidocs/index.html"/>
       <item name="ロードマップ" href="roadmap.html"/>
-      <item name="変更点" href="changes.html"/>
+      <item name="変更点" href="https://github.com/codelibs/fess/issues/milestones?state=closed"/>
       <item name="依存関係" href="dependencies.html"/>
       <item name="課題追跡" href="https://github.com/codelibs/fess/issues?state=open"/>
       <item name="開発者" href="team-list.html"/>
@@ -130,6 +130,7 @@
       <item name="ライセンス" href="license.html"/>
       <item name="FAQ" href="faq.html"/>
       <item name="関連プロジェクト" href="supporting-projects.html"/>
+      <item name="対応ファイル形式" href="supported-files.html"/>
       <item name="商用サポート" href="support-services.html"/>
       <item name="ASP/SaaS" href="asp.html"/>
       <item name="広告" href="donation.html"/>

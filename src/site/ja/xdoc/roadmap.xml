@@ -17,14 +17,16 @@
         <li>Z: マイクロバージョン。致命的なバグ修正の場合にバージョンが上がる。(致命的でなくても利用者の要望で必要であれば。ケースバイケースで対応)</li>
       </ul>
     </section>
-    <section name="8.1">
+    <section name="9.3">
       <ul>
         <li>バグ修正</li>
+        <li>Solrの更新</li>
       </ul>
       <p>その他、何かあれば追加します。</p>
     </section>
-    <section name="9.0">
+    <section name="10.0">
       <ul>
+        <li>Java 8</li>
         <li>Solr 5の導入</li>
       </ul>
       <p>その他、何かあれば追加します。</p>
