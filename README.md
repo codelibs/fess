@@ -14,6 +14,7 @@ Fess is Solr based search server, but knowledge/experience about Solr is NOT nee
 
 ### Issues/Questions
 
-Please file an [issue](https://github.com/codelibs/elasticsearch-river-web/issues "issue").
+Please file an [issue](https://github.com/codelibs/fess/issues "issue").
+(Japanese forum is [here](https://github.com/codelibs/codelibs-ja-forum "here").)
 
 
