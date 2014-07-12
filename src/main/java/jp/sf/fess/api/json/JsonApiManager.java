@@ -798,7 +798,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected String escapeCallbackName(final String callbackName) {
-        return callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
+        return "/**/"
+                + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]",
+                        StringUtil.EMPTY);
     }
 
     protected String escapeJson(final Object obj) {
