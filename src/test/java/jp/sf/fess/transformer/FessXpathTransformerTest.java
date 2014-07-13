@@ -33,7 +33,9 @@ import javax.xml.transform.stream.StreamResult;
 import org.cyberneko.html.parsers.DOMParser;
 import org.seasar.extension.unit.S2TestCase;
 import org.seasar.framework.container.ComponentNotFoundRuntimeException;
+import org.seasar.robot.builder.RequestDataBuilder;
 import org.seasar.robot.client.fs.ChildUrlsException;
+import org.seasar.robot.entity.RequestData;
 import org.seasar.robot.entity.ResponseData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -178,32 +180,37 @@ public class FessXpathTransformerTest extends S2TestCase {
     }
 
     public void test_convertChildUrlList() {
-        List<String> urlList = new ArrayList<String>();
+        List<RequestData> urlList = new ArrayList<>();
 
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(0, urlList.size());
 
         urlList.clear();
-        urlList.add("http://www.example.com");
+        urlList.add(RequestDataBuilder.newRequestData().get()
+                .url("http://www.example.com").build());
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(1, urlList.size());
-        assertEquals("http://www.example.com", urlList.get(0));
+        assertEquals("http://www.example.com", urlList.get(0).getUrl());
 
         urlList.clear();
-        urlList.add("http://www.example.com");
-        urlList.add("http://www.test.com");
+        urlList.add(RequestDataBuilder.newRequestData().get()
+                .url("http://www.example.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get()
+                .url("http://www.test.com").build());
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(2, urlList.size());
-        assertEquals("http://www.example.com", urlList.get(0));
-        assertEquals("http://www.test.com", urlList.get(1));
+        assertEquals("http://www.example.com", urlList.get(0).getUrl());
+        assertEquals("http://www.test.com", urlList.get(1).getUrl());
 
         urlList.clear();
-        urlList.add("feed://www.example.com");
-        urlList.add("http://www.test.com");
+        urlList.add(RequestDataBuilder.newRequestData().get()
+                .url("feed://www.example.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get()
+                .url("http://www.test.com").build());
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(2, urlList.size());
-        assertEquals("http://www.example.com", urlList.get(0));
-        assertEquals("http://www.test.com", urlList.get(1));
+        assertEquals("http://www.example.com", urlList.get(0).getUrl());
+        assertEquals("http://www.test.com", urlList.get(1).getUrl());
 
     }
 
@@ -277,10 +284,10 @@ public class FessXpathTransformerTest extends S2TestCase {
             transformer.putAdditionalData(dataMap, responseData, document);
             fail();
         } catch (final ChildUrlsException e) {
-            final Set<String> childUrlList = e.getChildUrlList();
+            final Set<RequestData> childUrlList = e.getChildUrlList();
             assertEquals(1, childUrlList.size());
             assertEquals("http://example.com/hoge", childUrlList.iterator()
-                    .next());
+                    .next().getUrl());
         }
 
         data = "<html><link rel=\"canonical\" href=\"http://example.com/hoge\"><body>aaa</body></html>";
@@ -289,10 +296,10 @@ public class FessXpathTransformerTest extends S2TestCase {
             transformer.putAdditionalData(dataMap, responseData, document);
             fail();
         } catch (final ChildUrlsException e) {
-            final Set<String> childUrlList = e.getChildUrlList();
+            final Set<RequestData> childUrlList = e.getChildUrlList();
             assertEquals(1, childUrlList.size());
             assertEquals("http://example.com/hoge", childUrlList.iterator()
-                    .next());
+                    .next().getUrl());
         }
     }
 

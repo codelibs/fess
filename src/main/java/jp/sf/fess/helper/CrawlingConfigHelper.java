@@ -42,6 +42,7 @@ import jp.sf.fess.util.ComponentUtil;
 import org.apache.commons.io.IOUtils;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.Base64Util;
+import org.seasar.robot.builder.RequestDataBuilder;
 import org.seasar.robot.client.S2RobotClient;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.entity.ResponseData;
@@ -179,7 +180,8 @@ public class CrawlingConfigHelper implements Serializable {
             throw new FessSystemException("No S2RobotClient: " + configIdObj
                     + ", url: " + url);
         }
-        final ResponseData responseData = client.doGet(url);
+        final ResponseData responseData = client.execute(RequestDataBuilder
+                .newRequestData().get().url(url).build());
         final HttpServletResponse response = ResponseUtil.getResponse();
         writeFileName(response, responseData);
         writeContentType(response, responseData);

@@ -34,6 +34,7 @@ import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
 import org.seasar.robot.RobotSystemException;
+import org.seasar.robot.builder.RequestDataBuilder;
 import org.seasar.robot.client.S2RobotClient;
 import org.seasar.robot.client.S2RobotClientFactory;
 import org.seasar.robot.entity.ResponseData;
@@ -196,7 +197,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                     }
 
                     final long startTime = System.currentTimeMillis();
-                    final ResponseData responseData = client.doGet(url);
+                    final ResponseData responseData = client
+                            .execute(RequestDataBuilder.newRequestData().get()
+                                    .url(url).build());
                     responseData.setExecutionTime(System.currentTimeMillis()
                             - startTime);
                     responseData.setSessionId((String) dataMap

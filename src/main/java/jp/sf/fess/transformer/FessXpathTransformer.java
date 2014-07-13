@@ -54,8 +54,10 @@ import org.seasar.framework.util.InputStreamUtil;
 import org.seasar.framework.util.SerializeUtil;
 import org.seasar.robot.RobotCrawlAccessException;
 import org.seasar.robot.RobotSystemException;
+import org.seasar.robot.builder.RequestDataBuilder;
 import org.seasar.robot.client.fs.ChildUrlsException;
 import org.seasar.robot.entity.AccessResultData;
+import org.seasar.robot.entity.RequestData;
 import org.seasar.robot.entity.ResponseData;
 import org.seasar.robot.entity.ResultData;
 import org.seasar.robot.entity.UrlQueue;
@@ -66,7 +68,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.traversal.NodeIterator;
 import org.xml.sax.InputSource;
 
 public class FessXpathTransformer extends AbstractFessXpathTransformer {
@@ -201,8 +202,9 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             final String canonicalUrl = getCanonicalUrl(responseData, document);
             if (canonicalUrl != null
                     && !canonicalUrl.equals(responseData.getUrl())) {
-                final Set<String> childUrlSet = new HashSet<String>();
-                childUrlSet.add(canonicalUrl);
+                final Set<RequestData> childUrlSet = new HashSet<>();
+                childUrlSet.add(RequestDataBuilder.newRequestData().get()
+                        .url(canonicalUrl).build());
                 throw new ChildUrlsException(childUrlSet);
             }
         }
@@ -498,18 +500,21 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         }
     }
 
-    protected List<String> getAnchorList(final Document document,
+    protected List<RequestData> getAnchorList(final Document document,
             final ResponseData responseData) {
-        List<String> anchorList = new ArrayList<String>();
+        List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
         try {
             final URL url = new URL(baseHref != null ? baseHref
                     : responseData.getUrl());
             for (final Map.Entry<String, String> entry : childUrlRuleMap
                     .entrySet()) {
-                anchorList.addAll(getUrlFromTagAttribute(url, document,
+                for (String u : getUrlFromTagAttribute(url, document,
                         entry.getKey(), entry.getValue(),
-                        responseData.getCharSet()));
+                        responseData.getCharSet())) {
+                    anchorList.add(RequestDataBuilder.newRequestData().get()
+                            .url(u).build());
+                }
             }
             anchorList = convertChildUrlList(anchorList);
         } catch (final Exception e) {
@@ -521,20 +526,19 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     }
 
     @Override
-    protected List<String> convertChildUrlList(final List<String> urlList) {
-
-        final List<String> newUrlList = new ArrayList<String>();
+    protected List<RequestData> convertChildUrlList(
+            final List<RequestData> urlList) {
         if (urlList != null) {
-            for (String url : urlList) {
+            for (RequestData requestData : urlList) {
+                String url = requestData.getUrl();
                 for (final Map.Entry<String, String> entry : convertUrlMap
                         .entrySet()) {
                     url = url.replaceAll(entry.getKey(), entry.getValue());
                 }
-
-                newUrlList.add(replaceOverlappingHost(url));
+                requestData.setUrl(replaceOverlappingHost(url));
             }
         }
-        return newUrlList;
+        return urlList;
     }
 
     public void addPrunedTag(final String tagName) {

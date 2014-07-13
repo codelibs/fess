@@ -47,8 +47,10 @@ import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.seasar.robot.S2RobotThread;
+import org.seasar.robot.builder.RequestDataBuilder;
 import org.seasar.robot.client.S2RobotClient;
 import org.seasar.robot.client.smb.SmbClient;
+import org.seasar.robot.entity.RequestData;
 import org.seasar.robot.entity.ResponseData;
 import org.seasar.robot.entity.UrlQueue;
 import org.seasar.robot.log.LogType;
@@ -88,7 +90,9 @@ public class FessS2RobotThread extends S2RobotThread {
             ResponseData responseData = null;
             try {
                 //  head method
-                responseData = client.doHead(urlQueue.getUrl());
+                responseData = client
+                        .execute(RequestDataBuilder.newRequestData().head()
+                                .url(urlQueue.getUrl()).build());
                 if (responseData == null) {
                     return true;
                 }
@@ -217,7 +221,7 @@ public class FessS2RobotThread extends S2RobotThread {
     }
 
     protected void storeChildUrlsToQueue(final UrlQueue urlQueue,
-            final Set<String> childUrlSet) {
+            final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
             synchronized (robotContext.getAccessCountLock()) {
                 //  add an url
@@ -229,7 +233,7 @@ public class FessS2RobotThread extends S2RobotThread {
     }
 
     @SuppressWarnings("unchecked")
-    protected Set<String> getAnchorSet(final Object obj) {
+    protected Set<RequestData> getAnchorSet(final Object obj) {
         List<String> anchorList;
         if (obj instanceof String) {
             anchorList = new ArrayList<String>();
@@ -244,9 +248,10 @@ public class FessS2RobotThread extends S2RobotThread {
             return null;
         }
 
-        final Set<String> childUrlSet = new LinkedHashSet<String>();
+        final Set<RequestData> childUrlSet = new LinkedHashSet<>();
         for (final String anchor : anchorList) {
-            childUrlSet.add(anchor);
+            childUrlSet.add(RequestDataBuilder.newRequestData().get()
+                    .url(anchor).build());
         }
         return childUrlSet;
     }
@@ -294,7 +299,7 @@ public class FessS2RobotThread extends S2RobotThread {
         return null;
     }
 
-    protected Set<String> getChildUrlSet(final String id) {
+    protected Set<RequestData> getChildUrlSet(final String id) {
         final SolrGroupManager solrGroupManager = ComponentUtil
                 .getSolrGroupManager();
         final SolrGroup solrGroup = solrGroupManager
@@ -313,11 +318,12 @@ public class FessS2RobotThread extends S2RobotThread {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Found solr documents: " + docList);
                 }
-                final Set<String> urlSet = new HashSet<String>(docList.size());
+                final Set<RequestData> urlSet = new HashSet<>(docList.size());
                 for (final SolrDocument doc : docList) {
                     final Object obj = doc.get("url");
                     if (obj != null) {
-                        urlSet.add(obj.toString());
+                        urlSet.add(RequestDataBuilder.newRequestData().get()
+                                .url(obj.toString()).build());
                     }
                 }
                 return urlSet;
