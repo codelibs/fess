@@ -530,6 +530,12 @@
       <groupId>org.codelibs.solr</groupId>
       <artifactId>solrlib</artifactId>
       <version>1.3.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.codelibs.sastruts</groupId>
@@ -759,6 +765,10 @@
         <exclusion>
           <artifactId>webbit</artifactId>
           <groupId>org.webbitserver</groupId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
