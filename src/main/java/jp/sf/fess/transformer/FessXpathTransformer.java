@@ -500,7 +500,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         }
     }
 
-    protected List<RequestData> getAnchorList(final Document document,
+    protected List<String> getAnchorList(final Document document,
             final ResponseData responseData) {
         List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
@@ -522,7 +522,12 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             //        } finally {
             //            xpathAPI.remove();
         }
-        return anchorList;
+
+        List<String> urlList = new ArrayList<>(anchorList.size());
+        for (RequestData requestData : anchorList) {
+            urlList.add(requestData.getUrl());
+        }
+        return urlList;
     }
 
     @Override
