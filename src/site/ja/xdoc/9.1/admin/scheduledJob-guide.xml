@@ -31,6 +31,10 @@
       </subsection>
       <section name="スクリプト">
         <p>ジョブの実行内容を実行方法で指定した言語で記述します。</p>
+        <p>たとえば、3つのクロール設定のみをクロールジョブとして実行させたい場合は、以下のように記述します(前提としてウェブクロール設定のIDを1と2としファイルシステムクロール設定のIDを1とします)。</p>
+        <source><![CDATA[
+return container.getComponent("crawlJob").execute(executor, ["1", "2"] as String[],["1"] as String[],[] as String[],"commit");
+]]></source>
       </section>
       <section name="ログ">
         <p>有効にすることでジョブログへ記録されます。</p>
