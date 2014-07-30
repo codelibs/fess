@@ -1,0 +1,163 @@
+package jp.sf.fess.filter;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
+import org.codelibs.core.util.StringUtil;
+import org.seasar.extension.filter.EncodingFilter;
+
+public class FessEncodingFilter extends EncodingFilter {
+    public static String ENCODING_MAP = "encoding-map";
+
+    protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
+
+    protected String encoding;
+
+    protected ServletContext servletContext;
+
+    protected URLCodec urlCodec = new URLCodec();
+
+    @Override
+    public void init(final FilterConfig config) throws ServletException {
+        super.init(config);
+        servletContext = config.getServletContext();
+
+        encoding = config.getInitParameter(ENCODING);
+        if (encoding == null) {
+            encoding = DEFAULT_ENCODING;
+        }
+
+        // ex. sjis:Shift_JIS,eucjp:EUC-JP
+        final String value = config.getInitParameter(ENCODING_MAP);
+        if (StringUtil.isNotBlank(value)) {
+            final String[] encodingPairs = value.split(",");
+            for (final String pair : encodingPairs) {
+                final String[] encInfos = pair.trim().split(":");
+                if (encInfos.length == 2) {
+                    encodingMap.put("/" + encInfos[0] + "/", encInfos[1]);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void doFilter(final ServletRequest request,
+            final ServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
+        final HttpServletRequest req = (HttpServletRequest) request;
+        final String servletPath = req.getServletPath();
+        for (final Map.Entry<String, String> entry : encodingMap.entrySet()) {
+            final String path = entry.getKey();
+            if (servletPath.startsWith(path)) {
+                req.setCharacterEncoding(entry.getValue());
+                final StringBuilder locationBuf = new StringBuilder(1000);
+                final String contextPath = servletContext.getContextPath();
+                locationBuf.append(StringUtil.isBlank(contextPath) ? "/"
+                        : contextPath);
+                locationBuf.append(servletPath.substring(path.length()));
+                boolean append = false;
+                final Map<String, String[]> parameterMap = new HashMap<>();
+                parameterMap.putAll(req.getParameterMap());
+                parameterMap.putAll(getParameterMapFromQueryString(req,
+                        entry.getValue()));
+                for (final Map.Entry<String, String[]> paramEntry : parameterMap
+                        .entrySet()) {
+                    final String[] values = paramEntry.getValue();
+                    if (values == null) {
+                        continue;
+                    }
+                    final String key = paramEntry.getKey();
+                    for (final String value : values) {
+                        if (append) {
+                            locationBuf.append('&');
+                        } else {
+                            locationBuf.append('?');
+                            append = true;
+                        }
+                        locationBuf.append(urlCodec.encode(key, encoding));
+                        locationBuf.append('=');
+                        locationBuf.append(urlCodec.encode(value, encoding));
+                    }
+
+                }
+                final HttpServletResponse res = (HttpServletResponse) response;
+                res.sendRedirect(locationBuf.toString());
+                return;
+            }
+        }
+
+        super.doFilter(request, response, chain);
+    }
+
+    protected Map<String, String[]> getParameterMapFromQueryString(
+            final HttpServletRequest request, final String enc)
+            throws IOException {
+        final String queryString = request.getQueryString();
+        if (StringUtil.isNotBlank(queryString)) {
+            return parseQueryString(queryString, enc);
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    protected Map<String, String[]> parseQueryString(final String queryString,
+            final String enc) throws IOException {
+        final Map<String, List<String>> paramListMap = new HashMap<>();
+        final String[] pairs = queryString.split("&");
+        try {
+            for (final String pair : pairs) {
+                final int pos = pair.indexOf('=');
+                if (pos >= 0) {
+                    final String key = urlCodec.decode(pair.substring(0, pos),
+                            enc);
+                    List<String> list = paramListMap.get(key);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        paramListMap.put(key, list);
+                    }
+                    if (pos + 1 < pair.length()) {
+                        list.add(urlCodec.decode(pair.substring(pos + 1), enc));
+                    } else {
+                        list.add(StringUtil.EMPTY);
+                    }
+                } else {
+                    final String key = urlCodec.decode(pair, enc);
+                    List<String> list = paramListMap.get(key);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        paramListMap.put(key, list);
+                    }
+                    list.add(StringUtil.EMPTY);
+                }
+            }
+        } catch (DecoderException e) {
+            throw new IOException(e);
+        }
+
+        final Map<String, String[]> paramMap = new HashMap<>(
+                paramListMap.size());
+        for (final Map.Entry<String, List<String>> entry : paramListMap
+                .entrySet()) {
+            final List<String> list = entry.getValue();
+            paramMap.put(entry.getKey(), list.toArray(new String[list.size()]));
+        }
+        return paramMap;
+    }
+}
