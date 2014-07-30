@@ -1,7 +1,6 @@
 package jp.sf.fess.filter;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +23,7 @@ import org.codelibs.core.util.StringUtil;
 import org.seasar.extension.filter.EncodingFilter;
 
 public class FessEncodingFilter extends EncodingFilter {
-    public static String ENCODING_MAP = "encoding-map";
+    public static String ENCODING_MAP = "encodingRules";
 
     protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
 
@@ -69,8 +68,11 @@ public class FessEncodingFilter extends EncodingFilter {
                 req.setCharacterEncoding(entry.getValue());
                 final StringBuilder locationBuf = new StringBuilder(1000);
                 final String contextPath = servletContext.getContextPath();
-                locationBuf.append(StringUtil.isBlank(contextPath) ? "/"
-                        : contextPath);
+                if (StringUtil.isNotBlank(contextPath)
+                        && !"/".equals(contextPath)) {
+                    locationBuf.append(contextPath);
+                }
+                locationBuf.append('/');
                 locationBuf.append(servletPath.substring(path.length()));
                 boolean append = false;
                 final Map<String, String[]> parameterMap = new HashMap<>();

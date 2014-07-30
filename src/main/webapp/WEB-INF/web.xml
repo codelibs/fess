@@ -27,10 +27,14 @@
 
   <filter>
     <filter-name>encodingfilter</filter-name>
-    <filter-class>org.seasar.extension.filter.EncodingFilter</filter-class>
+    <filter-class>jp.sf.fess.filter.FessEncodingFilter</filter-class>
     <init-param>
       <param-name>encoding</param-name>
       <param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+      <param-name>encodingRules</param-name>
+      <param-value>sjis:Shift_JIS,eucjp:EUC-JP</param-value>
     </init-param>
   </filter>
 
