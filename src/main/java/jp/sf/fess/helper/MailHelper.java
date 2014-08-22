@@ -63,10 +63,8 @@ public class MailHelper implements Serializable {
             final MimeMessage msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(from));
             final InternetAddress[] address = new InternetAddress[toAddresses.length];
-            if (toAddresses.length > 1) {
-                for (int i = 1; i < toAddresses.length; i++) {
-                    address[i] = new InternetAddress(toAddresses[i]);
-                }
+            for (int i = 0; i < toAddresses.length; i++) {
+                address[i] = new InternetAddress(toAddresses[i]);
             }
             msg.setRecipients(Message.RecipientType.TO, address);
             msg.setSubject(subject);
