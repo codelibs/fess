@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +38,6 @@ import jp.sf.fess.dict.DictionaryFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.util.StringUtil;
-import org.seasar.framework.util.FileUtil;
 import org.seasar.robot.util.StreamUtil;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {

@@ -422,7 +422,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 } else {
                     buf.append(' ');
                 }
-                Node node = list.item(i);
+                final Node node = list.item(i);
                 if (pruned) {
                     final Node n = pruneNode(node.cloneNode(true));
                     buf.append(n.getTextContent());
@@ -509,7 +509,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                     : responseData.getUrl());
             for (final Map.Entry<String, String> entry : childUrlRuleMap
                     .entrySet()) {
-                for (String u : getUrlFromTagAttribute(url, document,
+                for (final String u : getUrlFromTagAttribute(url, document,
                         entry.getKey(), entry.getValue(),
                         responseData.getCharSet())) {
                     anchorList.add(RequestDataBuilder.newRequestData().get()
@@ -523,8 +523,8 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             //            xpathAPI.remove();
         }
 
-        List<String> urlList = new ArrayList<>(anchorList.size());
-        for (RequestData requestData : anchorList) {
+        final List<String> urlList = new ArrayList<>(anchorList.size());
+        for (final RequestData requestData : anchorList) {
             urlList.add(requestData.getUrl());
         }
         return urlList;
@@ -534,7 +534,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     protected List<RequestData> convertChildUrlList(
             final List<RequestData> urlList) {
         if (urlList != null) {
-            for (RequestData requestData : urlList) {
+            for (final RequestData requestData : urlList) {
                 String url = requestData.getUrl();
                 for (final Map.Entry<String, String> entry : convertUrlMap
                         .entrySet()) {

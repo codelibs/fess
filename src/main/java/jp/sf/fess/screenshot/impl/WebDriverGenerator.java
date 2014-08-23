@@ -72,7 +72,7 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
 
         if (webDriver instanceof TakesScreenshot) {
             webDriver.get(url);
-            File screenshot = ((TakesScreenshot) webDriver)
+            final File screenshot = ((TakesScreenshot) webDriver)
                     .getScreenshotAs(OutputType.FILE);
             convert(screenshot, outputFile);
         } else {
@@ -83,18 +83,18 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
 
     protected void convert(File inputFile, File outputFile) {
         try {
-            BufferedImage image = loadImage(inputFile);
-            int screenShotHeight = screenShotWidth * image.getHeight()
+            final BufferedImage image = loadImage(inputFile);
+            final int screenShotHeight = screenShotWidth * image.getHeight()
                     / windowWidth;
-            BufferedImage screenShotImage = new BufferedImage(screenShotWidth,
-                    screenShotHeight, image.getType());
+            final BufferedImage screenShotImage = new BufferedImage(
+                    screenShotWidth, screenShotHeight, image.getType());
             screenShotImage.getGraphics().drawImage(
                     image.getScaledInstance(screenShotWidth, screenShotHeight,
                             Image.SCALE_AREA_AVERAGING), 0, 0, screenShotWidth,
                     screenShotHeight, null);
 
             ImageIO.write(screenShotImage, imageFormatName, outputFile);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to convert " + inputFile.getAbsolutePath(), e);
             inputFile.renameTo(outputFile);
         }

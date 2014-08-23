@@ -312,7 +312,7 @@ public class UserDictAction {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "downloadpage")
     public String downloadpage() {
-        UserDictFile userdictFile = userDictService
+        final UserDictFile userdictFile = userDictService
                 .getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
             throw new SSCActionMessagesException(
@@ -325,7 +325,7 @@ public class UserDictAction {
     @Token(save = true, validate = true)
     @Execute(validator = false, input = "downloadpage")
     public String download() {
-        UserDictFile userdictFile = userDictService
+        final UserDictFile userdictFile = userDictService
                 .getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
             throw new SSCActionMessagesException(
@@ -333,7 +333,7 @@ public class UserDictAction {
         }
         try (InputStream in = userdictFile.getInputStream()) {
             ResponseUtil.download(userdictFile.getSimpleName(), in);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_download_userdict_file");
         }
@@ -344,7 +344,7 @@ public class UserDictAction {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "uploadpage")
     public String uploadpage() {
-        UserDictFile userdictFile = userDictService
+        final UserDictFile userdictFile = userDictService
                 .getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
             throw new SSCActionMessagesException(
@@ -357,7 +357,7 @@ public class UserDictAction {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "uploadpage")
     public String upload() {
-        UserDictFile userdictFile = userDictService
+        final UserDictFile userdictFile = userDictService
                 .getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
             throw new SSCActionMessagesException(
@@ -365,7 +365,7 @@ public class UserDictAction {
         }
         try (InputStream in = userDictForm.userDictFile.getInputStream()) {
             userdictFile.update(in);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_upload_userdict_file");
         }

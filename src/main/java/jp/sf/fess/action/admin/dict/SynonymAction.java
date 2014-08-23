@@ -314,7 +314,7 @@ public class SynonymAction {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "downloadpage")
     public String downloadpage() {
-        SynonymFile synonymFile = synonymService
+        final SynonymFile synonymFile = synonymService
                 .getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
             throw new SSCActionMessagesException(
@@ -327,7 +327,7 @@ public class SynonymAction {
     @Token(save = true, validate = true)
     @Execute(validator = false, input = "downloadpage")
     public String download() {
-        SynonymFile synonymFile = synonymService
+        final SynonymFile synonymFile = synonymService
                 .getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
             throw new SSCActionMessagesException(
@@ -335,7 +335,7 @@ public class SynonymAction {
         }
         try (InputStream in = synonymFile.getInputStream()) {
             ResponseUtil.download(synonymFile.getSimpleName(), in);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_download_synonym_file");
         }
@@ -346,7 +346,7 @@ public class SynonymAction {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "uploadpage")
     public String uploadpage() {
-        SynonymFile synonymFile = synonymService
+        final SynonymFile synonymFile = synonymService
                 .getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
             throw new SSCActionMessagesException(
@@ -359,7 +359,7 @@ public class SynonymAction {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "uploadpage")
     public String upload() {
-        SynonymFile synonymFile = synonymService
+        final SynonymFile synonymFile = synonymService
                 .getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
             throw new SSCActionMessagesException(
@@ -367,7 +367,7 @@ public class SynonymAction {
         }
         try (InputStream in = synonymForm.synonymFile.getInputStream()) {
             synonymFile.update(in);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_upload_synonym_file");
         }

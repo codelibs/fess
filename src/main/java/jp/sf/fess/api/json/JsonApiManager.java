@@ -115,16 +115,16 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     protected void processPingRequest(HttpServletRequest request,
             HttpServletResponse response, FilterChain chain) {
-        SearchService searchService = ComponentUtil.getSearchService();
+        final SearchService searchService = ComponentUtil.getSearchService();
         int status;
         final StringBuilder buf = new StringBuilder(1000);
         String errMsg = null;
         try {
-            PingResponse pingResponse = searchService.ping();
+            final PingResponse pingResponse = searchService.ping();
             status = pingResponse.getStatus();
             buf.append("\"result\":[");
             boolean appended = false;
-            for (Target target : pingResponse.getTargets()) {
+            for (final Target target : pingResponse.getTargets()) {
                 if (appended) {
                     buf.append(',');
                 } else {
@@ -141,7 +141,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 buf.append("}");
             }
             buf.append(']');
-        } catch (Exception e) {
+        } catch (final Exception e) {
             status = 9;
             errMsg = e.getMessage();
             if (errMsg == null) {

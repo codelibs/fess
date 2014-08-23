@@ -167,7 +167,8 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     public String stop() {
         final ScheduledJob scheduledJob = getScheduledJob();
         try {
-            JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
+            final JobExecutor jobExecutoer = jobHelper
+                    .getJobExecutoer(scheduledJob.getId());
             jobExecutoer.shutdown();
             SAStrutsUtil.addSessionMessage("success.job_stopped",
                     scheduledJob.getName());

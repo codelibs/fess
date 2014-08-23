@@ -149,7 +149,7 @@ public class FessEncodingFilter extends EncodingFilter {
                     list.add(StringUtil.EMPTY);
                 }
             }
-        } catch (DecoderException e) {
+        } catch (final DecoderException e) {
             throw new IOException(e);
         }
 

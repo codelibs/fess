@@ -79,7 +79,7 @@ public class SearchService implements Serializable {
     @Resource
     protected SpellChecker spellChecker;
 
-    public PingResponse ping( ) {
+    public PingResponse ping() {
         final SolrGroup solrGroup = solrGroupManager
                 .getSolrGroup(QueryType.QUERY);
         return new PingResponse(solrGroup.ping());

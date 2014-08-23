@@ -62,7 +62,7 @@ public class ScreenShotManager {
 
     public int splitSize = 5;
 
-    private BlockingQueue<ScreenShotTask> screenShotTaskQueue = new LinkedBlockingQueue<ScreenShotTask>();
+    private final BlockingQueue<ScreenShotTask> screenShotTaskQueue = new LinkedBlockingQueue<ScreenShotTask>();
 
     private boolean generating;
 
@@ -97,9 +97,9 @@ public class ScreenShotManager {
                 while (generating) {
                     try {
                         screenShotTaskQueue.take().generate();
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         logger.debug("Interupted task.", e);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.warn("Failed to generage a screenshot.", e);
                     }
                 }
@@ -119,8 +119,8 @@ public class ScreenShotManager {
             if (generator.isTarget(docMap)) {
                 final String url = (String) docMap.get("url");
                 final String path = getImageFilename(docMap);
-                if (!screenShotTaskQueue.offer((new ScreenShotTask(url,
-                        new File(baseDir, path), generator)))) {
+                if (!screenShotTaskQueue.offer(new ScreenShotTask(url,
+                        new File(baseDir, path), generator))) {
                     logger.warn("Failed to offer a screenshot task: " + url
                             + " -> " + path);
                 }
@@ -130,7 +130,7 @@ public class ScreenShotManager {
     }
 
     protected String getImageFilename(final Map<String, Object> docMap) {
-        StringBuilder buf = new StringBuilder(50);
+        final StringBuilder buf = new StringBuilder(50);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String docid = (String) docMap.get(systemHelper.docIdField);
         for (int i = 0; i < docid.length(); i++) {
@@ -219,30 +219,37 @@ public class ScreenShotManager {
             final int prime = 31;
             int result = 1;
             result = prime * result
-                    + ((outputFile == null) ? 0 : outputFile.hashCode());
-            result = prime * result + ((url == null) ? 0 : url.hashCode());
+                    + (outputFile == null ? 0 : outputFile.hashCode());
+            result = prime * result + (url == null ? 0 : url.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
-            ScreenShotTask other = (ScreenShotTask) obj;
+            }
+            final ScreenShotTask other = (ScreenShotTask) obj;
             if (outputFile == null) {
-                if (other.outputFile != null)
+                if (other.outputFile != null) {
                     return false;
-            } else if (!outputFile.equals(other.outputFile))
+                }
+            } else if (!outputFile.equals(other.outputFile)) {
                 return false;
+            }
             if (url == null) {
-                if (other.url != null)
+                if (other.url != null) {
                     return false;
-            } else if (!url.equals(other.url))
+                }
+            } else if (!url.equals(other.url)) {
                 return false;
+            }
             return true;
         }
 
