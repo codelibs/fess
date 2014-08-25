@@ -128,6 +128,8 @@ public class WizardAction implements Serializable {
             final char c = configPath.charAt(i);
             if (c == '\\') {
                 buf.append('/');
+            } else if (c == ' ') {
+                buf.append("%20");
             } else if (CharUtil.isUrlChar(c)) {
                 buf.append(c);
             } else {
