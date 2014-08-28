@@ -323,6 +323,11 @@
       <url>http://maven.codelibs.org/</url>
     </repository>
     <repository>
+      <name>oss.sonatype.org</name>
+      <id>oss.sonatype.org</id>
+      <url>http://oss.sonatype.org/content/groups/public/</url>
+    </repository>
+    <repository>
       <id>maven.seasar.org</id>
       <name>The Seasar Foundation Maven2 Repository</name>
       <url>http://maven.seasar.org/maven2/</url>
