@@ -32,10 +32,10 @@ import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
 
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.robot.util.LruHashMap;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.robot.util.LruHashMap;
 
 public abstract class SearchLogHelper {
 

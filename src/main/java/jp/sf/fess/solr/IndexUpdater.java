@@ -37,23 +37,23 @@ import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.robot.S2Robot;
+import org.codelibs.robot.db.cbean.AccessResultCB;
+import org.codelibs.robot.db.exbhv.AccessResultBhv;
+import org.codelibs.robot.db.exbhv.AccessResultDataBhv;
+import org.codelibs.robot.db.exentity.AccessResult;
+import org.codelibs.robot.dbflute.cbean.PagingResultBean;
+import org.codelibs.robot.entity.AccessResultData;
+import org.codelibs.robot.service.DataService;
+import org.codelibs.robot.service.UrlFilterService;
+import org.codelibs.robot.service.UrlQueueService;
+import org.codelibs.robot.transformer.Transformer;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.robot.S2Robot;
-import org.seasar.robot.db.cbean.AccessResultCB;
-import org.seasar.robot.db.exbhv.AccessResultBhv;
-import org.seasar.robot.db.exbhv.AccessResultDataBhv;
-import org.seasar.robot.db.exentity.AccessResult;
-import org.seasar.robot.dbflute.cbean.PagingResultBean;
-import org.seasar.robot.entity.AccessResultData;
-import org.seasar.robot.service.DataService;
-import org.seasar.robot.service.UrlFilterService;
-import org.seasar.robot.service.UrlQueueService;
-import org.seasar.robot.transformer.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,7 +173,7 @@ public class IndexUpdater extends Thread {
             cb.setupSelect_AccessResultDataAsOne();
             cb.query().setSessionId_InScope(sessionIdList);
             cb.query().addOrderBy_CreateTime_Asc();
-            cb.query().setStatus_Equal(org.seasar.robot.Constants.OK_STATUS);
+            cb.query().setStatus_Equal(org.codelibs.robot.Constants.OK_STATUS);
             if (maxDocumentCacheSize <= 0) {
                 maxDocumentCacheSize = 1;
             }
@@ -181,8 +181,8 @@ public class IndexUpdater extends Thread {
             cb.fetchPage(1);
 
             final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
-            final List<org.seasar.robot.entity.AccessResult> accessResultList = new ArrayList<org.seasar.robot.entity.AccessResult>();
-            final List<org.seasar.robot.db.exentity.AccessResultData> accessResultDataList = new ArrayList<org.seasar.robot.db.exentity.AccessResultData>();
+            final List<org.codelibs.robot.entity.AccessResult> accessResultList = new ArrayList<org.codelibs.robot.entity.AccessResult>();
+            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList = new ArrayList<org.codelibs.robot.db.exentity.AccessResultData>();
 
             long updateTime = System.currentTimeMillis();
             int solrErrorCount = 0;
@@ -325,8 +325,8 @@ public class IndexUpdater extends Thread {
 
     private void processAccessResults(
             final List<SolrInputDocument> docList,
-            final List<org.seasar.robot.entity.AccessResult> accessResultList,
-            final List<org.seasar.robot.db.exentity.AccessResultData> accessResultDataList,
+            final List<org.codelibs.robot.entity.AccessResult> accessResultList,
+            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList,
             final PagingResultBean<AccessResult> arList) {
         for (final AccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
@@ -349,7 +349,7 @@ public class IndexUpdater extends Thread {
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
                 accessResultDataList
-                        .add((org.seasar.robot.db.exentity.AccessResultData) accessResultData);
+                        .add((org.codelibs.robot.db.exentity.AccessResultData) accessResultData);
                 try {
                     final Transformer transformer = SingletonS2Container
                             .getComponent(accessResultData.getTransformerName());
@@ -515,8 +515,8 @@ public class IndexUpdater extends Thread {
     }
 
     private void cleanupAccessResults(
-            final List<org.seasar.robot.entity.AccessResult> accessResultList,
-            final List<org.seasar.robot.db.exentity.AccessResultData> accessResultDataList) {
+            final List<org.codelibs.robot.entity.AccessResult> accessResultList,
+            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList) {
         if (!accessResultList.isEmpty()) {
             final long execTime = System.currentTimeMillis();
             final int size = accessResultList.size();

@@ -31,10 +31,10 @@ import jp.sf.fess.service.WebAuthenticationService;
 import jp.sf.fess.util.ParameterUtil;
 
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.client.http.Authentication;
+import org.codelibs.robot.client.http.HcHttpClient;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.client.S2RobotClientFactory;
-import org.seasar.robot.client.http.Authentication;
-import org.seasar.robot.client.http.HcHttpClient;
 
 /**
  * The entity of WEB_CRAWLING_CONFIG.
@@ -239,12 +239,12 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
         // request header
         final List<RequestHeader> requestHeaderList = requestHeaderService
                 .getRequestHeaderList(getId());
-        final List<org.seasar.robot.client.http.RequestHeader> rhList = new ArrayList<org.seasar.robot.client.http.RequestHeader>();
+        final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
         for (final RequestHeader requestHeader : requestHeaderList) {
             rhList.add(requestHeader.getS2RobotRequestHeader());
         }
         paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList
-                .toArray(new org.seasar.robot.client.http.RequestHeader[rhList
+                .toArray(new org.codelibs.robot.client.http.RequestHeader[rhList
                         .size()]));
 
     }

@@ -40,13 +40,13 @@ import jp.sf.fess.service.WebCrawlingConfigService;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.robot.builder.RequestDataBuilder;
+import org.codelibs.robot.client.S2RobotClient;
+import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.entity.ResponseData;
+import org.codelibs.robot.util.StreamUtil;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.Base64Util;
-import org.seasar.robot.builder.RequestDataBuilder;
-import org.seasar.robot.client.S2RobotClient;
-import org.seasar.robot.client.S2RobotClientFactory;
-import org.seasar.robot.entity.ResponseData;
-import org.seasar.robot.util.StreamUtil;
 import org.seasar.struts.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

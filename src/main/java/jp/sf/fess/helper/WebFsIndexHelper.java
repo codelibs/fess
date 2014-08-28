@@ -36,13 +36,13 @@ import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.robot.S2Robot;
+import org.codelibs.robot.S2RobotContext;
+import org.codelibs.robot.service.DataService;
+import org.codelibs.robot.service.UrlFilterService;
+import org.codelibs.robot.service.UrlQueueService;
 import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.S2Robot;
-import org.seasar.robot.S2RobotContext;
-import org.seasar.robot.service.DataService;
-import org.seasar.robot.service.UrlFilterService;
-import org.seasar.robot.service.UrlQueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

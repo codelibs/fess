@@ -548,7 +548,7 @@
       <version>0.1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.seasar.robot</groupId>
+      <groupId>org.codelibs.robot</groupId>
       <artifactId>s2-robot-db-${database}</artifactId>
       <version>${s2robot.version}</version>
       <exclusions>
@@ -559,7 +559,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.seasar.robot</groupId>
+      <groupId>org.codelibs.robot</groupId>
       <artifactId>s2-robot-db</artifactId>
       <version>${s2robot.version}</version>
     </dependency>

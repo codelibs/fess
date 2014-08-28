@@ -39,9 +39,9 @@ import jp.sf.orangesignal.csv.CsvReader;
 
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.robot.RobotCrawlAccessException;
+import org.codelibs.robot.RobotMultipleCrawlAccessException;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.RobotCrawlAccessException;
-import org.seasar.robot.RobotMultipleCrawlAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

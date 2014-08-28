@@ -19,7 +19,7 @@ package jp.sf.fess.interval;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.util.ComponentUtil;
 
-import org.seasar.robot.interval.impl.DefaultIntervalController;
+import org.codelibs.robot.interval.impl.DefaultIntervalController;
 
 public class FessIntervalController extends DefaultIntervalController {
 

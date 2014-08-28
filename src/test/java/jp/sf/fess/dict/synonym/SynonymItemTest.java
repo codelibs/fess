@@ -16,8 +16,6 @@
 
 package jp.sf.fess.dict.synonym;
 
-import jp.sf.fess.dict.synonym.SynonymItem;
-
 import org.seasar.extension.unit.S2TestCase;
 
 public class SynonymItemTest extends S2TestCase {

@@ -32,10 +32,10 @@ import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ParameterUtil;
 
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.client.smb.SmbAuthentication;
+import org.codelibs.robot.client.smb.SmbClient;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.client.S2RobotClientFactory;
-import org.seasar.robot.client.smb.SmbAuthentication;
-import org.seasar.robot.client.smb.SmbClient;
 
 /**
  * The entity of FILE_CRAWLING_CONFIG.

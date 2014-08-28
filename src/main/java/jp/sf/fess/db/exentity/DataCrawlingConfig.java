@@ -37,13 +37,13 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
 import org.codelibs.core.util.StringUtil;
-import org.seasar.robot.client.S2RobotClientFactory;
-import org.seasar.robot.client.http.Authentication;
-import org.seasar.robot.client.http.HcHttpClient;
-import org.seasar.robot.client.http.impl.AuthenticationImpl;
-import org.seasar.robot.client.http.ntlm.JcifsEngine;
-import org.seasar.robot.client.smb.SmbAuthentication;
-import org.seasar.robot.client.smb.SmbClient;
+import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.client.http.Authentication;
+import org.codelibs.robot.client.http.HcHttpClient;
+import org.codelibs.robot.client.http.impl.AuthenticationImpl;
+import org.codelibs.robot.client.http.ntlm.JcifsEngine;
+import org.codelibs.robot.client.smb.SmbAuthentication;
+import org.codelibs.robot.client.smb.SmbClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -291,14 +291,14 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
         }
 
         // request header
-        final List<org.seasar.robot.client.http.RequestHeader> rhList = new ArrayList<org.seasar.robot.client.http.RequestHeader>();
+        final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
         int count = 1;
         String headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count
                 + ".name");
         while (StringUtil.isNotBlank(headerName)) {
             final String headerValue = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX
                     + count + ".value");
-            rhList.add(new org.seasar.robot.client.http.RequestHeader(
+            rhList.add(new org.codelibs.robot.client.http.RequestHeader(
                     headerName, headerValue));
             count++;
             headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count
@@ -307,7 +307,7 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
         if (!rhList.isEmpty()) {
             factoryParamMap
                     .put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
-                            rhList.toArray(new org.seasar.robot.client.http.RequestHeader[rhList
+                            rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList
                                     .size()]));
         }
 

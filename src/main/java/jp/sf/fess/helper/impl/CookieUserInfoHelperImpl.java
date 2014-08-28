@@ -31,7 +31,7 @@ import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.UserInfoHelper;
 
 import org.codelibs.core.util.StringUtil;
-import org.seasar.robot.util.LruHashMap;
+import org.codelibs.robot.util.LruHashMap;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
 

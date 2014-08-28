@@ -15,7 +15,7 @@
     <include path="s2robot_sitemaps.dicon"/>
 
 	<!-- S2Robot -->
-	<component name="s2Robot" class="org.seasar.robot.S2Robot" instance="prototype" >
+	<component name="s2Robot" class="org.codelibs.robot.S2Robot" instance="prototype" >
 	</component>
 
 	<!-- Robot Thread -->
@@ -24,23 +24,23 @@
 	</component>
 
 	<!-- Entity -->
-	<component name="accessResult" class="org.seasar.robot.db.exentity.AccessResult" instance="prototype" >
+	<component name="accessResult" class="org.codelibs.robot.db.exentity.AccessResult" instance="prototype" >
 	</component>
-	<component name="urlQueue" class="org.seasar.robot.db.exentity.UrlQueue" instance="prototype" >
+	<component name="urlQueue" class="org.codelibs.robot.db.exentity.UrlQueue" instance="prototype" >
 	</component>
 
     <!-- Service -->
-	<component name="urlQueueService" class="org.seasar.robot.service.impl.DBUrlQueueServiceImpl" instance="prototype" >
+	<component name="urlQueueService" class="org.codelibs.robot.service.impl.DBUrlQueueServiceImpl" instance="prototype" >
 		<aspect pointcut="poll,visited,add,delete,deleteAll,generateUrlQueues,insert,offerAll,saveSession,updateSessionId">
 			s2robot_j2ee.requiredTx
 		</aspect>
 	</component>
-	<component name="dataService" class="org.seasar.robot.service.impl.DBDataServiceImpl" instance="prototype" >
+	<component name="dataService" class="org.codelibs.robot.service.impl.DBDataServiceImpl" instance="prototype" >
 		<aspect pointcut="getAccessResult,getAccessResultList,getCount,delete,deleteAll,iterate,iterateUrlDiff,store,update">
 			s2robot_j2ee.requiredTx
 		</aspect>
 	</component>
-	<component name="urlFilterService" class="org.seasar.robot.service.impl.DBUrlFilterServiceImpl" instance="prototype" >
+	<component name="urlFilterService" class="org.codelibs.robot.service.impl.DBUrlFilterServiceImpl" instance="prototype" >
 		<aspect pointcut="getExcludeUrlPatternList,getIncludeUrlPatternList,addExcludeUrlFilter,addIncludeUrlFilter,delete,deleteAll">
 			s2robot_j2ee.requiredTx
 		</aspect>

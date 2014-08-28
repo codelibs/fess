@@ -18,9 +18,9 @@ package jp.sf.fess.transformer;
 
 import jp.sf.fess.FessSystemException;
 
+import org.codelibs.robot.entity.ResponseData;
+import org.codelibs.robot.extractor.Extractor;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.entity.ResponseData;
-import org.seasar.robot.extractor.Extractor;
 
 public class FessTikaTransformer extends AbstractFessFileTransformer {
     @Override

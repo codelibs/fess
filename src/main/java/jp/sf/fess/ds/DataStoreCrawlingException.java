@@ -16,7 +16,7 @@
 
 package jp.sf.fess.ds;
 
-import org.seasar.robot.RobotCrawlAccessException;
+import org.codelibs.robot.RobotCrawlAccessException;
 
 public class DataStoreCrawlingException extends RobotCrawlAccessException {
 

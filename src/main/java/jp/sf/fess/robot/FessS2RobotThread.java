@@ -43,17 +43,17 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.robot.S2RobotThread;
+import org.codelibs.robot.builder.RequestDataBuilder;
+import org.codelibs.robot.client.S2RobotClient;
+import org.codelibs.robot.client.smb.SmbClient;
+import org.codelibs.robot.entity.RequestData;
+import org.codelibs.robot.entity.ResponseData;
+import org.codelibs.robot.entity.UrlQueue;
+import org.codelibs.robot.log.LogType;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.codelibs.solr.lib.policy.QueryType;
-import org.seasar.robot.S2RobotThread;
-import org.seasar.robot.builder.RequestDataBuilder;
-import org.seasar.robot.client.S2RobotClient;
-import org.seasar.robot.client.smb.SmbClient;
-import org.seasar.robot.entity.RequestData;
-import org.seasar.robot.entity.ResponseData;
-import org.seasar.robot.entity.UrlQueue;
-import org.seasar.robot.log.LogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +203,7 @@ public class FessS2RobotThread extends S2RobotThread {
                     responseData.setParentUrl(urlQueue.getParentUrl());
                     responseData.setSessionId(robotContext.getSessionId());
                     responseData
-                            .setStatus(org.seasar.robot.Constants.NOT_MODIFIED_STATUS);
+                            .setStatus(org.codelibs.robot.Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
                     storeChildUrlsToQueue(urlQueue,

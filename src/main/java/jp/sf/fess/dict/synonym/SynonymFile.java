@@ -38,7 +38,7 @@ import jp.sf.fess.dict.DictionaryFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.util.StringUtil;
-import org.seasar.robot.util.StreamUtil;
+import org.codelibs.robot.util.StreamUtil;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";

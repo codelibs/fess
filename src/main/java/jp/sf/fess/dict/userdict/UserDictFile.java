@@ -39,7 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.ja.util.CSVUtil;
 import org.codelibs.core.util.StringUtil;
-import org.seasar.robot.util.StreamUtil;
+import org.codelibs.robot.util.StreamUtil;
 
 public class UserDictFile extends DictionaryFile<UserDictItem> {
     private static final String USERDICT = "userDict";

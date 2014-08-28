@@ -43,9 +43,9 @@ import jp.sf.fess.solr.IndexUpdater;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.robot.extractor.ExtractorFactory;
 import org.codelibs.solr.lib.SolrGroupManager;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.extractor.ExtractorFactory;
 
 public final class ComponentUtil {
     private static final String USER_AGENT_NAME = "userAgentName";

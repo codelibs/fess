@@ -20,12 +20,12 @@ import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.service.FailureUrlService;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.codelibs.robot.RobotMultipleCrawlAccessException;
+import org.codelibs.robot.S2RobotContext;
+import org.codelibs.robot.entity.UrlQueue;
+import org.codelibs.robot.helper.impl.LogHelperImpl;
+import org.codelibs.robot.log.LogType;
 import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.robot.RobotMultipleCrawlAccessException;
-import org.seasar.robot.S2RobotContext;
-import org.seasar.robot.entity.UrlQueue;
-import org.seasar.robot.helper.impl.LogHelperImpl;
-import org.seasar.robot.log.LogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

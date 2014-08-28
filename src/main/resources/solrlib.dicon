@@ -56,7 +56,7 @@
 		<property name="defaultMaxPerRoute">2</property>
 		<destroyMethod name="shutdown"></destroyMethod>
 	</component>
-	<component name="connectionMonitorTarget" class="org.seasar.robot.client.http.HcConnectionMonitorTarget">
+	<component name="connectionMonitorTarget" class="org.codelibs.robot.client.http.HcConnectionMonitorTarget">
 		<arg>clientConnectionManager</arg>
 		<arg>300000</arg>
 	</component>

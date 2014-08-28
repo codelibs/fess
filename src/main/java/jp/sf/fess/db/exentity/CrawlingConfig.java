@@ -18,7 +18,7 @@ package jp.sf.fess.db.exentity;
 
 import java.util.Map;
 
-import org.seasar.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.client.S2RobotClientFactory;
 
 public interface CrawlingConfig {
 

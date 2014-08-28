@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.robot.transformer.impl.XpathTransformer;
 import org.seasar.framework.util.OgnlUtil;
-import org.seasar.robot.transformer.impl.XpathTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

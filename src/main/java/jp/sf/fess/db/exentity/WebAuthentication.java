@@ -31,10 +31,10 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
 import org.codelibs.core.util.StringUtil;
-import org.seasar.robot.RobotSystemException;
-import org.seasar.robot.client.http.Authentication;
-import org.seasar.robot.client.http.impl.AuthenticationImpl;
-import org.seasar.robot.client.http.ntlm.JcifsEngine;
+import org.codelibs.robot.RobotSystemException;
+import org.codelibs.robot.client.http.Authentication;
+import org.codelibs.robot.client.http.impl.AuthenticationImpl;
+import org.codelibs.robot.client.http.ntlm.JcifsEngine;
 
 /**
  * The entity of WEB_AUTHENTICATION.

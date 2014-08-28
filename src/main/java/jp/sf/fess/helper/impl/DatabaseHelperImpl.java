@@ -18,9 +18,9 @@ package jp.sf.fess.helper.impl;
 
 import jp.sf.fess.helper.DatabaseHelper;
 
-import org.seasar.robot.service.DataService;
-import org.seasar.robot.service.UrlFilterService;
-import org.seasar.robot.service.UrlQueueService;
+import org.codelibs.robot.service.DataService;
+import org.codelibs.robot.service.UrlFilterService;
+import org.codelibs.robot.service.UrlQueueService;
 
 public class DatabaseHelperImpl implements DatabaseHelper {
 
