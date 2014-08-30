@@ -25,6 +25,8 @@ import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.WebConfigToLabelTypeMappingCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -44,10 +46,10 @@ public class BsWebConfigToLabelTypeMappingCQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsWebConfigToLabelTypeMappingCQ(final ConditionQuery childQuery,
+    public BsWebConfigToLabelTypeMappingCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -57,7 +59,7 @@ public class BsWebConfigToLabelTypeMappingCQ extends
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from WEB_CONFIG_TO_LABEL_TYPE_MAPPING) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -84,7 +86,7 @@ public class BsWebConfigToLabelTypeMappingCQ extends
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join WEB_CONFIG_TO_LABEL_TYPE_MAPPING on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -102,7 +104,6 @@ public class BsWebConfigToLabelTypeMappingCQ extends
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -151,40 +152,24 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return getWebConfigId();
     }
 
-    protected Map<String, WebCrawlingConfigCQ> _webConfigId_InScopeRelation_WebCrawlingConfigMap;
-
     public Map<String, WebCrawlingConfigCQ> getWebConfigId_InScopeRelation_WebCrawlingConfig() {
-        return _webConfigId_InScopeRelation_WebCrawlingConfigMap;
+        return xgetSQueMap("webConfigId_InScopeRelation_WebCrawlingConfig");
     }
 
     @Override
     public String keepWebConfigId_InScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webConfigId_InScopeRelation_WebCrawlingConfigMap == null) {
-            _webConfigId_InScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webConfigId_InScopeRelation_WebCrawlingConfigMap.size() + 1);
-        _webConfigId_InScopeRelation_WebCrawlingConfigMap.put(key, subQuery);
-        return "webConfigId_InScopeRelation_WebCrawlingConfig." + key;
+            final WebCrawlingConfigCQ sq) {
+        return xkeepSQue("webConfigId_InScopeRelation_WebCrawlingConfig", sq);
     }
 
-    protected Map<String, WebCrawlingConfigCQ> _webConfigId_NotInScopeRelation_WebCrawlingConfigMap;
-
     public Map<String, WebCrawlingConfigCQ> getWebConfigId_NotInScopeRelation_WebCrawlingConfig() {
-        return _webConfigId_NotInScopeRelation_WebCrawlingConfigMap;
+        return xgetSQueMap("webConfigId_NotInScopeRelation_WebCrawlingConfig");
     }
 
     @Override
     public String keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webConfigId_NotInScopeRelation_WebCrawlingConfigMap == null) {
-            _webConfigId_NotInScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webConfigId_NotInScopeRelation_WebCrawlingConfigMap.size() + 1);
-        _webConfigId_NotInScopeRelation_WebCrawlingConfigMap.put(key, subQuery);
-        return "webConfigId_NotInScopeRelation_WebCrawlingConfig." + key;
+            final WebCrawlingConfigCQ sq) {
+        return xkeepSQue("webConfigId_NotInScopeRelation_WebCrawlingConfig", sq);
     }
 
     /**
@@ -221,40 +206,23 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return getLabelTypeId();
     }
 
-    protected Map<String, LabelTypeCQ> _labelTypeId_InScopeRelation_LabelTypeMap;
-
     public Map<String, LabelTypeCQ> getLabelTypeId_InScopeRelation_LabelType() {
-        return _labelTypeId_InScopeRelation_LabelTypeMap;
+        return xgetSQueMap("labelTypeId_InScopeRelation_LabelType");
     }
 
     @Override
-    public String keepLabelTypeId_InScopeRelation_LabelType(
-            final LabelTypeCQ subQuery) {
-        if (_labelTypeId_InScopeRelation_LabelTypeMap == null) {
-            _labelTypeId_InScopeRelation_LabelTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_labelTypeId_InScopeRelation_LabelTypeMap.size() + 1);
-        _labelTypeId_InScopeRelation_LabelTypeMap.put(key, subQuery);
-        return "labelTypeId_InScopeRelation_LabelType." + key;
+    public String keepLabelTypeId_InScopeRelation_LabelType(final LabelTypeCQ sq) {
+        return xkeepSQue("labelTypeId_InScopeRelation_LabelType", sq);
     }
 
-    protected Map<String, LabelTypeCQ> _labelTypeId_NotInScopeRelation_LabelTypeMap;
-
     public Map<String, LabelTypeCQ> getLabelTypeId_NotInScopeRelation_LabelType() {
-        return _labelTypeId_NotInScopeRelation_LabelTypeMap;
+        return xgetSQueMap("labelTypeId_NotInScopeRelation_LabelType");
     }
 
     @Override
     public String keepLabelTypeId_NotInScopeRelation_LabelType(
-            final LabelTypeCQ subQuery) {
-        if (_labelTypeId_NotInScopeRelation_LabelTypeMap == null) {
-            _labelTypeId_NotInScopeRelation_LabelTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_labelTypeId_NotInScopeRelation_LabelTypeMap.size() + 1);
-        _labelTypeId_NotInScopeRelation_LabelTypeMap.put(key, subQuery);
-        return "labelTypeId_NotInScopeRelation_LabelType." + key;
+            final LabelTypeCQ sq) {
+        return xkeepSQue("labelTypeId_NotInScopeRelation_LabelType", sq);
     }
 
     /**
@@ -287,9 +255,9 @@ public class BsWebConfigToLabelTypeMappingCQ extends
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -307,9 +275,9 @@ public class BsWebConfigToLabelTypeMappingCQ extends
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -324,19 +292,17 @@ public class BsWebConfigToLabelTypeMappingCQ extends
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final WebConfigToLabelTypeMappingCQ baseQuery = (WebConfigToLabelTypeMappingCQ) baseQueryAsSuper;
-        final WebConfigToLabelTypeMappingCQ unionQuery = (WebConfigToLabelTypeMappingCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryLabelType()) {
-            unionQuery.queryLabelType().reflectRelationOnUnionQuery(
-                    baseQuery.queryLabelType(), unionQuery.queryLabelType());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final WebConfigToLabelTypeMappingCQ bq = (WebConfigToLabelTypeMappingCQ) bqs;
+        final WebConfigToLabelTypeMappingCQ uq = (WebConfigToLabelTypeMappingCQ) uqs;
+        if (bq.hasConditionQueryLabelType()) {
+            uq.queryLabelType().reflectRelationOnUnionQuery(
+                    bq.queryLabelType(), uq.queryLabelType());
         }
-        if (baseQuery.hasConditionQueryWebCrawlingConfig()) {
-            unionQuery.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
-                    baseQuery.queryWebCrawlingConfig(),
-                    unionQuery.queryWebCrawlingConfig());
+        if (bq.hasConditionQueryWebCrawlingConfig()) {
+            uq.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
+                    bq.queryWebCrawlingConfig(), uq.queryWebCrawlingConfig());
         }
     }
 
@@ -352,37 +318,29 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return getConditionQueryLabelType();
     }
 
-    protected LabelTypeCQ _conditionQueryLabelType;
-
     public LabelTypeCQ getConditionQueryLabelType() {
-        if (_conditionQueryLabelType == null) {
-            _conditionQueryLabelType = xcreateQueryLabelType();
+        final String prop = "labelType";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryLabelType());
             xsetupOuterJoinLabelType();
         }
-        return _conditionQueryLabelType;
+        return xgetQueRlMap(prop);
     }
 
     protected LabelTypeCQ xcreateQueryLabelType() {
-        final String nrp = resolveNextRelationPath(
-                "WEB_CONFIG_TO_LABEL_TYPE_MAPPING", "labelType");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final LabelTypeCQ cq = new LabelTypeCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("labelType");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("WEB_CONFIG_TO_LABEL_TYPE_MAPPING",
+                "labelType");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new LabelTypeCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "labelType", nrp);
     }
 
     protected void xsetupOuterJoinLabelType() {
-        final LabelTypeCQ cq = getConditionQueryLabelType();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("LABEL_TYPE_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "labelType");
+        xregOutJo("labelType");
     }
 
     public boolean hasConditionQueryLabelType() {
-        return _conditionQueryLabelType != null;
+        return xhasQueRlMap("labelType");
     }
 
     /**
@@ -394,37 +352,29 @@ public class BsWebConfigToLabelTypeMappingCQ extends
         return getConditionQueryWebCrawlingConfig();
     }
 
-    protected WebCrawlingConfigCQ _conditionQueryWebCrawlingConfig;
-
     public WebCrawlingConfigCQ getConditionQueryWebCrawlingConfig() {
-        if (_conditionQueryWebCrawlingConfig == null) {
-            _conditionQueryWebCrawlingConfig = xcreateQueryWebCrawlingConfig();
+        final String prop = "webCrawlingConfig";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryWebCrawlingConfig());
             xsetupOuterJoinWebCrawlingConfig();
         }
-        return _conditionQueryWebCrawlingConfig;
+        return xgetQueRlMap(prop);
     }
 
     protected WebCrawlingConfigCQ xcreateQueryWebCrawlingConfig() {
-        final String nrp = resolveNextRelationPath(
-                "WEB_CONFIG_TO_LABEL_TYPE_MAPPING", "webCrawlingConfig");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final WebCrawlingConfigCQ cq = new WebCrawlingConfigCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("webCrawlingConfig");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("WEB_CONFIG_TO_LABEL_TYPE_MAPPING",
+                "webCrawlingConfig");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new WebCrawlingConfigCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "webCrawlingConfig", nrp);
     }
 
     protected void xsetupOuterJoinWebCrawlingConfig() {
-        final WebCrawlingConfigCQ cq = getConditionQueryWebCrawlingConfig();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("WEB_CONFIG_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "webCrawlingConfig");
+        xregOutJo("webCrawlingConfig");
     }
 
     public boolean hasConditionQueryWebCrawlingConfig() {
-        return _conditionQueryWebCrawlingConfig != null;
+        return xhasQueRlMap("webCrawlingConfig");
     }
 
     @Override
@@ -436,77 +386,44 @@ public class BsWebConfigToLabelTypeMappingCQ extends
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, WebConfigToLabelTypeMappingCQ> _scalarConditionMap;
-
     public Map<String, WebConfigToLabelTypeMappingCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(
-            final WebConfigToLabelTypeMappingCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final WebConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, WebConfigToLabelTypeMappingCQ> _specifyMyselfDerivedMap;
-
     public Map<String, WebConfigToLabelTypeMappingCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
     public String keepSpecifyMyselfDerived(
-            final WebConfigToLabelTypeMappingCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+            final WebConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, WebConfigToLabelTypeMappingCQ> _queryMyselfDerivedMap;
 
     public Map<String, WebConfigToLabelTypeMappingCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(
-            final WebConfigToLabelTypeMappingCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final WebConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -515,36 +432,24 @@ public class BsWebConfigToLabelTypeMappingCQ extends
     protected Map<String, WebConfigToLabelTypeMappingCQ> _myselfExistsMap;
 
     public Map<String, WebConfigToLabelTypeMappingCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final WebConfigToLabelTypeMappingCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final WebConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, WebConfigToLabelTypeMappingCQ> _myselfInScopeMap;
-
     public Map<String, WebConfigToLabelTypeMappingCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final WebConfigToLabelTypeMappingCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final WebConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -557,6 +462,14 @@ public class BsWebConfigToLabelTypeMappingCQ extends
 
     protected String xCQ() {
         return WebConfigToLabelTypeMappingCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

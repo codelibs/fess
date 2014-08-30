@@ -56,5 +56,4 @@ public class SearchFieldLogNss {
         });
         return new SearchLogNss(_query.querySearchLog());
     }
-
 }

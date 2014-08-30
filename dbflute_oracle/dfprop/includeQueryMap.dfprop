@@ -7,24 +7,27 @@
 #         ; [condition-key] = map:{ [table] = list:{ [column] ; [column] } }
 # }
 #
-# property-type: String, Number, Date, (or defaultExcludeColumnList)
+# property-type: String, Number, Date, OrderBy, ...
 # condition-key: NotEqual, GreaterThan, LessThan, GreaterEqual, LessEqual
 #              , InScope, NotInScope, PrefixSearch, LikeSearch, NotLikeSearch
-#              , EmptyString, FromTo, DateFromTo, RangeOf
-#              , (and prefix '!' means excluding)
-# table: table name or $$ALL$$
+#              , EmptyString, FromTo, DateFromTo, RangeOf, ...
+#              , (and prefix '!' means excluding, '%' means reviving)
+# table: table name (hint) or $$ALL$$
 # column: column name (hint) or $$CommonColumn$$ or $$VersionNo$$
 #
 # Example:
 # map:{
 #     # This means that String includes GreaterThan at MEMBER.MEMBER_ACCOUNT only
-#     # and LessThan at PRODUCT.PRODUCT_NAME and PRODUCT.PRODUCT_HANDLE_CODE.
+#     # and LessThan at PRODUCT.PRODUCT_NAME and PRODUCT.PRODUCT_HANDLE_CODE,
+#     # and InScope for LONGVARCHAR(e.g. text type) is excluded.
 #     ; String = map:{
 #         ; GreaterThan = map:{ MEMBER = list:{ MEMBER_ACCOUNT } }
 #         ; LessThan = map:{ PRODUCT = list:{ PRODUCT_NAME ; PRODUCT_HANDLE_CODE } }
+#         ; !InScope = map:{ $$ALL$$ = list:{ type:LONGVARCHAR } }
 #     }
-#     # This means that Number includes all condition-keys. (same as no setting)
+#     # This means that Number excludes all version-no's NotEqual.
 #     ; Number = map:{
+#         ; !NotEqual = map:{ $$ALL$$ = list:{ $$VersionNo$$ } }
 #     }
 #     # This means that Date does not includes NotEqual at all tables.  
 #     ; Date = map:{

@@ -31,7 +31,7 @@ map:{
     #  the SQL for your DBFlute project.
     #  Your possible choices are:
     #
-    #    mysql, postgresql, oracle, db2, mssql,
+    #    mysql, postgresql, oracle, db2, sqlserver,
     #    h2, derby, (sqlite, msaccess)
     #
     ; database = mysql
@@ -42,7 +42,7 @@ map:{
     #  The target language.
     #  Your possible choices are:
     #
-    #       java, csharp
+    #       java, csharp, scala
     #
     ; targetLanguage = java
     # - - - - - - - - - -/
@@ -53,7 +53,7 @@ map:{
     #  If your target language is 'csharp', you can specify 'seasar' only.
     #  Your possible choices are:
     #
-    #       seasar, spring, guice, lucy, cdi
+    #       seasar, spring, guice, cdi
     #
     ; targetContainer = seasar
     # - - - - - - - - - -/

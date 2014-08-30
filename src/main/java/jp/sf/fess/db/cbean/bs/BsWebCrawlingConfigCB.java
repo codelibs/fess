@@ -110,6 +110,22 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public WebCrawlingConfigCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsWebCrawlingConfigCB cb = this;
+        cb.query().setId_Equal(id);
+        return (WebCrawlingConfigCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsWebCrawlingConfigCB cb = this;
@@ -158,7 +174,7 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -176,7 +192,7 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -251,7 +267,7 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;WebCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void query(WebCrawlingConfigCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -263,7 +279,12 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
         final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final WebCrawlingConfigCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -274,7 +295,7 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;WebCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void query(WebCrawlingConfigCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -286,7 +307,12 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
         final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final WebCrawlingConfigCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -295,7 +321,6 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-
     // [DBFlute-0.7.4]
     // ===================================================================================
     //                                                                             Specify
@@ -561,16 +586,16 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from REQUEST_HEADER where ...) as FOO_MAX} <br />
          * REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedRequestHeaderList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;RequestHeaderCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedRequestHeaderList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;RequestHeaderCB&gt;() {
          *     public void query(RequestHeaderCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, RequestHeader.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, RequestHeader.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -583,28 +608,26 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
                     _baseCB, _qyCall.qy(),
                     new HpSDRSetupper<RequestHeaderCB, WebCrawlingConfigCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<RequestHeaderCB> subQuery,
-                                final WebCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveRequestHeaderList(function, subQuery,
-                                    aliasName, option);
+                        public void setup(final String fn,
+                                final SubQuery<RequestHeaderCB> sq,
+                                final WebCrawlingConfigCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveRequestHeaderList(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from WEB_AUTHENTICATION where ...) as FOO_MAX} <br />
          * WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedWebAuthenticationList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebAuthenticationCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedWebAuthenticationList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;WebAuthenticationCB&gt;() {
          *     public void query(WebAuthenticationCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, WebAuthentication.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, WebAuthentication.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -618,28 +641,26 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
                     _qyCall.qy(),
                     new HpSDRSetupper<WebAuthenticationCB, WebCrawlingConfigCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<WebAuthenticationCB> subQuery,
-                                final WebCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveWebAuthenticationList(function,
-                                    subQuery, aliasName, option);
+                        public void setup(final String fn,
+                                final SubQuery<WebAuthenticationCB> sq,
+                                final WebCrawlingConfigCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveWebAuthenticationList(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...) as FOO_MAX} <br />
          * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedWebConfigToLabelTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedWebConfigToLabelTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
          *     public void query(WebConfigToLabelTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, WebConfigToLabelTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, WebConfigToLabelTypeMapping.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -654,28 +675,27 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
                     new HpSDRSetupper<WebConfigToLabelTypeMappingCB, WebCrawlingConfigCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<WebConfigToLabelTypeMappingCB> subQuery,
-                                final WebCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveWebConfigToLabelTypeMappingList(
-                                    function, subQuery, aliasName, option);
+                                final String fn,
+                                final SubQuery<WebConfigToLabelTypeMappingCB> sq,
+                                final WebCrawlingConfigCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveWebConfigToLabelTypeMappingList(fn, sq,
+                                    al, op);
                         }
                     }, _dbmetaProvider);
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from WEB_CONFIG_TO_ROLE_TYPE_MAPPING where ...) as FOO_MAX} <br />
          * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedWebConfigToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedWebConfigToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
          *     public void query(WebConfigToRoleTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, WebConfigToRoleTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, WebConfigToRoleTypeMapping.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -690,13 +710,12 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
                     new HpSDRSetupper<WebConfigToRoleTypeMappingCB, WebCrawlingConfigCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<WebConfigToRoleTypeMappingCB> subQuery,
-                                final WebCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveWebConfigToRoleTypeMappingList(function,
-                                    subQuery, aliasName, option);
+                                final String fn,
+                                final SubQuery<WebConfigToRoleTypeMappingCB> sq,
+                                final WebCrawlingConfigCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveWebConfigToRoleTypeMappingList(fn, sq,
+                                    al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -715,13 +734,11 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
                     _qyCall.qy(),
                     new HpSDRSetupper<WebCrawlingConfigCB, WebCrawlingConfigCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<WebCrawlingConfigCB> subQuery,
-                                final WebCrawlingConfigCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                        public void setup(final String fn,
+                                final SubQuery<WebCrawlingConfigCB> sq,
+                                final WebCrawlingConfigCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -729,19 +746,19 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;WebCrawlingConfigCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void query(WebCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void query(WebCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -790,14 +807,14 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;WebCrawlingConfigCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void query(WebCrawlingConfigCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -810,15 +827,20 @@ public class BsWebCrawlingConfigCB extends AbstractConditionBean {
         xorSQ((WebCrawlingConfigCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;WebCrawlingConfigCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void query(WebCrawlingConfigCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;WebCrawlingConfigCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;WebCrawlingConfigCB&gt;() {
      *             public void query(WebCrawlingConfigCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

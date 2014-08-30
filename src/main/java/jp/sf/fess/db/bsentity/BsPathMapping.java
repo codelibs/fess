@@ -141,8 +141,14 @@ public abstract class BsPathMapping implements Entity, Serializable, Cloneable {
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -186,6 +192,18 @@ public abstract class BsPathMapping implements Entity, Serializable, Cloneable {
             return false;
         }
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
     }
 
     // ===================================================================================
@@ -329,28 +347,47 @@ public abstract class BsPathMapping implements Entity, Serializable, Cloneable {
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsPathMapping)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsPathMapping)) {
             return false;
         }
-        final BsPathMapping otherEntity = (BsPathMapping) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsPathMapping other = (BsPathMapping) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -359,14 +396,14 @@ public abstract class BsPathMapping implements Entity, Serializable, Cloneable {
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -383,7 +420,7 @@ public abstract class BsPathMapping implements Entity, Serializable, Cloneable {
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -418,21 +455,21 @@ public abstract class BsPathMapping implements Entity, Serializable, Cloneable {
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getRegex());
-        sb.append(delimiter).append(getReplacement());
-        sb.append(delimiter).append(getProcessType());
-        sb.append(delimiter).append(getSortOrder());
-        sb.append(delimiter).append(getCreatedBy());
-        sb.append(delimiter).append(getCreatedTime());
-        sb.append(delimiter).append(getUpdatedBy());
-        sb.append(delimiter).append(getUpdatedTime());
-        sb.append(delimiter).append(getDeletedBy());
-        sb.append(delimiter).append(getDeletedTime());
-        sb.append(delimiter).append(getVersionNo());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getRegex());
+        sb.append(dm).append(getReplacement());
+        sb.append(dm).append(getProcessType());
+        sb.append(dm).append(getSortOrder());
+        sb.append(dm).append(getCreatedBy());
+        sb.append(dm).append(getCreatedTime());
+        sb.append(dm).append(getUpdatedBy());
+        sb.append(dm).append(getUpdatedTime());
+        sb.append(dm).append(getDeletedBy());
+        sb.append(dm).append(getDeletedTime());
+        sb.append(dm).append(getVersionNo());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();

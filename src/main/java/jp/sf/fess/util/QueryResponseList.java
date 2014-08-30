@@ -446,4 +446,21 @@ public class QueryResponseList implements List<Map<String, Object>> {
         return searchTime;
     }
 
+    @Override
+    public String toString() {
+        return "parent=" + parent + ", pageSize=" + pageSize
+                + ", currentPageNumber=" + currentPageNumber
+                + ", allRecordCount=" + allRecordCount + ", allPageCount="
+                + allPageCount + ", existNextPage=" + existNextPage
+                + ", existPrevPage=" + existPrevPage
+                + ", currentStartRecordNumber=" + currentStartRecordNumber
+                + ", currentEndRecordNumber=" + currentEndRecordNumber
+                + ", pageNumberList=" + pageNumberList + ", searchQuery="
+                + searchQuery + ", solrQuery=" + solrQuery + ", execTime="
+                + execTime + ", facetResponse=" + facetResponse
+                + ", moreLikeThisResponse=" + moreLikeThisResponse
+                + ", partialResults=" + partialResults + ", queryTime="
+                + queryTime + ", searchTime=" + searchTime;
+    }
+
 }

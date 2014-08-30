@@ -61,6 +61,9 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -88,285 +91,285 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getId();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setId(ctl(vl));
         }
     }
 
     public static class EpgName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getName();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setName((String) vl);
         }
     }
 
     public static class EpgUrls implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getUrls();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getUrls();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setUrls((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setUrls((String) vl);
         }
     }
 
     public static class EpgIncludedUrls implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getIncludedUrls();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getIncludedUrls();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setIncludedUrls((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setIncludedUrls((String) vl);
         }
     }
 
     public static class EpgExcludedUrls implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getExcludedUrls();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getExcludedUrls();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setExcludedUrls((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setExcludedUrls((String) vl);
         }
     }
 
     public static class EpgIncludedDocUrls implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getIncludedDocUrls();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getIncludedDocUrls();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setIncludedDocUrls((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setIncludedDocUrls((String) vl);
         }
     }
 
     public static class EpgExcludedDocUrls implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getExcludedDocUrls();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getExcludedDocUrls();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setExcludedDocUrls((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setExcludedDocUrls((String) vl);
         }
     }
 
     public static class EpgConfigParameter implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getConfigParameter();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getConfigParameter();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setConfigParameter((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setConfigParameter((String) vl);
         }
     }
 
     public static class EpgDepth implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getDepth();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getDepth();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setDepth(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setDepth(cti(vl));
         }
     }
 
     public static class EpgMaxAccessCount implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getMaxAccessCount();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getMaxAccessCount();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setMaxAccessCount(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setMaxAccessCount(ctl(vl));
         }
     }
 
     public static class EpgUserAgent implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getUserAgent();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getUserAgent();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setUserAgent((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setUserAgent((String) vl);
         }
     }
 
     public static class EpgNumOfThread implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getNumOfThread();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getNumOfThread();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setNumOfThread(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setNumOfThread(cti(vl));
         }
     }
 
     public static class EpgIntervalTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getIntervalTime();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getIntervalTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setIntervalTime(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setIntervalTime(cti(vl));
         }
     }
 
     public static class EpgBoost implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getBoost();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getBoost();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setBoost(ctb(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setBoost(ctb(vl));
         }
     }
 
     public static class EpgAvailable implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getAvailable();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getAvailable();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setAvailable((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setAvailable((String) vl);
         }
     }
 
     public static class EpgSortOrder implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getSortOrder();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getSortOrder();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setSortOrder(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setSortOrder(cti(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebCrawlingConfig) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((WebCrawlingConfig) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebCrawlingConfig) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebCrawlingConfig) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -406,15 +409,16 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_9B631798_6685_4707_8CAC_0DC16580CF42",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_BE9CC66D_15CD_43DB_8E0D_F05E290AF6D6",
             false,
             null,
             null,
@@ -423,193 +427,290 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
-            true, "name", String.class, false, false, "VARCHAR", 200, 0, null,
-            false, null, null, null, null, null);
+            String.class, "name", null, false, false, true, "VARCHAR", 200, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUrls = cci("URLS", "URLS", null, null,
-            true, "urls", String.class, false, false, "VARCHAR", 4000, 0, null,
-            false, null, null, null, null, null);
+            String.class, "urls", null, false, false, true, "VARCHAR", 4000, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnIncludedUrls = cci("INCLUDED_URLS",
-            "INCLUDED_URLS", null, null, false, "includedUrls", String.class,
-            false, false, "VARCHAR", 4000, 0, null, false, null, null, null,
-            null, null);
+            "INCLUDED_URLS", null, null, String.class, "includedUrls", null,
+            false, false, false, "VARCHAR", 4000, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnExcludedUrls = cci("EXCLUDED_URLS",
-            "EXCLUDED_URLS", null, null, false, "excludedUrls", String.class,
-            false, false, "VARCHAR", 4000, 0, null, false, null, null, null,
-            null, null);
+            "EXCLUDED_URLS", null, null, String.class, "excludedUrls", null,
+            false, false, false, "VARCHAR", 4000, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnIncludedDocUrls = cci(
-            "INCLUDED_DOC_URLS", "INCLUDED_DOC_URLS", null, null, false,
-            "includedDocUrls", String.class, false, false, "VARCHAR", 4000, 0,
+            "INCLUDED_DOC_URLS", "INCLUDED_DOC_URLS", null, null, String.class,
+            "includedDocUrls", null, false, false, false, "VARCHAR", 4000, 0,
             null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnExcludedDocUrls = cci(
-            "EXCLUDED_DOC_URLS", "EXCLUDED_DOC_URLS", null, null, false,
-            "excludedDocUrls", String.class, false, false, "VARCHAR", 4000, 0,
+            "EXCLUDED_DOC_URLS", "EXCLUDED_DOC_URLS", null, null, String.class,
+            "excludedDocUrls", null, false, false, false, "VARCHAR", 4000, 0,
             null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnConfigParameter = cci("CONFIG_PARAMETER",
-            "CONFIG_PARAMETER", null, null, false, "configParameter",
-            String.class, false, false, "VARCHAR", 4000, 0, null, false, null,
+            "CONFIG_PARAMETER", null, null, String.class, "configParameter",
+            null, false, false, false, "VARCHAR", 4000, 0, null, false, null,
             null, null, null, null);
 
     protected final ColumnInfo _columnDepth = cci("DEPTH", "DEPTH", null, null,
-            false, "depth", Integer.class, false, false, "INTEGER", 10, 0,
-            null, false, null, null, null, null, null);
+            Integer.class, "depth", null, false, false, false, "INTEGER", 10,
+            0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnMaxAccessCount = cci("MAX_ACCESS_COUNT",
-            "MAX_ACCESS_COUNT", null, null, false, "maxAccessCount",
-            Long.class, false, false, "BIGINT", 19, 0, null, false, null, null,
+            "MAX_ACCESS_COUNT", null, null, Long.class, "maxAccessCount", null,
+            false, false, false, "BIGINT", 19, 0, null, false, null, null,
             null, null, null);
 
     protected final ColumnInfo _columnUserAgent = cci("USER_AGENT",
-            "USER_AGENT", null, null, true, "userAgent", String.class, false,
-            false, "VARCHAR", 200, 0, null, false, null, null, null, null, null);
+            "USER_AGENT", null, null, String.class, "userAgent", null, false,
+            false, true, "VARCHAR", 200, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnNumOfThread = cci("NUM_OF_THREAD",
-            "NUM_OF_THREAD", null, null, true, "numOfThread", Integer.class,
-            false, false, "INTEGER", 10, 0, null, false, null, null, null,
-            null, null);
+            "NUM_OF_THREAD", null, null, Integer.class, "numOfThread", null,
+            false, false, true, "INTEGER", 10, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnIntervalTime = cci("INTERVAL_TIME",
-            "INTERVAL_TIME", null, null, true, "intervalTime", Integer.class,
-            false, false, "INTEGER", 10, 0, null, false, null, null, null,
-            null, null);
+            "INTERVAL_TIME", null, null, Integer.class, "intervalTime", null,
+            false, false, true, "INTEGER", 10, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnBoost = cci("BOOST", "BOOST", null, null,
-            true, "boost", java.math.BigDecimal.class, false, false, "DOUBLE",
-            17, 0, null, false, null, null, null, null, null);
+            java.math.BigDecimal.class, "boost", null, false, false, true,
+            "DOUBLE", 17, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnAvailable = cci("AVAILABLE", "AVAILABLE",
-            null, null, true, "available", String.class, false, false,
+            null, null, String.class, "available", null, false, false, true,
             "VARCHAR", 1, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSortOrder = cci("SORT_ORDER",
-            "SORT_ORDER", null, null, true, "sortOrder", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false, null, null, null, null, null);
+            "SORT_ORDER", null, null, Integer.class, "sortOrder", null, false,
+            false, true, "INTEGER", 10, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * NAME: {NotNull, VARCHAR(200)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnName() {
         return _columnName;
     }
 
+    /**
+     * URLS: {NotNull, VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUrls() {
         return _columnUrls;
     }
 
+    /**
+     * INCLUDED_URLS: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnIncludedUrls() {
         return _columnIncludedUrls;
     }
 
+    /**
+     * EXCLUDED_URLS: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnExcludedUrls() {
         return _columnExcludedUrls;
     }
 
+    /**
+     * INCLUDED_DOC_URLS: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnIncludedDocUrls() {
         return _columnIncludedDocUrls;
     }
 
+    /**
+     * EXCLUDED_DOC_URLS: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnExcludedDocUrls() {
         return _columnExcludedDocUrls;
     }
 
+    /**
+     * CONFIG_PARAMETER: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnConfigParameter() {
         return _columnConfigParameter;
     }
 
+    /**
+     * DEPTH: {INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDepth() {
         return _columnDepth;
     }
 
+    /**
+     * MAX_ACCESS_COUNT: {BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnMaxAccessCount() {
         return _columnMaxAccessCount;
     }
 
+    /**
+     * USER_AGENT: {NotNull, VARCHAR(200)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUserAgent() {
         return _columnUserAgent;
     }
 
+    /**
+     * NUM_OF_THREAD: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnNumOfThread() {
         return _columnNumOfThread;
     }
 
+    /**
+     * INTERVAL_TIME: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnIntervalTime() {
         return _columnIntervalTime;
     }
 
+    /**
+     * BOOST: {NotNull, DOUBLE(17)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnBoost() {
         return _columnBoost;
     }
 
+    /**
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnAvailable() {
         return _columnAvailable;
     }
 
+    /**
+     * SORT_ORDER: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -671,6 +772,8 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -678,35 +781,51 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
+    /**
+     * REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerRequestHeaderList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 RequestHeaderDbm.getInstance().columnWebCrawlingConfigId());
         return cri("CONSTRAINT_A1", "requestHeaderList", this,
-                RequestHeaderDbm.getInstance(), map, false, "webCrawlingConfig");
+                RequestHeaderDbm.getInstance(), mp, false, "webCrawlingConfig");
     }
 
+    /**
+     * WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerWebAuthenticationList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 WebAuthenticationDbm.getInstance().columnWebCrawlingConfigId());
         return cri("CONSTRAINT_A31", "webAuthenticationList", this,
-                WebAuthenticationDbm.getInstance(), map, false,
+                WebAuthenticationDbm.getInstance(), mp, false,
                 "webCrawlingConfig");
     }
 
+    /**
+     * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerWebConfigToLabelTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 WebConfigToLabelTypeMappingDbm.getInstance()
                         .columnWebConfigId());
         return cri("CONSTRAINT_6AC", "webConfigToLabelTypeMappingList", this,
-                WebConfigToLabelTypeMappingDbm.getInstance(), map, false,
+                WebConfigToLabelTypeMappingDbm.getInstance(), mp, false,
                 "webCrawlingConfig");
     }
 
+    /**
+     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerWebConfigToRoleTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 WebConfigToRoleTypeMappingDbm.getInstance().columnWebConfigId());
         return cri("CONSTRAINT_A17D", "webConfigToRoleTypeMappingList", this,
-                WebConfigToRoleTypeMappingDbm.getInstance(), map, false,
+                WebConfigToRoleTypeMappingDbm.getInstance(), mp, false,
                 "webCrawlingConfig");
     }
 
@@ -758,8 +877,8 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public WebCrawlingConfig newEntity() {
+        return new WebCrawlingConfig();
     }
 
     public WebCrawlingConfig newMyEntity() {
@@ -770,24 +889,24 @@ public class WebCrawlingConfigDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((WebCrawlingConfig) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((WebCrawlingConfig) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((WebCrawlingConfig) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((WebCrawlingConfig) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

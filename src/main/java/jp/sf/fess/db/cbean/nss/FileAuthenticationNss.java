@@ -45,16 +45,13 @@ public class FileAuthenticationNss {
     /**
      * With nested relation columns to select clause. <br />
      * FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public FileCrawlingConfigNss withFileCrawlingConfig() {
+    public void withFileCrawlingConfig() {
         _query.doNss(new FileAuthenticationCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryFileCrawlingConfig();
             }
         });
-        return new FileCrawlingConfigNss(_query.queryFileCrawlingConfig());
     }
-
 }

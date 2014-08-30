@@ -61,6 +61,9 @@ public class UserInfoDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -69,57 +72,57 @@ public class UserInfoDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgUpdatedTime(), "updatedTime");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((UserInfo) e).getId();
+        public Object read(final Entity et) {
+            return ((UserInfo) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((UserInfo) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((UserInfo) et).setId(ctl(vl));
         }
     }
 
     public static class EpgCode implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((UserInfo) e).getCode();
+        public Object read(final Entity et) {
+            return ((UserInfo) et).getCode();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((UserInfo) e).setCode((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((UserInfo) et).setCode((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((UserInfo) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((UserInfo) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((UserInfo) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((UserInfo) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((UserInfo) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((UserInfo) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((UserInfo) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((UserInfo) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -159,43 +162,60 @@ public class UserInfoDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_1D5AD9A3_E54F_4B05_840C_073B08622C7B",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_AEA89236_23DC_4D8F_B645_FEF0BEE63AE3",
             false, null, null, null, "favoriteLogList,searchLogList", null);
 
     protected final ColumnInfo _columnCode = cci("CODE", "CODE", null, null,
-            true, "code", String.class, false, false, "VARCHAR", 1000, 0, null,
-            false, null, null, null, null, null);
+            String.class, "code", null, false, false, true, "VARCHAR", 1000, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, true, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * CODE: {NotNull, VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCode() {
         return _columnCode;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
@@ -238,6 +258,8 @@ public class UserInfoDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -245,18 +267,26 @@ public class UserInfoDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
+    /**
+     * FAVORITE_LOG by USER_ID, named 'favoriteLogList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerFavoriteLogList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 FavoriteLogDbm.getInstance().columnUserId());
         return cri("CONSTRAINT_A98", "favoriteLogList", this,
-                FavoriteLogDbm.getInstance(), map, false, "userInfo");
+                FavoriteLogDbm.getInstance(), mp, false, "userInfo");
     }
 
+    /**
+     * SEARCH_LOG by USER_ID, named 'searchLogList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerSearchLogList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 SearchLogDbm.getInstance().columnUserId());
         return cri("CONSTRAINT_F2A", "searchLogList", this,
-                SearchLogDbm.getInstance(), map, false, "userInfo");
+                SearchLogDbm.getInstance(), mp, false, "userInfo");
     }
 
     // ===================================================================================
@@ -297,8 +327,8 @@ public class UserInfoDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public UserInfo newEntity() {
+        return new UserInfo();
     }
 
     public UserInfo newMyEntity() {
@@ -309,24 +339,24 @@ public class UserInfoDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((UserInfo) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((UserInfo) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((UserInfo) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((UserInfo) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

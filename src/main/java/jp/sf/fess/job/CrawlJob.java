@@ -195,6 +195,7 @@ public class CrawlJob {
 
         try {
             executeCrawler();
+            ComponentUtil.getKeyMatchHelper().update();
         } catch (final FessSystemException e) {
             throw e;
         } catch (final Exception e) {

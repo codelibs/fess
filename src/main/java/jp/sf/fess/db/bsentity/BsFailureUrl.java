@@ -96,22 +96,22 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     /** ID: {PK, ID, NotNull, BIGINT(19)} */
     protected Long _id;
 
-    /** URL: {IX, NotNull, VARCHAR(4000)} */
+    /** URL: {IX+, NotNull, VARCHAR(4000)} */
     protected String _url;
 
     /** THREAD_NAME: {NotNull, VARCHAR(30)} */
     protected String _threadName;
 
-    /** ERROR_NAME: {IX+, VARCHAR(255)} */
+    /** ERROR_NAME: {VARCHAR(255)} */
     protected String _errorName;
 
     /** ERROR_LOG: {VARCHAR(4000)} */
     protected String _errorLog;
 
-    /** ERROR_COUNT: {IX+, NotNull, INTEGER(10)} */
+    /** ERROR_COUNT: {NotNull, INTEGER(10)} */
     protected Integer _errorCount;
 
-    /** LAST_ACCESS_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} */
+    /** LAST_ACCESS_TIME: {NotNull, TIMESTAMP(23, 10)} */
     protected java.sql.Timestamp _lastAccessTime;
 
     /** CONFIG_ID: {IX, VARCHAR(100)} */
@@ -120,8 +120,14 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -167,6 +173,18 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -209,28 +227,47 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsFailureUrl)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsFailureUrl)) {
             return false;
         }
-        final BsFailureUrl otherEntity = (BsFailureUrl) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsFailureUrl other = (BsFailureUrl) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -239,14 +276,14 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -263,7 +300,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -298,17 +335,17 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getUrl());
-        sb.append(delimiter).append(getThreadName());
-        sb.append(delimiter).append(getErrorName());
-        sb.append(delimiter).append(getErrorLog());
-        sb.append(delimiter).append(getErrorCount());
-        sb.append(delimiter).append(getLastAccessTime());
-        sb.append(delimiter).append(getConfigId());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getUrl());
+        sb.append(dm).append(getThreadName());
+        sb.append(dm).append(getErrorName());
+        sb.append(dm).append(getErrorLog());
+        sb.append(dm).append(getErrorCount());
+        sb.append(dm).append(getLastAccessTime());
+        sb.append(dm).append(getConfigId());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -353,7 +390,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [get] URL: {IX, NotNull, VARCHAR(4000)} <br />
+     * [get] URL: {IX+, NotNull, VARCHAR(4000)} <br />
      * @return The value of the column 'URL'. (basically NotNull if selected: for the constraint)
      */
     public String getUrl() {
@@ -361,7 +398,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [set] URL: {IX, NotNull, VARCHAR(4000)} <br />
+     * [set] URL: {IX+, NotNull, VARCHAR(4000)} <br />
      * @param url The value of the column 'URL'. (basically NotNull if update: for the constraint)
      */
     public void setUrl(final String url) {
@@ -387,7 +424,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [get] ERROR_NAME: {IX+, VARCHAR(255)} <br />
+     * [get] ERROR_NAME: {VARCHAR(255)} <br />
      * @return The value of the column 'ERROR_NAME'. (NullAllowed even if selected: for no constraint)
      */
     public String getErrorName() {
@@ -395,7 +432,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [set] ERROR_NAME: {IX+, VARCHAR(255)} <br />
+     * [set] ERROR_NAME: {VARCHAR(255)} <br />
      * @param errorName The value of the column 'ERROR_NAME'. (NullAllowed: null update allowed for no constraint)
      */
     public void setErrorName(final String errorName) {
@@ -421,7 +458,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [get] ERROR_COUNT: {IX+, NotNull, INTEGER(10)} <br />
+     * [get] ERROR_COUNT: {NotNull, INTEGER(10)} <br />
      * @return The value of the column 'ERROR_COUNT'. (basically NotNull if selected: for the constraint)
      */
     public Integer getErrorCount() {
@@ -429,7 +466,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [set] ERROR_COUNT: {IX+, NotNull, INTEGER(10)} <br />
+     * [set] ERROR_COUNT: {NotNull, INTEGER(10)} <br />
      * @param errorCount The value of the column 'ERROR_COUNT'. (basically NotNull if update: for the constraint)
      */
     public void setErrorCount(final Integer errorCount) {
@@ -438,7 +475,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [get] LAST_ACCESS_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} <br />
+     * [get] LAST_ACCESS_TIME: {NotNull, TIMESTAMP(23, 10)} <br />
      * @return The value of the column 'LAST_ACCESS_TIME'. (basically NotNull if selected: for the constraint)
      */
     public java.sql.Timestamp getLastAccessTime() {
@@ -446,7 +483,7 @@ public abstract class BsFailureUrl implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * [set] LAST_ACCESS_TIME: {IX+, NotNull, TIMESTAMP(23, 10)} <br />
+     * [set] LAST_ACCESS_TIME: {NotNull, TIMESTAMP(23, 10)} <br />
      * @param lastAccessTime The value of the column 'LAST_ACCESS_TIME'. (basically NotNull if update: for the constraint)
      */
     public void setLastAccessTime(final java.sql.Timestamp lastAccessTime) {

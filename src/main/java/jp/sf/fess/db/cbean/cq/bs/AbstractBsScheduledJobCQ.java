@@ -17,16 +17,19 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.ScheduledJobCB;
 import jp.sf.fess.db.cbean.cq.ScheduledJobCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
-import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
 import org.seasar.dbflute.cbean.chelper.HpSSQFunction;
 import org.seasar.dbflute.cbean.chelper.HpSSQOption;
 import org.seasar.dbflute.cbean.chelper.HpSSQSetupper;
@@ -48,10 +51,10 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsScheduledJobCQ(final ConditionQuery childQuery,
+    public AbstractBsScheduledJobCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -192,11 +195,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -298,7 +301,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * NAME: {NotNull, VARCHAR(100)} <br />
-     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param name The value of name as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -319,11 +322,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regLSQ(CK_NLS, fRES(name), getCValueName(), "NAME", likeSearchOption);
     }
 
-    protected void regName(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueName(), "NAME");
+    protected void regName(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueName(), "NAME");
     }
 
-    abstract protected ConditionValue getCValueName();
+    protected abstract ConditionValue getCValueName();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -425,7 +428,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * TARGET: {NotNull, VARCHAR(100)} <br />
-     * <pre>e.g. setTarget_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setTarget_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param target The value of target as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -448,11 +451,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regTarget(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueTarget(), "TARGET");
+    protected void regTarget(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueTarget(), "TARGET");
     }
 
-    abstract protected ConditionValue getCValueTarget();
+    protected abstract ConditionValue getCValueTarget();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -560,7 +563,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CRON_EXPRESSION: {NotNull, VARCHAR(100)} <br />
-     * <pre>e.g. setCronExpression_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCronExpression_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param cronExpression The value of cronExpression as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -583,11 +586,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 "CRON_EXPRESSION", likeSearchOption);
     }
 
-    protected void regCronExpression(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCronExpression(), "CRON_EXPRESSION");
+    protected void regCronExpression(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCronExpression(), "CRON_EXPRESSION");
     }
 
-    abstract protected ConditionValue getCValueCronExpression();
+    protected abstract ConditionValue getCValueCronExpression();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -692,7 +695,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * SCRIPT_TYPE: {NotNull, VARCHAR(100)} <br />
-     * <pre>e.g. setScriptType_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setScriptType_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param scriptType The value of scriptType as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -715,11 +718,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regScriptType(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueScriptType(), "SCRIPT_TYPE");
+    protected void regScriptType(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueScriptType(), "SCRIPT_TYPE");
     }
 
-    abstract protected ConditionValue getCValueScriptType();
+    protected abstract ConditionValue getCValueScriptType();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -824,7 +827,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * SCRIPT_DATA: {VARCHAR(4000)} <br />
-     * <pre>e.g. setScriptData_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setScriptData_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param scriptData The value of scriptData as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -871,11 +874,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regScriptData(CK_ISNN, DOBJ);
     }
 
-    protected void regScriptData(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueScriptData(), "SCRIPT_DATA");
+    protected void regScriptData(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueScriptData(), "SCRIPT_DATA");
     }
 
-    abstract protected ConditionValue getCValueScriptData();
+    protected abstract ConditionValue getCValueScriptData();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -977,7 +980,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CRAWLER: {NotNull, VARCHAR(1)} <br />
-     * <pre>e.g. setCrawler_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCrawler_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param crawler The value of crawler as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1000,11 +1003,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regCrawler(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCrawler(), "CRAWLER");
+    protected void regCrawler(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCrawler(), "CRAWLER");
     }
 
-    abstract protected ConditionValue getCValueCrawler();
+    protected abstract ConditionValue getCValueCrawler();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1109,7 +1112,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * JOB_LOGGING: {NotNull, VARCHAR(1)} <br />
-     * <pre>e.g. setJobLogging_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setJobLogging_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param jobLogging The value of jobLogging as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1132,11 +1135,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regJobLogging(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueJobLogging(), "JOB_LOGGING");
+    protected void regJobLogging(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueJobLogging(), "JOB_LOGGING");
     }
 
-    abstract protected ConditionValue getCValueJobLogging();
+    protected abstract ConditionValue getCValueJobLogging();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1238,7 +1241,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * AVAILABLE: {NotNull, VARCHAR(1)} <br />
-     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param available The value of available as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1261,11 +1264,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regAvailable(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueAvailable(), "AVAILABLE");
+    protected void regAvailable(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueAvailable(), "AVAILABLE");
     }
 
-    abstract protected ConditionValue getCValueAvailable();
+    protected abstract ConditionValue getCValueAvailable();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1372,11 +1375,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regINS(CK_NINS, cTL(sortOrderList), getCValueSortOrder(), "SORT_ORDER");
     }
 
-    protected void regSortOrder(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueSortOrder(), "SORT_ORDER");
+    protected void regSortOrder(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueSortOrder(), "SORT_ORDER");
     }
 
-    abstract protected ConditionValue getCValueSortOrder();
+    protected abstract ConditionValue getCValueSortOrder();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1478,7 +1481,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)} <br />
-     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param createdBy The value of createdBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1501,11 +1504,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regCreatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedBy(), "CREATED_BY");
+    protected void regCreatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedBy(), "CREATED_BY");
     }
 
-    abstract protected ConditionValue getCValueCreatedBy();
+    protected abstract ConditionValue getCValueCreatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1556,13 +1559,13 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
-     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setCreatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setCreatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1576,22 +1579,21 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no to-condition)
      */
-    public void setCreatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setCreatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setCreatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
 
-    protected void regCreatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedTime(), "CREATED_TIME");
+    protected void regCreatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedTime(), "CREATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueCreatedTime();
+    protected abstract ConditionValue getCValueCreatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1693,7 +1695,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * UPDATED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param updatedBy The value of updatedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1740,11 +1742,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regUpdatedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedBy(), "UPDATED_BY");
+    protected void regUpdatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedBy(), "UPDATED_BY");
     }
 
-    abstract protected ConditionValue getCValueUpdatedBy();
+    protected abstract ConditionValue getCValueUpdatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1795,13 +1797,13 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setUpdatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setUpdatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1815,13 +1817,12 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setUpdatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setUpdatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setUpdatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -1842,11 +1843,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regUpdatedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedTime(), "UPDATED_TIME");
+    protected void regUpdatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedTime(), "UPDATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueUpdatedTime();
+    protected abstract ConditionValue getCValueUpdatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1948,7 +1949,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * DELETED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param deletedBy The value of deletedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1995,11 +1996,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regDeletedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedBy(), "DELETED_BY");
+    protected void regDeletedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedBy(), "DELETED_BY");
     }
 
-    abstract protected ConditionValue getCValueDeletedBy();
+    protected abstract ConditionValue getCValueDeletedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2050,13 +2051,13 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setDeletedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setDeletedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -2070,13 +2071,12 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setDeletedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setDeletedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setDeletedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -2097,11 +2097,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regDeletedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedTime(), "DELETED_TIME");
+    protected void regDeletedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedTime(), "DELETED_TIME");
     }
 
-    abstract protected ConditionValue getCValueDeletedTime();
+    protected abstract ConditionValue getCValueDeletedTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2208,11 +2208,11 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
         regINS(CK_NINS, cTL(versionNoList), getCValueVersionNo(), "VERSION_NO");
     }
 
-    protected void regVersionNo(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueVersionNo(), "VERSION_NO");
+    protected void regVersionNo(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueVersionNo(), "VERSION_NO");
     }
 
-    abstract protected ConditionValue getCValueVersionNo();
+    protected abstract ConditionValue getCValueVersionNo();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -2221,7 +2221,7 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
      *     public void query(ScheduledJobCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2231,14 +2231,14 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<ScheduledJobCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, ScheduledJobCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
      *     public void query(ScheduledJobCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2248,14 +2248,14 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<ScheduledJobCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, ScheduledJobCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
      *     public void query(ScheduledJobCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2265,14 +2265,14 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<ScheduledJobCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, ScheduledJobCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
      *     public void query(ScheduledJobCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2282,14 +2282,14 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<ScheduledJobCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, ScheduledJobCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
      *     public void query(ScheduledJobCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2299,14 +2299,14 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<ScheduledJobCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, ScheduledJobCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;ScheduledJobCB&gt;() {
      *     public void query(ScheduledJobCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2316,44 +2316,31 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<ScheduledJobCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, ScheduledJobCB.class);
     }
 
-    protected HpSSQFunction<ScheduledJobCB> xcreateSSQFunction(
-            final String operand) {
-        return new HpSSQFunction<ScheduledJobCB>(
-                new HpSSQSetupper<ScheduledJobCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<ScheduledJobCB> subQuery,
-                            final HpSSQOption<ScheduledJobCB> option) {
-                        xscalarCondition(function, subQuery, operand, option);
-                    }
-                });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<ScheduledJobCB> subQuery, final String operand,
-            final HpSSQOption<ScheduledJobCB> option) {
-        assertObjectNotNull("subQuery<ScheduledJobCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final ScheduledJobCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(ScheduledJobCQ subQuery);
+    public abstract String keepScalarCondition(ScheduledJobCQ sq);
 
     protected ScheduledJobCB xcreateScalarConditionCB() {
-        final ScheduledJobCB cb = new ScheduledJobCB();
+        final ScheduledJobCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected ScheduledJobCB xcreateScalarConditionPartitionByCB() {
-        final ScheduledJobCB cb = new ScheduledJobCB();
+        final ScheduledJobCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -2361,104 +2348,174 @@ public abstract class AbstractBsScheduledJobCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<ScheduledJobCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<ScheduledJobCB>", subQuery);
+    public void xsmyselfDerive(final String fn,
+            final SubQuery<ScheduledJobCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final ScheduledJobCB cb = new ScheduledJobCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(ScheduledJobCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(ScheduledJobCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<ScheduledJobCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(ScheduledJobCB.class);
     }
 
-    protected HpQDRFunction<ScheduledJobCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<ScheduledJobCB>(
-                new HpQDRSetupper<ScheduledJobCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<ScheduledJobCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveMyselfDerived(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<ScheduledJobCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<ScheduledJobCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final ScheduledJobCB cb = new ScheduledJobCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(ScheduledJobCQ subQuery);
+    public abstract String keepQueryMyselfDerived(ScheduledJobCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<ScheduledJobCB> subQuery) {
-        assertObjectNotNull("subQuery<ScheduledJobCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final ScheduledJobCB cb = new ScheduledJobCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(ScheduledJobCQ subQuery);
+    public abstract String keepMyselfExists(ScheduledJobCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<ScheduledJobCB> subQuery) {
-        assertObjectNotNull("subQuery<ScheduledJobCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final ScheduledJobCB cb = new ScheduledJobCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(ScheduledJobCQ subQuery);
+    public abstract String keepMyselfInScope(ScheduledJobCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return ScheduledJobCB.class.getName();
+    protected ScheduledJobCB newMyCB() {
+        return new ScheduledJobCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return ScheduledJobCQ.class.getName();
     }

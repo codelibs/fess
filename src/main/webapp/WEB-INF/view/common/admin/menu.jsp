@@ -130,6 +130,16 @@
 			</span>
 		</c:if>
 		<br />
+		<c:if test="${menuType=='keyMatch'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="${contextPath}/admin/keyMatch/index">
+			<bean:message key="labels.menu.key_match" />
+		</s:link>
+		<c:if test="${menuType=='keyMatch'}">
+			</span>
+		</c:if>
+		<br />
 		<c:if test="${menuType=='pathMapping'}">
 			<span class="selected">
 		</c:if>

@@ -27,9 +27,7 @@
 				<%-- MENU: BEGIN --%>
 				<div class="span4">
 					<tiles:insert attribute="menu">
-						<tiles:put name="menuType">
-							<tiles:getAsString name="menuType" />
-						</tiles:put>
+						<tiles:put name="menuType"><tiles:getAsString name="menuType" /></tiles:put>
 					</tiles:insert>
 				</div>
 				<%-- MENU: END --%>

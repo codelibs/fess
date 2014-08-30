@@ -60,6 +60,9 @@ public class JobLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -73,117 +76,117 @@ public class JobLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgEndTime(), "endTime");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getId();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setId(ctl(vl));
         }
     }
 
     public static class EpgJobName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getJobName();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getJobName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setJobName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setJobName((String) vl);
         }
     }
 
     public static class EpgJobStatus implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getJobStatus();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getJobStatus();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setJobStatus((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setJobStatus((String) vl);
         }
     }
 
     public static class EpgTarget implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getTarget();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getTarget();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setTarget((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setTarget((String) vl);
         }
     }
 
     public static class EpgScriptType implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getScriptType();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getScriptType();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setScriptType((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setScriptType((String) vl);
         }
     }
 
     public static class EpgScriptData implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getScriptData();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getScriptData();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setScriptData((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setScriptData((String) vl);
         }
     }
 
     public static class EpgScriptResult implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getScriptResult();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getScriptResult();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setScriptResult((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setScriptResult((String) vl);
         }
     }
 
     public static class EpgStartTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getStartTime();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getStartTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setStartTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setStartTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgEndTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((JobLog) e).getEndTime();
+        public Object read(final Entity et) {
+            return ((JobLog) et).getEndTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((JobLog) e).setEndTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((JobLog) et).setEndTime((java.sql.Timestamp) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -223,85 +226,124 @@ public class JobLogDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_78485947_6452_4769_A81F_C2EC9AA0D733",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_18428598_57ED_471A_8B9C_911274CEE79E",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnJobName = cci("JOB_NAME", "JOB_NAME",
-            null, null, true, "jobName", String.class, false, false, "VARCHAR",
-            100, 0, null, false, null, null, null, null, null);
+            null, null, String.class, "jobName", null, false, false, true,
+            "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnJobStatus = cci("JOB_STATUS",
-            "JOB_STATUS", null, null, true, "jobStatus", String.class, false,
-            false, "VARCHAR", 10, 0, null, false, null, null, null, null, null);
+            "JOB_STATUS", null, null, String.class, "jobStatus", null, false,
+            false, true, "VARCHAR", 10, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnTarget = cci("TARGET", "TARGET", null,
-            null, true, "target", String.class, false, false, "VARCHAR", 100,
-            0, null, false, null, null, null, null, null);
+            null, String.class, "target", null, false, false, true, "VARCHAR",
+            100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnScriptType = cci("SCRIPT_TYPE",
-            "SCRIPT_TYPE", null, null, true, "scriptType", String.class, false,
-            false, "VARCHAR", 100, 0, null, false, null, null, null, null, null);
+            "SCRIPT_TYPE", null, null, String.class, "scriptType", null, false,
+            false, true, "VARCHAR", 100, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnScriptData = cci("SCRIPT_DATA",
-            "SCRIPT_DATA", null, null, false, "scriptData", String.class,
+            "SCRIPT_DATA", null, null, String.class, "scriptData", null, false,
             false, false, "VARCHAR", 4000, 0, null, false, null, null, null,
             null, null);
 
     protected final ColumnInfo _columnScriptResult = cci("SCRIPT_RESULT",
-            "SCRIPT_RESULT", null, null, false, "scriptResult", String.class,
-            false, false, "VARCHAR", 4000, 0, null, false, null, null, null,
-            null, null);
+            "SCRIPT_RESULT", null, null, String.class, "scriptResult", null,
+            false, false, false, "VARCHAR", 4000, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnStartTime = cci("START_TIME",
-            "START_TIME", null, null, true, "startTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "START_TIME", null, null, java.sql.Timestamp.class, "startTime",
+            null, false, false, true, "TIMESTAMP", 23, 10, null, false, null,
+            null, null, null, null);
 
     protected final ColumnInfo _columnEndTime = cci("END_TIME", "END_TIME",
-            null, null, false, "endTime", java.sql.Timestamp.class, false,
-            false, "TIMESTAMP", 23, 10, null, false, null, null, null, null,
-            null);
+            null, null, java.sql.Timestamp.class, "endTime", null, false,
+            false, false, "TIMESTAMP", 23, 10, null, false, null, null, null,
+            null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * JOB_NAME: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnJobName() {
         return _columnJobName;
     }
 
+    /**
+     * JOB_STATUS: {NotNull, VARCHAR(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnJobStatus() {
         return _columnJobStatus;
     }
 
+    /**
+     * TARGET: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnTarget() {
         return _columnTarget;
     }
 
+    /**
+     * SCRIPT_TYPE: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnScriptType() {
         return _columnScriptType;
     }
 
+    /**
+     * SCRIPT_DATA: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnScriptData() {
         return _columnScriptData;
     }
 
+    /**
+     * SCRIPT_RESULT: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnScriptResult() {
         return _columnScriptResult;
     }
 
+    /**
+     * START_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnStartTime() {
         return _columnStartTime;
     }
 
+    /**
+     * END_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnEndTime() {
         return _columnEndTime;
     }
@@ -349,6 +391,8 @@ public class JobLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -395,8 +439,8 @@ public class JobLogDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public JobLog newEntity() {
+        return new JobLog();
     }
 
     public JobLog newMyEntity() {
@@ -407,24 +451,24 @@ public class JobLogDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((JobLog) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((JobLog) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((JobLog) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((JobLog) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

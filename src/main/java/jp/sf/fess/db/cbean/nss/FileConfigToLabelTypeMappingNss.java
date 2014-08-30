@@ -45,32 +45,27 @@ public class FileConfigToLabelTypeMappingNss {
     //                                                                     ===============
     /**
      * With nested relation columns to select clause. <br />
-     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
-     */
-    public LabelTypeNss withLabelType() {
-        _query.doNss(new FileConfigToLabelTypeMappingCQ.NssCall() {
-            @Override
-            public ConditionQuery qf() {
-                return _query.queryLabelType();
-            }
-        });
-        return new LabelTypeNss(_query.queryLabelType());
-    }
-
-    /**
-     * With nested relation columns to select clause. <br />
      * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public FileCrawlingConfigNss withFileCrawlingConfig() {
+    public void withFileCrawlingConfig() {
         _query.doNss(new FileConfigToLabelTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryFileCrawlingConfig();
             }
         });
-        return new FileCrawlingConfigNss(_query.queryFileCrawlingConfig());
     }
 
+    /**
+     * With nested relation columns to select clause. <br />
+     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     */
+    public void withLabelType() {
+        _query.doNss(new FileConfigToLabelTypeMappingCQ.NssCall() {
+            @Override
+            public ConditionQuery qf() {
+                return _query.queryLabelType();
+            }
+        });
+    }
 }

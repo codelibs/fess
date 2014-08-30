@@ -24,7 +24,6 @@ import jp.sf.fess.db.cbean.FileAuthenticationCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.FileAuthenticationCQ;
 import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.nss.FileCrawlingConfigNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -109,6 +108,22 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public FileAuthenticationCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsFileAuthenticationCB cb = this;
+        cb.query().setId_Equal(id);
+        return (FileAuthenticationCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsFileAuthenticationCB cb = this;
@@ -157,7 +172,7 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -175,7 +190,7 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -250,7 +265,7 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;FileAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -262,7 +277,12 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FileAuthenticationCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -273,7 +293,7 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;FileAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -285,7 +305,12 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FileAuthenticationCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -294,28 +319,19 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected FileCrawlingConfigNss _nssFileCrawlingConfig;
-
-    public FileCrawlingConfigNss getNssFileCrawlingConfig() {
-        if (_nssFileCrawlingConfig == null) {
-            _nssFileCrawlingConfig = new FileCrawlingConfigNss(null);
-        }
-        return _nssFileCrawlingConfig;
-    }
-
     /**
      * Set up relation columns to select clause. <br />
      * FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
      * <pre>
      * FileAuthenticationCB cb = new FileAuthenticationCB();
-     * cb.<span style="color: #FD4747">setupSelect_FileCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_FileCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * FileAuthentication fileAuthentication = fileAuthenticationBhv.selectEntityWithDeletedCheck(cb);
-     * ... = fileAuthentication.<span style="color: #FD4747">getFileCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = fileAuthentication.<span style="color: #DD4747">getFileCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public FileCrawlingConfigNss setupSelect_FileCrawlingConfig() {
+    public void setupSelect_FileCrawlingConfig() {
+        assertSetupSelectPurpose("fileCrawlingConfig");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnFileCrawlingConfigId();
         }
@@ -325,12 +341,6 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
                 return query().queryFileCrawlingConfig();
             }
         });
-        if (_nssFileCrawlingConfig == null
-                || !_nssFileCrawlingConfig.hasConditionQuery()) {
-            _nssFileCrawlingConfig = new FileCrawlingConfigNss(query()
-                    .queryFileCrawlingConfig());
-        }
-        return _nssFileCrawlingConfig;
     }
 
     // [DBFlute-0.7.4]
@@ -598,13 +608,11 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
                     _qyCall.qy(),
                     new HpSDRSetupper<FileAuthenticationCB, FileAuthenticationCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<FileAuthenticationCB> subQuery,
-                                final FileAuthenticationCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                        public void setup(final String fn,
+                                final SubQuery<FileAuthenticationCB> sq,
+                                final FileAuthenticationCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -612,19 +620,19 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;FileAuthenticationCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -673,14 +681,14 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FileAuthenticationCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -693,15 +701,20 @@ public class BsFileAuthenticationCB extends AbstractConditionBean {
         xorSQ((FileAuthenticationCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FileAuthenticationCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FileAuthenticationCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FileAuthenticationCB&gt;() {
      *             public void query(FileAuthenticationCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

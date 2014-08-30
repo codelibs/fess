@@ -24,6 +24,8 @@ import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.RequestHeaderCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -42,10 +44,10 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsRequestHeaderCQ(final ConditionQuery childQuery,
+    public BsRequestHeaderCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -55,7 +57,7 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from REQUEST_HEADER) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -82,7 +84,7 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join REQUEST_HEADER on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -100,7 +102,6 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -217,45 +218,26 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
         return getWebCrawlingConfigId();
     }
 
-    protected Map<String, WebCrawlingConfigCQ> _webCrawlingConfigId_InScopeRelation_WebCrawlingConfigMap;
-
     public Map<String, WebCrawlingConfigCQ> getWebCrawlingConfigId_InScopeRelation_WebCrawlingConfig() {
-        return _webCrawlingConfigId_InScopeRelation_WebCrawlingConfigMap;
+        return xgetSQueMap("webCrawlingConfigId_InScopeRelation_WebCrawlingConfig");
     }
 
     @Override
     public String keepWebCrawlingConfigId_InScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webCrawlingConfigId_InScopeRelation_WebCrawlingConfigMap == null) {
-            _webCrawlingConfigId_InScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webCrawlingConfigId_InScopeRelation_WebCrawlingConfigMap
-                        .size() + 1);
-        _webCrawlingConfigId_InScopeRelation_WebCrawlingConfigMap.put(key,
-                subQuery);
-        return "webCrawlingConfigId_InScopeRelation_WebCrawlingConfig." + key;
+            final WebCrawlingConfigCQ sq) {
+        return xkeepSQue(
+                "webCrawlingConfigId_InScopeRelation_WebCrawlingConfig", sq);
     }
 
-    protected Map<String, WebCrawlingConfigCQ> _webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfigMap;
-
     public Map<String, WebCrawlingConfigCQ> getWebCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig() {
-        return _webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfigMap;
+        return xgetSQueMap("webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig");
     }
 
     @Override
     public String keepWebCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfigMap == null) {
-            _webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfigMap
-                        .size() + 1);
-        _webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfigMap.put(key,
-                subQuery);
-        return "webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig."
-                + key;
+            final WebCrawlingConfigCQ sq) {
+        return xkeepSQue(
+                "webCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig", sq);
     }
 
     /**
@@ -526,9 +508,9 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -546,9 +528,9 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -563,15 +545,13 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final RequestHeaderCQ baseQuery = (RequestHeaderCQ) baseQueryAsSuper;
-        final RequestHeaderCQ unionQuery = (RequestHeaderCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryWebCrawlingConfig()) {
-            unionQuery.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
-                    baseQuery.queryWebCrawlingConfig(),
-                    unionQuery.queryWebCrawlingConfig());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final RequestHeaderCQ bq = (RequestHeaderCQ) bqs;
+        final RequestHeaderCQ uq = (RequestHeaderCQ) uqs;
+        if (bq.hasConditionQueryWebCrawlingConfig()) {
+            uq.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
+                    bq.queryWebCrawlingConfig(), uq.queryWebCrawlingConfig());
         }
     }
 
@@ -587,37 +567,28 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
         return getConditionQueryWebCrawlingConfig();
     }
 
-    protected WebCrawlingConfigCQ _conditionQueryWebCrawlingConfig;
-
     public WebCrawlingConfigCQ getConditionQueryWebCrawlingConfig() {
-        if (_conditionQueryWebCrawlingConfig == null) {
-            _conditionQueryWebCrawlingConfig = xcreateQueryWebCrawlingConfig();
+        final String prop = "webCrawlingConfig";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryWebCrawlingConfig());
             xsetupOuterJoinWebCrawlingConfig();
         }
-        return _conditionQueryWebCrawlingConfig;
+        return xgetQueRlMap(prop);
     }
 
     protected WebCrawlingConfigCQ xcreateQueryWebCrawlingConfig() {
-        final String nrp = resolveNextRelationPath("REQUEST_HEADER",
-                "webCrawlingConfig");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final WebCrawlingConfigCQ cq = new WebCrawlingConfigCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("webCrawlingConfig");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("REQUEST_HEADER", "webCrawlingConfig");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new WebCrawlingConfigCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "webCrawlingConfig", nrp);
     }
 
     protected void xsetupOuterJoinWebCrawlingConfig() {
-        final WebCrawlingConfigCQ cq = getConditionQueryWebCrawlingConfig();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("WEB_CRAWLING_CONFIG_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "webCrawlingConfig");
+        xregOutJo("webCrawlingConfig");
     }
 
     public boolean hasConditionQueryWebCrawlingConfig() {
-        return _conditionQueryWebCrawlingConfig != null;
+        return xhasQueRlMap("webCrawlingConfig");
     }
 
     @Override
@@ -629,74 +600,43 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, RequestHeaderCQ> _scalarConditionMap;
-
     public Map<String, RequestHeaderCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final RequestHeaderCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final RequestHeaderCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, RequestHeaderCQ> _specifyMyselfDerivedMap;
-
     public Map<String, RequestHeaderCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final RequestHeaderCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final RequestHeaderCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, RequestHeaderCQ> _queryMyselfDerivedMap;
 
     public Map<String, RequestHeaderCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final RequestHeaderCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final RequestHeaderCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -705,36 +645,24 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
     protected Map<String, RequestHeaderCQ> _myselfExistsMap;
 
     public Map<String, RequestHeaderCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final RequestHeaderCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final RequestHeaderCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, RequestHeaderCQ> _myselfInScopeMap;
-
     public Map<String, RequestHeaderCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final RequestHeaderCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final RequestHeaderCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -747,6 +675,14 @@ public class BsRequestHeaderCQ extends AbstractBsRequestHeaderCQ {
 
     protected String xCQ() {
         return RequestHeaderCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

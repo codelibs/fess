@@ -200,8 +200,14 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -247,6 +253,18 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -257,7 +275,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     protected List<RequestHeader> _requestHeaderList;
 
     /**
-     * REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
+     * [get] REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
      * @return The entity list of referrer property 'requestHeaderList'. (NotNull: even if no loading, returns empty list)
      */
     public List<RequestHeader> getRequestHeaderList() {
@@ -268,7 +286,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
+     * [set] REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
      * @param requestHeaderList The entity list of referrer property 'requestHeaderList'. (NullAllowed)
      */
     public void setRequestHeaderList(final List<RequestHeader> requestHeaderList) {
@@ -279,7 +297,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     protected List<WebAuthentication> _webAuthenticationList;
 
     /**
-     * WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
+     * [get] WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
      * @return The entity list of referrer property 'webAuthenticationList'. (NotNull: even if no loading, returns empty list)
      */
     public List<WebAuthentication> getWebAuthenticationList() {
@@ -290,7 +308,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
+     * [set] WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
      * @param webAuthenticationList The entity list of referrer property 'webAuthenticationList'. (NullAllowed)
      */
     public void setWebAuthenticationList(
@@ -302,7 +320,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     protected List<WebConfigToLabelTypeMapping> _webConfigToLabelTypeMappingList;
 
     /**
-     * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
+     * [get] WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
      * @return The entity list of referrer property 'webConfigToLabelTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<WebConfigToLabelTypeMapping> getWebConfigToLabelTypeMappingList() {
@@ -313,7 +331,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
+     * [set] WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
      * @param webConfigToLabelTypeMappingList The entity list of referrer property 'webConfigToLabelTypeMappingList'. (NullAllowed)
      */
     public void setWebConfigToLabelTypeMappingList(
@@ -325,7 +343,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     protected List<WebConfigToRoleTypeMapping> _webConfigToRoleTypeMappingList;
 
     /**
-     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
+     * [get] WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
      * @return The entity list of referrer property 'webConfigToRoleTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<WebConfigToRoleTypeMapping> getWebConfigToRoleTypeMappingList() {
@@ -336,7 +354,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
+     * [set] WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
      * @param webConfigToRoleTypeMappingList The entity list of referrer property 'webConfigToRoleTypeMappingList'. (NullAllowed)
      */
     public void setWebConfigToRoleTypeMappingList(
@@ -380,28 +398,47 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsWebCrawlingConfig)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsWebCrawlingConfig)) {
             return false;
         }
-        final BsWebCrawlingConfig otherEntity = (BsWebCrawlingConfig) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsWebCrawlingConfig other = (BsWebCrawlingConfig) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -410,14 +447,14 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -434,7 +471,7 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -444,42 +481,42 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
+        final String li = "\n  ";
         if (_requestHeaderList != null) {
-            for (final Entity e : _requestHeaderList) {
-                if (e != null) {
-                    sb.append(l).append(xbRDS(e, "requestHeaderList"));
+            for (final Entity et : _requestHeaderList) {
+                if (et != null) {
+                    sb.append(li).append(xbRDS(et, "requestHeaderList"));
                 }
             }
         }
         if (_webAuthenticationList != null) {
-            for (final Entity e : _webAuthenticationList) {
-                if (e != null) {
-                    sb.append(l).append(xbRDS(e, "webAuthenticationList"));
+            for (final Entity et : _webAuthenticationList) {
+                if (et != null) {
+                    sb.append(li).append(xbRDS(et, "webAuthenticationList"));
                 }
             }
         }
         if (_webConfigToLabelTypeMappingList != null) {
-            for (final Entity e : _webConfigToLabelTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "webConfigToLabelTypeMappingList"));
+            for (final Entity et : _webConfigToLabelTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "webConfigToLabelTypeMappingList"));
                 }
             }
         }
         if (_webConfigToRoleTypeMappingList != null) {
-            for (final Entity e : _webConfigToRoleTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "webConfigToRoleTypeMappingList"));
+            for (final Entity et : _webConfigToRoleTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "webConfigToRoleTypeMappingList"));
                 }
             }
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -504,32 +541,32 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getName());
-        sb.append(delimiter).append(getUrls());
-        sb.append(delimiter).append(getIncludedUrls());
-        sb.append(delimiter).append(getExcludedUrls());
-        sb.append(delimiter).append(getIncludedDocUrls());
-        sb.append(delimiter).append(getExcludedDocUrls());
-        sb.append(delimiter).append(getConfigParameter());
-        sb.append(delimiter).append(getDepth());
-        sb.append(delimiter).append(getMaxAccessCount());
-        sb.append(delimiter).append(getUserAgent());
-        sb.append(delimiter).append(getNumOfThread());
-        sb.append(delimiter).append(getIntervalTime());
-        sb.append(delimiter).append(getBoost());
-        sb.append(delimiter).append(getAvailable());
-        sb.append(delimiter).append(getSortOrder());
-        sb.append(delimiter).append(getCreatedBy());
-        sb.append(delimiter).append(getCreatedTime());
-        sb.append(delimiter).append(getUpdatedBy());
-        sb.append(delimiter).append(getUpdatedTime());
-        sb.append(delimiter).append(getDeletedBy());
-        sb.append(delimiter).append(getDeletedTime());
-        sb.append(delimiter).append(getVersionNo());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getName());
+        sb.append(dm).append(getUrls());
+        sb.append(dm).append(getIncludedUrls());
+        sb.append(dm).append(getExcludedUrls());
+        sb.append(dm).append(getIncludedDocUrls());
+        sb.append(dm).append(getExcludedDocUrls());
+        sb.append(dm).append(getConfigParameter());
+        sb.append(dm).append(getDepth());
+        sb.append(dm).append(getMaxAccessCount());
+        sb.append(dm).append(getUserAgent());
+        sb.append(dm).append(getNumOfThread());
+        sb.append(dm).append(getIntervalTime());
+        sb.append(dm).append(getBoost());
+        sb.append(dm).append(getAvailable());
+        sb.append(dm).append(getSortOrder());
+        sb.append(dm).append(getCreatedBy());
+        sb.append(dm).append(getCreatedTime());
+        sb.append(dm).append(getUpdatedBy());
+        sb.append(dm).append(getUpdatedTime());
+        sb.append(dm).append(getDeletedBy());
+        sb.append(dm).append(getDeletedTime());
+        sb.append(dm).append(getVersionNo());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -537,23 +574,23 @@ public abstract class BsWebCrawlingConfig implements Entity, Serializable,
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
+        final String cm = ",";
         if (_requestHeaderList != null && !_requestHeaderList.isEmpty()) {
-            sb.append(c).append("requestHeaderList");
+            sb.append(cm).append("requestHeaderList");
         }
         if (_webAuthenticationList != null && !_webAuthenticationList.isEmpty()) {
-            sb.append(c).append("webAuthenticationList");
+            sb.append(cm).append("webAuthenticationList");
         }
         if (_webConfigToLabelTypeMappingList != null
                 && !_webConfigToLabelTypeMappingList.isEmpty()) {
-            sb.append(c).append("webConfigToLabelTypeMappingList");
+            sb.append(cm).append("webConfigToLabelTypeMappingList");
         }
         if (_webConfigToRoleTypeMappingList != null
                 && !_webConfigToRoleTypeMappingList.isEmpty()) {
-            sb.append(c).append("webConfigToRoleTypeMappingList");
+            sb.append(cm).append("webConfigToRoleTypeMappingList");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

@@ -45,10 +45,10 @@ public class WebAuthenticationCIQ extends AbstractBsWebAuthenticationCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public WebAuthenticationCIQ(final ConditionQuery childQuery,
+    public WebAuthenticationCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsWebAuthenticationCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -61,9 +61,8 @@ public class WebAuthenticationCIQ extends AbstractBsWebAuthenticationCQ {
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -193,47 +192,47 @@ public class WebAuthenticationCIQ extends AbstractBsWebAuthenticationCQ {
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(final WebAuthenticationCQ subQuery) {
+    public String keepScalarCondition(final WebAuthenticationCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final WebAuthenticationCQ subQuery) {
+    public String keepSpecifyMyselfDerived(final WebAuthenticationCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(final WebAuthenticationCQ subQuery) {
+    public String keepQueryMyselfDerived(final WebAuthenticationCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final WebAuthenticationCQ subQuery) {
+    public String keepMyselfExists(final WebAuthenticationCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(final WebAuthenticationCQ subQuery) {
+    public String keepMyselfInScope(final WebAuthenticationCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

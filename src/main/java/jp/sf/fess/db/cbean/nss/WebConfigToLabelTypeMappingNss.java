@@ -46,31 +46,26 @@ public class WebConfigToLabelTypeMappingNss {
     /**
      * With nested relation columns to select clause. <br />
      * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public LabelTypeNss withLabelType() {
+    public void withLabelType() {
         _query.doNss(new WebConfigToLabelTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryLabelType();
             }
         });
-        return new LabelTypeNss(_query.queryLabelType());
     }
 
     /**
      * With nested relation columns to select clause. <br />
      * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public WebCrawlingConfigNss withWebCrawlingConfig() {
+    public void withWebCrawlingConfig() {
         _query.doNss(new WebConfigToLabelTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryWebCrawlingConfig();
             }
         });
-        return new WebCrawlingConfigNss(_query.queryWebCrawlingConfig());
     }
-
 }

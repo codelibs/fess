@@ -24,6 +24,8 @@ import jp.sf.fess.db.cbean.cq.UserInfoCQ;
 import jp.sf.fess.db.cbean.cq.ciq.FavoriteLogCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -42,10 +44,10 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsFavoriteLogCQ(final ConditionQuery childQuery,
+    public BsFavoriteLogCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -55,7 +57,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from FAVORITE_LOG) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -82,7 +84,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join FAVORITE_LOG on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -100,7 +102,6 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -149,44 +150,27 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
         return getUserId();
     }
 
-    protected Map<String, UserInfoCQ> _userId_InScopeRelation_UserInfoMap;
-
     public Map<String, UserInfoCQ> getUserId_InScopeRelation_UserInfo() {
-        return _userId_InScopeRelation_UserInfoMap;
+        return xgetSQueMap("userId_InScopeRelation_UserInfo");
     }
 
     @Override
-    public String keepUserId_InScopeRelation_UserInfo(final UserInfoCQ subQuery) {
-        if (_userId_InScopeRelation_UserInfoMap == null) {
-            _userId_InScopeRelation_UserInfoMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_userId_InScopeRelation_UserInfoMap.size() + 1);
-        _userId_InScopeRelation_UserInfoMap.put(key, subQuery);
-        return "userId_InScopeRelation_UserInfo." + key;
+    public String keepUserId_InScopeRelation_UserInfo(final UserInfoCQ sq) {
+        return xkeepSQue("userId_InScopeRelation_UserInfo", sq);
     }
-
-    protected Map<String, UserInfoCQ> _userId_NotInScopeRelation_UserInfoMap;
 
     public Map<String, UserInfoCQ> getUserId_NotInScopeRelation_UserInfo() {
-        return _userId_NotInScopeRelation_UserInfoMap;
+        return xgetSQueMap("userId_NotInScopeRelation_UserInfo");
     }
 
     @Override
-    public String keepUserId_NotInScopeRelation_UserInfo(
-            final UserInfoCQ subQuery) {
-        if (_userId_NotInScopeRelation_UserInfoMap == null) {
-            _userId_NotInScopeRelation_UserInfoMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_userId_NotInScopeRelation_UserInfoMap.size() + 1);
-        _userId_NotInScopeRelation_UserInfoMap.put(key, subQuery);
-        return "userId_NotInScopeRelation_UserInfo." + key;
+    public String keepUserId_NotInScopeRelation_UserInfo(final UserInfoCQ sq) {
+        return xkeepSQue("userId_NotInScopeRelation_UserInfo", sq);
     }
 
     /**
      * Add order-by as ascend. <br />
-     * USER_ID: {UQ, IX, NotNull, BIGINT(19), FK to USER_INFO}
+     * USER_ID: {UQ+, IX, NotNull, BIGINT(19), FK to USER_INFO}
      * @return this. (NotNull)
      */
     public BsFavoriteLogCQ addOrderBy_UserId_Asc() {
@@ -196,7 +180,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
 
     /**
      * Add order-by as descend. <br />
-     * USER_ID: {UQ, IX, NotNull, BIGINT(19), FK to USER_INFO}
+     * USER_ID: {UQ+, IX, NotNull, BIGINT(19), FK to USER_INFO}
      * @return this. (NotNull)
      */
     public BsFavoriteLogCQ addOrderBy_UserId_Desc() {
@@ -220,7 +204,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
 
     /**
      * Add order-by as ascend. <br />
-     * URL: {UQ+, NotNull, VARCHAR(4000)}
+     * URL: {+UQ, NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
      */
     public BsFavoriteLogCQ addOrderBy_Url_Asc() {
@@ -230,7 +214,7 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
 
     /**
      * Add order-by as descend. <br />
-     * URL: {UQ+, NotNull, VARCHAR(4000)}
+     * URL: {+UQ, NotNull, VARCHAR(4000)}
      * @return this. (NotNull)
      */
     public BsFavoriteLogCQ addOrderBy_Url_Desc() {
@@ -282,9 +266,9 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -301,9 +285,9 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -318,14 +302,13 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final FavoriteLogCQ baseQuery = (FavoriteLogCQ) baseQueryAsSuper;
-        final FavoriteLogCQ unionQuery = (FavoriteLogCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryUserInfo()) {
-            unionQuery.queryUserInfo().reflectRelationOnUnionQuery(
-                    baseQuery.queryUserInfo(), unionQuery.queryUserInfo());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final FavoriteLogCQ bq = (FavoriteLogCQ) bqs;
+        final FavoriteLogCQ uq = (FavoriteLogCQ) uqs;
+        if (bq.hasConditionQueryUserInfo()) {
+            uq.queryUserInfo().reflectRelationOnUnionQuery(bq.queryUserInfo(),
+                    uq.queryUserInfo());
         }
     }
 
@@ -341,36 +324,28 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
         return getConditionQueryUserInfo();
     }
 
-    protected UserInfoCQ _conditionQueryUserInfo;
-
     public UserInfoCQ getConditionQueryUserInfo() {
-        if (_conditionQueryUserInfo == null) {
-            _conditionQueryUserInfo = xcreateQueryUserInfo();
+        final String prop = "userInfo";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryUserInfo());
             xsetupOuterJoinUserInfo();
         }
-        return _conditionQueryUserInfo;
+        return xgetQueRlMap(prop);
     }
 
     protected UserInfoCQ xcreateQueryUserInfo() {
-        final String nrp = resolveNextRelationPath("FAVORITE_LOG", "userInfo");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final UserInfoCQ cq = new UserInfoCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("userInfo");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("FAVORITE_LOG", "userInfo");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new UserInfoCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "userInfo", nrp);
     }
 
     protected void xsetupOuterJoinUserInfo() {
-        final UserInfoCQ cq = getConditionQueryUserInfo();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("USER_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "userInfo");
+        xregOutJo("userInfo");
     }
 
     public boolean hasConditionQueryUserInfo() {
-        return _conditionQueryUserInfo != null;
+        return xhasQueRlMap("userInfo");
     }
 
     @Override
@@ -382,74 +357,43 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, FavoriteLogCQ> _scalarConditionMap;
-
     public Map<String, FavoriteLogCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final FavoriteLogCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final FavoriteLogCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, FavoriteLogCQ> _specifyMyselfDerivedMap;
-
     public Map<String, FavoriteLogCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final FavoriteLogCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final FavoriteLogCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, FavoriteLogCQ> _queryMyselfDerivedMap;
 
     public Map<String, FavoriteLogCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final FavoriteLogCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final FavoriteLogCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -458,36 +402,24 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
     protected Map<String, FavoriteLogCQ> _myselfExistsMap;
 
     public Map<String, FavoriteLogCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final FavoriteLogCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final FavoriteLogCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, FavoriteLogCQ> _myselfInScopeMap;
-
     public Map<String, FavoriteLogCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final FavoriteLogCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final FavoriteLogCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -500,6 +432,14 @@ public class BsFavoriteLogCQ extends AbstractBsFavoriteLogCQ {
 
     protected String xCQ() {
         return FavoriteLogCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

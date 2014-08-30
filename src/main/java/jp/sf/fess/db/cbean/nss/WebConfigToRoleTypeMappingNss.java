@@ -45,32 +45,27 @@ public class WebConfigToRoleTypeMappingNss {
     //                                                                     ===============
     /**
      * With nested relation columns to select clause. <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
-     */
-    public WebCrawlingConfigNss withWebCrawlingConfig() {
-        _query.doNss(new WebConfigToRoleTypeMappingCQ.NssCall() {
-            @Override
-            public ConditionQuery qf() {
-                return _query.queryWebCrawlingConfig();
-            }
-        });
-        return new WebCrawlingConfigNss(_query.queryWebCrawlingConfig());
-    }
-
-    /**
-     * With nested relation columns to select clause. <br />
      * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public RoleTypeNss withRoleType() {
+    public void withRoleType() {
         _query.doNss(new WebConfigToRoleTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryRoleType();
             }
         });
-        return new RoleTypeNss(_query.queryRoleType());
     }
 
+    /**
+     * With nested relation columns to select clause. <br />
+     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
+     */
+    public void withWebCrawlingConfig() {
+        _query.doNss(new WebConfigToRoleTypeMappingCQ.NssCall() {
+            @Override
+            public ConditionQuery qf() {
+                return _query.queryWebCrawlingConfig();
+            }
+        });
+    }
 }

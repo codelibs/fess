@@ -60,39 +60,42 @@ public class ClientIpRankingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgName(), "name");
         setupEpg(_epgMap, new EpgCnt(), "cnt");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ClientIpRanking) e).getName();
+        public Object read(final Entity et) {
+            return ((ClientIpRanking) et).getName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ClientIpRanking) e).setName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ClientIpRanking) et).setName((String) vl);
         }
     }
 
     public static class EpgCnt implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ClientIpRanking) e).getCnt();
+        public Object read(final Entity et) {
+            return ((ClientIpRanking) et).getCnt();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ClientIpRanking) e).setCnt(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((ClientIpRanking) et).setCnt(ctl(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -128,17 +131,25 @@ public class ClientIpRankingDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
-            false, "name", String.class, false, false, "VARCHAR", 50, 0, null,
-            false, null, null, null, null, null);
+            String.class, "name", null, false, false, false, "VARCHAR", 50, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnCnt = cci("CNT", "CNT", null, null,
-            false, "cnt", Long.class, false, false, "BIGINT", 19, 0, null,
-            false, null, null, null, null, null);
+            Long.class, "cnt", null, false, false, false, "BIGINT", 19, 0,
+            null, false, null, null, null, null, null);
 
+    /**
+     * NAME: {VARCHAR(50), refers to SEARCH_LOG.CLIENT_IP}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnName() {
         return _columnName;
     }
 
+    /**
+     * CNT: {BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCnt() {
         return _columnCnt;
     }
@@ -180,6 +191,8 @@ public class ClientIpRankingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -222,8 +235,8 @@ public class ClientIpRankingDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public ClientIpRanking newEntity() {
+        return new ClientIpRanking();
     }
 
     public ClientIpRanking newMyEntity() {
@@ -234,24 +247,24 @@ public class ClientIpRankingDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((ClientIpRanking) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((ClientIpRanking) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((ClientIpRanking) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((ClientIpRanking) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

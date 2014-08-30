@@ -45,16 +45,13 @@ public class FavoriteLogNss {
     /**
      * With nested relation columns to select clause. <br />
      * USER_INFO by my USER_ID, named 'userInfo'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public UserInfoNss withUserInfo() {
+    public void withUserInfo() {
         _query.doNss(new FavoriteLogCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryUserInfo();
             }
         });
-        return new UserInfoNss(_query.queryUserInfo());
     }
-
 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.FileAuthentication;
+import jp.sf.fess.db.exentity.FileCrawlingConfig;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +62,9 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -80,189 +84,215 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getId();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setId(ctl(vl));
         }
     }
 
     public static class EpgHostname implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getHostname();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getHostname();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setHostname((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setHostname((String) vl);
         }
     }
 
     public static class EpgPort implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getPort();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getPort();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setPort(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setPort(cti(vl));
         }
     }
 
     public static class EpgProtocolScheme implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getProtocolScheme();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getProtocolScheme();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setProtocolScheme((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setProtocolScheme((String) vl);
         }
     }
 
     public static class EpgUsername implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getUsername();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getUsername();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setUsername((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setUsername((String) vl);
         }
     }
 
     public static class EpgPassword implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getPassword();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getPassword();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setPassword((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setPassword((String) vl);
         }
     }
 
     public static class EpgParameters implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getParameters();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getParameters();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setParameters((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setParameters((String) vl);
         }
     }
 
     public static class EpgFileCrawlingConfigId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getFileCrawlingConfigId();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getFileCrawlingConfigId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setFileCrawlingConfigId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setFileCrawlingConfigId(ctl(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileAuthentication) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileAuthentication) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgFileCrawlingConfig(), "fileCrawlingConfig");
+    }
+
+    public class EfpgFileCrawlingConfig implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((FileAuthentication) et).getFileCrawlingConfig();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((FileAuthentication) et)
+                    .setFileCrawlingConfig((FileCrawlingConfig) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -302,136 +332,201 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_6FDE572E_08DC_4E2C_A196_B14DC4126640",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_E661CD0A_DFB5_49EA_9DDC_A77B303BC06A",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnHostname = cci("HOSTNAME", "HOSTNAME",
-            null, null, false, "hostname", String.class, false, false,
+            null, null, String.class, "hostname", null, false, false, false,
             "VARCHAR", 255, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnPort = cci("PORT", "PORT", null, null,
-            true, "port", Integer.class, false, false, "INTEGER", 10, 0, null,
-            false, null, null, null, null, null);
+            Integer.class, "port", null, false, false, true, "INTEGER", 10, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnProtocolScheme = cci("PROTOCOL_SCHEME",
-            "PROTOCOL_SCHEME", null, null, false, "protocolScheme",
-            String.class, false, false, "VARCHAR", 10, 0, null, false, null,
+            "PROTOCOL_SCHEME", null, null, String.class, "protocolScheme",
+            null, false, false, false, "VARCHAR", 10, 0, null, false, null,
             null, null, null, null);
 
     protected final ColumnInfo _columnUsername = cci("USERNAME", "USERNAME",
-            null, null, true, "username", String.class, false, false,
+            null, null, String.class, "username", null, false, false, true,
             "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnPassword = cci("PASSWORD", "PASSWORD",
-            null, null, false, "password", String.class, false, false,
+            null, null, String.class, "password", null, false, false, false,
             "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnParameters = cci("PARAMETERS",
-            "PARAMETERS", null, null, false, "parameters", String.class, false,
-            false, "VARCHAR", 1000, 0, null, false, null, null, null, null,
-            null);
+            "PARAMETERS", null, null, String.class, "parameters", null, false,
+            false, false, "VARCHAR", 1000, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnFileCrawlingConfigId = cci(
             "FILE_CRAWLING_CONFIG_ID", "FILE_CRAWLING_CONFIG_ID", null, null,
-            true, "fileCrawlingConfigId", Long.class, false, false, "BIGINT",
-            19, 0, null, false, null, null, "fileCrawlingConfig", null, null);
+            Long.class, "fileCrawlingConfigId", null, false, false, true,
+            "BIGINT", 19, 0, null, false, null, null, "fileCrawlingConfig",
+            null, null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * HOSTNAME: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnHostname() {
         return _columnHostname;
     }
 
+    /**
+     * PORT: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnPort() {
         return _columnPort;
     }
 
+    /**
+     * PROTOCOL_SCHEME: {VARCHAR(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnProtocolScheme() {
         return _columnProtocolScheme;
     }
 
+    /**
+     * USERNAME: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUsername() {
         return _columnUsername;
     }
 
+    /**
+     * PASSWORD: {VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnPassword() {
         return _columnPassword;
     }
 
+    /**
+     * PARAMETERS: {VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnParameters() {
         return _columnParameters;
     }
 
+    /**
+     * FILE_CRAWLING_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnFileCrawlingConfigId() {
         return _columnFileCrawlingConfigId;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -485,15 +580,21 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignFileCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnFileCrawlingConfigId(), FileCrawlingConfigDbm
                         .getInstance().columnId());
         return cfi("CONSTRAINT_F90", "fileCrawlingConfig", this,
-                FileCrawlingConfigDbm.getInstance(), map, 0, false, false,
+                FileCrawlingConfigDbm.getInstance(), mp, 0, null, false, false,
                 false, false, null, null, false, "fileAuthenticationList");
     }
 
@@ -549,8 +650,8 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FileAuthentication newEntity() {
+        return new FileAuthentication();
     }
 
     public FileAuthentication newMyEntity() {
@@ -561,24 +662,24 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((FileAuthentication) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((FileAuthentication) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((FileAuthentication) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((FileAuthentication) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

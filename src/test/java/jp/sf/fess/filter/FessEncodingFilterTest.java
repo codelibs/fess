@@ -23,7 +23,7 @@ import org.seasar.extension.unit.S2TestCase;
 
 public class FessEncodingFilterTest extends S2TestCase {
     public void test_normal() throws IOException {
-        FessEncodingFilter filter = new FessEncodingFilter();
+        final FessEncodingFilter filter = new FessEncodingFilter();
         Map<String, String[]> paramMap;
 
         paramMap = filter.parseQueryString("a=1", "UTF-8");
@@ -51,7 +51,7 @@ public class FessEncodingFilterTest extends S2TestCase {
     }
 
     public void test_missing() throws IOException {
-        FessEncodingFilter filter = new FessEncodingFilter();
+        final FessEncodingFilter filter = new FessEncodingFilter();
         Map<String, String[]> paramMap;
 
         paramMap = filter.parseQueryString("a=", "UTF-8");
@@ -73,7 +73,7 @@ public class FessEncodingFilterTest extends S2TestCase {
     }
 
     public void test_decode() throws IOException {
-        FessEncodingFilter filter = new FessEncodingFilter();
+        final FessEncodingFilter filter = new FessEncodingFilter();
         Map<String, String[]> paramMap;
 
         paramMap = filter.parseQueryString("a=%E3%83%86%E3%82%B9%E3%83%88",

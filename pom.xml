@@ -69,7 +69,7 @@
         <database>h2</database>
         <databaseGroupId>com.h2database</databaseGroupId>
         <databaseArtifactId>h2</databaseArtifactId>
-        <databaseVersion>1.4.179</databaseVersion>
+        <databaseVersion>1.4.181</databaseVersion>
         <databaseDriver>org.h2.Driver</databaseDriver>
         <databaseUrl>jdbc:h2:file:${basedir}/src/main/webapp/WEB-INF/db/fess</databaseUrl>
         <databaseTestUrl>jdbc:h2:file:${basedir}/target/test-classes/db/fess</databaseTestUrl>
@@ -83,7 +83,7 @@
         <database>mysql</database>
         <databaseGroupId>mysql</databaseGroupId>
         <databaseArtifactId>mysql-connector-java</databaseArtifactId>
-        <databaseVersion>5.1.31</databaseVersion>
+        <databaseVersion>5.1.32</databaseVersion>
         <databaseDriver>com.mysql.jdbc.Driver</databaseDriver>
         <databaseUrl>jdbc:mysql://localhost:3306/fess_db?noDatetimeStringSync=true&amp;zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</databaseUrl>
         <databaseTestUrl>jdbc:mysql://localhost:3306/fess_testdb?noDatetimeStringSync=true&amp;zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</databaseTestUrl>
@@ -107,7 +107,7 @@
     </profile>
   </profiles>
   <properties>
-    <dbflute.version>1.0.4K</dbflute.version>
+    <dbflute.version>1.0.5J</dbflute.version>
     <s2robot.version>0.8.0-SNAPSHOT</s2robot.version>
     <solr.version>4.9.0</solr.version>
     <slf4j.version>1.7.7</slf4j.version>

@@ -45,10 +45,10 @@ public class FavoriteLogCIQ extends AbstractBsFavoriteLogCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FavoriteLogCIQ(final ConditionQuery childQuery,
+    public FavoriteLogCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsFavoriteLogCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -61,9 +61,8 @@ public class FavoriteLogCIQ extends AbstractBsFavoriteLogCQ {
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -129,47 +128,47 @@ public class FavoriteLogCIQ extends AbstractBsFavoriteLogCQ {
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(final FavoriteLogCQ subQuery) {
+    public String keepScalarCondition(final FavoriteLogCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final FavoriteLogCQ subQuery) {
+    public String keepSpecifyMyselfDerived(final FavoriteLogCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(final FavoriteLogCQ subQuery) {
+    public String keepQueryMyselfDerived(final FavoriteLogCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final FavoriteLogCQ subQuery) {
+    public String keepMyselfExists(final FavoriteLogCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(final FavoriteLogCQ subQuery) {
+    public String keepMyselfInScope(final FavoriteLogCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

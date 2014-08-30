@@ -17,6 +17,8 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.FileAuthenticationCB;
@@ -29,7 +31,9 @@ import jp.sf.fess.db.cbean.cq.FileConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
 import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
@@ -55,10 +59,10 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsFileCrawlingConfigCQ(final ConditionQuery childQuery,
+    public AbstractBsFileCrawlingConfigCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -184,12 +188,12 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     }
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select FILE_CRAWLING_CONFIG_ID from FILE_AUTHENTICATION where ...)} <br />
      * FILE_AUTHENTICATION by FILE_CRAWLING_CONFIG_ID, named 'fileAuthenticationAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsFileAuthenticationList</span>(new SubQuery&lt;FileAuthenticationCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsFileAuthenticationList</span>(new SubQuery&lt;FileAuthenticationCB&gt;() {
+     *     public void query(FileAuthenticationCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -198,26 +202,31 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void existsFileAuthenticationList(
             final SubQuery<FileAuthenticationCB> subQuery) {
-        assertObjectNotNull("subQuery<FileAuthenticationCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_FileAuthenticationList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "FILE_CRAWLING_CONFIG_ID",
-                subQueryPropertyName, "fileAuthenticationList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_FileAuthenticationList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "FILE_CRAWLING_CONFIG_ID", pp,
+                "fileAuthenticationList");
     }
 
     public abstract String keepId_ExistsReferrer_FileAuthenticationList(
-            FileAuthenticationCQ subQuery);
+            FileAuthenticationCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(FileConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -226,27 +235,31 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void existsFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsFileConfigToRoleTypeMappingList</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsFileConfigToRoleTypeMappingList</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
+     *     public void query(FileConfigToRoleTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -255,26 +268,31 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void existsFileConfigToRoleTypeMappingList(
             final SubQuery<FileConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_FileConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_FileConfigToRoleTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_FileConfigToRoleTypeMappingList(
-            FileConfigToRoleTypeMappingCQ subQuery);
+            FileConfigToRoleTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select FILE_CRAWLING_CONFIG_ID from FILE_AUTHENTICATION where ...)} <br />
      * FILE_AUTHENTICATION by FILE_CRAWLING_CONFIG_ID, named 'fileAuthenticationAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsFileAuthenticationList</span>(new SubQuery&lt;FileAuthenticationCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsFileAuthenticationList</span>(new SubQuery&lt;FileAuthenticationCB&gt;() {
+     *     public void query(FileAuthenticationCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -283,26 +301,31 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void notExistsFileAuthenticationList(
             final SubQuery<FileAuthenticationCB> subQuery) {
-        assertObjectNotNull("subQuery<FileAuthenticationCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_FileAuthenticationList(cb
-                .query()); // for saving query-value.
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_FileAuthenticationList(cb
+                .query());
         registerNotExistsReferrer(cb.query(), "ID", "FILE_CRAWLING_CONFIG_ID",
-                subQueryPropertyName, "fileAuthenticationList");
+                pp, "fileAuthenticationList");
     }
 
     public abstract String keepId_NotExistsReferrer_FileAuthenticationList(
-            FileAuthenticationCQ subQuery);
+            FileAuthenticationCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(FileConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -311,27 +334,31 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void notExistsFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select FILE_CONFIG_ID from FILE_CONFIG_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsFileConfigToRoleTypeMappingList</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
-     *     public void query(FileCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsFileConfigToRoleTypeMappingList</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
+     *     public void query(FileConfigToRoleTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -340,18 +367,23 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void notExistsFileConfigToRoleTypeMappingList(
             final SubQuery<FileConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_FileConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_FileConfigToRoleTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_FileConfigToRoleTypeMappingList(
-            FileConfigToRoleTypeMappingCQ subQuery);
+            FileConfigToRoleTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -361,18 +393,23 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void inScopeFileAuthenticationList(
             final SubQuery<FileAuthenticationCB> subQuery) {
-        assertObjectNotNull("subQuery<FileAuthenticationCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_FileAuthenticationList(cb
-                .query()); // for saving query-value.
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_FileAuthenticationList(cb
+                .query());
         registerInScopeRelation(cb.query(), "ID", "FILE_CRAWLING_CONFIG_ID",
-                subQueryPropertyName, "fileAuthenticationList");
+                pp, "fileAuthenticationList");
     }
 
     public abstract String keepId_InScopeRelation_FileAuthenticationList(
-            FileAuthenticationCQ subQuery);
+            FileAuthenticationCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -382,19 +419,23 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void inScopeFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -404,18 +445,23 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void inScopeFileConfigToRoleTypeMappingList(
             final SubQuery<FileConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_FileConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_FileConfigToRoleTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_FileConfigToRoleTypeMappingList(
-            FileConfigToRoleTypeMappingCQ subQuery);
+            FileConfigToRoleTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -425,18 +471,23 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void notInScopeFileAuthenticationList(
             final SubQuery<FileAuthenticationCB> subQuery) {
-        assertObjectNotNull("subQuery<FileAuthenticationCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_FileAuthenticationList(cb
-                .query()); // for saving query-value.
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_FileAuthenticationList(cb
+                .query());
         registerNotInScopeRelation(cb.query(), "ID", "FILE_CRAWLING_CONFIG_ID",
-                subQueryPropertyName, "fileAuthenticationList");
+                pp, "fileAuthenticationList");
     }
 
     public abstract String keepId_NotInScopeRelation_FileAuthenticationList(
-            FileAuthenticationCQ subQuery);
+            FileAuthenticationCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -446,19 +497,23 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void notInScopeFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -468,82 +523,98 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      */
     public void notInScopeFileConfigToRoleTypeMappingList(
             final SubQuery<FileConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_FileConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID",
-                subQueryPropertyName, "fileConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_FileConfigToRoleTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "FILE_CONFIG_ID", pp,
+                "fileConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_FileConfigToRoleTypeMappingList(
-            FileConfigToRoleTypeMappingCQ subQuery);
+            FileConfigToRoleTypeMappingCQ sq);
 
-    public void xsderiveFileAuthenticationList(final String function,
-            final SubQuery<FileAuthenticationCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileAuthenticationCB>", subQuery);
+    public void xsderiveFileAuthenticationList(final String fn,
+            final SubQuery<FileAuthenticationCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_FileAuthenticationList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CRAWLING_CONFIG_ID", subQueryPropertyName,
-                "fileAuthenticationList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_FileAuthenticationList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID",
+                "FILE_CRAWLING_CONFIG_ID", pp, "fileAuthenticationList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_FileAuthenticationList(
-            FileAuthenticationCQ subQuery);
+            FileAuthenticationCQ sq);
 
-    public void xsderiveFileConfigToLabelTypeMappingList(final String function,
-            final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xsderiveFileConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<FileConfigToLabelTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName,
-                "fileConfigToLabelTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "FILE_CONFIG_ID",
+                pp, "fileConfigToLabelTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
-    public void xsderiveFileConfigToRoleTypeMappingList(final String function,
-            final SubQuery<FileConfigToRoleTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToRoleTypeMappingCB>", subQuery);
+    public void xsderiveFileConfigToRoleTypeMappingList(final String fn,
+            final SubQuery<FileConfigToRoleTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName,
-                "fileConfigToRoleTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "FILE_CONFIG_ID",
+                pp, "fileConfigToRoleTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList(
-            FileConfigToRoleTypeMappingCQ subQuery);
+            FileConfigToRoleTypeMappingCQ sq);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from FILE_AUTHENTICATION where ...)} <br />
      * FILE_AUTHENTICATION by FILE_CRAWLING_CONFIG_ID, named 'fileAuthenticationAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedFileAuthenticationList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedFileAuthenticationList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;FileAuthenticationCB&gt;() {
      *     public void query(FileAuthenticationCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -555,50 +626,52 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         return new HpQDRFunction<FileAuthenticationCB>(
                 new HpQDRSetupper<FileAuthenticationCB>() {
                     @Override
-                    public void setup(final String function,
-                            final SubQuery<FileAuthenticationCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveFileAuthenticationList(function, subQuery,
-                                operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<FileAuthenticationCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveFileAuthenticationList(fn, sq, rd, vl, op);
                     }
                 });
     }
 
-    public void xqderiveFileAuthenticationList(final String function,
-            final SubQuery<FileAuthenticationCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileAuthenticationCB>", subQuery);
+    public void xqderiveFileAuthenticationList(final String fn,
+            final SubQuery<FileAuthenticationCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileAuthenticationCB cb = new FileAuthenticationCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_FileAuthenticationList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_FileAuthenticationListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CRAWLING_CONFIG_ID", subQueryPropertyName,
-                "fileAuthenticationList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_FileAuthenticationList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_FileAuthenticationListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID",
+                "FILE_CRAWLING_CONFIG_ID", sqpp, "fileAuthenticationList", rd,
+                vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_FileAuthenticationList(
-            FileAuthenticationCQ subQuery);
+            FileAuthenticationCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_FileAuthenticationListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedFileConfigToLabelTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedFileConfigToLabelTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -610,52 +683,52 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         return new HpQDRFunction<FileConfigToLabelTypeMappingCB>(
                 new HpQDRSetupper<FileConfigToLabelTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveFileConfigToLabelTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<FileConfigToLabelTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveFileConfigToLabelTypeMappingList(fn, sq, rd,
+                                vl, op);
                     }
                 });
     }
 
-    public void xqderiveFileConfigToLabelTypeMappingList(final String function,
-            final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xqderiveFileConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<FileConfigToLabelTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName,
-                "fileConfigToLabelTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "FILE_CONFIG_ID",
+                sqpp, "fileConfigToLabelTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from FILE_CONFIG_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by FILE_CONFIG_ID, named 'fileConfigToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedFileConfigToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedFileConfigToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
      *     public void query(FileConfigToRoleTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -667,39 +740,40 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         return new HpQDRFunction<FileConfigToRoleTypeMappingCB>(
                 new HpQDRSetupper<FileConfigToRoleTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<FileConfigToRoleTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveFileConfigToRoleTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<FileConfigToRoleTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveFileConfigToRoleTypeMappingList(fn, sq, rd, vl,
+                                op);
                     }
                 });
     }
 
-    public void xqderiveFileConfigToRoleTypeMappingList(final String function,
-            final SubQuery<FileConfigToRoleTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToRoleTypeMappingCB>", subQuery);
+    public void xqderiveFileConfigToRoleTypeMappingList(final String fn,
+            final SubQuery<FileConfigToRoleTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "FILE_CONFIG_ID", subQueryPropertyName,
-                "fileConfigToRoleTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "FILE_CONFIG_ID",
+                sqpp, "fileConfigToRoleTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList(
-            FileConfigToRoleTypeMappingCQ subQuery);
+            FileConfigToRoleTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
@@ -717,11 +791,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -823,7 +897,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * NAME: {NotNull, VARCHAR(200)} <br />
-     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param name The value of name as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -844,11 +918,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regLSQ(CK_NLS, fRES(name), getCValueName(), "NAME", likeSearchOption);
     }
 
-    protected void regName(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueName(), "NAME");
+    protected void regName(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueName(), "NAME");
     }
 
-    abstract protected ConditionValue getCValueName();
+    protected abstract ConditionValue getCValueName();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -950,7 +1024,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * PATHS: {NotNull, VARCHAR(4000)} <br />
-     * <pre>e.g. setPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param paths The value of paths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -971,11 +1045,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regLSQ(CK_NLS, fRES(paths), getCValuePaths(), "PATHS", likeSearchOption);
     }
 
-    protected void regPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValuePaths(), "PATHS");
+    protected void regPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValuePaths(), "PATHS");
     }
 
-    abstract protected ConditionValue getCValuePaths();
+    protected abstract ConditionValue getCValuePaths();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1083,7 +1157,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * INCLUDED_PATHS: {VARCHAR(4000)} <br />
-     * <pre>e.g. setIncludedPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setIncludedPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param includedPaths The value of includedPaths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1130,11 +1204,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regIncludedPaths(CK_ISNN, DOBJ);
     }
 
-    protected void regIncludedPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueIncludedPaths(), "INCLUDED_PATHS");
+    protected void regIncludedPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueIncludedPaths(), "INCLUDED_PATHS");
     }
 
-    abstract protected ConditionValue getCValueIncludedPaths();
+    protected abstract ConditionValue getCValueIncludedPaths();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1242,7 +1316,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * EXCLUDED_PATHS: {VARCHAR(4000)} <br />
-     * <pre>e.g. setExcludedPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setExcludedPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param excludedPaths The value of excludedPaths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1289,11 +1363,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regExcludedPaths(CK_ISNN, DOBJ);
     }
 
-    protected void regExcludedPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueExcludedPaths(), "EXCLUDED_PATHS");
+    protected void regExcludedPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueExcludedPaths(), "EXCLUDED_PATHS");
     }
 
-    abstract protected ConditionValue getCValueExcludedPaths();
+    protected abstract ConditionValue getCValueExcludedPaths();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1401,7 +1475,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * INCLUDED_DOC_PATHS: {VARCHAR(4000)} <br />
-     * <pre>e.g. setIncludedDocPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setIncludedDocPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param includedDocPaths The value of includedDocPaths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1449,11 +1523,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regIncludedDocPaths(CK_ISNN, DOBJ);
     }
 
-    protected void regIncludedDocPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueIncludedDocPaths(), "INCLUDED_DOC_PATHS");
+    protected void regIncludedDocPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueIncludedDocPaths(), "INCLUDED_DOC_PATHS");
     }
 
-    abstract protected ConditionValue getCValueIncludedDocPaths();
+    protected abstract ConditionValue getCValueIncludedDocPaths();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1561,7 +1635,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * EXCLUDED_DOC_PATHS: {VARCHAR(4000)} <br />
-     * <pre>e.g. setExcludedDocPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setExcludedDocPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param excludedDocPaths The value of excludedDocPaths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1609,11 +1683,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regExcludedDocPaths(CK_ISNN, DOBJ);
     }
 
-    protected void regExcludedDocPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueExcludedDocPaths(), "EXCLUDED_DOC_PATHS");
+    protected void regExcludedDocPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueExcludedDocPaths(), "EXCLUDED_DOC_PATHS");
     }
 
-    abstract protected ConditionValue getCValueExcludedDocPaths();
+    protected abstract ConditionValue getCValueExcludedDocPaths();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1721,7 +1795,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CONFIG_PARAMETER: {VARCHAR(4000)} <br />
-     * <pre>e.g. setConfigParameter_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setConfigParameter_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param configParameter The value of configParameter as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1768,11 +1842,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regConfigParameter(CK_ISNN, DOBJ);
     }
 
-    protected void regConfigParameter(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueConfigParameter(), "CONFIG_PARAMETER");
+    protected void regConfigParameter(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueConfigParameter(), "CONFIG_PARAMETER");
     }
 
-    abstract protected ConditionValue getCValueConfigParameter();
+    protected abstract ConditionValue getCValueConfigParameter();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1892,11 +1966,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regDepth(CK_ISNN, DOBJ);
     }
 
-    protected void regDepth(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDepth(), "DEPTH");
+    protected void regDepth(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDepth(), "DEPTH");
     }
 
-    abstract protected ConditionValue getCValueDepth();
+    protected abstract ConditionValue getCValueDepth();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2023,11 +2097,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regMaxAccessCount(CK_ISNN, DOBJ);
     }
 
-    protected void regMaxAccessCount(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueMaxAccessCount(), "MAX_ACCESS_COUNT");
+    protected void regMaxAccessCount(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueMaxAccessCount(), "MAX_ACCESS_COUNT");
     }
 
-    abstract protected ConditionValue getCValueMaxAccessCount();
+    protected abstract ConditionValue getCValueMaxAccessCount();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2137,11 +2211,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
                 "NUM_OF_THREAD");
     }
 
-    protected void regNumOfThread(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueNumOfThread(), "NUM_OF_THREAD");
+    protected void regNumOfThread(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueNumOfThread(), "NUM_OF_THREAD");
     }
 
-    abstract protected ConditionValue getCValueNumOfThread();
+    protected abstract ConditionValue getCValueNumOfThread();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2252,11 +2326,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
                 "INTERVAL_TIME");
     }
 
-    protected void regIntervalTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueIntervalTime(), "INTERVAL_TIME");
+    protected void regIntervalTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueIntervalTime(), "INTERVAL_TIME");
     }
 
-    abstract protected ConditionValue getCValueIntervalTime();
+    protected abstract ConditionValue getCValueIntervalTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2365,11 +2439,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regINS(CK_NINS, cTL(boostList), getCValueBoost(), "BOOST");
     }
 
-    protected void regBoost(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueBoost(), "BOOST");
+    protected void regBoost(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueBoost(), "BOOST");
     }
 
-    abstract protected ConditionValue getCValueBoost();
+    protected abstract ConditionValue getCValueBoost();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -2471,7 +2545,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * AVAILABLE: {NotNull, VARCHAR(1)} <br />
-     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param available The value of available as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -2494,11 +2568,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
                 likeSearchOption);
     }
 
-    protected void regAvailable(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueAvailable(), "AVAILABLE");
+    protected void regAvailable(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueAvailable(), "AVAILABLE");
     }
 
-    abstract protected ConditionValue getCValueAvailable();
+    protected abstract ConditionValue getCValueAvailable();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2605,11 +2679,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regINS(CK_NINS, cTL(sortOrderList), getCValueSortOrder(), "SORT_ORDER");
     }
 
-    protected void regSortOrder(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueSortOrder(), "SORT_ORDER");
+    protected void regSortOrder(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueSortOrder(), "SORT_ORDER");
     }
 
-    abstract protected ConditionValue getCValueSortOrder();
+    protected abstract ConditionValue getCValueSortOrder();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -2711,7 +2785,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)} <br />
-     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param createdBy The value of createdBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -2734,11 +2808,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
                 likeSearchOption);
     }
 
-    protected void regCreatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedBy(), "CREATED_BY");
+    protected void regCreatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedBy(), "CREATED_BY");
     }
 
-    abstract protected ConditionValue getCValueCreatedBy();
+    protected abstract ConditionValue getCValueCreatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2789,13 +2863,13 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
-     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setCreatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setCreatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -2809,22 +2883,21 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no to-condition)
      */
-    public void setCreatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setCreatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setCreatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
 
-    protected void regCreatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedTime(), "CREATED_TIME");
+    protected void regCreatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedTime(), "CREATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueCreatedTime();
+    protected abstract ConditionValue getCValueCreatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -2926,7 +2999,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * UPDATED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param updatedBy The value of updatedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -2973,11 +3046,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regUpdatedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedBy(), "UPDATED_BY");
+    protected void regUpdatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedBy(), "UPDATED_BY");
     }
 
-    abstract protected ConditionValue getCValueUpdatedBy();
+    protected abstract ConditionValue getCValueUpdatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -3028,13 +3101,13 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setUpdatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setUpdatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -3048,13 +3121,12 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setUpdatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setUpdatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setUpdatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -3075,11 +3147,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regUpdatedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedTime(), "UPDATED_TIME");
+    protected void regUpdatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedTime(), "UPDATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueUpdatedTime();
+    protected abstract ConditionValue getCValueUpdatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -3181,7 +3253,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * DELETED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param deletedBy The value of deletedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -3228,11 +3300,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regDeletedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedBy(), "DELETED_BY");
+    protected void regDeletedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedBy(), "DELETED_BY");
     }
 
-    abstract protected ConditionValue getCValueDeletedBy();
+    protected abstract ConditionValue getCValueDeletedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -3283,13 +3355,13 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setDeletedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setDeletedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -3303,13 +3375,12 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setDeletedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setDeletedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setDeletedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -3330,11 +3401,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regDeletedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedTime(), "DELETED_TIME");
+    protected void regDeletedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedTime(), "DELETED_TIME");
     }
 
-    abstract protected ConditionValue getCValueDeletedTime();
+    protected abstract ConditionValue getCValueDeletedTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -3441,11 +3512,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         regINS(CK_NINS, cTL(versionNoList), getCValueVersionNo(), "VERSION_NO");
     }
 
-    protected void regVersionNo(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueVersionNo(), "VERSION_NO");
+    protected void regVersionNo(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueVersionNo(), "VERSION_NO");
     }
 
-    abstract protected ConditionValue getCValueVersionNo();
+    protected abstract ConditionValue getCValueVersionNo();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -3454,7 +3525,7 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
      *     public void query(FileCrawlingConfigCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -3464,14 +3535,14 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<FileCrawlingConfigCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, FileCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
      *     public void query(FileCrawlingConfigCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -3481,14 +3552,14 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<FileCrawlingConfigCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, FileCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
      *     public void query(FileCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -3498,14 +3569,14 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<FileCrawlingConfigCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, FileCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
      *     public void query(FileCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -3515,14 +3586,14 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<FileCrawlingConfigCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, FileCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
      *     public void query(FileCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -3532,14 +3603,14 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<FileCrawlingConfigCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, FileCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;FileCrawlingConfigCB&gt;() {
      *     public void query(FileCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -3549,44 +3620,31 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<FileCrawlingConfigCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, FileCrawlingConfigCB.class);
     }
 
-    protected HpSSQFunction<FileCrawlingConfigCB> xcreateSSQFunction(
-            final String operand) {
-        return new HpSSQFunction<FileCrawlingConfigCB>(
-                new HpSSQSetupper<FileCrawlingConfigCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<FileCrawlingConfigCB> subQuery,
-                            final HpSSQOption<FileCrawlingConfigCB> option) {
-                        xscalarCondition(function, subQuery, operand, option);
-                    }
-                });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<FileCrawlingConfigCB> subQuery,
-            final String operand, final HpSSQOption<FileCrawlingConfigCB> option) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final FileCrawlingConfigCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(FileCrawlingConfigCQ subQuery);
+    public abstract String keepScalarCondition(FileCrawlingConfigCQ sq);
 
     protected FileCrawlingConfigCB xcreateScalarConditionCB() {
-        final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
+        final FileCrawlingConfigCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected FileCrawlingConfigCB xcreateScalarConditionPartitionByCB() {
-        final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
+        final FileCrawlingConfigCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -3594,106 +3652,174 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<FileCrawlingConfigCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
+    public void xsmyselfDerive(final String fn,
+            final SubQuery<FileCrawlingConfigCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(
-            FileCrawlingConfigCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(FileCrawlingConfigCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<FileCrawlingConfigCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(FileCrawlingConfigCB.class);
     }
 
-    protected HpQDRFunction<FileCrawlingConfigCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<FileCrawlingConfigCB>(
-                new HpQDRSetupper<FileCrawlingConfigCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<FileCrawlingConfigCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveMyselfDerived(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<FileCrawlingConfigCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(FileCrawlingConfigCQ subQuery);
+    public abstract String keepQueryMyselfDerived(FileCrawlingConfigCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<FileCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(FileCrawlingConfigCQ subQuery);
+    public abstract String keepMyselfExists(FileCrawlingConfigCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<FileCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<FileCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(FileCrawlingConfigCQ subQuery);
+    public abstract String keepMyselfInScope(FileCrawlingConfigCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return FileCrawlingConfigCB.class.getName();
+    protected FileCrawlingConfigCB newMyCB() {
+        return new FileCrawlingConfigCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return FileCrawlingConfigCQ.class.getName();
     }

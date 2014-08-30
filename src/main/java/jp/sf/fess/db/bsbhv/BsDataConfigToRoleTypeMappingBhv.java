@@ -18,6 +18,7 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfDataConfigToRoleTypeMapping;
 import jp.sf.fess.db.bsentity.dbmeta.DataConfigToRoleTypeMappingDbm;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
@@ -30,13 +31,24 @@ import org.seasar.dbflute.bhv.AbstractBehaviorWritable;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -92,7 +104,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return DataConfigToRoleTypeMappingDbm.getInstance();
@@ -108,14 +120,14 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public DataConfigToRoleTypeMapping newEntity() {
+        return new DataConfigToRoleTypeMapping();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public DataConfigToRoleTypeMappingCB newConditionBean() {
+        return new DataConfigToRoleTypeMappingCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -137,12 +149,16 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <pre>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
-     * int count = dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final DataConfigToRoleTypeMappingCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final DataConfigToRoleTypeMappingCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -158,19 +174,21 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
-     * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (dataConfigToRoleTypeMapping != null) {
+     * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (dataConfigToRoleTypeMapping != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = dataConfigToRoleTypeMapping.get...();
      * } else {
      *     ...
@@ -178,118 +196,117 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * </pre>
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataConfigToRoleTypeMapping selectEntity(
             final DataConfigToRoleTypeMappingCB cb) {
-        return doSelectEntity(cb, DataConfigToRoleTypeMapping.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected DataConfigToRoleTypeMapping facadeSelectEntity(
+            final DataConfigToRoleTypeMappingCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataConfigToRoleTypeMapping> ENTITY doSelectEntity(
-            final DataConfigToRoleTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityCallback<ENTITY, DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataConfigToRoleTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final DataConfigToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends DataConfigToRoleTypeMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final DataConfigToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
-     * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = dataConfigToRoleTypeMapping.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataConfigToRoleTypeMapping selectEntityWithDeletedCheck(
             final DataConfigToRoleTypeMappingCB cb) {
-        return doSelectEntityWithDeletedCheck(cb,
-                DataConfigToRoleTypeMapping.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected DataConfigToRoleTypeMapping facadeSelectEntityWithDeletedCheck(
+            final DataConfigToRoleTypeMappingCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataConfigToRoleTypeMapping> ENTITY doSelectEntityWithDeletedCheck(
-            final DataConfigToRoleTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
+            final DataConfigToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataConfigToRoleTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataConfigToRoleTypeMapping selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, DataConfigToRoleTypeMapping.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends DataConfigToRoleTypeMapping> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected DataConfigToRoleTypeMapping facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends DataConfigToRoleTypeMapping> ENTITY doSelectByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends DataConfigToRoleTypeMapping> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataConfigToRoleTypeMapping selectByPKValueWithDeletedCheck(
             final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id,
-                DataConfigToRoleTypeMapping.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends DataConfigToRoleTypeMapping> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends DataConfigToRoleTypeMapping> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private DataConfigToRoleTypeMappingCB buildPKCB(final Long id) {
+    protected DataConfigToRoleTypeMappingCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final DataConfigToRoleTypeMappingCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -301,42 +318,33 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;DataConfigToRoleTypeMapping&gt; dataConfigToRoleTypeMappingList = dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;DataConfigToRoleTypeMapping&gt; dataConfigToRoleTypeMappingList = dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping : dataConfigToRoleTypeMappingList) {
      *     ... = dataConfigToRoleTypeMapping.get...();
      * }
      * </pre>
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<DataConfigToRoleTypeMapping> selectList(
             final DataConfigToRoleTypeMappingCB cb) {
-        return doSelectList(cb, DataConfigToRoleTypeMapping.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<DataConfigToRoleTypeMapping> facadeSelectList(
+            final DataConfigToRoleTypeMappingCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataConfigToRoleTypeMapping> ListResultBean<ENTITY> doSelectList(
-            final DataConfigToRoleTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(
-                cb,
-                entityType,
-                new InternalSelectListCallback<ENTITY, DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataConfigToRoleTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final DataConfigToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -349,8 +357,8 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;DataConfigToRoleTypeMapping&gt; page = dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;DataConfigToRoleTypeMapping&gt; page = dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -362,41 +370,27 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * </pre>
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<DataConfigToRoleTypeMapping> selectPage(
             final DataConfigToRoleTypeMappingCB cb) {
-        return doSelectPage(cb, DataConfigToRoleTypeMapping.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<DataConfigToRoleTypeMapping> facadeSelectPage(
+            final DataConfigToRoleTypeMappingCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataConfigToRoleTypeMapping> PagingResultBean<ENTITY> doSelectPage(
-            final DataConfigToRoleTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(
-                cb,
-                entityType,
-                new InternalSelectPageCallback<ENTITY, DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public int callbackSelectCount(
-                            final DataConfigToRoleTypeMappingCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataConfigToRoleTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final DataConfigToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -407,7 +401,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <pre>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;DataConfigToRoleTypeMapping&gt;() {
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;DataConfigToRoleTypeMapping&gt;() {
      *     public void handle(DataConfigToRoleTypeMapping entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -418,38 +412,22 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      */
     public void selectCursor(final DataConfigToRoleTypeMappingCB cb,
             final EntityRowHandler<DataConfigToRoleTypeMapping> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, DataConfigToRoleTypeMapping.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final DataConfigToRoleTypeMappingCB cb,
+            final EntityRowHandler<DataConfigToRoleTypeMapping> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataConfigToRoleTypeMapping> void doSelectCursor(
             final DataConfigToRoleTypeMappingCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<DataConfigToRoleTypeMapping>",
-                entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(
-                cb,
-                entityRowHandler,
-                entityType,
-                new InternalSelectCursorCallback<ENTITY, DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public void callbackSelectCursor(
-                            final DataConfigToRoleTypeMappingCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataConfigToRoleTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -459,29 +437,41 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(DataConfigToRoleTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<DataConfigToRoleTypeMappingCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<DataConfigToRoleTypeMappingCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends DataConfigToRoleTypeMappingCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<DataConfigToRoleTypeMappingCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends DataConfigToRoleTypeMappingCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -495,6 +485,87 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     }
 
     // ===================================================================================
+    //                                                                       Load Referrer
+    //                                                                       =============
+    /**
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param dataConfigToRoleTypeMappingList The entity list of dataConfigToRoleTypeMapping. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(
+            final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList,
+            final ReferrerLoaderHandler<LoaderOfDataConfigToRoleTypeMapping> handler) {
+        xassLRArg(dataConfigToRoleTypeMappingList, handler);
+        handler.handle(new LoaderOfDataConfigToRoleTypeMapping().ready(
+                dataConfigToRoleTypeMappingList, _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param dataConfigToRoleTypeMapping The entity of dataConfigToRoleTypeMapping. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(
+            final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
+            final ReferrerLoaderHandler<LoaderOfDataConfigToRoleTypeMapping> handler) {
+        xassLRArg(dataConfigToRoleTypeMapping, handler);
+        handler.handle(new LoaderOfDataConfigToRoleTypeMapping().ready(
+                xnewLRAryLs(dataConfigToRoleTypeMapping), _behaviorSelector));
+    }
+
+    // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
     /**
@@ -504,26 +575,8 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      */
     public List<DataCrawlingConfig> pulloutDataCrawlingConfig(
             final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList) {
-        return helpPulloutInternally(
-                dataConfigToRoleTypeMappingList,
-                new InternalPulloutCallback<DataConfigToRoleTypeMapping, DataCrawlingConfig>() {
-                    @Override
-                    public DataCrawlingConfig getFr(
-                            final DataConfigToRoleTypeMapping e) {
-                        return e.getDataCrawlingConfig();
-                    }
-
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final DataCrawlingConfig e,
-                            final List<DataConfigToRoleTypeMapping> ls) {
-                        e.setDataConfigToRoleTypeMappingList(ls);
-                    }
-                });
+        return helpPulloutInternally(dataConfigToRoleTypeMappingList,
+                "dataCrawlingConfig");
     }
 
     /**
@@ -533,25 +586,8 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      */
     public List<RoleType> pulloutRoleType(
             final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList) {
-        return helpPulloutInternally(
-                dataConfigToRoleTypeMappingList,
-                new InternalPulloutCallback<DataConfigToRoleTypeMapping, RoleType>() {
-                    @Override
-                    public RoleType getFr(final DataConfigToRoleTypeMapping e) {
-                        return e.getRoleType();
-                    }
-
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final RoleType e,
-                            final List<DataConfigToRoleTypeMapping> ls) {
-                        e.setDataConfigToRoleTypeMappingList(ls);
-                    }
-                });
+        return helpPulloutInternally(dataConfigToRoleTypeMappingList,
+                "roleType");
     }
 
     // ===================================================================================
@@ -564,21 +600,14 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      */
     public List<Long> extractIdList(
             final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList) {
-        return helpExtractListInternally(
-                dataConfigToRoleTypeMappingList,
-                new InternalExtractCallback<DataConfigToRoleTypeMapping, Long>() {
-                    @Override
-                    public Long getCV(final DataConfigToRoleTypeMapping e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(dataConfigToRoleTypeMappingList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -587,42 +616,40 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.set...;</span>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">insert</span>(dataConfigToRoleTypeMapping);
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">insert</span>(dataConfigToRoleTypeMapping);
      * ... = dataConfigToRoleTypeMapping.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param dataConfigToRoleTypeMapping The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param dataConfigToRoleTypeMapping The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping) {
         doInsert(dataConfigToRoleTypeMapping, null);
     }
 
-    protected void doInsert(
-            final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
-            final InsertOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMapping",
-                dataConfigToRoleTypeMapping);
-        prepareInsertOption(option);
-        delegateInsert(dataConfigToRoleTypeMapping, option);
+    protected void doInsert(final DataConfigToRoleTypeMapping et,
+            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMapping", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
     protected void prepareInsertOption(
-            final InsertOption<DataConfigToRoleTypeMappingCB> option) {
-        if (option == null) {
+            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -634,149 +661,102 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * dataConfigToRoleTypeMapping.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * dataConfigToRoleTypeMapping.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">update</span>(dataConfigToRoleTypeMapping);
+     *     dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">update</span>(dataConfigToRoleTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param dataConfigToRoleTypeMapping The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param dataConfigToRoleTypeMapping The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping) {
         doUpdate(dataConfigToRoleTypeMapping, null);
     }
 
-    protected void doUpdate(
-            final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMapping",
-                dataConfigToRoleTypeMapping);
-        prepareUpdateOption(option);
-        helpUpdateInternally(dataConfigToRoleTypeMapping,
-                new InternalUpdateCallback<DataConfigToRoleTypeMapping>() {
-                    @Override
-                    public int callbackDelegateUpdate(
-                            final DataConfigToRoleTypeMapping entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final DataConfigToRoleTypeMapping et,
+            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMapping", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
     protected void prepareUpdateOption(
-            final UpdateOption<DataConfigToRoleTypeMappingCB> option) {
-        if (option == null) {
+            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected DataConfigToRoleTypeMappingCB createCBForVaryingUpdate() {
-        final DataConfigToRoleTypeMappingCB cb = newMyConditionBean();
+        final DataConfigToRoleTypeMappingCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected DataConfigToRoleTypeMappingCB createCBForSpecifiedUpdate() {
-        final DataConfigToRoleTypeMappingCB cb = newMyConditionBean();
+        final DataConfigToRoleTypeMappingCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        doModify(entity, option);
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doModify(et, op);
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param dataConfigToRoleTypeMapping The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param dataConfigToRoleTypeMapping The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping) {
-        doInesrtOrUpdate(dataConfigToRoleTypeMapping, null, null);
+        doInsertOrUpdate(dataConfigToRoleTypeMapping, null, null);
     }
 
-    protected void doInesrtOrUpdate(
-            final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
-            final InsertOption<DataConfigToRoleTypeMappingCB> insertOption,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                dataConfigToRoleTypeMapping,
-                new InternalInsertOrUpdateCallback<DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public void callbackInsert(
-                            final DataConfigToRoleTypeMapping entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(
-                            final DataConfigToRoleTypeMapping entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public DataConfigToRoleTypeMappingCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(
-                            final DataConfigToRoleTypeMappingCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final DataConfigToRoleTypeMapping et,
+            final InsertOption<DataConfigToRoleTypeMappingCB> iop,
+            final UpdateOption<DataConfigToRoleTypeMappingCB> uop) {
+        assertObjectNotNull("dataConfigToRoleTypeMapping", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<DataConfigToRoleTypeMappingCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<DataConfigToRoleTypeMappingCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            final InsertOption<? extends ConditionBean> insertOption,
-            final UpdateOption<? extends ConditionBean> updateOption) {
-        doCreateOrModify(entity, insertOption, updateOption);
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -784,72 +764,73 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <pre>
      * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
      * dataConfigToRoleTypeMapping.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * dataConfigToRoleTypeMapping.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * dataConfigToRoleTypeMapping.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">delete</span>(dataConfigToRoleTypeMapping);
+     *     dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">delete</span>(dataConfigToRoleTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param dataConfigToRoleTypeMapping The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param dataConfigToRoleTypeMapping The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping) {
         doDelete(dataConfigToRoleTypeMapping, null);
     }
 
-    protected void doDelete(
-            final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMapping",
-                dataConfigToRoleTypeMapping);
-        prepareDeleteOption(option);
-        helpDeleteInternally(dataConfigToRoleTypeMapping,
-                new InternalDeleteCallback<DataConfigToRoleTypeMapping>() {
-                    @Override
-                    public int callbackDelegateDelete(
-                            final DataConfigToRoleTypeMapping entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final DataConfigToRoleTypeMapping et,
+            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMapping", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
     protected void prepareDeleteOption(
-            final DeleteOption<DataConfigToRoleTypeMappingCB> option) {
-        if (option == null) {
-            return;
-        }
-        assertDeleteOptionStatus(option);
-    }
-
-    @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
+            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        doRemove(entity, option);
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
+    }
+
+    @Override
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doRemove(et, op);
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
+     *     dataConfigToRoleTypeMapping.setFooName("foo");
+     *     if (...) {
+     *         dataConfigToRoleTypeMapping.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     dataConfigToRoleTypeMappingList.add(dataConfigToRoleTypeMapping);
+     * }
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">batchInsert</span>(dataConfigToRoleTypeMappingList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param dataConfigToRoleTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -858,95 +839,103 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
         return doBatchInsert(dataConfigToRoleTypeMappingList, null);
     }
 
-    protected int[] doBatchInsert(
-            final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList,
-            final InsertOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMappingList",
-                dataConfigToRoleTypeMappingList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(dataConfigToRoleTypeMappingList, option);
+    protected int[] doBatchInsert(final List<DataConfigToRoleTypeMapping> ls,
+            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMappingList", ls);
+        InsertOption<DataConfigToRoleTypeMappingCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(
+            final List<DataConfigToRoleTypeMapping> ls,
+            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(dataConfigToRoleTypeMappingList, new SpecifyQuery<DataConfigToRoleTypeMappingCB>() {
-     *     public void specify(DataConfigToRoleTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
+     *     dataConfigToRoleTypeMapping.setFooName("foo");
+     *     if (...) {
+     *         dataConfigToRoleTypeMapping.setFooPrice(123);
+     *     } else {
+     *         dataConfigToRoleTypeMapping.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     dataConfigToRoleTypeMappingList.add(dataConfigToRoleTypeMapping);
+     * }
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">batchUpdate</span>(dataConfigToRoleTypeMappingList);
      * </pre>
      * @param dataConfigToRoleTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(
             final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList) {
         return doBatchUpdate(dataConfigToRoleTypeMappingList, null);
     }
 
-    protected int[] doBatchUpdate(
-            final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMappingList",
-                dataConfigToRoleTypeMappingList);
-        prepareBatchUpdateOption(dataConfigToRoleTypeMappingList, option);
-        return delegateBatchUpdate(dataConfigToRoleTypeMappingList, option);
+    protected int[] doBatchUpdate(final List<DataConfigToRoleTypeMapping> ls,
+            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMappingList", ls);
+        UpdateOption<DataConfigToRoleTypeMappingCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
     protected void prepareBatchUpdateOption(
-            final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(dataConfigToRoleTypeMappingList);
-        //}
+            final List<DataConfigToRoleTypeMapping> ls,
+            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(dataConfigToRoleTypeMappingList, new SpecifyQuery<DataConfigToRoleTypeMappingCB>() {
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">batchUpdate</span>(dataConfigToRoleTypeMappingList, new SpecifyQuery<DataConfigToRoleTypeMappingCB>() {
      *     public void specify(DataConfigToRoleTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(dataConfigToRoleTypeMappingList, new SpecifyQuery<DataConfigToRoleTypeMappingCB>() {
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">batchUpdate</span>(dataConfigToRoleTypeMappingList, new SpecifyQuery<DataConfigToRoleTypeMappingCB>() {
      *     public void specify(DataConfigToRoleTypeMappingCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -958,7 +947,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * @param dataConfigToRoleTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(
             final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList,
@@ -969,8 +958,8 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        return doLumpModify(ls, option);
+            final UpdateOption<? extends ConditionBean> op) {
+        return doLumpModify(ls, op);
     }
 
     /**
@@ -978,36 +967,30 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param dataConfigToRoleTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDelete(
             final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList) {
         return doBatchDelete(dataConfigToRoleTypeMappingList, null);
     }
 
-    protected int[] doBatchDelete(
-            final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMappingList",
-                dataConfigToRoleTypeMappingList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(dataConfigToRoleTypeMappingList, option);
+    protected int[] doBatchDelete(final List<DataConfigToRoleTypeMapping> ls,
+            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMappingList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        return doLumpRemove(ls, option);
+            final DeleteOption<? extends ConditionBean> op) {
+        return doLumpRemove(ls, op);
     }
 
     // ===================================================================================
@@ -1016,7 +999,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB&gt;() {
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB&gt;() {
      *     public ConditionBean setup(dataConfigToRoleTypeMapping entity, DataConfigToRoleTypeMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1029,7 +1012,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1045,18 +1028,17 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB> setupper,
-            final InsertOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final DataConfigToRoleTypeMapping entity = new DataConfigToRoleTypeMapping();
-        final DataConfigToRoleTypeMappingCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB> sp,
+            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final DataConfigToRoleTypeMapping et = newEntity();
+        final DataConfigToRoleTypeMappingCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected DataConfigToRoleTypeMappingCB createCBForQueryInsert() {
-        final DataConfigToRoleTypeMappingCB cb = newMyConditionBean();
+        final DataConfigToRoleTypeMappingCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1064,12 +1046,8 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1082,17 +1060,17 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setVersionNo(value);</span>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">queryUpdate</span>(dataConfigToRoleTypeMapping, cb);
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">queryUpdate</span>(dataConfigToRoleTypeMapping, cb);
      * </pre>
      * @param dataConfigToRoleTypeMapping The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
@@ -1100,28 +1078,20 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
         return doQueryUpdate(dataConfigToRoleTypeMapping, cb, null);
     }
 
-    protected int doQueryUpdate(
-            final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
+    protected int doQueryUpdate(final DataConfigToRoleTypeMapping et,
             final DataConfigToRoleTypeMappingCB cb,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("dataConfigToRoleTypeMapping",
-                dataConfigToRoleTypeMapping);
+            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
+        assertObjectNotNull("dataConfigToRoleTypeMapping", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                dataConfigToRoleTypeMapping, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity),
-                    (DataConfigToRoleTypeMappingCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity),
-                    (DataConfigToRoleTypeMappingCB) cb, downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1129,33 +1099,28 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <pre>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
      * cb.query().setFoo...(value);
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">queryDelete</span>(dataConfigToRoleTypeMapping, cb);
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">queryDelete</span>(dataConfigToRoleTypeMapping, cb);
      * </pre>
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final DataConfigToRoleTypeMappingCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final DataConfigToRoleTypeMappingCB cb,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> option) {
+            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((DataConfigToRoleTypeMappingCB) cb);
-        } else {
-            return varyingQueryDelete((DataConfigToRoleTypeMappingCB) cb,
-                    downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1176,12 +1141,12 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * InsertOption<DataConfigToRoleTypeMappingCB> option = new InsertOption<DataConfigToRoleTypeMappingCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">varyingInsert</span>(dataConfigToRoleTypeMapping, option);
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">varyingInsert</span>(dataConfigToRoleTypeMapping, option);
      * ... = dataConfigToRoleTypeMapping.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param dataConfigToRoleTypeMapping The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param dataConfigToRoleTypeMapping The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
@@ -1198,26 +1163,26 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
      * dataConfigToRoleTypeMapping.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * dataConfigToRoleTypeMapping.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * dataConfigToRoleTypeMapping.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * dataConfigToRoleTypeMapping.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;DataConfigToRoleTypeMappingCB&gt; option = new UpdateOption&lt;DataConfigToRoleTypeMappingCB&gt;();
      *     option.self(new SpecifyQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *         public void specify(DataConfigToRoleTypeMappingCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">varyingUpdate</span>(dataConfigToRoleTypeMapping, option);
+     *     dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">varyingUpdate</span>(dataConfigToRoleTypeMapping, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param dataConfigToRoleTypeMapping The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param dataConfigToRoleTypeMapping The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
@@ -1229,12 +1194,12 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param dataConfigToRoleTypeMapping The entity of insert or update target. (NotNull)
+     * @param dataConfigToRoleTypeMapping The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
@@ -1242,7 +1207,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
             final UpdateOption<DataConfigToRoleTypeMappingCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(dataConfigToRoleTypeMapping, insertOption,
+        doInsertOrUpdate(dataConfigToRoleTypeMapping, insertOption,
                 updateOption);
     }
 
@@ -1250,10 +1215,10 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * Delete the entity with varying requests. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param dataConfigToRoleTypeMapping The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param dataConfigToRoleTypeMapping The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
@@ -1341,7 +1306,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setPK...(value);</span>
      * dataConfigToRoleTypeMapping.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataConfigToRoleTypeMapping.setVersionNo(value);</span>
      * DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
@@ -1349,16 +1314,16 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * UpdateOption&lt;DataConfigToRoleTypeMappingCB&gt; option = new UpdateOption&lt;DataConfigToRoleTypeMappingCB&gt;();
      * option.self(new SpecifyQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void specify(DataConfigToRoleTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * dataConfigToRoleTypeMappingBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(dataConfigToRoleTypeMapping, cb, option);
+     * dataConfigToRoleTypeMappingBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(dataConfigToRoleTypeMapping, cb, option);
      * </pre>
      * @param dataConfigToRoleTypeMapping The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(
             final DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping,
@@ -1375,7 +1340,7 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
      * @param cb The condition-bean of DataConfigToRoleTypeMapping. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final DataConfigToRoleTypeMappingCB cb,
             final DeleteOption<DataConfigToRoleTypeMappingCB> option) {
@@ -1422,175 +1387,14 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(
-            final DataConfigToRoleTypeMappingCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<DataConfigToRoleTypeMapping> typeOfSelectedEntity() {
+        return DataConfigToRoleTypeMapping.class;
     }
 
-    protected int delegateSelectCountPlainly(
-            final DataConfigToRoleTypeMappingCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends DataConfigToRoleTypeMapping> void delegateSelectCursor(
-            final DataConfigToRoleTypeMappingCB cb,
-            final EntityRowHandler<ENTITY> erh, final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends DataConfigToRoleTypeMapping> List<ENTITY> delegateSelectList(
-            final DataConfigToRoleTypeMappingCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final DataConfigToRoleTypeMapping e,
-            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final DataConfigToRoleTypeMapping e,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return delegateUpdateNonstrict(e, op);
-    }
-
-    protected int delegateUpdateNonstrict(final DataConfigToRoleTypeMapping e,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final DataConfigToRoleTypeMapping e,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return delegateDeleteNonstrict(e, op);
-    }
-
-    protected int delegateDeleteNonstrict(final DataConfigToRoleTypeMapping e,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(
-            final List<DataConfigToRoleTypeMapping> ls,
-            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(
-            final List<DataConfigToRoleTypeMapping> ls,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchUpdateNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(
-            final List<DataConfigToRoleTypeMapping> ls,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(
-            final List<DataConfigToRoleTypeMapping> ls,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(
-            final List<DataConfigToRoleTypeMapping> ls,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final DataConfigToRoleTypeMapping e,
-            final DataConfigToRoleTypeMappingCB inCB,
-            final ConditionBean resCB,
-            final InsertOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final DataConfigToRoleTypeMapping e,
-            final DataConfigToRoleTypeMappingCB cb,
-            final UpdateOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final DataConfigToRoleTypeMappingCB cb,
-            final DeleteOption<DataConfigToRoleTypeMappingCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
-    //                                                                Optimistic Lock Info
-    //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
-    }
-
-    // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected DataConfigToRoleTypeMapping downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity,
+    protected DataConfigToRoleTypeMapping downcast(final Entity et) {
+        return helpEntityDowncastInternally(et,
                 DataConfigToRoleTypeMapping.class);
     }
 
@@ -1601,31 +1405,31 @@ public abstract class BsDataConfigToRoleTypeMappingBhv extends
 
     @SuppressWarnings("unchecked")
     protected List<DataConfigToRoleTypeMapping> downcast(
-            final List<? extends Entity> entityList) {
-        return (List<DataConfigToRoleTypeMapping>) entityList;
+            final List<? extends Entity> ls) {
+        return (List<DataConfigToRoleTypeMapping>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<DataConfigToRoleTypeMappingCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<DataConfigToRoleTypeMappingCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<DataConfigToRoleTypeMappingCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<DataConfigToRoleTypeMappingCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<DataConfigToRoleTypeMappingCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<DataConfigToRoleTypeMappingCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<DataConfigToRoleTypeMappingCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<DataConfigToRoleTypeMappingCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<DataConfigToRoleTypeMappingCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<DataConfigToRoleTypeMapping, DataConfigToRoleTypeMappingCB>) sp;
     }
 }

@@ -51,6 +51,7 @@ map:{
 # | BINARY        | byte[]               | byte[]        |
 # | VARBINARY     | byte[]               | byte[]        |
 # | LONGVARBINARY | byte[]               | byte[]        |
+# | BLOB          | byte[]               | byte[]        |
 # | ARRAY         | *Unsupported         | *Unsupported  |
 # | UUID          | java.util.UUID       | *Unsupported  |
 # --------------------------------------------------------

@@ -103,13 +103,13 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     /** ID: {PK, ID, NotNull, BIGINT(19)} */
     protected Long _id;
 
-    /** REGULAR_NAME: {IX, NotNull, VARCHAR(1000)} */
+    /** REGULAR_NAME: {IX+, NotNull, VARCHAR(1000)} */
     protected String _regularName;
 
     /** OVERLAPPING_NAME: {NotNull, VARCHAR(1000)} */
     protected String _overlappingName;
 
-    /** SORT_ORDER: {IX+, NotNull, INTEGER(10)} */
+    /** SORT_ORDER: {NotNull, INTEGER(10)} */
     protected Integer _sortOrder;
 
     /** CREATED_BY: {NotNull, VARCHAR(255)} */
@@ -136,8 +136,14 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -183,6 +189,18 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -225,28 +243,47 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsOverlappingHost)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsOverlappingHost)) {
             return false;
         }
-        final BsOverlappingHost otherEntity = (BsOverlappingHost) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsOverlappingHost other = (BsOverlappingHost) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -255,14 +292,14 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -279,7 +316,7 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -314,20 +351,20 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getRegularName());
-        sb.append(delimiter).append(getOverlappingName());
-        sb.append(delimiter).append(getSortOrder());
-        sb.append(delimiter).append(getCreatedBy());
-        sb.append(delimiter).append(getCreatedTime());
-        sb.append(delimiter).append(getUpdatedBy());
-        sb.append(delimiter).append(getUpdatedTime());
-        sb.append(delimiter).append(getDeletedBy());
-        sb.append(delimiter).append(getDeletedTime());
-        sb.append(delimiter).append(getVersionNo());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getRegularName());
+        sb.append(dm).append(getOverlappingName());
+        sb.append(dm).append(getSortOrder());
+        sb.append(dm).append(getCreatedBy());
+        sb.append(dm).append(getCreatedTime());
+        sb.append(dm).append(getUpdatedBy());
+        sb.append(dm).append(getUpdatedTime());
+        sb.append(dm).append(getDeletedBy());
+        sb.append(dm).append(getDeletedTime());
+        sb.append(dm).append(getVersionNo());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -372,7 +409,7 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     }
 
     /**
-     * [get] REGULAR_NAME: {IX, NotNull, VARCHAR(1000)} <br />
+     * [get] REGULAR_NAME: {IX+, NotNull, VARCHAR(1000)} <br />
      * @return The value of the column 'REGULAR_NAME'. (basically NotNull if selected: for the constraint)
      */
     public String getRegularName() {
@@ -380,7 +417,7 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     }
 
     /**
-     * [set] REGULAR_NAME: {IX, NotNull, VARCHAR(1000)} <br />
+     * [set] REGULAR_NAME: {IX+, NotNull, VARCHAR(1000)} <br />
      * @param regularName The value of the column 'REGULAR_NAME'. (basically NotNull if update: for the constraint)
      */
     public void setRegularName(final String regularName) {
@@ -406,7 +443,7 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     }
 
     /**
-     * [get] SORT_ORDER: {IX+, NotNull, INTEGER(10)} <br />
+     * [get] SORT_ORDER: {NotNull, INTEGER(10)} <br />
      * @return The value of the column 'SORT_ORDER'. (basically NotNull if selected: for the constraint)
      */
     public Integer getSortOrder() {
@@ -414,7 +451,7 @@ public abstract class BsOverlappingHost implements Entity, Serializable,
     }
 
     /**
-     * [set] SORT_ORDER: {IX+, NotNull, INTEGER(10)} <br />
+     * [set] SORT_ORDER: {NotNull, INTEGER(10)} <br />
      * @param sortOrder The value of the column 'SORT_ORDER'. (basically NotNull if update: for the constraint)
      */
     public void setSortOrder(final Integer sortOrder) {

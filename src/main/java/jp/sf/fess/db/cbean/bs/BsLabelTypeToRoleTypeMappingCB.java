@@ -26,8 +26,6 @@ import jp.sf.fess.db.cbean.RoleTypeCB;
 import jp.sf.fess.db.cbean.cq.LabelTypeCQ;
 import jp.sf.fess.db.cbean.cq.LabelTypeToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.RoleTypeCQ;
-import jp.sf.fess.db.cbean.nss.LabelTypeNss;
-import jp.sf.fess.db.cbean.nss.RoleTypeNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -112,6 +110,22 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public LabelTypeToRoleTypeMappingCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsLabelTypeToRoleTypeMappingCB cb = this;
+        cb.query().setId_Equal(id);
+        return (LabelTypeToRoleTypeMappingCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsLabelTypeToRoleTypeMappingCB cb = this;
@@ -160,7 +174,7 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -178,7 +192,7 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -253,7 +267,7 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -265,7 +279,12 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final LabelTypeToRoleTypeMappingCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -276,7 +295,7 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -289,7 +308,12 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final LabelTypeToRoleTypeMappingCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -298,28 +322,19 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected LabelTypeNss _nssLabelType;
-
-    public LabelTypeNss getNssLabelType() {
-        if (_nssLabelType == null) {
-            _nssLabelType = new LabelTypeNss(null);
-        }
-        return _nssLabelType;
-    }
-
     /**
      * Set up relation columns to select clause. <br />
      * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
      * <pre>
      * LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
-     * cb.<span style="color: #FD4747">setupSelect_LabelType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_LabelType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * LabelTypeToRoleTypeMapping labelTypeToRoleTypeMapping = labelTypeToRoleTypeMappingBhv.selectEntityWithDeletedCheck(cb);
-     * ... = labelTypeToRoleTypeMapping.<span style="color: #FD4747">getLabelType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = labelTypeToRoleTypeMapping.<span style="color: #DD4747">getLabelType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public LabelTypeNss setupSelect_LabelType() {
+    public void setupSelect_LabelType() {
+        assertSetupSelectPurpose("labelType");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnLabelTypeId();
         }
@@ -329,19 +344,6 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
                 return query().queryLabelType();
             }
         });
-        if (_nssLabelType == null || !_nssLabelType.hasConditionQuery()) {
-            _nssLabelType = new LabelTypeNss(query().queryLabelType());
-        }
-        return _nssLabelType;
-    }
-
-    protected RoleTypeNss _nssRoleType;
-
-    public RoleTypeNss getNssRoleType() {
-        if (_nssRoleType == null) {
-            _nssRoleType = new RoleTypeNss(null);
-        }
-        return _nssRoleType;
     }
 
     /**
@@ -349,14 +351,14 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
      * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
      * <pre>
      * LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
-     * cb.<span style="color: #FD4747">setupSelect_RoleType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_RoleType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * LabelTypeToRoleTypeMapping labelTypeToRoleTypeMapping = labelTypeToRoleTypeMappingBhv.selectEntityWithDeletedCheck(cb);
-     * ... = labelTypeToRoleTypeMapping.<span style="color: #FD4747">getRoleType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = labelTypeToRoleTypeMapping.<span style="color: #DD4747">getRoleType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public RoleTypeNss setupSelect_RoleType() {
+    public void setupSelect_RoleType() {
+        assertSetupSelectPurpose("roleType");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnRoleTypeId();
         }
@@ -366,10 +368,6 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
                 return query().queryRoleType();
             }
         });
-        if (_nssRoleType == null || !_nssRoleType.hasConditionQuery()) {
-            _nssRoleType = new RoleTypeNss(query().queryRoleType());
-        }
-        return _nssRoleType;
     }
 
     // [DBFlute-0.7.4]
@@ -585,13 +583,11 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
                     new HpSDRSetupper<LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMappingCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery,
+                                final String fn,
+                                final SubQuery<LabelTypeToRoleTypeMappingCB> sq,
                                 final LabelTypeToRoleTypeMappingCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                                final String al, final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -599,19 +595,19 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -660,14 +656,14 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -680,15 +676,20 @@ public class BsLabelTypeToRoleTypeMappingCB extends AbstractConditionBean {
         xorSQ((LabelTypeToRoleTypeMappingCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *             public void query(LabelTypeToRoleTypeMappingCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

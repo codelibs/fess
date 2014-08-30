@@ -18,6 +18,7 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfSearchFieldLog;
 import jp.sf.fess.db.bsentity.dbmeta.SearchFieldLogDbm;
 import jp.sf.fess.db.cbean.SearchFieldLogCB;
 import jp.sf.fess.db.exbhv.SearchFieldLogBhv;
@@ -29,13 +30,24 @@ import org.seasar.dbflute.bhv.AbstractBehaviorWritable;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -92,7 +104,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return SearchFieldLogDbm.getInstance();
@@ -108,14 +120,14 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public SearchFieldLog newEntity() {
+        return new SearchFieldLog();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public SearchFieldLogCB newConditionBean() {
+        return new SearchFieldLogCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -137,12 +149,16 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <pre>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
-     * int count = searchFieldLogBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = searchFieldLogBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final SearchFieldLogCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final SearchFieldLogCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -158,19 +174,21 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
-     * SearchFieldLog searchFieldLog = searchFieldLogBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (searchFieldLog != null) {
+     * SearchFieldLog searchFieldLog = searchFieldLogBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (searchFieldLog != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = searchFieldLog.get...();
      * } else {
      *     ...
@@ -178,109 +196,113 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public SearchFieldLog selectEntity(final SearchFieldLogCB cb) {
-        return doSelectEntity(cb, SearchFieldLog.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected SearchFieldLog facadeSelectEntity(final SearchFieldLogCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends SearchFieldLog> ENTITY doSelectEntity(
-            final SearchFieldLogCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(cb, entityType,
-                new InternalSelectEntityCallback<ENTITY, SearchFieldLogCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final SearchFieldLogCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final SearchFieldLogCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends SearchFieldLog> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final SearchFieldLogCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
-     * SearchFieldLog searchFieldLog = searchFieldLogBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * SearchFieldLog searchFieldLog = searchFieldLogBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = searchFieldLog.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public SearchFieldLog selectEntityWithDeletedCheck(final SearchFieldLogCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, SearchFieldLog.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected SearchFieldLog facadeSelectEntityWithDeletedCheck(
+            final SearchFieldLogCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends SearchFieldLog> ENTITY doSelectEntityWithDeletedCheck(
-            final SearchFieldLogCB cb, final Class<ENTITY> entityType) {
+            final SearchFieldLogCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, SearchFieldLogCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final SearchFieldLogCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public SearchFieldLog selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, SearchFieldLog.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends SearchFieldLog> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected SearchFieldLog facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends SearchFieldLog> ENTITY doSelectByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends SearchFieldLog> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public SearchFieldLog selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, SearchFieldLog.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SearchFieldLog> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends SearchFieldLog> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private SearchFieldLogCB buildPKCB(final Long id) {
+    protected SearchFieldLogCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final SearchFieldLogCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -292,38 +314,32 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;SearchFieldLog&gt; searchFieldLogList = searchFieldLogBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;SearchFieldLog&gt; searchFieldLogList = searchFieldLogBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (SearchFieldLog searchFieldLog : searchFieldLogList) {
      *     ... = searchFieldLog.get...();
      * }
      * </pre>
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<SearchFieldLog> selectList(final SearchFieldLogCB cb) {
-        return doSelectList(cb, SearchFieldLog.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<SearchFieldLog> facadeSelectList(
+            final SearchFieldLogCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends SearchFieldLog> ListResultBean<ENTITY> doSelectList(
-            final SearchFieldLogCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, SearchFieldLogCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final SearchFieldLogCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final SearchFieldLogCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -336,8 +352,8 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;SearchFieldLog&gt; page = searchFieldLogBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;SearchFieldLog&gt; page = searchFieldLogBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -349,36 +365,26 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<SearchFieldLog> selectPage(final SearchFieldLogCB cb) {
-        return doSelectPage(cb, SearchFieldLog.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<SearchFieldLog> facadeSelectPage(
+            final SearchFieldLogCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends SearchFieldLog> PagingResultBean<ENTITY> doSelectPage(
-            final SearchFieldLogCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, SearchFieldLogCB>() {
-                    @Override
-                    public int callbackSelectCount(final SearchFieldLogCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final SearchFieldLogCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final SearchFieldLogCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -389,7 +395,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <pre>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
-     * searchFieldLogBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;SearchFieldLog&gt;() {
+     * searchFieldLogBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;SearchFieldLog&gt;() {
      *     public void handle(SearchFieldLog entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -400,34 +406,22 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final SearchFieldLogCB cb,
             final EntityRowHandler<SearchFieldLog> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, SearchFieldLog.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final SearchFieldLogCB cb,
+            final EntityRowHandler<SearchFieldLog> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends SearchFieldLog> void doSelectCursor(
-            final SearchFieldLogCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final SearchFieldLogCB cb, final EntityRowHandler<ENTITY> handler,
+            final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<SearchFieldLog>",
-                entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(cb, entityRowHandler, entityType,
-                new InternalSelectCursorCallback<ENTITY, SearchFieldLogCB>() {
-                    @Override
-                    public void callbackSelectCursor(final SearchFieldLogCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final SearchFieldLogCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -437,29 +431,41 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * searchFieldLogBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * searchFieldLogBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(SearchFieldLogCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<SearchFieldLogCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<SearchFieldLogCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends SearchFieldLogCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<SearchFieldLogCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends SearchFieldLogCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -473,6 +479,85 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
+    //                                                                       Load Referrer
+    //                                                                       =============
+    /**
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param searchFieldLogList The entity list of searchFieldLog. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final List<SearchFieldLog> searchFieldLogList,
+            final ReferrerLoaderHandler<LoaderOfSearchFieldLog> handler) {
+        xassLRArg(searchFieldLogList, handler);
+        handler.handle(new LoaderOfSearchFieldLog().ready(searchFieldLogList,
+                _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param searchFieldLog The entity of searchFieldLog. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final SearchFieldLog searchFieldLog,
+            final ReferrerLoaderHandler<LoaderOfSearchFieldLog> handler) {
+        xassLRArg(searchFieldLog, handler);
+        handler.handle(new LoaderOfSearchFieldLog().ready(
+                xnewLRAryLs(searchFieldLog), _behaviorSelector));
+    }
+
+    // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
     /**
@@ -482,24 +567,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      */
     public List<SearchLog> pulloutSearchLog(
             final List<SearchFieldLog> searchFieldLogList) {
-        return helpPulloutInternally(searchFieldLogList,
-                new InternalPulloutCallback<SearchFieldLog, SearchLog>() {
-                    @Override
-                    public SearchLog getFr(final SearchFieldLog e) {
-                        return e.getSearchLog();
-                    }
-
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final SearchLog e,
-                            final List<SearchFieldLog> ls) {
-                        e.setSearchFieldLogList(ls);
-                    }
-                });
+        return helpPulloutInternally(searchFieldLogList, "searchLog");
     }
 
     // ===================================================================================
@@ -512,20 +580,14 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      */
     public List<Long> extractIdList(
             final List<SearchFieldLog> searchFieldLogList) {
-        return helpExtractListInternally(searchFieldLogList,
-                new InternalExtractCallback<SearchFieldLog, Long>() {
-                    @Override
-                    public Long getCV(final SearchFieldLog e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(searchFieldLogList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * SearchFieldLog searchFieldLog = new SearchFieldLog();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -534,39 +596,38 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//searchFieldLog.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//searchFieldLog.set...;</span>
-     * searchFieldLogBhv.<span style="color: #FD4747">insert</span>(searchFieldLog);
+     * searchFieldLogBhv.<span style="color: #DD4747">insert</span>(searchFieldLog);
      * ... = searchFieldLog.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param searchFieldLog The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param searchFieldLog The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final SearchFieldLog searchFieldLog) {
         doInsert(searchFieldLog, null);
     }
 
-    protected void doInsert(final SearchFieldLog searchFieldLog,
-            final InsertOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLog", searchFieldLog);
-        prepareInsertOption(option);
-        delegateInsert(searchFieldLog, option);
+    protected void doInsert(final SearchFieldLog et,
+            final InsertOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLog", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
-    protected void prepareInsertOption(
-            final InsertOption<SearchFieldLogCB> option) {
-        if (option == null) {
+    protected void prepareInsertOption(final InsertOption<SearchFieldLogCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -578,141 +639,99 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//searchFieldLog.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//searchFieldLog.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * searchFieldLog.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * searchFieldLog.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     searchFieldLogBhv.<span style="color: #FD4747">update</span>(searchFieldLog);
+     *     searchFieldLogBhv.<span style="color: #DD4747">update</span>(searchFieldLog);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param searchFieldLog The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param searchFieldLog The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final SearchFieldLog searchFieldLog) {
         doUpdate(searchFieldLog, null);
     }
 
-    protected void doUpdate(final SearchFieldLog searchFieldLog,
-            final UpdateOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLog", searchFieldLog);
-        prepareUpdateOption(option);
-        helpUpdateInternally(searchFieldLog,
-                new InternalUpdateCallback<SearchFieldLog>() {
-                    @Override
-                    public int callbackDelegateUpdate(
-                            final SearchFieldLog entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final SearchFieldLog et,
+            final UpdateOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLog", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
-    protected void prepareUpdateOption(
-            final UpdateOption<SearchFieldLogCB> option) {
-        if (option == null) {
+    protected void prepareUpdateOption(final UpdateOption<SearchFieldLogCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected SearchFieldLogCB createCBForVaryingUpdate() {
-        final SearchFieldLogCB cb = newMyConditionBean();
+        final SearchFieldLogCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected SearchFieldLogCB createCBForSpecifiedUpdate() {
-        final SearchFieldLogCB cb = newMyConditionBean();
+        final SearchFieldLogCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        doModify(entity, option);
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doModify(et, op);
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param searchFieldLog The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param searchFieldLog The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final SearchFieldLog searchFieldLog) {
-        doInesrtOrUpdate(searchFieldLog, null, null);
+        doInsertOrUpdate(searchFieldLog, null, null);
     }
 
-    protected void doInesrtOrUpdate(final SearchFieldLog searchFieldLog,
-            final InsertOption<SearchFieldLogCB> insertOption,
-            final UpdateOption<SearchFieldLogCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                searchFieldLog,
-                new InternalInsertOrUpdateCallback<SearchFieldLog, SearchFieldLogCB>() {
-                    @Override
-                    public void callbackInsert(final SearchFieldLog entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final SearchFieldLog entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public SearchFieldLogCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final SearchFieldLogCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final SearchFieldLog et,
+            final InsertOption<SearchFieldLogCB> iop,
+            final UpdateOption<SearchFieldLogCB> uop) {
+        assertObjectNotNull("searchFieldLog", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<SearchFieldLogCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<SearchFieldLogCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            final InsertOption<? extends ConditionBean> insertOption,
-            final UpdateOption<? extends ConditionBean> updateOption) {
-        doCreateOrModify(entity, insertOption, updateOption);
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -720,69 +739,71 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <pre>
      * SearchFieldLog searchFieldLog = new SearchFieldLog();
      * searchFieldLog.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * searchFieldLog.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * searchFieldLog.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     searchFieldLogBhv.<span style="color: #FD4747">delete</span>(searchFieldLog);
+     *     searchFieldLogBhv.<span style="color: #DD4747">delete</span>(searchFieldLog);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param searchFieldLog The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param searchFieldLog The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final SearchFieldLog searchFieldLog) {
         doDelete(searchFieldLog, null);
     }
 
-    protected void doDelete(final SearchFieldLog searchFieldLog,
-            final DeleteOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLog", searchFieldLog);
-        prepareDeleteOption(option);
-        helpDeleteInternally(searchFieldLog,
-                new InternalDeleteCallback<SearchFieldLog>() {
-                    @Override
-                    public int callbackDelegateDelete(
-                            final SearchFieldLog entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final SearchFieldLog et,
+            final DeleteOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLog", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
-    protected void prepareDeleteOption(
-            final DeleteOption<SearchFieldLogCB> option) {
-        if (option == null) {
-            return;
-        }
-        assertDeleteOptionStatus(option);
-    }
-
-    @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
+    protected void prepareDeleteOption(final DeleteOption<SearchFieldLogCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        doRemove(entity, option);
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
+    }
+
+    @Override
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doRemove(et, op);
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     SearchFieldLog searchFieldLog = new SearchFieldLog();
+     *     searchFieldLog.setFooName("foo");
+     *     if (...) {
+     *         searchFieldLog.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     searchFieldLogList.add(searchFieldLog);
+     * }
+     * searchFieldLogBhv.<span style="color: #DD4747">batchInsert</span>(searchFieldLogList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param searchFieldLogList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -790,92 +811,100 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
         return doBatchInsert(searchFieldLogList, null);
     }
 
-    protected int[] doBatchInsert(
-            final List<SearchFieldLog> searchFieldLogList,
-            final InsertOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLogList", searchFieldLogList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(searchFieldLogList, option);
+    protected int[] doBatchInsert(final List<SearchFieldLog> ls,
+            final InsertOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLogList", ls);
+        InsertOption<SearchFieldLogCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<SearchFieldLog> ls,
+            final InsertOption<SearchFieldLogCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * searchFieldLogBhv.<span style="color: #FD4747">batchUpdate</span>(searchFieldLogList, new SpecifyQuery<SearchFieldLogCB>() {
-     *     public void specify(SearchFieldLogCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     SearchFieldLog searchFieldLog = new SearchFieldLog();
+     *     searchFieldLog.setFooName("foo");
+     *     if (...) {
+     *         searchFieldLog.setFooPrice(123);
+     *     } else {
+     *         searchFieldLog.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//searchFieldLog.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     searchFieldLogList.add(searchFieldLog);
+     * }
+     * searchFieldLogBhv.<span style="color: #DD4747">batchUpdate</span>(searchFieldLogList);
      * </pre>
      * @param searchFieldLogList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(final List<SearchFieldLog> searchFieldLogList) {
         return doBatchUpdate(searchFieldLogList, null);
     }
 
-    protected int[] doBatchUpdate(
-            final List<SearchFieldLog> searchFieldLogList,
-            final UpdateOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLogList", searchFieldLogList);
-        prepareBatchUpdateOption(searchFieldLogList, option);
-        return delegateBatchUpdate(searchFieldLogList, option);
+    protected int[] doBatchUpdate(final List<SearchFieldLog> ls,
+            final UpdateOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLogList", ls);
+        UpdateOption<SearchFieldLogCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(
-            final List<SearchFieldLog> searchFieldLogList,
-            final UpdateOption<SearchFieldLogCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(searchFieldLogList);
-        //}
+    protected void prepareBatchUpdateOption(final List<SearchFieldLog> ls,
+            final UpdateOption<SearchFieldLogCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * searchFieldLogBhv.<span style="color: #FD4747">batchUpdate</span>(searchFieldLogList, new SpecifyQuery<SearchFieldLogCB>() {
+     * searchFieldLogBhv.<span style="color: #DD4747">batchUpdate</span>(searchFieldLogList, new SpecifyQuery<SearchFieldLogCB>() {
      *     public void specify(SearchFieldLogCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * searchFieldLogBhv.<span style="color: #FD4747">batchUpdate</span>(searchFieldLogList, new SpecifyQuery<SearchFieldLogCB>() {
+     * searchFieldLogBhv.<span style="color: #DD4747">batchUpdate</span>(searchFieldLogList, new SpecifyQuery<SearchFieldLogCB>() {
      *     public void specify(SearchFieldLogCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -887,7 +916,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * @param searchFieldLogList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(final List<SearchFieldLog> searchFieldLogList,
             final SpecifyQuery<SearchFieldLogCB> updateColumnSpec) {
@@ -897,8 +926,8 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        return doLumpModify(ls, option);
+            final UpdateOption<? extends ConditionBean> op) {
+        return doLumpModify(ls, op);
     }
 
     /**
@@ -906,34 +935,29 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param searchFieldLogList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDelete(final List<SearchFieldLog> searchFieldLogList) {
         return doBatchDelete(searchFieldLogList, null);
     }
 
-    protected int[] doBatchDelete(
-            final List<SearchFieldLog> searchFieldLogList,
-            final DeleteOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLogList", searchFieldLogList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(searchFieldLogList, option);
+    protected int[] doBatchDelete(final List<SearchFieldLog> ls,
+            final DeleteOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLogList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        return doLumpRemove(ls, option);
+            final DeleteOption<? extends ConditionBean> op) {
+        return doLumpRemove(ls, op);
     }
 
     // ===================================================================================
@@ -942,7 +966,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * searchFieldLogBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;SearchFieldLog, SearchFieldLogCB&gt;() {
+     * searchFieldLogBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;SearchFieldLog, SearchFieldLogCB&gt;() {
      *     public ConditionBean setup(searchFieldLog entity, SearchFieldLogCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -955,7 +979,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -971,18 +995,17 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<SearchFieldLog, SearchFieldLogCB> setupper,
-            final InsertOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final SearchFieldLog entity = new SearchFieldLog();
-        final SearchFieldLogCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<SearchFieldLog, SearchFieldLogCB> sp,
+            final InsertOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final SearchFieldLog et = newEntity();
+        final SearchFieldLogCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected SearchFieldLogCB createCBForQueryInsert() {
-        final SearchFieldLogCB cb = newMyConditionBean();
+        final SearchFieldLogCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -990,12 +1013,8 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1008,42 +1027,36 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//searchFieldLog.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//searchFieldLog.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//searchFieldLog.setVersionNo(value);</span>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
-     * searchFieldLogBhv.<span style="color: #FD4747">queryUpdate</span>(searchFieldLog, cb);
+     * searchFieldLogBhv.<span style="color: #DD4747">queryUpdate</span>(searchFieldLog, cb);
      * </pre>
      * @param searchFieldLog The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final SearchFieldLog searchFieldLog,
             final SearchFieldLogCB cb) {
         return doQueryUpdate(searchFieldLog, cb, null);
     }
 
-    protected int doQueryUpdate(final SearchFieldLog searchFieldLog,
-            final SearchFieldLogCB cb,
-            final UpdateOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("searchFieldLog", searchFieldLog);
+    protected int doQueryUpdate(final SearchFieldLog et,
+            final SearchFieldLogCB cb, final UpdateOption<SearchFieldLogCB> op) {
+        assertObjectNotNull("searchFieldLog", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                searchFieldLog, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (SearchFieldLogCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity), (SearchFieldLogCB) cb,
-                    downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1051,32 +1064,28 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <pre>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
      * cb.query().setFoo...(value);
-     * searchFieldLogBhv.<span style="color: #FD4747">queryDelete</span>(searchFieldLog, cb);
+     * searchFieldLogBhv.<span style="color: #DD4747">queryDelete</span>(searchFieldLog, cb);
      * </pre>
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final SearchFieldLogCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final SearchFieldLogCB cb,
-            final DeleteOption<SearchFieldLogCB> option) {
+            final DeleteOption<SearchFieldLogCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((SearchFieldLogCB) cb);
-        } else {
-            return varyingQueryDelete((SearchFieldLogCB) cb, downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1097,12 +1106,12 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * InsertOption<SearchFieldLogCB> option = new InsertOption<SearchFieldLogCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * searchFieldLogBhv.<span style="color: #FD4747">varyingInsert</span>(searchFieldLog, option);
+     * searchFieldLogBhv.<span style="color: #DD4747">varyingInsert</span>(searchFieldLog, option);
      * ... = searchFieldLog.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param searchFieldLog The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param searchFieldLog The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final SearchFieldLog searchFieldLog,
             final InsertOption<SearchFieldLogCB> option) {
@@ -1118,26 +1127,26 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * SearchFieldLog searchFieldLog = new SearchFieldLog();
      * searchFieldLog.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * searchFieldLog.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * searchFieldLog.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * searchFieldLog.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;SearchFieldLogCB&gt; option = new UpdateOption&lt;SearchFieldLogCB&gt;();
      *     option.self(new SpecifyQuery&lt;SearchFieldLogCB&gt;() {
      *         public void specify(SearchFieldLogCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     searchFieldLogBhv.<span style="color: #FD4747">varyingUpdate</span>(searchFieldLog, option);
+     *     searchFieldLogBhv.<span style="color: #DD4747">varyingUpdate</span>(searchFieldLog, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param searchFieldLog The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param searchFieldLog The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final SearchFieldLog searchFieldLog,
             final UpdateOption<SearchFieldLogCB> option) {
@@ -1148,29 +1157,29 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param searchFieldLog The entity of insert or update target. (NotNull)
+     * @param searchFieldLog The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(final SearchFieldLog searchFieldLog,
             final InsertOption<SearchFieldLogCB> insertOption,
             final UpdateOption<SearchFieldLogCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(searchFieldLog, insertOption, updateOption);
+        doInsertOrUpdate(searchFieldLog, insertOption, updateOption);
     }
 
     /**
      * Delete the entity with varying requests. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param searchFieldLog The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param searchFieldLog The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final SearchFieldLog searchFieldLog,
             final DeleteOption<SearchFieldLogCB> option) {
@@ -1257,7 +1266,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//searchFieldLog.setPK...(value);</span>
      * searchFieldLog.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//searchFieldLog.setVersionNo(value);</span>
      * SearchFieldLogCB cb = new SearchFieldLogCB();
@@ -1265,16 +1274,16 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;SearchFieldLogCB&gt; option = new UpdateOption&lt;SearchFieldLogCB&gt;();
      * option.self(new SpecifyQuery&lt;SearchFieldLogCB&gt;() {
      *     public void specify(SearchFieldLogCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * searchFieldLogBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(searchFieldLog, cb, option);
+     * searchFieldLogBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(searchFieldLog, cb, option);
      * </pre>
      * @param searchFieldLog The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final SearchFieldLog searchFieldLog,
             final SearchFieldLogCB cb,
@@ -1290,7 +1299,7 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of SearchFieldLog. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final SearchFieldLogCB cb,
             final DeleteOption<SearchFieldLogCB> option) {
@@ -1337,166 +1346,14 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final SearchFieldLogCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<SearchFieldLog> typeOfSelectedEntity() {
+        return SearchFieldLog.class;
     }
 
-    protected int delegateSelectCountPlainly(final SearchFieldLogCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends SearchFieldLog> void delegateSelectCursor(
-            final SearchFieldLogCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends SearchFieldLog> List<ENTITY> delegateSelectList(
-            final SearchFieldLogCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final SearchFieldLog e,
-            final InsertOption<SearchFieldLogCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final SearchFieldLog e,
-            final UpdateOption<SearchFieldLogCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return delegateUpdateNonstrict(e, op);
-    }
-
-    protected int delegateUpdateNonstrict(final SearchFieldLog e,
-            final UpdateOption<SearchFieldLogCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final SearchFieldLog e,
-            final DeleteOption<SearchFieldLogCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return delegateDeleteNonstrict(e, op);
-    }
-
-    protected int delegateDeleteNonstrict(final SearchFieldLog e,
-            final DeleteOption<SearchFieldLogCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<SearchFieldLog> ls,
-            final InsertOption<SearchFieldLogCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<SearchFieldLog> ls,
-            final UpdateOption<SearchFieldLogCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchUpdateNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(final List<SearchFieldLog> ls,
-            final UpdateOption<SearchFieldLogCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<SearchFieldLog> ls,
-            final DeleteOption<SearchFieldLogCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(final List<SearchFieldLog> ls,
-            final DeleteOption<SearchFieldLogCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final SearchFieldLog e,
-            final SearchFieldLogCB inCB, final ConditionBean resCB,
-            final InsertOption<SearchFieldLogCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final SearchFieldLog e,
-            final SearchFieldLogCB cb, final UpdateOption<SearchFieldLogCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final SearchFieldLogCB cb,
-            final DeleteOption<SearchFieldLogCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
-    //                                                                Optimistic Lock Info
-    //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
-    }
-
-    // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected SearchFieldLog downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, SearchFieldLog.class);
+    protected SearchFieldLog downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, SearchFieldLog.class);
     }
 
     protected SearchFieldLogCB downcast(final ConditionBean cb) {
@@ -1504,32 +1361,31 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<SearchFieldLog> downcast(
-            final List<? extends Entity> entityList) {
-        return (List<SearchFieldLog>) entityList;
+    protected List<SearchFieldLog> downcast(final List<? extends Entity> ls) {
+        return (List<SearchFieldLog>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<SearchFieldLogCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<SearchFieldLogCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<SearchFieldLogCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<SearchFieldLogCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<SearchFieldLogCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<SearchFieldLogCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<SearchFieldLogCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<SearchFieldLogCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<SearchFieldLogCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<SearchFieldLog, SearchFieldLogCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<SearchFieldLog, SearchFieldLogCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<SearchFieldLog, SearchFieldLogCB>) sp;
     }
 }

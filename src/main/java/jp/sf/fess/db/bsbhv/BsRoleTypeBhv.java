@@ -18,17 +18,14 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfRoleType;
 import jp.sf.fess.db.bsentity.dbmeta.RoleTypeDbm;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.LabelTypeToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.RoleTypeCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
-import jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
-import jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
-import jp.sf.fess.db.exbhv.LabelTypeToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.RoleTypeBhv;
-import jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exentity.DataConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.LabelTypeToRoleTypeMapping;
@@ -41,14 +38,28 @@ import org.seasar.dbflute.bhv.ConditionBeanSetupper;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.LoadReferrerOption;
+import org.seasar.dbflute.bhv.NestedReferrerListGateway;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -103,7 +114,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return RoleTypeDbm.getInstance();
@@ -119,14 +130,14 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public RoleType newEntity() {
+        return new RoleType();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public RoleTypeCB newConditionBean() {
+        return new RoleTypeCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -148,12 +159,16 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <pre>
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
-     * int count = roleTypeBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = roleTypeBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final RoleTypeCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final RoleTypeCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -169,19 +184,21 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
-     * RoleType roleType = roleTypeBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (roleType != null) {
+     * RoleType roleType = roleTypeBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (roleType != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = roleType.get...();
      * } else {
      *     ...
@@ -189,107 +206,112 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public RoleType selectEntity(final RoleTypeCB cb) {
-        return doSelectEntity(cb, RoleType.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected RoleType facadeSelectEntity(final RoleTypeCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends RoleType> ENTITY doSelectEntity(
-            final RoleTypeCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(cb, entityType,
-                new InternalSelectEntityCallback<ENTITY, RoleTypeCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(final RoleTypeCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final RoleTypeCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends RoleType> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final RoleTypeCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
-     * RoleType roleType = roleTypeBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * RoleType roleType = roleTypeBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = roleType.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public RoleType selectEntityWithDeletedCheck(final RoleTypeCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, RoleType.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected RoleType facadeSelectEntityWithDeletedCheck(final RoleTypeCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends RoleType> ENTITY doSelectEntityWithDeletedCheck(
-            final RoleTypeCB cb, final Class<ENTITY> entityType) {
+            final RoleTypeCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, RoleTypeCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(final RoleTypeCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public RoleType selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, RoleType.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends RoleType> ENTITY doSelectByPKValue(final Long id,
-            final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected RoleType facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends RoleType> ENTITY doSelectByPK(final Long id,
+            final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends RoleType> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public RoleType selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, RoleType.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends RoleType> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends RoleType> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private RoleTypeCB buildPKCB(final Long id) {
+    protected RoleTypeCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final RoleTypeCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -301,37 +323,31 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;RoleType&gt; roleTypeList = roleTypeBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;RoleType&gt; roleTypeList = roleTypeBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (RoleType roleType : roleTypeList) {
      *     ... = roleType.get...();
      * }
      * </pre>
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<RoleType> selectList(final RoleTypeCB cb) {
-        return doSelectList(cb, RoleType.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<RoleType> facadeSelectList(final RoleTypeCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends RoleType> ListResultBean<ENTITY> doSelectList(
-            final RoleTypeCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, RoleTypeCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(final RoleTypeCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final RoleTypeCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -344,8 +360,8 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;RoleType&gt; page = roleTypeBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;RoleType&gt; page = roleTypeBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -357,35 +373,25 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<RoleType> selectPage(final RoleTypeCB cb) {
-        return doSelectPage(cb, RoleType.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<RoleType> facadeSelectPage(final RoleTypeCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends RoleType> PagingResultBean<ENTITY> doSelectPage(
-            final RoleTypeCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, RoleTypeCB>() {
-                    @Override
-                    public int callbackSelectCount(final RoleTypeCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(final RoleTypeCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final RoleTypeCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -396,7 +402,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <pre>
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
-     * roleTypeBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;RoleType&gt;() {
+     * roleTypeBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;RoleType&gt;() {
      *     public void handle(RoleType entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -407,32 +413,22 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final RoleTypeCB cb,
             final EntityRowHandler<RoleType> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, RoleType.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final RoleTypeCB cb,
+            final EntityRowHandler<RoleType> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends RoleType> void doSelectCursor(
-            final RoleTypeCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final RoleTypeCB cb, final EntityRowHandler<ENTITY> handler,
+            final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<RoleType>", entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(cb, entityRowHandler, entityType,
-                new InternalSelectCursorCallback<ENTITY, RoleTypeCB>() {
-                    @Override
-                    public void callbackSelectCursor(final RoleTypeCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(final RoleTypeCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -442,29 +438,41 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * roleTypeBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(RoleTypeCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<RoleTypeCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<RoleTypeCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends RoleTypeCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<RoleTypeCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends RoleTypeCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -481,545 +489,536 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     //                                                                       Load Referrer
     //                                                                       =============
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param roleType The entity of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param roleTypeList The entity list of roleType. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
-            final RoleType roleType,
-            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleType, conditionBeanSetupper);
-        loadDataConfigToRoleTypeMappingList(xnewLRLs(roleType),
-                conditionBeanSetupper);
+    public void load(final List<RoleType> roleTypeList,
+            final ReferrerLoaderHandler<LoaderOfRoleType> handler) {
+        xassLRArg(roleTypeList, handler);
+        handler.handle(new LoaderOfRoleType().ready(roleTypeList,
+                _behaviorSelector));
     }
 
     /**
-     * Load referrer of dataConfigToRoleTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param roleType The entity of roleType. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final RoleType roleType,
+            final ReferrerLoaderHandler<LoaderOfRoleType> handler) {
+        xassLRArg(roleType, handler);
+        handler.handle(new LoaderOfRoleType().ready(xnewLRAryLs(roleType),
+                _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of dataConfigToRoleTypeMappingList by the set-upper of referrer. <br />
      * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">loadDataConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * roleTypeBhv.<span style="color: #DD4747">loadDataConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void setup(DataConfigToRoleTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (RoleType roleType : roleTypeList) {
-     *     ... = roleType.<span style="color: #FD4747">getDataConfigToRoleTypeMappingList()</span>;
+     *     ... = roleType.<span style="color: #DD4747">getDataConfigToRoleTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setRoleTypeId_InScope(pkList);
      * cb.query().addOrderBy_RoleTypeId_Asc();
      * </pre>
      * @param roleTypeList The entity list of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
-            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleTypeList, conditionBeanSetupper);
-        loadDataConfigToRoleTypeMappingList(
+            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleTypeList, setupper);
+        return doLoadDataConfigToRoleTypeMappingList(
                 roleTypeList,
                 new LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of dataConfigToRoleTypeMappingList by the set-upper of referrer. <br />
+     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
+     * <pre>
+     * roleTypeBhv.<span style="color: #DD4747">loadDataConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     *     public void setup(DataConfigToRoleTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = roleType.<span style="color: #DD4747">getDataConfigToRoleTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setRoleTypeId_InScope(pkList);
+     * cb.query().addOrderBy_RoleTypeId_Asc();
+     * </pre>
+     * @param roleType The entity of roleType. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
+            final RoleType roleType,
+            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleType, setupper);
+        return doLoadDataConfigToRoleTypeMappingList(
+                xnewLRLs(roleType),
+                new LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param roleType The entity of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
             final RoleType roleType,
             final LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleType, loadReferrerOption);
-        loadDataConfigToRoleTypeMappingList(xnewLRLs(roleType),
+        return loadDataConfigToRoleTypeMappingList(xnewLRLs(roleType),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
             final LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleTypeList, loadReferrerOption);
         if (roleTypeList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<DataConfigToRoleTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final DataConfigToRoleTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                DataConfigToRoleTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                roleTypeList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<RoleType, Long, DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final RoleType e) {
-                        return e.getId();
-                    }
+        return doLoadDataConfigToRoleTypeMappingList(roleTypeList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final RoleType e,
-                            final List<DataConfigToRoleTypeMapping> ls) {
-                        e.setDataConfigToRoleTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public DataConfigToRoleTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final DataConfigToRoleTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setRoleTypeId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final DataConfigToRoleTypeMappingCB cb) {
-                        cb.query().addOrderBy_RoleTypeId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final DataConfigToRoleTypeMappingCB cb) {
-                        cb.specify().columnRoleTypeId();
-                    }
-
-                    @Override
-                    public List<DataConfigToRoleTypeMapping> selRfLs(
-                            final DataConfigToRoleTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final DataConfigToRoleTypeMapping e) {
-                        return e.getRoleTypeId();
-                    }
-
-                    @Override
-                    public void setlcEt(final DataConfigToRoleTypeMapping re,
-                            final RoleType le) {
-                        re.setRoleType(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "dataConfigToRoleTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<DataConfigToRoleTypeMapping> doLoadDataConfigToRoleTypeMappingList(
+            final List<RoleType> roleTypeList,
+            final LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping> option) {
+        return helpLoadReferrerInternally(roleTypeList, option,
+                "dataConfigToRoleTypeMappingList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param roleType The entity of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadFileConfigToRoleTypeMappingList(
-            final RoleType roleType,
-            final ConditionBeanSetupper<FileConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleType, conditionBeanSetupper);
-        loadFileConfigToRoleTypeMappingList(xnewLRLs(roleType),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of fileConfigToRoleTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of fileConfigToRoleTypeMappingList by the set-upper of referrer. <br />
      * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">loadFileConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;FileConfigToRoleTypeMappingCB&gt;() {
+     * roleTypeBhv.<span style="color: #DD4747">loadFileConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;FileConfigToRoleTypeMappingCB&gt;() {
      *     public void setup(FileConfigToRoleTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (RoleType roleType : roleTypeList) {
-     *     ... = roleType.<span style="color: #FD4747">getFileConfigToRoleTypeMappingList()</span>;
+     *     ... = roleType.<span style="color: #DD4747">getFileConfigToRoleTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setRoleTypeId_InScope(pkList);
      * cb.query().addOrderBy_RoleTypeId_Asc();
      * </pre>
      * @param roleTypeList The entity list of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadFileConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<FileConfigToRoleTypeMapping> loadFileConfigToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
-            final ConditionBeanSetupper<FileConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleTypeList, conditionBeanSetupper);
-        loadFileConfigToRoleTypeMappingList(
+            final ConditionBeanSetupper<FileConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleTypeList, setupper);
+        return doLoadFileConfigToRoleTypeMappingList(
                 roleTypeList,
                 new LoadReferrerOption<FileConfigToRoleTypeMappingCB, FileConfigToRoleTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of fileConfigToRoleTypeMappingList by the set-upper of referrer. <br />
+     * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
+     * <pre>
+     * roleTypeBhv.<span style="color: #DD4747">loadFileConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;FileConfigToRoleTypeMappingCB&gt;() {
+     *     public void setup(FileConfigToRoleTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = roleType.<span style="color: #DD4747">getFileConfigToRoleTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setRoleTypeId_InScope(pkList);
+     * cb.query().addOrderBy_RoleTypeId_Asc();
+     * </pre>
+     * @param roleType The entity of roleType. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<FileConfigToRoleTypeMapping> loadFileConfigToRoleTypeMappingList(
+            final RoleType roleType,
+            final ConditionBeanSetupper<FileConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleType, setupper);
+        return doLoadFileConfigToRoleTypeMappingList(
+                xnewLRLs(roleType),
+                new LoadReferrerOption<FileConfigToRoleTypeMappingCB, FileConfigToRoleTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param roleType The entity of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadFileConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<FileConfigToRoleTypeMapping> loadFileConfigToRoleTypeMappingList(
             final RoleType roleType,
             final LoadReferrerOption<FileConfigToRoleTypeMappingCB, FileConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleType, loadReferrerOption);
-        loadFileConfigToRoleTypeMappingList(xnewLRLs(roleType),
+        return loadFileConfigToRoleTypeMappingList(xnewLRLs(roleType),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadFileConfigToRoleTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<FileConfigToRoleTypeMapping> loadFileConfigToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
             final LoadReferrerOption<FileConfigToRoleTypeMappingCB, FileConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleTypeList, loadReferrerOption);
         if (roleTypeList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<FileConfigToRoleTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final FileConfigToRoleTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                FileConfigToRoleTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                roleTypeList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<RoleType, Long, FileConfigToRoleTypeMappingCB, FileConfigToRoleTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final RoleType e) {
-                        return e.getId();
-                    }
+        return doLoadFileConfigToRoleTypeMappingList(roleTypeList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final RoleType e,
-                            final List<FileConfigToRoleTypeMapping> ls) {
-                        e.setFileConfigToRoleTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public FileConfigToRoleTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final FileConfigToRoleTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setRoleTypeId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final FileConfigToRoleTypeMappingCB cb) {
-                        cb.query().addOrderBy_RoleTypeId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final FileConfigToRoleTypeMappingCB cb) {
-                        cb.specify().columnRoleTypeId();
-                    }
-
-                    @Override
-                    public List<FileConfigToRoleTypeMapping> selRfLs(
-                            final FileConfigToRoleTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final FileConfigToRoleTypeMapping e) {
-                        return e.getRoleTypeId();
-                    }
-
-                    @Override
-                    public void setlcEt(final FileConfigToRoleTypeMapping re,
-                            final RoleType le) {
-                        re.setRoleType(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "fileConfigToRoleTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<FileConfigToRoleTypeMapping> doLoadFileConfigToRoleTypeMappingList(
+            final List<RoleType> roleTypeList,
+            final LoadReferrerOption<FileConfigToRoleTypeMappingCB, FileConfigToRoleTypeMapping> option) {
+        return helpLoadReferrerInternally(roleTypeList, option,
+                "fileConfigToRoleTypeMappingList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param roleType The entity of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadLabelTypeToRoleTypeMappingList(
-            final RoleType roleType,
-            final ConditionBeanSetupper<LabelTypeToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleType, conditionBeanSetupper);
-        loadLabelTypeToRoleTypeMappingList(xnewLRLs(roleType),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of labelTypeToRoleTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of labelTypeToRoleTypeMappingList by the set-upper of referrer. <br />
      * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">loadLabelTypeToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * roleTypeBhv.<span style="color: #DD4747">loadLabelTypeToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void setup(LabelTypeToRoleTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (RoleType roleType : roleTypeList) {
-     *     ... = roleType.<span style="color: #FD4747">getLabelTypeToRoleTypeMappingList()</span>;
+     *     ... = roleType.<span style="color: #DD4747">getLabelTypeToRoleTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setRoleTypeId_InScope(pkList);
      * cb.query().addOrderBy_RoleTypeId_Asc();
      * </pre>
      * @param roleTypeList The entity list of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadLabelTypeToRoleTypeMappingList(
+    public NestedReferrerListGateway<LabelTypeToRoleTypeMapping> loadLabelTypeToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
-            final ConditionBeanSetupper<LabelTypeToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleTypeList, conditionBeanSetupper);
-        loadLabelTypeToRoleTypeMappingList(
+            final ConditionBeanSetupper<LabelTypeToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleTypeList, setupper);
+        return doLoadLabelTypeToRoleTypeMappingList(
                 roleTypeList,
                 new LoadReferrerOption<LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of labelTypeToRoleTypeMappingList by the set-upper of referrer. <br />
+     * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
+     * <pre>
+     * roleTypeBhv.<span style="color: #DD4747">loadLabelTypeToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     *     public void setup(LabelTypeToRoleTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = roleType.<span style="color: #DD4747">getLabelTypeToRoleTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setRoleTypeId_InScope(pkList);
+     * cb.query().addOrderBy_RoleTypeId_Asc();
+     * </pre>
+     * @param roleType The entity of roleType. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<LabelTypeToRoleTypeMapping> loadLabelTypeToRoleTypeMappingList(
+            final RoleType roleType,
+            final ConditionBeanSetupper<LabelTypeToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleType, setupper);
+        return doLoadLabelTypeToRoleTypeMappingList(
+                xnewLRLs(roleType),
+                new LoadReferrerOption<LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param roleType The entity of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadLabelTypeToRoleTypeMappingList(
+    public NestedReferrerListGateway<LabelTypeToRoleTypeMapping> loadLabelTypeToRoleTypeMappingList(
             final RoleType roleType,
             final LoadReferrerOption<LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleType, loadReferrerOption);
-        loadLabelTypeToRoleTypeMappingList(xnewLRLs(roleType),
+        return loadLabelTypeToRoleTypeMappingList(xnewLRLs(roleType),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadLabelTypeToRoleTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<LabelTypeToRoleTypeMapping> loadLabelTypeToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
             final LoadReferrerOption<LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleTypeList, loadReferrerOption);
         if (roleTypeList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<LabelTypeToRoleTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final LabelTypeToRoleTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                LabelTypeToRoleTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                roleTypeList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<RoleType, Long, LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final RoleType e) {
-                        return e.getId();
-                    }
+        return doLoadLabelTypeToRoleTypeMappingList(roleTypeList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final RoleType e,
-                            final List<LabelTypeToRoleTypeMapping> ls) {
-                        e.setLabelTypeToRoleTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public LabelTypeToRoleTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final LabelTypeToRoleTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setRoleTypeId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final LabelTypeToRoleTypeMappingCB cb) {
-                        cb.query().addOrderBy_RoleTypeId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final LabelTypeToRoleTypeMappingCB cb) {
-                        cb.specify().columnRoleTypeId();
-                    }
-
-                    @Override
-                    public List<LabelTypeToRoleTypeMapping> selRfLs(
-                            final LabelTypeToRoleTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final LabelTypeToRoleTypeMapping e) {
-                        return e.getRoleTypeId();
-                    }
-
-                    @Override
-                    public void setlcEt(final LabelTypeToRoleTypeMapping re,
-                            final RoleType le) {
-                        re.setRoleType(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "labelTypeToRoleTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<LabelTypeToRoleTypeMapping> doLoadLabelTypeToRoleTypeMappingList(
+            final List<RoleType> roleTypeList,
+            final LoadReferrerOption<LabelTypeToRoleTypeMappingCB, LabelTypeToRoleTypeMapping> option) {
+        return helpLoadReferrerInternally(roleTypeList, option,
+                "labelTypeToRoleTypeMappingList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param roleType The entity of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadWebConfigToRoleTypeMappingList(
-            final RoleType roleType,
-            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleType, conditionBeanSetupper);
-        loadWebConfigToRoleTypeMappingList(xnewLRLs(roleType),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of webConfigToRoleTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of webConfigToRoleTypeMappingList by the set-upper of referrer. <br />
      * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">loadWebConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * roleTypeBhv.<span style="color: #DD4747">loadWebConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void setup(WebConfigToRoleTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (RoleType roleType : roleTypeList) {
-     *     ... = roleType.<span style="color: #FD4747">getWebConfigToRoleTypeMappingList()</span>;
+     *     ... = roleType.<span style="color: #DD4747">getWebConfigToRoleTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setRoleTypeId_InScope(pkList);
      * cb.query().addOrderBy_RoleTypeId_Asc();
      * </pre>
      * @param roleTypeList The entity list of roleType. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
-            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(roleTypeList, conditionBeanSetupper);
-        loadWebConfigToRoleTypeMappingList(
+            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleTypeList, setupper);
+        return doLoadWebConfigToRoleTypeMappingList(
                 roleTypeList,
                 new LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of webConfigToRoleTypeMappingList by the set-upper of referrer. <br />
+     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
+     * <pre>
+     * roleTypeBhv.<span style="color: #DD4747">loadWebConfigToRoleTypeMappingList</span>(roleTypeList, new ConditionBeanSetupper&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     *     public void setup(WebConfigToRoleTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = roleType.<span style="color: #DD4747">getWebConfigToRoleTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setRoleTypeId_InScope(pkList);
+     * cb.query().addOrderBy_RoleTypeId_Asc();
+     * </pre>
+     * @param roleType The entity of roleType. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
+            final RoleType roleType,
+            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(roleType, setupper);
+        return doLoadWebConfigToRoleTypeMappingList(
+                xnewLRLs(roleType),
+                new LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param roleType The entity of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
             final RoleType roleType,
             final LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleType, loadReferrerOption);
-        loadWebConfigToRoleTypeMappingList(xnewLRLs(roleType),
+        return loadWebConfigToRoleTypeMappingList(xnewLRLs(roleType),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToRoleTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
             final List<RoleType> roleTypeList,
             final LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(roleTypeList, loadReferrerOption);
         if (roleTypeList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<WebConfigToRoleTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final WebConfigToRoleTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                WebConfigToRoleTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                roleTypeList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<RoleType, Long, WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final RoleType e) {
-                        return e.getId();
-                    }
+        return doLoadWebConfigToRoleTypeMappingList(roleTypeList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final RoleType e,
-                            final List<WebConfigToRoleTypeMapping> ls) {
-                        e.setWebConfigToRoleTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public WebConfigToRoleTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final WebConfigToRoleTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setRoleTypeId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final WebConfigToRoleTypeMappingCB cb) {
-                        cb.query().addOrderBy_RoleTypeId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final WebConfigToRoleTypeMappingCB cb) {
-                        cb.specify().columnRoleTypeId();
-                    }
-
-                    @Override
-                    public List<WebConfigToRoleTypeMapping> selRfLs(
-                            final WebConfigToRoleTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final WebConfigToRoleTypeMapping e) {
-                        return e.getRoleTypeId();
-                    }
-
-                    @Override
-                    public void setlcEt(final WebConfigToRoleTypeMapping re,
-                            final RoleType le) {
-                        re.setRoleType(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "webConfigToRoleTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<WebConfigToRoleTypeMapping> doLoadWebConfigToRoleTypeMappingList(
+            final List<RoleType> roleTypeList,
+            final LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping> option) {
+        return helpLoadReferrerInternally(roleTypeList, option,
+                "webConfigToRoleTypeMappingList");
     }
 
     // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-
     // ===================================================================================
     //                                                                      Extract Column
     //                                                                      ==============
@@ -1029,20 +1028,14 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * @return The list of the column value. (NotNull, EmptyAllowed, NotNullElement)
      */
     public List<Long> extractIdList(final List<RoleType> roleTypeList) {
-        return helpExtractListInternally(roleTypeList,
-                new InternalExtractCallback<RoleType, Long>() {
-                    @Override
-                    public Long getCV(final RoleType e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(roleTypeList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * RoleType roleType = new RoleType();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -1051,38 +1044,37 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//roleType.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//roleType.set...;</span>
-     * roleTypeBhv.<span style="color: #FD4747">insert</span>(roleType);
+     * roleTypeBhv.<span style="color: #DD4747">insert</span>(roleType);
      * ... = roleType.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param roleType The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param roleType The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final RoleType roleType) {
         doInsert(roleType, null);
     }
 
-    protected void doInsert(final RoleType roleType,
-            final InsertOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
-        prepareInsertOption(option);
-        delegateInsert(roleType, option);
+    protected void doInsert(final RoleType et, final InsertOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
-    protected void prepareInsertOption(final InsertOption<RoleTypeCB> option) {
-        if (option == null) {
+    protected void prepareInsertOption(final InsertOption<RoleTypeCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -1094,68 +1086,58 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//roleType.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//roleType.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * roleType.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * roleType.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     roleTypeBhv.<span style="color: #FD4747">update</span>(roleType);
+     *     roleTypeBhv.<span style="color: #DD4747">update</span>(roleType);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param roleType The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param roleType The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final RoleType roleType) {
         doUpdate(roleType, null);
     }
 
-    protected void doUpdate(final RoleType roleType,
-            final UpdateOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
-        prepareUpdateOption(option);
-        helpUpdateInternally(roleType, new InternalUpdateCallback<RoleType>() {
-            @Override
-            public int callbackDelegateUpdate(final RoleType entity) {
-                return delegateUpdate(entity, option);
-            }
-        });
+    protected void doUpdate(final RoleType et, final UpdateOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
-    protected void prepareUpdateOption(final UpdateOption<RoleTypeCB> option) {
-        if (option == null) {
+    protected void prepareUpdateOption(final UpdateOption<RoleTypeCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected RoleTypeCB createCBForVaryingUpdate() {
-        final RoleTypeCB cb = newMyConditionBean();
+        final RoleTypeCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected RoleTypeCB createCBForSpecifiedUpdate() {
-        final RoleTypeCB cb = newMyConditionBean();
+        final RoleTypeCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     /**
@@ -1167,144 +1149,85 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//roleType.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//roleType.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//roleType.setVersionNo(value);</span>
-     * roleTypeBhv.<span style="color: #FD4747">updateNonstrict</span>(roleType);
+     * roleTypeBhv.<span style="color: #DD4747">updateNonstrict</span>(roleType);
      * </pre>
-     * @param roleType The entity of update target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param roleType The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void updateNonstrict(final RoleType roleType) {
         doUpdateNonstrict(roleType, null);
     }
 
-    protected void doUpdateNonstrict(final RoleType roleType,
-            final UpdateOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
-        prepareUpdateOption(option);
-        helpUpdateNonstrictInternally(roleType,
-                new InternalUpdateNonstrictCallback<RoleType>() {
-                    @Override
-                    public int callbackDelegateUpdateNonstrict(
-                            final RoleType entity) {
-                        return delegateUpdateNonstrict(entity, option);
-                    }
-                });
+    protected void doUpdateNonstrict(final RoleType et,
+            final UpdateOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
+        prepareUpdateOption(op);
+        helpUpdateNonstrictInternally(et, op);
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            updateNonstrict(downcast(entity));
-        } else {
-            varyingUpdateNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdateNonstrict(downcast(et), downcast(op));
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param roleType The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param roleType The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final RoleType roleType) {
-        doInesrtOrUpdate(roleType, null, null);
+        doInsertOrUpdate(roleType, null, null);
     }
 
-    protected void doInesrtOrUpdate(final RoleType roleType,
-            final InsertOption<RoleTypeCB> insertOption,
-            final UpdateOption<RoleTypeCB> updateOption) {
-        helpInsertOrUpdateInternally(roleType,
-                new InternalInsertOrUpdateCallback<RoleType, RoleTypeCB>() {
-                    @Override
-                    public void callbackInsert(final RoleType entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final RoleType entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public RoleTypeCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final RoleTypeCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final RoleType et,
+            final InsertOption<RoleTypeCB> iop,
+            final UpdateOption<RoleTypeCB> uop) {
+        assertObjectNotNull("roleType", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<RoleTypeCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<RoleTypeCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param roleType The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param roleType The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdateNonstrict(final RoleType roleType) {
-        doInesrtOrUpdateNonstrict(roleType, null, null);
+        doInsertOrUpdateNonstrict(roleType, null, null);
     }
 
-    protected void doInesrtOrUpdateNonstrict(final RoleType roleType,
-            final InsertOption<RoleTypeCB> insertOption,
-            final UpdateOption<RoleTypeCB> updateOption) {
-        helpInsertOrUpdateInternally(roleType,
-                new InternalInsertOrUpdateNonstrictCallback<RoleType>() {
-                    @Override
-                    public void callbackInsert(final RoleType entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdateNonstrict(final RoleType entity) {
-                        doUpdateNonstrict(entity, updateOption);
-                    }
-                });
+    protected void doInsertOrUpdateNonstrict(final RoleType et,
+            final InsertOption<RoleTypeCB> iop,
+            final UpdateOption<RoleTypeCB> uop) {
+        assertObjectNotNull("roleType", et);
+        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdateNonstrict(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<RoleTypeCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<RoleTypeCB>()
-                    : updateOption;
-            varyingInsertOrUpdateNonstrict(downcast(entity),
-                    downcast(insertOption), downcast(updateOption));
-        }
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1312,49 +1235,38 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <pre>
      * RoleType roleType = new RoleType();
      * roleType.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * roleType.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * roleType.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     roleTypeBhv.<span style="color: #FD4747">delete</span>(roleType);
+     *     roleTypeBhv.<span style="color: #DD4747">delete</span>(roleType);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param roleType The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param roleType The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final RoleType roleType) {
         doDelete(roleType, null);
     }
 
-    protected void doDelete(final RoleType roleType,
-            final DeleteOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
-        prepareDeleteOption(option);
-        helpDeleteInternally(roleType, new InternalDeleteCallback<RoleType>() {
-            @Override
-            public int callbackDelegateDelete(final RoleType entity) {
-                return delegateDelete(entity, option);
-            }
-        });
+    protected void doDelete(final RoleType et, final DeleteOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
-    protected void prepareDeleteOption(final DeleteOption<RoleTypeCB> option) {
-        if (option == null) {
-            return;
+    protected void prepareDeleteOption(final DeleteOption<RoleTypeCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
-        assertDeleteOptionStatus(option);
     }
 
     @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
-        }
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
     }
 
     /**
@@ -1362,31 +1274,24 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <pre>
      * RoleType roleType = new RoleType();
      * roleType.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//roleType.setVersionNo(value);</span>
-     * roleTypeBhv.<span style="color: #FD4747">deleteNonstrict</span>(roleType);
+     * roleTypeBhv.<span style="color: #DD4747">deleteNonstrict</span>(roleType);
      * </pre>
-     * @param roleType The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param roleType The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrict(final RoleType roleType) {
         doDeleteNonstrict(roleType, null);
     }
 
-    protected void doDeleteNonstrict(final RoleType roleType,
-            final DeleteOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictInternally(roleType,
-                new InternalDeleteNonstrictCallback<RoleType>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final RoleType entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrict(final RoleType et,
+            final DeleteOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -1394,52 +1299,56 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <pre>
      * RoleType roleType = new RoleType();
      * roleType.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//roleType.setVersionNo(value);</span>
-     * roleTypeBhv.<span style="color: #FD4747">deleteNonstrictIgnoreDeleted</span>(roleType);
+     * roleTypeBhv.<span style="color: #DD4747">deleteNonstrictIgnoreDeleted</span>(roleType);
      * <span style="color: #3F7E5E">// if the target entity doesn't exist, no exception</span>
      * </pre>
-     * @param roleType The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param roleType The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrictIgnoreDeleted(final RoleType roleType) {
         doDeleteNonstrictIgnoreDeleted(roleType, null);
     }
 
-    protected void doDeleteNonstrictIgnoreDeleted(final RoleType roleType,
-            final DeleteOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictIgnoreDeletedInternally(roleType,
-                new InternalDeleteNonstrictIgnoreDeletedCallback<RoleType>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final RoleType entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrictIgnoreDeleted(final RoleType et,
+            final DeleteOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictIgnoreDeletedInternally(et, op);
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            deleteNonstrict(downcast(entity));
-        } else {
-            varyingDeleteNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     RoleType roleType = new RoleType();
+     *     roleType.setFooName("foo");
+     *     if (...) {
+     *         roleType.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     roleTypeList.add(roleType);
+     * }
+     * roleTypeBhv.<span style="color: #DD4747">batchInsert</span>(roleTypeList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -1447,89 +1356,100 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return doBatchInsert(roleTypeList, null);
     }
 
-    protected int[] doBatchInsert(final List<RoleType> roleTypeList,
-            final InsertOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleTypeList", roleTypeList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(roleTypeList, option);
+    protected int[] doBatchInsert(final List<RoleType> ls,
+            final InsertOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleTypeList", ls);
+        InsertOption<RoleTypeCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<RoleType> ls,
+            final InsertOption<RoleTypeCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">batchUpdate</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
-     *     public void specify(RoleTypeCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     RoleType roleType = new RoleType();
+     *     roleType.setFooName("foo");
+     *     if (...) {
+     *         roleType.setFooPrice(123);
+     *     } else {
+     *         roleType.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//roleType.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     roleTypeList.add(roleType);
+     * }
+     * roleTypeBhv.<span style="color: #DD4747">batchUpdate</span>(roleTypeList);
      * </pre>
-     * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(final List<RoleType> roleTypeList) {
         return doBatchUpdate(roleTypeList, null);
     }
 
-    protected int[] doBatchUpdate(final List<RoleType> roleTypeList,
-            final UpdateOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleTypeList", roleTypeList);
-        prepareBatchUpdateOption(roleTypeList, option);
-        return delegateBatchUpdate(roleTypeList, option);
+    protected int[] doBatchUpdate(final List<RoleType> ls,
+            final UpdateOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleTypeList", ls);
+        UpdateOption<RoleTypeCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(final List<RoleType> roleTypeList,
-            final UpdateOption<RoleTypeCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(roleTypeList);
-        //}
+    protected void prepareBatchUpdateOption(final List<RoleType> ls,
+            final UpdateOption<RoleTypeCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * roleTypeBhv.<span style="color: #FD4747">batchUpdate</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
+     * roleTypeBhv.<span style="color: #DD4747">batchUpdate</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
      *     public void specify(RoleTypeCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * roleTypeBhv.<span style="color: #FD4747">batchUpdate</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
+     * roleTypeBhv.<span style="color: #DD4747">batchUpdate</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
      *     public void specify(RoleTypeCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1538,10 +1458,10 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * and an optimistic lock column because they are specified implicitly.</p>
      * <p>And you should specify columns that are modified in any entities (at least one entity).
      * But if you specify every column, it has no check.</p>
-     * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(final List<RoleType> roleTypeList,
             final SpecifyQuery<RoleTypeCB> updateColumnSpec) {
@@ -1550,49 +1470,61 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * Batch-update the entity list non-strictly. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are update target. {NOT modified only}</span>
-     * So you should the other batchUpdateNonstrict() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 140%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
-     *     public void specify(RoleTypeCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     RoleType roleType = new RoleType();
+     *     roleType.setFooName("foo");
+     *     if (...) {
+     *         roleType.setFooPrice(123);
+     *     } else {
+     *         roleType.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//roleType.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     roleTypeList.add(roleType);
+     * }
+     * roleTypeBhv.<span style="color: #DD4747">batchUpdate</span>(roleTypeList);
      * </pre>
      * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(final List<RoleType> roleTypeList) {
         return doBatchUpdateNonstrict(roleTypeList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<RoleType> roleTypeList,
-            final UpdateOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleTypeList", roleTypeList);
-        prepareBatchUpdateOption(roleTypeList, option);
-        return delegateBatchUpdateNonstrict(roleTypeList, option);
+    protected int[] doBatchUpdateNonstrict(final List<RoleType> ls,
+            final UpdateOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleTypeList", ls);
+        UpdateOption<RoleTypeCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop);
+        return delegateBatchUpdateNonstrict(ls, rlop);
     }
 
     /**
-     * Batch-update the entity list non-strictly. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * roleTypeBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
+     * roleTypeBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
      *     public void specify(RoleTypeCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * roleTypeBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
+     * roleTypeBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(roleTypeList, new SpecifyQuery<RoleTypeCB>() {
      *     public void specify(RoleTypeCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1603,7 +1535,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(final List<RoleType> roleTypeList,
             final SpecifyQuery<RoleTypeCB> updateColumnSpec) {
@@ -1613,12 +1545,8 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdateNonstrict(downcast(ls));
-        } else {
-            return varyingBatchUpdateNonstrict(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
     }
 
     /**
@@ -1626,27 +1554,23 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchDelete(final List<RoleType> roleTypeList) {
         return doBatchDelete(roleTypeList, null);
     }
 
-    protected int[] doBatchDelete(final List<RoleType> roleTypeList,
-            final DeleteOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleTypeList", roleTypeList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(roleTypeList, option);
+    protected int[] doBatchDelete(final List<RoleType> ls,
+            final DeleteOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleTypeList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1654,27 +1578,23 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param roleTypeList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDeleteNonstrict(final List<RoleType> roleTypeList) {
         return doBatchDeleteNonstrict(roleTypeList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<RoleType> roleTypeList,
-            final DeleteOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleTypeList", roleTypeList);
-        prepareDeleteOption(option);
-        return delegateBatchDeleteNonstrict(roleTypeList, option);
+    protected int[] doBatchDeleteNonstrict(final List<RoleType> ls,
+            final DeleteOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleTypeList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDeleteNonstrict(ls, op);
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDeleteNonstrict(downcast(ls));
-        } else {
-            return varyingBatchDeleteNonstrict(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
     }
 
     // ===================================================================================
@@ -1683,7 +1603,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * roleTypeBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;RoleType, RoleTypeCB&gt;() {
+     * roleTypeBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;RoleType, RoleTypeCB&gt;() {
      *     public ConditionBean setup(roleType entity, RoleTypeCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1696,7 +1616,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1712,18 +1632,17 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<RoleType, RoleTypeCB> setupper,
-            final InsertOption<RoleTypeCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final RoleType entity = new RoleType();
-        final RoleTypeCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<RoleType, RoleTypeCB> sp,
+            final InsertOption<RoleTypeCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final RoleType et = newEntity();
+        final RoleTypeCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected RoleTypeCB createCBForQueryInsert() {
-        final RoleTypeCB cb = newMyConditionBean();
+        final RoleTypeCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1731,12 +1650,8 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1749,40 +1664,35 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//roleType.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//roleType.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//roleType.setVersionNo(value);</span>
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
-     * roleTypeBhv.<span style="color: #FD4747">queryUpdate</span>(roleType, cb);
+     * roleTypeBhv.<span style="color: #DD4747">queryUpdate</span>(roleType, cb);
      * </pre>
      * @param roleType The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final RoleType roleType, final RoleTypeCB cb) {
         return doQueryUpdate(roleType, cb, null);
     }
 
-    protected int doQueryUpdate(final RoleType roleType, final RoleTypeCB cb,
-            final UpdateOption<RoleTypeCB> option) {
-        assertObjectNotNull("roleType", roleType);
+    protected int doQueryUpdate(final RoleType et, final RoleTypeCB cb,
+            final UpdateOption<RoleTypeCB> op) {
+        assertObjectNotNull("roleType", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                roleType, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (RoleTypeCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity), (RoleTypeCB) cb,
-                    downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1790,32 +1700,28 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <pre>
      * RoleTypeCB cb = new RoleTypeCB();
      * cb.query().setFoo...(value);
-     * roleTypeBhv.<span style="color: #FD4747">queryDelete</span>(roleType, cb);
+     * roleTypeBhv.<span style="color: #DD4747">queryDelete</span>(roleType, cb);
      * </pre>
      * @param cb The condition-bean of RoleType. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final RoleTypeCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final RoleTypeCB cb,
-            final DeleteOption<RoleTypeCB> option) {
+            final DeleteOption<RoleTypeCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((RoleTypeCB) cb);
-        } else {
-            return varyingQueryDelete((RoleTypeCB) cb, downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1836,12 +1742,12 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * InsertOption<RoleTypeCB> option = new InsertOption<RoleTypeCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * roleTypeBhv.<span style="color: #FD4747">varyingInsert</span>(roleType, option);
+     * roleTypeBhv.<span style="color: #DD4747">varyingInsert</span>(roleType, option);
      * ... = roleType.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param roleType The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param roleType The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final RoleType roleType,
             final InsertOption<RoleTypeCB> option) {
@@ -1857,26 +1763,26 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * RoleType roleType = new RoleType();
      * roleType.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * roleType.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * roleType.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * roleType.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;RoleTypeCB&gt; option = new UpdateOption&lt;RoleTypeCB&gt;();
      *     option.self(new SpecifyQuery&lt;RoleTypeCB&gt;() {
      *         public void specify(RoleTypeCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     roleTypeBhv.<span style="color: #FD4747">varyingUpdate</span>(roleType, option);
+     *     roleTypeBhv.<span style="color: #DD4747">varyingUpdate</span>(roleType, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param roleType The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param roleType The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final RoleType roleType,
             final UpdateOption<RoleTypeCB> option) {
@@ -1893,22 +1799,22 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * RoleType roleType = new RoleType();
      * roleType.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * roleType.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//roleType.setVersionNo(value);</span>
      * UpdateOption&lt;RoleTypeCB&gt; option = new UpdateOption&lt;RoleTypeCB&gt;();
      * option.self(new SpecifyQuery&lt;RoleTypeCB&gt;() {
      *     public void specify(RoleTypeCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * roleTypeBhv.<span style="color: #FD4747">varyingUpdateNonstrict</span>(roleType, option);
+     * roleTypeBhv.<span style="color: #DD4747">varyingUpdateNonstrict</span>(roleType, option);
      * </pre>
-     * @param roleType The entity of update target. (NotNull, PrimaryKeyNotNull)
+     * @param roleType The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdateNonstrict(final RoleType roleType,
             final UpdateOption<RoleTypeCB> option) {
@@ -1919,47 +1825,47 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param roleType The entity of insert or update target. (NotNull)
+     * @param roleType The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(final RoleType roleType,
             final InsertOption<RoleTypeCB> insertOption,
             final UpdateOption<RoleTypeCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(roleType, insertOption, updateOption);
+        doInsertOrUpdate(roleType, insertOption, updateOption);
     }
 
     /**
      * Insert or update the entity with varying requests non-strictly. (NonExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdateNonstrict(entity).
-     * @param roleType The entity of insert or update target. (NotNull)
+     * @param roleType The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdateNonstrict(final RoleType roleType,
             final InsertOption<RoleTypeCB> insertOption,
             final UpdateOption<RoleTypeCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdateNonstrict(roleType, insertOption, updateOption);
+        doInsertOrUpdateNonstrict(roleType, insertOption, updateOption);
     }
 
     /**
      * Delete the entity with varying requests. (ZeroUpdateException, ExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param roleType The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param roleType The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final RoleType roleType,
             final DeleteOption<RoleTypeCB> option) {
@@ -1971,10 +1877,10 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * Delete the entity with varying requests non-strictly. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as deleteNonstrict(entity).
-     * @param roleType The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param roleType The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDeleteNonstrict(final RoleType roleType,
             final DeleteOption<RoleTypeCB> option) {
@@ -2087,7 +1993,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//roleType.setPK...(value);</span>
      * roleType.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//roleType.setVersionNo(value);</span>
      * RoleTypeCB cb = new RoleTypeCB();
@@ -2095,16 +2001,16 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;RoleTypeCB&gt; option = new UpdateOption&lt;RoleTypeCB&gt;();
      * option.self(new SpecifyQuery&lt;RoleTypeCB&gt;() {
      *     public void specify(RoleTypeCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * roleTypeBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(roleType, cb, option);
+     * roleTypeBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(roleType, cb, option);
      * </pre>
      * @param roleType The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of RoleType. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final RoleType roleType, final RoleTypeCB cb,
             final UpdateOption<RoleTypeCB> option) {
@@ -2119,7 +2025,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of RoleType. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final RoleTypeCB cb,
             final DeleteOption<RoleTypeCB> option) {
@@ -2166,167 +2072,22 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final RoleTypeCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
-    }
-
-    protected int delegateSelectCountPlainly(final RoleTypeCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends RoleType> void delegateSelectCursor(
-            final RoleTypeCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends RoleType> List<ENTITY> delegateSelectList(
-            final RoleTypeCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final RoleType e,
-            final InsertOption<RoleTypeCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final RoleType e,
-            final UpdateOption<RoleTypeCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateEntityCommand(e, op));
-    }
-
-    protected int delegateUpdateNonstrict(final RoleType e,
-            final UpdateOption<RoleTypeCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final RoleType e,
-            final DeleteOption<RoleTypeCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteEntityCommand(e, op));
-    }
-
-    protected int delegateDeleteNonstrict(final RoleType e,
-            final DeleteOption<RoleTypeCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<RoleType> ls,
-            final InsertOption<RoleTypeCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<RoleType> ls,
-            final UpdateOption<RoleTypeCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(final List<RoleType> ls,
-            final UpdateOption<RoleTypeCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<RoleType> ls,
-            final DeleteOption<RoleTypeCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(final List<RoleType> ls,
-            final DeleteOption<RoleTypeCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final RoleType e, final RoleTypeCB inCB,
-            final ConditionBean resCB, final InsertOption<RoleTypeCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final RoleType e, final RoleTypeCB cb,
-            final UpdateOption<RoleTypeCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final RoleTypeCB cb,
-            final DeleteOption<RoleTypeCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
     //                                                                Optimistic Lock Info
     //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return !(downcast(entity).getVersionNo() + "").equals("null");// For primitive type
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
+    protected boolean hasVersionNoValue(final Entity et) {
+        return downcast(et).getVersionNo() != null;
     }
 
     // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected RoleType downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, RoleType.class);
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<RoleType> typeOfSelectedEntity() {
+        return RoleType.class;
+    }
+
+    protected RoleType downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, RoleType.class);
     }
 
     protected RoleTypeCB downcast(final ConditionBean cb) {
@@ -2334,31 +2095,31 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<RoleType> downcast(final List<? extends Entity> entityList) {
-        return (List<RoleType>) entityList;
+    protected List<RoleType> downcast(final List<? extends Entity> ls) {
+        return (List<RoleType>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<RoleTypeCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<RoleTypeCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<RoleTypeCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<RoleTypeCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<RoleTypeCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<RoleTypeCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<RoleTypeCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<RoleTypeCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<RoleTypeCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<RoleType, RoleTypeCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<RoleType, RoleTypeCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<RoleType, RoleTypeCB>) sp;
     }
 }

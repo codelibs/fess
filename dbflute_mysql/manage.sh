@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd `dirname $0`
-. _project.sh
+. ./_project.sh
 
 FIRST_ARG=$1
 SECOND_ARG=$2

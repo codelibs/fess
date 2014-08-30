@@ -22,6 +22,7 @@ import java.util.Map;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.FavoriteLog;
+import jp.sf.fess.db.exentity.UserInfo;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +62,9 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -69,57 +73,82 @@ public class FavoriteLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgCreatedTime(), "createdTime");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FavoriteLog) e).getId();
+        public Object read(final Entity et) {
+            return ((FavoriteLog) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FavoriteLog) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FavoriteLog) et).setId(ctl(vl));
         }
     }
 
     public static class EpgUserId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FavoriteLog) e).getUserId();
+        public Object read(final Entity et) {
+            return ((FavoriteLog) et).getUserId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FavoriteLog) e).setUserId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FavoriteLog) et).setUserId(ctl(vl));
         }
     }
 
     public static class EpgUrl implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FavoriteLog) e).getUrl();
+        public Object read(final Entity et) {
+            return ((FavoriteLog) et).getUrl();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FavoriteLog) e).setUrl((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FavoriteLog) et).setUrl((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FavoriteLog) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((FavoriteLog) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FavoriteLog) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((FavoriteLog) et).setCreatedTime((java.sql.Timestamp) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgUserInfo(), "userInfo");
+    }
+
+    public class EfpgUserInfo implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((FavoriteLog) et).getUserInfo();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((FavoriteLog) et).setUserInfo((UserInfo) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -159,42 +188,59 @@ public class FavoriteLogDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_42E754CD_EB0E_4E02_84C8_3F417432FFD5",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_00130965_7882_4795_A93F_D65309A1B482",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUserId = cci("USER_ID", "USER_ID", null,
-            null, true, "userId", Long.class, false, false, "BIGINT", 19, 0,
-            null, false, null, null, "userInfo", null, null);
+            null, Long.class, "userId", null, false, false, true, "BIGINT", 19,
+            0, null, false, null, null, "userInfo", null, null);
 
-    protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null, true,
-            "url", String.class, false, false, "VARCHAR", 4000, 0, null, false,
-            null, null, null, null, null);
+    protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null,
+            String.class, "url", null, false, false, true, "VARCHAR", 4000, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * USER_ID: {UQ+, IX, NotNull, BIGINT(19), FK to USER_INFO}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUserId() {
         return _columnUserId;
     }
 
+    /**
+     * URL: {+UQ, NotNull, VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUrl() {
         return _columnUrl;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
@@ -237,15 +283,21 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * USER_INFO by my USER_ID, named 'userInfo'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignUserInfo() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
-                columnUserId(), UserInfoDbm.getInstance().columnId());
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnUserId(),
+                UserInfoDbm.getInstance().columnId());
         return cfi("CONSTRAINT_A98", "userInfo", this,
-                UserInfoDbm.getInstance(), map, 0, false, false, false, false,
-                null, null, false, "favoriteLogList");
+                UserInfoDbm.getInstance(), mp, 0, null, false, false, false,
+                false, null, null, false, "favoriteLogList");
     }
 
     // -----------------------------------------------------
@@ -290,8 +342,8 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FavoriteLog newEntity() {
+        return new FavoriteLog();
     }
 
     public FavoriteLog newMyEntity() {
@@ -302,24 +354,24 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((FavoriteLog) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((FavoriteLog) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((FavoriteLog) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((FavoriteLog) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

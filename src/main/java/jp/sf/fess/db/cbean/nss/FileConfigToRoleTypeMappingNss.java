@@ -46,31 +46,26 @@ public class FileConfigToRoleTypeMappingNss {
     /**
      * With nested relation columns to select clause. <br />
      * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public FileCrawlingConfigNss withFileCrawlingConfig() {
+    public void withFileCrawlingConfig() {
         _query.doNss(new FileConfigToRoleTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryFileCrawlingConfig();
             }
         });
-        return new FileCrawlingConfigNss(_query.queryFileCrawlingConfig());
     }
 
     /**
      * With nested relation columns to select clause. <br />
      * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public RoleTypeNss withRoleType() {
+    public void withRoleType() {
         _query.doNss(new FileConfigToRoleTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryRoleType();
             }
         });
-        return new RoleTypeNss(_query.queryRoleType());
     }
-
 }

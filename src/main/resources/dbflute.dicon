@@ -26,6 +26,7 @@
     <component name="fileConfigToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv"/>
     <component name="fileCrawlingConfigBhv" class="jp.sf.fess.db.exbhv.FileCrawlingConfigBhv"/>
     <component name="jobLogBhv" class="jp.sf.fess.db.exbhv.JobLogBhv"/>
+    <component name="keyMatchBhv" class="jp.sf.fess.db.exbhv.KeyMatchBhv"/>
     <component name="labelTypeBhv" class="jp.sf.fess.db.exbhv.LabelTypeBhv"/>
     <component name="labelTypeToRoleTypeMappingBhv" class="jp.sf.fess.db.exbhv.LabelTypeToRoleTypeMappingBhv"/>
     <component name="overlappingHostBhv" class="jp.sf.fess.db.exbhv.OverlappingHostBhv"/>

@@ -61,6 +61,9 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -70,69 +73,69 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgCreatedTime(), "createdTime");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((CrawlingSession) e).getId();
+        public Object read(final Entity et) {
+            return ((CrawlingSession) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((CrawlingSession) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((CrawlingSession) et).setId(ctl(vl));
         }
     }
 
     public static class EpgSessionId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((CrawlingSession) e).getSessionId();
+        public Object read(final Entity et) {
+            return ((CrawlingSession) et).getSessionId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((CrawlingSession) e).setSessionId((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((CrawlingSession) et).setSessionId((String) vl);
         }
     }
 
     public static class EpgName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((CrawlingSession) e).getName();
+        public Object read(final Entity et) {
+            return ((CrawlingSession) et).getName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((CrawlingSession) e).setName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((CrawlingSession) et).setName((String) vl);
         }
     }
 
     public static class EpgExpiredTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((CrawlingSession) e).getExpiredTime();
+        public Object read(final Entity et) {
+            return ((CrawlingSession) et).getExpiredTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((CrawlingSession) e).setExpiredTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((CrawlingSession) et).setExpiredTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((CrawlingSession) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((CrawlingSession) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((CrawlingSession) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((CrawlingSession) et).setCreatedTime((java.sql.Timestamp) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -172,51 +175,73 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_7DC667DC_EEF8_47B1_B04C_3D0FBEF23CC8",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_86E39EF1_506E_49C7_919A_335F7363C6EE",
             false, null, null, null, "crawlingSessionInfoList", null);
 
     protected final ColumnInfo _columnSessionId = cci("SESSION_ID",
-            "SESSION_ID", null, null, true, "sessionId", String.class, false,
-            false, "VARCHAR", 20, 0, null, false, null, null, null, null, null);
+            "SESSION_ID", null, null, String.class, "sessionId", null, false,
+            false, true, "VARCHAR", 20, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
-            false, "name", String.class, false, false, "VARCHAR", 20, 0, null,
-            false, null, null, null, null, null);
+            String.class, "name", null, false, false, false, "VARCHAR", 20, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnExpiredTime = cci("EXPIRED_TIME",
-            "EXPIRED_TIME", null, null, false, "expiredTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "EXPIRED_TIME", null, null, java.sql.Timestamp.class,
+            "expiredTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * SESSION_ID: {NotNull, VARCHAR(20)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSessionId() {
         return _columnSessionId;
     }
 
+    /**
+     * NAME: {IX+, VARCHAR(20)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnName() {
         return _columnName;
     }
 
+    /**
+     * EXPIRED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnExpiredTime() {
         return _columnExpiredTime;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
@@ -260,6 +285,8 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -267,11 +294,15 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
+    /**
+     * CRAWLING_SESSION_INFO by CRAWLING_SESSION_ID, named 'crawlingSessionInfoList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerCrawlingSessionInfoList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 CrawlingSessionInfoDbm.getInstance().columnCrawlingSessionId());
         return cri("CONSTRAINT_B3A", "crawlingSessionInfoList", this,
-                CrawlingSessionInfoDbm.getInstance(), map, false,
+                CrawlingSessionInfoDbm.getInstance(), mp, false,
                 "crawlingSession");
     }
 
@@ -313,8 +344,8 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public CrawlingSession newEntity() {
+        return new CrawlingSession();
     }
 
     public CrawlingSession newMyEntity() {
@@ -325,24 +356,24 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((CrawlingSession) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((CrawlingSession) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((CrawlingSession) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((CrawlingSession) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

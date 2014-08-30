@@ -60,11 +60,11 @@ public interface CDef extends Classification {
             }
         }
 
-        private final String _code;
+        private String _code;
 
-        private final String _alias;
+        private String _alias;
 
-        private final String[] _sisters;
+        private String[] _sisters;
 
         private ProcessType(final String code, final String alias,
                 final String[] sisters) {
@@ -178,11 +178,11 @@ public interface CDef extends Classification {
             }
         }
 
-        private final String _code;
+        private String _code;
 
-        private final String _alias;
+        private String _alias;
 
-        private final String[] _sisters;
+        private String[] _sisters;
 
         private AccessType(final String code, final String alias,
                 final String[] sisters) {

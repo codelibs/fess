@@ -45,16 +45,13 @@ public class WebAuthenticationNss {
     /**
      * With nested relation columns to select clause. <br />
      * WEB_CRAWLING_CONFIG by my WEB_CRAWLING_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public WebCrawlingConfigNss withWebCrawlingConfig() {
+    public void withWebCrawlingConfig() {
         _query.doNss(new WebAuthenticationCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryWebCrawlingConfig();
             }
         });
-        return new WebCrawlingConfigNss(_query.queryWebCrawlingConfig());
     }
-
 }

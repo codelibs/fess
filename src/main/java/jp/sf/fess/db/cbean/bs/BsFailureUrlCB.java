@@ -106,6 +106,22 @@ public class BsFailureUrlCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public FailureUrlCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsFailureUrlCB cb = this;
+        cb.query().setId_Equal(id);
+        return (FailureUrlCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsFailureUrlCB cb = this;
@@ -154,7 +170,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -172,7 +188,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -246,7 +262,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;FailureUrlCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;FailureUrlCB&gt;() {
      *     public void query(FailureUrlCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -258,7 +274,12 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         final FailureUrlCB cb = new FailureUrlCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FailureUrlCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -269,7 +290,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;FailureUrlCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;FailureUrlCB&gt;() {
      *     public void query(FailureUrlCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -281,7 +302,12 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         final FailureUrlCB cb = new FailureUrlCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FailureUrlCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -290,7 +316,6 @@ public class BsFailureUrlCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-
     // [DBFlute-0.7.4]
     // ===================================================================================
     //                                                                             Specify
@@ -360,7 +385,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         }
 
         /**
-         * URL: {IX, NotNull, VARCHAR(4000)}
+         * URL: {IX+, NotNull, VARCHAR(4000)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnUrl() {
@@ -376,7 +401,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         }
 
         /**
-         * ERROR_NAME: {IX+, VARCHAR(255)}
+         * ERROR_NAME: {VARCHAR(255)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnErrorName() {
@@ -392,7 +417,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         }
 
         /**
-         * ERROR_COUNT: {IX+, NotNull, INTEGER(10)}
+         * ERROR_COUNT: {NotNull, INTEGER(10)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnErrorCount() {
@@ -400,7 +425,7 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         }
 
         /**
-         * LAST_ACCESS_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+         * LAST_ACCESS_TIME: {NotNull, TIMESTAMP(23, 10)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnLastAccessTime() {
@@ -448,12 +473,11 @@ public class BsFailureUrlCB extends AbstractConditionBean {
                     _qyCall.qy(),
                     new HpSDRSetupper<FailureUrlCB, FailureUrlCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<FailureUrlCB> subQuery,
-                                final FailureUrlCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                        public void setup(final String fn,
+                                final SubQuery<FailureUrlCB> sq,
+                                final FailureUrlCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -461,19 +485,19 @@ public class BsFailureUrlCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;FailureUrlCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;FailureUrlCB&gt;() {
      *     public void query(FailureUrlCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;FailureUrlCB&gt;() {
      *     public void query(FailureUrlCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -522,14 +546,14 @@ public class BsFailureUrlCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FailureUrlCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FailureUrlCB&gt;() {
      *     public void query(FailureUrlCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -542,15 +566,20 @@ public class BsFailureUrlCB extends AbstractConditionBean {
         xorSQ((FailureUrlCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FailureUrlCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FailureUrlCB&gt;() {
      *     public void query(FailureUrlCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FailureUrlCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FailureUrlCB&gt;() {
      *             public void query(FailureUrlCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

@@ -26,6 +26,8 @@ import jp.sf.fess.db.cbean.cq.UserInfoCQ;
 import jp.sf.fess.db.cbean.cq.ciq.SearchLogCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -44,10 +46,10 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsSearchLogCQ(final ConditionQuery childQuery,
+    public BsSearchLogCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -57,7 +59,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from SEARCH_LOG) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -84,7 +86,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join SEARCH_LOG on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -102,7 +104,6 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -117,257 +118,138 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getId();
     }
 
-    protected Map<String, ClickLogCQ> _id_ExistsReferrer_ClickLogListMap;
-
     public Map<String, ClickLogCQ> getId_ExistsReferrer_ClickLogList() {
-        return _id_ExistsReferrer_ClickLogListMap;
+        return xgetSQueMap("id_ExistsReferrer_ClickLogList");
     }
 
     @Override
-    public String keepId_ExistsReferrer_ClickLogList(final ClickLogCQ subQuery) {
-        if (_id_ExistsReferrer_ClickLogListMap == null) {
-            _id_ExistsReferrer_ClickLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_ClickLogListMap.size() + 1);
-        _id_ExistsReferrer_ClickLogListMap.put(key, subQuery);
-        return "id_ExistsReferrer_ClickLogList." + key;
+    public String keepId_ExistsReferrer_ClickLogList(final ClickLogCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_ClickLogList", sq);
     }
 
-    protected Map<String, SearchFieldLogCQ> _id_ExistsReferrer_SearchFieldLogListMap;
-
     public Map<String, SearchFieldLogCQ> getId_ExistsReferrer_SearchFieldLogList() {
-        return _id_ExistsReferrer_SearchFieldLogListMap;
+        return xgetSQueMap("id_ExistsReferrer_SearchFieldLogList");
     }
 
     @Override
     public String keepId_ExistsReferrer_SearchFieldLogList(
-            final SearchFieldLogCQ subQuery) {
-        if (_id_ExistsReferrer_SearchFieldLogListMap == null) {
-            _id_ExistsReferrer_SearchFieldLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_SearchFieldLogListMap.size() + 1);
-        _id_ExistsReferrer_SearchFieldLogListMap.put(key, subQuery);
-        return "id_ExistsReferrer_SearchFieldLogList." + key;
+            final SearchFieldLogCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_SearchFieldLogList", sq);
     }
 
-    protected Map<String, ClickLogCQ> _id_NotExistsReferrer_ClickLogListMap;
-
     public Map<String, ClickLogCQ> getId_NotExistsReferrer_ClickLogList() {
-        return _id_NotExistsReferrer_ClickLogListMap;
+        return xgetSQueMap("id_NotExistsReferrer_ClickLogList");
     }
 
     @Override
-    public String keepId_NotExistsReferrer_ClickLogList(
-            final ClickLogCQ subQuery) {
-        if (_id_NotExistsReferrer_ClickLogListMap == null) {
-            _id_NotExistsReferrer_ClickLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_ClickLogListMap.size() + 1);
-        _id_NotExistsReferrer_ClickLogListMap.put(key, subQuery);
-        return "id_NotExistsReferrer_ClickLogList." + key;
+    public String keepId_NotExistsReferrer_ClickLogList(final ClickLogCQ sq) {
+        return xkeepSQue("id_NotExistsReferrer_ClickLogList", sq);
     }
 
-    protected Map<String, SearchFieldLogCQ> _id_NotExistsReferrer_SearchFieldLogListMap;
-
     public Map<String, SearchFieldLogCQ> getId_NotExistsReferrer_SearchFieldLogList() {
-        return _id_NotExistsReferrer_SearchFieldLogListMap;
+        return xgetSQueMap("id_NotExistsReferrer_SearchFieldLogList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_SearchFieldLogList(
-            final SearchFieldLogCQ subQuery) {
-        if (_id_NotExistsReferrer_SearchFieldLogListMap == null) {
-            _id_NotExistsReferrer_SearchFieldLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_SearchFieldLogListMap.size() + 1);
-        _id_NotExistsReferrer_SearchFieldLogListMap.put(key, subQuery);
-        return "id_NotExistsReferrer_SearchFieldLogList." + key;
+            final SearchFieldLogCQ sq) {
+        return xkeepSQue("id_NotExistsReferrer_SearchFieldLogList", sq);
     }
 
-    protected Map<String, ClickLogCQ> _id_SpecifyDerivedReferrer_ClickLogListMap;
-
     public Map<String, ClickLogCQ> getId_SpecifyDerivedReferrer_ClickLogList() {
-        return _id_SpecifyDerivedReferrer_ClickLogListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_ClickLogList");
     }
 
     @Override
-    public String keepId_SpecifyDerivedReferrer_ClickLogList(
-            final ClickLogCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_ClickLogListMap == null) {
-            _id_SpecifyDerivedReferrer_ClickLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_ClickLogListMap.size() + 1);
-        _id_SpecifyDerivedReferrer_ClickLogListMap.put(key, subQuery);
-        return "id_SpecifyDerivedReferrer_ClickLogList." + key;
+    public String keepId_SpecifyDerivedReferrer_ClickLogList(final ClickLogCQ sq) {
+        return xkeepSQue("id_SpecifyDerivedReferrer_ClickLogList", sq);
     }
 
-    protected Map<String, SearchFieldLogCQ> _id_SpecifyDerivedReferrer_SearchFieldLogListMap;
-
     public Map<String, SearchFieldLogCQ> getId_SpecifyDerivedReferrer_SearchFieldLogList() {
-        return _id_SpecifyDerivedReferrer_SearchFieldLogListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_SearchFieldLogList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_SearchFieldLogList(
-            final SearchFieldLogCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_SearchFieldLogListMap == null) {
-            _id_SpecifyDerivedReferrer_SearchFieldLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_SearchFieldLogListMap.size() + 1);
-        _id_SpecifyDerivedReferrer_SearchFieldLogListMap.put(key, subQuery);
-        return "id_SpecifyDerivedReferrer_SearchFieldLogList." + key;
+            final SearchFieldLogCQ sq) {
+        return xkeepSQue("id_SpecifyDerivedReferrer_SearchFieldLogList", sq);
     }
 
-    protected Map<String, ClickLogCQ> _id_InScopeRelation_ClickLogListMap;
-
     public Map<String, ClickLogCQ> getId_InScopeRelation_ClickLogList() {
-        return _id_InScopeRelation_ClickLogListMap;
+        return xgetSQueMap("id_InScopeRelation_ClickLogList");
     }
 
     @Override
-    public String keepId_InScopeRelation_ClickLogList(final ClickLogCQ subQuery) {
-        if (_id_InScopeRelation_ClickLogListMap == null) {
-            _id_InScopeRelation_ClickLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_ClickLogListMap.size() + 1);
-        _id_InScopeRelation_ClickLogListMap.put(key, subQuery);
-        return "id_InScopeRelation_ClickLogList." + key;
+    public String keepId_InScopeRelation_ClickLogList(final ClickLogCQ sq) {
+        return xkeepSQue("id_InScopeRelation_ClickLogList", sq);
     }
 
-    protected Map<String, SearchFieldLogCQ> _id_InScopeRelation_SearchFieldLogListMap;
-
     public Map<String, SearchFieldLogCQ> getId_InScopeRelation_SearchFieldLogList() {
-        return _id_InScopeRelation_SearchFieldLogListMap;
+        return xgetSQueMap("id_InScopeRelation_SearchFieldLogList");
     }
 
     @Override
     public String keepId_InScopeRelation_SearchFieldLogList(
-            final SearchFieldLogCQ subQuery) {
-        if (_id_InScopeRelation_SearchFieldLogListMap == null) {
-            _id_InScopeRelation_SearchFieldLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_SearchFieldLogListMap.size() + 1);
-        _id_InScopeRelation_SearchFieldLogListMap.put(key, subQuery);
-        return "id_InScopeRelation_SearchFieldLogList." + key;
+            final SearchFieldLogCQ sq) {
+        return xkeepSQue("id_InScopeRelation_SearchFieldLogList", sq);
     }
 
-    protected Map<String, ClickLogCQ> _id_NotInScopeRelation_ClickLogListMap;
-
     public Map<String, ClickLogCQ> getId_NotInScopeRelation_ClickLogList() {
-        return _id_NotInScopeRelation_ClickLogListMap;
+        return xgetSQueMap("id_NotInScopeRelation_ClickLogList");
     }
 
     @Override
-    public String keepId_NotInScopeRelation_ClickLogList(
-            final ClickLogCQ subQuery) {
-        if (_id_NotInScopeRelation_ClickLogListMap == null) {
-            _id_NotInScopeRelation_ClickLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_ClickLogListMap.size() + 1);
-        _id_NotInScopeRelation_ClickLogListMap.put(key, subQuery);
-        return "id_NotInScopeRelation_ClickLogList." + key;
+    public String keepId_NotInScopeRelation_ClickLogList(final ClickLogCQ sq) {
+        return xkeepSQue("id_NotInScopeRelation_ClickLogList", sq);
     }
 
-    protected Map<String, SearchFieldLogCQ> _id_NotInScopeRelation_SearchFieldLogListMap;
-
     public Map<String, SearchFieldLogCQ> getId_NotInScopeRelation_SearchFieldLogList() {
-        return _id_NotInScopeRelation_SearchFieldLogListMap;
+        return xgetSQueMap("id_NotInScopeRelation_SearchFieldLogList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_SearchFieldLogList(
-            final SearchFieldLogCQ subQuery) {
-        if (_id_NotInScopeRelation_SearchFieldLogListMap == null) {
-            _id_NotInScopeRelation_SearchFieldLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_SearchFieldLogListMap.size() + 1);
-        _id_NotInScopeRelation_SearchFieldLogListMap.put(key, subQuery);
-        return "id_NotInScopeRelation_SearchFieldLogList." + key;
+            final SearchFieldLogCQ sq) {
+        return xkeepSQue("id_NotInScopeRelation_SearchFieldLogList", sq);
     }
 
-    protected Map<String, ClickLogCQ> _id_QueryDerivedReferrer_ClickLogListMap;
-
     public Map<String, ClickLogCQ> getId_QueryDerivedReferrer_ClickLogList() {
-        return _id_QueryDerivedReferrer_ClickLogListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_ClickLogList");
     }
 
     @Override
-    public String keepId_QueryDerivedReferrer_ClickLogList(
-            final ClickLogCQ subQuery) {
-        if (_id_QueryDerivedReferrer_ClickLogListMap == null) {
-            _id_QueryDerivedReferrer_ClickLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_ClickLogListMap.size() + 1);
-        _id_QueryDerivedReferrer_ClickLogListMap.put(key, subQuery);
-        return "id_QueryDerivedReferrer_ClickLogList." + key;
+    public String keepId_QueryDerivedReferrer_ClickLogList(final ClickLogCQ sq) {
+        return xkeepSQue("id_QueryDerivedReferrer_ClickLogList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_ClickLogListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_ClickLogListParameter() {
-        return _id_QueryDerivedReferrer_ClickLogListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_ClickLogList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_ClickLogListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_ClickLogListParameterMap == null) {
-            _id_QueryDerivedReferrer_ClickLogListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_ClickLogListParameterMap.size() + 1);
-        _id_QueryDerivedReferrer_ClickLogListParameterMap.put(key,
-                parameterValue);
-        return "id_QueryDerivedReferrer_ClickLogListParameter." + key;
+            final Object pm) {
+        return xkeepSQuePm("id_QueryDerivedReferrer_ClickLogList", pm);
     }
 
-    protected Map<String, SearchFieldLogCQ> _id_QueryDerivedReferrer_SearchFieldLogListMap;
-
     public Map<String, SearchFieldLogCQ> getId_QueryDerivedReferrer_SearchFieldLogList() {
-        return _id_QueryDerivedReferrer_SearchFieldLogListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_SearchFieldLogList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_SearchFieldLogList(
-            final SearchFieldLogCQ subQuery) {
-        if (_id_QueryDerivedReferrer_SearchFieldLogListMap == null) {
-            _id_QueryDerivedReferrer_SearchFieldLogListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_SearchFieldLogListMap.size() + 1);
-        _id_QueryDerivedReferrer_SearchFieldLogListMap.put(key, subQuery);
-        return "id_QueryDerivedReferrer_SearchFieldLogList." + key;
+            final SearchFieldLogCQ sq) {
+        return xkeepSQue("id_QueryDerivedReferrer_SearchFieldLogList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_SearchFieldLogListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_SearchFieldLogListParameter() {
-        return _id_QueryDerivedReferrer_SearchFieldLogListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_SearchFieldLogList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_SearchFieldLogListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_SearchFieldLogListParameterMap == null) {
-            _id_QueryDerivedReferrer_SearchFieldLogListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_SearchFieldLogListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_SearchFieldLogListParameterMap.put(key,
-                parameterValue);
-        return "id_QueryDerivedReferrer_SearchFieldLogListParameter." + key;
+            final Object pm) {
+        return xkeepSQuePm("id_QueryDerivedReferrer_SearchFieldLogList", pm);
     }
 
     /**
@@ -440,7 +322,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
 
     /**
      * Add order-by as ascend. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
      */
     public BsSearchLogCQ addOrderBy_RequestedTime_Asc() {
@@ -450,7 +332,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
 
     /**
      * Add order-by as descend. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @return this. (NotNull)
      */
     public BsSearchLogCQ addOrderBy_RequestedTime_Desc() {
@@ -712,7 +594,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
 
     /**
      * Add order-by as ascend. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @return this. (NotNull)
      */
     public BsSearchLogCQ addOrderBy_UserSessionId_Asc() {
@@ -722,7 +604,7 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
 
     /**
      * Add order-by as descend. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @return this. (NotNull)
      */
     public BsSearchLogCQ addOrderBy_UserSessionId_Desc() {
@@ -778,39 +660,22 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getUserId();
     }
 
-    protected Map<String, UserInfoCQ> _userId_InScopeRelation_UserInfoMap;
-
     public Map<String, UserInfoCQ> getUserId_InScopeRelation_UserInfo() {
-        return _userId_InScopeRelation_UserInfoMap;
+        return xgetSQueMap("userId_InScopeRelation_UserInfo");
     }
 
     @Override
-    public String keepUserId_InScopeRelation_UserInfo(final UserInfoCQ subQuery) {
-        if (_userId_InScopeRelation_UserInfoMap == null) {
-            _userId_InScopeRelation_UserInfoMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_userId_InScopeRelation_UserInfoMap.size() + 1);
-        _userId_InScopeRelation_UserInfoMap.put(key, subQuery);
-        return "userId_InScopeRelation_UserInfo." + key;
+    public String keepUserId_InScopeRelation_UserInfo(final UserInfoCQ sq) {
+        return xkeepSQue("userId_InScopeRelation_UserInfo", sq);
     }
-
-    protected Map<String, UserInfoCQ> _userId_NotInScopeRelation_UserInfoMap;
 
     public Map<String, UserInfoCQ> getUserId_NotInScopeRelation_UserInfo() {
-        return _userId_NotInScopeRelation_UserInfoMap;
+        return xgetSQueMap("userId_NotInScopeRelation_UserInfo");
     }
 
     @Override
-    public String keepUserId_NotInScopeRelation_UserInfo(
-            final UserInfoCQ subQuery) {
-        if (_userId_NotInScopeRelation_UserInfoMap == null) {
-            _userId_NotInScopeRelation_UserInfoMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_userId_NotInScopeRelation_UserInfoMap.size() + 1);
-        _userId_NotInScopeRelation_UserInfoMap.put(key, subQuery);
-        return "userId_NotInScopeRelation_UserInfo." + key;
+    public String keepUserId_NotInScopeRelation_UserInfo(final UserInfoCQ sq) {
+        return xkeepSQue("userId_NotInScopeRelation_UserInfo", sq);
     }
 
     /**
@@ -843,9 +708,9 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -862,9 +727,9 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -878,14 +743,13 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final SearchLogCQ baseQuery = (SearchLogCQ) baseQueryAsSuper;
-        final SearchLogCQ unionQuery = (SearchLogCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryUserInfo()) {
-            unionQuery.queryUserInfo().reflectRelationOnUnionQuery(
-                    baseQuery.queryUserInfo(), unionQuery.queryUserInfo());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final SearchLogCQ bq = (SearchLogCQ) bqs;
+        final SearchLogCQ uq = (SearchLogCQ) uqs;
+        if (bq.hasConditionQueryUserInfo()) {
+            uq.queryUserInfo().reflectRelationOnUnionQuery(bq.queryUserInfo(),
+                    uq.queryUserInfo());
         }
     }
 
@@ -901,36 +765,28 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
         return getConditionQueryUserInfo();
     }
 
-    protected UserInfoCQ _conditionQueryUserInfo;
-
     public UserInfoCQ getConditionQueryUserInfo() {
-        if (_conditionQueryUserInfo == null) {
-            _conditionQueryUserInfo = xcreateQueryUserInfo();
+        final String prop = "userInfo";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryUserInfo());
             xsetupOuterJoinUserInfo();
         }
-        return _conditionQueryUserInfo;
+        return xgetQueRlMap(prop);
     }
 
     protected UserInfoCQ xcreateQueryUserInfo() {
-        final String nrp = resolveNextRelationPath("SEARCH_LOG", "userInfo");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final UserInfoCQ cq = new UserInfoCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("userInfo");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("SEARCH_LOG", "userInfo");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new UserInfoCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "userInfo", nrp);
     }
 
     protected void xsetupOuterJoinUserInfo() {
-        final UserInfoCQ cq = getConditionQueryUserInfo();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("USER_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "userInfo");
+        xregOutJo("userInfo");
     }
 
     public boolean hasConditionQueryUserInfo() {
-        return _conditionQueryUserInfo != null;
+        return xhasQueRlMap("userInfo");
     }
 
     @Override
@@ -942,74 +798,43 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, SearchLogCQ> _scalarConditionMap;
-
     public Map<String, SearchLogCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final SearchLogCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final SearchLogCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, SearchLogCQ> _specifyMyselfDerivedMap;
-
     public Map<String, SearchLogCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final SearchLogCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final SearchLogCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, SearchLogCQ> _queryMyselfDerivedMap;
 
     public Map<String, SearchLogCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final SearchLogCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final SearchLogCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -1018,36 +843,24 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
     protected Map<String, SearchLogCQ> _myselfExistsMap;
 
     public Map<String, SearchLogCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final SearchLogCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final SearchLogCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, SearchLogCQ> _myselfInScopeMap;
-
     public Map<String, SearchLogCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final SearchLogCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final SearchLogCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -1060,6 +873,14 @@ public class BsSearchLogCQ extends AbstractBsSearchLogCQ {
 
     protected String xCQ() {
         return SearchLogCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

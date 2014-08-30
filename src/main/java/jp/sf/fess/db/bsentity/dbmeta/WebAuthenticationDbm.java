@@ -22,6 +22,7 @@ import java.util.Map;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.WebAuthentication;
+import jp.sf.fess.db.exentity.WebCrawlingConfig;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +62,9 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -81,201 +85,227 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getId();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setId(ctl(vl));
         }
     }
 
     public static class EpgHostname implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getHostname();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getHostname();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setHostname((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setHostname((String) vl);
         }
     }
 
     public static class EpgPort implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getPort();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getPort();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setPort(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setPort(cti(vl));
         }
     }
 
     public static class EpgAuthRealm implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getAuthRealm();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getAuthRealm();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setAuthRealm((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setAuthRealm((String) vl);
         }
     }
 
     public static class EpgProtocolScheme implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getProtocolScheme();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getProtocolScheme();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setProtocolScheme((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setProtocolScheme((String) vl);
         }
     }
 
     public static class EpgUsername implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getUsername();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getUsername();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setUsername((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setUsername((String) vl);
         }
     }
 
     public static class EpgPassword implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getPassword();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getPassword();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setPassword((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setPassword((String) vl);
         }
     }
 
     public static class EpgParameters implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getParameters();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getParameters();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setParameters((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setParameters((String) vl);
         }
     }
 
     public static class EpgWebCrawlingConfigId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getWebCrawlingConfigId();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getWebCrawlingConfigId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setWebCrawlingConfigId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setWebCrawlingConfigId(ctl(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebAuthentication) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebAuthentication) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgWebCrawlingConfig(), "webCrawlingConfig");
+    }
+
+    public class EfpgWebCrawlingConfig implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((WebAuthentication) et).getWebCrawlingConfig();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((WebAuthentication) et)
+                    .setWebCrawlingConfig((WebCrawlingConfig) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -315,144 +345,214 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_178CE5A3_39F9_4559_92EF_1FE512ED5818",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_239D97D2_3CE1_4BAD_9E96_A33676C1461C",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnHostname = cci("HOSTNAME", "HOSTNAME",
-            null, null, false, "hostname", String.class, false, false,
+            null, null, String.class, "hostname", null, false, false, false,
             "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnPort = cci("PORT", "PORT", null, null,
-            true, "port", Integer.class, false, false, "INTEGER", 10, 0, null,
-            false, null, null, null, null, null);
+            Integer.class, "port", null, false, false, true, "INTEGER", 10, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnAuthRealm = cci("AUTH_REALM",
-            "AUTH_REALM", null, null, false, "authRealm", String.class, false,
-            false, "VARCHAR", 100, 0, null, false, null, null, null, null, null);
+            "AUTH_REALM", null, null, String.class, "authRealm", null, false,
+            false, false, "VARCHAR", 100, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnProtocolScheme = cci("PROTOCOL_SCHEME",
-            "PROTOCOL_SCHEME", null, null, false, "protocolScheme",
-            String.class, false, false, "VARCHAR", 10, 0, null, false, null,
+            "PROTOCOL_SCHEME", null, null, String.class, "protocolScheme",
+            null, false, false, false, "VARCHAR", 10, 0, null, false, null,
             null, null, null, null);
 
     protected final ColumnInfo _columnUsername = cci("USERNAME", "USERNAME",
-            null, null, true, "username", String.class, false, false,
+            null, null, String.class, "username", null, false, false, true,
             "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnPassword = cci("PASSWORD", "PASSWORD",
-            null, null, false, "password", String.class, false, false,
+            null, null, String.class, "password", null, false, false, false,
             "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnParameters = cci("PARAMETERS",
-            "PARAMETERS", null, null, false, "parameters", String.class, false,
-            false, "VARCHAR", 1000, 0, null, false, null, null, null, null,
-            null);
+            "PARAMETERS", null, null, String.class, "parameters", null, false,
+            false, false, "VARCHAR", 1000, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnWebCrawlingConfigId = cci(
             "WEB_CRAWLING_CONFIG_ID", "WEB_CRAWLING_CONFIG_ID", null, null,
-            true, "webCrawlingConfigId", Long.class, false, false, "BIGINT",
-            19, 0, null, false, null, null, "webCrawlingConfig", null, null);
+            Long.class, "webCrawlingConfigId", null, false, false, true,
+            "BIGINT", 19, 0, null, false, null, null, "webCrawlingConfig",
+            null, null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * HOSTNAME: {VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnHostname() {
         return _columnHostname;
     }
 
+    /**
+     * PORT: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnPort() {
         return _columnPort;
     }
 
+    /**
+     * AUTH_REALM: {VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnAuthRealm() {
         return _columnAuthRealm;
     }
 
+    /**
+     * PROTOCOL_SCHEME: {VARCHAR(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnProtocolScheme() {
         return _columnProtocolScheme;
     }
 
+    /**
+     * USERNAME: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUsername() {
         return _columnUsername;
     }
 
+    /**
+     * PASSWORD: {VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnPassword() {
         return _columnPassword;
     }
 
+    /**
+     * PARAMETERS: {VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnParameters() {
         return _columnParameters;
     }
 
+    /**
+     * WEB_CRAWLING_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnWebCrawlingConfigId() {
         return _columnWebCrawlingConfigId;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -507,15 +607,21 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * WEB_CRAWLING_CONFIG by my WEB_CRAWLING_CONFIG_ID, named 'webCrawlingConfig'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignWebCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnWebCrawlingConfigId(), WebCrawlingConfigDbm.getInstance()
                         .columnId());
         return cfi("CONSTRAINT_A31", "webCrawlingConfig", this,
-                WebCrawlingConfigDbm.getInstance(), map, 0, false, false,
+                WebCrawlingConfigDbm.getInstance(), mp, 0, null, false, false,
                 false, false, null, null, false, "webAuthenticationList");
     }
 
@@ -571,8 +677,8 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public WebAuthentication newEntity() {
+        return new WebAuthentication();
     }
 
     public WebAuthentication newMyEntity() {
@@ -583,24 +689,24 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((WebAuthentication) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((WebAuthentication) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((WebAuthentication) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((WebAuthentication) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

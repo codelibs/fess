@@ -17,14 +17,15 @@
 package jp.sf.fess.db.allcommon;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.seasar.dbflute.BehaviorSelector;
 import org.seasar.dbflute.bhv.BehaviorReadable;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.IllegalBehaviorStateException;
 import org.seasar.dbflute.util.DfTraceViewUtil;
 import org.seasar.dbflute.util.DfTypeUtil;
 import org.seasar.framework.container.ComponentNotFoundRuntimeException;
@@ -46,8 +47,8 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** The cache of behavior. */
-    protected final Map<Class<? extends BehaviorReadable>, BehaviorReadable> _behaviorCache = newHashMap();
+    /** The concurrent cache of behavior. */
+    protected final Map<Class<? extends BehaviorReadable>, BehaviorReadable> _behaviorCache = newConcurrentHashMap();
 
     /** The container of Seasar. */
     protected S2Container _container;
@@ -56,7 +57,7 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
     //                                                                          Initialize
     //                                                                          ==========
     /**
-     * Initialize condition-bean meta data. <br />
+     * Initialize condition-bean meta data.
      */
     @Override
     public void initializeConditionBeanMetaData() {
@@ -66,16 +67,23 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
         long before = 0;
         if (_log.isInfoEnabled()) {
             before = System.currentTimeMillis();
-            _log.info("/= = = = = = = = = = = = = = = = = initializeConditionBeanMetaData()");
+            _log.info("...Initializing condition-bean meta data");
         }
+        int count = 0;
         for (final DBMeta dbmeta : dbmetas) {
-            final BehaviorReadable bhv = byName(dbmeta.getTableDbName());
-            bhv.warmUpCommand();
+            try {
+                final BehaviorReadable bhv = byName(dbmeta.getTableDbName());
+                bhv.warmUpCommand();
+                ++count;
+            } catch (final IllegalBehaviorStateException ignored) { // means the behavior is suppressed
+                if (_log.isDebugEnabled()) {
+                    _log.debug("No behavior for " + dbmeta.getTableDbName());
+                }
+            }
         }
         if (_log.isInfoEnabled()) {
             final long after = System.currentTimeMillis();
-            _log.info("Initialized Count: " + dbmetas.size());
-            _log.info("= = = = = = = = = =/ ["
+            _log.info("CB initialized: " + count + " ["
                     + DfTraceViewUtil.convertToPerformanceView(after - before)
                     + "]");
         }
@@ -85,10 +93,10 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
     //                                                                            Selector
     //                                                                            ========
     /**
-     * Select behavior.
+     * Select behavior instance by the type.
      * @param <BEHAVIOR> The type of behavior.
      * @param behaviorType Behavior type. (NotNull)
-     * @return Behavior. (NotNull)
+     * @return The selected instance of the behavior. (NotNull)
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -112,9 +120,11 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
     }
 
     /**
-     * Select behavior-readable by name.
-     * @param tableFlexibleName Table flexible-name. (NotNull)
-     * @return Behavior-readable. (NotNull)
+     * Select behavior (as readable type) by name.
+     * @param tableFlexibleName The flexible-name of table. (NotNull)
+     * @return The instance of found behavior. (NotNull)
+     * @throws org.seasar.dbflute.exception.DBMetaNotFoundException When the table is not found.
+     * @throws org.seasar.dbflute.exception.IllegalBehaviorStateException When the behavior class is suppressed.
      */
     @Override
     public BehaviorReadable byName(final String tableFlexibleName) {
@@ -127,8 +137,9 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
 
     /**
      * Get behavior-type by DB meta.
-     * @param dbmeta DB meta. (NotNull)
-     * @return Behavior-type. (NotNull)
+     * @param dbmeta The instance of DB meta for the behavior. (NotNull)
+     * @return The type of behavior (as readable type). (NotNull)
+     * @throws org.seasar.dbflute.exception.IllegalBehaviorStateException When the behavior class is suppressed.
      */
     @SuppressWarnings("unchecked")
     protected Class<BehaviorReadable> getBehaviorType(final DBMeta dbmeta) {
@@ -143,8 +154,8 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
             behaviorType = (Class<BehaviorReadable>) Class
                     .forName(behaviorTypeName);
         } catch (final ClassNotFoundException e) {
-            throw new RuntimeException("The class does not exist: "
-                    + behaviorTypeName, e);
+            throw new IllegalBehaviorStateException(
+                    "The class does not exist: " + behaviorTypeName, e);
         }
         return behaviorType;
     }
@@ -184,8 +195,8 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
         return DfTypeUtil.toClassTitle(obj);
     }
 
-    protected <KEY, VALUE> HashMap<KEY, VALUE> newHashMap() {
-        return new HashMap<KEY, VALUE>();
+    protected <KEY, VALUE> ConcurrentHashMap<KEY, VALUE> newConcurrentHashMap() {
+        return new ConcurrentHashMap<KEY, VALUE>();
     }
 
     // ===================================================================================

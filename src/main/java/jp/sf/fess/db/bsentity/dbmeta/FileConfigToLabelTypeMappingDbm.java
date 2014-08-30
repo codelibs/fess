@@ -22,6 +22,8 @@ import java.util.Map;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
+import jp.sf.fess.db.exentity.FileCrawlingConfig;
+import jp.sf.fess.db.exentity.LabelType;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +63,9 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -68,45 +73,84 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgLabelTypeId(), "labelTypeId");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileConfigToLabelTypeMapping) e).getId();
+        public Object read(final Entity et) {
+            return ((FileConfigToLabelTypeMapping) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileConfigToLabelTypeMapping) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToLabelTypeMapping) et).setId(ctl(vl));
         }
     }
 
     public static class EpgFileConfigId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileConfigToLabelTypeMapping) e).getFileConfigId();
+        public Object read(final Entity et) {
+            return ((FileConfigToLabelTypeMapping) et).getFileConfigId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileConfigToLabelTypeMapping) e).setFileConfigId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToLabelTypeMapping) et).setFileConfigId(ctl(vl));
         }
     }
 
     public static class EpgLabelTypeId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileConfigToLabelTypeMapping) e).getLabelTypeId();
+        public Object read(final Entity et) {
+            return ((FileConfigToLabelTypeMapping) et).getLabelTypeId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileConfigToLabelTypeMapping) e).setLabelTypeId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToLabelTypeMapping) et).setLabelTypeId(ctl(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgFileCrawlingConfig(), "fileCrawlingConfig");
+        setupEfpg(_efpgMap, new EfpgLabelType(), "labelType");
+    }
+
+    public class EfpgFileCrawlingConfig implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((FileConfigToLabelTypeMapping) et).getFileCrawlingConfig();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToLabelTypeMapping) et)
+                    .setFileCrawlingConfig((FileCrawlingConfig) vl);
+        }
+    }
+
+    public class EfpgLabelType implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((FileConfigToLabelTypeMapping) et).getLabelType();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToLabelTypeMapping) et).setLabelType((LabelType) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -146,35 +190,48 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D9ADAEBA_B241_48A7_8C84_1DC4F3B625F1",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_E2C38DC8_5424_4E72_BE70_DA5CD73398ED",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnFileConfigId = cci("FILE_CONFIG_ID",
-            "FILE_CONFIG_ID", null, null, true, "fileConfigId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
+            "FILE_CONFIG_ID", null, null, Long.class, "fileConfigId", null,
+            false, false, true, "BIGINT", 19, 0, null, false, null, null,
             "fileCrawlingConfig", null, null);
 
     protected final ColumnInfo _columnLabelTypeId = cci("LABEL_TYPE_ID",
-            "LABEL_TYPE_ID", null, null, true, "labelTypeId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
+            "LABEL_TYPE_ID", null, null, Long.class, "labelTypeId", null,
+            false, false, true, "BIGINT", 19, 0, null, false, null, null,
             "labelType", null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * FILE_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnFileConfigId() {
         return _columnFileConfigId;
     }
 
+    /**
+     * LABEL_TYPE_ID: {IX, NotNull, BIGINT(19), FK to LABEL_TYPE}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnLabelTypeId() {
         return _columnLabelTypeId;
     }
@@ -216,25 +273,35 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
-    public ForeignInfo foreignLabelType() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
-                columnLabelTypeId(), LabelTypeDbm.getInstance().columnId());
-        return cfi("CONSTRAINT_F57", "labelType", this,
-                LabelTypeDbm.getInstance(), map, 0, false, false, false, false,
-                null, null, false, "fileConfigToLabelTypeMappingList");
-    }
-
+    /**
+     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignFileCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnFileConfigId(), FileCrawlingConfigDbm.getInstance()
                         .columnId());
         return cfi("CONSTRAINT_F57F", "fileCrawlingConfig", this,
-                FileCrawlingConfigDbm.getInstance(), map, 1, false, false,
+                FileCrawlingConfigDbm.getInstance(), mp, 0, null, false, false,
                 false, false, null, null, false,
                 "fileConfigToLabelTypeMappingList");
+    }
+
+    /**
+     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * @return The information object of foreign property. (NotNull)
+     */
+    public ForeignInfo foreignLabelType() {
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
+                columnLabelTypeId(), LabelTypeDbm.getInstance().columnId());
+        return cfi("CONSTRAINT_F57", "labelType", this,
+                LabelTypeDbm.getInstance(), mp, 1, null, false, false, false,
+                false, null, null, false, "fileConfigToLabelTypeMappingList");
     }
 
     // -----------------------------------------------------
@@ -279,8 +346,8 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FileConfigToLabelTypeMapping newEntity() {
+        return new FileConfigToLabelTypeMapping();
     }
 
     public FileConfigToLabelTypeMapping newMyEntity() {
@@ -291,24 +358,24 @@ public class FileConfigToLabelTypeMappingDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((FileConfigToLabelTypeMapping) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((FileConfigToLabelTypeMapping) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((FileConfigToLabelTypeMapping) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((FileConfigToLabelTypeMapping) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

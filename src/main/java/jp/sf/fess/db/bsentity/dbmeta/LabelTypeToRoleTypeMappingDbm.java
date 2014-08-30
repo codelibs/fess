@@ -21,7 +21,9 @@ import java.util.Map;
 
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
+import jp.sf.fess.db.exentity.LabelType;
 import jp.sf.fess.db.exentity.LabelTypeToRoleTypeMapping;
+import jp.sf.fess.db.exentity.RoleType;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +63,9 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -68,45 +73,83 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgRoleTypeId(), "roleTypeId");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((LabelTypeToRoleTypeMapping) e).getId();
+        public Object read(final Entity et) {
+            return ((LabelTypeToRoleTypeMapping) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((LabelTypeToRoleTypeMapping) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((LabelTypeToRoleTypeMapping) et).setId(ctl(vl));
         }
     }
 
     public static class EpgLabelTypeId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((LabelTypeToRoleTypeMapping) e).getLabelTypeId();
+        public Object read(final Entity et) {
+            return ((LabelTypeToRoleTypeMapping) et).getLabelTypeId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((LabelTypeToRoleTypeMapping) e).setLabelTypeId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((LabelTypeToRoleTypeMapping) et).setLabelTypeId(ctl(vl));
         }
     }
 
     public static class EpgRoleTypeId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((LabelTypeToRoleTypeMapping) e).getRoleTypeId();
+        public Object read(final Entity et) {
+            return ((LabelTypeToRoleTypeMapping) et).getRoleTypeId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((LabelTypeToRoleTypeMapping) e).setRoleTypeId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((LabelTypeToRoleTypeMapping) et).setRoleTypeId(ctl(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgLabelType(), "labelType");
+        setupEfpg(_efpgMap, new EfpgRoleType(), "roleType");
+    }
+
+    public class EfpgLabelType implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((LabelTypeToRoleTypeMapping) et).getLabelType();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((LabelTypeToRoleTypeMapping) et).setLabelType((LabelType) vl);
+        }
+    }
+
+    public class EfpgRoleType implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((LabelTypeToRoleTypeMapping) et).getRoleType();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((LabelTypeToRoleTypeMapping) et).setRoleType((RoleType) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -146,35 +189,48 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_938A49A8_58DA_4010_93C9_00C7B2CFA6D2",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_EBC6D553_E53B_4789_8B97_BA3ECC49A013",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnLabelTypeId = cci("LABEL_TYPE_ID",
-            "LABEL_TYPE_ID", null, null, true, "labelTypeId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
+            "LABEL_TYPE_ID", null, null, Long.class, "labelTypeId", null,
+            false, false, true, "BIGINT", 19, 0, null, false, null, null,
             "labelType", null, null);
 
     protected final ColumnInfo _columnRoleTypeId = cci("ROLE_TYPE_ID",
-            "ROLE_TYPE_ID", null, null, true, "roleTypeId", Long.class, false,
-            false, "BIGINT", 19, 0, null, false, null, null, "roleType", null,
-            null);
+            "ROLE_TYPE_ID", null, null, Long.class, "roleTypeId", null, false,
+            false, true, "BIGINT", 19, 0, null, false, null, null, "roleType",
+            null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * LABEL_TYPE_ID: {IX, NotNull, BIGINT(19), FK to LABEL_TYPE}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnLabelTypeId() {
         return _columnLabelTypeId;
     }
 
+    /**
+     * ROLE_TYPE_ID: {IX, NotNull, BIGINT(19), FK to ROLE_TYPE}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRoleTypeId() {
         return _columnRoleTypeId;
     }
@@ -216,23 +272,33 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignLabelType() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnLabelTypeId(), LabelTypeDbm.getInstance().columnId());
         return cfi("CONSTRAINT_2C", "labelType", this,
-                LabelTypeDbm.getInstance(), map, 0, false, false, false, false,
-                null, null, false, "labelTypeToRoleTypeMappingList");
+                LabelTypeDbm.getInstance(), mp, 0, null, false, false, false,
+                false, null, null, false, "labelTypeToRoleTypeMappingList");
     }
 
+    /**
+     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignRoleType() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnRoleTypeId(), RoleTypeDbm.getInstance().columnId());
         return cfi("CONSTRAINT_2C8", "roleType", this,
-                RoleTypeDbm.getInstance(), map, 1, false, false, false, false,
-                null, null, false, "labelTypeToRoleTypeMappingList");
+                RoleTypeDbm.getInstance(), mp, 1, null, false, false, false,
+                false, null, null, false, "labelTypeToRoleTypeMappingList");
     }
 
     // -----------------------------------------------------
@@ -277,8 +343,8 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public LabelTypeToRoleTypeMapping newEntity() {
+        return new LabelTypeToRoleTypeMapping();
     }
 
     public LabelTypeToRoleTypeMapping newMyEntity() {
@@ -289,24 +355,24 @@ public class LabelTypeToRoleTypeMappingDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((LabelTypeToRoleTypeMapping) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((LabelTypeToRoleTypeMapping) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((LabelTypeToRoleTypeMapping) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((LabelTypeToRoleTypeMapping) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

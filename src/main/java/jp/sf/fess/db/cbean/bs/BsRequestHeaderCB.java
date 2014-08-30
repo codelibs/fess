@@ -24,7 +24,6 @@ import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.RequestHeaderCQ;
 import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.nss.WebCrawlingConfigNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -109,6 +108,22 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public RequestHeaderCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsRequestHeaderCB cb = this;
+        cb.query().setId_Equal(id);
+        return (RequestHeaderCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsRequestHeaderCB cb = this;
@@ -157,7 +172,7 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -175,7 +190,7 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -249,7 +264,7 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;RequestHeaderCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;RequestHeaderCB&gt;() {
      *     public void query(RequestHeaderCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -261,7 +276,12 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
         final RequestHeaderCB cb = new RequestHeaderCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final RequestHeaderCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -272,7 +292,7 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;RequestHeaderCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;RequestHeaderCB&gt;() {
      *     public void query(RequestHeaderCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -284,7 +304,12 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
         final RequestHeaderCB cb = new RequestHeaderCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final RequestHeaderCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -293,28 +318,19 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected WebCrawlingConfigNss _nssWebCrawlingConfig;
-
-    public WebCrawlingConfigNss getNssWebCrawlingConfig() {
-        if (_nssWebCrawlingConfig == null) {
-            _nssWebCrawlingConfig = new WebCrawlingConfigNss(null);
-        }
-        return _nssWebCrawlingConfig;
-    }
-
     /**
      * Set up relation columns to select clause. <br />
      * WEB_CRAWLING_CONFIG by my WEB_CRAWLING_CONFIG_ID, named 'webCrawlingConfig'.
      * <pre>
      * RequestHeaderCB cb = new RequestHeaderCB();
-     * cb.<span style="color: #FD4747">setupSelect_WebCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_WebCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * RequestHeader requestHeader = requestHeaderBhv.selectEntityWithDeletedCheck(cb);
-     * ... = requestHeader.<span style="color: #FD4747">getWebCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = requestHeader.<span style="color: #DD4747">getWebCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public WebCrawlingConfigNss setupSelect_WebCrawlingConfig() {
+    public void setupSelect_WebCrawlingConfig() {
+        assertSetupSelectPurpose("webCrawlingConfig");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnWebCrawlingConfigId();
         }
@@ -324,12 +340,6 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
                 return query().queryWebCrawlingConfig();
             }
         });
-        if (_nssWebCrawlingConfig == null
-                || !_nssWebCrawlingConfig.hasConditionQuery()) {
-            _nssWebCrawlingConfig = new WebCrawlingConfigNss(query()
-                    .queryWebCrawlingConfig());
-        }
-        return _nssWebCrawlingConfig;
     }
 
     // [DBFlute-0.7.4]
@@ -564,13 +574,11 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
                     _qyCall.qy(),
                     new HpSDRSetupper<RequestHeaderCB, RequestHeaderCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<RequestHeaderCB> subQuery,
-                                final RequestHeaderCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                        public void setup(final String fn,
+                                final SubQuery<RequestHeaderCB> sq,
+                                final RequestHeaderCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -578,19 +586,19 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;RequestHeaderCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;RequestHeaderCB&gt;() {
      *     public void query(RequestHeaderCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;RequestHeaderCB&gt;() {
      *     public void query(RequestHeaderCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -639,14 +647,14 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;RequestHeaderCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;RequestHeaderCB&gt;() {
      *     public void query(RequestHeaderCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -659,15 +667,20 @@ public class BsRequestHeaderCB extends AbstractConditionBean {
         xorSQ((RequestHeaderCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;RequestHeaderCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;RequestHeaderCB&gt;() {
      *     public void query(RequestHeaderCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;RequestHeaderCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;RequestHeaderCB&gt;() {
      *             public void query(RequestHeaderCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

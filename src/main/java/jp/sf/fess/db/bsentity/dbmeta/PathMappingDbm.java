@@ -61,6 +61,9 @@ public class PathMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -77,153 +80,153 @@ public class PathMappingDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getId();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setId(ctl(vl));
         }
     }
 
     public static class EpgRegex implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getRegex();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getRegex();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setRegex((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setRegex((String) vl);
         }
     }
 
     public static class EpgReplacement implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getReplacement();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getReplacement();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setReplacement((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setReplacement((String) vl);
         }
     }
 
     public static class EpgProcessType implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getProcessType();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getProcessType();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setProcessType((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setProcessType((String) vl);
         }
     }
 
     public static class EpgSortOrder implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getSortOrder();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getSortOrder();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setSortOrder(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setSortOrder(cti(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((PathMapping) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((PathMapping) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((PathMapping) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((PathMapping) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -263,111 +266,164 @@ public class PathMappingDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_94342EAC_2C6E_4EFD_93C2_91CD4C4B6486",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_99FAF328_55B8_4575_A678_CDBD4AEF08A9",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnRegex = cci("REGEX", "REGEX", null, null,
-            true, "regex", String.class, false, false, "VARCHAR", 1000, 0,
-            null, false, null, null, null, null, null);
+            String.class, "regex", null, false, false, true, "VARCHAR", 1000,
+            0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnReplacement = cci("REPLACEMENT",
-            "REPLACEMENT", null, null, true, "replacement", String.class,
-            false, false, "VARCHAR", 1000, 0, null, false, null, null, null,
-            null, null);
+            "REPLACEMENT", null, null, String.class, "replacement", null,
+            false, false, true, "VARCHAR", 1000, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnProcessType = cci("PROCESS_TYPE",
-            "PROCESS_TYPE", null, null, true, "processType", String.class,
-            false, false, "VARCHAR", 1, 0, null, false, null, null, null, null,
-            CDef.DefMeta.ProcessType);
+            "PROCESS_TYPE", null, null, String.class, "processType", null,
+            false, false, true, "VARCHAR", 1, 0, null, false, null, null, null,
+            null, CDef.DefMeta.ProcessType);
 
     protected final ColumnInfo _columnSortOrder = cci("SORT_ORDER",
-            "SORT_ORDER", null, null, true, "sortOrder", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false, null, null, null, null, null);
+            "SORT_ORDER", null, null, Integer.class, "sortOrder", null, false,
+            false, true, "INTEGER", 10, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * REGEX: {NotNull, VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRegex() {
         return _columnRegex;
     }
 
+    /**
+     * REPLACEMENT: {NotNull, VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnReplacement() {
         return _columnReplacement;
     }
 
+    /**
+     * PROCESS_TYPE: {NotNull, VARCHAR(1), classification=ProcessType}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnProcessType() {
         return _columnProcessType;
     }
 
+    /**
+     * SORT_ORDER: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -418,6 +474,8 @@ public class PathMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -474,8 +532,8 @@ public class PathMappingDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public PathMapping newEntity() {
+        return new PathMapping();
     }
 
     public PathMapping newMyEntity() {
@@ -486,24 +544,24 @@ public class PathMappingDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((PathMapping) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((PathMapping) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((PathMapping) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((PathMapping) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

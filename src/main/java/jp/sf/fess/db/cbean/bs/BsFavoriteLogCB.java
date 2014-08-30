@@ -24,7 +24,6 @@ import jp.sf.fess.db.cbean.FavoriteLogCB;
 import jp.sf.fess.db.cbean.UserInfoCB;
 import jp.sf.fess.db.cbean.cq.FavoriteLogCQ;
 import jp.sf.fess.db.cbean.cq.UserInfoCQ;
-import jp.sf.fess.db.cbean.nss.UserInfoNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -109,10 +108,41 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public FavoriteLogCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsFavoriteLogCB cb = this;
+        cb.query().setId_Equal(id);
+        return (FavoriteLogCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsFavoriteLogCB cb = this;
         cb.query().setId_Equal(id);
+    }
+
+    /**
+     * Accept the query condition of unique key as equal.
+     * @param userId : UQ+, IX, NotNull, BIGINT(19), FK to USER_INFO. (NotNull)
+     * @param url : +UQ, NotNull, VARCHAR(4000). (NotNull)
+     * @return this. (NotNull)
+     */
+    public FavoriteLogCB acceptUniqueOf(final Long userId, final String url) {
+        assertObjectNotNull("userId", userId);
+        assertObjectNotNull("url", url);
+        final BsFavoriteLogCB cb = this;
+        cb.query().setUserId_Equal(userId);
+        cb.query().setUrl_Equal(url);
+        return (FavoriteLogCB) this;
     }
 
     @Override
@@ -157,7 +187,7 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -175,7 +205,7 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -249,7 +279,7 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;FavoriteLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;FavoriteLogCB&gt;() {
      *     public void query(FavoriteLogCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -261,7 +291,12 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
         final FavoriteLogCB cb = new FavoriteLogCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FavoriteLogCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -272,7 +307,7 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;FavoriteLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;FavoriteLogCB&gt;() {
      *     public void query(FavoriteLogCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -284,7 +319,12 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
         final FavoriteLogCB cb = new FavoriteLogCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FavoriteLogCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -293,28 +333,19 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected UserInfoNss _nssUserInfo;
-
-    public UserInfoNss getNssUserInfo() {
-        if (_nssUserInfo == null) {
-            _nssUserInfo = new UserInfoNss(null);
-        }
-        return _nssUserInfo;
-    }
-
     /**
      * Set up relation columns to select clause. <br />
      * USER_INFO by my USER_ID, named 'userInfo'.
      * <pre>
      * FavoriteLogCB cb = new FavoriteLogCB();
-     * cb.<span style="color: #FD4747">setupSelect_UserInfo()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_UserInfo()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * FavoriteLog favoriteLog = favoriteLogBhv.selectEntityWithDeletedCheck(cb);
-     * ... = favoriteLog.<span style="color: #FD4747">getUserInfo()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = favoriteLog.<span style="color: #DD4747">getUserInfo()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public UserInfoNss setupSelect_UserInfo() {
+    public void setupSelect_UserInfo() {
+        assertSetupSelectPurpose("userInfo");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnUserId();
         }
@@ -324,10 +355,6 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
                 return query().queryUserInfo();
             }
         });
-        if (_nssUserInfo == null || !_nssUserInfo.hasConditionQuery()) {
-            _nssUserInfo = new UserInfoNss(query().queryUserInfo());
-        }
-        return _nssUserInfo;
     }
 
     // [DBFlute-0.7.4]
@@ -401,7 +428,7 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
         }
 
         /**
-         * USER_ID: {UQ, IX, NotNull, BIGINT(19), FK to USER_INFO}
+         * USER_ID: {UQ+, IX, NotNull, BIGINT(19), FK to USER_INFO}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnUserId() {
@@ -409,7 +436,7 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
         }
 
         /**
-         * URL: {UQ+, NotNull, VARCHAR(4000)}
+         * URL: {+UQ, NotNull, VARCHAR(4000)}
          * @return The information object of specified column. (NotNull)
          */
         public HpSpecifiedColumn columnUrl() {
@@ -502,12 +529,11 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
                     _qyCall.qy(),
                     new HpSDRSetupper<FavoriteLogCB, FavoriteLogCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<FavoriteLogCB> subQuery,
-                                final FavoriteLogCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                        public void setup(final String fn,
+                                final SubQuery<FavoriteLogCB> sq,
+                                final FavoriteLogCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -515,19 +541,19 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;FavoriteLogCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;FavoriteLogCB&gt;() {
      *     public void query(FavoriteLogCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;FavoriteLogCB&gt;() {
      *     public void query(FavoriteLogCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -576,14 +602,14 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FavoriteLogCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FavoriteLogCB&gt;() {
      *     public void query(FavoriteLogCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -596,15 +622,20 @@ public class BsFavoriteLogCB extends AbstractConditionBean {
         xorSQ((FavoriteLogCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FavoriteLogCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FavoriteLogCB&gt;() {
      *     public void query(FavoriteLogCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FavoriteLogCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FavoriteLogCB&gt;() {
      *             public void query(FavoriteLogCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

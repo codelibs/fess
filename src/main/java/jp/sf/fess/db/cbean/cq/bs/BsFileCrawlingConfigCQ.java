@@ -26,6 +26,8 @@ import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.FileCrawlingConfigCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -44,10 +46,10 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsFileCrawlingConfigCQ(final ConditionQuery childQuery,
+    public BsFileCrawlingConfigCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -57,7 +59,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from FILE_CRAWLING_CONFIG) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -84,7 +86,7 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join FILE_CRAWLING_CONFIG on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -102,7 +104,6 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -117,416 +118,229 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
         return getId();
     }
 
-    protected Map<String, FileAuthenticationCQ> _id_ExistsReferrer_FileAuthenticationListMap;
-
     public Map<String, FileAuthenticationCQ> getId_ExistsReferrer_FileAuthenticationList() {
-        return _id_ExistsReferrer_FileAuthenticationListMap;
+        return xgetSQueMap("id_ExistsReferrer_FileAuthenticationList");
     }
 
     @Override
     public String keepId_ExistsReferrer_FileAuthenticationList(
-            final FileAuthenticationCQ subQuery) {
-        if (_id_ExistsReferrer_FileAuthenticationListMap == null) {
-            _id_ExistsReferrer_FileAuthenticationListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_FileAuthenticationListMap.size() + 1);
-        _id_ExistsReferrer_FileAuthenticationListMap.put(key, subQuery);
-        return "id_ExistsReferrer_FileAuthenticationList." + key;
+            final FileAuthenticationCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_FileAuthenticationList", sq);
     }
 
-    protected Map<String, FileConfigToLabelTypeMappingCQ> _id_ExistsReferrer_FileConfigToLabelTypeMappingListMap;
-
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_ExistsReferrer_FileConfigToLabelTypeMappingList() {
-        return _id_ExistsReferrer_FileConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_FileConfigToLabelTypeMappingListMap == null) {
-            _id_ExistsReferrer_FileConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_FileConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_ExistsReferrer_FileConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_ExistsReferrer_FileConfigToLabelTypeMappingList." + key;
+            final FileConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_FileConfigToLabelTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_ExistsReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_FileConfigToRoleTypeMappingListMap.size() + 1);
-        _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap
-                .put(key, subQuery);
-        return "id_ExistsReferrer_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_FileConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileAuthenticationCQ> _id_NotExistsReferrer_FileAuthenticationListMap;
-
     public Map<String, FileAuthenticationCQ> getId_NotExistsReferrer_FileAuthenticationList() {
-        return _id_NotExistsReferrer_FileAuthenticationListMap;
+        return xgetSQueMap("id_NotExistsReferrer_FileAuthenticationList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_FileAuthenticationList(
-            final FileAuthenticationCQ subQuery) {
-        if (_id_NotExistsReferrer_FileAuthenticationListMap == null) {
-            _id_NotExistsReferrer_FileAuthenticationListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_FileAuthenticationListMap.size() + 1);
-        _id_NotExistsReferrer_FileAuthenticationListMap.put(key, subQuery);
-        return "id_NotExistsReferrer_FileAuthenticationList." + key;
+            final FileAuthenticationCQ sq) {
+        return xkeepSQue("id_NotExistsReferrer_FileAuthenticationList", sq);
     }
 
-    protected Map<String, FileConfigToLabelTypeMappingCQ> _id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap;
-
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_NotExistsReferrer_FileConfigToLabelTypeMappingList() {
-        return _id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap == null) {
-            _id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_FileConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_FileConfigToLabelTypeMappingList." + key;
+            final FileConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotExistsReferrer_FileConfigToLabelTypeMappingList", sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_NotExistsReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotExistsReferrer_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, FileAuthenticationCQ> _id_SpecifyDerivedReferrer_FileAuthenticationListMap;
-
     public Map<String, FileAuthenticationCQ> getId_SpecifyDerivedReferrer_FileAuthenticationList() {
-        return _id_SpecifyDerivedReferrer_FileAuthenticationListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_FileAuthenticationList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_FileAuthenticationList(
-            final FileAuthenticationCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_FileAuthenticationListMap == null) {
-            _id_SpecifyDerivedReferrer_FileAuthenticationListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_FileAuthenticationListMap.size() + 1);
-        _id_SpecifyDerivedReferrer_FileAuthenticationListMap.put(key, subQuery);
-        return "id_SpecifyDerivedReferrer_FileAuthenticationList." + key;
+            final FileAuthenticationCQ sq) {
+        return xkeepSQue("id_SpecifyDerivedReferrer_FileAuthenticationList", sq);
     }
 
-    protected Map<String, FileConfigToLabelTypeMappingCQ> _id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap;
-
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList."
-                + key;
+            final FileConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList."
-                + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, FileAuthenticationCQ> _id_InScopeRelation_FileAuthenticationListMap;
-
     public Map<String, FileAuthenticationCQ> getId_InScopeRelation_FileAuthenticationList() {
-        return _id_InScopeRelation_FileAuthenticationListMap;
+        return xgetSQueMap("id_InScopeRelation_FileAuthenticationList");
     }
 
     @Override
     public String keepId_InScopeRelation_FileAuthenticationList(
-            final FileAuthenticationCQ subQuery) {
-        if (_id_InScopeRelation_FileAuthenticationListMap == null) {
-            _id_InScopeRelation_FileAuthenticationListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_FileAuthenticationListMap.size() + 1);
-        _id_InScopeRelation_FileAuthenticationListMap.put(key, subQuery);
-        return "id_InScopeRelation_FileAuthenticationList." + key;
+            final FileAuthenticationCQ sq) {
+        return xkeepSQue("id_InScopeRelation_FileAuthenticationList", sq);
     }
 
-    protected Map<String, FileConfigToLabelTypeMappingCQ> _id_InScopeRelation_FileConfigToLabelTypeMappingListMap;
-
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_InScopeRelation_FileConfigToLabelTypeMappingList() {
-        return _id_InScopeRelation_FileConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_FileConfigToLabelTypeMappingList(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_FileConfigToLabelTypeMappingListMap == null) {
-            _id_InScopeRelation_FileConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_FileConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_FileConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_FileConfigToLabelTypeMappingList." + key;
+            final FileConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_FileConfigToLabelTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_InScopeRelation_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_InScopeRelation_FileConfigToRoleTypeMappingList() {
-        return _id_InScopeRelation_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_FileConfigToRoleTypeMappingListMap == null) {
-            _id_InScopeRelation_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_FileConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileAuthenticationCQ> _id_NotInScopeRelation_FileAuthenticationListMap;
-
     public Map<String, FileAuthenticationCQ> getId_NotInScopeRelation_FileAuthenticationList() {
-        return _id_NotInScopeRelation_FileAuthenticationListMap;
+        return xgetSQueMap("id_NotInScopeRelation_FileAuthenticationList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_FileAuthenticationList(
-            final FileAuthenticationCQ subQuery) {
-        if (_id_NotInScopeRelation_FileAuthenticationListMap == null) {
-            _id_NotInScopeRelation_FileAuthenticationListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_FileAuthenticationListMap.size() + 1);
-        _id_NotInScopeRelation_FileAuthenticationListMap.put(key, subQuery);
-        return "id_NotInScopeRelation_FileAuthenticationList." + key;
+            final FileAuthenticationCQ sq) {
+        return xkeepSQue("id_NotInScopeRelation_FileAuthenticationList", sq);
     }
 
-    protected Map<String, FileConfigToLabelTypeMappingCQ> _id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap;
-
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_NotInScopeRelation_FileConfigToLabelTypeMappingList() {
-        return _id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap == null) {
-            _id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_FileConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_FileConfigToLabelTypeMappingList." + key;
+            final FileConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_FileConfigToLabelTypeMappingList", sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_NotInScopeRelation_FileConfigToRoleTypeMappingList() {
-        return _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap == null) {
-            _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, FileAuthenticationCQ> _id_QueryDerivedReferrer_FileAuthenticationListMap;
-
     public Map<String, FileAuthenticationCQ> getId_QueryDerivedReferrer_FileAuthenticationList() {
-        return _id_QueryDerivedReferrer_FileAuthenticationListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_FileAuthenticationList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileAuthenticationList(
-            final FileAuthenticationCQ subQuery) {
-        if (_id_QueryDerivedReferrer_FileAuthenticationListMap == null) {
-            _id_QueryDerivedReferrer_FileAuthenticationListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_FileAuthenticationListMap.size() + 1);
-        _id_QueryDerivedReferrer_FileAuthenticationListMap.put(key, subQuery);
-        return "id_QueryDerivedReferrer_FileAuthenticationList." + key;
+            final FileAuthenticationCQ sq) {
+        return xkeepSQue("id_QueryDerivedReferrer_FileAuthenticationList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_FileAuthenticationListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_FileAuthenticationListParameter() {
-        return _id_QueryDerivedReferrer_FileAuthenticationListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_FileAuthenticationList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileAuthenticationListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_FileAuthenticationListParameterMap == null) {
-            _id_QueryDerivedReferrer_FileAuthenticationListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_FileAuthenticationListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileAuthenticationListParameterMap.put(key,
-                parameterValue);
-        return "id_QueryDerivedReferrer_FileAuthenticationListParameter." + key;
+            final Object pm) {
+        return xkeepSQuePm("id_QueryDerivedReferrer_FileAuthenticationList", pm);
     }
 
-    protected Map<String, FileConfigToLabelTypeMappingCQ> _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap;
-
     public Map<String, FileConfigToLabelTypeMappingCQ> getId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList() {
-        return _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_FileConfigToLabelTypeMappingList."
-                + key;
+            final FileConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_FileConfigToLabelTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_FileConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_FileConfigToLabelTypeMappingList", pm);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList", pm);
     }
 
     /**
@@ -1273,9 +1087,9 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -1293,9 +1107,9 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -1310,9 +1124,8 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
     }
 
     // ===================================================================================
@@ -1327,74 +1140,43 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, FileCrawlingConfigCQ> _scalarConditionMap;
-
     public Map<String, FileCrawlingConfigCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final FileCrawlingConfigCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final FileCrawlingConfigCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, FileCrawlingConfigCQ> _specifyMyselfDerivedMap;
-
     public Map<String, FileCrawlingConfigCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final FileCrawlingConfigCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final FileCrawlingConfigCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, FileCrawlingConfigCQ> _queryMyselfDerivedMap;
 
     public Map<String, FileCrawlingConfigCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final FileCrawlingConfigCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final FileCrawlingConfigCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -1403,36 +1185,24 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
     protected Map<String, FileCrawlingConfigCQ> _myselfExistsMap;
 
     public Map<String, FileCrawlingConfigCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final FileCrawlingConfigCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final FileCrawlingConfigCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, FileCrawlingConfigCQ> _myselfInScopeMap;
-
     public Map<String, FileCrawlingConfigCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final FileCrawlingConfigCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final FileCrawlingConfigCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -1445,6 +1215,14 @@ public class BsFileCrawlingConfigCQ extends AbstractBsFileCrawlingConfigCQ {
 
     protected String xCQ() {
         return FileCrawlingConfigCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

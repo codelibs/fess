@@ -24,6 +24,8 @@ import jp.sf.fess.db.cbean.cq.CrawlingSessionInfoCQ;
 import jp.sf.fess.db.cbean.cq.ciq.CrawlingSessionInfoCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -42,10 +44,10 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsCrawlingSessionInfoCQ(final ConditionQuery childQuery,
+    public BsCrawlingSessionInfoCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -55,7 +57,7 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from CRAWLING_SESSION_INFO) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -82,7 +84,7 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join CRAWLING_SESSION_INFO on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -100,7 +102,6 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -149,43 +150,26 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
         return getCrawlingSessionId();
     }
 
-    protected Map<String, CrawlingSessionCQ> _crawlingSessionId_InScopeRelation_CrawlingSessionMap;
-
     public Map<String, CrawlingSessionCQ> getCrawlingSessionId_InScopeRelation_CrawlingSession() {
-        return _crawlingSessionId_InScopeRelation_CrawlingSessionMap;
+        return xgetSQueMap("crawlingSessionId_InScopeRelation_CrawlingSession");
     }
 
     @Override
     public String keepCrawlingSessionId_InScopeRelation_CrawlingSession(
-            final CrawlingSessionCQ subQuery) {
-        if (_crawlingSessionId_InScopeRelation_CrawlingSessionMap == null) {
-            _crawlingSessionId_InScopeRelation_CrawlingSessionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_crawlingSessionId_InScopeRelation_CrawlingSessionMap.size() + 1);
-        _crawlingSessionId_InScopeRelation_CrawlingSessionMap
-                .put(key, subQuery);
-        return "crawlingSessionId_InScopeRelation_CrawlingSession." + key;
+            final CrawlingSessionCQ sq) {
+        return xkeepSQue("crawlingSessionId_InScopeRelation_CrawlingSession",
+                sq);
     }
 
-    protected Map<String, CrawlingSessionCQ> _crawlingSessionId_NotInScopeRelation_CrawlingSessionMap;
-
     public Map<String, CrawlingSessionCQ> getCrawlingSessionId_NotInScopeRelation_CrawlingSession() {
-        return _crawlingSessionId_NotInScopeRelation_CrawlingSessionMap;
+        return xgetSQueMap("crawlingSessionId_NotInScopeRelation_CrawlingSession");
     }
 
     @Override
     public String keepCrawlingSessionId_NotInScopeRelation_CrawlingSession(
-            final CrawlingSessionCQ subQuery) {
-        if (_crawlingSessionId_NotInScopeRelation_CrawlingSessionMap == null) {
-            _crawlingSessionId_NotInScopeRelation_CrawlingSessionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_crawlingSessionId_NotInScopeRelation_CrawlingSessionMap
-                        .size() + 1);
-        _crawlingSessionId_NotInScopeRelation_CrawlingSessionMap.put(key,
-                subQuery);
-        return "crawlingSessionId_NotInScopeRelation_CrawlingSession." + key;
+            final CrawlingSessionCQ sq) {
+        return xkeepSQue(
+                "crawlingSessionId_NotInScopeRelation_CrawlingSession", sq);
     }
 
     /**
@@ -320,9 +304,9 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -340,9 +324,9 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -357,15 +341,13 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final CrawlingSessionInfoCQ baseQuery = (CrawlingSessionInfoCQ) baseQueryAsSuper;
-        final CrawlingSessionInfoCQ unionQuery = (CrawlingSessionInfoCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryCrawlingSession()) {
-            unionQuery.queryCrawlingSession().reflectRelationOnUnionQuery(
-                    baseQuery.queryCrawlingSession(),
-                    unionQuery.queryCrawlingSession());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final CrawlingSessionInfoCQ bq = (CrawlingSessionInfoCQ) bqs;
+        final CrawlingSessionInfoCQ uq = (CrawlingSessionInfoCQ) uqs;
+        if (bq.hasConditionQueryCrawlingSession()) {
+            uq.queryCrawlingSession().reflectRelationOnUnionQuery(
+                    bq.queryCrawlingSession(), uq.queryCrawlingSession());
         }
     }
 
@@ -381,37 +363,29 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
         return getConditionQueryCrawlingSession();
     }
 
-    protected CrawlingSessionCQ _conditionQueryCrawlingSession;
-
     public CrawlingSessionCQ getConditionQueryCrawlingSession() {
-        if (_conditionQueryCrawlingSession == null) {
-            _conditionQueryCrawlingSession = xcreateQueryCrawlingSession();
+        final String prop = "crawlingSession";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryCrawlingSession());
             xsetupOuterJoinCrawlingSession();
         }
-        return _conditionQueryCrawlingSession;
+        return xgetQueRlMap(prop);
     }
 
     protected CrawlingSessionCQ xcreateQueryCrawlingSession() {
-        final String nrp = resolveNextRelationPath("CRAWLING_SESSION_INFO",
+        final String nrp = xresolveNRP("CRAWLING_SESSION_INFO",
                 "crawlingSession");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final CrawlingSessionCQ cq = new CrawlingSessionCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("crawlingSession");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new CrawlingSessionCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "crawlingSession", nrp);
     }
 
     protected void xsetupOuterJoinCrawlingSession() {
-        final CrawlingSessionCQ cq = getConditionQueryCrawlingSession();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("CRAWLING_SESSION_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "crawlingSession");
+        xregOutJo("crawlingSession");
     }
 
     public boolean hasConditionQueryCrawlingSession() {
-        return _conditionQueryCrawlingSession != null;
+        return xhasQueRlMap("crawlingSession");
     }
 
     @Override
@@ -423,74 +397,43 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, CrawlingSessionInfoCQ> _scalarConditionMap;
-
     public Map<String, CrawlingSessionInfoCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final CrawlingSessionInfoCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final CrawlingSessionInfoCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, CrawlingSessionInfoCQ> _specifyMyselfDerivedMap;
-
     public Map<String, CrawlingSessionInfoCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final CrawlingSessionInfoCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final CrawlingSessionInfoCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, CrawlingSessionInfoCQ> _queryMyselfDerivedMap;
 
     public Map<String, CrawlingSessionInfoCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final CrawlingSessionInfoCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final CrawlingSessionInfoCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -499,36 +442,24 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
     protected Map<String, CrawlingSessionInfoCQ> _myselfExistsMap;
 
     public Map<String, CrawlingSessionInfoCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final CrawlingSessionInfoCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final CrawlingSessionInfoCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, CrawlingSessionInfoCQ> _myselfInScopeMap;
-
     public Map<String, CrawlingSessionInfoCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final CrawlingSessionInfoCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final CrawlingSessionInfoCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -541,6 +472,14 @@ public class BsCrawlingSessionInfoCQ extends AbstractBsCrawlingSessionInfoCQ {
 
     protected String xCQ() {
         return CrawlingSessionInfoCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

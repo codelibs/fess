@@ -101,8 +101,14 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -148,6 +154,18 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -155,7 +173,7 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
     protected SearchLog _searchLog;
 
     /**
-     * SEARCH_LOG by my SEARCH_ID, named 'searchLog'.
+     * [get] SEARCH_LOG by my SEARCH_ID, named 'searchLog'.
      * @return The entity of foreign property 'searchLog'. (NullAllowed: when e.g. null FK column, no setupSelect)
      */
     public SearchLog getSearchLog() {
@@ -163,7 +181,7 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * SEARCH_LOG by my SEARCH_ID, named 'searchLog'.
+     * [set] SEARCH_LOG by my SEARCH_ID, named 'searchLog'.
      * @param searchLog The entity of foreign property 'searchLog'. (NullAllowed)
      */
     public void setSearchLog(final SearchLog searchLog) {
@@ -209,28 +227,47 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsClickLog)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsClickLog)) {
             return false;
         }
-        final BsClickLog otherEntity = (BsClickLog) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsClickLog other = (BsClickLog) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -239,14 +276,14 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -263,7 +300,7 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -273,15 +310,15 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
+        final String li = "\n  ";
         if (_searchLog != null) {
-            sb.append(l).append(xbRDS(_searchLog, "searchLog"));
+            sb.append(li).append(xbRDS(_searchLog, "searchLog"));
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -306,13 +343,13 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getSearchId());
-        sb.append(delimiter).append(getUrl());
-        sb.append(delimiter).append(getRequestedTime());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getSearchId());
+        sb.append(dm).append(getUrl());
+        sb.append(dm).append(getRequestedTime());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -320,12 +357,12 @@ public abstract class BsClickLog implements Entity, Serializable, Cloneable {
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
+        final String cm = ",";
         if (_searchLog != null) {
-            sb.append(c).append("searchLog");
+            sb.append(cm).append("searchLog");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

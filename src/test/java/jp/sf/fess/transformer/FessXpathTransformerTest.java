@@ -306,8 +306,8 @@ public class FessXpathTransformerTest extends S2TestCase {
     public void test_contentXpath() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
 
-        String data = "<html><head><meta name=\"keywords\" content=\"bbb\"></head><body>aaa</body></html>";
-        Document document = getDocument(data);
+        final String data = "<html><head><meta name=\"keywords\" content=\"bbb\"></head><body>aaa</body></html>";
+        final Document document = getDocument(data);
         String value = transformer
                 .getSingleNodeValue(document, "//BODY", false);
         assertEquals("aaa", value);

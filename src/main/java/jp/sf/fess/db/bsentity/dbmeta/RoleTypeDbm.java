@@ -61,6 +61,9 @@ public class RoleTypeDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -76,141 +79,141 @@ public class RoleTypeDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getId();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setId(ctl(vl));
         }
     }
 
     public static class EpgName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getName();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setName((String) vl);
         }
     }
 
     public static class EpgValue implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getValue();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getValue();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setValue((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setValue((String) vl);
         }
     }
 
     public static class EpgSortOrder implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getSortOrder();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getSortOrder();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setSortOrder(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setSortOrder(cti(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((RoleType) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((RoleType) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((RoleType) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((RoleType) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -250,15 +253,16 @@ public class RoleTypeDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_48B353CB_186B_46CA_8570_3F4A5223505A",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_8E1E8109_9B47_4727_9690_CE17BF777340",
             false,
             null,
             null,
@@ -267,89 +271,137 @@ public class RoleTypeDbm extends AbstractDBMeta {
             null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
-            true, "name", String.class, false, false, "VARCHAR", 100, 0, null,
-            false, null, null, null, null, null);
+            String.class, "name", null, false, false, true, "VARCHAR", 100, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnValue = cci("VALUE", "VALUE", null, null,
-            true, "value", String.class, false, false, "VARCHAR", 20, 0, null,
-            false, null, null, null, null, null);
+            String.class, "value", null, false, false, true, "VARCHAR", 20, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSortOrder = cci("SORT_ORDER",
-            "SORT_ORDER", null, null, true, "sortOrder", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false, null, null, null, null, null);
+            "SORT_ORDER", null, null, Integer.class, "sortOrder", null, false,
+            false, true, "INTEGER", 10, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * NAME: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnName() {
         return _columnName;
     }
 
+    /**
+     * VALUE: {NotNull, VARCHAR(20)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnValue() {
         return _columnValue;
     }
 
+    /**
+     * SORT_ORDER: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -399,6 +451,8 @@ public class RoleTypeDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -406,35 +460,51 @@ public class RoleTypeDbm extends AbstractDBMeta {
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
+    /**
+     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerDataConfigToRoleTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 DataConfigToRoleTypeMappingDbm.getInstance().columnRoleTypeId());
         return cri("CONSTRAINT_E31", "dataConfigToRoleTypeMappingList", this,
-                DataConfigToRoleTypeMappingDbm.getInstance(), map, false,
+                DataConfigToRoleTypeMappingDbm.getInstance(), mp, false,
                 "roleType");
     }
 
+    /**
+     * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerFileConfigToRoleTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 FileConfigToRoleTypeMappingDbm.getInstance().columnRoleTypeId());
         return cri("CONSTRAINT_3A9", "fileConfigToRoleTypeMappingList", this,
-                FileConfigToRoleTypeMappingDbm.getInstance(), map, false,
+                FileConfigToRoleTypeMappingDbm.getInstance(), mp, false,
                 "roleType");
     }
 
+    /**
+     * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerLabelTypeToRoleTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 LabelTypeToRoleTypeMappingDbm.getInstance().columnRoleTypeId());
         return cri("CONSTRAINT_2C8", "labelTypeToRoleTypeMappingList", this,
-                LabelTypeToRoleTypeMappingDbm.getInstance(), map, false,
+                LabelTypeToRoleTypeMappingDbm.getInstance(), mp, false,
                 "roleType");
     }
 
+    /**
+     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerWebConfigToRoleTypeMappingList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 WebConfigToRoleTypeMappingDbm.getInstance().columnRoleTypeId());
         return cri("CONSTRAINT_A17D5", "webConfigToRoleTypeMappingList", this,
-                WebConfigToRoleTypeMappingDbm.getInstance(), map, false,
+                WebConfigToRoleTypeMappingDbm.getInstance(), mp, false,
                 "roleType");
     }
 
@@ -486,8 +556,8 @@ public class RoleTypeDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public RoleType newEntity() {
+        return new RoleType();
     }
 
     public RoleType newMyEntity() {
@@ -498,24 +568,24 @@ public class RoleTypeDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((RoleType) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((RoleType) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((RoleType) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((RoleType) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

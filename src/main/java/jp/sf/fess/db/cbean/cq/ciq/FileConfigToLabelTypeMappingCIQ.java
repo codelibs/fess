@@ -47,10 +47,10 @@ public class FileConfigToLabelTypeMappingCIQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FileConfigToLabelTypeMappingCIQ(final ConditionQuery childQuery,
+    public FileConfigToLabelTypeMappingCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsFileConfigToLabelTypeMappingCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -63,9 +63,8 @@ public class FileConfigToLabelTypeMappingCIQ extends
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -139,51 +138,48 @@ public class FileConfigToLabelTypeMappingCIQ extends
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
+    public String keepScalarCondition(final FileConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
     public String keepSpecifyMyselfDerived(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
+            final FileConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
+    public String keepQueryMyselfDerived(final FileConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final FileConfigToLabelTypeMappingCQ subQuery) {
+    public String keepMyselfExists(final FileConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(
-            final FileConfigToLabelTypeMappingCQ subQuery) {
+    public String keepMyselfInScope(final FileConfigToLabelTypeMappingCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

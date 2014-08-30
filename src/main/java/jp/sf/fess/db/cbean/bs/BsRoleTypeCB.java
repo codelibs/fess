@@ -110,6 +110,22 @@ public class BsRoleTypeCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public RoleTypeCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsRoleTypeCB cb = this;
+        cb.query().setId_Equal(id);
+        return (RoleTypeCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsRoleTypeCB cb = this;
@@ -158,7 +174,7 @@ public class BsRoleTypeCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -176,7 +192,7 @@ public class BsRoleTypeCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -250,7 +266,7 @@ public class BsRoleTypeCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;RoleTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;RoleTypeCB&gt;() {
      *     public void query(RoleTypeCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -262,7 +278,12 @@ public class BsRoleTypeCB extends AbstractConditionBean {
         final RoleTypeCB cb = new RoleTypeCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final RoleTypeCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -273,7 +294,7 @@ public class BsRoleTypeCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;RoleTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;RoleTypeCB&gt;() {
      *     public void query(RoleTypeCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -285,7 +306,12 @@ public class BsRoleTypeCB extends AbstractConditionBean {
         final RoleTypeCB cb = new RoleTypeCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final RoleTypeCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -294,7 +320,6 @@ public class BsRoleTypeCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-
     // [DBFlute-0.7.4]
     // ===================================================================================
     //                                                                             Specify
@@ -464,16 +489,16 @@ public class BsRoleTypeCB extends AbstractConditionBean {
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from DATA_CONFIG_TO_ROLE_TYPE_MAPPING where ...) as FOO_MAX} <br />
          * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedDataConfigToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedDataConfigToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
          *     public void query(DataConfigToRoleTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, DataConfigToRoleTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, DataConfigToRoleTypeMapping.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -488,27 +513,27 @@ public class BsRoleTypeCB extends AbstractConditionBean {
                     new HpSDRSetupper<DataConfigToRoleTypeMappingCB, RoleTypeCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-                                final RoleTypeCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveDataConfigToRoleTypeMappingList(
-                                    function, subQuery, aliasName, option);
+                                final String fn,
+                                final SubQuery<DataConfigToRoleTypeMappingCB> sq,
+                                final RoleTypeCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveDataConfigToRoleTypeMappingList(fn, sq,
+                                    al, op);
                         }
                     }, _dbmetaProvider);
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from FILE_CONFIG_TO_ROLE_TYPE_MAPPING where ...) as FOO_MAX} <br />
          * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedFileConfigToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedFileConfigToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;FileConfigToRoleTypeMappingCB&gt;() {
          *     public void query(FileConfigToRoleTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, FileConfigToRoleTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, FileConfigToRoleTypeMapping.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -523,27 +548,27 @@ public class BsRoleTypeCB extends AbstractConditionBean {
                     new HpSDRSetupper<FileConfigToRoleTypeMappingCB, RoleTypeCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<FileConfigToRoleTypeMappingCB> subQuery,
-                                final RoleTypeCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveFileConfigToRoleTypeMappingList(
-                                    function, subQuery, aliasName, option);
+                                final String fn,
+                                final SubQuery<FileConfigToRoleTypeMappingCB> sq,
+                                final RoleTypeCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveFileConfigToRoleTypeMappingList(fn, sq,
+                                    al, op);
                         }
                     }, _dbmetaProvider);
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from LABEL_TYPE_TO_ROLE_TYPE_MAPPING where ...) as FOO_MAX} <br />
          * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedLabelTypeToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedLabelTypeToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
          *     public void query(LabelTypeToRoleTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, LabelTypeToRoleTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, LabelTypeToRoleTypeMapping.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -558,27 +583,27 @@ public class BsRoleTypeCB extends AbstractConditionBean {
                     new HpSDRSetupper<LabelTypeToRoleTypeMappingCB, RoleTypeCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery,
-                                final RoleTypeCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveLabelTypeToRoleTypeMappingList(function,
-                                    subQuery, aliasName, option);
+                                final String fn,
+                                final SubQuery<LabelTypeToRoleTypeMappingCB> sq,
+                                final RoleTypeCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveLabelTypeToRoleTypeMappingList(fn, sq,
+                                    al, op);
                         }
                     }, _dbmetaProvider);
         }
 
         /**
-         * Prepare for (Specify)DerivedReferrer. <br />
+         * Prepare for (Specify)DerivedReferrer (correlated sub-query). <br />
          * {select max(FOO) from WEB_CONFIG_TO_ROLE_TYPE_MAPPING where ...) as FOO_MAX} <br />
          * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
          * <pre>
-         * cb.specify().<span style="color: #FD4747">derivedWebConfigToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+         * cb.specify().<span style="color: #DD4747">derivedWebConfigToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
          *     public void query(WebConfigToRoleTypeMappingCB subCB) {
-         *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+         *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
          *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
          *     }
-         * }, WebConfigToRoleTypeMapping.<span style="color: #FD4747">ALIAS_foo...</span>);
+         * }, WebConfigToRoleTypeMapping.<span style="color: #DD4747">ALIAS_foo...</span>);
          * </pre>
          * @return The object to set up a function for referrer table. (NotNull)
          */
@@ -593,12 +618,12 @@ public class BsRoleTypeCB extends AbstractConditionBean {
                     new HpSDRSetupper<WebConfigToRoleTypeMappingCB, RoleTypeCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<WebConfigToRoleTypeMappingCB> subQuery,
-                                final RoleTypeCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsderiveWebConfigToRoleTypeMappingList(function,
-                                    subQuery, aliasName, option);
+                                final String fn,
+                                final SubQuery<WebConfigToRoleTypeMappingCB> sq,
+                                final RoleTypeCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsderiveWebConfigToRoleTypeMappingList(fn, sq,
+                                    al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -615,12 +640,11 @@ public class BsRoleTypeCB extends AbstractConditionBean {
             return new HpSDRFunction<RoleTypeCB, RoleTypeCQ>(_baseCB,
                     _qyCall.qy(), new HpSDRSetupper<RoleTypeCB, RoleTypeCQ>() {
                         @Override
-                        public void setup(final String function,
-                                final SubQuery<RoleTypeCB> subQuery,
-                                final RoleTypeCQ cq, final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                        public void setup(final String fn,
+                                final SubQuery<RoleTypeCB> sq,
+                                final RoleTypeCQ cq, final String al,
+                                final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -628,19 +652,19 @@ public class BsRoleTypeCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;RoleTypeCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;RoleTypeCB&gt;() {
      *     public void query(RoleTypeCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;RoleTypeCB&gt;() {
      *     public void query(RoleTypeCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -686,14 +710,14 @@ public class BsRoleTypeCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;RoleTypeCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;RoleTypeCB&gt;() {
      *     public void query(RoleTypeCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -706,15 +730,20 @@ public class BsRoleTypeCB extends AbstractConditionBean {
         xorSQ((RoleTypeCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;RoleTypeCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;RoleTypeCB&gt;() {
      *     public void query(RoleTypeCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;RoleTypeCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;RoleTypeCB&gt;() {
      *             public void query(RoleTypeCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

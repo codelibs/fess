@@ -18,12 +18,11 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfUserInfo;
 import jp.sf.fess.db.bsentity.dbmeta.UserInfoDbm;
 import jp.sf.fess.db.cbean.FavoriteLogCB;
 import jp.sf.fess.db.cbean.SearchLogCB;
 import jp.sf.fess.db.cbean.UserInfoCB;
-import jp.sf.fess.db.exbhv.FavoriteLogBhv;
-import jp.sf.fess.db.exbhv.SearchLogBhv;
 import jp.sf.fess.db.exbhv.UserInfoBhv;
 import jp.sf.fess.db.exentity.FavoriteLog;
 import jp.sf.fess.db.exentity.SearchLog;
@@ -35,14 +34,26 @@ import org.seasar.dbflute.bhv.ConditionBeanSetupper;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.LoadReferrerOption;
+import org.seasar.dbflute.bhv.NestedReferrerListGateway;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -97,7 +108,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return UserInfoDbm.getInstance();
@@ -113,14 +124,14 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public UserInfo newEntity() {
+        return new UserInfo();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public UserInfoCB newConditionBean() {
+        return new UserInfoCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -142,12 +153,16 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <pre>
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
-     * int count = userInfoBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = userInfoBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final UserInfoCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final UserInfoCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -163,19 +178,21 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
-     * UserInfo userInfo = userInfoBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (userInfo != null) {
+     * UserInfo userInfo = userInfoBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (userInfo != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = userInfo.get...();
      * } else {
      *     ...
@@ -183,107 +200,112 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public UserInfo selectEntity(final UserInfoCB cb) {
-        return doSelectEntity(cb, UserInfo.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected UserInfo facadeSelectEntity(final UserInfoCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends UserInfo> ENTITY doSelectEntity(
-            final UserInfoCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(cb, entityType,
-                new InternalSelectEntityCallback<ENTITY, UserInfoCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(final UserInfoCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final UserInfoCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends UserInfo> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final UserInfoCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
-     * UserInfo userInfo = userInfoBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * UserInfo userInfo = userInfoBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = userInfo.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public UserInfo selectEntityWithDeletedCheck(final UserInfoCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, UserInfo.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected UserInfo facadeSelectEntityWithDeletedCheck(final UserInfoCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends UserInfo> ENTITY doSelectEntityWithDeletedCheck(
-            final UserInfoCB cb, final Class<ENTITY> entityType) {
+            final UserInfoCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, UserInfoCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(final UserInfoCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public UserInfo selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, UserInfo.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends UserInfo> ENTITY doSelectByPKValue(final Long id,
-            final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected UserInfo facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends UserInfo> ENTITY doSelectByPK(final Long id,
+            final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends UserInfo> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public UserInfo selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, UserInfo.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends UserInfo> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends UserInfo> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private UserInfoCB buildPKCB(final Long id) {
+    protected UserInfoCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final UserInfoCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -295,37 +317,31 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;UserInfo&gt; userInfoList = userInfoBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;UserInfo&gt; userInfoList = userInfoBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (UserInfo userInfo : userInfoList) {
      *     ... = userInfo.get...();
      * }
      * </pre>
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<UserInfo> selectList(final UserInfoCB cb) {
-        return doSelectList(cb, UserInfo.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<UserInfo> facadeSelectList(final UserInfoCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends UserInfo> ListResultBean<ENTITY> doSelectList(
-            final UserInfoCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, UserInfoCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(final UserInfoCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final UserInfoCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -338,8 +354,8 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;UserInfo&gt; page = userInfoBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;UserInfo&gt; page = userInfoBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -351,35 +367,25 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<UserInfo> selectPage(final UserInfoCB cb) {
-        return doSelectPage(cb, UserInfo.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<UserInfo> facadeSelectPage(final UserInfoCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends UserInfo> PagingResultBean<ENTITY> doSelectPage(
-            final UserInfoCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, UserInfoCB>() {
-                    @Override
-                    public int callbackSelectCount(final UserInfoCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(final UserInfoCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final UserInfoCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -390,7 +396,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <pre>
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
-     * userInfoBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;UserInfo&gt;() {
+     * userInfoBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;UserInfo&gt;() {
      *     public void handle(UserInfo entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -401,32 +407,22 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final UserInfoCB cb,
             final EntityRowHandler<UserInfo> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, UserInfo.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final UserInfoCB cb,
+            final EntityRowHandler<UserInfo> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends UserInfo> void doSelectCursor(
-            final UserInfoCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final UserInfoCB cb, final EntityRowHandler<ENTITY> handler,
+            final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<UserInfo>", entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(cb, entityRowHandler, entityType,
-                new InternalSelectCursorCallback<ENTITY, UserInfoCB>() {
-                    @Override
-                    public void callbackSelectCursor(final UserInfoCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(final UserInfoCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -436,29 +432,41 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * userInfoBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * userInfoBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(UserInfoCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<UserInfoCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<UserInfoCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends UserInfoCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<UserInfoCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends UserInfoCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -475,259 +483,301 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     //                                                                       Load Referrer
     //                                                                       =============
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param userInfo The entity of userInfo. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param userInfoList The entity list of userInfo. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
      */
-    public void loadFavoriteLogList(final UserInfo userInfo,
-            final ConditionBeanSetupper<FavoriteLogCB> conditionBeanSetupper) {
-        xassLRArg(userInfo, conditionBeanSetupper);
-        loadFavoriteLogList(xnewLRLs(userInfo), conditionBeanSetupper);
+    public void load(final List<UserInfo> userInfoList,
+            final ReferrerLoaderHandler<LoaderOfUserInfo> handler) {
+        xassLRArg(userInfoList, handler);
+        handler.handle(new LoaderOfUserInfo().ready(userInfoList,
+                _behaviorSelector));
     }
 
     /**
-     * Load referrer of favoriteLogList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param userInfo The entity of userInfo. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final UserInfo userInfo,
+            final ReferrerLoaderHandler<LoaderOfUserInfo> handler) {
+        xassLRArg(userInfo, handler);
+        handler.handle(new LoaderOfUserInfo().ready(xnewLRAryLs(userInfo),
+                _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of favoriteLogList by the set-upper of referrer. <br />
      * FAVORITE_LOG by USER_ID, named 'favoriteLogList'.
      * <pre>
-     * userInfoBhv.<span style="color: #FD4747">loadFavoriteLogList</span>(userInfoList, new ConditionBeanSetupper&lt;FavoriteLogCB&gt;() {
+     * userInfoBhv.<span style="color: #DD4747">loadFavoriteLogList</span>(userInfoList, new ConditionBeanSetupper&lt;FavoriteLogCB&gt;() {
      *     public void setup(FavoriteLogCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (UserInfo userInfo : userInfoList) {
-     *     ... = userInfo.<span style="color: #FD4747">getFavoriteLogList()</span>;
+     *     ... = userInfo.<span style="color: #DD4747">getFavoriteLogList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setUserId_InScope(pkList);
      * cb.query().addOrderBy_UserId_Asc();
      * </pre>
      * @param userInfoList The entity list of userInfo. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadFavoriteLogList(final List<UserInfo> userInfoList,
-            final ConditionBeanSetupper<FavoriteLogCB> conditionBeanSetupper) {
-        xassLRArg(userInfoList, conditionBeanSetupper);
-        loadFavoriteLogList(userInfoList,
+    public NestedReferrerListGateway<FavoriteLog> loadFavoriteLogList(
+            final List<UserInfo> userInfoList,
+            final ConditionBeanSetupper<FavoriteLogCB> setupper) {
+        xassLRArg(userInfoList, setupper);
+        return doLoadFavoriteLogList(userInfoList,
                 new LoadReferrerOption<FavoriteLogCB, FavoriteLog>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of favoriteLogList by the set-upper of referrer. <br />
+     * FAVORITE_LOG by USER_ID, named 'favoriteLogList'.
+     * <pre>
+     * userInfoBhv.<span style="color: #DD4747">loadFavoriteLogList</span>(userInfoList, new ConditionBeanSetupper&lt;FavoriteLogCB&gt;() {
+     *     public void setup(FavoriteLogCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = userInfo.<span style="color: #DD4747">getFavoriteLogList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setUserId_InScope(pkList);
+     * cb.query().addOrderBy_UserId_Asc();
+     * </pre>
+     * @param userInfo The entity of userInfo. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<FavoriteLog> loadFavoriteLogList(
+            final UserInfo userInfo,
+            final ConditionBeanSetupper<FavoriteLogCB> setupper) {
+        xassLRArg(userInfo, setupper);
+        return doLoadFavoriteLogList(xnewLRLs(userInfo),
+                new LoadReferrerOption<FavoriteLogCB, FavoriteLog>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param userInfo The entity of userInfo. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadFavoriteLogList(
+    public NestedReferrerListGateway<FavoriteLog> loadFavoriteLogList(
             final UserInfo userInfo,
             final LoadReferrerOption<FavoriteLogCB, FavoriteLog> loadReferrerOption) {
         xassLRArg(userInfo, loadReferrerOption);
-        loadFavoriteLogList(xnewLRLs(userInfo), loadReferrerOption);
+        return loadFavoriteLogList(xnewLRLs(userInfo), loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param userInfoList The entity list of userInfo. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadFavoriteLogList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<FavoriteLog> loadFavoriteLogList(
             final List<UserInfo> userInfoList,
             final LoadReferrerOption<FavoriteLogCB, FavoriteLog> loadReferrerOption) {
         xassLRArg(userInfoList, loadReferrerOption);
         if (userInfoList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<FavoriteLog>) EMPTY_NREF_LGWAY;
         }
-        final FavoriteLogBhv referrerBhv = xgetBSFLR().select(
-                FavoriteLogBhv.class);
-        helpLoadReferrerInternally(
-                userInfoList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<UserInfo, Long, FavoriteLogCB, FavoriteLog>() {
-                    @Override
-                    public Long getPKVal(final UserInfo e) {
-                        return e.getId();
-                    }
+        return doLoadFavoriteLogList(userInfoList, loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final UserInfo e,
-                            final List<FavoriteLog> ls) {
-                        e.setFavoriteLogList(ls);
-                    }
-
-                    @Override
-                    public FavoriteLogCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final FavoriteLogCB cb,
-                            final List<Long> ls) {
-                        cb.query().setUserId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final FavoriteLogCB cb) {
-                        cb.query().addOrderBy_UserId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final FavoriteLogCB cb) {
-                        cb.specify().columnUserId();
-                    }
-
-                    @Override
-                    public List<FavoriteLog> selRfLs(final FavoriteLogCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final FavoriteLog e) {
-                        return e.getUserId();
-                    }
-
-                    @Override
-                    public void setlcEt(final FavoriteLog re, final UserInfo le) {
-                        re.setUserInfo(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "favoriteLogList";
-                    }
-                });
+    protected NestedReferrerListGateway<FavoriteLog> doLoadFavoriteLogList(
+            final List<UserInfo> userInfoList,
+            final LoadReferrerOption<FavoriteLogCB, FavoriteLog> option) {
+        return helpLoadReferrerInternally(userInfoList, option,
+                "favoriteLogList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param userInfo The entity of userInfo. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadSearchLogList(final UserInfo userInfo,
-            final ConditionBeanSetupper<SearchLogCB> conditionBeanSetupper) {
-        xassLRArg(userInfo, conditionBeanSetupper);
-        loadSearchLogList(xnewLRLs(userInfo), conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of searchLogList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of searchLogList by the set-upper of referrer. <br />
      * SEARCH_LOG by USER_ID, named 'searchLogList'.
      * <pre>
-     * userInfoBhv.<span style="color: #FD4747">loadSearchLogList</span>(userInfoList, new ConditionBeanSetupper&lt;SearchLogCB&gt;() {
+     * userInfoBhv.<span style="color: #DD4747">loadSearchLogList</span>(userInfoList, new ConditionBeanSetupper&lt;SearchLogCB&gt;() {
      *     public void setup(SearchLogCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (UserInfo userInfo : userInfoList) {
-     *     ... = userInfo.<span style="color: #FD4747">getSearchLogList()</span>;
+     *     ... = userInfo.<span style="color: #DD4747">getSearchLogList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setUserId_InScope(pkList);
      * cb.query().addOrderBy_UserId_Asc();
      * </pre>
      * @param userInfoList The entity list of userInfo. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadSearchLogList(final List<UserInfo> userInfoList,
-            final ConditionBeanSetupper<SearchLogCB> conditionBeanSetupper) {
-        xassLRArg(userInfoList, conditionBeanSetupper);
-        loadSearchLogList(userInfoList,
+    public NestedReferrerListGateway<SearchLog> loadSearchLogList(
+            final List<UserInfo> userInfoList,
+            final ConditionBeanSetupper<SearchLogCB> setupper) {
+        xassLRArg(userInfoList, setupper);
+        return doLoadSearchLogList(userInfoList,
                 new LoadReferrerOption<SearchLogCB, SearchLog>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of searchLogList by the set-upper of referrer. <br />
+     * SEARCH_LOG by USER_ID, named 'searchLogList'.
+     * <pre>
+     * userInfoBhv.<span style="color: #DD4747">loadSearchLogList</span>(userInfoList, new ConditionBeanSetupper&lt;SearchLogCB&gt;() {
+     *     public void setup(SearchLogCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = userInfo.<span style="color: #DD4747">getSearchLogList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setUserId_InScope(pkList);
+     * cb.query().addOrderBy_UserId_Asc();
+     * </pre>
+     * @param userInfo The entity of userInfo. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<SearchLog> loadSearchLogList(
+            final UserInfo userInfo,
+            final ConditionBeanSetupper<SearchLogCB> setupper) {
+        xassLRArg(userInfo, setupper);
+        return doLoadSearchLogList(xnewLRLs(userInfo),
+                new LoadReferrerOption<SearchLogCB, SearchLog>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param userInfo The entity of userInfo. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadSearchLogList(final UserInfo userInfo,
+    public NestedReferrerListGateway<SearchLog> loadSearchLogList(
+            final UserInfo userInfo,
             final LoadReferrerOption<SearchLogCB, SearchLog> loadReferrerOption) {
         xassLRArg(userInfo, loadReferrerOption);
-        loadSearchLogList(xnewLRLs(userInfo), loadReferrerOption);
+        return loadSearchLogList(xnewLRLs(userInfo), loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param userInfoList The entity list of userInfo. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadSearchLogList(final List<UserInfo> userInfoList,
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<SearchLog> loadSearchLogList(
+            final List<UserInfo> userInfoList,
             final LoadReferrerOption<SearchLogCB, SearchLog> loadReferrerOption) {
         xassLRArg(userInfoList, loadReferrerOption);
         if (userInfoList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<SearchLog>) EMPTY_NREF_LGWAY;
         }
-        final SearchLogBhv referrerBhv = xgetBSFLR().select(SearchLogBhv.class);
-        helpLoadReferrerInternally(
-                userInfoList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<UserInfo, Long, SearchLogCB, SearchLog>() {
-                    @Override
-                    public Long getPKVal(final UserInfo e) {
-                        return e.getId();
-                    }
+        return doLoadSearchLogList(userInfoList, loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final UserInfo e,
-                            final List<SearchLog> ls) {
-                        e.setSearchLogList(ls);
-                    }
-
-                    @Override
-                    public SearchLogCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final SearchLogCB cb, final List<Long> ls) {
-                        cb.query().setUserId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final SearchLogCB cb) {
-                        cb.query().addOrderBy_UserId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final SearchLogCB cb) {
-                        cb.specify().columnUserId();
-                    }
-
-                    @Override
-                    public List<SearchLog> selRfLs(final SearchLogCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final SearchLog e) {
-                        return e.getUserId();
-                    }
-
-                    @Override
-                    public void setlcEt(final SearchLog re, final UserInfo le) {
-                        re.setUserInfo(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "searchLogList";
-                    }
-                });
+    protected NestedReferrerListGateway<SearchLog> doLoadSearchLogList(
+            final List<UserInfo> userInfoList,
+            final LoadReferrerOption<SearchLogCB, SearchLog> option) {
+        return helpLoadReferrerInternally(userInfoList, option, "searchLogList");
     }
 
     // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-
     // ===================================================================================
     //                                                                      Extract Column
     //                                                                      ==============
@@ -737,20 +787,14 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * @return The list of the column value. (NotNull, EmptyAllowed, NotNullElement)
      */
     public List<Long> extractIdList(final List<UserInfo> userInfoList) {
-        return helpExtractListInternally(userInfoList,
-                new InternalExtractCallback<UserInfo, Long>() {
-                    @Override
-                    public Long getCV(final UserInfo e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(userInfoList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * UserInfo userInfo = new UserInfo();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -759,38 +803,37 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//userInfo.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//userInfo.set...;</span>
-     * userInfoBhv.<span style="color: #FD4747">insert</span>(userInfo);
+     * userInfoBhv.<span style="color: #DD4747">insert</span>(userInfo);
      * ... = userInfo.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param userInfo The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param userInfo The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final UserInfo userInfo) {
         doInsert(userInfo, null);
     }
 
-    protected void doInsert(final UserInfo userInfo,
-            final InsertOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfo", userInfo);
-        prepareInsertOption(option);
-        delegateInsert(userInfo, option);
+    protected void doInsert(final UserInfo et, final InsertOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfo", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
-    protected void prepareInsertOption(final InsertOption<UserInfoCB> option) {
-        if (option == null) {
+    protected void prepareInsertOption(final InsertOption<UserInfoCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -802,137 +845,98 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//userInfo.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//userInfo.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * userInfo.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * userInfo.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     userInfoBhv.<span style="color: #FD4747">update</span>(userInfo);
+     *     userInfoBhv.<span style="color: #DD4747">update</span>(userInfo);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param userInfo The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param userInfo The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final UserInfo userInfo) {
         doUpdate(userInfo, null);
     }
 
-    protected void doUpdate(final UserInfo userInfo,
-            final UpdateOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfo", userInfo);
-        prepareUpdateOption(option);
-        helpUpdateInternally(userInfo, new InternalUpdateCallback<UserInfo>() {
-            @Override
-            public int callbackDelegateUpdate(final UserInfo entity) {
-                return delegateUpdate(entity, option);
-            }
-        });
+    protected void doUpdate(final UserInfo et, final UpdateOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfo", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
-    protected void prepareUpdateOption(final UpdateOption<UserInfoCB> option) {
-        if (option == null) {
+    protected void prepareUpdateOption(final UpdateOption<UserInfoCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected UserInfoCB createCBForVaryingUpdate() {
-        final UserInfoCB cb = newMyConditionBean();
+        final UserInfoCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected UserInfoCB createCBForSpecifiedUpdate() {
-        final UserInfoCB cb = newMyConditionBean();
+        final UserInfoCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        doModify(entity, option);
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doModify(et, op);
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param userInfo The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param userInfo The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final UserInfo userInfo) {
-        doInesrtOrUpdate(userInfo, null, null);
+        doInsertOrUpdate(userInfo, null, null);
     }
 
-    protected void doInesrtOrUpdate(final UserInfo userInfo,
-            final InsertOption<UserInfoCB> insertOption,
-            final UpdateOption<UserInfoCB> updateOption) {
-        helpInsertOrUpdateInternally(userInfo,
-                new InternalInsertOrUpdateCallback<UserInfo, UserInfoCB>() {
-                    @Override
-                    public void callbackInsert(final UserInfo entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final UserInfo entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public UserInfoCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final UserInfoCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final UserInfo et,
+            final InsertOption<UserInfoCB> iop,
+            final UpdateOption<UserInfoCB> uop) {
+        assertObjectNotNull("userInfo", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<UserInfoCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<UserInfoCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            final InsertOption<? extends ConditionBean> insertOption,
-            final UpdateOption<? extends ConditionBean> updateOption) {
-        doCreateOrModify(entity, insertOption, updateOption);
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -940,66 +944,70 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <pre>
      * UserInfo userInfo = new UserInfo();
      * userInfo.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * userInfo.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * userInfo.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     userInfoBhv.<span style="color: #FD4747">delete</span>(userInfo);
+     *     userInfoBhv.<span style="color: #DD4747">delete</span>(userInfo);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param userInfo The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param userInfo The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final UserInfo userInfo) {
         doDelete(userInfo, null);
     }
 
-    protected void doDelete(final UserInfo userInfo,
-            final DeleteOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfo", userInfo);
-        prepareDeleteOption(option);
-        helpDeleteInternally(userInfo, new InternalDeleteCallback<UserInfo>() {
-            @Override
-            public int callbackDelegateDelete(final UserInfo entity) {
-                return delegateDelete(entity, option);
-            }
-        });
+    protected void doDelete(final UserInfo et, final DeleteOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfo", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
-    protected void prepareDeleteOption(final DeleteOption<UserInfoCB> option) {
-        if (option == null) {
-            return;
-        }
-        assertDeleteOptionStatus(option);
-    }
-
-    @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
+    protected void prepareDeleteOption(final DeleteOption<UserInfoCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        doRemove(entity, option);
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
+    }
+
+    @Override
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doRemove(et, op);
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     UserInfo userInfo = new UserInfo();
+     *     userInfo.setFooName("foo");
+     *     if (...) {
+     *         userInfo.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     userInfoList.add(userInfo);
+     * }
+     * userInfoBhv.<span style="color: #DD4747">batchInsert</span>(userInfoList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param userInfoList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -1007,89 +1015,100 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
         return doBatchInsert(userInfoList, null);
     }
 
-    protected int[] doBatchInsert(final List<UserInfo> userInfoList,
-            final InsertOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfoList", userInfoList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(userInfoList, option);
+    protected int[] doBatchInsert(final List<UserInfo> ls,
+            final InsertOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfoList", ls);
+        InsertOption<UserInfoCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<UserInfo> ls,
+            final InsertOption<UserInfoCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * userInfoBhv.<span style="color: #FD4747">batchUpdate</span>(userInfoList, new SpecifyQuery<UserInfoCB>() {
-     *     public void specify(UserInfoCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     UserInfo userInfo = new UserInfo();
+     *     userInfo.setFooName("foo");
+     *     if (...) {
+     *         userInfo.setFooPrice(123);
+     *     } else {
+     *         userInfo.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//userInfo.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     userInfoList.add(userInfo);
+     * }
+     * userInfoBhv.<span style="color: #DD4747">batchUpdate</span>(userInfoList);
      * </pre>
      * @param userInfoList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(final List<UserInfo> userInfoList) {
         return doBatchUpdate(userInfoList, null);
     }
 
-    protected int[] doBatchUpdate(final List<UserInfo> userInfoList,
-            final UpdateOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfoList", userInfoList);
-        prepareBatchUpdateOption(userInfoList, option);
-        return delegateBatchUpdate(userInfoList, option);
+    protected int[] doBatchUpdate(final List<UserInfo> ls,
+            final UpdateOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfoList", ls);
+        UpdateOption<UserInfoCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(final List<UserInfo> userInfoList,
-            final UpdateOption<UserInfoCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(userInfoList);
-        //}
+    protected void prepareBatchUpdateOption(final List<UserInfo> ls,
+            final UpdateOption<UserInfoCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * userInfoBhv.<span style="color: #FD4747">batchUpdate</span>(userInfoList, new SpecifyQuery<UserInfoCB>() {
+     * userInfoBhv.<span style="color: #DD4747">batchUpdate</span>(userInfoList, new SpecifyQuery<UserInfoCB>() {
      *     public void specify(UserInfoCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * userInfoBhv.<span style="color: #FD4747">batchUpdate</span>(userInfoList, new SpecifyQuery<UserInfoCB>() {
+     * userInfoBhv.<span style="color: #DD4747">batchUpdate</span>(userInfoList, new SpecifyQuery<UserInfoCB>() {
      *     public void specify(UserInfoCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1101,7 +1120,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * @param userInfoList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(final List<UserInfo> userInfoList,
             final SpecifyQuery<UserInfoCB> updateColumnSpec) {
@@ -1111,8 +1130,8 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        return doLumpModify(ls, option);
+            final UpdateOption<? extends ConditionBean> op) {
+        return doLumpModify(ls, op);
     }
 
     /**
@@ -1120,33 +1139,29 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param userInfoList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDelete(final List<UserInfo> userInfoList) {
         return doBatchDelete(userInfoList, null);
     }
 
-    protected int[] doBatchDelete(final List<UserInfo> userInfoList,
-            final DeleteOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfoList", userInfoList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(userInfoList, option);
+    protected int[] doBatchDelete(final List<UserInfo> ls,
+            final DeleteOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfoList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        return doLumpRemove(ls, option);
+            final DeleteOption<? extends ConditionBean> op) {
+        return doLumpRemove(ls, op);
     }
 
     // ===================================================================================
@@ -1155,7 +1170,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * userInfoBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;UserInfo, UserInfoCB&gt;() {
+     * userInfoBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;UserInfo, UserInfoCB&gt;() {
      *     public ConditionBean setup(userInfo entity, UserInfoCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1168,7 +1183,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1184,18 +1199,17 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<UserInfo, UserInfoCB> setupper,
-            final InsertOption<UserInfoCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final UserInfo entity = new UserInfo();
-        final UserInfoCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<UserInfo, UserInfoCB> sp,
+            final InsertOption<UserInfoCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final UserInfo et = newEntity();
+        final UserInfoCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected UserInfoCB createCBForQueryInsert() {
-        final UserInfoCB cb = newMyConditionBean();
+        final UserInfoCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1203,12 +1217,8 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1221,40 +1231,35 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//userInfo.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//userInfo.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//userInfo.setVersionNo(value);</span>
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
-     * userInfoBhv.<span style="color: #FD4747">queryUpdate</span>(userInfo, cb);
+     * userInfoBhv.<span style="color: #DD4747">queryUpdate</span>(userInfo, cb);
      * </pre>
      * @param userInfo The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final UserInfo userInfo, final UserInfoCB cb) {
         return doQueryUpdate(userInfo, cb, null);
     }
 
-    protected int doQueryUpdate(final UserInfo userInfo, final UserInfoCB cb,
-            final UpdateOption<UserInfoCB> option) {
-        assertObjectNotNull("userInfo", userInfo);
+    protected int doQueryUpdate(final UserInfo et, final UserInfoCB cb,
+            final UpdateOption<UserInfoCB> op) {
+        assertObjectNotNull("userInfo", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                userInfo, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (UserInfoCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity), (UserInfoCB) cb,
-                    downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1262,32 +1267,28 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <pre>
      * UserInfoCB cb = new UserInfoCB();
      * cb.query().setFoo...(value);
-     * userInfoBhv.<span style="color: #FD4747">queryDelete</span>(userInfo, cb);
+     * userInfoBhv.<span style="color: #DD4747">queryDelete</span>(userInfo, cb);
      * </pre>
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final UserInfoCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final UserInfoCB cb,
-            final DeleteOption<UserInfoCB> option) {
+            final DeleteOption<UserInfoCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((UserInfoCB) cb);
-        } else {
-            return varyingQueryDelete((UserInfoCB) cb, downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1308,12 +1309,12 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * InsertOption<UserInfoCB> option = new InsertOption<UserInfoCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * userInfoBhv.<span style="color: #FD4747">varyingInsert</span>(userInfo, option);
+     * userInfoBhv.<span style="color: #DD4747">varyingInsert</span>(userInfo, option);
      * ... = userInfo.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param userInfo The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param userInfo The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final UserInfo userInfo,
             final InsertOption<UserInfoCB> option) {
@@ -1329,26 +1330,26 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * UserInfo userInfo = new UserInfo();
      * userInfo.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * userInfo.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * userInfo.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * userInfo.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;UserInfoCB&gt; option = new UpdateOption&lt;UserInfoCB&gt;();
      *     option.self(new SpecifyQuery&lt;UserInfoCB&gt;() {
      *         public void specify(UserInfoCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     userInfoBhv.<span style="color: #FD4747">varyingUpdate</span>(userInfo, option);
+     *     userInfoBhv.<span style="color: #DD4747">varyingUpdate</span>(userInfo, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param userInfo The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param userInfo The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final UserInfo userInfo,
             final UpdateOption<UserInfoCB> option) {
@@ -1359,29 +1360,29 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param userInfo The entity of insert or update target. (NotNull)
+     * @param userInfo The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(final UserInfo userInfo,
             final InsertOption<UserInfoCB> insertOption,
             final UpdateOption<UserInfoCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(userInfo, insertOption, updateOption);
+        doInsertOrUpdate(userInfo, insertOption, updateOption);
     }
 
     /**
      * Delete the entity with varying requests. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param userInfo The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param userInfo The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final UserInfo userInfo,
             final DeleteOption<UserInfoCB> option) {
@@ -1465,7 +1466,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//userInfo.setPK...(value);</span>
      * userInfo.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//userInfo.setVersionNo(value);</span>
      * UserInfoCB cb = new UserInfoCB();
@@ -1473,16 +1474,16 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;UserInfoCB&gt; option = new UpdateOption&lt;UserInfoCB&gt;();
      * option.self(new SpecifyQuery&lt;UserInfoCB&gt;() {
      *     public void specify(UserInfoCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * userInfoBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(userInfo, cb, option);
+     * userInfoBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(userInfo, cb, option);
      * </pre>
      * @param userInfo The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final UserInfo userInfo, final UserInfoCB cb,
             final UpdateOption<UserInfoCB> option) {
@@ -1497,7 +1498,7 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of UserInfo. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final UserInfoCB cb,
             final DeleteOption<UserInfoCB> option) {
@@ -1544,165 +1545,14 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final UserInfoCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<UserInfo> typeOfSelectedEntity() {
+        return UserInfo.class;
     }
 
-    protected int delegateSelectCountPlainly(final UserInfoCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends UserInfo> void delegateSelectCursor(
-            final UserInfoCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends UserInfo> List<ENTITY> delegateSelectList(
-            final UserInfoCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final UserInfo e,
-            final InsertOption<UserInfoCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final UserInfo e,
-            final UpdateOption<UserInfoCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return delegateUpdateNonstrict(e, op);
-    }
-
-    protected int delegateUpdateNonstrict(final UserInfo e,
-            final UpdateOption<UserInfoCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final UserInfo e,
-            final DeleteOption<UserInfoCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return delegateDeleteNonstrict(e, op);
-    }
-
-    protected int delegateDeleteNonstrict(final UserInfo e,
-            final DeleteOption<UserInfoCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<UserInfo> ls,
-            final InsertOption<UserInfoCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<UserInfo> ls,
-            final UpdateOption<UserInfoCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchUpdateNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(final List<UserInfo> ls,
-            final UpdateOption<UserInfoCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<UserInfo> ls,
-            final DeleteOption<UserInfoCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(final List<UserInfo> ls,
-            final DeleteOption<UserInfoCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final UserInfo e, final UserInfoCB inCB,
-            final ConditionBean resCB, final InsertOption<UserInfoCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final UserInfo e, final UserInfoCB cb,
-            final UpdateOption<UserInfoCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final UserInfoCB cb,
-            final DeleteOption<UserInfoCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
-    //                                                                Optimistic Lock Info
-    //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
-    }
-
-    // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected UserInfo downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, UserInfo.class);
+    protected UserInfo downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, UserInfo.class);
     }
 
     protected UserInfoCB downcast(final ConditionBean cb) {
@@ -1710,31 +1560,31 @@ public abstract class BsUserInfoBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<UserInfo> downcast(final List<? extends Entity> entityList) {
-        return (List<UserInfo>) entityList;
+    protected List<UserInfo> downcast(final List<? extends Entity> ls) {
+        return (List<UserInfo>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<UserInfoCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<UserInfoCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<UserInfoCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<UserInfoCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<UserInfoCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<UserInfoCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<UserInfoCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<UserInfoCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<UserInfoCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<UserInfo, UserInfoCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<UserInfo, UserInfoCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<UserInfo, UserInfoCB>) sp;
     }
 }

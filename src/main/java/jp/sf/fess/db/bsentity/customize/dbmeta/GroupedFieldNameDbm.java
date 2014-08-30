@@ -60,26 +60,29 @@ public class GroupedFieldNameDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgName(), "name");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((GroupedFieldName) e).getName();
+        public Object read(final Entity et) {
+            return ((GroupedFieldName) et).getName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((GroupedFieldName) e).setName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((GroupedFieldName) et).setName((String) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -115,9 +118,13 @@ public class GroupedFieldNameDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
-            false, "name", String.class, false, false, "VARCHAR", 255, 0, null,
-            false, null, null, null, null, null);
+            String.class, "name", null, false, false, false, "VARCHAR", 255, 0,
+            null, false, null, null, null, null, null);
 
+    /**
+     * NAME: {VARCHAR(255), refers to SEARCH_FIELD_LOG.NAME}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnName() {
         return _columnName;
     }
@@ -158,6 +165,8 @@ public class GroupedFieldNameDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -200,8 +209,8 @@ public class GroupedFieldNameDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public GroupedFieldName newEntity() {
+        return new GroupedFieldName();
     }
 
     public GroupedFieldName newMyEntity() {
@@ -212,24 +221,24 @@ public class GroupedFieldNameDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((GroupedFieldName) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((GroupedFieldName) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((GroupedFieldName) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((GroupedFieldName) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

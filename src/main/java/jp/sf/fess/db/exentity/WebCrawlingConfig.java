@@ -243,8 +243,9 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
         for (final RequestHeader requestHeader : requestHeaderList) {
             rhList.add(requestHeader.getS2RobotRequestHeader());
         }
-        paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList
-                .toArray(new org.codelibs.robot.client.http.RequestHeader[rhList
+        paramMap.put(
+                HcHttpClient.REQUERT_HEADERS_PROPERTY,
+                rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList
                         .size()]));
 
     }

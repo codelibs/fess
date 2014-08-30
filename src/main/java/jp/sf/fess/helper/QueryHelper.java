@@ -96,6 +96,10 @@ public class QueryHelper implements Serializable {
     @Resource
     protected SystemHelper systemHelper;
 
+    @Binding(bindingType = BindingType.MAY)
+    @Resource
+    protected KeyMatchHelper keyMatchHelper;
+
     protected Set<String> apiResponseFieldSet;
 
     protected Set<String> highlightFieldSet = new HashSet<>();
@@ -192,22 +196,35 @@ public class QueryHelper implements Serializable {
 
         final SearchQuery searchQuery = buildQuery(q);
         if (!searchQuery.queryExists()) {
-            return searchQuery.query(StringUtil.EMPTY);
+            searchQuery.query(StringUtil.EMPTY);
         }
 
-        if (roleQueryHelper == null || !envCondition) {
+        if (!envCondition) {
             return searchQuery;
         }
 
-        StringBuilder queryBuf = new StringBuilder(255);
-        queryBuf.append(searchQuery.getQuery());
+        if (keyMatchHelper != null) {
+            final List<String> docIdQueryList = keyMatchHelper
+                    .getDocIdQueryList();
+            if (docIdQueryList != null && searchQuery.queryExists()) {
+                final String originalQuery = searchQuery.getQuery();
+                final StringBuilder queryBuf = new StringBuilder(
+                        originalQuery.length() + 100);
+                queryBuf.append(originalQuery);
+                for (final String docIdQuery : docIdQueryList) {
+                    queryBuf.append(_OR_);
+                    queryBuf.append(docIdQuery);
+                }
+                searchQuery.setQuery(queryBuf.toString());
+            }
+        }
 
         if (roleQueryHelper != null) {
             final Set<String> roleSet = roleQueryHelper.build();
             if (roleSet.size() > maxFilterQueriesForRole) {
                 // add query
-                final String sq = queryBuf.toString();
-                queryBuf = new StringBuilder(255);
+                final String sq = searchQuery.getQuery();
+                final StringBuilder queryBuf = new StringBuilder(255);
                 final boolean hasQueries = sq.contains(_AND_)
                         || sq.contains(_OR_);
                 if (hasQueries) {
@@ -225,13 +242,13 @@ public class QueryHelper implements Serializable {
                 if (roleSet.size() > 1) {
                     queryBuf.append(')');
                 }
+                searchQuery.query(queryBuf.toString());
             } else if (!roleSet.isEmpty()) {
                 // add filter query
                 searchQuery.addFilterQuery(getRoleQuery(roleSet));
             }
         }
-
-        return searchQuery.query(queryBuf.toString());
+        return searchQuery;
     }
 
     private String getRoleQuery(final Set<String> roleList) {
@@ -261,8 +278,6 @@ public class QueryHelper implements Serializable {
         String solrQuery;
         if (q == null || "()".equals(q)) {
             solrQuery = StringUtil.EMPTY;
-            // } else if (q.startsWith("(") && q.endsWith(")")) {
-            // solrQuery = q.substring(1, q.length() - 1);
         } else {
             solrQuery = unbracketQuery(q);
         }
@@ -363,7 +378,8 @@ public class QueryHelper implements Serializable {
                         if (isInUrl) {
                             buf.append('*');
                         }
-                        appendQueryValue(buf, targetWord);
+                        appendQueryValue(buf, targetWord, isInUrl ? false
+                                : useBigram);
                         if (isInUrl) {
                             buf.append('*');
                         }
@@ -375,7 +391,8 @@ public class QueryHelper implements Serializable {
                         if (isInUrl) {
                             queryBuf.append('*');
                         }
-                        appendQueryValue(queryBuf, targetWord);
+                        appendQueryValue(queryBuf, targetWord, isInUrl ? false
+                                : useBigram);
                         if (isInUrl) {
                             queryBuf.append('*');
                         }
@@ -449,6 +466,10 @@ public class QueryHelper implements Serializable {
                     if (fieldLogMap != null) {
                         addFieldLogValue(fieldLogMap, CONTENT_FIELD, value);
                     }
+
+                    if (keyMatchHelper != null) {
+                        keyMatchHelper.addSearchWord(value);
+                    }
                 }
             }
         }
@@ -492,7 +513,8 @@ public class QueryHelper implements Serializable {
         logList.add(targetWord);
     }
 
-    protected void appendQueryValue(final StringBuilder buf, final String query) {
+    protected void appendQueryValue(final StringBuilder buf,
+            final String query, final boolean useBigram) {
         // check reserved
         boolean reserved = false;
         for (final String element : Constants.RESERVED) {
@@ -826,12 +848,12 @@ public class QueryHelper implements Serializable {
                     if (notOperatorFlag) {
                         final StringBuilder buf = new StringBuilder(100);
                         buf.append(prefix);
-                        appendQueryValue(buf, targetWord);
+                        appendQueryValue(buf, targetWord, useBigram);
                         notOperatorList.add(buf.toString());
                         notOperatorFlag = false;
                     } else {
                         queryBuf.append(prefix);
-                        appendQueryValue(queryBuf, targetWord);
+                        appendQueryValue(queryBuf, targetWord, useBigram);
                         queryOperandCount++;
                     }
                     nonPrefix = true;
@@ -908,16 +930,16 @@ public class QueryHelper implements Serializable {
             final String value, final String queryLanguage) {
         buf.append('(');
         buf.append(TITLE_FIELD).append(':');
-        appendQueryValue(buf, value);
+        appendQueryValue(buf, value, useBigram);
         buf.append(_OR_);
         buf.append(CONTENT_FIELD).append(':');
-        appendQueryValue(buf, value);
+        appendQueryValue(buf, value, useBigram);
         if (StringUtil.isNotBlank(queryLanguage)) {
             buf.append(_OR_);
             buf.append("content_");
             buf.append(queryLanguage);
             buf.append(':');
-            appendQueryValue(buf, value);
+            appendQueryValue(buf, value, false);
         }
         buf.append(')');
     }
@@ -1381,7 +1403,7 @@ public class QueryHelper implements Serializable {
         return defType;
     }
 
-    public void setDefType(String defType) {
+    public void setDefType(final String defType) {
         this.defType = defType;
     }
 

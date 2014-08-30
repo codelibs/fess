@@ -25,6 +25,8 @@ import jp.sf.fess.db.cbean.cq.DataCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.DataCrawlingConfigCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -43,10 +45,10 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsDataCrawlingConfigCQ(final ConditionQuery childQuery,
+    public BsDataCrawlingConfigCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -56,7 +58,7 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from DATA_CRAWLING_CONFIG) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -83,7 +85,7 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join DATA_CRAWLING_CONFIG on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -101,7 +103,6 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -116,288 +117,159 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
         return getId();
     }
 
-    protected Map<String, DataConfigToLabelTypeMappingCQ> _id_ExistsReferrer_DataConfigToLabelTypeMappingListMap;
-
     public Map<String, DataConfigToLabelTypeMappingCQ> getId_ExistsReferrer_DataConfigToLabelTypeMappingList() {
-        return _id_ExistsReferrer_DataConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(
-            final DataConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_DataConfigToLabelTypeMappingListMap == null) {
-            _id_ExistsReferrer_DataConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_DataConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_ExistsReferrer_DataConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_ExistsReferrer_DataConfigToLabelTypeMappingList." + key;
+            final DataConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_DataConfigToLabelTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_ExistsReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_DataConfigToRoleTypeMappingListMap.size() + 1);
-        _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap
-                .put(key, subQuery);
-        return "id_ExistsReferrer_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_DataConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToLabelTypeMappingCQ> _id_NotExistsReferrer_DataConfigToLabelTypeMappingListMap;
-
     public Map<String, DataConfigToLabelTypeMappingCQ> getId_NotExistsReferrer_DataConfigToLabelTypeMappingList() {
-        return _id_NotExistsReferrer_DataConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(
-            final DataConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_DataConfigToLabelTypeMappingListMap == null) {
-            _id_NotExistsReferrer_DataConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_DataConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_DataConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_DataConfigToLabelTypeMappingList." + key;
+            final DataConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotExistsReferrer_DataConfigToLabelTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_NotExistsReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotExistsReferrer_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToLabelTypeMappingCQ> _id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingListMap;
-
     public Map<String, DataConfigToLabelTypeMappingCQ> getId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(
-            final DataConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList."
-                + key;
+            final DataConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList."
-                + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToLabelTypeMappingCQ> _id_InScopeRelation_DataConfigToLabelTypeMappingListMap;
-
     public Map<String, DataConfigToLabelTypeMappingCQ> getId_InScopeRelation_DataConfigToLabelTypeMappingList() {
-        return _id_InScopeRelation_DataConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_DataConfigToLabelTypeMappingList(
-            final DataConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_DataConfigToLabelTypeMappingListMap == null) {
-            _id_InScopeRelation_DataConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_DataConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_DataConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_DataConfigToLabelTypeMappingList." + key;
+            final DataConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_DataConfigToLabelTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_InScopeRelation_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_InScopeRelation_DataConfigToRoleTypeMappingList() {
-        return _id_InScopeRelation_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_DataConfigToRoleTypeMappingListMap == null) {
-            _id_InScopeRelation_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_DataConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToLabelTypeMappingCQ> _id_NotInScopeRelation_DataConfigToLabelTypeMappingListMap;
-
     public Map<String, DataConfigToLabelTypeMappingCQ> getId_NotInScopeRelation_DataConfigToLabelTypeMappingList() {
-        return _id_NotInScopeRelation_DataConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(
-            final DataConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_DataConfigToLabelTypeMappingListMap == null) {
-            _id_NotInScopeRelation_DataConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_DataConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_DataConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_DataConfigToLabelTypeMappingList." + key;
+            final DataConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_DataConfigToLabelTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_NotInScopeRelation_DataConfigToRoleTypeMappingList() {
-        return _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap == null) {
-            _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToLabelTypeMappingCQ> _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListMap;
-
     public Map<String, DataConfigToLabelTypeMappingCQ> getId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList() {
-        return _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(
-            final DataConfigToLabelTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_DataConfigToLabelTypeMappingList."
-                + key;
+            final DataConfigToLabelTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_DataConfigToLabelTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_DataConfigToLabelTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_DataConfigToLabelTypeMappingList", pm);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList", pm);
     }
 
     /**
@@ -906,9 +778,9 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -926,9 +798,9 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -943,9 +815,8 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
     }
 
     // ===================================================================================
@@ -960,74 +831,43 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, DataCrawlingConfigCQ> _scalarConditionMap;
-
     public Map<String, DataCrawlingConfigCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final DataCrawlingConfigCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final DataCrawlingConfigCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, DataCrawlingConfigCQ> _specifyMyselfDerivedMap;
-
     public Map<String, DataCrawlingConfigCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final DataCrawlingConfigCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final DataCrawlingConfigCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, DataCrawlingConfigCQ> _queryMyselfDerivedMap;
 
     public Map<String, DataCrawlingConfigCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final DataCrawlingConfigCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final DataCrawlingConfigCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -1036,36 +876,24 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
     protected Map<String, DataCrawlingConfigCQ> _myselfExistsMap;
 
     public Map<String, DataCrawlingConfigCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final DataCrawlingConfigCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final DataCrawlingConfigCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, DataCrawlingConfigCQ> _myselfInScopeMap;
-
     public Map<String, DataCrawlingConfigCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final DataCrawlingConfigCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final DataCrawlingConfigCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -1078,6 +906,14 @@ public class BsDataCrawlingConfigCQ extends AbstractBsDataCrawlingConfigCQ {
 
     protected String xCQ() {
         return DataCrawlingConfigCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

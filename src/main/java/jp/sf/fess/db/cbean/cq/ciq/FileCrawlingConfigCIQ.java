@@ -47,10 +47,10 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FileCrawlingConfigCIQ(final ConditionQuery childQuery,
+    public FileCrawlingConfigCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsFileCrawlingConfigCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -63,9 +63,8 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -215,7 +214,7 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_FileAuthenticationListParameter(
-            final Object pv) {
+            final Object vl) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
@@ -229,7 +228,7 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(
-            final Object pv) {
+            final Object vl) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
@@ -243,7 +242,7 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter(
-            final Object pv) {
+            final Object vl) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
@@ -355,47 +354,47 @@ public class FileCrawlingConfigCIQ extends AbstractBsFileCrawlingConfigCQ {
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(final FileCrawlingConfigCQ subQuery) {
+    public String keepScalarCondition(final FileCrawlingConfigCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final FileCrawlingConfigCQ subQuery) {
+    public String keepSpecifyMyselfDerived(final FileCrawlingConfigCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(final FileCrawlingConfigCQ subQuery) {
+    public String keepQueryMyselfDerived(final FileCrawlingConfigCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final FileCrawlingConfigCQ subQuery) {
+    public String keepMyselfExists(final FileCrawlingConfigCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(final FileCrawlingConfigCQ subQuery) {
+    public String keepMyselfInScope(final FileCrawlingConfigCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

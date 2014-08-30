@@ -157,8 +157,14 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -204,6 +210,18 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -211,7 +229,7 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
     protected FileCrawlingConfig _fileCrawlingConfig;
 
     /**
-     * FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
+     * [get] FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
      * @return The entity of foreign property 'fileCrawlingConfig'. (NullAllowed: when e.g. null FK column, no setupSelect)
      */
     public FileCrawlingConfig getFileCrawlingConfig() {
@@ -219,7 +237,7 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
     }
 
     /**
-     * FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
+     * [set] FILE_CRAWLING_CONFIG by my FILE_CRAWLING_CONFIG_ID, named 'fileCrawlingConfig'.
      * @param fileCrawlingConfig The entity of foreign property 'fileCrawlingConfig'. (NullAllowed)
      */
     public void setFileCrawlingConfig(
@@ -266,28 +284,47 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsFileAuthentication)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsFileAuthentication)) {
             return false;
         }
-        final BsFileAuthentication otherEntity = (BsFileAuthentication) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsFileAuthentication other = (BsFileAuthentication) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -296,14 +333,14 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -320,7 +357,7 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -330,16 +367,16 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
+        final String li = "\n  ";
         if (_fileCrawlingConfig != null) {
-            sb.append(l).append(
+            sb.append(li).append(
                     xbRDS(_fileCrawlingConfig, "fileCrawlingConfig"));
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -364,24 +401,24 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getHostname());
-        sb.append(delimiter).append(getPort());
-        sb.append(delimiter).append(getProtocolScheme());
-        sb.append(delimiter).append(getUsername());
-        sb.append(delimiter).append(getPassword());
-        sb.append(delimiter).append(getParameters());
-        sb.append(delimiter).append(getFileCrawlingConfigId());
-        sb.append(delimiter).append(getCreatedBy());
-        sb.append(delimiter).append(getCreatedTime());
-        sb.append(delimiter).append(getUpdatedBy());
-        sb.append(delimiter).append(getUpdatedTime());
-        sb.append(delimiter).append(getDeletedBy());
-        sb.append(delimiter).append(getDeletedTime());
-        sb.append(delimiter).append(getVersionNo());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getHostname());
+        sb.append(dm).append(getPort());
+        sb.append(dm).append(getProtocolScheme());
+        sb.append(dm).append(getUsername());
+        sb.append(dm).append(getPassword());
+        sb.append(dm).append(getParameters());
+        sb.append(dm).append(getFileCrawlingConfigId());
+        sb.append(dm).append(getCreatedBy());
+        sb.append(dm).append(getCreatedTime());
+        sb.append(dm).append(getUpdatedBy());
+        sb.append(dm).append(getUpdatedTime());
+        sb.append(dm).append(getDeletedBy());
+        sb.append(dm).append(getDeletedTime());
+        sb.append(dm).append(getVersionNo());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -389,12 +426,12 @@ public abstract class BsFileAuthentication implements Entity, Serializable,
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
+        final String cm = ",";
         if (_fileCrawlingConfig != null) {
-            sb.append(c).append("fileCrawlingConfig");
+            sb.append(cm).append("fileCrawlingConfig");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

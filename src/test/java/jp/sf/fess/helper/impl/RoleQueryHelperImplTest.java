@@ -206,7 +206,7 @@ public class RoleQueryHelperImplTest extends S2TestCase {
             roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
             fail();
         } catch (final Exception e) {
-            // ok 
+            // ok
         }
 
         roleQueryHelperImpl.cookieKey = "fess3";

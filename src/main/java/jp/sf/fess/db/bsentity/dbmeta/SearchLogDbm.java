@@ -23,6 +23,7 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.SearchLog;
+import jp.sf.fess.db.exentity.UserInfo;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -63,6 +64,9 @@ public class SearchLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -80,165 +84,190 @@ public class SearchLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgUserId(), "userId");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getId();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setId(ctl(vl));
         }
     }
 
     public static class EpgSearchWord implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getSearchWord();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getSearchWord();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setSearchWord((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setSearchWord((String) vl);
         }
     }
 
     public static class EpgRequestedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getRequestedTime();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getRequestedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setRequestedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setRequestedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgResponseTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getResponseTime();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getResponseTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setResponseTime(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setResponseTime(cti(vl));
         }
     }
 
     public static class EpgHitCount implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getHitCount();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getHitCount();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setHitCount(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setHitCount(ctl(vl));
         }
     }
 
     public static class EpgQueryOffset implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getQueryOffset();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getQueryOffset();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setQueryOffset(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setQueryOffset(cti(vl));
         }
     }
 
     public static class EpgQueryPageSize implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getQueryPageSize();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getQueryPageSize();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setQueryPageSize(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setQueryPageSize(cti(vl));
         }
     }
 
     public static class EpgUserAgent implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getUserAgent();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getUserAgent();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setUserAgent((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setUserAgent((String) vl);
         }
     }
 
     public static class EpgReferer implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getReferer();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getReferer();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setReferer((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setReferer((String) vl);
         }
     }
 
     public static class EpgClientIp implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getClientIp();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getClientIp();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setClientIp((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setClientIp((String) vl);
         }
     }
 
     public static class EpgUserSessionId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getUserSessionId();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getUserSessionId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setUserSessionId((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setUserSessionId((String) vl);
         }
     }
 
     public static class EpgAccessType implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getAccessType();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getAccessType();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setAccessType((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setAccessType((String) vl);
         }
     }
 
     public static class EpgUserId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((SearchLog) e).getUserId();
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getUserId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((SearchLog) e).setUserId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setUserId(ctl(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgUserInfo(), "userInfo");
+    }
+
+    public class EfpgUserInfo implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((SearchLog) et).getUserInfo();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((SearchLog) et).setUserInfo((UserInfo) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -278,120 +307,174 @@ public class SearchLogDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_8783C606_3D3E_4C1A_BC84_AE27C7A87550",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_C9A95574_1382_47A1_9C54_F71929A22BDA",
             false, null, null, null, "clickLogList,searchFieldLogList", null);
 
     protected final ColumnInfo _columnSearchWord = cci("SEARCH_WORD",
-            "SEARCH_WORD", null, null, false, "searchWord", String.class,
+            "SEARCH_WORD", null, null, String.class, "searchWord", null, false,
             false, false, "VARCHAR", 1000, 0, null, false, null, null, null,
             null, null);
 
     protected final ColumnInfo _columnRequestedTime = cci("REQUESTED_TIME",
-            "REQUESTED_TIME", null, null, true, "requestedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "REQUESTED_TIME", null, null, java.sql.Timestamp.class,
+            "requestedTime", null, false, false, true, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnResponseTime = cci("RESPONSE_TIME",
-            "RESPONSE_TIME", null, null, true, "responseTime", Integer.class,
-            false, false, "INTEGER", 10, 0, null, false, null, null, null,
-            null, null);
+            "RESPONSE_TIME", null, null, Integer.class, "responseTime", null,
+            false, false, true, "INTEGER", 10, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnHitCount = cci("HIT_COUNT", "HIT_COUNT",
-            null, null, true, "hitCount", Long.class, false, false, "BIGINT",
-            19, 0, null, false, null, null, null, null, null);
+            null, null, Long.class, "hitCount", null, false, false, true,
+            "BIGINT", 19, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnQueryOffset = cci("QUERY_OFFSET",
-            "QUERY_OFFSET", null, null, true, "queryOffset", Integer.class,
-            false, false, "INTEGER", 10, 0, null, false, null, null, null,
-            null, null);
+            "QUERY_OFFSET", null, null, Integer.class, "queryOffset", null,
+            false, false, true, "INTEGER", 10, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnQueryPageSize = cci("QUERY_PAGE_SIZE",
-            "QUERY_PAGE_SIZE", null, null, true, "queryPageSize",
-            Integer.class, false, false, "INTEGER", 10, 0, null, false, null,
+            "QUERY_PAGE_SIZE", null, null, Integer.class, "queryPageSize",
+            null, false, false, true, "INTEGER", 10, 0, null, false, null,
             null, null, null, null);
 
     protected final ColumnInfo _columnUserAgent = cci("USER_AGENT",
-            "USER_AGENT", null, null, false, "userAgent", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "USER_AGENT", null, null, String.class, "userAgent", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnReferer = cci("REFERER", "REFERER", null,
-            null, false, "referer", String.class, false, false, "VARCHAR",
-            1000, 0, null, false, null, null, null, null, null);
+            null, String.class, "referer", null, false, false, false,
+            "VARCHAR", 1000, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnClientIp = cci("CLIENT_IP", "CLIENT_IP",
-            null, null, false, "clientIp", String.class, false, false,
+            null, null, String.class, "clientIp", null, false, false, false,
             "VARCHAR", 50, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUserSessionId = cci("USER_SESSION_ID",
-            "USER_SESSION_ID", null, null, false, "userSessionId",
-            String.class, false, false, "VARCHAR", 100, 0, null, false, null,
-            null, null, null, null);
+            "USER_SESSION_ID", null, null, String.class, "userSessionId", null,
+            false, false, false, "VARCHAR", 100, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnAccessType = cci("ACCESS_TYPE",
-            "ACCESS_TYPE", null, null, true, "accessType", String.class, false,
-            false, "VARCHAR", 1, 0, null, false, null, null, null, null,
+            "ACCESS_TYPE", null, null, String.class, "accessType", null, false,
+            false, true, "VARCHAR", 1, 0, null, false, null, null, null, null,
             CDef.DefMeta.AccessType);
 
     protected final ColumnInfo _columnUserId = cci("USER_ID", "USER_ID", null,
-            null, false, "userId", Long.class, false, false, "BIGINT", 19, 0,
-            null, false, null, null, "userInfo", null, null);
+            null, Long.class, "userId", null, false, false, false, "BIGINT",
+            19, 0, null, false, null, null, "userInfo", null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * SEARCH_WORD: {IX, VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSearchWord() {
         return _columnSearchWord;
     }
 
+    /**
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRequestedTime() {
         return _columnRequestedTime;
     }
 
+    /**
+     * RESPONSE_TIME: {IX, NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnResponseTime() {
         return _columnResponseTime;
     }
 
+    /**
+     * HIT_COUNT: {IX, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnHitCount() {
         return _columnHitCount;
     }
 
+    /**
+     * QUERY_OFFSET: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnQueryOffset() {
         return _columnQueryOffset;
     }
 
+    /**
+     * QUERY_PAGE_SIZE: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnQueryPageSize() {
         return _columnQueryPageSize;
     }
 
+    /**
+     * USER_AGENT: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUserAgent() {
         return _columnUserAgent;
     }
 
+    /**
+     * REFERER: {VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnReferer() {
         return _columnReferer;
     }
 
+    /**
+     * CLIENT_IP: {VARCHAR(50)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnClientIp() {
         return _columnClientIp;
     }
 
+    /**
+     * USER_SESSION_ID: {VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUserSessionId() {
         return _columnUserSessionId;
     }
 
+    /**
+     * ACCESS_TYPE: {NotNull, VARCHAR(1), classification=AccessType}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnAccessType() {
         return _columnAccessType;
     }
 
+    /**
+     * USER_ID: {IX, BIGINT(19), FK to USER_INFO}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUserId() {
         return _columnUserId;
     }
@@ -443,32 +526,46 @@ public class SearchLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * USER_INFO by my USER_ID, named 'userInfo'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignUserInfo() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
-                columnUserId(), UserInfoDbm.getInstance().columnId());
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnUserId(),
+                UserInfoDbm.getInstance().columnId());
         return cfi("CONSTRAINT_F2A", "userInfo", this,
-                UserInfoDbm.getInstance(), map, 0, false, false, false, false,
-                null, null, false, "searchLogList");
+                UserInfoDbm.getInstance(), mp, 0, null, false, false, false,
+                false, null, null, false, "searchLogList");
     }
 
     // -----------------------------------------------------
     //                                     Referrer Property
     //                                     -----------------
+    /**
+     * CLICK_LOG by SEARCH_ID, named 'clickLogList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerClickLogList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 ClickLogDbm.getInstance().columnSearchId());
         return cri("CONSTRAINT_310", "clickLogList", this,
-                ClickLogDbm.getInstance(), map, false, "searchLog");
+                ClickLogDbm.getInstance(), mp, false, "searchLog");
     }
 
+    /**
+     * SEARCH_FIELD_LOG by SEARCH_ID, named 'searchFieldLogList'.
+     * @return The information object of referrer property. (NotNull)
+     */
     public ReferrerInfo referrerSearchFieldLogList() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(columnId(),
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(columnId(),
                 SearchFieldLogDbm.getInstance().columnSearchId());
         return cri("CONSTRAINT_96", "searchFieldLogList", this,
-                SearchFieldLogDbm.getInstance(), map, false, "searchLog");
+                SearchFieldLogDbm.getInstance(), mp, false, "searchLog");
     }
 
     // ===================================================================================
@@ -509,8 +606,8 @@ public class SearchLogDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public SearchLog newEntity() {
+        return new SearchLog();
     }
 
     public SearchLog newMyEntity() {
@@ -521,24 +618,24 @@ public class SearchLogDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((SearchLog) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((SearchLog) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((SearchLog) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((SearchLog) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

@@ -27,6 +27,8 @@ import jp.sf.fess.db.cbean.cq.WebConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.ciq.RoleTypeCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -45,10 +47,10 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsRoleTypeCQ(final ConditionQuery childQuery,
+    public BsRoleTypeCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -58,7 +60,7 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from ROLE_TYPE) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -85,7 +87,7 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join ROLE_TYPE on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -103,7 +105,6 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -118,564 +119,310 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
         return getId();
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_ExistsReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_DataConfigToRoleTypeMappingListMap.size() + 1);
-        _id_ExistsReferrer_DataConfigToRoleTypeMappingListMap
-                .put(key, subQuery);
-        return "id_ExistsReferrer_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_DataConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_ExistsReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_FileConfigToRoleTypeMappingListMap.size() + 1);
-        _id_ExistsReferrer_FileConfigToRoleTypeMappingListMap
-                .put(key, subQuery);
-        return "id_ExistsReferrer_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_FileConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _id_ExistsReferrer_LabelTypeToRoleTypeMappingListMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getId_ExistsReferrer_LabelTypeToRoleTypeMappingList() {
-        return _id_ExistsReferrer_LabelTypeToRoleTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_LabelTypeToRoleTypeMappingList(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_LabelTypeToRoleTypeMappingListMap == null) {
-            _id_ExistsReferrer_LabelTypeToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_LabelTypeToRoleTypeMappingListMap.size() + 1);
-        _id_ExistsReferrer_LabelTypeToRoleTypeMappingListMap.put(key, subQuery);
-        return "id_ExistsReferrer_LabelTypeToRoleTypeMappingList." + key;
+            final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_LabelTypeToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _id_ExistsReferrer_WebConfigToRoleTypeMappingListMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getId_ExistsReferrer_WebConfigToRoleTypeMappingList() {
-        return _id_ExistsReferrer_WebConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_ExistsReferrer_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_ExistsReferrer_WebConfigToRoleTypeMappingList(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_ExistsReferrer_WebConfigToRoleTypeMappingListMap == null) {
-            _id_ExistsReferrer_WebConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_ExistsReferrer_WebConfigToRoleTypeMappingListMap.size() + 1);
-        _id_ExistsReferrer_WebConfigToRoleTypeMappingListMap.put(key, subQuery);
-        return "id_ExistsReferrer_WebConfigToRoleTypeMappingList." + key;
+            final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_ExistsReferrer_WebConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_NotExistsReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotExistsReferrer_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_NotExistsReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotExistsReferrer_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _id_NotExistsReferrer_LabelTypeToRoleTypeMappingListMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getId_NotExistsReferrer_LabelTypeToRoleTypeMappingList() {
-        return _id_NotExistsReferrer_LabelTypeToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_LabelTypeToRoleTypeMappingList(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_LabelTypeToRoleTypeMappingListMap == null) {
-            _id_NotExistsReferrer_LabelTypeToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_LabelTypeToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_LabelTypeToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_LabelTypeToRoleTypeMappingList." + key;
+            final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_NotExistsReferrer_LabelTypeToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getId_NotExistsReferrer_WebConfigToRoleTypeMappingList() {
-        return _id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotExistsReferrer_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotExistsReferrer_WebConfigToRoleTypeMappingList(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap == null) {
-            _id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotExistsReferrer_WebConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotExistsReferrer_WebConfigToRoleTypeMappingList." + key;
+            final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_NotExistsReferrer_WebConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList."
-                + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList."
-                + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingListMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getId_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList."
-                + key;
+            final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingListMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getId_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingList() {
-        return _id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingList(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingListMap == null) {
-            _id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingList."
-                + key;
+            final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_SpecifyDerivedReferrer_WebConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_InScopeRelation_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_InScopeRelation_DataConfigToRoleTypeMappingList() {
-        return _id_InScopeRelation_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_DataConfigToRoleTypeMappingListMap == null) {
-            _id_InScopeRelation_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_DataConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_InScopeRelation_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_InScopeRelation_FileConfigToRoleTypeMappingList() {
-        return _id_InScopeRelation_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_FileConfigToRoleTypeMappingListMap == null) {
-            _id_InScopeRelation_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_InScopeRelation_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_InScopeRelation_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_FileConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _id_InScopeRelation_LabelTypeToRoleTypeMappingListMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getId_InScopeRelation_LabelTypeToRoleTypeMappingList() {
-        return _id_InScopeRelation_LabelTypeToRoleTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_LabelTypeToRoleTypeMappingList(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_LabelTypeToRoleTypeMappingListMap == null) {
-            _id_InScopeRelation_LabelTypeToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_LabelTypeToRoleTypeMappingListMap.size() + 1);
-        _id_InScopeRelation_LabelTypeToRoleTypeMappingListMap
-                .put(key, subQuery);
-        return "id_InScopeRelation_LabelTypeToRoleTypeMappingList." + key;
+            final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_LabelTypeToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _id_InScopeRelation_WebConfigToRoleTypeMappingListMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getId_InScopeRelation_WebConfigToRoleTypeMappingList() {
-        return _id_InScopeRelation_WebConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_InScopeRelation_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_InScopeRelation_WebConfigToRoleTypeMappingList(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_InScopeRelation_WebConfigToRoleTypeMappingListMap == null) {
-            _id_InScopeRelation_WebConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_InScopeRelation_WebConfigToRoleTypeMappingListMap.size() + 1);
-        _id_InScopeRelation_WebConfigToRoleTypeMappingListMap
-                .put(key, subQuery);
-        return "id_InScopeRelation_WebConfigToRoleTypeMappingList." + key;
+            final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("id_InScopeRelation_WebConfigToRoleTypeMappingList",
+                sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_NotInScopeRelation_DataConfigToRoleTypeMappingList() {
-        return _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap == null) {
-            _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_NotInScopeRelation_FileConfigToRoleTypeMappingList() {
-        return _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap == null) {
-            _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _id_NotInScopeRelation_LabelTypeToRoleTypeMappingListMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getId_NotInScopeRelation_LabelTypeToRoleTypeMappingList() {
-        return _id_NotInScopeRelation_LabelTypeToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_LabelTypeToRoleTypeMappingList(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_LabelTypeToRoleTypeMappingListMap == null) {
-            _id_NotInScopeRelation_LabelTypeToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_LabelTypeToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_LabelTypeToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_LabelTypeToRoleTypeMappingList." + key;
+            final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_LabelTypeToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getId_NotInScopeRelation_WebConfigToRoleTypeMappingList() {
-        return _id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_NotInScopeRelation_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_NotInScopeRelation_WebConfigToRoleTypeMappingList(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap == null) {
-            _id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_NotInScopeRelation_WebConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_NotInScopeRelation_WebConfigToRoleTypeMappingList." + key;
+            final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_NotInScopeRelation_WebConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, DataConfigToRoleTypeMappingCQ> _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap;
-
     public Map<String, DataConfigToRoleTypeMappingCQ> getId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList() {
-        return _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList(
-            final DataConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList." + key;
+            final DataConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_DataConfigToRoleTypeMappingList", pm);
     }
 
-    protected Map<String, FileConfigToRoleTypeMappingCQ> _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap;
-
     public Map<String, FileConfigToRoleTypeMappingCQ> getId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList() {
-        return _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingList(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList." + key;
+            final FileConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_FileConfigToRoleTypeMappingList", pm);
     }
 
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList() {
-        return _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList." + key;
+            final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList", pm);
     }
 
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getId_QueryDerivedReferrer_WebConfigToRoleTypeMappingList() {
-        return _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListMap;
+        return xgetSQueMap("id_QueryDerivedReferrer_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_WebConfigToRoleTypeMappingList(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListMap == null) {
-            _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListMap.put(key,
-                subQuery);
-        return "id_QueryDerivedReferrer_WebConfigToRoleTypeMappingList." + key;
+            final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue(
+                "id_QueryDerivedReferrer_WebConfigToRoleTypeMappingList", sq);
     }
 
-    protected Map<String, Object> _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameterMap;
-
     public Map<String, Object> getId_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameter() {
-        return _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameterMap;
+        return xgetSQuePmMap("id_QueryDerivedReferrer_WebConfigToRoleTypeMappingList");
     }
 
     @Override
     public String keepId_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameter(
-            final Object parameterValue) {
-        if (_id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameterMap == null) {
-            _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameterMap
-                        .size() + 1);
-        _id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameterMap
-                .put(key, parameterValue);
-        return "id_QueryDerivedReferrer_WebConfigToRoleTypeMappingListParameter."
-                + key;
+            final Object pm) {
+        return xkeepSQuePm(
+                "id_QueryDerivedReferrer_WebConfigToRoleTypeMappingList", pm);
     }
 
     /**
@@ -1048,9 +795,9 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -1067,9 +814,9 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -1083,9 +830,8 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
     }
 
     // ===================================================================================
@@ -1100,74 +846,43 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, RoleTypeCQ> _scalarConditionMap;
-
     public Map<String, RoleTypeCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final RoleTypeCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final RoleTypeCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, RoleTypeCQ> _specifyMyselfDerivedMap;
-
     public Map<String, RoleTypeCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final RoleTypeCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final RoleTypeCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, RoleTypeCQ> _queryMyselfDerivedMap;
 
     public Map<String, RoleTypeCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final RoleTypeCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final RoleTypeCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -1176,36 +891,24 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
     protected Map<String, RoleTypeCQ> _myselfExistsMap;
 
     public Map<String, RoleTypeCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final RoleTypeCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final RoleTypeCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, RoleTypeCQ> _myselfInScopeMap;
-
     public Map<String, RoleTypeCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final RoleTypeCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final RoleTypeCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -1218,6 +921,14 @@ public class BsRoleTypeCQ extends AbstractBsRoleTypeCQ {
 
     protected String xCQ() {
         return RoleTypeCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

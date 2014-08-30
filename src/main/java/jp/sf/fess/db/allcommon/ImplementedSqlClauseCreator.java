@@ -92,7 +92,7 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
             sqlClause = createSqlClauseSqlite(tableDbName);
         } else if (isCurrentDBDef(DBDef.MSAccess)) {
             sqlClause = createSqlClauseMsAccess(tableDbName);
-        } else if (isCurrentDBDef(DBDef.FireBird)) {
+        } else if (isCurrentDBDef(DBDef.Firebird)) {
             sqlClause = createSqlClauseFirebird(tableDbName);
         } else if (isCurrentDBDef(DBDef.Sybase)) {
             sqlClause = createSqlClauseSybase(tableDbName);
@@ -177,6 +177,9 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
         if (isInnerJoinAutoDetect()) {
             sqlClause.allowInnerJoinAutoDetect();
         }
+        if (isThatsBadTimingDetect()) {
+            sqlClause.allowThatsBadTimingDetect();
+        }
         if (isEmptyStringQueryAllowed()) {
             sqlClause.allowEmptyStringQuery();
         }
@@ -197,6 +200,10 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
 
     protected boolean isInnerJoinAutoDetect() {
         return DBFluteConfig.getInstance().isInnerJoinAutoDetect();
+    }
+
+    protected boolean isThatsBadTimingDetect() {
+        return DBFluteConfig.getInstance().isThatsBadTimingDetect();
     }
 
     protected boolean isEmptyStringQueryAllowed() {

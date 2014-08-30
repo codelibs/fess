@@ -27,6 +27,7 @@ import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.JobHelper;
+import jp.sf.fess.helper.KeyMatchHelper;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.MailHelper;
 import jp.sf.fess.helper.OverlappingHostHelper;
@@ -107,6 +108,8 @@ public final class ComponentUtil {
     private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
 
     private static final String SEARCH_SERVICE = "searchService";
+
+    private static final String KEY_MATCH_HELPER = "keyMatchHelper";
 
     private ComponentUtil() {
     }
@@ -234,6 +237,9 @@ public final class ComponentUtil {
 
     public static SearchService getSearchService() {
         return SingletonS2Container.getComponent(SEARCH_SERVICE);
+    }
 
+    public static KeyMatchHelper getKeyMatchHelper() {
+        return SingletonS2Container.getComponent(KEY_MATCH_HELPER);
     }
 }

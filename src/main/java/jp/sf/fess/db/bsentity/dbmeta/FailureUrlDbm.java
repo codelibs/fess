@@ -60,6 +60,9 @@ public class FailureUrlDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -72,105 +75,105 @@ public class FailureUrlDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgConfigId(), "configId");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getId();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setId(ctl(vl));
         }
     }
 
     public static class EpgUrl implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getUrl();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getUrl();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setUrl((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setUrl((String) vl);
         }
     }
 
     public static class EpgThreadName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getThreadName();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getThreadName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setThreadName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setThreadName((String) vl);
         }
     }
 
     public static class EpgErrorName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getErrorName();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getErrorName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setErrorName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setErrorName((String) vl);
         }
     }
 
     public static class EpgErrorLog implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getErrorLog();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getErrorLog();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setErrorLog((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setErrorLog((String) vl);
         }
     }
 
     public static class EpgErrorCount implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getErrorCount();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getErrorCount();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setErrorCount(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setErrorCount(cti(vl));
         }
     }
 
     public static class EpgLastAccessTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getLastAccessTime();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getLastAccessTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setLastAccessTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setLastAccessTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgConfigId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FailureUrl) e).getConfigId();
+        public Object read(final Entity et) {
+            return ((FailureUrl) et).getConfigId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FailureUrl) e).setConfigId((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((FailureUrl) et).setConfigId((String) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -210,75 +213,110 @@ public class FailureUrlDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_F3B5964C_EF15_4271_B6D8_04FC76FA7212",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_4FF7C61F_EA19_46A8_AD20_9C681D07CA6A",
             false, null, null, null, null, null);
 
-    protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null, true,
-            "url", String.class, false, false, "VARCHAR", 4000, 0, null, false,
-            null, null, null, null, null);
+    protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null,
+            String.class, "url", null, false, false, true, "VARCHAR", 4000, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnThreadName = cci("THREAD_NAME",
-            "THREAD_NAME", null, null, true, "threadName", String.class, false,
-            false, "VARCHAR", 30, 0, null, false, null, null, null, null, null);
+            "THREAD_NAME", null, null, String.class, "threadName", null, false,
+            false, true, "VARCHAR", 30, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnErrorName = cci("ERROR_NAME",
-            "ERROR_NAME", null, null, false, "errorName", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "ERROR_NAME", null, null, String.class, "errorName", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnErrorLog = cci("ERROR_LOG", "ERROR_LOG",
-            null, null, false, "errorLog", String.class, false, false,
+            null, null, String.class, "errorLog", null, false, false, false,
             "VARCHAR", 4000, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnErrorCount = cci("ERROR_COUNT",
-            "ERROR_COUNT", null, null, true, "errorCount", Integer.class,
-            false, false, "INTEGER", 10, 0, null, false, null, null, null,
-            null, null);
+            "ERROR_COUNT", null, null, Integer.class, "errorCount", null,
+            false, false, true, "INTEGER", 10, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnLastAccessTime = cci("LAST_ACCESS_TIME",
-            "LAST_ACCESS_TIME", null, null, true, "lastAccessTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "LAST_ACCESS_TIME", null, null, java.sql.Timestamp.class,
+            "lastAccessTime", null, false, false, true, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnConfigId = cci("CONFIG_ID", "CONFIG_ID",
-            null, null, false, "configId", String.class, false, false,
+            null, null, String.class, "configId", null, false, false, false,
             "VARCHAR", 100, 0, null, false, null, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * URL: {IX+, NotNull, VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUrl() {
         return _columnUrl;
     }
 
+    /**
+     * THREAD_NAME: {NotNull, VARCHAR(30)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnThreadName() {
         return _columnThreadName;
     }
 
+    /**
+     * ERROR_NAME: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnErrorName() {
         return _columnErrorName;
     }
 
+    /**
+     * ERROR_LOG: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnErrorLog() {
         return _columnErrorLog;
     }
 
+    /**
+     * ERROR_COUNT: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnErrorCount() {
         return _columnErrorCount;
     }
 
+    /**
+     * LAST_ACCESS_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnLastAccessTime() {
         return _columnLastAccessTime;
     }
 
+    /**
+     * CONFIG_ID: {IX, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnConfigId() {
         return _columnConfigId;
     }
@@ -325,6 +363,8 @@ public class FailureUrlDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -371,8 +411,8 @@ public class FailureUrlDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FailureUrl newEntity() {
+        return new FailureUrl();
     }
 
     public FailureUrl newMyEntity() {
@@ -383,24 +423,24 @@ public class FailureUrlDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((FailureUrl) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((FailureUrl) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((FailureUrl) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((FailureUrl) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

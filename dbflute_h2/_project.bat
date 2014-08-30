@@ -2,7 +2,7 @@
 
 set ANT_OPTS=-Xmx512m
 
-set DBFLUTE_HOME=..\mydbflute\dbflute-1.0.4K
+set DBFLUTE_HOME=..\mydbflute\dbflute-1.0.5J
 
 set MY_PROJECT_NAME=h2
 

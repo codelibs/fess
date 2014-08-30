@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd `dirname $0`
-. _project.sh
+. ./_project.sh
 
 echo "/nnnnnnnnnnnnnnnnnnnnnnnnnnn"
 echo "...Calling the Generate task"

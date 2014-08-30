@@ -17,6 +17,8 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
@@ -30,7 +32,9 @@ import jp.sf.fess.db.cbean.cq.SearchLogCQ;
 import jp.sf.fess.db.cbean.cq.UserInfoCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
 import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
@@ -55,10 +59,10 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsSearchLogCQ(final ConditionQuery childQuery,
+    public AbstractBsSearchLogCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -184,12 +188,12 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     }
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select SEARCH_ID from CLICK_LOG where ...)} <br />
      * CLICK_LOG by SEARCH_ID, named 'clickLogAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsClickLogList</span>(new SubQuery&lt;ClickLogCB&gt;() {
-     *     public void query(SearchLogCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsClickLogList</span>(new SubQuery&lt;ClickLogCB&gt;() {
+     *     public void query(ClickLogCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -197,26 +201,29 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @param subQuery The sub-query of ClickLogList for 'exists'. (NotNull)
      */
     public void existsClickLogList(final SubQuery<ClickLogCB> subQuery) {
-        assertObjectNotNull("subQuery<ClickLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final ClickLogCB cb = new ClickLogCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_ClickLogList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "clickLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_ClickLogList(cb.query());
+        registerExistsReferrer(cb.query(), "ID", "SEARCH_ID", pp,
+                "clickLogList");
     }
 
-    public abstract String keepId_ExistsReferrer_ClickLogList(
-            ClickLogCQ subQuery);
+    public abstract String keepId_ExistsReferrer_ClickLogList(ClickLogCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select SEARCH_ID from SEARCH_FIELD_LOG where ...)} <br />
      * SEARCH_FIELD_LOG by SEARCH_ID, named 'searchFieldLogAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsSearchFieldLogList</span>(new SubQuery&lt;SearchFieldLogCB&gt;() {
-     *     public void query(SearchLogCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsSearchFieldLogList</span>(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     *     public void query(SearchFieldLogCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -225,26 +232,30 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      */
     public void existsSearchFieldLogList(
             final SubQuery<SearchFieldLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_SearchFieldLogList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "searchFieldLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_SearchFieldLogList(cb.query());
+        registerExistsReferrer(cb.query(), "ID", "SEARCH_ID", pp,
+                "searchFieldLogList");
     }
 
     public abstract String keepId_ExistsReferrer_SearchFieldLogList(
-            SearchFieldLogCQ subQuery);
+            SearchFieldLogCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select SEARCH_ID from CLICK_LOG where ...)} <br />
      * CLICK_LOG by SEARCH_ID, named 'clickLogAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsClickLogList</span>(new SubQuery&lt;ClickLogCB&gt;() {
-     *     public void query(SearchLogCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsClickLogList</span>(new SubQuery&lt;ClickLogCB&gt;() {
+     *     public void query(ClickLogCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -252,26 +263,29 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @param subQuery The sub-query of Id_NotExistsReferrer_ClickLogList for 'not exists'. (NotNull)
      */
     public void notExistsClickLogList(final SubQuery<ClickLogCB> subQuery) {
-        assertObjectNotNull("subQuery<ClickLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final ClickLogCB cb = new ClickLogCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_ClickLogList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "clickLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_ClickLogList(cb.query());
+        registerNotExistsReferrer(cb.query(), "ID", "SEARCH_ID", pp,
+                "clickLogList");
     }
 
-    public abstract String keepId_NotExistsReferrer_ClickLogList(
-            ClickLogCQ subQuery);
+    public abstract String keepId_NotExistsReferrer_ClickLogList(ClickLogCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select SEARCH_ID from SEARCH_FIELD_LOG where ...)} <br />
      * SEARCH_FIELD_LOG by SEARCH_ID, named 'searchFieldLogAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsSearchFieldLogList</span>(new SubQuery&lt;SearchFieldLogCB&gt;() {
-     *     public void query(SearchLogCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsSearchFieldLogList</span>(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     *     public void query(SearchFieldLogCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -280,18 +294,23 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      */
     public void notExistsSearchFieldLogList(
             final SubQuery<SearchFieldLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_SearchFieldLogList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "searchFieldLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_SearchFieldLogList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "SEARCH_ID", pp,
+                "searchFieldLogList");
     }
 
     public abstract String keepId_NotExistsReferrer_SearchFieldLogList(
-            SearchFieldLogCQ subQuery);
+            SearchFieldLogCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -300,18 +319,21 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @param subQuery The sub-query of ClickLogList for 'in-scope'. (NotNull)
      */
     public void inScopeClickLogList(final SubQuery<ClickLogCB> subQuery) {
-        assertObjectNotNull("subQuery<ClickLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final ClickLogCB cb = new ClickLogCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_ClickLogList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "clickLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_ClickLogList(cb.query());
+        registerInScopeRelation(cb.query(), "ID", "SEARCH_ID", pp,
+                "clickLogList");
     }
 
-    public abstract String keepId_InScopeRelation_ClickLogList(
-            ClickLogCQ subQuery);
+    public abstract String keepId_InScopeRelation_ClickLogList(ClickLogCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -321,18 +343,22 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      */
     public void inScopeSearchFieldLogList(
             final SubQuery<SearchFieldLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_SearchFieldLogList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "searchFieldLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_SearchFieldLogList(cb.query());
+        registerInScopeRelation(cb.query(), "ID", "SEARCH_ID", pp,
+                "searchFieldLogList");
     }
 
     public abstract String keepId_InScopeRelation_SearchFieldLogList(
-            SearchFieldLogCQ subQuery);
+            SearchFieldLogCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -341,18 +367,21 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @param subQuery The sub-query of ClickLogList for 'not in-scope'. (NotNull)
      */
     public void notInScopeClickLogList(final SubQuery<ClickLogCB> subQuery) {
-        assertObjectNotNull("subQuery<ClickLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final ClickLogCB cb = new ClickLogCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_ClickLogList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "clickLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_ClickLogList(cb.query());
+        registerNotInScopeRelation(cb.query(), "ID", "SEARCH_ID", pp,
+                "clickLogList");
     }
 
-    public abstract String keepId_NotInScopeRelation_ClickLogList(
-            ClickLogCQ subQuery);
+    public abstract String keepId_NotInScopeRelation_ClickLogList(ClickLogCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -362,62 +391,76 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      */
     public void notInScopeSearchFieldLogList(
             final SubQuery<SearchFieldLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_SearchFieldLogList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "searchFieldLogList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_SearchFieldLogList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "SEARCH_ID", pp,
+                "searchFieldLogList");
     }
 
     public abstract String keepId_NotInScopeRelation_SearchFieldLogList(
-            SearchFieldLogCQ subQuery);
+            SearchFieldLogCQ sq);
 
-    public void xsderiveClickLogList(final String function,
-            final SubQuery<ClickLogCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<ClickLogCB>", subQuery);
+    public void xsderiveClickLogList(final String fn,
+            final SubQuery<ClickLogCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final ClickLogCB cb = new ClickLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_ClickLogList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "clickLogList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_ClickLogList(cb.query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "SEARCH_ID", pp,
+                "clickLogList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_ClickLogList(
-            ClickLogCQ subQuery);
+            ClickLogCQ sq);
 
-    public void xsderiveSearchFieldLogList(final String function,
-            final SubQuery<SearchFieldLogCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+    public void xsderiveSearchFieldLogList(final String fn,
+            final SubQuery<SearchFieldLogCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_SearchFieldLogList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "searchFieldLogList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_SearchFieldLogList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "SEARCH_ID", pp,
+                "searchFieldLogList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_SearchFieldLogList(
-            SearchFieldLogCQ subQuery);
+            SearchFieldLogCQ sq);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from CLICK_LOG where ...)} <br />
      * CLICK_LOG by SEARCH_ID, named 'clickLogAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedClickLogList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;ClickLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedClickLogList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;ClickLogCB&gt;() {
      *     public void query(ClickLogCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -428,46 +471,49 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     protected HpQDRFunction<ClickLogCB> xcreateQDRFunctionClickLogList() {
         return new HpQDRFunction<ClickLogCB>(new HpQDRSetupper<ClickLogCB>() {
             @Override
-            public void setup(final String function,
-                    final SubQuery<ClickLogCB> subQuery, final String operand,
-                    final Object value, final DerivedReferrerOption option) {
-                xqderiveClickLogList(function, subQuery, operand, value, option);
+            public void setup(final String fn, final SubQuery<ClickLogCB> sq,
+                    final String rd, final Object vl,
+                    final DerivedReferrerOption op) {
+                xqderiveClickLogList(fn, sq, rd, vl, op);
             }
         });
     }
 
-    public void xqderiveClickLogList(final String function,
-            final SubQuery<ClickLogCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<ClickLogCB>", subQuery);
+    public void xqderiveClickLogList(final String fn,
+            final SubQuery<ClickLogCB> sq, final String rd, final Object vl,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final ClickLogCB cb = new ClickLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_ClickLogList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_ClickLogListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "clickLogList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_ClickLogList(cb.query());
+        final String prpp = keepId_QueryDerivedReferrer_ClickLogListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "SEARCH_ID", sqpp,
+                "clickLogList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_ClickLogList(
-            ClickLogCQ subQuery);
+            ClickLogCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_ClickLogListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from SEARCH_FIELD_LOG where ...)} <br />
      * SEARCH_FIELD_LOG by SEARCH_ID, named 'searchFieldLogAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedSearchFieldLogList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedSearchFieldLogList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -479,36 +525,39 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         return new HpQDRFunction<SearchFieldLogCB>(
                 new HpQDRSetupper<SearchFieldLogCB>() {
                     @Override
-                    public void setup(final String function,
-                            final SubQuery<SearchFieldLogCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveSearchFieldLogList(function, subQuery, operand,
-                                value, option);
+                    public void setup(final String fn,
+                            final SubQuery<SearchFieldLogCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveSearchFieldLogList(fn, sq, rd, vl, op);
                     }
                 });
     }
 
-    public void xqderiveSearchFieldLogList(final String function,
-            final SubQuery<SearchFieldLogCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+    public void xqderiveSearchFieldLogList(final String fn,
+            final SubQuery<SearchFieldLogCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_SearchFieldLogList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_SearchFieldLogListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID", "SEARCH_ID",
-                subQueryPropertyName, "searchFieldLogList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_SearchFieldLogList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_SearchFieldLogListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "SEARCH_ID", sqpp,
+                "searchFieldLogList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_SearchFieldLogList(
-            SearchFieldLogCQ subQuery);
+            SearchFieldLogCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_SearchFieldLogListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
@@ -526,11 +575,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -635,7 +684,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * SEARCH_WORD: {IX, VARCHAR(1000)} <br />
-     * <pre>e.g. setSearchWord_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setSearchWord_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param searchWord The value of searchWord as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -682,15 +731,15 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regSearchWord(CK_ISNN, DOBJ);
     }
 
-    protected void regSearchWord(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueSearchWord(), "SEARCH_WORD");
+    protected void regSearchWord(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueSearchWord(), "SEARCH_WORD");
     }
 
-    abstract protected ConditionValue getCValueSearchWord();
+    protected abstract ConditionValue getCValueSearchWord();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @param requestedTime The value of requestedTime as equal. (NullAllowed: if null, no condition)
      */
     public void setRequestedTime_Equal(final java.sql.Timestamp requestedTime) {
@@ -699,7 +748,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * GreaterThan(&gt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @param requestedTime The value of requestedTime as greaterThan. (NullAllowed: if null, no condition)
      */
     public void setRequestedTime_GreaterThan(
@@ -709,7 +758,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * LessThan(&lt;). And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @param requestedTime The value of requestedTime as lessThan. (NullAllowed: if null, no condition)
      */
     public void setRequestedTime_LessThan(final java.sql.Timestamp requestedTime) {
@@ -718,7 +767,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * GreaterEqual(&gt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @param requestedTime The value of requestedTime as greaterEqual. (NullAllowed: if null, no condition)
      */
     public void setRequestedTime_GreaterEqual(
@@ -728,7 +777,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * LessEqual(&lt;=). And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * @param requestedTime The value of requestedTime as lessEqual. (NullAllowed: if null, no condition)
      */
     public void setRequestedTime_LessEqual(
@@ -739,14 +788,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
-     * <pre>e.g. setRequestedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
+     * <pre>e.g. setRequestedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of requestedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of requestedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setRequestedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setRequestedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -757,25 +806,25 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * DateFromTo. (Date means yyyy/MM/dd) {fromDate &lt;= column &lt; toDate + 1 day} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
-     * REQUESTED_TIME: {IX, NotNull, TIMESTAMP(23, 10)}
+     * REQUESTED_TIME: {IX+, NotNull, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of requestedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of requestedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setRequestedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setRequestedTime_DateFromTo(final Date fromDate,
+            final Date toDate) {
         setRequestedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
 
-    protected void regRequestedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueRequestedTime(), "REQUESTED_TIME");
+    protected void regRequestedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueRequestedTime(), "REQUESTED_TIME");
     }
 
-    abstract protected ConditionValue getCValueRequestedTime();
+    protected abstract ConditionValue getCValueRequestedTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -886,11 +935,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
                 "RESPONSE_TIME");
     }
 
-    protected void regResponseTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueResponseTime(), "RESPONSE_TIME");
+    protected void regResponseTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueResponseTime(), "RESPONSE_TIME");
     }
 
-    abstract protected ConditionValue getCValueResponseTime();
+    protected abstract ConditionValue getCValueResponseTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -995,11 +1044,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regINS(CK_NINS, cTL(hitCountList), getCValueHitCount(), "HIT_COUNT");
     }
 
-    protected void regHitCount(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueHitCount(), "HIT_COUNT");
+    protected void regHitCount(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueHitCount(), "HIT_COUNT");
     }
 
-    abstract protected ConditionValue getCValueHitCount();
+    protected abstract ConditionValue getCValueHitCount();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1109,11 +1158,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
                 "QUERY_OFFSET");
     }
 
-    protected void regQueryOffset(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueQueryOffset(), "QUERY_OFFSET");
+    protected void regQueryOffset(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueQueryOffset(), "QUERY_OFFSET");
     }
 
-    abstract protected ConditionValue getCValueQueryOffset();
+    protected abstract ConditionValue getCValueQueryOffset();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1224,11 +1273,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
                 "QUERY_PAGE_SIZE");
     }
 
-    protected void regQueryPageSize(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueQueryPageSize(), "QUERY_PAGE_SIZE");
+    protected void regQueryPageSize(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueQueryPageSize(), "QUERY_PAGE_SIZE");
     }
 
-    abstract protected ConditionValue getCValueQueryPageSize();
+    protected abstract ConditionValue getCValueQueryPageSize();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1330,7 +1379,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * USER_AGENT: {VARCHAR(255)} <br />
-     * <pre>e.g. setUserAgent_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUserAgent_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param userAgent The value of userAgent as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1377,11 +1426,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regUserAgent(CK_ISNN, DOBJ);
     }
 
-    protected void regUserAgent(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUserAgent(), "USER_AGENT");
+    protected void regUserAgent(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUserAgent(), "USER_AGENT");
     }
 
-    abstract protected ConditionValue getCValueUserAgent();
+    protected abstract ConditionValue getCValueUserAgent();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1483,7 +1532,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * REFERER: {VARCHAR(1000)} <br />
-     * <pre>e.g. setReferer_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setReferer_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param referer The value of referer as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1530,11 +1579,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regReferer(CK_ISNN, DOBJ);
     }
 
-    protected void regReferer(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueReferer(), "REFERER");
+    protected void regReferer(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueReferer(), "REFERER");
     }
 
-    abstract protected ConditionValue getCValueReferer();
+    protected abstract ConditionValue getCValueReferer();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1636,7 +1685,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CLIENT_IP: {VARCHAR(50)} <br />
-     * <pre>e.g. setClientIp_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setClientIp_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param clientIp The value of clientIp as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1683,15 +1732,15 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regClientIp(CK_ISNN, DOBJ);
     }
 
-    protected void regClientIp(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueClientIp(), "CLIENT_IP");
+    protected void regClientIp(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueClientIp(), "CLIENT_IP");
     }
 
-    abstract protected ConditionValue getCValueClientIp();
+    protected abstract ConditionValue getCValueClientIp();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as equal. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_Equal(final String userSessionId) {
@@ -1704,7 +1753,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * NotEqual(&lt;&gt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as notEqual. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_NotEqual(final String userSessionId) {
@@ -1717,7 +1766,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * GreaterThan(&gt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as greaterThan. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_GreaterThan(final String userSessionId) {
@@ -1726,7 +1775,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * LessThan(&lt;). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as lessThan. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_LessThan(final String userSessionId) {
@@ -1735,7 +1784,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * GreaterEqual(&gt;=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as greaterEqual. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_GreaterEqual(final String userSessionId) {
@@ -1744,7 +1793,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * LessEqual(&lt;=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as lessEqual. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_LessEqual(final String userSessionId) {
@@ -1753,7 +1802,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * InScope {in ('a', 'b')}. And NullOrEmptyIgnored, NullOrEmptyElementIgnored, SeveralRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionIdList The collection of userSessionId as inScope. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_InScope(
@@ -1769,7 +1818,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * NotInScope {not in ('a', 'b')}. And NullOrEmptyIgnored, NullOrEmptyElementIgnored, SeveralRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionIdList The collection of userSessionId as notInScope. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_NotInScope(
@@ -1785,7 +1834,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * PrefixSearch {like 'xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as prefixSearch. (NullAllowed: if null (or empty), no condition)
      */
     public void setUserSessionId_PrefixSearch(final String userSessionId) {
@@ -1794,8 +1843,8 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)} <br />
-     * <pre>e.g. setUserSessionId_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * USER_SESSION_ID: {VARCHAR(100)} <br />
+     * <pre>e.g. setUserSessionId_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param userSessionId The value of userSessionId as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1808,7 +1857,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     /**
      * NotLikeSearch with various options. (versatile) {not like 'xxx%' escape ...} <br />
      * And NullOrEmptyIgnored, SeveralRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      * @param userSessionId The value of userSessionId as notLikeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of not-like-search. (NotNull)
      */
@@ -1820,7 +1869,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      */
     public void setUserSessionId_IsNull() {
         regUserSessionId(CK_ISN, DOBJ);
@@ -1828,7 +1877,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * IsNullOrEmpty {is null or empty}. And OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      */
     public void setUserSessionId_IsNullOrEmpty() {
         regUserSessionId(CK_ISNOE, DOBJ);
@@ -1836,17 +1885,17 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
 
     /**
      * IsNotNull {is not null}. And OnlyOnceRegistered. <br />
-     * USER_SESSION_ID: {IX+, VARCHAR(100)}
+     * USER_SESSION_ID: {VARCHAR(100)}
      */
     public void setUserSessionId_IsNotNull() {
         regUserSessionId(CK_ISNN, DOBJ);
     }
 
-    protected void regUserSessionId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUserSessionId(), "USER_SESSION_ID");
+    protected void regUserSessionId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUserSessionId(), "USER_SESSION_ID");
     }
 
-    abstract protected ConditionValue getCValueUserSessionId();
+    protected abstract ConditionValue getCValueUserSessionId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -2009,11 +2058,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
                 "ACCESS_TYPE");
     }
 
-    protected void regAccessType(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueAccessType(), "ACCESS_TYPE");
+    protected void regAccessType(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueAccessType(), "ACCESS_TYPE");
     }
 
-    abstract protected ConditionValue getCValueAccessType();
+    protected abstract ConditionValue getCValueAccessType();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2125,18 +2174,20 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @param subQuery The sub-query of UserInfo for 'in-scope'. (NotNull)
      */
     public void inScopeUserInfo(final SubQuery<UserInfoCB> subQuery) {
-        assertObjectNotNull("subQuery<UserInfoCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final UserInfoCB cb = new UserInfoCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepUserId_InScopeRelation_UserInfo(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "USER_ID", "ID",
-                subQueryPropertyName, "userInfo");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepUserId_InScopeRelation_UserInfo(cb.query());
+        registerInScopeRelation(cb.query(), "USER_ID", "ID", pp, "userInfo");
     }
 
-    public abstract String keepUserId_InScopeRelation_UserInfo(
-            UserInfoCQ subQuery);
+    public abstract String keepUserId_InScopeRelation_UserInfo(UserInfoCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -2145,18 +2196,20 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @param subQuery The sub-query of UserInfo for 'not in-scope'. (NotNull)
      */
     public void notInScopeUserInfo(final SubQuery<UserInfoCB> subQuery) {
-        assertObjectNotNull("subQuery<UserInfoCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final UserInfoCB cb = new UserInfoCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepUserId_NotInScopeRelation_UserInfo(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "USER_ID", "ID",
-                subQueryPropertyName, "userInfo");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepUserId_NotInScopeRelation_UserInfo(cb.query());
+        registerNotInScopeRelation(cb.query(), "USER_ID", "ID", pp, "userInfo");
     }
 
-    public abstract String keepUserId_NotInScopeRelation_UserInfo(
-            UserInfoCQ subQuery);
+    public abstract String keepUserId_NotInScopeRelation_UserInfo(UserInfoCQ sq);
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
@@ -2174,11 +2227,11 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
         regUserId(CK_ISNN, DOBJ);
     }
 
-    protected void regUserId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUserId(), "USER_ID");
+    protected void regUserId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUserId(), "USER_ID");
     }
 
-    abstract protected ConditionValue getCValueUserId();
+    protected abstract ConditionValue getCValueUserId();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -2187,7 +2240,7 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
      *     public void query(SearchLogCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2197,14 +2250,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchLogCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, SearchLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
      *     public void query(SearchLogCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2214,14 +2267,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchLogCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, SearchLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
      *     public void query(SearchLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2231,14 +2284,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchLogCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, SearchLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
      *     public void query(SearchLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2248,14 +2301,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchLogCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, SearchLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
      *     public void query(SearchLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2265,14 +2318,14 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchLogCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, SearchLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;SearchLogCB&gt;() {
      *     public void query(SearchLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2282,42 +2335,31 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchLogCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, SearchLogCB.class);
     }
 
-    protected HpSSQFunction<SearchLogCB> xcreateSSQFunction(final String operand) {
-        return new HpSSQFunction<SearchLogCB>(new HpSSQSetupper<SearchLogCB>() {
-            @Override
-            public void setup(final String function,
-                    final SubQuery<SearchLogCB> subQuery,
-                    final HpSSQOption<SearchLogCB> option) {
-                xscalarCondition(function, subQuery, operand, option);
-            }
-        });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<SearchLogCB> subQuery, final String operand,
-            final HpSSQOption<SearchLogCB> option) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchLogCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(SearchLogCQ subQuery);
+    public abstract String keepScalarCondition(SearchLogCQ sq);
 
     protected SearchLogCB xcreateScalarConditionCB() {
-        final SearchLogCB cb = new SearchLogCB();
+        final SearchLogCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected SearchLogCB xcreateScalarConditionPartitionByCB() {
-        final SearchLogCB cb = new SearchLogCB();
+        final SearchLogCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -2325,102 +2367,173 @@ public abstract class AbstractBsSearchLogCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<SearchLogCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+    public void xsmyselfDerive(final String fn, final SubQuery<SearchLogCB> sq,
+            final String al, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchLogCB cb = new SearchLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(SearchLogCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(SearchLogCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<SearchLogCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(SearchLogCB.class);
     }
 
-    protected HpQDRFunction<SearchLogCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<SearchLogCB>(new HpQDRSetupper<SearchLogCB>() {
-            @Override
-            public void setup(final String function,
-                    final SubQuery<SearchLogCB> subQuery, final String operand,
-                    final Object value, final DerivedReferrerOption option) {
-                xqderiveMyselfDerived(function, subQuery, operand, value,
-                        option);
-            }
-        });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<SearchLogCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchLogCB cb = new SearchLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(SearchLogCQ subQuery);
+    public abstract String keepQueryMyselfDerived(SearchLogCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<SearchLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchLogCB cb = new SearchLogCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(SearchLogCQ subQuery);
+    public abstract String keepMyselfExists(SearchLogCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<SearchLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchLogCB cb = new SearchLogCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(SearchLogCQ subQuery);
+    public abstract String keepMyselfInScope(SearchLogCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return SearchLogCB.class.getName();
+    protected SearchLogCB newMyCB() {
+        return new SearchLogCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return SearchLogCQ.class.getName();
     }

@@ -24,6 +24,8 @@ import jp.sf.fess.db.cbean.cq.SearchLogCQ;
 import jp.sf.fess.db.cbean.cq.ciq.SearchFieldLogCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -42,10 +44,10 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsSearchFieldLogCQ(final ConditionQuery childQuery,
+    public BsSearchFieldLogCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -55,7 +57,7 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from SEARCH_FIELD_LOG) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -82,7 +84,7 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join SEARCH_FIELD_LOG on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -100,7 +102,6 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -149,40 +150,22 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
         return getSearchId();
     }
 
-    protected Map<String, SearchLogCQ> _searchId_InScopeRelation_SearchLogMap;
-
     public Map<String, SearchLogCQ> getSearchId_InScopeRelation_SearchLog() {
-        return _searchId_InScopeRelation_SearchLogMap;
+        return xgetSQueMap("searchId_InScopeRelation_SearchLog");
     }
 
     @Override
-    public String keepSearchId_InScopeRelation_SearchLog(
-            final SearchLogCQ subQuery) {
-        if (_searchId_InScopeRelation_SearchLogMap == null) {
-            _searchId_InScopeRelation_SearchLogMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_searchId_InScopeRelation_SearchLogMap.size() + 1);
-        _searchId_InScopeRelation_SearchLogMap.put(key, subQuery);
-        return "searchId_InScopeRelation_SearchLog." + key;
+    public String keepSearchId_InScopeRelation_SearchLog(final SearchLogCQ sq) {
+        return xkeepSQue("searchId_InScopeRelation_SearchLog", sq);
     }
-
-    protected Map<String, SearchLogCQ> _searchId_NotInScopeRelation_SearchLogMap;
 
     public Map<String, SearchLogCQ> getSearchId_NotInScopeRelation_SearchLog() {
-        return _searchId_NotInScopeRelation_SearchLogMap;
+        return xgetSQueMap("searchId_NotInScopeRelation_SearchLog");
     }
 
     @Override
-    public String keepSearchId_NotInScopeRelation_SearchLog(
-            final SearchLogCQ subQuery) {
-        if (_searchId_NotInScopeRelation_SearchLogMap == null) {
-            _searchId_NotInScopeRelation_SearchLogMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_searchId_NotInScopeRelation_SearchLogMap.size() + 1);
-        _searchId_NotInScopeRelation_SearchLogMap.put(key, subQuery);
-        return "searchId_NotInScopeRelation_SearchLog." + key;
+    public String keepSearchId_NotInScopeRelation_SearchLog(final SearchLogCQ sq) {
+        return xkeepSQue("searchId_NotInScopeRelation_SearchLog", sq);
     }
 
     /**
@@ -283,9 +266,9 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -303,9 +286,9 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -320,14 +303,13 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final SearchFieldLogCQ baseQuery = (SearchFieldLogCQ) baseQueryAsSuper;
-        final SearchFieldLogCQ unionQuery = (SearchFieldLogCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQuerySearchLog()) {
-            unionQuery.querySearchLog().reflectRelationOnUnionQuery(
-                    baseQuery.querySearchLog(), unionQuery.querySearchLog());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final SearchFieldLogCQ bq = (SearchFieldLogCQ) bqs;
+        final SearchFieldLogCQ uq = (SearchFieldLogCQ) uqs;
+        if (bq.hasConditionQuerySearchLog()) {
+            uq.querySearchLog().reflectRelationOnUnionQuery(
+                    bq.querySearchLog(), uq.querySearchLog());
         }
     }
 
@@ -343,37 +325,28 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
         return getConditionQuerySearchLog();
     }
 
-    protected SearchLogCQ _conditionQuerySearchLog;
-
     public SearchLogCQ getConditionQuerySearchLog() {
-        if (_conditionQuerySearchLog == null) {
-            _conditionQuerySearchLog = xcreateQuerySearchLog();
+        final String prop = "searchLog";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQuerySearchLog());
             xsetupOuterJoinSearchLog();
         }
-        return _conditionQuerySearchLog;
+        return xgetQueRlMap(prop);
     }
 
     protected SearchLogCQ xcreateQuerySearchLog() {
-        final String nrp = resolveNextRelationPath("SEARCH_FIELD_LOG",
-                "searchLog");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final SearchLogCQ cq = new SearchLogCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("searchLog");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("SEARCH_FIELD_LOG", "searchLog");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new SearchLogCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "searchLog", nrp);
     }
 
     protected void xsetupOuterJoinSearchLog() {
-        final SearchLogCQ cq = getConditionQuerySearchLog();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("SEARCH_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "searchLog");
+        xregOutJo("searchLog");
     }
 
     public boolean hasConditionQuerySearchLog() {
-        return _conditionQuerySearchLog != null;
+        return xhasQueRlMap("searchLog");
     }
 
     @Override
@@ -385,74 +358,43 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, SearchFieldLogCQ> _scalarConditionMap;
-
     public Map<String, SearchFieldLogCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final SearchFieldLogCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final SearchFieldLogCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, SearchFieldLogCQ> _specifyMyselfDerivedMap;
-
     public Map<String, SearchFieldLogCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final SearchFieldLogCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final SearchFieldLogCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, SearchFieldLogCQ> _queryMyselfDerivedMap;
 
     public Map<String, SearchFieldLogCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final SearchFieldLogCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final SearchFieldLogCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -461,36 +403,24 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
     protected Map<String, SearchFieldLogCQ> _myselfExistsMap;
 
     public Map<String, SearchFieldLogCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final SearchFieldLogCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final SearchFieldLogCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, SearchFieldLogCQ> _myselfInScopeMap;
-
     public Map<String, SearchFieldLogCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final SearchFieldLogCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final SearchFieldLogCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -503,6 +433,14 @@ public class BsSearchFieldLogCQ extends AbstractBsSearchFieldLogCQ {
 
     protected String xCQ() {
         return SearchFieldLogCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

@@ -46,31 +46,26 @@ public class DataConfigToRoleTypeMappingNss {
     /**
      * With nested relation columns to select clause. <br />
      * DATA_CRAWLING_CONFIG by my DATA_CONFIG_ID, named 'dataCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public DataCrawlingConfigNss withDataCrawlingConfig() {
+    public void withDataCrawlingConfig() {
         _query.doNss(new DataConfigToRoleTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryDataCrawlingConfig();
             }
         });
-        return new DataCrawlingConfigNss(_query.queryDataCrawlingConfig());
     }
 
     /**
      * With nested relation columns to select clause. <br />
      * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public RoleTypeNss withRoleType() {
+    public void withRoleType() {
         _query.doNss(new DataConfigToRoleTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryRoleType();
             }
         });
-        return new RoleTypeNss(_query.queryRoleType());
     }
-
 }

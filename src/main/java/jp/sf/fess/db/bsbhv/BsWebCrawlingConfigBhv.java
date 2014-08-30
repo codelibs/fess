@@ -18,16 +18,13 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfWebCrawlingConfig;
 import jp.sf.fess.db.bsentity.dbmeta.WebCrawlingConfigDbm;
 import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.RequestHeaderBhv;
-import jp.sf.fess.db.exbhv.WebAuthenticationBhv;
-import jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
-import jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebCrawlingConfigBhv;
 import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.WebAuthentication;
@@ -41,14 +38,28 @@ import org.seasar.dbflute.bhv.ConditionBeanSetupper;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.LoadReferrerOption;
+import org.seasar.dbflute.bhv.NestedReferrerListGateway;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -103,7 +114,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return WebCrawlingConfigDbm.getInstance();
@@ -119,14 +130,14 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public WebCrawlingConfig newEntity() {
+        return new WebCrawlingConfig();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public WebCrawlingConfigCB newConditionBean() {
+        return new WebCrawlingConfigCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -148,12 +159,16 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * int count = webCrawlingConfigBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = webCrawlingConfigBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final WebCrawlingConfigCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final WebCrawlingConfigCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -169,19 +184,21 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (webCrawlingConfig != null) {
+     * WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (webCrawlingConfig != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = webCrawlingConfig.get...();
      * } else {
      *     ...
@@ -189,112 +206,114 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public WebCrawlingConfig selectEntity(final WebCrawlingConfigCB cb) {
-        return doSelectEntity(cb, WebCrawlingConfig.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected WebCrawlingConfig facadeSelectEntity(final WebCrawlingConfigCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectEntity(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityCallback<ENTITY, WebCrawlingConfigCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final WebCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends WebCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = webCrawlingConfig.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public WebCrawlingConfig selectEntityWithDeletedCheck(
             final WebCrawlingConfigCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, WebCrawlingConfig.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected WebCrawlingConfig facadeSelectEntityWithDeletedCheck(
+            final WebCrawlingConfigCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectEntityWithDeletedCheck(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> entityType) {
+            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, WebCrawlingConfigCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final WebCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public WebCrawlingConfig selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, WebCrawlingConfig.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected WebCrawlingConfig facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends WebCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public WebCrawlingConfig selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, WebCrawlingConfig.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private WebCrawlingConfigCB buildPKCB(final Long id) {
+    protected WebCrawlingConfigCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final WebCrawlingConfigCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -306,39 +325,33 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;WebCrawlingConfig&gt; webCrawlingConfigList = webCrawlingConfigBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;WebCrawlingConfig&gt; webCrawlingConfigList = webCrawlingConfigBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
      *     ... = webCrawlingConfig.get...();
      * }
      * </pre>
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<WebCrawlingConfig> selectList(
             final WebCrawlingConfigCB cb) {
-        return doSelectList(cb, WebCrawlingConfig.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<WebCrawlingConfig> facadeSelectList(
+            final WebCrawlingConfigCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends WebCrawlingConfig> ListResultBean<ENTITY> doSelectList(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, WebCrawlingConfigCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final WebCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -351,8 +364,8 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;WebCrawlingConfig&gt; page = webCrawlingConfigBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;WebCrawlingConfig&gt; page = webCrawlingConfigBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -364,37 +377,27 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<WebCrawlingConfig> selectPage(
             final WebCrawlingConfigCB cb) {
-        return doSelectPage(cb, WebCrawlingConfig.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<WebCrawlingConfig> facadeSelectPage(
+            final WebCrawlingConfigCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends WebCrawlingConfig> PagingResultBean<ENTITY> doSelectPage(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, WebCrawlingConfigCB>() {
-                    @Override
-                    public int callbackSelectCount(final WebCrawlingConfigCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final WebCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -405,7 +408,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * webCrawlingConfigBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;WebCrawlingConfig&gt;() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;WebCrawlingConfig&gt;() {
      *     public void handle(WebCrawlingConfig entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -416,38 +419,22 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final WebCrawlingConfigCB cb,
             final EntityRowHandler<WebCrawlingConfig> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, WebCrawlingConfig.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final WebCrawlingConfigCB cb,
+            final EntityRowHandler<WebCrawlingConfig> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends WebCrawlingConfig> void doSelectCursor(
             final WebCrawlingConfigCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<WebCrawlingConfig>",
-                entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(
-                cb,
-                entityRowHandler,
-                entityType,
-                new InternalSelectCursorCallback<ENTITY, WebCrawlingConfigCB>() {
-                    @Override
-                    public void callbackSelectCursor(
-                            final WebCrawlingConfigCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final WebCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -457,29 +444,41 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(WebCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<WebCrawlingConfigCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<WebCrawlingConfigCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends WebCrawlingConfigCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<WebCrawlingConfigCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends WebCrawlingConfigCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -496,542 +495,534 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     //                                                                       Load Referrer
     //                                                                       =============
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
      */
-    public void loadRequestHeaderList(
-            final WebCrawlingConfig webCrawlingConfig,
-            final ConditionBeanSetupper<RequestHeaderCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfig, conditionBeanSetupper);
-        loadRequestHeaderList(xnewLRLs(webCrawlingConfig),
-                conditionBeanSetupper);
+    public void load(final List<WebCrawlingConfig> webCrawlingConfigList,
+            final ReferrerLoaderHandler<LoaderOfWebCrawlingConfig> handler) {
+        xassLRArg(webCrawlingConfigList, handler);
+        handler.handle(new LoaderOfWebCrawlingConfig().ready(
+                webCrawlingConfigList, _behaviorSelector));
     }
 
     /**
-     * Load referrer of requestHeaderList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final WebCrawlingConfig webCrawlingConfig,
+            final ReferrerLoaderHandler<LoaderOfWebCrawlingConfig> handler) {
+        xassLRArg(webCrawlingConfig, handler);
+        handler.handle(new LoaderOfWebCrawlingConfig().ready(
+                xnewLRAryLs(webCrawlingConfig), _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of requestHeaderList by the set-upper of referrer. <br />
      * REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">loadRequestHeaderList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;RequestHeaderCB&gt;() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadRequestHeaderList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;RequestHeaderCB&gt;() {
      *     public void setup(RequestHeaderCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-     *     ... = webCrawlingConfig.<span style="color: #FD4747">getRequestHeaderList()</span>;
+     *     ... = webCrawlingConfig.<span style="color: #DD4747">getRequestHeaderList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setWebCrawlingConfigId_InScope(pkList);
      * cb.query().addOrderBy_WebCrawlingConfigId_Asc();
      * </pre>
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadRequestHeaderList(
+    public NestedReferrerListGateway<RequestHeader> loadRequestHeaderList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
-            final ConditionBeanSetupper<RequestHeaderCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfigList, conditionBeanSetupper);
-        loadRequestHeaderList(webCrawlingConfigList,
+            final ConditionBeanSetupper<RequestHeaderCB> setupper) {
+        xassLRArg(webCrawlingConfigList, setupper);
+        return doLoadRequestHeaderList(webCrawlingConfigList,
                 new LoadReferrerOption<RequestHeaderCB, RequestHeader>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of requestHeaderList by the set-upper of referrer. <br />
+     * REQUEST_HEADER by WEB_CRAWLING_CONFIG_ID, named 'requestHeaderList'.
+     * <pre>
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadRequestHeaderList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;RequestHeaderCB&gt;() {
+     *     public void setup(RequestHeaderCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = webCrawlingConfig.<span style="color: #DD4747">getRequestHeaderList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setWebCrawlingConfigId_InScope(pkList);
+     * cb.query().addOrderBy_WebCrawlingConfigId_Asc();
+     * </pre>
+     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<RequestHeader> loadRequestHeaderList(
+            final WebCrawlingConfig webCrawlingConfig,
+            final ConditionBeanSetupper<RequestHeaderCB> setupper) {
+        xassLRArg(webCrawlingConfig, setupper);
+        return doLoadRequestHeaderList(xnewLRLs(webCrawlingConfig),
+                new LoadReferrerOption<RequestHeaderCB, RequestHeader>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadRequestHeaderList(
+    public NestedReferrerListGateway<RequestHeader> loadRequestHeaderList(
             final WebCrawlingConfig webCrawlingConfig,
             final LoadReferrerOption<RequestHeaderCB, RequestHeader> loadReferrerOption) {
         xassLRArg(webCrawlingConfig, loadReferrerOption);
-        loadRequestHeaderList(xnewLRLs(webCrawlingConfig), loadReferrerOption);
+        return loadRequestHeaderList(xnewLRLs(webCrawlingConfig),
+                loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadRequestHeaderList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<RequestHeader> loadRequestHeaderList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
             final LoadReferrerOption<RequestHeaderCB, RequestHeader> loadReferrerOption) {
         xassLRArg(webCrawlingConfigList, loadReferrerOption);
         if (webCrawlingConfigList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<RequestHeader>) EMPTY_NREF_LGWAY;
         }
-        final RequestHeaderBhv referrerBhv = xgetBSFLR().select(
-                RequestHeaderBhv.class);
-        helpLoadReferrerInternally(
-                webCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<WebCrawlingConfig, Long, RequestHeaderCB, RequestHeader>() {
-                    @Override
-                    public Long getPKVal(final WebCrawlingConfig e) {
-                        return e.getId();
-                    }
+        return doLoadRequestHeaderList(webCrawlingConfigList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final WebCrawlingConfig e,
-                            final List<RequestHeader> ls) {
-                        e.setRequestHeaderList(ls);
-                    }
-
-                    @Override
-                    public RequestHeaderCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final RequestHeaderCB cb,
-                            final List<Long> ls) {
-                        cb.query().setWebCrawlingConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final RequestHeaderCB cb) {
-                        cb.query().addOrderBy_WebCrawlingConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final RequestHeaderCB cb) {
-                        cb.specify().columnWebCrawlingConfigId();
-                    }
-
-                    @Override
-                    public List<RequestHeader> selRfLs(final RequestHeaderCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final RequestHeader e) {
-                        return e.getWebCrawlingConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final RequestHeader re,
-                            final WebCrawlingConfig le) {
-                        re.setWebCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "requestHeaderList";
-                    }
-                });
+    protected NestedReferrerListGateway<RequestHeader> doLoadRequestHeaderList(
+            final List<WebCrawlingConfig> webCrawlingConfigList,
+            final LoadReferrerOption<RequestHeaderCB, RequestHeader> option) {
+        return helpLoadReferrerInternally(webCrawlingConfigList, option,
+                "requestHeaderList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadWebAuthenticationList(
-            final WebCrawlingConfig webCrawlingConfig,
-            final ConditionBeanSetupper<WebAuthenticationCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfig, conditionBeanSetupper);
-        loadWebAuthenticationList(xnewLRLs(webCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of webAuthenticationList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of webAuthenticationList by the set-upper of referrer. <br />
      * WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">loadWebAuthenticationList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebAuthenticationCB&gt;() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadWebAuthenticationList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebAuthenticationCB&gt;() {
      *     public void setup(WebAuthenticationCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-     *     ... = webCrawlingConfig.<span style="color: #FD4747">getWebAuthenticationList()</span>;
+     *     ... = webCrawlingConfig.<span style="color: #DD4747">getWebAuthenticationList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setWebCrawlingConfigId_InScope(pkList);
      * cb.query().addOrderBy_WebCrawlingConfigId_Asc();
      * </pre>
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebAuthenticationList(
+    public NestedReferrerListGateway<WebAuthentication> loadWebAuthenticationList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
-            final ConditionBeanSetupper<WebAuthenticationCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfigList, conditionBeanSetupper);
-        loadWebAuthenticationList(
+            final ConditionBeanSetupper<WebAuthenticationCB> setupper) {
+        xassLRArg(webCrawlingConfigList, setupper);
+        return doLoadWebAuthenticationList(
                 webCrawlingConfigList,
                 new LoadReferrerOption<WebAuthenticationCB, WebAuthentication>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of webAuthenticationList by the set-upper of referrer. <br />
+     * WEB_AUTHENTICATION by WEB_CRAWLING_CONFIG_ID, named 'webAuthenticationList'.
+     * <pre>
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadWebAuthenticationList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebAuthenticationCB&gt;() {
+     *     public void setup(WebAuthenticationCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = webCrawlingConfig.<span style="color: #DD4747">getWebAuthenticationList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setWebCrawlingConfigId_InScope(pkList);
+     * cb.query().addOrderBy_WebCrawlingConfigId_Asc();
+     * </pre>
+     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<WebAuthentication> loadWebAuthenticationList(
+            final WebCrawlingConfig webCrawlingConfig,
+            final ConditionBeanSetupper<WebAuthenticationCB> setupper) {
+        xassLRArg(webCrawlingConfig, setupper);
+        return doLoadWebAuthenticationList(
+                xnewLRLs(webCrawlingConfig),
+                new LoadReferrerOption<WebAuthenticationCB, WebAuthentication>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebAuthenticationList(
+    public NestedReferrerListGateway<WebAuthentication> loadWebAuthenticationList(
             final WebCrawlingConfig webCrawlingConfig,
             final LoadReferrerOption<WebAuthenticationCB, WebAuthentication> loadReferrerOption) {
         xassLRArg(webCrawlingConfig, loadReferrerOption);
-        loadWebAuthenticationList(xnewLRLs(webCrawlingConfig),
+        return loadWebAuthenticationList(xnewLRLs(webCrawlingConfig),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebAuthenticationList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<WebAuthentication> loadWebAuthenticationList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
             final LoadReferrerOption<WebAuthenticationCB, WebAuthentication> loadReferrerOption) {
         xassLRArg(webCrawlingConfigList, loadReferrerOption);
         if (webCrawlingConfigList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<WebAuthentication>) EMPTY_NREF_LGWAY;
         }
-        final WebAuthenticationBhv referrerBhv = xgetBSFLR().select(
-                WebAuthenticationBhv.class);
-        helpLoadReferrerInternally(
-                webCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<WebCrawlingConfig, Long, WebAuthenticationCB, WebAuthentication>() {
-                    @Override
-                    public Long getPKVal(final WebCrawlingConfig e) {
-                        return e.getId();
-                    }
+        return doLoadWebAuthenticationList(webCrawlingConfigList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final WebCrawlingConfig e,
-                            final List<WebAuthentication> ls) {
-                        e.setWebAuthenticationList(ls);
-                    }
-
-                    @Override
-                    public WebAuthenticationCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final WebAuthenticationCB cb,
-                            final List<Long> ls) {
-                        cb.query().setWebCrawlingConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final WebAuthenticationCB cb) {
-                        cb.query().addOrderBy_WebCrawlingConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final WebAuthenticationCB cb) {
-                        cb.specify().columnWebCrawlingConfigId();
-                    }
-
-                    @Override
-                    public List<WebAuthentication> selRfLs(
-                            final WebAuthenticationCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final WebAuthentication e) {
-                        return e.getWebCrawlingConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final WebAuthentication re,
-                            final WebCrawlingConfig le) {
-                        re.setWebCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "webAuthenticationList";
-                    }
-                });
+    protected NestedReferrerListGateway<WebAuthentication> doLoadWebAuthenticationList(
+            final List<WebCrawlingConfig> webCrawlingConfigList,
+            final LoadReferrerOption<WebAuthenticationCB, WebAuthentication> option) {
+        return helpLoadReferrerInternally(webCrawlingConfigList, option,
+                "webAuthenticationList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadWebConfigToLabelTypeMappingList(
-            final WebCrawlingConfig webCrawlingConfig,
-            final ConditionBeanSetupper<WebConfigToLabelTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfig, conditionBeanSetupper);
-        loadWebConfigToLabelTypeMappingList(xnewLRLs(webCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of webConfigToLabelTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of webConfigToLabelTypeMappingList by the set-upper of referrer. <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">loadWebConfigToLabelTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToLabelTypeMappingCB&gt;() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadWebConfigToLabelTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToLabelTypeMappingCB&gt;() {
      *     public void setup(WebConfigToLabelTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-     *     ... = webCrawlingConfig.<span style="color: #FD4747">getWebConfigToLabelTypeMappingList()</span>;
+     *     ... = webCrawlingConfig.<span style="color: #DD4747">getWebConfigToLabelTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setWebConfigId_InScope(pkList);
      * cb.query().addOrderBy_WebConfigId_Asc();
      * </pre>
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToLabelTypeMappingList(
+    public NestedReferrerListGateway<WebConfigToLabelTypeMapping> loadWebConfigToLabelTypeMappingList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
-            final ConditionBeanSetupper<WebConfigToLabelTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfigList, conditionBeanSetupper);
-        loadWebConfigToLabelTypeMappingList(
+            final ConditionBeanSetupper<WebConfigToLabelTypeMappingCB> setupper) {
+        xassLRArg(webCrawlingConfigList, setupper);
+        return doLoadWebConfigToLabelTypeMappingList(
                 webCrawlingConfigList,
                 new LoadReferrerOption<WebConfigToLabelTypeMappingCB, WebConfigToLabelTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of webConfigToLabelTypeMappingList by the set-upper of referrer. <br />
+     * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToLabelTypeMappingList'.
+     * <pre>
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadWebConfigToLabelTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToLabelTypeMappingCB&gt;() {
+     *     public void setup(WebConfigToLabelTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = webCrawlingConfig.<span style="color: #DD4747">getWebConfigToLabelTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setWebConfigId_InScope(pkList);
+     * cb.query().addOrderBy_WebConfigId_Asc();
+     * </pre>
+     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<WebConfigToLabelTypeMapping> loadWebConfigToLabelTypeMappingList(
+            final WebCrawlingConfig webCrawlingConfig,
+            final ConditionBeanSetupper<WebConfigToLabelTypeMappingCB> setupper) {
+        xassLRArg(webCrawlingConfig, setupper);
+        return doLoadWebConfigToLabelTypeMappingList(
+                xnewLRLs(webCrawlingConfig),
+                new LoadReferrerOption<WebConfigToLabelTypeMappingCB, WebConfigToLabelTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToLabelTypeMappingList(
+    public NestedReferrerListGateway<WebConfigToLabelTypeMapping> loadWebConfigToLabelTypeMappingList(
             final WebCrawlingConfig webCrawlingConfig,
             final LoadReferrerOption<WebConfigToLabelTypeMappingCB, WebConfigToLabelTypeMapping> loadReferrerOption) {
         xassLRArg(webCrawlingConfig, loadReferrerOption);
-        loadWebConfigToLabelTypeMappingList(xnewLRLs(webCrawlingConfig),
+        return loadWebConfigToLabelTypeMappingList(xnewLRLs(webCrawlingConfig),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToLabelTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<WebConfigToLabelTypeMapping> loadWebConfigToLabelTypeMappingList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
             final LoadReferrerOption<WebConfigToLabelTypeMappingCB, WebConfigToLabelTypeMapping> loadReferrerOption) {
         xassLRArg(webCrawlingConfigList, loadReferrerOption);
         if (webCrawlingConfigList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<WebConfigToLabelTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final WebConfigToLabelTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                WebConfigToLabelTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                webCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<WebCrawlingConfig, Long, WebConfigToLabelTypeMappingCB, WebConfigToLabelTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final WebCrawlingConfig e) {
-                        return e.getId();
-                    }
+        return doLoadWebConfigToLabelTypeMappingList(webCrawlingConfigList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final WebCrawlingConfig e,
-                            final List<WebConfigToLabelTypeMapping> ls) {
-                        e.setWebConfigToLabelTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public WebConfigToLabelTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final WebConfigToLabelTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setWebConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final WebConfigToLabelTypeMappingCB cb) {
-                        cb.query().addOrderBy_WebConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final WebConfigToLabelTypeMappingCB cb) {
-                        cb.specify().columnWebConfigId();
-                    }
-
-                    @Override
-                    public List<WebConfigToLabelTypeMapping> selRfLs(
-                            final WebConfigToLabelTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final WebConfigToLabelTypeMapping e) {
-                        return e.getWebConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final WebConfigToLabelTypeMapping re,
-                            final WebCrawlingConfig le) {
-                        re.setWebCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "webConfigToLabelTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<WebConfigToLabelTypeMapping> doLoadWebConfigToLabelTypeMappingList(
+            final List<WebCrawlingConfig> webCrawlingConfigList,
+            final LoadReferrerOption<WebConfigToLabelTypeMappingCB, WebConfigToLabelTypeMapping> option) {
+        return helpLoadReferrerInternally(webCrawlingConfigList, option,
+                "webConfigToLabelTypeMappingList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadWebConfigToRoleTypeMappingList(
-            final WebCrawlingConfig webCrawlingConfig,
-            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfig, conditionBeanSetupper);
-        loadWebConfigToRoleTypeMappingList(xnewLRLs(webCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of webConfigToRoleTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of webConfigToRoleTypeMappingList by the set-upper of referrer. <br />
      * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">loadWebConfigToRoleTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadWebConfigToRoleTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void setup(WebConfigToRoleTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-     *     ... = webCrawlingConfig.<span style="color: #FD4747">getWebConfigToRoleTypeMappingList()</span>;
+     *     ... = webCrawlingConfig.<span style="color: #DD4747">getWebConfigToRoleTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setWebConfigId_InScope(pkList);
      * cb.query().addOrderBy_WebConfigId_Asc();
      * </pre>
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
-            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(webCrawlingConfigList, conditionBeanSetupper);
-        loadWebConfigToRoleTypeMappingList(
+            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(webCrawlingConfigList, setupper);
+        return doLoadWebConfigToRoleTypeMappingList(
                 webCrawlingConfigList,
                 new LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of webConfigToRoleTypeMappingList by the set-upper of referrer. <br />
+     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by WEB_CONFIG_ID, named 'webConfigToRoleTypeMappingList'.
+     * <pre>
+     * webCrawlingConfigBhv.<span style="color: #DD4747">loadWebConfigToRoleTypeMappingList</span>(webCrawlingConfigList, new ConditionBeanSetupper&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     *     public void setup(WebConfigToRoleTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = webCrawlingConfig.<span style="color: #DD4747">getWebConfigToRoleTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setWebConfigId_InScope(pkList);
+     * cb.query().addOrderBy_WebConfigId_Asc();
+     * </pre>
+     * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
+            final WebCrawlingConfig webCrawlingConfig,
+            final ConditionBeanSetupper<WebConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(webCrawlingConfig, setupper);
+        return doLoadWebConfigToRoleTypeMappingList(
+                xnewLRLs(webCrawlingConfig),
+                new LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param webCrawlingConfig The entity of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
             final WebCrawlingConfig webCrawlingConfig,
             final LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(webCrawlingConfig, loadReferrerOption);
-        loadWebConfigToRoleTypeMappingList(xnewLRLs(webCrawlingConfig),
+        return loadWebConfigToRoleTypeMappingList(xnewLRLs(webCrawlingConfig),
                 loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadWebConfigToRoleTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<WebConfigToRoleTypeMapping> loadWebConfigToRoleTypeMappingList(
             final List<WebCrawlingConfig> webCrawlingConfigList,
             final LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(webCrawlingConfigList, loadReferrerOption);
         if (webCrawlingConfigList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<WebConfigToRoleTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final WebConfigToRoleTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                WebConfigToRoleTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                webCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<WebCrawlingConfig, Long, WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final WebCrawlingConfig e) {
-                        return e.getId();
-                    }
+        return doLoadWebConfigToRoleTypeMappingList(webCrawlingConfigList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final WebCrawlingConfig e,
-                            final List<WebConfigToRoleTypeMapping> ls) {
-                        e.setWebConfigToRoleTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public WebConfigToRoleTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final WebConfigToRoleTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setWebConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final WebConfigToRoleTypeMappingCB cb) {
-                        cb.query().addOrderBy_WebConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final WebConfigToRoleTypeMappingCB cb) {
-                        cb.specify().columnWebConfigId();
-                    }
-
-                    @Override
-                    public List<WebConfigToRoleTypeMapping> selRfLs(
-                            final WebConfigToRoleTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final WebConfigToRoleTypeMapping e) {
-                        return e.getWebConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final WebConfigToRoleTypeMapping re,
-                            final WebCrawlingConfig le) {
-                        re.setWebCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "webConfigToRoleTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<WebConfigToRoleTypeMapping> doLoadWebConfigToRoleTypeMappingList(
+            final List<WebCrawlingConfig> webCrawlingConfigList,
+            final LoadReferrerOption<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMapping> option) {
+        return helpLoadReferrerInternally(webCrawlingConfigList, option,
+                "webConfigToRoleTypeMappingList");
     }
 
     // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-
     // ===================================================================================
     //                                                                      Extract Column
     //                                                                      ==============
@@ -1042,20 +1033,14 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public List<Long> extractIdList(
             final List<WebCrawlingConfig> webCrawlingConfigList) {
-        return helpExtractListInternally(webCrawlingConfigList,
-                new InternalExtractCallback<WebCrawlingConfig, Long>() {
-                    @Override
-                    public Long getCV(final WebCrawlingConfig e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(webCrawlingConfigList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -1064,39 +1049,39 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.set...;</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">insert</span>(webCrawlingConfig);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">insert</span>(webCrawlingConfig);
      * ... = webCrawlingConfig.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param webCrawlingConfig The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param webCrawlingConfig The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final WebCrawlingConfig webCrawlingConfig) {
         doInsert(webCrawlingConfig, null);
     }
 
-    protected void doInsert(final WebCrawlingConfig webCrawlingConfig,
-            final InsertOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
-        prepareInsertOption(option);
-        delegateInsert(webCrawlingConfig, option);
+    protected void doInsert(final WebCrawlingConfig et,
+            final InsertOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
     protected void prepareInsertOption(
-            final InsertOption<WebCrawlingConfigCB> option) {
-        if (option == null) {
+            final InsertOption<WebCrawlingConfigCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -1108,71 +1093,60 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * webCrawlingConfig.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * webCrawlingConfig.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     webCrawlingConfigBhv.<span style="color: #FD4747">update</span>(webCrawlingConfig);
+     *     webCrawlingConfigBhv.<span style="color: #DD4747">update</span>(webCrawlingConfig);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param webCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param webCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final WebCrawlingConfig webCrawlingConfig) {
         doUpdate(webCrawlingConfig, null);
     }
 
-    protected void doUpdate(final WebCrawlingConfig webCrawlingConfig,
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
-        prepareUpdateOption(option);
-        helpUpdateInternally(webCrawlingConfig,
-                new InternalUpdateCallback<WebCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateUpdate(
-                            final WebCrawlingConfig entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final WebCrawlingConfig et,
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
     protected void prepareUpdateOption(
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        if (option == null) {
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected WebCrawlingConfigCB createCBForVaryingUpdate() {
-        final WebCrawlingConfigCB cb = newMyConditionBean();
+        final WebCrawlingConfigCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected WebCrawlingConfigCB createCBForSpecifiedUpdate() {
-        final WebCrawlingConfigCB cb = newMyConditionBean();
+        final WebCrawlingConfigCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     /**
@@ -1184,149 +1158,86 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setVersionNo(value);</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">updateNonstrict</span>(webCrawlingConfig);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">updateNonstrict</span>(webCrawlingConfig);
      * </pre>
-     * @param webCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param webCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void updateNonstrict(final WebCrawlingConfig webCrawlingConfig) {
         doUpdateNonstrict(webCrawlingConfig, null);
     }
 
-    protected void doUpdateNonstrict(final WebCrawlingConfig webCrawlingConfig,
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
-        prepareUpdateOption(option);
-        helpUpdateNonstrictInternally(webCrawlingConfig,
-                new InternalUpdateNonstrictCallback<WebCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateUpdateNonstrict(
-                            final WebCrawlingConfig entity) {
-                        return delegateUpdateNonstrict(entity, option);
-                    }
-                });
+    protected void doUpdateNonstrict(final WebCrawlingConfig et,
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        prepareUpdateOption(op);
+        helpUpdateNonstrictInternally(et, op);
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            updateNonstrict(downcast(entity));
-        } else {
-            varyingUpdateNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdateNonstrict(downcast(et), downcast(op));
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param webCrawlingConfig The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param webCrawlingConfig The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final WebCrawlingConfig webCrawlingConfig) {
-        doInesrtOrUpdate(webCrawlingConfig, null, null);
+        doInsertOrUpdate(webCrawlingConfig, null, null);
     }
 
-    protected void doInesrtOrUpdate(final WebCrawlingConfig webCrawlingConfig,
-            final InsertOption<WebCrawlingConfigCB> insertOption,
-            final UpdateOption<WebCrawlingConfigCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                webCrawlingConfig,
-                new InternalInsertOrUpdateCallback<WebCrawlingConfig, WebCrawlingConfigCB>() {
-                    @Override
-                    public void callbackInsert(final WebCrawlingConfig entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final WebCrawlingConfig entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public WebCrawlingConfigCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final WebCrawlingConfigCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final WebCrawlingConfig et,
+            final InsertOption<WebCrawlingConfigCB> iop,
+            final UpdateOption<WebCrawlingConfigCB> uop) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<WebCrawlingConfigCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<WebCrawlingConfigCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param webCrawlingConfig The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param webCrawlingConfig The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdateNonstrict(
             final WebCrawlingConfig webCrawlingConfig) {
-        doInesrtOrUpdateNonstrict(webCrawlingConfig, null, null);
+        doInsertOrUpdateNonstrict(webCrawlingConfig, null, null);
     }
 
-    protected void doInesrtOrUpdateNonstrict(
-            final WebCrawlingConfig webCrawlingConfig,
-            final InsertOption<WebCrawlingConfigCB> insertOption,
-            final UpdateOption<WebCrawlingConfigCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                webCrawlingConfig,
-                new InternalInsertOrUpdateNonstrictCallback<WebCrawlingConfig>() {
-                    @Override
-                    public void callbackInsert(final WebCrawlingConfig entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdateNonstrict(
-                            final WebCrawlingConfig entity) {
-                        doUpdateNonstrict(entity, updateOption);
-                    }
-                });
+    protected void doInsertOrUpdateNonstrict(final WebCrawlingConfig et,
+            final InsertOption<WebCrawlingConfigCB> iop,
+            final UpdateOption<WebCrawlingConfigCB> uop) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdateNonstrict(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<WebCrawlingConfigCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<WebCrawlingConfigCB>()
-                    : updateOption;
-            varyingInsertOrUpdateNonstrict(downcast(entity),
-                    downcast(insertOption), downcast(updateOption));
-        }
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1334,52 +1245,40 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
      * webCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * webCrawlingConfig.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * webCrawlingConfig.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     webCrawlingConfigBhv.<span style="color: #FD4747">delete</span>(webCrawlingConfig);
+     *     webCrawlingConfigBhv.<span style="color: #DD4747">delete</span>(webCrawlingConfig);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param webCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param webCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final WebCrawlingConfig webCrawlingConfig) {
         doDelete(webCrawlingConfig, null);
     }
 
-    protected void doDelete(final WebCrawlingConfig webCrawlingConfig,
-            final DeleteOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
-        prepareDeleteOption(option);
-        helpDeleteInternally(webCrawlingConfig,
-                new InternalDeleteCallback<WebCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateDelete(
-                            final WebCrawlingConfig entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final WebCrawlingConfig et,
+            final DeleteOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
     protected void prepareDeleteOption(
-            final DeleteOption<WebCrawlingConfigCB> option) {
-        if (option == null) {
-            return;
+            final DeleteOption<WebCrawlingConfigCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
-        assertDeleteOptionStatus(option);
     }
 
     @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
-        }
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
     }
 
     /**
@@ -1387,31 +1286,24 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
      * webCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setVersionNo(value);</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">deleteNonstrict</span>(webCrawlingConfig);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">deleteNonstrict</span>(webCrawlingConfig);
      * </pre>
-     * @param webCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param webCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrict(final WebCrawlingConfig webCrawlingConfig) {
         doDeleteNonstrict(webCrawlingConfig, null);
     }
 
-    protected void doDeleteNonstrict(final WebCrawlingConfig webCrawlingConfig,
-            final DeleteOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictInternally(webCrawlingConfig,
-                new InternalDeleteNonstrictCallback<WebCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final WebCrawlingConfig entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrict(final WebCrawlingConfig et,
+            final DeleteOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -1419,55 +1311,57 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
      * webCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setVersionNo(value);</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">deleteNonstrictIgnoreDeleted</span>(webCrawlingConfig);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">deleteNonstrictIgnoreDeleted</span>(webCrawlingConfig);
      * <span style="color: #3F7E5E">// if the target entity doesn't exist, no exception</span>
      * </pre>
-     * @param webCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param webCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrictIgnoreDeleted(
             final WebCrawlingConfig webCrawlingConfig) {
         doDeleteNonstrictIgnoreDeleted(webCrawlingConfig, null);
     }
 
-    protected void doDeleteNonstrictIgnoreDeleted(
-            final WebCrawlingConfig webCrawlingConfig,
-            final DeleteOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictIgnoreDeletedInternally(
-                webCrawlingConfig,
-                new InternalDeleteNonstrictIgnoreDeletedCallback<WebCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final WebCrawlingConfig entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrictIgnoreDeleted(final WebCrawlingConfig et,
+            final DeleteOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictIgnoreDeletedInternally(et, op);
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            deleteNonstrict(downcast(entity));
-        } else {
-            varyingDeleteNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
+     *     webCrawlingConfig.setFooName("foo");
+     *     if (...) {
+     *         webCrawlingConfig.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     webCrawlingConfigList.add(webCrawlingConfig);
+     * }
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchInsert</span>(webCrawlingConfigList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -1475,92 +1369,100 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchInsert(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchInsert(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final InsertOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfigList", webCrawlingConfigList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(webCrawlingConfigList, option);
+    protected int[] doBatchInsert(final List<WebCrawlingConfig> ls,
+            final InsertOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfigList", ls);
+        InsertOption<WebCrawlingConfigCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<WebCrawlingConfig> ls,
+            final InsertOption<WebCrawlingConfigCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">batchUpdate</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
-     *     public void specify(WebCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
+     *     webCrawlingConfig.setFooName("foo");
+     *     if (...) {
+     *         webCrawlingConfig.setFooPrice(123);
+     *     } else {
+     *         webCrawlingConfig.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//webCrawlingConfig.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     webCrawlingConfigList.add(webCrawlingConfig);
+     * }
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(webCrawlingConfigList);
      * </pre>
-     * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(final List<WebCrawlingConfig> webCrawlingConfigList) {
         return doBatchUpdate(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchUpdate(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfigList", webCrawlingConfigList);
-        prepareBatchUpdateOption(webCrawlingConfigList, option);
-        return delegateBatchUpdate(webCrawlingConfigList, option);
+    protected int[] doBatchUpdate(final List<WebCrawlingConfig> ls,
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfigList", ls);
+        UpdateOption<WebCrawlingConfigCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(webCrawlingConfigList);
-        //}
+    protected void prepareBatchUpdateOption(final List<WebCrawlingConfig> ls,
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">batchUpdate</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
      *     public void specify(WebCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">batchUpdate</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
      *     public void specify(WebCrawlingConfigCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1569,10 +1471,10 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * and an optimistic lock column because they are specified implicitly.</p>
      * <p>And you should specify columns that are modified in any entities (at least one entity).
      * But if you specify every column, it has no check.</p>
-     * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(
             final List<WebCrawlingConfig> webCrawlingConfigList,
@@ -1582,51 +1484,62 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * Batch-update the entity list non-strictly. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are update target. {NOT modified only}</span>
-     * So you should the other batchUpdateNonstrict() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 140%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
-     *     public void specify(WebCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
+     *     webCrawlingConfig.setFooName("foo");
+     *     if (...) {
+     *         webCrawlingConfig.setFooPrice(123);
+     *     } else {
+     *         webCrawlingConfig.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//webCrawlingConfig.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     webCrawlingConfigList.add(webCrawlingConfig);
+     * }
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(webCrawlingConfigList);
      * </pre>
      * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(
             final List<WebCrawlingConfig> webCrawlingConfigList) {
         return doBatchUpdateNonstrict(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfigList", webCrawlingConfigList);
-        prepareBatchUpdateOption(webCrawlingConfigList, option);
-        return delegateBatchUpdateNonstrict(webCrawlingConfigList, option);
+    protected int[] doBatchUpdateNonstrict(final List<WebCrawlingConfig> ls,
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfigList", ls);
+        UpdateOption<WebCrawlingConfigCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop);
+        return delegateBatchUpdateNonstrict(ls, rlop);
     }
 
     /**
-     * Batch-update the entity list non-strictly. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
      *     public void specify(WebCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(webCrawlingConfigList, new SpecifyQuery<WebCrawlingConfigCB>() {
      *     public void specify(WebCrawlingConfigCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1637,7 +1550,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(
             final List<WebCrawlingConfig> webCrawlingConfigList,
@@ -1648,12 +1561,8 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdateNonstrict(downcast(ls));
-        } else {
-            return varyingBatchUpdateNonstrict(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
     }
 
     /**
@@ -1661,28 +1570,23 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchDelete(final List<WebCrawlingConfig> webCrawlingConfigList) {
         return doBatchDelete(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchDelete(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final DeleteOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfigList", webCrawlingConfigList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(webCrawlingConfigList, option);
+    protected int[] doBatchDelete(final List<WebCrawlingConfig> ls,
+            final DeleteOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfigList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1690,29 +1594,24 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param webCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDeleteNonstrict(
             final List<WebCrawlingConfig> webCrawlingConfigList) {
         return doBatchDeleteNonstrict(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(
-            final List<WebCrawlingConfig> webCrawlingConfigList,
-            final DeleteOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfigList", webCrawlingConfigList);
-        prepareDeleteOption(option);
-        return delegateBatchDeleteNonstrict(webCrawlingConfigList, option);
+    protected int[] doBatchDeleteNonstrict(final List<WebCrawlingConfig> ls,
+            final DeleteOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfigList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDeleteNonstrict(ls, op);
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDeleteNonstrict(downcast(ls));
-        } else {
-            return varyingBatchDeleteNonstrict(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
     }
 
     // ===================================================================================
@@ -1721,7 +1620,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;WebCrawlingConfig, WebCrawlingConfigCB&gt;() {
+     * webCrawlingConfigBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;WebCrawlingConfig, WebCrawlingConfigCB&gt;() {
      *     public ConditionBean setup(webCrawlingConfig entity, WebCrawlingConfigCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1734,7 +1633,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1750,18 +1649,17 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB> setupper,
-            final InsertOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final WebCrawlingConfig entity = new WebCrawlingConfig();
-        final WebCrawlingConfigCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB> sp,
+            final InsertOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final WebCrawlingConfig et = newEntity();
+        final WebCrawlingConfigCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected WebCrawlingConfigCB createCBForQueryInsert() {
-        final WebCrawlingConfigCB cb = newMyConditionBean();
+        final WebCrawlingConfigCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1769,12 +1667,8 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1787,42 +1681,37 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setVersionNo(value);</span>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * webCrawlingConfigBhv.<span style="color: #FD4747">queryUpdate</span>(webCrawlingConfig, cb);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">queryUpdate</span>(webCrawlingConfig, cb);
      * </pre>
      * @param webCrawlingConfig The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final WebCrawlingConfig webCrawlingConfig,
             final WebCrawlingConfigCB cb) {
         return doQueryUpdate(webCrawlingConfig, cb, null);
     }
 
-    protected int doQueryUpdate(final WebCrawlingConfig webCrawlingConfig,
+    protected int doQueryUpdate(final WebCrawlingConfig et,
             final WebCrawlingConfigCB cb,
-            final UpdateOption<WebCrawlingConfigCB> option) {
-        assertObjectNotNull("webCrawlingConfig", webCrawlingConfig);
+            final UpdateOption<WebCrawlingConfigCB> op) {
+        assertObjectNotNull("webCrawlingConfig", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                webCrawlingConfig, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (WebCrawlingConfigCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity),
-                    (WebCrawlingConfigCB) cb, downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1830,33 +1719,28 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * webCrawlingConfigBhv.<span style="color: #FD4747">queryDelete</span>(webCrawlingConfig, cb);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">queryDelete</span>(webCrawlingConfig, cb);
      * </pre>
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final WebCrawlingConfigCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final WebCrawlingConfigCB cb,
-            final DeleteOption<WebCrawlingConfigCB> option) {
+            final DeleteOption<WebCrawlingConfigCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((WebCrawlingConfigCB) cb);
-        } else {
-            return varyingQueryDelete((WebCrawlingConfigCB) cb,
-                    downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1877,12 +1761,12 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * InsertOption<WebCrawlingConfigCB> option = new InsertOption<WebCrawlingConfigCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * webCrawlingConfigBhv.<span style="color: #FD4747">varyingInsert</span>(webCrawlingConfig, option);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">varyingInsert</span>(webCrawlingConfig, option);
      * ... = webCrawlingConfig.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param webCrawlingConfig The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param webCrawlingConfig The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final WebCrawlingConfig webCrawlingConfig,
             final InsertOption<WebCrawlingConfigCB> option) {
@@ -1898,26 +1782,26 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
      * webCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * webCrawlingConfig.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * webCrawlingConfig.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * webCrawlingConfig.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;WebCrawlingConfigCB&gt; option = new UpdateOption&lt;WebCrawlingConfigCB&gt;();
      *     option.self(new SpecifyQuery&lt;WebCrawlingConfigCB&gt;() {
      *         public void specify(WebCrawlingConfigCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     webCrawlingConfigBhv.<span style="color: #FD4747">varyingUpdate</span>(webCrawlingConfig, option);
+     *     webCrawlingConfigBhv.<span style="color: #DD4747">varyingUpdate</span>(webCrawlingConfig, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param webCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param webCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final WebCrawlingConfig webCrawlingConfig,
             final UpdateOption<WebCrawlingConfigCB> option) {
@@ -1934,22 +1818,22 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * WebCrawlingConfig webCrawlingConfig = new WebCrawlingConfig();
      * webCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * webCrawlingConfig.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setVersionNo(value);</span>
      * UpdateOption&lt;WebCrawlingConfigCB&gt; option = new UpdateOption&lt;WebCrawlingConfigCB&gt;();
      * option.self(new SpecifyQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void specify(WebCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">varyingUpdateNonstrict</span>(webCrawlingConfig, option);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">varyingUpdateNonstrict</span>(webCrawlingConfig, option);
      * </pre>
-     * @param webCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull)
+     * @param webCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdateNonstrict(
             final WebCrawlingConfig webCrawlingConfig,
@@ -1961,12 +1845,12 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param webCrawlingConfig The entity of insert or update target. (NotNull)
+     * @param webCrawlingConfig The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(
             final WebCrawlingConfig webCrawlingConfig,
@@ -1974,18 +1858,18 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
             final UpdateOption<WebCrawlingConfigCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(webCrawlingConfig, insertOption, updateOption);
+        doInsertOrUpdate(webCrawlingConfig, insertOption, updateOption);
     }
 
     /**
      * Insert or update the entity with varying requests non-strictly. (NonExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdateNonstrict(entity).
-     * @param webCrawlingConfig The entity of insert or update target. (NotNull)
+     * @param webCrawlingConfig The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdateNonstrict(
             final WebCrawlingConfig webCrawlingConfig,
@@ -1993,17 +1877,17 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
             final UpdateOption<WebCrawlingConfigCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdateNonstrict(webCrawlingConfig, insertOption, updateOption);
+        doInsertOrUpdateNonstrict(webCrawlingConfig, insertOption, updateOption);
     }
 
     /**
      * Delete the entity with varying requests. (ZeroUpdateException, ExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param webCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param webCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final WebCrawlingConfig webCrawlingConfig,
             final DeleteOption<WebCrawlingConfigCB> option) {
@@ -2015,10 +1899,10 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Delete the entity with varying requests non-strictly. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as deleteNonstrict(entity).
-     * @param webCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param webCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDeleteNonstrict(
             final WebCrawlingConfig webCrawlingConfig,
@@ -2137,7 +2021,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setPK...(value);</span>
      * webCrawlingConfig.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//webCrawlingConfig.setVersionNo(value);</span>
      * WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
@@ -2145,16 +2029,16 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;WebCrawlingConfigCB&gt; option = new UpdateOption&lt;WebCrawlingConfigCB&gt;();
      * option.self(new SpecifyQuery&lt;WebCrawlingConfigCB&gt;() {
      *     public void specify(WebCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * webCrawlingConfigBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(webCrawlingConfig, cb, option);
+     * webCrawlingConfigBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(webCrawlingConfig, cb, option);
      * </pre>
      * @param webCrawlingConfig The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final WebCrawlingConfig webCrawlingConfig,
             final WebCrawlingConfigCB cb,
@@ -2170,7 +2054,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of WebCrawlingConfig. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final WebCrawlingConfigCB cb,
             final DeleteOption<WebCrawlingConfigCB> option) {
@@ -2217,171 +2101,22 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final WebCrawlingConfigCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
-    }
-
-    protected int delegateSelectCountPlainly(final WebCrawlingConfigCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends WebCrawlingConfig> void delegateSelectCursor(
-            final WebCrawlingConfigCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends WebCrawlingConfig> List<ENTITY> delegateSelectList(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final WebCrawlingConfig e,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final WebCrawlingConfig e,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateEntityCommand(e, op));
-    }
-
-    protected int delegateUpdateNonstrict(final WebCrawlingConfig e,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final WebCrawlingConfig e,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteEntityCommand(e, op));
-    }
-
-    protected int delegateDeleteNonstrict(final WebCrawlingConfig e,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<WebCrawlingConfig> ls,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<WebCrawlingConfig> ls,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(
-            final List<WebCrawlingConfig> ls,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<WebCrawlingConfig> ls,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(
-            final List<WebCrawlingConfig> ls,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final WebCrawlingConfig e,
-            final WebCrawlingConfigCB inCB, final ConditionBean resCB,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final WebCrawlingConfig e,
-            final WebCrawlingConfigCB cb,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final WebCrawlingConfigCB cb,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
     //                                                                Optimistic Lock Info
     //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return !(downcast(entity).getVersionNo() + "").equals("null");// For primitive type
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
+    protected boolean hasVersionNoValue(final Entity et) {
+        return downcast(et).getVersionNo() != null;
     }
 
     // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected WebCrawlingConfig downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, WebCrawlingConfig.class);
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<WebCrawlingConfig> typeOfSelectedEntity() {
+        return WebCrawlingConfig.class;
+    }
+
+    protected WebCrawlingConfig downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, WebCrawlingConfig.class);
     }
 
     protected WebCrawlingConfigCB downcast(final ConditionBean cb) {
@@ -2390,32 +2125,31 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<WebCrawlingConfig> downcast(
-            final List<? extends Entity> entityList) {
-        return (List<WebCrawlingConfig>) entityList;
+    protected List<WebCrawlingConfig> downcast(final List<? extends Entity> ls) {
+        return (List<WebCrawlingConfig>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<WebCrawlingConfigCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<WebCrawlingConfigCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<WebCrawlingConfigCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<WebCrawlingConfigCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<WebCrawlingConfigCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<WebCrawlingConfigCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<WebCrawlingConfigCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<WebCrawlingConfigCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<WebCrawlingConfigCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB>) sp;
     }
 }

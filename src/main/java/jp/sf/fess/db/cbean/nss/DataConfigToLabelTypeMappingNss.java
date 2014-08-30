@@ -46,31 +46,26 @@ public class DataConfigToLabelTypeMappingNss {
     /**
      * With nested relation columns to select clause. <br />
      * DATA_CRAWLING_CONFIG by my DATA_CONFIG_ID, named 'dataCrawlingConfig'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public DataCrawlingConfigNss withDataCrawlingConfig() {
+    public void withDataCrawlingConfig() {
         _query.doNss(new DataConfigToLabelTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryDataCrawlingConfig();
             }
         });
-        return new DataCrawlingConfigNss(_query.queryDataCrawlingConfig());
     }
 
     /**
      * With nested relation columns to select clause. <br />
      * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public LabelTypeNss withLabelType() {
+    public void withLabelType() {
         _query.doNss(new DataConfigToLabelTypeMappingCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryLabelType();
             }
         });
-        return new LabelTypeNss(_query.queryLabelType());
     }
-
 }

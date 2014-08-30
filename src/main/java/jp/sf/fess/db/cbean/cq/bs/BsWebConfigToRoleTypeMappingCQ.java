@@ -25,6 +25,8 @@ import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.WebConfigToRoleTypeMappingCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -44,10 +46,10 @@ public class BsWebConfigToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsWebConfigToRoleTypeMappingCQ(final ConditionQuery childQuery,
+    public BsWebConfigToRoleTypeMappingCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -57,7 +59,7 @@ public class BsWebConfigToRoleTypeMappingCQ extends
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from WEB_CONFIG_TO_ROLE_TYPE_MAPPING) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -84,7 +86,7 @@ public class BsWebConfigToRoleTypeMappingCQ extends
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join WEB_CONFIG_TO_ROLE_TYPE_MAPPING on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -102,7 +104,6 @@ public class BsWebConfigToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -151,40 +152,24 @@ public class BsWebConfigToRoleTypeMappingCQ extends
         return getWebConfigId();
     }
 
-    protected Map<String, WebCrawlingConfigCQ> _webConfigId_InScopeRelation_WebCrawlingConfigMap;
-
     public Map<String, WebCrawlingConfigCQ> getWebConfigId_InScopeRelation_WebCrawlingConfig() {
-        return _webConfigId_InScopeRelation_WebCrawlingConfigMap;
+        return xgetSQueMap("webConfigId_InScopeRelation_WebCrawlingConfig");
     }
 
     @Override
     public String keepWebConfigId_InScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webConfigId_InScopeRelation_WebCrawlingConfigMap == null) {
-            _webConfigId_InScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webConfigId_InScopeRelation_WebCrawlingConfigMap.size() + 1);
-        _webConfigId_InScopeRelation_WebCrawlingConfigMap.put(key, subQuery);
-        return "webConfigId_InScopeRelation_WebCrawlingConfig." + key;
+            final WebCrawlingConfigCQ sq) {
+        return xkeepSQue("webConfigId_InScopeRelation_WebCrawlingConfig", sq);
     }
 
-    protected Map<String, WebCrawlingConfigCQ> _webConfigId_NotInScopeRelation_WebCrawlingConfigMap;
-
     public Map<String, WebCrawlingConfigCQ> getWebConfigId_NotInScopeRelation_WebCrawlingConfig() {
-        return _webConfigId_NotInScopeRelation_WebCrawlingConfigMap;
+        return xgetSQueMap("webConfigId_NotInScopeRelation_WebCrawlingConfig");
     }
 
     @Override
     public String keepWebConfigId_NotInScopeRelation_WebCrawlingConfig(
-            final WebCrawlingConfigCQ subQuery) {
-        if (_webConfigId_NotInScopeRelation_WebCrawlingConfigMap == null) {
-            _webConfigId_NotInScopeRelation_WebCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_webConfigId_NotInScopeRelation_WebCrawlingConfigMap.size() + 1);
-        _webConfigId_NotInScopeRelation_WebCrawlingConfigMap.put(key, subQuery);
-        return "webConfigId_NotInScopeRelation_WebCrawlingConfig." + key;
+            final WebCrawlingConfigCQ sq) {
+        return xkeepSQue("webConfigId_NotInScopeRelation_WebCrawlingConfig", sq);
     }
 
     /**
@@ -221,40 +206,22 @@ public class BsWebConfigToRoleTypeMappingCQ extends
         return getRoleTypeId();
     }
 
-    protected Map<String, RoleTypeCQ> _roleTypeId_InScopeRelation_RoleTypeMap;
-
     public Map<String, RoleTypeCQ> getRoleTypeId_InScopeRelation_RoleType() {
-        return _roleTypeId_InScopeRelation_RoleTypeMap;
+        return xgetSQueMap("roleTypeId_InScopeRelation_RoleType");
     }
 
     @Override
-    public String keepRoleTypeId_InScopeRelation_RoleType(
-            final RoleTypeCQ subQuery) {
-        if (_roleTypeId_InScopeRelation_RoleTypeMap == null) {
-            _roleTypeId_InScopeRelation_RoleTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_roleTypeId_InScopeRelation_RoleTypeMap.size() + 1);
-        _roleTypeId_InScopeRelation_RoleTypeMap.put(key, subQuery);
-        return "roleTypeId_InScopeRelation_RoleType." + key;
+    public String keepRoleTypeId_InScopeRelation_RoleType(final RoleTypeCQ sq) {
+        return xkeepSQue("roleTypeId_InScopeRelation_RoleType", sq);
     }
-
-    protected Map<String, RoleTypeCQ> _roleTypeId_NotInScopeRelation_RoleTypeMap;
 
     public Map<String, RoleTypeCQ> getRoleTypeId_NotInScopeRelation_RoleType() {
-        return _roleTypeId_NotInScopeRelation_RoleTypeMap;
+        return xgetSQueMap("roleTypeId_NotInScopeRelation_RoleType");
     }
 
     @Override
-    public String keepRoleTypeId_NotInScopeRelation_RoleType(
-            final RoleTypeCQ subQuery) {
-        if (_roleTypeId_NotInScopeRelation_RoleTypeMap == null) {
-            _roleTypeId_NotInScopeRelation_RoleTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_roleTypeId_NotInScopeRelation_RoleTypeMap.size() + 1);
-        _roleTypeId_NotInScopeRelation_RoleTypeMap.put(key, subQuery);
-        return "roleTypeId_NotInScopeRelation_RoleType." + key;
+    public String keepRoleTypeId_NotInScopeRelation_RoleType(final RoleTypeCQ sq) {
+        return xkeepSQue("roleTypeId_NotInScopeRelation_RoleType", sq);
     }
 
     /**
@@ -287,9 +254,9 @@ public class BsWebConfigToRoleTypeMappingCQ extends
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -307,9 +274,9 @@ public class BsWebConfigToRoleTypeMappingCQ extends
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -324,67 +291,23 @@ public class BsWebConfigToRoleTypeMappingCQ extends
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final WebConfigToRoleTypeMappingCQ baseQuery = (WebConfigToRoleTypeMappingCQ) baseQueryAsSuper;
-        final WebConfigToRoleTypeMappingCQ unionQuery = (WebConfigToRoleTypeMappingCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryWebCrawlingConfig()) {
-            unionQuery.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
-                    baseQuery.queryWebCrawlingConfig(),
-                    unionQuery.queryWebCrawlingConfig());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final WebConfigToRoleTypeMappingCQ bq = (WebConfigToRoleTypeMappingCQ) bqs;
+        final WebConfigToRoleTypeMappingCQ uq = (WebConfigToRoleTypeMappingCQ) uqs;
+        if (bq.hasConditionQueryRoleType()) {
+            uq.queryRoleType().reflectRelationOnUnionQuery(bq.queryRoleType(),
+                    uq.queryRoleType());
         }
-        if (baseQuery.hasConditionQueryRoleType()) {
-            unionQuery.queryRoleType().reflectRelationOnUnionQuery(
-                    baseQuery.queryRoleType(), unionQuery.queryRoleType());
+        if (bq.hasConditionQueryWebCrawlingConfig()) {
+            uq.queryWebCrawlingConfig().reflectRelationOnUnionQuery(
+                    bq.queryWebCrawlingConfig(), uq.queryWebCrawlingConfig());
         }
     }
 
     // ===================================================================================
     //                                                                       Foreign Query
     //                                                                       =============
-    /**
-     * Get the condition-query for relation table. <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The instance of condition-query. (NotNull)
-     */
-    public WebCrawlingConfigCQ queryWebCrawlingConfig() {
-        return getConditionQueryWebCrawlingConfig();
-    }
-
-    protected WebCrawlingConfigCQ _conditionQueryWebCrawlingConfig;
-
-    public WebCrawlingConfigCQ getConditionQueryWebCrawlingConfig() {
-        if (_conditionQueryWebCrawlingConfig == null) {
-            _conditionQueryWebCrawlingConfig = xcreateQueryWebCrawlingConfig();
-            xsetupOuterJoinWebCrawlingConfig();
-        }
-        return _conditionQueryWebCrawlingConfig;
-    }
-
-    protected WebCrawlingConfigCQ xcreateQueryWebCrawlingConfig() {
-        final String nrp = resolveNextRelationPath(
-                "WEB_CONFIG_TO_ROLE_TYPE_MAPPING", "webCrawlingConfig");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final WebCrawlingConfigCQ cq = new WebCrawlingConfigCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("webCrawlingConfig");
-        cq.xsetRelationPath(nrp);
-        return cq;
-    }
-
-    protected void xsetupOuterJoinWebCrawlingConfig() {
-        final WebCrawlingConfigCQ cq = getConditionQueryWebCrawlingConfig();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("WEB_CONFIG_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "webCrawlingConfig");
-    }
-
-    public boolean hasConditionQueryWebCrawlingConfig() {
-        return _conditionQueryWebCrawlingConfig != null;
-    }
-
     /**
      * Get the condition-query for relation table. <br />
      * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
@@ -394,37 +317,63 @@ public class BsWebConfigToRoleTypeMappingCQ extends
         return getConditionQueryRoleType();
     }
 
-    protected RoleTypeCQ _conditionQueryRoleType;
-
     public RoleTypeCQ getConditionQueryRoleType() {
-        if (_conditionQueryRoleType == null) {
-            _conditionQueryRoleType = xcreateQueryRoleType();
+        final String prop = "roleType";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryRoleType());
             xsetupOuterJoinRoleType();
         }
-        return _conditionQueryRoleType;
+        return xgetQueRlMap(prop);
     }
 
     protected RoleTypeCQ xcreateQueryRoleType() {
-        final String nrp = resolveNextRelationPath(
-                "WEB_CONFIG_TO_ROLE_TYPE_MAPPING", "roleType");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final RoleTypeCQ cq = new RoleTypeCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("roleType");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("WEB_CONFIG_TO_ROLE_TYPE_MAPPING",
+                "roleType");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new RoleTypeCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "roleType", nrp);
     }
 
     protected void xsetupOuterJoinRoleType() {
-        final RoleTypeCQ cq = getConditionQueryRoleType();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("ROLE_TYPE_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "roleType");
+        xregOutJo("roleType");
     }
 
     public boolean hasConditionQueryRoleType() {
-        return _conditionQueryRoleType != null;
+        return xhasQueRlMap("roleType");
+    }
+
+    /**
+     * Get the condition-query for relation table. <br />
+     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
+     * @return The instance of condition-query. (NotNull)
+     */
+    public WebCrawlingConfigCQ queryWebCrawlingConfig() {
+        return getConditionQueryWebCrawlingConfig();
+    }
+
+    public WebCrawlingConfigCQ getConditionQueryWebCrawlingConfig() {
+        final String prop = "webCrawlingConfig";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryWebCrawlingConfig());
+            xsetupOuterJoinWebCrawlingConfig();
+        }
+        return xgetQueRlMap(prop);
+    }
+
+    protected WebCrawlingConfigCQ xcreateQueryWebCrawlingConfig() {
+        final String nrp = xresolveNRP("WEB_CONFIG_TO_ROLE_TYPE_MAPPING",
+                "webCrawlingConfig");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new WebCrawlingConfigCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "webCrawlingConfig", nrp);
+    }
+
+    protected void xsetupOuterJoinWebCrawlingConfig() {
+        xregOutJo("webCrawlingConfig");
+    }
+
+    public boolean hasConditionQueryWebCrawlingConfig() {
+        return xhasQueRlMap("webCrawlingConfig");
     }
 
     @Override
@@ -436,77 +385,43 @@ public class BsWebConfigToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _scalarConditionMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _specifyMyselfDerivedMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _queryMyselfDerivedMap;
 
     public Map<String, WebConfigToRoleTypeMappingCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(
-            final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -515,36 +430,24 @@ public class BsWebConfigToRoleTypeMappingCQ extends
     protected Map<String, WebConfigToRoleTypeMappingCQ> _myselfExistsMap;
 
     public Map<String, WebConfigToRoleTypeMappingCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, WebConfigToRoleTypeMappingCQ> _myselfInScopeMap;
-
     public Map<String, WebConfigToRoleTypeMappingCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final WebConfigToRoleTypeMappingCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final WebConfigToRoleTypeMappingCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -557,6 +460,14 @@ public class BsWebConfigToRoleTypeMappingCQ extends
 
     protected String xCQ() {
         return WebConfigToRoleTypeMappingCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

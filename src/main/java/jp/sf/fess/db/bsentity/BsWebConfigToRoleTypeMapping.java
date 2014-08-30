@@ -48,13 +48,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *
  *
  * [foreign table]
- *     WEB_CRAWLING_CONFIG, ROLE_TYPE
+ *     ROLE_TYPE, WEB_CRAWLING_CONFIG
  *
  * [referrer table]
  *
  *
  * [foreign property]
- *     webCrawlingConfig, roleType
+ *     roleType, webCrawlingConfig
  *
  * [referrer property]
  *
@@ -98,8 +98,14 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -145,33 +151,26 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
-    /** WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'. */
-    protected WebCrawlingConfig _webCrawlingConfig;
-
-    /**
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @return The entity of foreign property 'webCrawlingConfig'. (NullAllowed: when e.g. null FK column, no setupSelect)
-     */
-    public WebCrawlingConfig getWebCrawlingConfig() {
-        return _webCrawlingConfig;
-    }
-
-    /**
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * @param webCrawlingConfig The entity of foreign property 'webCrawlingConfig'. (NullAllowed)
-     */
-    public void setWebCrawlingConfig(final WebCrawlingConfig webCrawlingConfig) {
-        _webCrawlingConfig = webCrawlingConfig;
-    }
-
     /** ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'. */
     protected RoleType _roleType;
 
     /**
-     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * [get] ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
      * @return The entity of foreign property 'roleType'. (NullAllowed: when e.g. null FK column, no setupSelect)
      */
     public RoleType getRoleType() {
@@ -179,11 +178,30 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
     }
 
     /**
-     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * [set] ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
      * @param roleType The entity of foreign property 'roleType'. (NullAllowed)
      */
     public void setRoleType(final RoleType roleType) {
         _roleType = roleType;
+    }
+
+    /** WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'. */
+    protected WebCrawlingConfig _webCrawlingConfig;
+
+    /**
+     * [get] WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
+     * @return The entity of foreign property 'webCrawlingConfig'. (NullAllowed: when e.g. null FK column, no setupSelect)
+     */
+    public WebCrawlingConfig getWebCrawlingConfig() {
+        return _webCrawlingConfig;
+    }
+
+    /**
+     * [set] WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
+     * @param webCrawlingConfig The entity of foreign property 'webCrawlingConfig'. (NullAllowed)
+     */
+    public void setWebCrawlingConfig(final WebCrawlingConfig webCrawlingConfig) {
+        _webCrawlingConfig = webCrawlingConfig;
     }
 
     // ===================================================================================
@@ -225,28 +243,47 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsWebConfigToRoleTypeMapping)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsWebConfigToRoleTypeMapping)) {
             return false;
         }
-        final BsWebConfigToRoleTypeMapping otherEntity = (BsWebConfigToRoleTypeMapping) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsWebConfigToRoleTypeMapping other = (BsWebConfigToRoleTypeMapping) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -255,14 +292,14 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -279,7 +316,7 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -289,18 +326,19 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
-        if (_webCrawlingConfig != null) {
-            sb.append(l).append(xbRDS(_webCrawlingConfig, "webCrawlingConfig"));
-        }
+        final String li = "\n  ";
         if (_roleType != null) {
-            sb.append(l).append(xbRDS(_roleType, "roleType"));
+            sb.append(li).append(xbRDS(_roleType, "roleType"));
+        }
+        if (_webCrawlingConfig != null) {
+            sb.append(li)
+                    .append(xbRDS(_webCrawlingConfig, "webCrawlingConfig"));
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -325,12 +363,12 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getWebConfigId());
-        sb.append(delimiter).append(getRoleTypeId());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getWebConfigId());
+        sb.append(dm).append(getRoleTypeId());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -338,15 +376,15 @@ public abstract class BsWebConfigToRoleTypeMapping implements Entity,
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
-        if (_webCrawlingConfig != null) {
-            sb.append(c).append("webCrawlingConfig");
-        }
+        final String cm = ",";
         if (_roleType != null) {
-            sb.append(c).append("roleType");
+            sb.append(cm).append("roleType");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (_webCrawlingConfig != null) {
+            sb.append(cm).append("webCrawlingConfig");
+        }
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

@@ -23,6 +23,8 @@ import jp.sf.fess.db.cbean.cq.OverlappingHostCQ;
 import jp.sf.fess.db.cbean.cq.ciq.OverlappingHostCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -41,10 +43,10 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsOverlappingHostCQ(final ConditionQuery childQuery,
+    public BsOverlappingHostCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -54,7 +56,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from OVERLAPPING_HOST) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -81,7 +83,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join OVERLAPPING_HOST on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -99,7 +101,6 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -150,7 +151,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
 
     /**
      * Add order-by as ascend. <br />
-     * REGULAR_NAME: {IX, NotNull, VARCHAR(1000)}
+     * REGULAR_NAME: {IX+, NotNull, VARCHAR(1000)}
      * @return this. (NotNull)
      */
     public BsOverlappingHostCQ addOrderBy_RegularName_Asc() {
@@ -160,7 +161,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
 
     /**
      * Add order-by as descend. <br />
-     * REGULAR_NAME: {IX, NotNull, VARCHAR(1000)}
+     * REGULAR_NAME: {IX+, NotNull, VARCHAR(1000)}
      * @return this. (NotNull)
      */
     public BsOverlappingHostCQ addOrderBy_RegularName_Desc() {
@@ -218,7 +219,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
 
     /**
      * Add order-by as ascend. <br />
-     * SORT_ORDER: {IX+, NotNull, INTEGER(10)}
+     * SORT_ORDER: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
      */
     public BsOverlappingHostCQ addOrderBy_SortOrder_Asc() {
@@ -228,7 +229,7 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
 
     /**
      * Add order-by as descend. <br />
-     * SORT_ORDER: {IX+, NotNull, INTEGER(10)}
+     * SORT_ORDER: {NotNull, INTEGER(10)}
      * @return this. (NotNull)
      */
     public BsOverlappingHostCQ addOrderBy_SortOrder_Desc() {
@@ -484,9 +485,9 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -504,9 +505,9 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -521,9 +522,8 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
     }
 
     // ===================================================================================
@@ -538,74 +538,43 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, OverlappingHostCQ> _scalarConditionMap;
-
     public Map<String, OverlappingHostCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final OverlappingHostCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final OverlappingHostCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, OverlappingHostCQ> _specifyMyselfDerivedMap;
-
     public Map<String, OverlappingHostCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final OverlappingHostCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final OverlappingHostCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, OverlappingHostCQ> _queryMyselfDerivedMap;
 
     public Map<String, OverlappingHostCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final OverlappingHostCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final OverlappingHostCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -614,36 +583,24 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
     protected Map<String, OverlappingHostCQ> _myselfExistsMap;
 
     public Map<String, OverlappingHostCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final OverlappingHostCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final OverlappingHostCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, OverlappingHostCQ> _myselfInScopeMap;
-
     public Map<String, OverlappingHostCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final OverlappingHostCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final OverlappingHostCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -656,6 +613,14 @@ public class BsOverlappingHostCQ extends AbstractBsOverlappingHostCQ {
 
     protected String xCQ() {
         return OverlappingHostCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

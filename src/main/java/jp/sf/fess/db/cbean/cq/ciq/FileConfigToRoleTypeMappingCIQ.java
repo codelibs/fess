@@ -47,10 +47,10 @@ public class FileConfigToRoleTypeMappingCIQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FileConfigToRoleTypeMappingCIQ(final ConditionQuery childQuery,
+    public FileConfigToRoleTypeMappingCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsFileConfigToRoleTypeMappingCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -63,9 +63,8 @@ public class FileConfigToRoleTypeMappingCIQ extends
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -138,50 +137,48 @@ public class FileConfigToRoleTypeMappingCIQ extends
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
+    public String keepScalarCondition(final FileConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
     public String keepSpecifyMyselfDerived(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
+            final FileConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(
-            final FileConfigToRoleTypeMappingCQ subQuery) {
+    public String keepQueryMyselfDerived(final FileConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final FileConfigToRoleTypeMappingCQ subQuery) {
+    public String keepMyselfExists(final FileConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(final FileConfigToRoleTypeMappingCQ subQuery) {
+    public String keepMyselfInScope(final FileConfigToRoleTypeMappingCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

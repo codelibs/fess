@@ -17,6 +17,7 @@
 package jp.sf.fess.job;
 
 import jp.sf.fess.service.SearchFieldLogService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
@@ -36,6 +37,13 @@ public class HourlyJob {
         try {
             // update stats fields
             searchFieldLogService.updateFieldLabels();
+        } catch (final Exception e) {
+            logger.error("Failed to execute the hourly task.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
+        try {
+            ComponentUtil.getKeyMatchHelper().update();
         } catch (final Exception e) {
             logger.error("Failed to execute the hourly task.", e);
             resultBuf.append(e.getMessage()).append("\n");

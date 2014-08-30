@@ -21,7 +21,9 @@ import java.util.Map;
 
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
+import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
+import jp.sf.fess.db.exentity.WebCrawlingConfig;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +63,9 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -68,45 +73,84 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgRoleTypeId(), "roleTypeId");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebConfigToRoleTypeMapping) e).getId();
+        public Object read(final Entity et) {
+            return ((WebConfigToRoleTypeMapping) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebConfigToRoleTypeMapping) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebConfigToRoleTypeMapping) et).setId(ctl(vl));
         }
     }
 
     public static class EpgWebConfigId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebConfigToRoleTypeMapping) e).getWebConfigId();
+        public Object read(final Entity et) {
+            return ((WebConfigToRoleTypeMapping) et).getWebConfigId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebConfigToRoleTypeMapping) e).setWebConfigId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebConfigToRoleTypeMapping) et).setWebConfigId(ctl(vl));
         }
     }
 
     public static class EpgRoleTypeId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((WebConfigToRoleTypeMapping) e).getRoleTypeId();
+        public Object read(final Entity et) {
+            return ((WebConfigToRoleTypeMapping) et).getRoleTypeId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((WebConfigToRoleTypeMapping) e).setRoleTypeId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((WebConfigToRoleTypeMapping) et).setRoleTypeId(ctl(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgRoleType(), "roleType");
+        setupEfpg(_efpgMap, new EfpgWebCrawlingConfig(), "webCrawlingConfig");
+    }
+
+    public class EfpgRoleType implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((WebConfigToRoleTypeMapping) et).getRoleType();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((WebConfigToRoleTypeMapping) et).setRoleType((RoleType) vl);
+        }
+    }
+
+    public class EfpgWebCrawlingConfig implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((WebConfigToRoleTypeMapping) et).getWebCrawlingConfig();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((WebConfigToRoleTypeMapping) et)
+                    .setWebCrawlingConfig((WebCrawlingConfig) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -146,35 +190,48 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_99BFC927_AE9E_4EC2_8AF7_27EC480CC80C",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_3498664F_AE93_4441_9780_8D6D8C62011B",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnWebConfigId = cci("WEB_CONFIG_ID",
-            "WEB_CONFIG_ID", null, null, true, "webConfigId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
+            "WEB_CONFIG_ID", null, null, Long.class, "webConfigId", null,
+            false, false, true, "BIGINT", 19, 0, null, false, null, null,
             "webCrawlingConfig", null, null);
 
     protected final ColumnInfo _columnRoleTypeId = cci("ROLE_TYPE_ID",
-            "ROLE_TYPE_ID", null, null, true, "roleTypeId", Long.class, false,
-            false, "BIGINT", 19, 0, null, false, null, null, "roleType", null,
-            null);
+            "ROLE_TYPE_ID", null, null, Long.class, "roleTypeId", null, false,
+            false, true, "BIGINT", 19, 0, null, false, null, null, "roleType",
+            null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * WEB_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to WEB_CRAWLING_CONFIG}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnWebConfigId() {
         return _columnWebConfigId;
     }
 
+    /**
+     * ROLE_TYPE_ID: {IX, NotNull, BIGINT(19), FK to ROLE_TYPE}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRoleTypeId() {
         return _columnRoleTypeId;
     }
@@ -216,25 +273,35 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * @return The information object of foreign property. (NotNull)
+     */
+    public ForeignInfo foreignRoleType() {
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
+                columnRoleTypeId(), RoleTypeDbm.getInstance().columnId());
+        return cfi("CONSTRAINT_A17D5", "roleType", this,
+                RoleTypeDbm.getInstance(), mp, 0, null, false, false, false,
+                false, null, null, false, "webConfigToRoleTypeMappingList");
+    }
+
+    /**
+     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignWebCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnWebConfigId(), WebCrawlingConfigDbm.getInstance()
                         .columnId());
         return cfi("CONSTRAINT_A17D", "webCrawlingConfig", this,
-                WebCrawlingConfigDbm.getInstance(), map, 0, false, false,
+                WebCrawlingConfigDbm.getInstance(), mp, 1, null, false, false,
                 false, false, null, null, false,
                 "webConfigToRoleTypeMappingList");
-    }
-
-    public ForeignInfo foreignRoleType() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
-                columnRoleTypeId(), RoleTypeDbm.getInstance().columnId());
-        return cfi("CONSTRAINT_A17D5", "roleType", this,
-                RoleTypeDbm.getInstance(), map, 1, false, false, false, false,
-                null, null, false, "webConfigToRoleTypeMappingList");
     }
 
     // -----------------------------------------------------
@@ -279,8 +346,8 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public WebConfigToRoleTypeMapping newEntity() {
+        return new WebConfigToRoleTypeMapping();
     }
 
     public WebConfigToRoleTypeMapping newMyEntity() {
@@ -291,24 +358,24 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((WebConfigToRoleTypeMapping) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((WebConfigToRoleTypeMapping) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((WebConfigToRoleTypeMapping) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((WebConfigToRoleTypeMapping) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

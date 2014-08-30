@@ -45,16 +45,13 @@ public class CrawlingSessionInfoNss {
     /**
      * With nested relation columns to select clause. <br />
      * CRAWLING_SESSION by my CRAWLING_SESSION_ID, named 'crawlingSession'.
-     * @return The set-upper of more nested relation. {...with[nested-relation].with[more-nested-relation]} (NotNull)
      */
-    public CrawlingSessionNss withCrawlingSession() {
+    public void withCrawlingSession() {
         _query.doNss(new CrawlingSessionInfoCQ.NssCall() {
             @Override
             public ConditionQuery qf() {
                 return _query.queryCrawlingSession();
             }
         });
-        return new CrawlingSessionNss(_query.queryCrawlingSession());
     }
-
 }

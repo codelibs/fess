@@ -18,6 +18,7 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfFileConfigToLabelTypeMapping;
 import jp.sf.fess.db.bsentity.dbmeta.FileConfigToLabelTypeMappingDbm;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
@@ -30,13 +31,24 @@ import org.seasar.dbflute.bhv.AbstractBehaviorWritable;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -58,13 +70,13 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  *
  *
  * [foreign table]
- *     LABEL_TYPE, FILE_CRAWLING_CONFIG
+ *     FILE_CRAWLING_CONFIG, LABEL_TYPE
  *
  * [referrer table]
  *
  *
  * [foreign property]
- *     labelType, fileCrawlingConfig
+ *     fileCrawlingConfig, labelType
  *
  * [referrer property]
  *
@@ -92,7 +104,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return FileConfigToLabelTypeMappingDbm.getInstance();
@@ -108,14 +120,14 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FileConfigToLabelTypeMapping newEntity() {
+        return new FileConfigToLabelTypeMapping();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public FileConfigToLabelTypeMappingCB newConditionBean() {
+        return new FileConfigToLabelTypeMappingCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -137,12 +149,16 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <pre>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
-     * int count = fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final FileConfigToLabelTypeMappingCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final FileConfigToLabelTypeMappingCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -158,19 +174,21 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
-     * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (fileConfigToLabelTypeMapping != null) {
+     * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (fileConfigToLabelTypeMapping != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = fileConfigToLabelTypeMapping.get...();
      * } else {
      *     ...
@@ -178,118 +196,117 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * </pre>
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FileConfigToLabelTypeMapping selectEntity(
             final FileConfigToLabelTypeMappingCB cb) {
-        return doSelectEntity(cb, FileConfigToLabelTypeMapping.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected FileConfigToLabelTypeMapping facadeSelectEntity(
+            final FileConfigToLabelTypeMappingCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FileConfigToLabelTypeMapping> ENTITY doSelectEntity(
-            final FileConfigToLabelTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityCallback<ENTITY, FileConfigToLabelTypeMappingCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FileConfigToLabelTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final FileConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends FileConfigToLabelTypeMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final FileConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
-     * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = fileConfigToLabelTypeMapping.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FileConfigToLabelTypeMapping selectEntityWithDeletedCheck(
             final FileConfigToLabelTypeMappingCB cb) {
-        return doSelectEntityWithDeletedCheck(cb,
-                FileConfigToLabelTypeMapping.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected FileConfigToLabelTypeMapping facadeSelectEntityWithDeletedCheck(
+            final FileConfigToLabelTypeMappingCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FileConfigToLabelTypeMapping> ENTITY doSelectEntityWithDeletedCheck(
-            final FileConfigToLabelTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
+            final FileConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, FileConfigToLabelTypeMappingCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FileConfigToLabelTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FileConfigToLabelTypeMapping selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, FileConfigToLabelTypeMapping.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends FileConfigToLabelTypeMapping> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected FileConfigToLabelTypeMapping facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends FileConfigToLabelTypeMapping> ENTITY doSelectByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends FileConfigToLabelTypeMapping> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FileConfigToLabelTypeMapping selectByPKValueWithDeletedCheck(
             final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id,
-                FileConfigToLabelTypeMapping.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FileConfigToLabelTypeMapping> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends FileConfigToLabelTypeMapping> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private FileConfigToLabelTypeMappingCB buildPKCB(final Long id) {
+    protected FileConfigToLabelTypeMappingCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final FileConfigToLabelTypeMappingCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -301,42 +318,33 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;FileConfigToLabelTypeMapping&gt; fileConfigToLabelTypeMappingList = fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;FileConfigToLabelTypeMapping&gt; fileConfigToLabelTypeMappingList = fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping : fileConfigToLabelTypeMappingList) {
      *     ... = fileConfigToLabelTypeMapping.get...();
      * }
      * </pre>
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<FileConfigToLabelTypeMapping> selectList(
             final FileConfigToLabelTypeMappingCB cb) {
-        return doSelectList(cb, FileConfigToLabelTypeMapping.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<FileConfigToLabelTypeMapping> facadeSelectList(
+            final FileConfigToLabelTypeMappingCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FileConfigToLabelTypeMapping> ListResultBean<ENTITY> doSelectList(
-            final FileConfigToLabelTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(
-                cb,
-                entityType,
-                new InternalSelectListCallback<ENTITY, FileConfigToLabelTypeMappingCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FileConfigToLabelTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final FileConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -349,8 +357,8 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;FileConfigToLabelTypeMapping&gt; page = fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;FileConfigToLabelTypeMapping&gt; page = fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -362,41 +370,27 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * </pre>
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<FileConfigToLabelTypeMapping> selectPage(
             final FileConfigToLabelTypeMappingCB cb) {
-        return doSelectPage(cb, FileConfigToLabelTypeMapping.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<FileConfigToLabelTypeMapping> facadeSelectPage(
+            final FileConfigToLabelTypeMappingCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FileConfigToLabelTypeMapping> PagingResultBean<ENTITY> doSelectPage(
-            final FileConfigToLabelTypeMappingCB cb,
-            final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(
-                cb,
-                entityType,
-                new InternalSelectPageCallback<ENTITY, FileConfigToLabelTypeMappingCB>() {
-                    @Override
-                    public int callbackSelectCount(
-                            final FileConfigToLabelTypeMappingCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FileConfigToLabelTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final FileConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -407,7 +401,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <pre>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;FileConfigToLabelTypeMapping&gt;() {
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;FileConfigToLabelTypeMapping&gt;() {
      *     public void handle(FileConfigToLabelTypeMapping entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -419,38 +413,23 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     public void selectCursor(
             final FileConfigToLabelTypeMappingCB cb,
             final EntityRowHandler<FileConfigToLabelTypeMapping> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, FileConfigToLabelTypeMapping.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(
+            final FileConfigToLabelTypeMappingCB cb,
+            final EntityRowHandler<FileConfigToLabelTypeMapping> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FileConfigToLabelTypeMapping> void doSelectCursor(
             final FileConfigToLabelTypeMappingCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<FileConfigToLabelTypeMapping>",
-                entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(
-                cb,
-                entityRowHandler,
-                entityType,
-                new InternalSelectCursorCallback<ENTITY, FileConfigToLabelTypeMappingCB>() {
-                    @Override
-                    public void callbackSelectCursor(
-                            final FileConfigToLabelTypeMappingCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FileConfigToLabelTypeMappingCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -460,29 +439,41 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(FileConfigToLabelTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<FileConfigToLabelTypeMappingCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<FileConfigToLabelTypeMappingCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends FileConfigToLabelTypeMappingCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<FileConfigToLabelTypeMappingCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends FileConfigToLabelTypeMappingCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -496,36 +487,89 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     }
 
     // ===================================================================================
-    //                                                                   Pull out Relation
-    //                                                                   =================
+    //                                                                       Load Referrer
+    //                                                                       =============
     /**
-     * Pull out the list of foreign table 'LabelType'.
-     * @param fileConfigToLabelTypeMappingList The list of fileConfigToLabelTypeMapping. (NotNull, EmptyAllowed)
-     * @return The list of foreign table. (NotNull, EmptyAllowed, NotNullElement)
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param fileConfigToLabelTypeMappingList The entity list of fileConfigToLabelTypeMapping. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
      */
-    public List<LabelType> pulloutLabelType(
-            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList) {
-        return helpPulloutInternally(
-                fileConfigToLabelTypeMappingList,
-                new InternalPulloutCallback<FileConfigToLabelTypeMapping, LabelType>() {
-                    @Override
-                    public LabelType getFr(final FileConfigToLabelTypeMapping e) {
-                        return e.getLabelType();
-                    }
-
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final LabelType e,
-                            final List<FileConfigToLabelTypeMapping> ls) {
-                        e.setFileConfigToLabelTypeMappingList(ls);
-                    }
-                });
+    public void load(
+            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList,
+            final ReferrerLoaderHandler<LoaderOfFileConfigToLabelTypeMapping> handler) {
+        xassLRArg(fileConfigToLabelTypeMappingList, handler);
+        handler.handle(new LoaderOfFileConfigToLabelTypeMapping().ready(
+                fileConfigToLabelTypeMappingList, _behaviorSelector));
     }
 
+    /**
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param fileConfigToLabelTypeMapping The entity of fileConfigToLabelTypeMapping. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(
+            final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
+            final ReferrerLoaderHandler<LoaderOfFileConfigToLabelTypeMapping> handler) {
+        xassLRArg(fileConfigToLabelTypeMapping, handler);
+        handler.handle(new LoaderOfFileConfigToLabelTypeMapping().ready(
+                xnewLRAryLs(fileConfigToLabelTypeMapping), _behaviorSelector));
+    }
+
+    // ===================================================================================
+    //                                                                   Pull out Relation
+    //                                                                   =================
     /**
      * Pull out the list of foreign table 'FileCrawlingConfig'.
      * @param fileConfigToLabelTypeMappingList The list of fileConfigToLabelTypeMapping. (NotNull, EmptyAllowed)
@@ -533,26 +577,19 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      */
     public List<FileCrawlingConfig> pulloutFileCrawlingConfig(
             final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList) {
-        return helpPulloutInternally(
-                fileConfigToLabelTypeMappingList,
-                new InternalPulloutCallback<FileConfigToLabelTypeMapping, FileCrawlingConfig>() {
-                    @Override
-                    public FileCrawlingConfig getFr(
-                            final FileConfigToLabelTypeMapping e) {
-                        return e.getFileCrawlingConfig();
-                    }
+        return helpPulloutInternally(fileConfigToLabelTypeMappingList,
+                "fileCrawlingConfig");
+    }
 
-                    @Override
-                    public boolean hasRf() {
-                        return true;
-                    }
-
-                    @Override
-                    public void setRfLs(final FileCrawlingConfig e,
-                            final List<FileConfigToLabelTypeMapping> ls) {
-                        e.setFileConfigToLabelTypeMappingList(ls);
-                    }
-                });
+    /**
+     * Pull out the list of foreign table 'LabelType'.
+     * @param fileConfigToLabelTypeMappingList The list of fileConfigToLabelTypeMapping. (NotNull, EmptyAllowed)
+     * @return The list of foreign table. (NotNull, EmptyAllowed, NotNullElement)
+     */
+    public List<LabelType> pulloutLabelType(
+            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList) {
+        return helpPulloutInternally(fileConfigToLabelTypeMappingList,
+                "labelType");
     }
 
     // ===================================================================================
@@ -565,21 +602,14 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      */
     public List<Long> extractIdList(
             final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList) {
-        return helpExtractListInternally(
-                fileConfigToLabelTypeMappingList,
-                new InternalExtractCallback<FileConfigToLabelTypeMapping, Long>() {
-                    @Override
-                    public Long getCV(final FileConfigToLabelTypeMapping e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(fileConfigToLabelTypeMappingList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -588,42 +618,40 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.set...;</span>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">insert</span>(fileConfigToLabelTypeMapping);
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">insert</span>(fileConfigToLabelTypeMapping);
      * ... = fileConfigToLabelTypeMapping.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param fileConfigToLabelTypeMapping The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param fileConfigToLabelTypeMapping The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping) {
         doInsert(fileConfigToLabelTypeMapping, null);
     }
 
-    protected void doInsert(
-            final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
-            final InsertOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMapping",
-                fileConfigToLabelTypeMapping);
-        prepareInsertOption(option);
-        delegateInsert(fileConfigToLabelTypeMapping, option);
+    protected void doInsert(final FileConfigToLabelTypeMapping et,
+            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMapping", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
     protected void prepareInsertOption(
-            final InsertOption<FileConfigToLabelTypeMappingCB> option) {
-        if (option == null) {
+            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -635,149 +663,102 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * fileConfigToLabelTypeMapping.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * fileConfigToLabelTypeMapping.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">update</span>(fileConfigToLabelTypeMapping);
+     *     fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">update</span>(fileConfigToLabelTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param fileConfigToLabelTypeMapping The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param fileConfigToLabelTypeMapping The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping) {
         doUpdate(fileConfigToLabelTypeMapping, null);
     }
 
-    protected void doUpdate(
-            final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMapping",
-                fileConfigToLabelTypeMapping);
-        prepareUpdateOption(option);
-        helpUpdateInternally(fileConfigToLabelTypeMapping,
-                new InternalUpdateCallback<FileConfigToLabelTypeMapping>() {
-                    @Override
-                    public int callbackDelegateUpdate(
-                            final FileConfigToLabelTypeMapping entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final FileConfigToLabelTypeMapping et,
+            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMapping", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
     protected void prepareUpdateOption(
-            final UpdateOption<FileConfigToLabelTypeMappingCB> option) {
-        if (option == null) {
+            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected FileConfigToLabelTypeMappingCB createCBForVaryingUpdate() {
-        final FileConfigToLabelTypeMappingCB cb = newMyConditionBean();
+        final FileConfigToLabelTypeMappingCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected FileConfigToLabelTypeMappingCB createCBForSpecifiedUpdate() {
-        final FileConfigToLabelTypeMappingCB cb = newMyConditionBean();
+        final FileConfigToLabelTypeMappingCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        doModify(entity, option);
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doModify(et, op);
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param fileConfigToLabelTypeMapping The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param fileConfigToLabelTypeMapping The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping) {
-        doInesrtOrUpdate(fileConfigToLabelTypeMapping, null, null);
+        doInsertOrUpdate(fileConfigToLabelTypeMapping, null, null);
     }
 
-    protected void doInesrtOrUpdate(
-            final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
-            final InsertOption<FileConfigToLabelTypeMappingCB> insertOption,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                fileConfigToLabelTypeMapping,
-                new InternalInsertOrUpdateCallback<FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB>() {
-                    @Override
-                    public void callbackInsert(
-                            final FileConfigToLabelTypeMapping entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(
-                            final FileConfigToLabelTypeMapping entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public FileConfigToLabelTypeMappingCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(
-                            final FileConfigToLabelTypeMappingCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final FileConfigToLabelTypeMapping et,
+            final InsertOption<FileConfigToLabelTypeMappingCB> iop,
+            final UpdateOption<FileConfigToLabelTypeMappingCB> uop) {
+        assertObjectNotNull("fileConfigToLabelTypeMapping", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<FileConfigToLabelTypeMappingCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<FileConfigToLabelTypeMappingCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            final InsertOption<? extends ConditionBean> insertOption,
-            final UpdateOption<? extends ConditionBean> updateOption) {
-        doCreateOrModify(entity, insertOption, updateOption);
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -785,72 +766,73 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <pre>
      * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
      * fileConfigToLabelTypeMapping.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * fileConfigToLabelTypeMapping.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * fileConfigToLabelTypeMapping.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">delete</span>(fileConfigToLabelTypeMapping);
+     *     fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">delete</span>(fileConfigToLabelTypeMapping);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param fileConfigToLabelTypeMapping The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param fileConfigToLabelTypeMapping The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping) {
         doDelete(fileConfigToLabelTypeMapping, null);
     }
 
-    protected void doDelete(
-            final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMapping",
-                fileConfigToLabelTypeMapping);
-        prepareDeleteOption(option);
-        helpDeleteInternally(fileConfigToLabelTypeMapping,
-                new InternalDeleteCallback<FileConfigToLabelTypeMapping>() {
-                    @Override
-                    public int callbackDelegateDelete(
-                            final FileConfigToLabelTypeMapping entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final FileConfigToLabelTypeMapping et,
+            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMapping", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
     protected void prepareDeleteOption(
-            final DeleteOption<FileConfigToLabelTypeMappingCB> option) {
-        if (option == null) {
-            return;
-        }
-        assertDeleteOptionStatus(option);
-    }
-
-    @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
+            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        doRemove(entity, option);
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
+    }
+
+    @Override
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doRemove(et, op);
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
+     *     fileConfigToLabelTypeMapping.setFooName("foo");
+     *     if (...) {
+     *         fileConfigToLabelTypeMapping.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     fileConfigToLabelTypeMappingList.add(fileConfigToLabelTypeMapping);
+     * }
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">batchInsert</span>(fileConfigToLabelTypeMappingList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param fileConfigToLabelTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -859,95 +841,103 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
         return doBatchInsert(fileConfigToLabelTypeMappingList, null);
     }
 
-    protected int[] doBatchInsert(
-            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList,
-            final InsertOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMappingList",
-                fileConfigToLabelTypeMappingList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(fileConfigToLabelTypeMappingList, option);
+    protected int[] doBatchInsert(final List<FileConfigToLabelTypeMapping> ls,
+            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMappingList", ls);
+        InsertOption<FileConfigToLabelTypeMappingCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(
+            final List<FileConfigToLabelTypeMapping> ls,
+            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(fileConfigToLabelTypeMappingList, new SpecifyQuery<FileConfigToLabelTypeMappingCB>() {
-     *     public void specify(FileConfigToLabelTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
+     *     fileConfigToLabelTypeMapping.setFooName("foo");
+     *     if (...) {
+     *         fileConfigToLabelTypeMapping.setFooPrice(123);
+     *     } else {
+     *         fileConfigToLabelTypeMapping.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     fileConfigToLabelTypeMappingList.add(fileConfigToLabelTypeMapping);
+     * }
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">batchUpdate</span>(fileConfigToLabelTypeMappingList);
      * </pre>
      * @param fileConfigToLabelTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(
             final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList) {
         return doBatchUpdate(fileConfigToLabelTypeMappingList, null);
     }
 
-    protected int[] doBatchUpdate(
-            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMappingList",
-                fileConfigToLabelTypeMappingList);
-        prepareBatchUpdateOption(fileConfigToLabelTypeMappingList, option);
-        return delegateBatchUpdate(fileConfigToLabelTypeMappingList, option);
+    protected int[] doBatchUpdate(final List<FileConfigToLabelTypeMapping> ls,
+            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMappingList", ls);
+        UpdateOption<FileConfigToLabelTypeMappingCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
     protected void prepareBatchUpdateOption(
-            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(fileConfigToLabelTypeMappingList);
-        //}
+            final List<FileConfigToLabelTypeMapping> ls,
+            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(fileConfigToLabelTypeMappingList, new SpecifyQuery<FileConfigToLabelTypeMappingCB>() {
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">batchUpdate</span>(fileConfigToLabelTypeMappingList, new SpecifyQuery<FileConfigToLabelTypeMappingCB>() {
      *     public void specify(FileConfigToLabelTypeMappingCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">batchUpdate</span>(fileConfigToLabelTypeMappingList, new SpecifyQuery<FileConfigToLabelTypeMappingCB>() {
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">batchUpdate</span>(fileConfigToLabelTypeMappingList, new SpecifyQuery<FileConfigToLabelTypeMappingCB>() {
      *     public void specify(FileConfigToLabelTypeMappingCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -959,7 +949,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * @param fileConfigToLabelTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(
             final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList,
@@ -970,8 +960,8 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        return doLumpModify(ls, option);
+            final UpdateOption<? extends ConditionBean> op) {
+        return doLumpModify(ls, op);
     }
 
     /**
@@ -979,36 +969,30 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param fileConfigToLabelTypeMappingList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDelete(
             final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList) {
         return doBatchDelete(fileConfigToLabelTypeMappingList, null);
     }
 
-    protected int[] doBatchDelete(
-            final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMappingList",
-                fileConfigToLabelTypeMappingList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(fileConfigToLabelTypeMappingList, option);
+    protected int[] doBatchDelete(final List<FileConfigToLabelTypeMapping> ls,
+            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMappingList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        return doLumpRemove(ls, option);
+            final DeleteOption<? extends ConditionBean> op) {
+        return doLumpRemove(ls, op);
     }
 
     // ===================================================================================
@@ -1017,7 +1001,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB&gt;() {
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB&gt;() {
      *     public ConditionBean setup(fileConfigToLabelTypeMapping entity, FileConfigToLabelTypeMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1030,7 +1014,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1046,18 +1030,17 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB> setupper,
-            final InsertOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final FileConfigToLabelTypeMapping entity = new FileConfigToLabelTypeMapping();
-        final FileConfigToLabelTypeMappingCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB> sp,
+            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final FileConfigToLabelTypeMapping et = newEntity();
+        final FileConfigToLabelTypeMappingCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected FileConfigToLabelTypeMappingCB createCBForQueryInsert() {
-        final FileConfigToLabelTypeMappingCB cb = newMyConditionBean();
+        final FileConfigToLabelTypeMappingCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1065,12 +1048,8 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1083,17 +1062,17 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setVersionNo(value);</span>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">queryUpdate</span>(fileConfigToLabelTypeMapping, cb);
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">queryUpdate</span>(fileConfigToLabelTypeMapping, cb);
      * </pre>
      * @param fileConfigToLabelTypeMapping The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
@@ -1101,28 +1080,20 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
         return doQueryUpdate(fileConfigToLabelTypeMapping, cb, null);
     }
 
-    protected int doQueryUpdate(
-            final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
+    protected int doQueryUpdate(final FileConfigToLabelTypeMapping et,
             final FileConfigToLabelTypeMappingCB cb,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> option) {
-        assertObjectNotNull("fileConfigToLabelTypeMapping",
-                fileConfigToLabelTypeMapping);
+            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
+        assertObjectNotNull("fileConfigToLabelTypeMapping", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                fileConfigToLabelTypeMapping, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity),
-                    (FileConfigToLabelTypeMappingCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity),
-                    (FileConfigToLabelTypeMappingCB) cb, downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1130,33 +1101,28 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <pre>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
      * cb.query().setFoo...(value);
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">queryDelete</span>(fileConfigToLabelTypeMapping, cb);
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">queryDelete</span>(fileConfigToLabelTypeMapping, cb);
      * </pre>
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final FileConfigToLabelTypeMappingCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final FileConfigToLabelTypeMappingCB cb,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> option) {
+            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((FileConfigToLabelTypeMappingCB) cb);
-        } else {
-            return varyingQueryDelete((FileConfigToLabelTypeMappingCB) cb,
-                    downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1177,12 +1143,12 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * InsertOption<FileConfigToLabelTypeMappingCB> option = new InsertOption<FileConfigToLabelTypeMappingCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">varyingInsert</span>(fileConfigToLabelTypeMapping, option);
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">varyingInsert</span>(fileConfigToLabelTypeMapping, option);
      * ... = fileConfigToLabelTypeMapping.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param fileConfigToLabelTypeMapping The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param fileConfigToLabelTypeMapping The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
@@ -1199,26 +1165,26 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
      * fileConfigToLabelTypeMapping.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * fileConfigToLabelTypeMapping.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * fileConfigToLabelTypeMapping.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * fileConfigToLabelTypeMapping.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;FileConfigToLabelTypeMappingCB&gt; option = new UpdateOption&lt;FileConfigToLabelTypeMappingCB&gt;();
      *     option.self(new SpecifyQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *         public void specify(FileConfigToLabelTypeMappingCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">varyingUpdate</span>(fileConfigToLabelTypeMapping, option);
+     *     fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">varyingUpdate</span>(fileConfigToLabelTypeMapping, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param fileConfigToLabelTypeMapping The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param fileConfigToLabelTypeMapping The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
@@ -1230,12 +1196,12 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param fileConfigToLabelTypeMapping The entity of insert or update target. (NotNull)
+     * @param fileConfigToLabelTypeMapping The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
@@ -1243,7 +1209,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
             final UpdateOption<FileConfigToLabelTypeMappingCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(fileConfigToLabelTypeMapping, insertOption,
+        doInsertOrUpdate(fileConfigToLabelTypeMapping, insertOption,
                 updateOption);
     }
 
@@ -1251,10 +1217,10 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * Delete the entity with varying requests. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param fileConfigToLabelTypeMapping The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param fileConfigToLabelTypeMapping The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
@@ -1342,7 +1308,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setPK...(value);</span>
      * fileConfigToLabelTypeMapping.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//fileConfigToLabelTypeMapping.setVersionNo(value);</span>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
@@ -1350,16 +1316,16 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * UpdateOption&lt;FileConfigToLabelTypeMappingCB&gt; option = new UpdateOption&lt;FileConfigToLabelTypeMappingCB&gt;();
      * option.self(new SpecifyQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void specify(FileConfigToLabelTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * fileConfigToLabelTypeMappingBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(fileConfigToLabelTypeMapping, cb, option);
+     * fileConfigToLabelTypeMappingBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(fileConfigToLabelTypeMapping, cb, option);
      * </pre>
      * @param fileConfigToLabelTypeMapping The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(
             final FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping,
@@ -1376,7 +1342,7 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
      * @param cb The condition-bean of FileConfigToLabelTypeMapping. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final FileConfigToLabelTypeMappingCB cb,
             final DeleteOption<FileConfigToLabelTypeMappingCB> option) {
@@ -1423,175 +1389,14 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(
-            final FileConfigToLabelTypeMappingCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<FileConfigToLabelTypeMapping> typeOfSelectedEntity() {
+        return FileConfigToLabelTypeMapping.class;
     }
 
-    protected int delegateSelectCountPlainly(
-            final FileConfigToLabelTypeMappingCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends FileConfigToLabelTypeMapping> void delegateSelectCursor(
-            final FileConfigToLabelTypeMappingCB cb,
-            final EntityRowHandler<ENTITY> erh, final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends FileConfigToLabelTypeMapping> List<ENTITY> delegateSelectList(
-            final FileConfigToLabelTypeMappingCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final FileConfigToLabelTypeMapping e,
-            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final FileConfigToLabelTypeMapping e,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return delegateUpdateNonstrict(e, op);
-    }
-
-    protected int delegateUpdateNonstrict(final FileConfigToLabelTypeMapping e,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final FileConfigToLabelTypeMapping e,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return delegateDeleteNonstrict(e, op);
-    }
-
-    protected int delegateDeleteNonstrict(final FileConfigToLabelTypeMapping e,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(
-            final List<FileConfigToLabelTypeMapping> ls,
-            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(
-            final List<FileConfigToLabelTypeMapping> ls,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchUpdateNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(
-            final List<FileConfigToLabelTypeMapping> ls,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(
-            final List<FileConfigToLabelTypeMapping> ls,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(
-            final List<FileConfigToLabelTypeMapping> ls,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final FileConfigToLabelTypeMapping e,
-            final FileConfigToLabelTypeMappingCB inCB,
-            final ConditionBean resCB,
-            final InsertOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final FileConfigToLabelTypeMapping e,
-            final FileConfigToLabelTypeMappingCB cb,
-            final UpdateOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final FileConfigToLabelTypeMappingCB cb,
-            final DeleteOption<FileConfigToLabelTypeMappingCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
-    //                                                                Optimistic Lock Info
-    //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
-    }
-
-    // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected FileConfigToLabelTypeMapping downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity,
+    protected FileConfigToLabelTypeMapping downcast(final Entity et) {
+        return helpEntityDowncastInternally(et,
                 FileConfigToLabelTypeMapping.class);
     }
 
@@ -1602,31 +1407,31 @@ public abstract class BsFileConfigToLabelTypeMappingBhv extends
 
     @SuppressWarnings("unchecked")
     protected List<FileConfigToLabelTypeMapping> downcast(
-            final List<? extends Entity> entityList) {
-        return (List<FileConfigToLabelTypeMapping>) entityList;
+            final List<? extends Entity> ls) {
+        return (List<FileConfigToLabelTypeMapping>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<FileConfigToLabelTypeMappingCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<FileConfigToLabelTypeMappingCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<FileConfigToLabelTypeMappingCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<FileConfigToLabelTypeMappingCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<FileConfigToLabelTypeMappingCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<FileConfigToLabelTypeMappingCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<FileConfigToLabelTypeMappingCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<FileConfigToLabelTypeMappingCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<FileConfigToLabelTypeMappingCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<FileConfigToLabelTypeMapping, FileConfigToLabelTypeMappingCB>) sp;
     }
 }

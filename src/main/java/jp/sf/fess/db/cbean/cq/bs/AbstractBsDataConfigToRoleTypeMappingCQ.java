@@ -17,6 +17,7 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
@@ -27,10 +28,11 @@ import jp.sf.fess.db.cbean.cq.DataCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.RoleTypeCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
-import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
 import org.seasar.dbflute.cbean.chelper.HpSSQFunction;
 import org.seasar.dbflute.cbean.chelper.HpSSQOption;
 import org.seasar.dbflute.cbean.chelper.HpSSQSetupper;
@@ -53,9 +55,9 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
     //                                                                         Constructor
     //                                                                         ===========
     public AbstractBsDataConfigToRoleTypeMappingCQ(
-            final ConditionQuery childQuery, final SqlClause sqlClause,
+            final ConditionQuery referrerQuery, final SqlClause sqlClause,
             final String aliasName, final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -196,11 +198,11 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -318,18 +320,23 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      */
     public void inScopeDataCrawlingConfig(
             final SubQuery<DataCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepDataConfigId_InScopeRelation_DataCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "DATA_CONFIG_ID", "ID",
-                subQueryPropertyName, "dataCrawlingConfig");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepDataConfigId_InScopeRelation_DataCrawlingConfig(cb
+                .query());
+        registerInScopeRelation(cb.query(), "DATA_CONFIG_ID", "ID", pp,
+                "dataCrawlingConfig");
     }
 
     public abstract String keepDataConfigId_InScopeRelation_DataCrawlingConfig(
-            DataCrawlingConfigCQ subQuery);
+            DataCrawlingConfigCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -339,24 +346,29 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      */
     public void notInScopeDataCrawlingConfig(
             final SubQuery<DataCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepDataConfigId_NotInScopeRelation_DataCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "DATA_CONFIG_ID", "ID",
-                subQueryPropertyName, "dataCrawlingConfig");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepDataConfigId_NotInScopeRelation_DataCrawlingConfig(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "DATA_CONFIG_ID", "ID", pp,
+                "dataCrawlingConfig");
     }
 
     public abstract String keepDataConfigId_NotInScopeRelation_DataCrawlingConfig(
-            DataCrawlingConfigCQ subQuery);
+            DataCrawlingConfigCQ sq);
 
-    protected void regDataConfigId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDataConfigId(), "DATA_CONFIG_ID");
+    protected void regDataConfigId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDataConfigId(), "DATA_CONFIG_ID");
     }
 
-    abstract protected ConditionValue getCValueDataConfigId();
+    protected abstract ConditionValue getCValueDataConfigId();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -471,18 +483,21 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @param subQuery The sub-query of RoleType for 'in-scope'. (NotNull)
      */
     public void inScopeRoleType(final SubQuery<RoleTypeCB> subQuery) {
-        assertObjectNotNull("subQuery<RoleTypeCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final RoleTypeCB cb = new RoleTypeCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepRoleTypeId_InScopeRelation_RoleType(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ROLE_TYPE_ID", "ID",
-                subQueryPropertyName, "roleType");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepRoleTypeId_InScopeRelation_RoleType(cb.query());
+        registerInScopeRelation(cb.query(), "ROLE_TYPE_ID", "ID", pp,
+                "roleType");
     }
 
-    public abstract String keepRoleTypeId_InScopeRelation_RoleType(
-            RoleTypeCQ subQuery);
+    public abstract String keepRoleTypeId_InScopeRelation_RoleType(RoleTypeCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -491,24 +506,28 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @param subQuery The sub-query of RoleType for 'not in-scope'. (NotNull)
      */
     public void notInScopeRoleType(final SubQuery<RoleTypeCB> subQuery) {
-        assertObjectNotNull("subQuery<RoleTypeCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final RoleTypeCB cb = new RoleTypeCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepRoleTypeId_NotInScopeRelation_RoleType(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ROLE_TYPE_ID", "ID",
-                subQueryPropertyName, "roleType");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepRoleTypeId_NotInScopeRelation_RoleType(cb.query());
+        registerNotInScopeRelation(cb.query(), "ROLE_TYPE_ID", "ID", pp,
+                "roleType");
     }
 
     public abstract String keepRoleTypeId_NotInScopeRelation_RoleType(
-            RoleTypeCQ subQuery);
+            RoleTypeCQ sq);
 
-    protected void regRoleTypeId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueRoleTypeId(), "ROLE_TYPE_ID");
+    protected void regRoleTypeId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueRoleTypeId(), "ROLE_TYPE_ID");
     }
 
-    abstract protected ConditionValue getCValueRoleTypeId();
+    protected abstract ConditionValue getCValueRoleTypeId();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -517,7 +536,7 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -527,14 +546,14 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataConfigToRoleTypeMappingCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, DataConfigToRoleTypeMappingCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -544,14 +563,14 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataConfigToRoleTypeMappingCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, DataConfigToRoleTypeMappingCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -561,14 +580,14 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataConfigToRoleTypeMappingCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, DataConfigToRoleTypeMappingCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -578,14 +597,14 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataConfigToRoleTypeMappingCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, DataConfigToRoleTypeMappingCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -595,14 +614,14 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataConfigToRoleTypeMappingCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, DataConfigToRoleTypeMappingCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -612,47 +631,31 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataConfigToRoleTypeMappingCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, DataConfigToRoleTypeMappingCB.class);
     }
 
-    protected HpSSQFunction<DataConfigToRoleTypeMappingCB> xcreateSSQFunction(
-            final String operand) {
-        return new HpSSQFunction<DataConfigToRoleTypeMappingCB>(
-                new HpSSQSetupper<DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-                            final HpSSQOption<DataConfigToRoleTypeMappingCB> option) {
-                        xscalarCondition(function, subQuery, operand, option);
-                    }
-                });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-            final String operand,
-            final HpSSQOption<DataConfigToRoleTypeMappingCB> option) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToRoleTypeMappingCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(
-            DataConfigToRoleTypeMappingCQ subQuery);
+    public abstract String keepScalarCondition(DataConfigToRoleTypeMappingCQ sq);
 
     protected DataConfigToRoleTypeMappingCB xcreateScalarConditionCB() {
-        final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
+        final DataConfigToRoleTypeMappingCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected DataConfigToRoleTypeMappingCB xcreateScalarConditionPartitionByCB() {
-        final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
+        final DataConfigToRoleTypeMappingCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -660,112 +663,178 @@ public abstract class AbstractBsDataConfigToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+    public void xsmyselfDerive(final String fn,
+            final SubQuery<DataConfigToRoleTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
     public abstract String keepSpecifyMyselfDerived(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<DataConfigToRoleTypeMappingCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(DataConfigToRoleTypeMappingCB.class);
     }
 
-    protected HpQDRFunction<DataConfigToRoleTypeMappingCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<DataConfigToRoleTypeMappingCB>(
-                new HpQDRSetupper<DataConfigToRoleTypeMappingCB>() {
-                    @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveMyselfDerived(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
     public abstract String keepQueryMyselfDerived(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(
             final SubQuery<DataConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(
-            DataConfigToRoleTypeMappingCQ subQuery);
+    public abstract String keepMyselfExists(DataConfigToRoleTypeMappingCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(
             final SubQuery<DataConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(
-            DataConfigToRoleTypeMappingCQ subQuery);
+    public abstract String keepMyselfInScope(DataConfigToRoleTypeMappingCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return DataConfigToRoleTypeMappingCB.class.getName();
+    protected DataConfigToRoleTypeMappingCB newMyCB() {
+        return new DataConfigToRoleTypeMappingCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return DataConfigToRoleTypeMappingCQ.class.getName();
     }

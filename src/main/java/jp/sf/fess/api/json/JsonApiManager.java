@@ -113,8 +113,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected void processPingRequest(HttpServletRequest request,
-            HttpServletResponse response, FilterChain chain) {
+    protected void processPingRequest(final HttpServletRequest request,
+            final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getSearchService();
         int status;
         final StringBuilder buf = new StringBuilder(1000);

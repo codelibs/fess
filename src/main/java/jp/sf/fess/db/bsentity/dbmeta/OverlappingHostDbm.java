@@ -60,6 +60,9 @@ public class OverlappingHostDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -75,141 +78,141 @@ public class OverlappingHostDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getId();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setId(ctl(vl));
         }
     }
 
     public static class EpgRegularName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getRegularName();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getRegularName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setRegularName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setRegularName((String) vl);
         }
     }
 
     public static class EpgOverlappingName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getOverlappingName();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getOverlappingName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setOverlappingName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setOverlappingName((String) vl);
         }
     }
 
     public static class EpgSortOrder implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getSortOrder();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getSortOrder();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setSortOrder(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setSortOrder(cti(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((OverlappingHost) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((OverlappingHost) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((OverlappingHost) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((OverlappingHost) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -249,103 +252,152 @@ public class OverlappingHostDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_3C848A8C_D557_4A55_BB70_1DD3BC7BFC6C",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_1754F480_A0A6_476F_BA83_17293AD5DBFE",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnRegularName = cci("REGULAR_NAME",
-            "REGULAR_NAME", null, null, true, "regularName", String.class,
-            false, false, "VARCHAR", 1000, 0, null, false, null, null, null,
-            null, null);
+            "REGULAR_NAME", null, null, String.class, "regularName", null,
+            false, false, true, "VARCHAR", 1000, 0, null, false, null, null,
+            null, null, null);
 
     protected final ColumnInfo _columnOverlappingName = cci("OVERLAPPING_NAME",
-            "OVERLAPPING_NAME", null, null, true, "overlappingName",
-            String.class, false, false, "VARCHAR", 1000, 0, null, false, null,
+            "OVERLAPPING_NAME", null, null, String.class, "overlappingName",
+            null, false, false, true, "VARCHAR", 1000, 0, null, false, null,
             null, null, null, null);
 
     protected final ColumnInfo _columnSortOrder = cci("SORT_ORDER",
-            "SORT_ORDER", null, null, true, "sortOrder", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false, null, null, null, null, null);
+            "SORT_ORDER", null, null, Integer.class, "sortOrder", null, false,
+            false, true, "INTEGER", 10, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * REGULAR_NAME: {IX+, NotNull, VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRegularName() {
         return _columnRegularName;
     }
 
+    /**
+     * OVERLAPPING_NAME: {NotNull, VARCHAR(1000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnOverlappingName() {
         return _columnOverlappingName;
     }
 
+    /**
+     * SORT_ORDER: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -395,6 +447,8 @@ public class OverlappingHostDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -451,8 +505,8 @@ public class OverlappingHostDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public OverlappingHost newEntity() {
+        return new OverlappingHost();
     }
 
     public OverlappingHost newMyEntity() {
@@ -463,24 +517,24 @@ public class OverlappingHostDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((OverlappingHost) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((OverlappingHost) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((OverlappingHost) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((OverlappingHost) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

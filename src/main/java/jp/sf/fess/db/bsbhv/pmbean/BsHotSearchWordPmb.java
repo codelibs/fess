@@ -115,14 +115,14 @@ public class BsHotSearchWordPmb extends SimplePagingBean implements
 
     @SuppressWarnings("unchecked")
     protected <ELEMENT> ArrayList<ELEMENT> newArrayList(
-            final ELEMENT... elements) {
+            final ELEMENT... elements) { // might be called by option handling
         final Object obj = DfCollectionUtil.newArrayList(elements);
         return (ArrayList<ELEMENT>) obj; // to avoid the warning between JDK6 and JDK7
     }
 
     @SuppressWarnings("unchecked")
     protected <NUMBER extends Number> NUMBER toNumber(final Object obj,
-            final Class<NUMBER> type) {
+            final Class<NUMBER> type) { // might be called by option handling
         return (NUMBER) DfTypeUtil.toNumber(obj, type);
     }
 
@@ -158,13 +158,13 @@ public class BsHotSearchWordPmb extends SimplePagingBean implements
         return sb.toString();
     }
 
-    private String xbuildColumnString() {
-        final String c = ", ";
+    protected String xbuildColumnString() {
+        final String dm = ", ";
         final StringBuilder sb = new StringBuilder();
-        sb.append(c).append(_fromRequestedTime);
-        sb.append(c).append(_toRequestedTime);
+        sb.append(dm).append(_fromRequestedTime);
+        sb.append(dm).append(_toRequestedTime);
         if (sb.length() > 0) {
-            sb.delete(0, c.length());
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -204,5 +204,4 @@ public class BsHotSearchWordPmb extends SimplePagingBean implements
     public void setToRequestedTime(final java.sql.Timestamp toRequestedTime) {
         _toRequestedTime = toRequestedTime;
     }
-
 }

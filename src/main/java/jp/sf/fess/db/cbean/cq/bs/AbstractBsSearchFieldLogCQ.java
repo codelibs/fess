@@ -17,6 +17,7 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.SearchFieldLogCB;
@@ -25,10 +26,11 @@ import jp.sf.fess.db.cbean.cq.SearchFieldLogCQ;
 import jp.sf.fess.db.cbean.cq.SearchLogCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
-import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
 import org.seasar.dbflute.cbean.chelper.HpSSQFunction;
 import org.seasar.dbflute.cbean.chelper.HpSSQOption;
 import org.seasar.dbflute.cbean.chelper.HpSSQSetupper;
@@ -49,10 +51,10 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsSearchFieldLogCQ(final ConditionQuery childQuery,
+    public AbstractBsSearchFieldLogCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -193,11 +195,11 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -309,18 +311,20 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @param subQuery The sub-query of SearchLog for 'in-scope'. (NotNull)
      */
     public void inScopeSearchLog(final SubQuery<SearchLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchLogCB cb = new SearchLogCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSearchId_InScopeRelation_SearchLog(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "SEARCH_ID", "ID",
-                subQueryPropertyName, "searchLog");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSearchId_InScopeRelation_SearchLog(cb.query());
+        registerInScopeRelation(cb.query(), "SEARCH_ID", "ID", pp, "searchLog");
     }
 
-    public abstract String keepSearchId_InScopeRelation_SearchLog(
-            SearchLogCQ subQuery);
+    public abstract String keepSearchId_InScopeRelation_SearchLog(SearchLogCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -329,24 +333,28 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @param subQuery The sub-query of SearchLog for 'not in-scope'. (NotNull)
      */
     public void notInScopeSearchLog(final SubQuery<SearchLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchLogCB cb = new SearchLogCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSearchId_NotInScopeRelation_SearchLog(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "SEARCH_ID", "ID",
-                subQueryPropertyName, "searchLog");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSearchId_NotInScopeRelation_SearchLog(cb.query());
+        registerNotInScopeRelation(cb.query(), "SEARCH_ID", "ID", pp,
+                "searchLog");
     }
 
     public abstract String keepSearchId_NotInScopeRelation_SearchLog(
-            SearchLogCQ subQuery);
+            SearchLogCQ sq);
 
-    protected void regSearchId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueSearchId(), "SEARCH_ID");
+    protected void regSearchId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueSearchId(), "SEARCH_ID");
     }
 
-    abstract protected ConditionValue getCValueSearchId();
+    protected abstract ConditionValue getCValueSearchId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -448,7 +456,7 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * NAME: {IX, NotNull, VARCHAR(255)} <br />
-     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param name The value of name as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -469,11 +477,11 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
         regLSQ(CK_NLS, fRES(name), getCValueName(), "NAME", likeSearchOption);
     }
 
-    protected void regName(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueName(), "NAME");
+    protected void regName(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueName(), "NAME");
     }
 
-    abstract protected ConditionValue getCValueName();
+    protected abstract ConditionValue getCValueName();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -575,7 +583,7 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * VALUE: {NotNull, VARCHAR(1000)} <br />
-     * <pre>e.g. setValue_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setValue_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param value The value of value as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -596,11 +604,11 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
         regLSQ(CK_NLS, fRES(value), getCValueValue(), "VALUE", likeSearchOption);
     }
 
-    protected void regValue(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueValue(), "VALUE");
+    protected void regValue(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueValue(), "VALUE");
     }
 
-    abstract protected ConditionValue getCValueValue();
+    protected abstract ConditionValue getCValueValue();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -609,7 +617,7 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -619,14 +627,14 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchFieldLogCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, SearchFieldLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -636,14 +644,14 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchFieldLogCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, SearchFieldLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -653,14 +661,14 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchFieldLogCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, SearchFieldLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -670,14 +678,14 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchFieldLogCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, SearchFieldLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -687,14 +695,14 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchFieldLogCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, SearchFieldLogCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;SearchFieldLogCB&gt;() {
      *     public void query(SearchFieldLogCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -704,44 +712,31 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<SearchFieldLogCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, SearchFieldLogCB.class);
     }
 
-    protected HpSSQFunction<SearchFieldLogCB> xcreateSSQFunction(
-            final String operand) {
-        return new HpSSQFunction<SearchFieldLogCB>(
-                new HpSSQSetupper<SearchFieldLogCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<SearchFieldLogCB> subQuery,
-                            final HpSSQOption<SearchFieldLogCB> option) {
-                        xscalarCondition(function, subQuery, operand, option);
-                    }
-                });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<SearchFieldLogCB> subQuery, final String operand,
-            final HpSSQOption<SearchFieldLogCB> option) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchFieldLogCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(SearchFieldLogCQ subQuery);
+    public abstract String keepScalarCondition(SearchFieldLogCQ sq);
 
     protected SearchFieldLogCB xcreateScalarConditionCB() {
-        final SearchFieldLogCB cb = new SearchFieldLogCB();
+        final SearchFieldLogCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected SearchFieldLogCB xcreateScalarConditionPartitionByCB() {
-        final SearchFieldLogCB cb = new SearchFieldLogCB();
+        final SearchFieldLogCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -749,104 +744,174 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<SearchFieldLogCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+    public void xsmyselfDerive(final String fn,
+            final SubQuery<SearchFieldLogCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(SearchFieldLogCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(SearchFieldLogCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<SearchFieldLogCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(SearchFieldLogCB.class);
     }
 
-    protected HpQDRFunction<SearchFieldLogCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<SearchFieldLogCB>(
-                new HpQDRSetupper<SearchFieldLogCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<SearchFieldLogCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveMyselfDerived(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<SearchFieldLogCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(SearchFieldLogCQ subQuery);
+    public abstract String keepQueryMyselfDerived(SearchFieldLogCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<SearchFieldLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(SearchFieldLogCQ subQuery);
+    public abstract String keepMyselfExists(SearchFieldLogCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<SearchFieldLogCB> subQuery) {
-        assertObjectNotNull("subQuery<SearchFieldLogCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final SearchFieldLogCB cb = new SearchFieldLogCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(SearchFieldLogCQ subQuery);
+    public abstract String keepMyselfInScope(SearchFieldLogCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return SearchFieldLogCB.class.getName();
+    protected SearchFieldLogCB newMyCB() {
+        return new SearchFieldLogCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return SearchFieldLogCQ.class.getName();
     }

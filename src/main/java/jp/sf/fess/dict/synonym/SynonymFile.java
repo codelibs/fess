@@ -393,7 +393,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         return new BufferedInputStream(new FileInputStream(file));
     }
 
-    public void update(InputStream in) throws IOException {
+    public void update(final InputStream in) throws IOException {
         StreamUtil.drain(in, file);
         reload(null);
     }

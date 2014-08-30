@@ -46,10 +46,10 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public DataCrawlingConfigCIQ(final ConditionQuery childQuery,
+    public DataCrawlingConfigCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsDataCrawlingConfigCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -62,9 +62,8 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -181,7 +180,7 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(
-            final Object pv) {
+            final Object vl) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
@@ -195,7 +194,7 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
 
     @Override
     public String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter(
-            final Object pv) {
+            final Object vl) {
         throwIICBOE("(Query)DerivedReferrer");
         return null;
     }
@@ -272,47 +271,47 @@ public class DataCrawlingConfigCIQ extends AbstractBsDataCrawlingConfigCQ {
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(final DataCrawlingConfigCQ subQuery) {
+    public String keepScalarCondition(final DataCrawlingConfigCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final DataCrawlingConfigCQ subQuery) {
+    public String keepSpecifyMyselfDerived(final DataCrawlingConfigCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(final DataCrawlingConfigCQ subQuery) {
+    public String keepQueryMyselfDerived(final DataCrawlingConfigCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final DataCrawlingConfigCQ subQuery) {
+    public String keepMyselfExists(final DataCrawlingConfigCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(final DataCrawlingConfigCQ subQuery) {
+    public String keepMyselfInScope(final DataCrawlingConfigCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

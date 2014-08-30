@@ -2,9 +2,9 @@
 
 set ANT_OPTS=-Xmx512m
 
-set DBFLUTE_HOME=..\mydbflute\dbflute-1.0.4K
+set DBFLUTE_HOME=..\mydbflute\dbflute-1.0.5J
 
-set MY_PROJECT_NAME=fess
+set MY_PROJECT_NAME=oracle
 
 set MY_PROPERTIES_PATH=build.properties
 

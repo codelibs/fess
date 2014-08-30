@@ -18,12 +18,11 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfDataCrawlingConfig;
 import jp.sf.fess.db.bsentity.dbmeta.DataCrawlingConfigDbm;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.DataConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.DataCrawlingConfigCB;
-import jp.sf.fess.db.exbhv.DataConfigToLabelTypeMappingBhv;
-import jp.sf.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.DataCrawlingConfigBhv;
 import jp.sf.fess.db.exentity.DataConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.DataConfigToRoleTypeMapping;
@@ -35,14 +34,28 @@ import org.seasar.dbflute.bhv.ConditionBeanSetupper;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.LoadReferrerOption;
+import org.seasar.dbflute.bhv.NestedReferrerListGateway;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -97,7 +110,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return DataCrawlingConfigDbm.getInstance();
@@ -113,14 +126,14 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public DataCrawlingConfig newEntity() {
+        return new DataCrawlingConfig();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public DataCrawlingConfigCB newConditionBean() {
+        return new DataCrawlingConfigCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -142,12 +155,16 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * int count = dataCrawlingConfigBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = dataCrawlingConfigBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final DataCrawlingConfigCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final DataCrawlingConfigCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -163,19 +180,21 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (dataCrawlingConfig != null) {
+     * DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (dataCrawlingConfig != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = dataCrawlingConfig.get...();
      * } else {
      *     ...
@@ -183,112 +202,115 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataCrawlingConfig selectEntity(final DataCrawlingConfigCB cb) {
-        return doSelectEntity(cb, DataCrawlingConfig.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected DataCrawlingConfig facadeSelectEntity(
+            final DataCrawlingConfigCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataCrawlingConfig> ENTITY doSelectEntity(
-            final DataCrawlingConfigCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityCallback<ENTITY, DataCrawlingConfigCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final DataCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends DataCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final DataCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = dataCrawlingConfig.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataCrawlingConfig selectEntityWithDeletedCheck(
             final DataCrawlingConfigCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, DataCrawlingConfig.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected DataCrawlingConfig facadeSelectEntityWithDeletedCheck(
+            final DataCrawlingConfigCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataCrawlingConfig> ENTITY doSelectEntityWithDeletedCheck(
-            final DataCrawlingConfigCB cb, final Class<ENTITY> entityType) {
+            final DataCrawlingConfigCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, DataCrawlingConfigCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataCrawlingConfig selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, DataCrawlingConfig.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends DataCrawlingConfig> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected DataCrawlingConfig facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends DataCrawlingConfig> ENTITY doSelectByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends DataCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public DataCrawlingConfig selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, DataCrawlingConfig.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends DataCrawlingConfig> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends DataCrawlingConfig> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private DataCrawlingConfigCB buildPKCB(final Long id) {
+    protected DataCrawlingConfigCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final DataCrawlingConfigCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -300,39 +322,33 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;DataCrawlingConfig&gt; dataCrawlingConfigList = dataCrawlingConfigBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;DataCrawlingConfig&gt; dataCrawlingConfigList = dataCrawlingConfigBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (DataCrawlingConfig dataCrawlingConfig : dataCrawlingConfigList) {
      *     ... = dataCrawlingConfig.get...();
      * }
      * </pre>
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<DataCrawlingConfig> selectList(
             final DataCrawlingConfigCB cb) {
-        return doSelectList(cb, DataCrawlingConfig.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<DataCrawlingConfig> facadeSelectList(
+            final DataCrawlingConfigCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataCrawlingConfig> ListResultBean<ENTITY> doSelectList(
-            final DataCrawlingConfigCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, DataCrawlingConfigCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final DataCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -345,8 +361,8 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;DataCrawlingConfig&gt; page = dataCrawlingConfigBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;DataCrawlingConfig&gt; page = dataCrawlingConfigBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -358,37 +374,27 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<DataCrawlingConfig> selectPage(
             final DataCrawlingConfigCB cb) {
-        return doSelectPage(cb, DataCrawlingConfig.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<DataCrawlingConfig> facadeSelectPage(
+            final DataCrawlingConfigCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataCrawlingConfig> PagingResultBean<ENTITY> doSelectPage(
-            final DataCrawlingConfigCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, DataCrawlingConfigCB>() {
-                    @Override
-                    public int callbackSelectCount(final DataCrawlingConfigCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final DataCrawlingConfigCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -399,7 +405,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;DataCrawlingConfig&gt;() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;DataCrawlingConfig&gt;() {
      *     public void handle(DataCrawlingConfig entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -410,38 +416,22 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final DataCrawlingConfigCB cb,
             final EntityRowHandler<DataCrawlingConfig> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, DataCrawlingConfig.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final DataCrawlingConfigCB cb,
+            final EntityRowHandler<DataCrawlingConfig> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends DataCrawlingConfig> void doSelectCursor(
             final DataCrawlingConfigCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<DataCrawlingConfig>",
-                entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(
-                cb,
-                entityRowHandler,
-                entityType,
-                new InternalSelectCursorCallback<ENTITY, DataCrawlingConfigCB>() {
-                    @Override
-                    public void callbackSelectCursor(
-                            final DataCrawlingConfigCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final DataCrawlingConfigCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -451,29 +441,41 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(DataCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<DataCrawlingConfigCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<DataCrawlingConfigCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends DataCrawlingConfigCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<DataCrawlingConfigCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends DataCrawlingConfigCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -490,278 +492,310 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     //                                                                       Load Referrer
     //                                                                       =============
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
      */
-    public void loadDataConfigToLabelTypeMappingList(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final ConditionBeanSetupper<DataConfigToLabelTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(dataCrawlingConfig, conditionBeanSetupper);
-        loadDataConfigToLabelTypeMappingList(xnewLRLs(dataCrawlingConfig),
-                conditionBeanSetupper);
+    public void load(final List<DataCrawlingConfig> dataCrawlingConfigList,
+            final ReferrerLoaderHandler<LoaderOfDataCrawlingConfig> handler) {
+        xassLRArg(dataCrawlingConfigList, handler);
+        handler.handle(new LoaderOfDataCrawlingConfig().ready(
+                dataCrawlingConfigList, _behaviorSelector));
     }
 
     /**
-     * Load referrer of dataConfigToLabelTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final DataCrawlingConfig dataCrawlingConfig,
+            final ReferrerLoaderHandler<LoaderOfDataCrawlingConfig> handler) {
+        xassLRArg(dataCrawlingConfig, handler);
+        handler.handle(new LoaderOfDataCrawlingConfig().ready(
+                xnewLRAryLs(dataCrawlingConfig), _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of dataConfigToLabelTypeMappingList by the set-upper of referrer. <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'.
      * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">loadDataConfigToLabelTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">loadDataConfigToLabelTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToLabelTypeMappingCB&gt;() {
      *     public void setup(DataConfigToLabelTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (DataCrawlingConfig dataCrawlingConfig : dataCrawlingConfigList) {
-     *     ... = dataCrawlingConfig.<span style="color: #FD4747">getDataConfigToLabelTypeMappingList()</span>;
+     *     ... = dataCrawlingConfig.<span style="color: #DD4747">getDataConfigToLabelTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setDataConfigId_InScope(pkList);
      * cb.query().addOrderBy_DataConfigId_Asc();
      * </pre>
      * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToLabelTypeMappingList(
+    public NestedReferrerListGateway<DataConfigToLabelTypeMapping> loadDataConfigToLabelTypeMappingList(
             final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final ConditionBeanSetupper<DataConfigToLabelTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(dataCrawlingConfigList, conditionBeanSetupper);
-        loadDataConfigToLabelTypeMappingList(
+            final ConditionBeanSetupper<DataConfigToLabelTypeMappingCB> setupper) {
+        xassLRArg(dataCrawlingConfigList, setupper);
+        return doLoadDataConfigToLabelTypeMappingList(
                 dataCrawlingConfigList,
                 new LoadReferrerOption<DataConfigToLabelTypeMappingCB, DataConfigToLabelTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of dataConfigToLabelTypeMappingList by the set-upper of referrer. <br />
+     * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'.
+     * <pre>
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">loadDataConfigToLabelTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     *     public void setup(DataConfigToLabelTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = dataCrawlingConfig.<span style="color: #DD4747">getDataConfigToLabelTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setDataConfigId_InScope(pkList);
+     * cb.query().addOrderBy_DataConfigId_Asc();
+     * </pre>
+     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<DataConfigToLabelTypeMapping> loadDataConfigToLabelTypeMappingList(
+            final DataCrawlingConfig dataCrawlingConfig,
+            final ConditionBeanSetupper<DataConfigToLabelTypeMappingCB> setupper) {
+        xassLRArg(dataCrawlingConfig, setupper);
+        return doLoadDataConfigToLabelTypeMappingList(
+                xnewLRLs(dataCrawlingConfig),
+                new LoadReferrerOption<DataConfigToLabelTypeMappingCB, DataConfigToLabelTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToLabelTypeMappingList(
+    public NestedReferrerListGateway<DataConfigToLabelTypeMapping> loadDataConfigToLabelTypeMappingList(
             final DataCrawlingConfig dataCrawlingConfig,
             final LoadReferrerOption<DataConfigToLabelTypeMappingCB, DataConfigToLabelTypeMapping> loadReferrerOption) {
         xassLRArg(dataCrawlingConfig, loadReferrerOption);
-        loadDataConfigToLabelTypeMappingList(xnewLRLs(dataCrawlingConfig),
-                loadReferrerOption);
+        return loadDataConfigToLabelTypeMappingList(
+                xnewLRLs(dataCrawlingConfig), loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToLabelTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<DataConfigToLabelTypeMapping> loadDataConfigToLabelTypeMappingList(
             final List<DataCrawlingConfig> dataCrawlingConfigList,
             final LoadReferrerOption<DataConfigToLabelTypeMappingCB, DataConfigToLabelTypeMapping> loadReferrerOption) {
         xassLRArg(dataCrawlingConfigList, loadReferrerOption);
         if (dataCrawlingConfigList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<DataConfigToLabelTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final DataConfigToLabelTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                DataConfigToLabelTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                dataCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<DataCrawlingConfig, Long, DataConfigToLabelTypeMappingCB, DataConfigToLabelTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final DataCrawlingConfig e) {
-                        return e.getId();
-                    }
+        return doLoadDataConfigToLabelTypeMappingList(dataCrawlingConfigList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final DataCrawlingConfig e,
-                            final List<DataConfigToLabelTypeMapping> ls) {
-                        e.setDataConfigToLabelTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public DataConfigToLabelTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final DataConfigToLabelTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setDataConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(
-                            final DataConfigToLabelTypeMappingCB cb) {
-                        cb.query().addOrderBy_DataConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final DataConfigToLabelTypeMappingCB cb) {
-                        cb.specify().columnDataConfigId();
-                    }
-
-                    @Override
-                    public List<DataConfigToLabelTypeMapping> selRfLs(
-                            final DataConfigToLabelTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final DataConfigToLabelTypeMapping e) {
-                        return e.getDataConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final DataConfigToLabelTypeMapping re,
-                            final DataCrawlingConfig le) {
-                        re.setDataCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "dataConfigToLabelTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<DataConfigToLabelTypeMapping> doLoadDataConfigToLabelTypeMappingList(
+            final List<DataCrawlingConfig> dataCrawlingConfigList,
+            final LoadReferrerOption<DataConfigToLabelTypeMappingCB, DataConfigToLabelTypeMapping> option) {
+        return helpLoadReferrerInternally(dataCrawlingConfigList, option,
+                "dataConfigToLabelTypeMappingList");
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
-     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
-     */
-    public void loadDataConfigToRoleTypeMappingList(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(dataCrawlingConfig, conditionBeanSetupper);
-        loadDataConfigToRoleTypeMappingList(xnewLRLs(dataCrawlingConfig),
-                conditionBeanSetupper);
-    }
-
-    /**
-     * Load referrer of dataConfigToRoleTypeMappingList with the set-upper for condition-bean of referrer. <br />
+     * Load referrer of dataConfigToRoleTypeMappingList by the set-upper of referrer. <br />
      * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingList'.
      * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">loadDataConfigToRoleTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">loadDataConfigToRoleTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void setup(DataConfigToRoleTypeMappingCB cb) {
      *         cb.setupSelect...();
      *         cb.query().setFoo...(value);
-     *         cb.query().addOrderBy_Bar...(); <span style="color: #3F7E5E">// basically you should order referrer list</span>
+     *         cb.query().addOrderBy_Bar...();
      *     }
-     * });
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
      * for (DataCrawlingConfig dataCrawlingConfig : dataCrawlingConfigList) {
-     *     ... = dataCrawlingConfig.<span style="color: #FD4747">getDataConfigToRoleTypeMappingList()</span>;
+     *     ... = dataCrawlingConfig.<span style="color: #DD4747">getDataConfigToRoleTypeMappingList()</span>;
      * }
      * </pre>
-     * About internal policy, the value of primary key(and others too) is treated as case-insensitive. <br />
-     * The condition-bean that the set-upper provides have settings before you touch it. It is as follows:
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
      * <pre>
      * cb.query().setDataConfigId_InScope(pkList);
      * cb.query().addOrderBy_DataConfigId_Asc();
      * </pre>
      * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
-     * @param conditionBeanSetupper The instance of referrer condition-bean set-upper for registering referrer condition. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
             final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> conditionBeanSetupper) {
-        xassLRArg(dataCrawlingConfigList, conditionBeanSetupper);
-        loadDataConfigToRoleTypeMappingList(
+            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(dataCrawlingConfigList, setupper);
+        return doLoadDataConfigToRoleTypeMappingList(
                 dataCrawlingConfigList,
                 new LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping>()
-                        .xinit(conditionBeanSetupper));
+                        .xinit(setupper));
     }
 
     /**
-     * {Refer to overload method that has an argument of the list of entity.}
+     * Load referrer of dataConfigToRoleTypeMappingList by the set-upper of referrer. <br />
+     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingList'.
+     * <pre>
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">loadDataConfigToRoleTypeMappingList</span>(dataCrawlingConfigList, new ConditionBeanSetupper&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     *     public void setup(DataConfigToRoleTypeMappingCB cb) {
+     *         cb.setupSelect...();
+     *         cb.query().setFoo...(value);
+     *         cb.query().addOrderBy_Bar...();
+     *     }
+     * }); <span style="color: #3F7E5E">// you can load nested referrer from here</span>
+     * <span style="color: #3F7E5E">//}).withNestedList(referrerList -&gt {</span>
+     * <span style="color: #3F7E5E">//    ...</span>
+     * <span style="color: #3F7E5E">//});</span>
+     * ... = dataCrawlingConfig.<span style="color: #DD4747">getDataConfigToRoleTypeMappingList()</span>;
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has settings before callback as follows:
+     * <pre>
+     * cb.query().setDataConfigId_InScope(pkList);
+     * cb.query().addOrderBy_DataConfigId_Asc();
+     * </pre>
+     * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
+     * @param setupper The callback to set up referrer condition-bean for loading referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
+     */
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
+            final DataCrawlingConfig dataCrawlingConfig,
+            final ConditionBeanSetupper<DataConfigToRoleTypeMappingCB> setupper) {
+        xassLRArg(dataCrawlingConfig, setupper);
+        return doLoadDataConfigToRoleTypeMappingList(
+                xnewLRLs(dataCrawlingConfig),
+                new LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping>()
+                        .xinit(setupper));
+    }
+
+    /**
+     * {Refer to overload method that has an argument of the list of entity.} #beforejava8
      * @param dataCrawlingConfig The entity of dataCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
             final DataCrawlingConfig dataCrawlingConfig,
             final LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(dataCrawlingConfig, loadReferrerOption);
-        loadDataConfigToRoleTypeMappingList(xnewLRLs(dataCrawlingConfig),
-                loadReferrerOption);
+        return loadDataConfigToRoleTypeMappingList(
+                xnewLRLs(dataCrawlingConfig), loadReferrerOption);
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.}
+     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
      * @param dataCrawlingConfigList The entity list of dataCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
+     * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
      */
-    public void loadDataConfigToRoleTypeMappingList(
+    @SuppressWarnings("unchecked")
+    public NestedReferrerListGateway<DataConfigToRoleTypeMapping> loadDataConfigToRoleTypeMappingList(
             final List<DataCrawlingConfig> dataCrawlingConfigList,
             final LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping> loadReferrerOption) {
         xassLRArg(dataCrawlingConfigList, loadReferrerOption);
         if (dataCrawlingConfigList.isEmpty()) {
-            return;
+            return (NestedReferrerListGateway<DataConfigToRoleTypeMapping>) EMPTY_NREF_LGWAY;
         }
-        final DataConfigToRoleTypeMappingBhv referrerBhv = xgetBSFLR().select(
-                DataConfigToRoleTypeMappingBhv.class);
-        helpLoadReferrerInternally(
-                dataCrawlingConfigList,
-                loadReferrerOption,
-                new InternalLoadReferrerCallback<DataCrawlingConfig, Long, DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping>() {
-                    @Override
-                    public Long getPKVal(final DataCrawlingConfig e) {
-                        return e.getId();
-                    }
+        return doLoadDataConfigToRoleTypeMappingList(dataCrawlingConfigList,
+                loadReferrerOption);
+    }
 
-                    @Override
-                    public void setRfLs(final DataCrawlingConfig e,
-                            final List<DataConfigToRoleTypeMapping> ls) {
-                        e.setDataConfigToRoleTypeMappingList(ls);
-                    }
-
-                    @Override
-                    public DataConfigToRoleTypeMappingCB newMyCB() {
-                        return referrerBhv.newMyConditionBean();
-                    }
-
-                    @Override
-                    public void qyFKIn(final DataConfigToRoleTypeMappingCB cb,
-                            final List<Long> ls) {
-                        cb.query().setDataConfigId_InScope(ls);
-                    }
-
-                    @Override
-                    public void qyOdFKAsc(final DataConfigToRoleTypeMappingCB cb) {
-                        cb.query().addOrderBy_DataConfigId_Asc();
-                    }
-
-                    @Override
-                    public void spFKCol(final DataConfigToRoleTypeMappingCB cb) {
-                        cb.specify().columnDataConfigId();
-                    }
-
-                    @Override
-                    public List<DataConfigToRoleTypeMapping> selRfLs(
-                            final DataConfigToRoleTypeMappingCB cb) {
-                        return referrerBhv.selectList(cb);
-                    }
-
-                    @Override
-                    public Long getFKVal(final DataConfigToRoleTypeMapping e) {
-                        return e.getDataConfigId();
-                    }
-
-                    @Override
-                    public void setlcEt(final DataConfigToRoleTypeMapping re,
-                            final DataCrawlingConfig le) {
-                        re.setDataCrawlingConfig(le);
-                    }
-
-                    @Override
-                    public String getRfPrNm() {
-                        return "dataConfigToRoleTypeMappingList";
-                    }
-                });
+    protected NestedReferrerListGateway<DataConfigToRoleTypeMapping> doLoadDataConfigToRoleTypeMappingList(
+            final List<DataCrawlingConfig> dataCrawlingConfigList,
+            final LoadReferrerOption<DataConfigToRoleTypeMappingCB, DataConfigToRoleTypeMapping> option) {
+        return helpLoadReferrerInternally(dataCrawlingConfigList, option,
+                "dataConfigToRoleTypeMappingList");
     }
 
     // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-
     // ===================================================================================
     //                                                                      Extract Column
     //                                                                      ==============
@@ -772,20 +806,14 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public List<Long> extractIdList(
             final List<DataCrawlingConfig> dataCrawlingConfigList) {
-        return helpExtractListInternally(dataCrawlingConfigList,
-                new InternalExtractCallback<DataCrawlingConfig, Long>() {
-                    @Override
-                    public Long getCV(final DataCrawlingConfig e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(dataCrawlingConfigList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -794,39 +822,39 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.set...;</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">insert</span>(dataCrawlingConfig);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">insert</span>(dataCrawlingConfig);
      * ... = dataCrawlingConfig.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param dataCrawlingConfig The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param dataCrawlingConfig The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final DataCrawlingConfig dataCrawlingConfig) {
         doInsert(dataCrawlingConfig, null);
     }
 
-    protected void doInsert(final DataCrawlingConfig dataCrawlingConfig,
-            final InsertOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
-        prepareInsertOption(option);
-        delegateInsert(dataCrawlingConfig, option);
+    protected void doInsert(final DataCrawlingConfig et,
+            final InsertOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
     protected void prepareInsertOption(
-            final InsertOption<DataCrawlingConfigCB> option) {
-        if (option == null) {
+            final InsertOption<DataCrawlingConfigCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -838,71 +866,60 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * dataCrawlingConfig.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * dataCrawlingConfig.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     dataCrawlingConfigBhv.<span style="color: #FD4747">update</span>(dataCrawlingConfig);
+     *     dataCrawlingConfigBhv.<span style="color: #DD4747">update</span>(dataCrawlingConfig);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param dataCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param dataCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final DataCrawlingConfig dataCrawlingConfig) {
         doUpdate(dataCrawlingConfig, null);
     }
 
-    protected void doUpdate(final DataCrawlingConfig dataCrawlingConfig,
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
-        prepareUpdateOption(option);
-        helpUpdateInternally(dataCrawlingConfig,
-                new InternalUpdateCallback<DataCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateUpdate(
-                            final DataCrawlingConfig entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final DataCrawlingConfig et,
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
     protected void prepareUpdateOption(
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        if (option == null) {
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected DataCrawlingConfigCB createCBForVaryingUpdate() {
-        final DataCrawlingConfigCB cb = newMyConditionBean();
+        final DataCrawlingConfigCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected DataCrawlingConfigCB createCBForSpecifiedUpdate() {
-        final DataCrawlingConfigCB cb = newMyConditionBean();
+        final DataCrawlingConfigCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     /**
@@ -914,151 +931,86 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setVersionNo(value);</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">updateNonstrict</span>(dataCrawlingConfig);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">updateNonstrict</span>(dataCrawlingConfig);
      * </pre>
-     * @param dataCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param dataCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void updateNonstrict(final DataCrawlingConfig dataCrawlingConfig) {
         doUpdateNonstrict(dataCrawlingConfig, null);
     }
 
-    protected void doUpdateNonstrict(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
-        prepareUpdateOption(option);
-        helpUpdateNonstrictInternally(dataCrawlingConfig,
-                new InternalUpdateNonstrictCallback<DataCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateUpdateNonstrict(
-                            final DataCrawlingConfig entity) {
-                        return delegateUpdateNonstrict(entity, option);
-                    }
-                });
+    protected void doUpdateNonstrict(final DataCrawlingConfig et,
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        prepareUpdateOption(op);
+        helpUpdateNonstrictInternally(et, op);
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            updateNonstrict(downcast(entity));
-        } else {
-            varyingUpdateNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdateNonstrict(downcast(et), downcast(op));
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param dataCrawlingConfig The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param dataCrawlingConfig The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final DataCrawlingConfig dataCrawlingConfig) {
-        doInesrtOrUpdate(dataCrawlingConfig, null, null);
+        doInsertOrUpdate(dataCrawlingConfig, null, null);
     }
 
-    protected void doInesrtOrUpdate(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final InsertOption<DataCrawlingConfigCB> insertOption,
-            final UpdateOption<DataCrawlingConfigCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                dataCrawlingConfig,
-                new InternalInsertOrUpdateCallback<DataCrawlingConfig, DataCrawlingConfigCB>() {
-                    @Override
-                    public void callbackInsert(final DataCrawlingConfig entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final DataCrawlingConfig entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public DataCrawlingConfigCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final DataCrawlingConfigCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final DataCrawlingConfig et,
+            final InsertOption<DataCrawlingConfigCB> iop,
+            final UpdateOption<DataCrawlingConfigCB> uop) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<DataCrawlingConfigCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<DataCrawlingConfigCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param dataCrawlingConfig The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param dataCrawlingConfig The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdateNonstrict(
             final DataCrawlingConfig dataCrawlingConfig) {
-        doInesrtOrUpdateNonstrict(dataCrawlingConfig, null, null);
+        doInsertOrUpdateNonstrict(dataCrawlingConfig, null, null);
     }
 
-    protected void doInesrtOrUpdateNonstrict(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final InsertOption<DataCrawlingConfigCB> insertOption,
-            final UpdateOption<DataCrawlingConfigCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                dataCrawlingConfig,
-                new InternalInsertOrUpdateNonstrictCallback<DataCrawlingConfig>() {
-                    @Override
-                    public void callbackInsert(final DataCrawlingConfig entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdateNonstrict(
-                            final DataCrawlingConfig entity) {
-                        doUpdateNonstrict(entity, updateOption);
-                    }
-                });
+    protected void doInsertOrUpdateNonstrict(final DataCrawlingConfig et,
+            final InsertOption<DataCrawlingConfigCB> iop,
+            final UpdateOption<DataCrawlingConfigCB> uop) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdateNonstrict(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<DataCrawlingConfigCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<DataCrawlingConfigCB>()
-                    : updateOption;
-            varyingInsertOrUpdateNonstrict(downcast(entity),
-                    downcast(insertOption), downcast(updateOption));
-        }
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1066,52 +1018,40 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
      * dataCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * dataCrawlingConfig.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * dataCrawlingConfig.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     dataCrawlingConfigBhv.<span style="color: #FD4747">delete</span>(dataCrawlingConfig);
+     *     dataCrawlingConfigBhv.<span style="color: #DD4747">delete</span>(dataCrawlingConfig);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param dataCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param dataCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final DataCrawlingConfig dataCrawlingConfig) {
         doDelete(dataCrawlingConfig, null);
     }
 
-    protected void doDelete(final DataCrawlingConfig dataCrawlingConfig,
-            final DeleteOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
-        prepareDeleteOption(option);
-        helpDeleteInternally(dataCrawlingConfig,
-                new InternalDeleteCallback<DataCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateDelete(
-                            final DataCrawlingConfig entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final DataCrawlingConfig et,
+            final DeleteOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
     protected void prepareDeleteOption(
-            final DeleteOption<DataCrawlingConfigCB> option) {
-        if (option == null) {
-            return;
+            final DeleteOption<DataCrawlingConfigCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
-        assertDeleteOptionStatus(option);
     }
 
     @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
-        }
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
     }
 
     /**
@@ -1119,32 +1059,24 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
      * dataCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setVersionNo(value);</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">deleteNonstrict</span>(dataCrawlingConfig);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">deleteNonstrict</span>(dataCrawlingConfig);
      * </pre>
-     * @param dataCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param dataCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrict(final DataCrawlingConfig dataCrawlingConfig) {
         doDeleteNonstrict(dataCrawlingConfig, null);
     }
 
-    protected void doDeleteNonstrict(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final DeleteOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictInternally(dataCrawlingConfig,
-                new InternalDeleteNonstrictCallback<DataCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final DataCrawlingConfig entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrict(final DataCrawlingConfig et,
+            final DeleteOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -1152,55 +1084,57 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
      * dataCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setVersionNo(value);</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">deleteNonstrictIgnoreDeleted</span>(dataCrawlingConfig);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">deleteNonstrictIgnoreDeleted</span>(dataCrawlingConfig);
      * <span style="color: #3F7E5E">// if the target entity doesn't exist, no exception</span>
      * </pre>
-     * @param dataCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param dataCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrictIgnoreDeleted(
             final DataCrawlingConfig dataCrawlingConfig) {
         doDeleteNonstrictIgnoreDeleted(dataCrawlingConfig, null);
     }
 
-    protected void doDeleteNonstrictIgnoreDeleted(
-            final DataCrawlingConfig dataCrawlingConfig,
-            final DeleteOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictIgnoreDeletedInternally(
-                dataCrawlingConfig,
-                new InternalDeleteNonstrictIgnoreDeletedCallback<DataCrawlingConfig>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final DataCrawlingConfig entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrictIgnoreDeleted(final DataCrawlingConfig et,
+            final DeleteOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictIgnoreDeletedInternally(et, op);
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            deleteNonstrict(downcast(entity));
-        } else {
-            varyingDeleteNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
+     *     dataCrawlingConfig.setFooName("foo");
+     *     if (...) {
+     *         dataCrawlingConfig.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     dataCrawlingConfigList.add(dataCrawlingConfig);
+     * }
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchInsert</span>(dataCrawlingConfigList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -1209,93 +1143,101 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchInsert(dataCrawlingConfigList, null);
     }
 
-    protected int[] doBatchInsert(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final InsertOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfigList", dataCrawlingConfigList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(dataCrawlingConfigList, option);
+    protected int[] doBatchInsert(final List<DataCrawlingConfig> ls,
+            final InsertOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfigList", ls);
+        InsertOption<DataCrawlingConfigCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<DataCrawlingConfig> ls,
+            final InsertOption<DataCrawlingConfigCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">batchUpdate</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
-     *     public void specify(DataCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
+     *     dataCrawlingConfig.setFooName("foo");
+     *     if (...) {
+     *         dataCrawlingConfig.setFooPrice(123);
+     *     } else {
+     *         dataCrawlingConfig.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//dataCrawlingConfig.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     dataCrawlingConfigList.add(dataCrawlingConfig);
+     * }
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(dataCrawlingConfigList);
      * </pre>
-     * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(
             final List<DataCrawlingConfig> dataCrawlingConfigList) {
         return doBatchUpdate(dataCrawlingConfigList, null);
     }
 
-    protected int[] doBatchUpdate(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfigList", dataCrawlingConfigList);
-        prepareBatchUpdateOption(dataCrawlingConfigList, option);
-        return delegateBatchUpdate(dataCrawlingConfigList, option);
+    protected int[] doBatchUpdate(final List<DataCrawlingConfig> ls,
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfigList", ls);
+        UpdateOption<DataCrawlingConfigCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(dataCrawlingConfigList);
-        //}
+    protected void prepareBatchUpdateOption(final List<DataCrawlingConfig> ls,
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">batchUpdate</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
      *     public void specify(DataCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">batchUpdate</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
      *     public void specify(DataCrawlingConfigCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1304,10 +1246,10 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * and an optimistic lock column because they are specified implicitly.</p>
      * <p>And you should specify columns that are modified in any entities (at least one entity).
      * But if you specify every column, it has no check.</p>
-     * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(
             final List<DataCrawlingConfig> dataCrawlingConfigList,
@@ -1317,51 +1259,62 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * Batch-update the entity list non-strictly. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are update target. {NOT modified only}</span>
-     * So you should the other batchUpdateNonstrict() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 140%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
-     *     public void specify(DataCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
+     *     dataCrawlingConfig.setFooName("foo");
+     *     if (...) {
+     *         dataCrawlingConfig.setFooPrice(123);
+     *     } else {
+     *         dataCrawlingConfig.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//dataCrawlingConfig.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     dataCrawlingConfigList.add(dataCrawlingConfig);
+     * }
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchUpdate</span>(dataCrawlingConfigList);
      * </pre>
      * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(
             final List<DataCrawlingConfig> dataCrawlingConfigList) {
         return doBatchUpdateNonstrict(dataCrawlingConfigList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfigList", dataCrawlingConfigList);
-        prepareBatchUpdateOption(dataCrawlingConfigList, option);
-        return delegateBatchUpdateNonstrict(dataCrawlingConfigList, option);
+    protected int[] doBatchUpdateNonstrict(final List<DataCrawlingConfig> ls,
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfigList", ls);
+        UpdateOption<DataCrawlingConfigCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop);
+        return delegateBatchUpdateNonstrict(ls, rlop);
     }
 
     /**
-     * Batch-update the entity list non-strictly. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
      *     public void specify(DataCrawlingConfigCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(dataCrawlingConfigList, new SpecifyQuery<DataCrawlingConfigCB>() {
      *     public void specify(DataCrawlingConfigCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1372,7 +1325,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(
             final List<DataCrawlingConfig> dataCrawlingConfigList,
@@ -1383,12 +1336,8 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdateNonstrict(downcast(ls));
-        } else {
-            return varyingBatchUpdateNonstrict(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
     }
 
     /**
@@ -1396,29 +1345,24 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchDelete(
             final List<DataCrawlingConfig> dataCrawlingConfigList) {
         return doBatchDelete(dataCrawlingConfigList, null);
     }
 
-    protected int[] doBatchDelete(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final DeleteOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfigList", dataCrawlingConfigList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(dataCrawlingConfigList, option);
+    protected int[] doBatchDelete(final List<DataCrawlingConfig> ls,
+            final DeleteOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfigList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1426,29 +1370,24 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param dataCrawlingConfigList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDeleteNonstrict(
             final List<DataCrawlingConfig> dataCrawlingConfigList) {
         return doBatchDeleteNonstrict(dataCrawlingConfigList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(
-            final List<DataCrawlingConfig> dataCrawlingConfigList,
-            final DeleteOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfigList", dataCrawlingConfigList);
-        prepareDeleteOption(option);
-        return delegateBatchDeleteNonstrict(dataCrawlingConfigList, option);
+    protected int[] doBatchDeleteNonstrict(final List<DataCrawlingConfig> ls,
+            final DeleteOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfigList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDeleteNonstrict(ls, op);
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDeleteNonstrict(downcast(ls));
-        } else {
-            return varyingBatchDeleteNonstrict(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
     }
 
     // ===================================================================================
@@ -1457,7 +1396,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;DataCrawlingConfig, DataCrawlingConfigCB&gt;() {
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;DataCrawlingConfig, DataCrawlingConfigCB&gt;() {
      *     public ConditionBean setup(dataCrawlingConfig entity, DataCrawlingConfigCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1470,7 +1409,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1486,18 +1425,17 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<DataCrawlingConfig, DataCrawlingConfigCB> setupper,
-            final InsertOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final DataCrawlingConfig entity = new DataCrawlingConfig();
-        final DataCrawlingConfigCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<DataCrawlingConfig, DataCrawlingConfigCB> sp,
+            final InsertOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final DataCrawlingConfig et = newEntity();
+        final DataCrawlingConfigCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected DataCrawlingConfigCB createCBForQueryInsert() {
-        final DataCrawlingConfigCB cb = newMyConditionBean();
+        final DataCrawlingConfigCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1505,12 +1443,8 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1523,42 +1457,37 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setVersionNo(value);</span>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">queryUpdate</span>(dataCrawlingConfig, cb);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">queryUpdate</span>(dataCrawlingConfig, cb);
      * </pre>
      * @param dataCrawlingConfig The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final DataCrawlingConfig dataCrawlingConfig,
             final DataCrawlingConfigCB cb) {
         return doQueryUpdate(dataCrawlingConfig, cb, null);
     }
 
-    protected int doQueryUpdate(final DataCrawlingConfig dataCrawlingConfig,
+    protected int doQueryUpdate(final DataCrawlingConfig et,
             final DataCrawlingConfigCB cb,
-            final UpdateOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("dataCrawlingConfig", dataCrawlingConfig);
+            final UpdateOption<DataCrawlingConfigCB> op) {
+        assertObjectNotNull("dataCrawlingConfig", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                dataCrawlingConfig, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (DataCrawlingConfigCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity),
-                    (DataCrawlingConfigCB) cb, downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1566,33 +1495,28 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <pre>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
      * cb.query().setFoo...(value);
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">queryDelete</span>(dataCrawlingConfig, cb);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">queryDelete</span>(dataCrawlingConfig, cb);
      * </pre>
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final DataCrawlingConfigCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final DataCrawlingConfigCB cb,
-            final DeleteOption<DataCrawlingConfigCB> option) {
+            final DeleteOption<DataCrawlingConfigCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((DataCrawlingConfigCB) cb);
-        } else {
-            return varyingQueryDelete((DataCrawlingConfigCB) cb,
-                    downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1613,12 +1537,12 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * InsertOption<DataCrawlingConfigCB> option = new InsertOption<DataCrawlingConfigCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">varyingInsert</span>(dataCrawlingConfig, option);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">varyingInsert</span>(dataCrawlingConfig, option);
      * ... = dataCrawlingConfig.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param dataCrawlingConfig The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param dataCrawlingConfig The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final DataCrawlingConfig dataCrawlingConfig,
             final InsertOption<DataCrawlingConfigCB> option) {
@@ -1634,26 +1558,26 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
      * dataCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * dataCrawlingConfig.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * dataCrawlingConfig.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * dataCrawlingConfig.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;DataCrawlingConfigCB&gt; option = new UpdateOption&lt;DataCrawlingConfigCB&gt;();
      *     option.self(new SpecifyQuery&lt;DataCrawlingConfigCB&gt;() {
      *         public void specify(DataCrawlingConfigCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     dataCrawlingConfigBhv.<span style="color: #FD4747">varyingUpdate</span>(dataCrawlingConfig, option);
+     *     dataCrawlingConfigBhv.<span style="color: #DD4747">varyingUpdate</span>(dataCrawlingConfig, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param dataCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param dataCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final DataCrawlingConfig dataCrawlingConfig,
             final UpdateOption<DataCrawlingConfigCB> option) {
@@ -1670,22 +1594,22 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * DataCrawlingConfig dataCrawlingConfig = new DataCrawlingConfig();
      * dataCrawlingConfig.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * dataCrawlingConfig.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setVersionNo(value);</span>
      * UpdateOption&lt;DataCrawlingConfigCB&gt; option = new UpdateOption&lt;DataCrawlingConfigCB&gt;();
      * option.self(new SpecifyQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void specify(DataCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">varyingUpdateNonstrict</span>(dataCrawlingConfig, option);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">varyingUpdateNonstrict</span>(dataCrawlingConfig, option);
      * </pre>
-     * @param dataCrawlingConfig The entity of update target. (NotNull, PrimaryKeyNotNull)
+     * @param dataCrawlingConfig The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdateNonstrict(
             final DataCrawlingConfig dataCrawlingConfig,
@@ -1697,12 +1621,12 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param dataCrawlingConfig The entity of insert or update target. (NotNull)
+     * @param dataCrawlingConfig The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(
             final DataCrawlingConfig dataCrawlingConfig,
@@ -1710,18 +1634,18 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
             final UpdateOption<DataCrawlingConfigCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(dataCrawlingConfig, insertOption, updateOption);
+        doInsertOrUpdate(dataCrawlingConfig, insertOption, updateOption);
     }
 
     /**
      * Insert or update the entity with varying requests non-strictly. (NonExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdateNonstrict(entity).
-     * @param dataCrawlingConfig The entity of insert or update target. (NotNull)
+     * @param dataCrawlingConfig The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdateNonstrict(
             final DataCrawlingConfig dataCrawlingConfig,
@@ -1729,7 +1653,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
             final UpdateOption<DataCrawlingConfigCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdateNonstrict(dataCrawlingConfig, insertOption,
+        doInsertOrUpdateNonstrict(dataCrawlingConfig, insertOption,
                 updateOption);
     }
 
@@ -1737,10 +1661,10 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Delete the entity with varying requests. (ZeroUpdateException, ExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param dataCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param dataCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final DataCrawlingConfig dataCrawlingConfig,
             final DeleteOption<DataCrawlingConfigCB> option) {
@@ -1752,10 +1676,10 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Delete the entity with varying requests non-strictly. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as deleteNonstrict(entity).
-     * @param dataCrawlingConfig The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param dataCrawlingConfig The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDeleteNonstrict(
             final DataCrawlingConfig dataCrawlingConfig,
@@ -1874,7 +1798,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setPK...(value);</span>
      * dataCrawlingConfig.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//dataCrawlingConfig.setVersionNo(value);</span>
      * DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
@@ -1882,16 +1806,16 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;DataCrawlingConfigCB&gt; option = new UpdateOption&lt;DataCrawlingConfigCB&gt;();
      * option.self(new SpecifyQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void specify(DataCrawlingConfigCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * dataCrawlingConfigBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(dataCrawlingConfig, cb, option);
+     * dataCrawlingConfigBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(dataCrawlingConfig, cb, option);
      * </pre>
      * @param dataCrawlingConfig The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final DataCrawlingConfig dataCrawlingConfig,
             final DataCrawlingConfigCB cb,
@@ -1907,7 +1831,7 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of DataCrawlingConfig. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final DataCrawlingConfigCB cb,
             final DeleteOption<DataCrawlingConfigCB> option) {
@@ -1954,171 +1878,22 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final DataCrawlingConfigCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
-    }
-
-    protected int delegateSelectCountPlainly(final DataCrawlingConfigCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends DataCrawlingConfig> void delegateSelectCursor(
-            final DataCrawlingConfigCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends DataCrawlingConfig> List<ENTITY> delegateSelectList(
-            final DataCrawlingConfigCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final DataCrawlingConfig e,
-            final InsertOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final DataCrawlingConfig e,
-            final UpdateOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateEntityCommand(e, op));
-    }
-
-    protected int delegateUpdateNonstrict(final DataCrawlingConfig e,
-            final UpdateOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final DataCrawlingConfig e,
-            final DeleteOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteEntityCommand(e, op));
-    }
-
-    protected int delegateDeleteNonstrict(final DataCrawlingConfig e,
-            final DeleteOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<DataCrawlingConfig> ls,
-            final InsertOption<DataCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<DataCrawlingConfig> ls,
-            final UpdateOption<DataCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(
-            final List<DataCrawlingConfig> ls,
-            final UpdateOption<DataCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<DataCrawlingConfig> ls,
-            final DeleteOption<DataCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(
-            final List<DataCrawlingConfig> ls,
-            final DeleteOption<DataCrawlingConfigCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final DataCrawlingConfig e,
-            final DataCrawlingConfigCB inCB, final ConditionBean resCB,
-            final InsertOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final DataCrawlingConfig e,
-            final DataCrawlingConfigCB cb,
-            final UpdateOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final DataCrawlingConfigCB cb,
-            final DeleteOption<DataCrawlingConfigCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
     //                                                                Optimistic Lock Info
     //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return !(downcast(entity).getVersionNo() + "").equals("null");// For primitive type
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
+    protected boolean hasVersionNoValue(final Entity et) {
+        return downcast(et).getVersionNo() != null;
     }
 
     // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected DataCrawlingConfig downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, DataCrawlingConfig.class);
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<DataCrawlingConfig> typeOfSelectedEntity() {
+        return DataCrawlingConfig.class;
+    }
+
+    protected DataCrawlingConfig downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, DataCrawlingConfig.class);
     }
 
     protected DataCrawlingConfigCB downcast(final ConditionBean cb) {
@@ -2127,32 +1902,31 @@ public abstract class BsDataCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<DataCrawlingConfig> downcast(
-            final List<? extends Entity> entityList) {
-        return (List<DataCrawlingConfig>) entityList;
+    protected List<DataCrawlingConfig> downcast(final List<? extends Entity> ls) {
+        return (List<DataCrawlingConfig>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<DataCrawlingConfigCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<DataCrawlingConfigCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<DataCrawlingConfigCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<DataCrawlingConfigCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<DataCrawlingConfigCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<DataCrawlingConfigCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<DataCrawlingConfigCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<DataCrawlingConfigCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<DataCrawlingConfigCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<DataCrawlingConfig, DataCrawlingConfigCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<DataCrawlingConfig, DataCrawlingConfigCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<DataCrawlingConfig, DataCrawlingConfigCB>) sp;
     }
 }

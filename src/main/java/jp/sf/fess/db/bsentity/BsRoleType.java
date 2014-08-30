@@ -139,8 +139,14 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -186,6 +192,18 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -196,7 +214,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     protected List<DataConfigToRoleTypeMapping> _dataConfigToRoleTypeMappingList;
 
     /**
-     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
+     * [get] DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
      * @return The entity list of referrer property 'dataConfigToRoleTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<DataConfigToRoleTypeMapping> getDataConfigToRoleTypeMappingList() {
@@ -207,7 +225,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
+     * [set] DATA_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'dataConfigToRoleTypeMappingList'.
      * @param dataConfigToRoleTypeMappingList The entity list of referrer property 'dataConfigToRoleTypeMappingList'. (NullAllowed)
      */
     public void setDataConfigToRoleTypeMappingList(
@@ -219,7 +237,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     protected List<FileConfigToRoleTypeMapping> _fileConfigToRoleTypeMappingList;
 
     /**
-     * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
+     * [get] FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
      * @return The entity list of referrer property 'fileConfigToRoleTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<FileConfigToRoleTypeMapping> getFileConfigToRoleTypeMappingList() {
@@ -230,7 +248,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
+     * [set] FILE_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'fileConfigToRoleTypeMappingList'.
      * @param fileConfigToRoleTypeMappingList The entity list of referrer property 'fileConfigToRoleTypeMappingList'. (NullAllowed)
      */
     public void setFileConfigToRoleTypeMappingList(
@@ -242,7 +260,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     protected List<LabelTypeToRoleTypeMapping> _labelTypeToRoleTypeMappingList;
 
     /**
-     * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
+     * [get] LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
      * @return The entity list of referrer property 'labelTypeToRoleTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<LabelTypeToRoleTypeMapping> getLabelTypeToRoleTypeMappingList() {
@@ -253,7 +271,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
+     * [set] LABEL_TYPE_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'labelTypeToRoleTypeMappingList'.
      * @param labelTypeToRoleTypeMappingList The entity list of referrer property 'labelTypeToRoleTypeMappingList'. (NullAllowed)
      */
     public void setLabelTypeToRoleTypeMappingList(
@@ -265,7 +283,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     protected List<WebConfigToRoleTypeMapping> _webConfigToRoleTypeMappingList;
 
     /**
-     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
+     * [get] WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
      * @return The entity list of referrer property 'webConfigToRoleTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<WebConfigToRoleTypeMapping> getWebConfigToRoleTypeMappingList() {
@@ -276,7 +294,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     }
 
     /**
-     * WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
+     * [set] WEB_CONFIG_TO_ROLE_TYPE_MAPPING by ROLE_TYPE_ID, named 'webConfigToRoleTypeMappingList'.
      * @param webConfigToRoleTypeMappingList The entity list of referrer property 'webConfigToRoleTypeMappingList'. (NullAllowed)
      */
     public void setWebConfigToRoleTypeMappingList(
@@ -320,28 +338,47 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsRoleType)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsRoleType)) {
             return false;
         }
-        final BsRoleType otherEntity = (BsRoleType) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsRoleType other = (BsRoleType) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -350,14 +387,14 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -374,7 +411,7 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -384,44 +421,44 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
+        final String li = "\n  ";
         if (_dataConfigToRoleTypeMappingList != null) {
-            for (final Entity e : _dataConfigToRoleTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "dataConfigToRoleTypeMappingList"));
+            for (final Entity et : _dataConfigToRoleTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "dataConfigToRoleTypeMappingList"));
                 }
             }
         }
         if (_fileConfigToRoleTypeMappingList != null) {
-            for (final Entity e : _fileConfigToRoleTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "fileConfigToRoleTypeMappingList"));
+            for (final Entity et : _fileConfigToRoleTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "fileConfigToRoleTypeMappingList"));
                 }
             }
         }
         if (_labelTypeToRoleTypeMappingList != null) {
-            for (final Entity e : _labelTypeToRoleTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "labelTypeToRoleTypeMappingList"));
+            for (final Entity et : _labelTypeToRoleTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "labelTypeToRoleTypeMappingList"));
                 }
             }
         }
         if (_webConfigToRoleTypeMappingList != null) {
-            for (final Entity e : _webConfigToRoleTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "webConfigToRoleTypeMappingList"));
+            for (final Entity et : _webConfigToRoleTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "webConfigToRoleTypeMappingList"));
                 }
             }
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -446,20 +483,20 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getName());
-        sb.append(delimiter).append(getValue());
-        sb.append(delimiter).append(getSortOrder());
-        sb.append(delimiter).append(getCreatedBy());
-        sb.append(delimiter).append(getCreatedTime());
-        sb.append(delimiter).append(getUpdatedBy());
-        sb.append(delimiter).append(getUpdatedTime());
-        sb.append(delimiter).append(getDeletedBy());
-        sb.append(delimiter).append(getDeletedTime());
-        sb.append(delimiter).append(getVersionNo());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getName());
+        sb.append(dm).append(getValue());
+        sb.append(dm).append(getSortOrder());
+        sb.append(dm).append(getCreatedBy());
+        sb.append(dm).append(getCreatedTime());
+        sb.append(dm).append(getUpdatedBy());
+        sb.append(dm).append(getUpdatedTime());
+        sb.append(dm).append(getDeletedBy());
+        sb.append(dm).append(getDeletedTime());
+        sb.append(dm).append(getVersionNo());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -467,25 +504,25 @@ public abstract class BsRoleType implements Entity, Serializable, Cloneable {
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
+        final String cm = ",";
         if (_dataConfigToRoleTypeMappingList != null
                 && !_dataConfigToRoleTypeMappingList.isEmpty()) {
-            sb.append(c).append("dataConfigToRoleTypeMappingList");
+            sb.append(cm).append("dataConfigToRoleTypeMappingList");
         }
         if (_fileConfigToRoleTypeMappingList != null
                 && !_fileConfigToRoleTypeMappingList.isEmpty()) {
-            sb.append(c).append("fileConfigToRoleTypeMappingList");
+            sb.append(cm).append("fileConfigToRoleTypeMappingList");
         }
         if (_labelTypeToRoleTypeMappingList != null
                 && !_labelTypeToRoleTypeMappingList.isEmpty()) {
-            sb.append(c).append("labelTypeToRoleTypeMappingList");
+            sb.append(cm).append("labelTypeToRoleTypeMappingList");
         }
         if (_webConfigToRoleTypeMappingList != null
                 && !_webConfigToRoleTypeMappingList.isEmpty()) {
-            sb.append(c).append("webConfigToRoleTypeMappingList");
+            sb.append(cm).append("webConfigToRoleTypeMappingList");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

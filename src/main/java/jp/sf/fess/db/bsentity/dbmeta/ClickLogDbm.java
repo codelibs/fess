@@ -22,6 +22,7 @@ import java.util.Map;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.ClickLog;
+import jp.sf.fess.db.exentity.SearchLog;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +62,9 @@ public class ClickLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -69,57 +73,82 @@ public class ClickLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgRequestedTime(), "requestedTime");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ClickLog) e).getId();
+        public Object read(final Entity et) {
+            return ((ClickLog) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ClickLog) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((ClickLog) et).setId(ctl(vl));
         }
     }
 
     public static class EpgSearchId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ClickLog) e).getSearchId();
+        public Object read(final Entity et) {
+            return ((ClickLog) et).getSearchId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ClickLog) e).setSearchId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((ClickLog) et).setSearchId(ctl(vl));
         }
     }
 
     public static class EpgUrl implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ClickLog) e).getUrl();
+        public Object read(final Entity et) {
+            return ((ClickLog) et).getUrl();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ClickLog) e).setUrl((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ClickLog) et).setUrl((String) vl);
         }
     }
 
     public static class EpgRequestedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ClickLog) e).getRequestedTime();
+        public Object read(final Entity et) {
+            return ((ClickLog) et).getRequestedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ClickLog) e).setRequestedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((ClickLog) et).setRequestedTime((java.sql.Timestamp) vl);
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgSearchLog(), "searchLog");
+    }
+
+    public class EfpgSearchLog implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((ClickLog) et).getSearchLog();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((ClickLog) et).setSearchLog((SearchLog) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -159,42 +188,59 @@ public class ClickLogDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_F4908A65_A80E_4A8F_8551_AD99C024E95D",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_1C4461A0_8D02_4547_BE0E_3178BBF09289",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSearchId = cci("SEARCH_ID", "SEARCH_ID",
-            null, null, true, "searchId", Long.class, false, false, "BIGINT",
-            19, 0, null, false, null, null, "searchLog", null, null);
+            null, null, Long.class, "searchId", null, false, false, true,
+            "BIGINT", 19, 0, null, false, null, null, "searchLog", null, null);
 
-    protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null, true,
-            "url", String.class, false, false, "VARCHAR", 4000, 0, null, false,
-            null, null, null, null, null);
+    protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null,
+            String.class, "url", null, false, false, true, "VARCHAR", 4000, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnRequestedTime = cci("REQUESTED_TIME",
-            "REQUESTED_TIME", null, null, true, "requestedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "REQUESTED_TIME", null, null, java.sql.Timestamp.class,
+            "requestedTime", null, false, false, true, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * SEARCH_ID: {IX, NotNull, BIGINT(19), FK to SEARCH_LOG}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSearchId() {
         return _columnSearchId;
     }
 
+    /**
+     * URL: {IX, NotNull, VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUrl() {
         return _columnUrl;
     }
 
+    /**
+     * REQUESTED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRequestedTime() {
         return _columnRequestedTime;
     }
@@ -237,15 +283,21 @@ public class ClickLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * SEARCH_LOG by my SEARCH_ID, named 'searchLog'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignSearchLog() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnSearchId(), SearchLogDbm.getInstance().columnId());
         return cfi("CONSTRAINT_310", "searchLog", this,
-                SearchLogDbm.getInstance(), map, 0, false, false, false, false,
-                null, null, false, "clickLogList");
+                SearchLogDbm.getInstance(), mp, 0, null, false, false, false,
+                false, null, null, false, "clickLogList");
     }
 
     // -----------------------------------------------------
@@ -290,8 +342,8 @@ public class ClickLogDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public ClickLog newEntity() {
+        return new ClickLog();
     }
 
     public ClickLog newMyEntity() {
@@ -302,24 +354,24 @@ public class ClickLogDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((ClickLog) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((ClickLog) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((ClickLog) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((ClickLog) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

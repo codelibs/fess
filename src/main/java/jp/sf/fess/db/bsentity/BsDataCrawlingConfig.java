@@ -158,8 +158,14 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -205,6 +211,18 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -215,7 +233,7 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     protected List<DataConfigToLabelTypeMapping> _dataConfigToLabelTypeMappingList;
 
     /**
-     * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'.
+     * [get] DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'.
      * @return The entity list of referrer property 'dataConfigToLabelTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<DataConfigToLabelTypeMapping> getDataConfigToLabelTypeMappingList() {
@@ -226,7 +244,7 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'.
+     * [set] DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingList'.
      * @param dataConfigToLabelTypeMappingList The entity list of referrer property 'dataConfigToLabelTypeMappingList'. (NullAllowed)
      */
     public void setDataConfigToLabelTypeMappingList(
@@ -238,7 +256,7 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     protected List<DataConfigToRoleTypeMapping> _dataConfigToRoleTypeMappingList;
 
     /**
-     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingList'.
+     * [get] DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingList'.
      * @return The entity list of referrer property 'dataConfigToRoleTypeMappingList'. (NotNull: even if no loading, returns empty list)
      */
     public List<DataConfigToRoleTypeMapping> getDataConfigToRoleTypeMappingList() {
@@ -249,7 +267,7 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     }
 
     /**
-     * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingList'.
+     * [set] DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingList'.
      * @param dataConfigToRoleTypeMappingList The entity list of referrer property 'dataConfigToRoleTypeMappingList'. (NullAllowed)
      */
     public void setDataConfigToRoleTypeMappingList(
@@ -293,28 +311,47 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsDataCrawlingConfig)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsDataCrawlingConfig)) {
             return false;
         }
-        final BsDataCrawlingConfig otherEntity = (BsDataCrawlingConfig) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsDataCrawlingConfig other = (BsDataCrawlingConfig) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -323,14 +360,14 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -347,7 +384,7 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -357,28 +394,28 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
+        final String li = "\n  ";
         if (_dataConfigToLabelTypeMappingList != null) {
-            for (final Entity e : _dataConfigToLabelTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "dataConfigToLabelTypeMappingList"));
+            for (final Entity et : _dataConfigToLabelTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "dataConfigToLabelTypeMappingList"));
                 }
             }
         }
         if (_dataConfigToRoleTypeMappingList != null) {
-            for (final Entity e : _dataConfigToRoleTypeMappingList) {
-                if (e != null) {
-                    sb.append(l).append(
-                            xbRDS(e, "dataConfigToRoleTypeMappingList"));
+            for (final Entity et : _dataConfigToRoleTypeMappingList) {
+                if (et != null) {
+                    sb.append(li).append(
+                            xbRDS(et, "dataConfigToRoleTypeMappingList"));
                 }
             }
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -403,24 +440,24 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getName());
-        sb.append(delimiter).append(getHandlerName());
-        sb.append(delimiter).append(getHandlerParameter());
-        sb.append(delimiter).append(getHandlerScript());
-        sb.append(delimiter).append(getBoost());
-        sb.append(delimiter).append(getAvailable());
-        sb.append(delimiter).append(getSortOrder());
-        sb.append(delimiter).append(getCreatedBy());
-        sb.append(delimiter).append(getCreatedTime());
-        sb.append(delimiter).append(getUpdatedBy());
-        sb.append(delimiter).append(getUpdatedTime());
-        sb.append(delimiter).append(getDeletedBy());
-        sb.append(delimiter).append(getDeletedTime());
-        sb.append(delimiter).append(getVersionNo());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getName());
+        sb.append(dm).append(getHandlerName());
+        sb.append(dm).append(getHandlerParameter());
+        sb.append(dm).append(getHandlerScript());
+        sb.append(dm).append(getBoost());
+        sb.append(dm).append(getAvailable());
+        sb.append(dm).append(getSortOrder());
+        sb.append(dm).append(getCreatedBy());
+        sb.append(dm).append(getCreatedTime());
+        sb.append(dm).append(getUpdatedBy());
+        sb.append(dm).append(getUpdatedTime());
+        sb.append(dm).append(getDeletedBy());
+        sb.append(dm).append(getDeletedTime());
+        sb.append(dm).append(getVersionNo());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -428,17 +465,17 @@ public abstract class BsDataCrawlingConfig implements Entity, Serializable,
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
+        final String cm = ",";
         if (_dataConfigToLabelTypeMappingList != null
                 && !_dataConfigToLabelTypeMappingList.isEmpty()) {
-            sb.append(c).append("dataConfigToLabelTypeMappingList");
+            sb.append(cm).append("dataConfigToLabelTypeMappingList");
         }
         if (_dataConfigToRoleTypeMappingList != null
                 && !_dataConfigToRoleTypeMappingList.isEmpty()) {
-            sb.append(c).append("dataConfigToRoleTypeMappingList");
+            sb.append(cm).append("dataConfigToRoleTypeMappingList");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

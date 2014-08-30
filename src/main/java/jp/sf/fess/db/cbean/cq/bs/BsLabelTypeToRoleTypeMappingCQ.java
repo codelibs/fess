@@ -25,6 +25,8 @@ import jp.sf.fess.db.cbean.cq.RoleTypeCQ;
 import jp.sf.fess.db.cbean.cq.ciq.LabelTypeToRoleTypeMappingCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -44,10 +46,10 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsLabelTypeToRoleTypeMappingCQ(final ConditionQuery childQuery,
+    public BsLabelTypeToRoleTypeMappingCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -57,7 +59,7 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from LABEL_TYPE_TO_ROLE_TYPE_MAPPING) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -84,7 +86,7 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join LABEL_TYPE_TO_ROLE_TYPE_MAPPING on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -102,7 +104,6 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -151,40 +152,23 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
         return getLabelTypeId();
     }
 
-    protected Map<String, LabelTypeCQ> _labelTypeId_InScopeRelation_LabelTypeMap;
-
     public Map<String, LabelTypeCQ> getLabelTypeId_InScopeRelation_LabelType() {
-        return _labelTypeId_InScopeRelation_LabelTypeMap;
+        return xgetSQueMap("labelTypeId_InScopeRelation_LabelType");
     }
 
     @Override
-    public String keepLabelTypeId_InScopeRelation_LabelType(
-            final LabelTypeCQ subQuery) {
-        if (_labelTypeId_InScopeRelation_LabelTypeMap == null) {
-            _labelTypeId_InScopeRelation_LabelTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_labelTypeId_InScopeRelation_LabelTypeMap.size() + 1);
-        _labelTypeId_InScopeRelation_LabelTypeMap.put(key, subQuery);
-        return "labelTypeId_InScopeRelation_LabelType." + key;
+    public String keepLabelTypeId_InScopeRelation_LabelType(final LabelTypeCQ sq) {
+        return xkeepSQue("labelTypeId_InScopeRelation_LabelType", sq);
     }
 
-    protected Map<String, LabelTypeCQ> _labelTypeId_NotInScopeRelation_LabelTypeMap;
-
     public Map<String, LabelTypeCQ> getLabelTypeId_NotInScopeRelation_LabelType() {
-        return _labelTypeId_NotInScopeRelation_LabelTypeMap;
+        return xgetSQueMap("labelTypeId_NotInScopeRelation_LabelType");
     }
 
     @Override
     public String keepLabelTypeId_NotInScopeRelation_LabelType(
-            final LabelTypeCQ subQuery) {
-        if (_labelTypeId_NotInScopeRelation_LabelTypeMap == null) {
-            _labelTypeId_NotInScopeRelation_LabelTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_labelTypeId_NotInScopeRelation_LabelTypeMap.size() + 1);
-        _labelTypeId_NotInScopeRelation_LabelTypeMap.put(key, subQuery);
-        return "labelTypeId_NotInScopeRelation_LabelType." + key;
+            final LabelTypeCQ sq) {
+        return xkeepSQue("labelTypeId_NotInScopeRelation_LabelType", sq);
     }
 
     /**
@@ -221,40 +205,22 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
         return getRoleTypeId();
     }
 
-    protected Map<String, RoleTypeCQ> _roleTypeId_InScopeRelation_RoleTypeMap;
-
     public Map<String, RoleTypeCQ> getRoleTypeId_InScopeRelation_RoleType() {
-        return _roleTypeId_InScopeRelation_RoleTypeMap;
+        return xgetSQueMap("roleTypeId_InScopeRelation_RoleType");
     }
 
     @Override
-    public String keepRoleTypeId_InScopeRelation_RoleType(
-            final RoleTypeCQ subQuery) {
-        if (_roleTypeId_InScopeRelation_RoleTypeMap == null) {
-            _roleTypeId_InScopeRelation_RoleTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_roleTypeId_InScopeRelation_RoleTypeMap.size() + 1);
-        _roleTypeId_InScopeRelation_RoleTypeMap.put(key, subQuery);
-        return "roleTypeId_InScopeRelation_RoleType." + key;
+    public String keepRoleTypeId_InScopeRelation_RoleType(final RoleTypeCQ sq) {
+        return xkeepSQue("roleTypeId_InScopeRelation_RoleType", sq);
     }
-
-    protected Map<String, RoleTypeCQ> _roleTypeId_NotInScopeRelation_RoleTypeMap;
 
     public Map<String, RoleTypeCQ> getRoleTypeId_NotInScopeRelation_RoleType() {
-        return _roleTypeId_NotInScopeRelation_RoleTypeMap;
+        return xgetSQueMap("roleTypeId_NotInScopeRelation_RoleType");
     }
 
     @Override
-    public String keepRoleTypeId_NotInScopeRelation_RoleType(
-            final RoleTypeCQ subQuery) {
-        if (_roleTypeId_NotInScopeRelation_RoleTypeMap == null) {
-            _roleTypeId_NotInScopeRelation_RoleTypeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_roleTypeId_NotInScopeRelation_RoleTypeMap.size() + 1);
-        _roleTypeId_NotInScopeRelation_RoleTypeMap.put(key, subQuery);
-        return "roleTypeId_NotInScopeRelation_RoleType." + key;
+    public String keepRoleTypeId_NotInScopeRelation_RoleType(final RoleTypeCQ sq) {
+        return xkeepSQue("roleTypeId_NotInScopeRelation_RoleType", sq);
     }
 
     /**
@@ -287,9 +253,9 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -307,9 +273,9 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -324,18 +290,17 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final LabelTypeToRoleTypeMappingCQ baseQuery = (LabelTypeToRoleTypeMappingCQ) baseQueryAsSuper;
-        final LabelTypeToRoleTypeMappingCQ unionQuery = (LabelTypeToRoleTypeMappingCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryLabelType()) {
-            unionQuery.queryLabelType().reflectRelationOnUnionQuery(
-                    baseQuery.queryLabelType(), unionQuery.queryLabelType());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final LabelTypeToRoleTypeMappingCQ bq = (LabelTypeToRoleTypeMappingCQ) bqs;
+        final LabelTypeToRoleTypeMappingCQ uq = (LabelTypeToRoleTypeMappingCQ) uqs;
+        if (bq.hasConditionQueryLabelType()) {
+            uq.queryLabelType().reflectRelationOnUnionQuery(
+                    bq.queryLabelType(), uq.queryLabelType());
         }
-        if (baseQuery.hasConditionQueryRoleType()) {
-            unionQuery.queryRoleType().reflectRelationOnUnionQuery(
-                    baseQuery.queryRoleType(), unionQuery.queryRoleType());
+        if (bq.hasConditionQueryRoleType()) {
+            uq.queryRoleType().reflectRelationOnUnionQuery(bq.queryRoleType(),
+                    uq.queryRoleType());
         }
     }
 
@@ -351,37 +316,29 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
         return getConditionQueryLabelType();
     }
 
-    protected LabelTypeCQ _conditionQueryLabelType;
-
     public LabelTypeCQ getConditionQueryLabelType() {
-        if (_conditionQueryLabelType == null) {
-            _conditionQueryLabelType = xcreateQueryLabelType();
+        final String prop = "labelType";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryLabelType());
             xsetupOuterJoinLabelType();
         }
-        return _conditionQueryLabelType;
+        return xgetQueRlMap(prop);
     }
 
     protected LabelTypeCQ xcreateQueryLabelType() {
-        final String nrp = resolveNextRelationPath(
-                "LABEL_TYPE_TO_ROLE_TYPE_MAPPING", "labelType");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final LabelTypeCQ cq = new LabelTypeCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("labelType");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("LABEL_TYPE_TO_ROLE_TYPE_MAPPING",
+                "labelType");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new LabelTypeCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "labelType", nrp);
     }
 
     protected void xsetupOuterJoinLabelType() {
-        final LabelTypeCQ cq = getConditionQueryLabelType();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("LABEL_TYPE_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "labelType");
+        xregOutJo("labelType");
     }
 
     public boolean hasConditionQueryLabelType() {
-        return _conditionQueryLabelType != null;
+        return xhasQueRlMap("labelType");
     }
 
     /**
@@ -393,37 +350,29 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
         return getConditionQueryRoleType();
     }
 
-    protected RoleTypeCQ _conditionQueryRoleType;
-
     public RoleTypeCQ getConditionQueryRoleType() {
-        if (_conditionQueryRoleType == null) {
-            _conditionQueryRoleType = xcreateQueryRoleType();
+        final String prop = "roleType";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryRoleType());
             xsetupOuterJoinRoleType();
         }
-        return _conditionQueryRoleType;
+        return xgetQueRlMap(prop);
     }
 
     protected RoleTypeCQ xcreateQueryRoleType() {
-        final String nrp = resolveNextRelationPath(
-                "LABEL_TYPE_TO_ROLE_TYPE_MAPPING", "roleType");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final RoleTypeCQ cq = new RoleTypeCQ(this, xgetSqlClause(), jan,
-                xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("roleType");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String nrp = xresolveNRP("LABEL_TYPE_TO_ROLE_TYPE_MAPPING",
+                "roleType");
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new RoleTypeCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "roleType", nrp);
     }
 
     protected void xsetupOuterJoinRoleType() {
-        final RoleTypeCQ cq = getConditionQueryRoleType();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("ROLE_TYPE_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "roleType");
+        xregOutJo("roleType");
     }
 
     public boolean hasConditionQueryRoleType() {
-        return _conditionQueryRoleType != null;
+        return xhasQueRlMap("roleType");
     }
 
     @Override
@@ -435,77 +384,43 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _scalarConditionMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _specifyMyselfDerivedMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _queryMyselfDerivedMap;
 
     public Map<String, LabelTypeToRoleTypeMappingCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(
-            final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -514,36 +429,24 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
     protected Map<String, LabelTypeToRoleTypeMappingCQ> _myselfExistsMap;
 
     public Map<String, LabelTypeToRoleTypeMappingCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, LabelTypeToRoleTypeMappingCQ> _myselfInScopeMap;
-
     public Map<String, LabelTypeToRoleTypeMappingCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final LabelTypeToRoleTypeMappingCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final LabelTypeToRoleTypeMappingCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -556,6 +459,14 @@ public class BsLabelTypeToRoleTypeMappingCQ extends
 
     protected String xCQ() {
         return LabelTypeToRoleTypeMappingCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

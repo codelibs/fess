@@ -45,10 +45,10 @@ public class ClickLogCIQ extends AbstractBsClickLogCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public ClickLogCIQ(final ConditionQuery childQuery,
+    public ClickLogCIQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel, final BsClickLogCQ myCQ) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
         _myCQ = myCQ;
         _foreignPropertyName = _myCQ.xgetForeignPropertyName(); // accept foreign property name
         _relationPath = _myCQ.xgetRelationPath(); // accept relation path
@@ -61,9 +61,8 @@ public class ClickLogCIQ extends AbstractBsClickLogCQ {
     @Override
     protected void reflectRelationOnUnionQuery(final ConditionQuery bq,
             final ConditionQuery uq) {
-        final String msg = "InlineView must not need UNION method: " + bq
-                + " : " + uq;
-        throw new IllegalConditionBeanOperationException(msg);
+        throw new IllegalConditionBeanOperationException(
+                "InlineView cannot use Union: " + bq + " : " + uq);
     }
 
     @Override
@@ -129,47 +128,47 @@ public class ClickLogCIQ extends AbstractBsClickLogCQ {
 
     @Override
     protected Map<String, Object> xfindFixedConditionDynamicParameterMap(
-            final String property) {
+            final String pp) {
         return null;
     }
 
     @Override
-    public String keepScalarCondition(final ClickLogCQ subQuery) {
+    public String keepScalarCondition(final ClickLogCQ sq) {
         throwIICBOE("ScalarCondition");
         return null;
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final ClickLogCQ subQuery) {
+    public String keepSpecifyMyselfDerived(final ClickLogCQ sq) {
         throwIICBOE("(Specify)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerived(final ClickLogCQ subQuery) {
+    public String keepQueryMyselfDerived(final ClickLogCQ sq) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
+    public String keepQueryMyselfDerivedParameter(final Object vl) {
         throwIICBOE("(Query)MyselfDerived");
         return null;
     }
 
     @Override
-    public String keepMyselfExists(final ClickLogCQ subQuery) {
+    public String keepMyselfExists(final ClickLogCQ sq) {
         throwIICBOE("MyselfExists");
         return null;
     }
 
     @Override
-    public String keepMyselfInScope(final ClickLogCQ subQuery) {
+    public String keepMyselfInScope(final ClickLogCQ sq) {
         throwIICBOE("MyselfInScope");
         return null;
     }
 
-    protected void throwIICBOE(final String name) { // throwInlineIllegalConditionBeanOperationException()
+    protected void throwIICBOE(final String name) {
         throw new IllegalConditionBeanOperationException(name
                 + " at InlineView is unsupported.");
     }

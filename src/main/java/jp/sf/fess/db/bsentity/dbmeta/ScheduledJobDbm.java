@@ -60,6 +60,9 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -81,213 +84,213 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgVersionNo(), "versionNo");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getId();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setId(ctl(vl));
         }
     }
 
     public static class EpgName implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getName();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getName();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setName((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setName((String) vl);
         }
     }
 
     public static class EpgTarget implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getTarget();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getTarget();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setTarget((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setTarget((String) vl);
         }
     }
 
     public static class EpgCronExpression implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getCronExpression();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getCronExpression();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setCronExpression((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setCronExpression((String) vl);
         }
     }
 
     public static class EpgScriptType implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getScriptType();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getScriptType();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setScriptType((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setScriptType((String) vl);
         }
     }
 
     public static class EpgScriptData implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getScriptData();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getScriptData();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setScriptData((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setScriptData((String) vl);
         }
     }
 
     public static class EpgCrawler implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getCrawler();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getCrawler();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setCrawler((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setCrawler((String) vl);
         }
     }
 
     public static class EpgJobLogging implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getJobLogging();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getJobLogging();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setJobLogging((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setJobLogging((String) vl);
         }
     }
 
     public static class EpgAvailable implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getAvailable();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getAvailable();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setAvailable((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setAvailable((String) vl);
         }
     }
 
     public static class EpgSortOrder implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getSortOrder();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getSortOrder();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setSortOrder(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setSortOrder(cti(vl));
         }
     }
 
     public static class EpgCreatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getCreatedBy();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getCreatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setCreatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setCreatedBy((String) vl);
         }
     }
 
     public static class EpgCreatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getCreatedTime();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getCreatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setCreatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setCreatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgUpdatedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getUpdatedBy();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getUpdatedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setUpdatedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setUpdatedBy((String) vl);
         }
     }
 
     public static class EpgUpdatedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getUpdatedTime();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getUpdatedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setUpdatedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setUpdatedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgDeletedBy implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getDeletedBy();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getDeletedBy();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setDeletedBy((String) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setDeletedBy((String) vl);
         }
     }
 
     public static class EpgDeletedTime implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getDeletedTime();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getDeletedTime();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setDeletedTime((java.sql.Timestamp) v);
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setDeletedTime((java.sql.Timestamp) vl);
         }
     }
 
     public static class EpgVersionNo implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((ScheduledJob) e).getVersionNo();
+        public Object read(final Entity et) {
+            return ((ScheduledJob) et).getVersionNo();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((ScheduledJob) e).setVersionNo(cti(v));
+        public void write(final Entity et, final Object vl) {
+            ((ScheduledJob) et).setVersionNo(cti(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -327,151 +330,226 @@ public class ScheduledJobDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_CE7674E0_15CD_434F_99F3_7FC3C8E5434A",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_B76470FB_53A8_401B_9095_426F84B5B7B8",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,
-            true, "name", String.class, false, false, "VARCHAR", 100, 0, null,
-            false, null, null, null, null, null);
+            String.class, "name", null, false, false, true, "VARCHAR", 100, 0,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnTarget = cci("TARGET", "TARGET", null,
-            null, true, "target", String.class, false, false, "VARCHAR", 100,
-            0, null, false, null, null, null, null, null);
+            null, String.class, "target", null, false, false, true, "VARCHAR",
+            100, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnCronExpression = cci("CRON_EXPRESSION",
-            "CRON_EXPRESSION", null, null, true, "cronExpression",
-            String.class, false, false, "VARCHAR", 100, 0, null, false, null,
+            "CRON_EXPRESSION", null, null, String.class, "cronExpression",
+            null, false, false, true, "VARCHAR", 100, 0, null, false, null,
             null, null, null, null);
 
     protected final ColumnInfo _columnScriptType = cci("SCRIPT_TYPE",
-            "SCRIPT_TYPE", null, null, true, "scriptType", String.class, false,
-            false, "VARCHAR", 100, 0, null, false, null, null, null, null, null);
+            "SCRIPT_TYPE", null, null, String.class, "scriptType", null, false,
+            false, true, "VARCHAR", 100, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnScriptData = cci("SCRIPT_DATA",
-            "SCRIPT_DATA", null, null, false, "scriptData", String.class,
+            "SCRIPT_DATA", null, null, String.class, "scriptData", null, false,
             false, false, "VARCHAR", 4000, 0, null, false, null, null, null,
             null, null);
 
     protected final ColumnInfo _columnCrawler = cci("CRAWLER", "CRAWLER", null,
-            null, true, "crawler", String.class, false, false, "VARCHAR", 1, 0,
-            null, false, null, null, null, null, null);
+            null, String.class, "crawler", null, false, false, true, "VARCHAR",
+            1, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnJobLogging = cci("JOB_LOGGING",
-            "JOB_LOGGING", null, null, true, "jobLogging", String.class, false,
-            false, "VARCHAR", 1, 0, null, false, null, null, null, null, null);
+            "JOB_LOGGING", null, null, String.class, "jobLogging", null, false,
+            false, true, "VARCHAR", 1, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnAvailable = cci("AVAILABLE", "AVAILABLE",
-            null, null, true, "available", String.class, false, false,
+            null, null, String.class, "available", null, false, false, true,
             "VARCHAR", 1, 0, null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnSortOrder = cci("SORT_ORDER",
-            "SORT_ORDER", null, null, true, "sortOrder", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false, null, null, null, null, null);
+            "SORT_ORDER", null, null, Integer.class, "sortOrder", null, false,
+            false, true, "INTEGER", 10, 0, null, false, null, null, null, null,
+            null);
 
     protected final ColumnInfo _columnCreatedBy = cci("CREATED_BY",
-            "CREATED_BY", null, null, true, "createdBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "CREATED_BY", null, null, String.class, "createdBy", null, false,
+            false, true, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnCreatedTime = cci("CREATED_TIME",
-            "CREATED_TIME", null, null, true, "createdTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
+            "CREATED_TIME", null, null, java.sql.Timestamp.class,
+            "createdTime", null, false, false, true, "TIMESTAMP", 23, 10, null,
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUpdatedBy = cci("UPDATED_BY",
-            "UPDATED_BY", null, null, false, "updatedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "UPDATED_BY", null, null, String.class, "updatedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnUpdatedTime = cci("UPDATED_TIME",
-            "UPDATED_TIME", null, null, false, "updatedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "UPDATED_TIME", null, null, java.sql.Timestamp.class,
+            "updatedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnDeletedBy = cci("DELETED_BY",
-            "DELETED_BY", null, null, false, "deletedBy", String.class, false,
-            false, "VARCHAR", 255, 0, null, false, null, null, null, null, null);
+            "DELETED_BY", null, null, String.class, "deletedBy", null, false,
+            false, false, "VARCHAR", 255, 0, null, false, null, null, null,
+            null, null);
 
     protected final ColumnInfo _columnDeletedTime = cci("DELETED_TIME",
-            "DELETED_TIME", null, null, false, "deletedTime",
-            java.sql.Timestamp.class, false, false, "TIMESTAMP", 23, 10, null,
-            false, null, null, null, null, null);
+            "DELETED_TIME", null, null, java.sql.Timestamp.class,
+            "deletedTime", null, false, false, false, "TIMESTAMP", 23, 10,
+            null, false, null, null, null, null, null);
 
     protected final ColumnInfo _columnVersionNo = cci("VERSION_NO",
-            "VERSION_NO", null, null, true, "versionNo", Integer.class, false,
-            false, "INTEGER", 10, 0, null, false,
+            "VERSION_NO", null, null, Integer.class, "versionNo", null, false,
+            false, true, "INTEGER", 10, 0, null, false,
             OptimisticLockType.VERSION_NO, null, null, null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * NAME: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnName() {
         return _columnName;
     }
 
+    /**
+     * TARGET: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnTarget() {
         return _columnTarget;
     }
 
+    /**
+     * CRON_EXPRESSION: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCronExpression() {
         return _columnCronExpression;
     }
 
+    /**
+     * SCRIPT_TYPE: {NotNull, VARCHAR(100)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnScriptType() {
         return _columnScriptType;
     }
 
+    /**
+     * SCRIPT_DATA: {VARCHAR(4000)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnScriptData() {
         return _columnScriptData;
     }
 
+    /**
+     * CRAWLER: {NotNull, VARCHAR(1)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCrawler() {
         return _columnCrawler;
     }
 
+    /**
+     * JOB_LOGGING: {NotNull, VARCHAR(1)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnJobLogging() {
         return _columnJobLogging;
     }
 
+    /**
+     * AVAILABLE: {NotNull, VARCHAR(1)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnAvailable() {
         return _columnAvailable;
     }
 
+    /**
+     * SORT_ORDER: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
 
+    /**
+     * CREATED_BY: {NotNull, VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
 
+    /**
+     * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
     }
 
+    /**
+     * UPDATED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedBy() {
         return _columnUpdatedBy;
     }
 
+    /**
+     * UPDATED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
 
+    /**
+     * DELETED_BY: {VARCHAR(255)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedBy() {
         return _columnDeletedBy;
     }
 
+    /**
+     * DELETED_TIME: {TIMESTAMP(23, 10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnDeletedTime() {
         return _columnDeletedTime;
     }
 
+    /**
+     * VERSION_NO: {NotNull, INTEGER(10)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnVersionNo() {
         return _columnVersionNo;
     }
@@ -527,6 +605,8 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
@@ -583,8 +663,8 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public ScheduledJob newEntity() {
+        return new ScheduledJob();
     }
 
     public ScheduledJob newMyEntity() {
@@ -595,24 +675,24 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((ScheduledJob) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((ScheduledJob) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((ScheduledJob) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((ScheduledJob) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

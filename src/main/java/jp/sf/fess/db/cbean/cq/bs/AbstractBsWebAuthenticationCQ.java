@@ -17,6 +17,8 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
@@ -25,10 +27,11 @@ import jp.sf.fess.db.cbean.cq.WebAuthenticationCQ;
 import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
-import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
 import org.seasar.dbflute.cbean.chelper.HpSSQFunction;
 import org.seasar.dbflute.cbean.chelper.HpSSQOption;
 import org.seasar.dbflute.cbean.chelper.HpSSQSetupper;
@@ -51,10 +54,10 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsWebAuthenticationCQ(final ConditionQuery childQuery,
+    public AbstractBsWebAuthenticationCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -195,11 +198,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -301,7 +304,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * HOSTNAME: {VARCHAR(100)} <br />
-     * <pre>e.g. setHostname_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setHostname_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param hostname The value of hostname as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -348,11 +351,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regHostname(CK_ISNN, DOBJ);
     }
 
-    protected void regHostname(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueHostname(), "HOSTNAME");
+    protected void regHostname(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueHostname(), "HOSTNAME");
     }
 
-    abstract protected ConditionValue getCValueHostname();
+    protected abstract ConditionValue getCValueHostname();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -456,11 +459,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regINS(CK_NINS, cTL(portList), getCValuePort(), "PORT");
     }
 
-    protected void regPort(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValuePort(), "PORT");
+    protected void regPort(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValuePort(), "PORT");
     }
 
-    abstract protected ConditionValue getCValuePort();
+    protected abstract ConditionValue getCValuePort();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -562,7 +565,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * AUTH_REALM: {VARCHAR(100)} <br />
-     * <pre>e.g. setAuthRealm_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setAuthRealm_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param authRealm The value of authRealm as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -609,11 +612,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regAuthRealm(CK_ISNN, DOBJ);
     }
 
-    protected void regAuthRealm(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueAuthRealm(), "AUTH_REALM");
+    protected void regAuthRealm(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueAuthRealm(), "AUTH_REALM");
     }
 
-    abstract protected ConditionValue getCValueAuthRealm();
+    protected abstract ConditionValue getCValueAuthRealm();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -721,7 +724,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * PROTOCOL_SCHEME: {VARCHAR(10)} <br />
-     * <pre>e.g. setProtocolScheme_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setProtocolScheme_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param protocolScheme The value of protocolScheme as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -768,11 +771,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regProtocolScheme(CK_ISNN, DOBJ);
     }
 
-    protected void regProtocolScheme(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueProtocolScheme(), "PROTOCOL_SCHEME");
+    protected void regProtocolScheme(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueProtocolScheme(), "PROTOCOL_SCHEME");
     }
 
-    abstract protected ConditionValue getCValueProtocolScheme();
+    protected abstract ConditionValue getCValueProtocolScheme();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -874,7 +877,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * USERNAME: {NotNull, VARCHAR(100)} <br />
-     * <pre>e.g. setUsername_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUsername_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param username The value of username as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -897,11 +900,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
                 likeSearchOption);
     }
 
-    protected void regUsername(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUsername(), "USERNAME");
+    protected void regUsername(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUsername(), "USERNAME");
     }
 
-    abstract protected ConditionValue getCValueUsername();
+    protected abstract ConditionValue getCValueUsername();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1003,7 +1006,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * PASSWORD: {VARCHAR(100)} <br />
-     * <pre>e.g. setPassword_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setPassword_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param password The value of password as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1050,11 +1053,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regPassword(CK_ISNN, DOBJ);
     }
 
-    protected void regPassword(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValuePassword(), "PASSWORD");
+    protected void regPassword(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValuePassword(), "PASSWORD");
     }
 
-    abstract protected ConditionValue getCValuePassword();
+    protected abstract ConditionValue getCValuePassword();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1158,7 +1161,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * PARAMETERS: {VARCHAR(1000)} <br />
-     * <pre>e.g. setParameters_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setParameters_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param parameters The value of parameters as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1205,11 +1208,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regParameters(CK_ISNN, DOBJ);
     }
 
-    protected void regParameters(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueParameters(), "PARAMETERS");
+    protected void regParameters(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueParameters(), "PARAMETERS");
     }
 
-    abstract protected ConditionValue getCValueParameters();
+    protected abstract ConditionValue getCValueParameters();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1331,18 +1334,23 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      */
     public void inScopeWebCrawlingConfig(
             final SubQuery<WebCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<WebCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepWebCrawlingConfigId_InScopeRelation_WebCrawlingConfig(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "WEB_CRAWLING_CONFIG_ID", "ID",
-                subQueryPropertyName, "webCrawlingConfig");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepWebCrawlingConfigId_InScopeRelation_WebCrawlingConfig(cb
+                .query());
+        registerInScopeRelation(cb.query(), "WEB_CRAWLING_CONFIG_ID", "ID", pp,
+                "webCrawlingConfig");
     }
 
     public abstract String keepWebCrawlingConfigId_InScopeRelation_WebCrawlingConfig(
-            WebCrawlingConfigCQ subQuery);
+            WebCrawlingConfigCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -1352,24 +1360,29 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      */
     public void notInScopeWebCrawlingConfig(
             final SubQuery<WebCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<WebCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepWebCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig(cb
-                .query()); // for saving query-value.
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepWebCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig(cb
+                .query());
         registerNotInScopeRelation(cb.query(), "WEB_CRAWLING_CONFIG_ID", "ID",
-                subQueryPropertyName, "webCrawlingConfig");
+                pp, "webCrawlingConfig");
     }
 
     public abstract String keepWebCrawlingConfigId_NotInScopeRelation_WebCrawlingConfig(
-            WebCrawlingConfigCQ subQuery);
+            WebCrawlingConfigCQ sq);
 
-    protected void regWebCrawlingConfigId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueWebCrawlingConfigId(), "WEB_CRAWLING_CONFIG_ID");
+    protected void regWebCrawlingConfigId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueWebCrawlingConfigId(), "WEB_CRAWLING_CONFIG_ID");
     }
 
-    abstract protected ConditionValue getCValueWebCrawlingConfigId();
+    protected abstract ConditionValue getCValueWebCrawlingConfigId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1471,7 +1484,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)} <br />
-     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param createdBy The value of createdBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1494,11 +1507,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
                 likeSearchOption);
     }
 
-    protected void regCreatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedBy(), "CREATED_BY");
+    protected void regCreatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedBy(), "CREATED_BY");
     }
 
-    abstract protected ConditionValue getCValueCreatedBy();
+    protected abstract ConditionValue getCValueCreatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1549,13 +1562,13 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
-     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setCreatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setCreatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1569,22 +1582,21 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no to-condition)
      */
-    public void setCreatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setCreatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setCreatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
 
-    protected void regCreatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedTime(), "CREATED_TIME");
+    protected void regCreatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedTime(), "CREATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueCreatedTime();
+    protected abstract ConditionValue getCValueCreatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1686,7 +1698,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * UPDATED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param updatedBy The value of updatedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1733,11 +1745,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regUpdatedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedBy(), "UPDATED_BY");
+    protected void regUpdatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedBy(), "UPDATED_BY");
     }
 
-    abstract protected ConditionValue getCValueUpdatedBy();
+    protected abstract ConditionValue getCValueUpdatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1788,13 +1800,13 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setUpdatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setUpdatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1808,13 +1820,12 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setUpdatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setUpdatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setUpdatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -1835,11 +1846,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regUpdatedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedTime(), "UPDATED_TIME");
+    protected void regUpdatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedTime(), "UPDATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueUpdatedTime();
+    protected abstract ConditionValue getCValueUpdatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1941,7 +1952,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * DELETED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param deletedBy The value of deletedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1988,11 +1999,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regDeletedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedBy(), "DELETED_BY");
+    protected void regDeletedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedBy(), "DELETED_BY");
     }
 
-    abstract protected ConditionValue getCValueDeletedBy();
+    protected abstract ConditionValue getCValueDeletedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2043,13 +2054,13 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setDeletedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setDeletedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -2063,13 +2074,12 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setDeletedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setDeletedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setDeletedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -2090,11 +2100,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regDeletedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedTime(), "DELETED_TIME");
+    protected void regDeletedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedTime(), "DELETED_TIME");
     }
 
-    abstract protected ConditionValue getCValueDeletedTime();
+    protected abstract ConditionValue getCValueDeletedTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2201,11 +2211,11 @@ public abstract class AbstractBsWebAuthenticationCQ extends
         regINS(CK_NINS, cTL(versionNoList), getCValueVersionNo(), "VERSION_NO");
     }
 
-    protected void regVersionNo(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueVersionNo(), "VERSION_NO");
+    protected void regVersionNo(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueVersionNo(), "VERSION_NO");
     }
 
-    abstract protected ConditionValue getCValueVersionNo();
+    protected abstract ConditionValue getCValueVersionNo();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -2214,7 +2224,7 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
      *     public void query(WebAuthenticationCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2224,14 +2234,14 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<WebAuthenticationCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, WebAuthenticationCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
      *     public void query(WebAuthenticationCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2241,14 +2251,14 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<WebAuthenticationCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, WebAuthenticationCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
      *     public void query(WebAuthenticationCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2258,14 +2268,14 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<WebAuthenticationCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, WebAuthenticationCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
      *     public void query(WebAuthenticationCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2275,14 +2285,14 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<WebAuthenticationCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, WebAuthenticationCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
      *     public void query(WebAuthenticationCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2292,14 +2302,14 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<WebAuthenticationCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, WebAuthenticationCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;WebAuthenticationCB&gt;() {
      *     public void query(WebAuthenticationCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2309,44 +2319,31 @@ public abstract class AbstractBsWebAuthenticationCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<WebAuthenticationCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, WebAuthenticationCB.class);
     }
 
-    protected HpSSQFunction<WebAuthenticationCB> xcreateSSQFunction(
-            final String operand) {
-        return new HpSSQFunction<WebAuthenticationCB>(
-                new HpSSQSetupper<WebAuthenticationCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<WebAuthenticationCB> subQuery,
-                            final HpSSQOption<WebAuthenticationCB> option) {
-                        xscalarCondition(function, subQuery, operand, option);
-                    }
-                });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<WebAuthenticationCB> subQuery, final String operand,
-            final HpSSQOption<WebAuthenticationCB> option) {
-        assertObjectNotNull("subQuery<WebAuthenticationCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final WebAuthenticationCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(WebAuthenticationCQ subQuery);
+    public abstract String keepScalarCondition(WebAuthenticationCQ sq);
 
     protected WebAuthenticationCB xcreateScalarConditionCB() {
-        final WebAuthenticationCB cb = new WebAuthenticationCB();
+        final WebAuthenticationCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected WebAuthenticationCB xcreateScalarConditionPartitionByCB() {
-        final WebAuthenticationCB cb = new WebAuthenticationCB();
+        final WebAuthenticationCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -2354,104 +2351,174 @@ public abstract class AbstractBsWebAuthenticationCQ extends
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<WebAuthenticationCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<WebAuthenticationCB>", subQuery);
+    public void xsmyselfDerive(final String fn,
+            final SubQuery<WebAuthenticationCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final WebAuthenticationCB cb = new WebAuthenticationCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(WebAuthenticationCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(WebAuthenticationCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<WebAuthenticationCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(WebAuthenticationCB.class);
     }
 
-    protected HpQDRFunction<WebAuthenticationCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<WebAuthenticationCB>(
-                new HpQDRSetupper<WebAuthenticationCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<WebAuthenticationCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveMyselfDerived(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<WebAuthenticationCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<WebAuthenticationCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final WebAuthenticationCB cb = new WebAuthenticationCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(WebAuthenticationCQ subQuery);
+    public abstract String keepQueryMyselfDerived(WebAuthenticationCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<WebAuthenticationCB> subQuery) {
-        assertObjectNotNull("subQuery<WebAuthenticationCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebAuthenticationCB cb = new WebAuthenticationCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(WebAuthenticationCQ subQuery);
+    public abstract String keepMyselfExists(WebAuthenticationCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<WebAuthenticationCB> subQuery) {
-        assertObjectNotNull("subQuery<WebAuthenticationCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebAuthenticationCB cb = new WebAuthenticationCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(WebAuthenticationCQ subQuery);
+    public abstract String keepMyselfInScope(WebAuthenticationCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return WebAuthenticationCB.class.getName();
+    protected WebAuthenticationCB newMyCB() {
+        return new WebAuthenticationCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return WebAuthenticationCQ.class.getName();
     }

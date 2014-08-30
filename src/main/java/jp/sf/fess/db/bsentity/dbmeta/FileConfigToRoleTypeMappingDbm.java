@@ -22,6 +22,8 @@ import java.util.Map;
 import jp.sf.fess.db.allcommon.DBCurrent;
 import jp.sf.fess.db.allcommon.DBFluteConfig;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
+import jp.sf.fess.db.exentity.FileCrawlingConfig;
+import jp.sf.fess.db.exentity.RoleType;
 
 import org.seasar.dbflute.DBDef;
 import org.seasar.dbflute.Entity;
@@ -61,6 +63,9 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                    Property Gateway
     //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, new EpgId(), "id");
@@ -68,45 +73,84 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
         setupEpg(_epgMap, new EpgRoleTypeId(), "roleTypeId");
     }
 
-    @Override
-    public PropertyGateway findPropertyGateway(final String propertyName) {
-        return doFindEpg(_epgMap, propertyName);
-    }
-
     public static class EpgId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileConfigToRoleTypeMapping) e).getId();
+        public Object read(final Entity et) {
+            return ((FileConfigToRoleTypeMapping) et).getId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileConfigToRoleTypeMapping) e).setId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToRoleTypeMapping) et).setId(ctl(vl));
         }
     }
 
     public static class EpgFileConfigId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileConfigToRoleTypeMapping) e).getFileConfigId();
+        public Object read(final Entity et) {
+            return ((FileConfigToRoleTypeMapping) et).getFileConfigId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileConfigToRoleTypeMapping) e).setFileConfigId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToRoleTypeMapping) et).setFileConfigId(ctl(vl));
         }
     }
 
     public static class EpgRoleTypeId implements PropertyGateway {
         @Override
-        public Object read(final Entity e) {
-            return ((FileConfigToRoleTypeMapping) e).getRoleTypeId();
+        public Object read(final Entity et) {
+            return ((FileConfigToRoleTypeMapping) et).getRoleTypeId();
         }
 
         @Override
-        public void write(final Entity e, final Object v) {
-            ((FileConfigToRoleTypeMapping) e).setRoleTypeId(ctl(v));
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToRoleTypeMapping) et).setRoleTypeId(ctl(vl));
         }
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // -----------------------------------------------------
+    //                                      Foreign Property
+    //                                      ----------------
+    protected final Map<String, PropertyGateway> _efpgMap = newHashMap();
+    {
+        setupEfpg(_efpgMap, new EfpgFileCrawlingConfig(), "fileCrawlingConfig");
+        setupEfpg(_efpgMap, new EfpgRoleType(), "roleType");
+    }
+
+    public class EfpgFileCrawlingConfig implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((FileConfigToRoleTypeMapping) et).getFileCrawlingConfig();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToRoleTypeMapping) et)
+                    .setFileCrawlingConfig((FileCrawlingConfig) vl);
+        }
+    }
+
+    public class EfpgRoleType implements PropertyGateway {
+        @Override
+        public Object read(final Entity et) {
+            return ((FileConfigToRoleTypeMapping) et).getRoleType();
+        }
+
+        @Override
+        public void write(final Entity et, final Object vl) {
+            ((FileConfigToRoleTypeMapping) et).setRoleType((RoleType) vl);
+        }
+    }
+
+    @Override
+    public PropertyGateway findForeignPropertyGateway(final String prop) {
+        return doFindEfpg(_efpgMap, prop);
     }
 
     // ===================================================================================
@@ -146,35 +190,48 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
             "ID",
             null,
             null,
-            true,
-            "id",
             Long.class,
+            "id",
+            null,
+            true,
             true,
             true,
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_5E357576_153F_4321_9ADB_CA67AA5618FC",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_753BD317_B84F_44B6_804F_A15B41D531BD",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnFileConfigId = cci("FILE_CONFIG_ID",
-            "FILE_CONFIG_ID", null, null, true, "fileConfigId", Long.class,
-            false, false, "BIGINT", 19, 0, null, false, null, null,
+            "FILE_CONFIG_ID", null, null, Long.class, "fileConfigId", null,
+            false, false, true, "BIGINT", 19, 0, null, false, null, null,
             "fileCrawlingConfig", null, null);
 
     protected final ColumnInfo _columnRoleTypeId = cci("ROLE_TYPE_ID",
-            "ROLE_TYPE_ID", null, null, true, "roleTypeId", Long.class, false,
-            false, "BIGINT", 19, 0, null, false, null, null, "roleType", null,
-            null);
+            "ROLE_TYPE_ID", null, null, Long.class, "roleTypeId", null, false,
+            false, true, "BIGINT", 19, 0, null, false, null, null, "roleType",
+            null, null);
 
+    /**
+     * ID: {PK, ID, NotNull, BIGINT(19)}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnId() {
         return _columnId;
     }
 
+    /**
+     * FILE_CONFIG_ID: {IX, NotNull, BIGINT(19), FK to FILE_CRAWLING_CONFIG}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnFileConfigId() {
         return _columnFileConfigId;
     }
 
+    /**
+     * ROLE_TYPE_ID: {IX, NotNull, BIGINT(19), FK to ROLE_TYPE}
+     * @return The information object of specified column. (NotNull)
+     */
     public ColumnInfo columnRoleTypeId() {
         return _columnRoleTypeId;
     }
@@ -216,25 +273,35 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                       Relation Info
     //                                                                       =============
+    // cannot cache because it uses related DB meta instance while booting
+    // (instead, cached by super's collection)
     // -----------------------------------------------------
     //                                      Foreign Property
     //                                      ----------------
+    /**
+     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignFileCrawlingConfig() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnFileConfigId(), FileCrawlingConfigDbm.getInstance()
                         .columnId());
         return cfi("CONSTRAINT_3A", "fileCrawlingConfig", this,
-                FileCrawlingConfigDbm.getInstance(), map, 0, false, false,
+                FileCrawlingConfigDbm.getInstance(), mp, 0, null, false, false,
                 false, false, null, null, false,
                 "fileConfigToRoleTypeMappingList");
     }
 
+    /**
+     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * @return The information object of foreign property. (NotNull)
+     */
     public ForeignInfo foreignRoleType() {
-        final Map<ColumnInfo, ColumnInfo> map = newLinkedHashMap(
+        final Map<ColumnInfo, ColumnInfo> mp = newLinkedHashMap(
                 columnRoleTypeId(), RoleTypeDbm.getInstance().columnId());
         return cfi("CONSTRAINT_3A9", "roleType", this,
-                RoleTypeDbm.getInstance(), map, 1, false, false, false, false,
-                null, null, false, "fileConfigToRoleTypeMappingList");
+                RoleTypeDbm.getInstance(), mp, 1, null, false, false, false,
+                false, null, null, false, "fileConfigToRoleTypeMappingList");
     }
 
     // -----------------------------------------------------
@@ -279,8 +346,8 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     //                                                                     Object Instance
     //                                                                     ===============
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FileConfigToRoleTypeMapping newEntity() {
+        return new FileConfigToRoleTypeMapping();
     }
 
     public FileConfigToRoleTypeMapping newMyEntity() {
@@ -291,24 +358,24 @@ public class FileConfigToRoleTypeMappingDbm extends AbstractDBMeta {
     //                                                                   Map Communication
     //                                                                   =================
     @Override
-    public void acceptPrimaryKeyMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptPrimaryKeyMap((FileConfigToRoleTypeMapping) e, m);
+    public void acceptPrimaryKeyMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptPrimaryKeyMap((FileConfigToRoleTypeMapping) et, mp);
     }
 
     @Override
-    public void acceptAllColumnMap(final Entity e,
-            final Map<String, ? extends Object> m) {
-        doAcceptAllColumnMap((FileConfigToRoleTypeMapping) e, m);
+    public void acceptAllColumnMap(final Entity et,
+            final Map<String, ? extends Object> mp) {
+        doAcceptAllColumnMap((FileConfigToRoleTypeMapping) et, mp);
     }
 
     @Override
-    public Map<String, Object> extractPrimaryKeyMap(final Entity e) {
-        return doExtractPrimaryKeyMap(e);
+    public Map<String, Object> extractPrimaryKeyMap(final Entity et) {
+        return doExtractPrimaryKeyMap(et);
     }
 
     @Override
-    public Map<String, Object> extractAllColumnMap(final Entity e) {
-        return doExtractAllColumnMap(e);
+    public Map<String, Object> extractAllColumnMap(final Entity et) {
+        return doExtractAllColumnMap(et);
     }
 }

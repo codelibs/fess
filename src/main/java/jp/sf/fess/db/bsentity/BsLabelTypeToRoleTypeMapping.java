@@ -98,8 +98,14 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -145,6 +151,18 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
@@ -152,7 +170,7 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     protected LabelType _labelType;
 
     /**
-     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * [get] LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
      * @return The entity of foreign property 'labelType'. (NullAllowed: when e.g. null FK column, no setupSelect)
      */
     public LabelType getLabelType() {
@@ -160,7 +178,7 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     }
 
     /**
-     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * [set] LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
      * @param labelType The entity of foreign property 'labelType'. (NullAllowed)
      */
     public void setLabelType(final LabelType labelType) {
@@ -171,7 +189,7 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     protected RoleType _roleType;
 
     /**
-     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * [get] ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
      * @return The entity of foreign property 'roleType'. (NullAllowed: when e.g. null FK column, no setupSelect)
      */
     public RoleType getRoleType() {
@@ -179,7 +197,7 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     }
 
     /**
-     * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+     * [set] ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
      * @param roleType The entity of foreign property 'roleType'. (NullAllowed)
      */
     public void setRoleType(final RoleType roleType) {
@@ -225,28 +243,47 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsLabelTypeToRoleTypeMapping)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsLabelTypeToRoleTypeMapping)) {
             return false;
         }
-        final BsLabelTypeToRoleTypeMapping otherEntity = (BsLabelTypeToRoleTypeMapping) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsLabelTypeToRoleTypeMapping other = (BsLabelTypeToRoleTypeMapping) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -255,14 +292,14 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -279,7 +316,7 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -289,18 +326,18 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
+        final String li = "\n  ";
         if (_labelType != null) {
-            sb.append(l).append(xbRDS(_labelType, "labelType"));
+            sb.append(li).append(xbRDS(_labelType, "labelType"));
         }
         if (_roleType != null) {
-            sb.append(l).append(xbRDS(_roleType, "roleType"));
+            sb.append(li).append(xbRDS(_roleType, "roleType"));
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -325,12 +362,12 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getLabelTypeId());
-        sb.append(delimiter).append(getRoleTypeId());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getLabelTypeId());
+        sb.append(dm).append(getRoleTypeId());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -338,15 +375,15 @@ public abstract class BsLabelTypeToRoleTypeMapping implements Entity,
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
+        final String cm = ",";
         if (_labelType != null) {
-            sb.append(c).append("labelType");
+            sb.append(cm).append("labelType");
         }
         if (_roleType != null) {
-            sb.append(c).append("roleType");
+            sb.append(cm).append("roleType");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

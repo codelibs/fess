@@ -26,8 +26,6 @@ import jp.sf.fess.db.cbean.LabelTypeCB;
 import jp.sf.fess.db.cbean.cq.FileConfigToLabelTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.LabelTypeCQ;
-import jp.sf.fess.db.cbean.nss.FileCrawlingConfigNss;
-import jp.sf.fess.db.cbean.nss.LabelTypeNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -112,6 +110,22 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public FileConfigToLabelTypeMappingCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsFileConfigToLabelTypeMappingCB cb = this;
+        cb.query().setId_Equal(id);
+        return (FileConfigToLabelTypeMappingCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsFileConfigToLabelTypeMappingCB cb = this;
@@ -160,7 +174,7 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -178,7 +192,7 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -253,7 +267,7 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -266,7 +280,12 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FileConfigToLabelTypeMappingCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -277,7 +296,7 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -290,7 +309,12 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final FileConfigToLabelTypeMappingCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -299,65 +323,19 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected LabelTypeNss _nssLabelType;
-
-    public LabelTypeNss getNssLabelType() {
-        if (_nssLabelType == null) {
-            _nssLabelType = new LabelTypeNss(null);
-        }
-        return _nssLabelType;
-    }
-
-    /**
-     * Set up relation columns to select clause. <br />
-     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-     * <pre>
-     * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
-     * cb.<span style="color: #FD4747">setupSelect_LabelType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
-     * cb.query().setFoo...(value);
-     * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.selectEntityWithDeletedCheck(cb);
-     * ... = fileConfigToLabelTypeMapping.<span style="color: #FD4747">getLabelType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
-     * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
-     */
-    public LabelTypeNss setupSelect_LabelType() {
-        if (hasSpecifiedColumn()) { // if reverse call
-            specify().columnLabelTypeId();
-        }
-        doSetupSelect(new SsCall() {
-            @Override
-            public ConditionQuery qf() {
-                return query().queryLabelType();
-            }
-        });
-        if (_nssLabelType == null || !_nssLabelType.hasConditionQuery()) {
-            _nssLabelType = new LabelTypeNss(query().queryLabelType());
-        }
-        return _nssLabelType;
-    }
-
-    protected FileCrawlingConfigNss _nssFileCrawlingConfig;
-
-    public FileCrawlingConfigNss getNssFileCrawlingConfig() {
-        if (_nssFileCrawlingConfig == null) {
-            _nssFileCrawlingConfig = new FileCrawlingConfigNss(null);
-        }
-        return _nssFileCrawlingConfig;
-    }
-
     /**
      * Set up relation columns to select clause. <br />
      * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
      * <pre>
      * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
-     * cb.<span style="color: #FD4747">setupSelect_FileCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_FileCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.selectEntityWithDeletedCheck(cb);
-     * ... = fileConfigToLabelTypeMapping.<span style="color: #FD4747">getFileCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = fileConfigToLabelTypeMapping.<span style="color: #DD4747">getFileCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public FileCrawlingConfigNss setupSelect_FileCrawlingConfig() {
+    public void setupSelect_FileCrawlingConfig() {
+        assertSetupSelectPurpose("fileCrawlingConfig");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnFileConfigId();
         }
@@ -367,12 +345,30 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
                 return query().queryFileCrawlingConfig();
             }
         });
-        if (_nssFileCrawlingConfig == null
-                || !_nssFileCrawlingConfig.hasConditionQuery()) {
-            _nssFileCrawlingConfig = new FileCrawlingConfigNss(query()
-                    .queryFileCrawlingConfig());
+    }
+
+    /**
+     * Set up relation columns to select clause. <br />
+     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * <pre>
+     * FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
+     * cb.<span style="color: #DD4747">setupSelect_LabelType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.query().setFoo...(value);
+     * FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping = fileConfigToLabelTypeMappingBhv.selectEntityWithDeletedCheck(cb);
+     * ... = fileConfigToLabelTypeMapping.<span style="color: #DD4747">getLabelType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * </pre>
+     */
+    public void setupSelect_LabelType() {
+        assertSetupSelectPurpose("labelType");
+        if (hasSpecifiedColumn()) { // if reverse call
+            specify().columnLabelTypeId();
         }
-        return _nssFileCrawlingConfig;
+        doSetupSelect(new SsCall() {
+            @Override
+            public ConditionQuery qf() {
+                return query().queryLabelType();
+            }
+        });
     }
 
     // [DBFlute-0.7.4]
@@ -429,9 +425,9 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
 
     public static class HpSpecification extends
             HpAbstractSpecification<FileConfigToLabelTypeMappingCQ> {
-        protected LabelTypeCB.HpSpecification _labelType;
-
         protected FileCrawlingConfigCB.HpSpecification _fileCrawlingConfig;
+
+        protected LabelTypeCB.HpSpecification _labelType;
 
         public HpSpecification(final ConditionBean baseCB,
                 final HpSpQyCall<FileConfigToLabelTypeMappingCQ> qyCall,
@@ -476,60 +472,19 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
         @Override
         protected void doSpecifyRequiredColumn() {
             columnId(); // PK
-            if (qyCall().qy().hasConditionQueryLabelType()
-                    || qyCall().qy().xgetReferrerQuery() instanceof LabelTypeCQ) {
-                columnLabelTypeId(); // FK or one-to-one referrer
-            }
             if (qyCall().qy().hasConditionQueryFileCrawlingConfig()
                     || qyCall().qy().xgetReferrerQuery() instanceof FileCrawlingConfigCQ) {
                 columnFileConfigId(); // FK or one-to-one referrer
+            }
+            if (qyCall().qy().hasConditionQueryLabelType()
+                    || qyCall().qy().xgetReferrerQuery() instanceof LabelTypeCQ) {
+                columnLabelTypeId(); // FK or one-to-one referrer
             }
         }
 
         @Override
         protected String getTableDbName() {
             return "FILE_CONFIG_TO_LABEL_TYPE_MAPPING";
-        }
-
-        /**
-         * Prepare to specify functions about relation table. <br />
-         * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-         * @return The instance for specification for relation table to specify. (NotNull)
-         */
-        public LabelTypeCB.HpSpecification specifyLabelType() {
-            assertRelation("labelType");
-            if (_labelType == null) {
-                _labelType = new LabelTypeCB.HpSpecification(_baseCB,
-                        new HpSpQyCall<LabelTypeCQ>() {
-                            @Override
-                            public boolean has() {
-                                return _qyCall.has()
-                                        && _qyCall.qy()
-                                                .hasConditionQueryLabelType();
-                            }
-
-                            @Override
-                            public LabelTypeCQ qy() {
-                                return _qyCall.qy().queryLabelType();
-                            }
-                        }, _purpose, _dbmetaProvider);
-                if (xhasSyncQyCall()) { // inherits it
-                    _labelType.xsetSyncQyCall(new HpSpQyCall<LabelTypeCQ>() {
-                        @Override
-                        public boolean has() {
-                            return xsyncQyCall().has()
-                                    && xsyncQyCall().qy()
-                                            .hasConditionQueryLabelType();
-                        }
-
-                        @Override
-                        public LabelTypeCQ qy() {
-                            return xsyncQyCall().qy().queryLabelType();
-                        }
-                    });
-                }
-            }
-            return _labelType;
         }
 
         /**
@@ -578,6 +533,47 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
         }
 
         /**
+         * Prepare to specify functions about relation table. <br />
+         * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+         * @return The instance for specification for relation table to specify. (NotNull)
+         */
+        public LabelTypeCB.HpSpecification specifyLabelType() {
+            assertRelation("labelType");
+            if (_labelType == null) {
+                _labelType = new LabelTypeCB.HpSpecification(_baseCB,
+                        new HpSpQyCall<LabelTypeCQ>() {
+                            @Override
+                            public boolean has() {
+                                return _qyCall.has()
+                                        && _qyCall.qy()
+                                                .hasConditionQueryLabelType();
+                            }
+
+                            @Override
+                            public LabelTypeCQ qy() {
+                                return _qyCall.qy().queryLabelType();
+                            }
+                        }, _purpose, _dbmetaProvider);
+                if (xhasSyncQyCall()) { // inherits it
+                    _labelType.xsetSyncQyCall(new HpSpQyCall<LabelTypeCQ>() {
+                        @Override
+                        public boolean has() {
+                            return xsyncQyCall().has()
+                                    && xsyncQyCall().qy()
+                                            .hasConditionQueryLabelType();
+                        }
+
+                        @Override
+                        public LabelTypeCQ qy() {
+                            return xsyncQyCall().qy().queryLabelType();
+                        }
+                    });
+                }
+            }
+            return _labelType;
+        }
+
+        /**
          * Prepare for (Specify)MyselfDerived (SubQuery).
          * @return The object to set up a function for myself table. (NotNull)
          */
@@ -592,13 +588,11 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
                     new HpSDRSetupper<FileConfigToLabelTypeMappingCB, FileConfigToLabelTypeMappingCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
+                                final String fn,
+                                final SubQuery<FileConfigToLabelTypeMappingCB> sq,
                                 final FileConfigToLabelTypeMappingCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                                final String al, final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -606,19 +600,19 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -667,14 +661,14 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -688,15 +682,20 @@ public class BsFileConfigToLabelTypeMappingCB extends AbstractConditionBean {
         xorSQ((FileConfigToLabelTypeMappingCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *             public void query(FileConfigToLabelTypeMappingCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

@@ -46,6 +46,7 @@ import jp.sf.fess.db.cbean.FileAuthenticationCB;
 import jp.sf.fess.db.cbean.FileConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.FileConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.FileCrawlingConfigCB;
+import jp.sf.fess.db.cbean.KeyMatchCB;
 import jp.sf.fess.db.cbean.LabelTypeCB;
 import jp.sf.fess.db.cbean.LabelTypeToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.OverlappingHostCB;
@@ -66,6 +67,7 @@ import jp.sf.fess.db.exbhv.FileAuthenticationBhv;
 import jp.sf.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.FileCrawlingConfigBhv;
+import jp.sf.fess.db.exbhv.KeyMatchBhv;
 import jp.sf.fess.db.exbhv.LabelTypeBhv;
 import jp.sf.fess.db.exbhv.LabelTypeToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.OverlappingHostBhv;
@@ -86,6 +88,7 @@ import jp.sf.fess.db.exentity.FileAuthentication;
 import jp.sf.fess.db.exentity.FileConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.FileConfigToRoleTypeMapping;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
+import jp.sf.fess.db.exentity.KeyMatch;
 import jp.sf.fess.db.exentity.LabelType;
 import jp.sf.fess.db.exentity.LabelTypeToRoleTypeMapping;
 import jp.sf.fess.db.exentity.OverlappingHost;
@@ -156,6 +159,8 @@ public class DatabaseService {
 
     private static final String REQUEST_HEADER_KEY = "requestHeader";
 
+    private static final String KEY_MATCH_KEY = "keyMatch";
+
     private static final String OVERLAPPING_HOST_KEY = "overlappingHost";
 
     @Resource
@@ -217,6 +222,9 @@ public class DatabaseService {
 
     @Resource
     protected RequestHeaderBhv requestHeaderBhv;
+
+    @Resource
+    protected KeyMatchBhv keyMatchBhv;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -321,6 +329,9 @@ public class DatabaseService {
         // requestHeader
         dataSet.put(REQUEST_HEADER_KEY + LIST_SUFFIX,
                 requestHeaderBhv.selectList(new RequestHeaderCB()));
+        // keyMatch
+        dataSet.put(KEY_MATCH_KEY + LIST_SUFFIX,
+                keyMatchBhv.selectList(new KeyMatchCB()));
 
         // crawlerProperties
         final Map<String, String> crawlerPropertyMap = new HashMap<String, String>();
@@ -1233,6 +1244,41 @@ public class DatabaseService {
                 userTransaction.commit();
             } catch (final Exception e) {
                 rollback(REQUEST_HEADER_KEY, e);
+            }
+            // keyMatch
+            try {
+                userTransaction.begin();
+
+                final List<KeyMatch> keyMatchList = (List<KeyMatch>) dataSet
+                        .get(KEY_MATCH_KEY + LIST_SUFFIX);
+                if (keyMatchList != null) {
+                    for (KeyMatch keyMatch : keyMatchList) {
+                        final Long id = keyMatch.getId();
+
+                        final KeyMatchCB cb = new KeyMatchCB();
+                        cb.query().setTerm_Equal(keyMatch.getTerm());
+                        final KeyMatch entity = keyMatchBhv.selectEntity(cb);
+                        keyMatch.setId(null);
+                        if (entity == null) {
+                            keyMatchBhv.insert(keyMatch);
+                        } else {
+                            if (overwrite) {
+                                keyMatch.setVersionNo(null);
+                                Beans.copy(keyMatch, entity).excludesNull()
+                                        .execute();
+                                keyMatch = entity;
+                                keyMatchBhv.update(keyMatch);
+                            } else {
+                                keyMatchBhv.insert(keyMatch);
+                            }
+                        }
+                        idMap.put(KEY_MATCH_KEY + ":" + id.toString(),
+                                keyMatch.getId());
+                    }
+                }
+                userTransaction.commit();
+            } catch (final Exception e) {
+                rollback(KEY_MATCH_KEY, e);
             }
 
             // crawlerProperties

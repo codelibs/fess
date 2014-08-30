@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd `dirname $0`
-. _project.sh
+. ./_project.sh
 
 echo "/nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
 echo "...Calling the OutsiteSqlTest task"

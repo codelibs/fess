@@ -24,6 +24,8 @@ import jp.sf.fess.db.cbean.cq.FileCrawlingConfigCQ;
 import jp.sf.fess.db.cbean.cq.ciq.FileAuthenticationCIQ;
 
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.chelper.HpCalculator;
+import org.seasar.dbflute.cbean.coption.ConditionOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
 import org.seasar.dbflute.cbean.sqlclause.SqlClause;
 import org.seasar.dbflute.exception.IllegalConditionBeanOperationException;
@@ -42,10 +44,10 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public BsFileAuthenticationCQ(final ConditionQuery childQuery,
+    public BsFileAuthenticationCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -55,7 +57,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
      * Prepare InlineView query. <br />
      * {select ... from ... left outer join (select * from FILE_AUTHENTICATION) where FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">inline()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">inline()</span>.setFoo...;
      * </pre>
      * @return The condition-query for InlineView query. (NotNull)
      */
@@ -82,7 +84,7 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
      * Prepare OnClause query. <br />
      * {select ... from ... left outer join FILE_AUTHENTICATION on ... and FOO = [value] ...}
      * <pre>
-     * cb.query().queryMemberStatus().<span style="color: #FD4747">on()</span>.setFoo...;
+     * cb.query().queryMemberStatus().<span style="color: #DD4747">on()</span>.setFoo...;
      * </pre>
      * @return The condition-query for OnClause query. (NotNull)
      * @throws IllegalConditionBeanOperationException When this condition-query is base query.
@@ -100,7 +102,6 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     protected ConditionValue _id;
 
     public ConditionValue getId() {
@@ -353,45 +354,27 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getFileCrawlingConfigId();
     }
 
-    protected Map<String, FileCrawlingConfigCQ> _fileCrawlingConfigId_InScopeRelation_FileCrawlingConfigMap;
-
     public Map<String, FileCrawlingConfigCQ> getFileCrawlingConfigId_InScopeRelation_FileCrawlingConfig() {
-        return _fileCrawlingConfigId_InScopeRelation_FileCrawlingConfigMap;
+        return xgetSQueMap("fileCrawlingConfigId_InScopeRelation_FileCrawlingConfig");
     }
 
     @Override
     public String keepFileCrawlingConfigId_InScopeRelation_FileCrawlingConfig(
-            final FileCrawlingConfigCQ subQuery) {
-        if (_fileCrawlingConfigId_InScopeRelation_FileCrawlingConfigMap == null) {
-            _fileCrawlingConfigId_InScopeRelation_FileCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_fileCrawlingConfigId_InScopeRelation_FileCrawlingConfigMap
-                        .size() + 1);
-        _fileCrawlingConfigId_InScopeRelation_FileCrawlingConfigMap.put(key,
-                subQuery);
-        return "fileCrawlingConfigId_InScopeRelation_FileCrawlingConfig." + key;
+            final FileCrawlingConfigCQ sq) {
+        return xkeepSQue(
+                "fileCrawlingConfigId_InScopeRelation_FileCrawlingConfig", sq);
     }
 
-    protected Map<String, FileCrawlingConfigCQ> _fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfigMap;
-
     public Map<String, FileCrawlingConfigCQ> getFileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfig() {
-        return _fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfigMap;
+        return xgetSQueMap("fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfig");
     }
 
     @Override
     public String keepFileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfig(
-            final FileCrawlingConfigCQ subQuery) {
-        if (_fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfigMap == null) {
-            _fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfigMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfigMap
-                        .size() + 1);
-        _fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfigMap.put(key,
-                subQuery);
-        return "fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfig."
-                + key;
+            final FileCrawlingConfigCQ sq) {
+        return xkeepSQue(
+                "fileCrawlingConfigId_NotInScopeRelation_FileCrawlingConfig",
+                sq);
     }
 
     /**
@@ -662,9 +645,9 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] asc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Asc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -682,9 +665,9 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchaseDatetime();
      *     }
-     * }, <span style="color: #FD4747">aliasName</span>);
+     * }, <span style="color: #DD4747">aliasName</span>);
      * <span style="color: #3F7E5E">// order by [alias-name] desc</span>
-     * cb.<span style="color: #FD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #FD4747">aliasName</span>);
+     * cb.<span style="color: #DD4747">addSpecifiedDerivedOrderBy_Desc</span>(<span style="color: #DD4747">aliasName</span>);
      * </pre>
      * @param aliasName The alias name specified at (Specify)DerivedReferrer. (NotNull)
      * @return this. (NotNull)
@@ -699,15 +682,13 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
     //                                                                         Union Query
     //                                                                         ===========
     @Override
-    protected void reflectRelationOnUnionQuery(
-            final ConditionQuery baseQueryAsSuper,
-            final ConditionQuery unionQueryAsSuper) {
-        final FileAuthenticationCQ baseQuery = (FileAuthenticationCQ) baseQueryAsSuper;
-        final FileAuthenticationCQ unionQuery = (FileAuthenticationCQ) unionQueryAsSuper;
-        if (baseQuery.hasConditionQueryFileCrawlingConfig()) {
-            unionQuery.queryFileCrawlingConfig().reflectRelationOnUnionQuery(
-                    baseQuery.queryFileCrawlingConfig(),
-                    unionQuery.queryFileCrawlingConfig());
+    public void reflectRelationOnUnionQuery(final ConditionQuery bqs,
+            final ConditionQuery uqs) {
+        final FileAuthenticationCQ bq = (FileAuthenticationCQ) bqs;
+        final FileAuthenticationCQ uq = (FileAuthenticationCQ) uqs;
+        if (bq.hasConditionQueryFileCrawlingConfig()) {
+            uq.queryFileCrawlingConfig().reflectRelationOnUnionQuery(
+                    bq.queryFileCrawlingConfig(), uq.queryFileCrawlingConfig());
         }
     }
 
@@ -723,37 +704,29 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
         return getConditionQueryFileCrawlingConfig();
     }
 
-    protected FileCrawlingConfigCQ _conditionQueryFileCrawlingConfig;
-
     public FileCrawlingConfigCQ getConditionQueryFileCrawlingConfig() {
-        if (_conditionQueryFileCrawlingConfig == null) {
-            _conditionQueryFileCrawlingConfig = xcreateQueryFileCrawlingConfig();
+        final String prop = "fileCrawlingConfig";
+        if (!xhasQueRlMap(prop)) {
+            xregQueRl(prop, xcreateQueryFileCrawlingConfig());
             xsetupOuterJoinFileCrawlingConfig();
         }
-        return _conditionQueryFileCrawlingConfig;
+        return xgetQueRlMap(prop);
     }
 
     protected FileCrawlingConfigCQ xcreateQueryFileCrawlingConfig() {
-        final String nrp = resolveNextRelationPath("FILE_AUTHENTICATION",
+        final String nrp = xresolveNRP("FILE_AUTHENTICATION",
                 "fileCrawlingConfig");
-        final String jan = resolveJoinAliasName(nrp, xgetNextNestLevel());
-        final FileCrawlingConfigCQ cq = new FileCrawlingConfigCQ(this,
-                xgetSqlClause(), jan, xgetNextNestLevel());
-        cq.xsetBaseCB(_baseCB);
-        cq.xsetForeignPropertyName("fileCrawlingConfig");
-        cq.xsetRelationPath(nrp);
-        return cq;
+        final String jan = xresolveJAN(nrp, xgetNNLvl());
+        return xinitRelCQ(new FileCrawlingConfigCQ(this, xgetSqlClause(), jan,
+                xgetNNLvl()), _baseCB, "fileCrawlingConfig", nrp);
     }
 
     protected void xsetupOuterJoinFileCrawlingConfig() {
-        final FileCrawlingConfigCQ cq = getConditionQueryFileCrawlingConfig();
-        final Map<String, String> joinOnMap = newLinkedHashMapSized(4);
-        joinOnMap.put("FILE_CRAWLING_CONFIG_ID", "ID");
-        registerOuterJoin(cq, joinOnMap, "fileCrawlingConfig");
+        xregOutJo("fileCrawlingConfig");
     }
 
     public boolean hasConditionQueryFileCrawlingConfig() {
-        return _conditionQueryFileCrawlingConfig != null;
+        return xhasQueRlMap("fileCrawlingConfig");
     }
 
     @Override
@@ -765,74 +738,43 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
     // ===================================================================================
     //                                                                     ScalarCondition
     //                                                                     ===============
-    protected Map<String, FileAuthenticationCQ> _scalarConditionMap;
-
     public Map<String, FileAuthenticationCQ> getScalarCondition() {
-        return _scalarConditionMap;
+        return xgetSQueMap("scalarCondition");
     }
 
     @Override
-    public String keepScalarCondition(final FileAuthenticationCQ subQuery) {
-        if (_scalarConditionMap == null) {
-            _scalarConditionMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_scalarConditionMap.size() + 1);
-        _scalarConditionMap.put(key, subQuery);
-        return "scalarCondition." + key;
+    public String keepScalarCondition(final FileAuthenticationCQ sq) {
+        return xkeepSQue("scalarCondition", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    protected Map<String, FileAuthenticationCQ> _specifyMyselfDerivedMap;
-
     public Map<String, FileAuthenticationCQ> getSpecifyMyselfDerived() {
-        return _specifyMyselfDerivedMap;
+        return xgetSQueMap("specifyMyselfDerived");
     }
 
     @Override
-    public String keepSpecifyMyselfDerived(final FileAuthenticationCQ subQuery) {
-        if (_specifyMyselfDerivedMap == null) {
-            _specifyMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_specifyMyselfDerivedMap.size() + 1);
-        _specifyMyselfDerivedMap.put(key, subQuery);
-        return "specifyMyselfDerived." + key;
+    public String keepSpecifyMyselfDerived(final FileAuthenticationCQ sq) {
+        return xkeepSQue("specifyMyselfDerived", sq);
     }
-
-    protected Map<String, FileAuthenticationCQ> _queryMyselfDerivedMap;
 
     public Map<String, FileAuthenticationCQ> getQueryMyselfDerived() {
-        return _queryMyselfDerivedMap;
+        return xgetSQueMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerived(final FileAuthenticationCQ subQuery) {
-        if (_queryMyselfDerivedMap == null) {
-            _queryMyselfDerivedMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey"
-                + (_queryMyselfDerivedMap.size() + 1);
-        _queryMyselfDerivedMap.put(key, subQuery);
-        return "queryMyselfDerived." + key;
+    public String keepQueryMyselfDerived(final FileAuthenticationCQ sq) {
+        return xkeepSQue("queryMyselfDerived", sq);
     }
-
-    protected Map<String, Object> _qyeryMyselfDerivedParameterMap;
 
     public Map<String, Object> getQueryMyselfDerivedParameter() {
-        return _qyeryMyselfDerivedParameterMap;
+        return xgetSQuePmMap("queryMyselfDerived");
     }
 
     @Override
-    public String keepQueryMyselfDerivedParameter(final Object parameterValue) {
-        if (_qyeryMyselfDerivedParameterMap == null) {
-            _qyeryMyselfDerivedParameterMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryParameterKey"
-                + (_qyeryMyselfDerivedParameterMap.size() + 1);
-        _qyeryMyselfDerivedParameterMap.put(key, parameterValue);
-        return "queryMyselfDerivedParameter." + key;
+    public String keepQueryMyselfDerivedParameter(final Object pm) {
+        return xkeepSQuePm("queryMyselfDerived", pm);
     }
 
     // ===================================================================================
@@ -841,36 +783,24 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
     protected Map<String, FileAuthenticationCQ> _myselfExistsMap;
 
     public Map<String, FileAuthenticationCQ> getMyselfExists() {
-        return _myselfExistsMap;
+        return xgetSQueMap("myselfExists");
     }
 
     @Override
-    public String keepMyselfExists(final FileAuthenticationCQ subQuery) {
-        if (_myselfExistsMap == null) {
-            _myselfExistsMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfExistsMap.size() + 1);
-        _myselfExistsMap.put(key, subQuery);
-        return "myselfExists." + key;
+    public String keepMyselfExists(final FileAuthenticationCQ sq) {
+        return xkeepSQue("myselfExists", sq);
     }
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
-    protected Map<String, FileAuthenticationCQ> _myselfInScopeMap;
-
     public Map<String, FileAuthenticationCQ> getMyselfInScope() {
-        return _myselfInScopeMap;
+        return xgetSQueMap("myselfInScope");
     }
 
     @Override
-    public String keepMyselfInScope(final FileAuthenticationCQ subQuery) {
-        if (_myselfInScopeMap == null) {
-            _myselfInScopeMap = newLinkedHashMapSized(4);
-        }
-        final String key = "subQueryMapKey" + (_myselfInScopeMap.size() + 1);
-        _myselfInScopeMap.put(key, subQuery);
-        return "myselfInScope." + key;
+    public String keepMyselfInScope(final FileAuthenticationCQ sq) {
+        return xkeepSQue("myselfInScope", sq);
     }
 
     // ===================================================================================
@@ -883,6 +813,14 @@ public class BsFileAuthenticationCQ extends AbstractBsFileAuthenticationCQ {
 
     protected String xCQ() {
         return FileAuthenticationCQ.class.getName();
+    }
+
+    protected String xCHp() {
+        return HpCalculator.class.getName();
+    }
+
+    protected String xCOp() {
+        return ConditionOption.class.getName();
     }
 
     protected String xMap() {

@@ -41,7 +41,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_build() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("", queryHelper.buildQuery("").getQuery());
 
@@ -76,7 +76,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_build_fullwidthSpace() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
 
             assertEquals("(title:QUERY1 OR content:QUERY1) " + op
@@ -103,7 +103,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_build_prefix() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("mimetype:QUERY1",
                     queryHelper.buildQuery("mimetype:QUERY1").getQuery());
@@ -125,7 +125,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_build_prefix_unknown() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("title:site\\: OR content:site\\:", queryHelper
                     .buildQuery("site:").getQuery());
@@ -151,7 +151,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_build_roleType() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             queryHelper.roleQueryHelper = new RoleQueryHelper() {
                 @Override
                 public Set<String> build() {
@@ -203,7 +203,7 @@ public class QueryHelperTest extends S2TestCase {
         String query;
         SearchQuery searchQuery;
 
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             query = "";
             searchQuery = queryHelper.buildQuery(query);
@@ -331,7 +331,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_wildcardSearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // *
 
@@ -388,7 +388,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_fuzzySearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // ~
 
@@ -443,7 +443,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_proximitySearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // ~10
             assertEquals("title:\"QUERY\"~10 OR content:\"QUERY\"~10",
@@ -478,7 +478,7 @@ public class QueryHelperTest extends S2TestCase {
 
     public void test_rangeSearches() {
         String rangeQuery;
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // mod_date:[20020101 TO 20030101]
             assertEquals(
@@ -596,7 +596,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_boosting() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // ^1000 ""^1000
             assertEquals("title:QUERY^1000 OR content:QUERY^1000", queryHelper
@@ -673,7 +673,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_or() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("title:QUERY OR content:QUERY", queryHelper
                     .buildQuery("OR QUERY").getQuery());
@@ -701,7 +701,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_and() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("title:QUERY OR content:QUERY", queryHelper
                     .buildQuery("AND QUERY").getQuery());
@@ -736,7 +736,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_not() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("NOT (title:QUERY OR content:QUERY)", queryHelper
                     .buildQuery("NOT QUERY").getQuery());
@@ -822,7 +822,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("", queryHelper.buildFacetQuery(""));
 
@@ -857,7 +857,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_fullwidthSpace() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
 
             assertEquals("(title:QUERY1 OR content:QUERY1) " + op
@@ -883,7 +883,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_prefix() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("mimetype:QUERY1",
                     queryHelper.buildFacetQuery("mimetype:QUERY1"));
@@ -909,7 +909,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_prefix_unknown() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("title:site\\: OR content:site\\:",
                     queryHelper.buildFacetQuery("site:"));
@@ -936,7 +936,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_sortField() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             String query;
             String searchQuery;
@@ -1004,7 +1004,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_wildcardSearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // *
 
@@ -1071,7 +1071,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_fuzzySearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // ~
 
@@ -1126,7 +1126,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_proximitySearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // ~10
             assertEquals("title:\"QUERY\"~10 OR content:\"QUERY\"~10",
@@ -1160,7 +1160,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_rangeSearches() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // mod_date:[20020101 TO 20030101]
             assertEquals(
@@ -1193,7 +1193,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_boosting() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             // ^1000 ""^1000
             assertEquals("title:QUERY^1000 OR content:QUERY^1000",
@@ -1270,7 +1270,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_or() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("title:QUERY OR content:QUERY",
                     queryHelper.buildFacetQuery("OR QUERY"));
@@ -1297,7 +1297,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_and() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("title:QUERY OR content:QUERY",
                     queryHelper.buildFacetQuery("AND QUERY"));
@@ -1331,7 +1331,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildFacet_not() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("NOT (title:QUERY OR content:QUERY)",
                     queryHelper.buildFacetQuery("NOT QUERY"));
@@ -1369,7 +1369,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_inner_query() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("(title:bbb OR content:bbb) " + op
                     + " (title:ccc OR content:ccc)",
@@ -1500,7 +1500,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_more_inner_query() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("(title:aaa OR content:aaa) " + op
                     + " ((title:bbb OR content:bbb) " + op
@@ -1516,7 +1516,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_inner_facetQuery() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("(title:bbb OR content:bbb) " + op
                     + " (title:ccc OR content:ccc)",
@@ -1642,7 +1642,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_more_inner_facetQuery() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("(title:aaa OR content:aaa) " + op
                     + " ((title:bbb OR content:bbb) " + op
@@ -1903,7 +1903,7 @@ public class QueryHelperTest extends S2TestCase {
                 .getRequest();
         request.setLocale(Locale.JAPAN);
 
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("", queryHelper.buildQuery("").getQuery());
 
@@ -2019,7 +2019,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_inurl() {
-        for (String op : new String[] { "AND", "OR" }) {
+        for (final String op : new String[] { "AND", "OR" }) {
             getRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
             assertEquals("url:*QUERY*", queryHelper.buildQuery("inurl:QUERY")
                     .getQuery());

@@ -48,13 +48,13 @@ import org.seasar.dbflute.dbmeta.DBMeta;
  *
  *
  * [foreign table]
- *     LABEL_TYPE, FILE_CRAWLING_CONFIG
+ *     FILE_CRAWLING_CONFIG, LABEL_TYPE
  *
  * [referrer table]
  *
  *
  * [foreign property]
- *     labelType, fileCrawlingConfig
+ *     fileCrawlingConfig, labelType
  *
  * [referrer property]
  *
@@ -98,8 +98,14 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
     // -----------------------------------------------------
     //                                              Internal
     //                                              --------
+    /** The unique-driven properties for this entity. (NotNull) */
+    protected final EntityUniqueDrivenProperties __uniqueDrivenProperties = newUniqueDrivenProperties();
+
     /** The modified properties for this entity. (NotNull) */
     protected final EntityModifiedProperties __modifiedProperties = newModifiedProperties();
+
+    /** Is the entity created by DBFlute select process? */
+    protected boolean __createdBySelect;
 
     // ===================================================================================
     //                                                                          Table Name
@@ -145,33 +151,26 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> myuniqueDrivenProperties() {
+        return __uniqueDrivenProperties.getPropertyNames();
+    }
+
+    protected EntityUniqueDrivenProperties newUniqueDrivenProperties() {
+        return new EntityUniqueDrivenProperties();
+    }
+
     // ===================================================================================
     //                                                                    Foreign Property
     //                                                                    ================
-    /** LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'. */
-    protected LabelType _labelType;
-
-    /**
-     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-     * @return The entity of foreign property 'labelType'. (NullAllowed: when e.g. null FK column, no setupSelect)
-     */
-    public LabelType getLabelType() {
-        return _labelType;
-    }
-
-    /**
-     * LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
-     * @param labelType The entity of foreign property 'labelType'. (NullAllowed)
-     */
-    public void setLabelType(final LabelType labelType) {
-        _labelType = labelType;
-    }
-
     /** FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'. */
     protected FileCrawlingConfig _fileCrawlingConfig;
 
     /**
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
+     * [get] FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
      * @return The entity of foreign property 'fileCrawlingConfig'. (NullAllowed: when e.g. null FK column, no setupSelect)
      */
     public FileCrawlingConfig getFileCrawlingConfig() {
@@ -179,12 +178,31 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
     }
 
     /**
-     * FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
+     * [set] FILE_CRAWLING_CONFIG by my FILE_CONFIG_ID, named 'fileCrawlingConfig'.
      * @param fileCrawlingConfig The entity of foreign property 'fileCrawlingConfig'. (NullAllowed)
      */
     public void setFileCrawlingConfig(
             final FileCrawlingConfig fileCrawlingConfig) {
         _fileCrawlingConfig = fileCrawlingConfig;
+    }
+
+    /** LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'. */
+    protected LabelType _labelType;
+
+    /**
+     * [get] LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * @return The entity of foreign property 'labelType'. (NullAllowed: when e.g. null FK column, no setupSelect)
+     */
+    public LabelType getLabelType() {
+        return _labelType;
+    }
+
+    /**
+     * [set] LABEL_TYPE by my LABEL_TYPE_ID, named 'labelType'.
+     * @param labelType The entity of foreign property 'labelType'. (NullAllowed)
+     */
+    public void setLabelType(final LabelType labelType) {
+        _labelType = labelType;
     }
 
     // ===================================================================================
@@ -226,28 +244,47 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
     }
 
     // ===================================================================================
+    //                                                                     Birthplace Mark
+    //                                                                     ===============
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void markAsSelect() {
+        __createdBySelect = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createdBySelect() {
+        return __createdBySelect;
+    }
+
+    // ===================================================================================
     //                                                                      Basic Override
     //                                                                      ==============
     /**
      * Determine the object is equal with this. <br />
      * If primary-keys or columns of the other are same as this one, returns true.
-     * @param other The other entity. (NullAllowed: if null, returns false fixedly)
+     * @param obj The object as other entity. (NullAllowed: if null, returns false fixedly)
      * @return Comparing result.
      */
     @Override
-    public boolean equals(final Object other) {
-        if (other == null || !(other instanceof BsFileConfigToLabelTypeMapping)) {
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof BsFileConfigToLabelTypeMapping)) {
             return false;
         }
-        final BsFileConfigToLabelTypeMapping otherEntity = (BsFileConfigToLabelTypeMapping) other;
-        if (!xSV(getId(), otherEntity.getId())) {
+        final BsFileConfigToLabelTypeMapping other = (BsFileConfigToLabelTypeMapping) obj;
+        if (!xSV(getId(), other.getId())) {
             return false;
         }
         return true;
     }
 
-    protected boolean xSV(final Object value1, final Object value2) { // isSameValue()
-        return InternalUtil.isSameValue(value1, value2);
+    protected boolean xSV(final Object v1, final Object v2) {
+        return FunCustodial.isSameValue(v1, v2);
     }
 
     /**
@@ -256,14 +293,14 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
      */
     @Override
     public int hashCode() {
-        int result = 17;
-        result = xCH(result, getTableDbName());
-        result = xCH(result, getId());
-        return result;
+        int hs = 17;
+        hs = xCH(hs, getTableDbName());
+        hs = xCH(hs, getId());
+        return hs;
     }
 
-    protected int xCH(final int result, final Object value) { // calculateHashcode()
-        return InternalUtil.calculateHashcode(result, value);
+    protected int xCH(final int hs, final Object vl) {
+        return FunCustodial.calculateHashcode(hs, vl);
     }
 
     /**
@@ -280,7 +317,7 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
      */
     @Override
     public String toString() {
-        return buildDisplayString(InternalUtil.toClassTitle(this), true, true);
+        return buildDisplayString(FunCustodial.toClassTitle(this), true, true);
     }
 
     /**
@@ -290,19 +327,19 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
     public String toStringWithRelation() {
         final StringBuilder sb = new StringBuilder();
         sb.append(toString());
-        final String l = "\n  ";
-        if (_labelType != null) {
-            sb.append(l).append(xbRDS(_labelType, "labelType"));
-        }
+        final String li = "\n  ";
         if (_fileCrawlingConfig != null) {
-            sb.append(l).append(
+            sb.append(li).append(
                     xbRDS(_fileCrawlingConfig, "fileCrawlingConfig"));
+        }
+        if (_labelType != null) {
+            sb.append(li).append(xbRDS(_labelType, "labelType"));
         }
         return sb.toString();
     }
 
-    protected String xbRDS(final Entity e, final String name) { // buildRelationDisplayString()
-        return e.buildDisplayString(name, true, true);
+    protected String xbRDS(final Entity et, final String name) { // buildRelationDisplayString()
+        return et.buildDisplayString(name, true, true);
     }
 
     /**
@@ -327,12 +364,12 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
 
     protected String buildColumnString() {
         final StringBuilder sb = new StringBuilder();
-        final String delimiter = ", ";
-        sb.append(delimiter).append(getId());
-        sb.append(delimiter).append(getFileConfigId());
-        sb.append(delimiter).append(getLabelTypeId());
-        if (sb.length() > delimiter.length()) {
-            sb.delete(0, delimiter.length());
+        final String dm = ", ";
+        sb.append(dm).append(getId());
+        sb.append(dm).append(getFileConfigId());
+        sb.append(dm).append(getLabelTypeId());
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
         }
         sb.insert(0, "{").append("}");
         return sb.toString();
@@ -340,15 +377,15 @@ public abstract class BsFileConfigToLabelTypeMapping implements Entity,
 
     protected String buildRelationString() {
         final StringBuilder sb = new StringBuilder();
-        final String c = ",";
-        if (_labelType != null) {
-            sb.append(c).append("labelType");
-        }
+        final String cm = ",";
         if (_fileCrawlingConfig != null) {
-            sb.append(c).append("fileCrawlingConfig");
+            sb.append(cm).append("fileCrawlingConfig");
         }
-        if (sb.length() > c.length()) {
-            sb.delete(0, c.length()).insert(0, "(").append(")");
+        if (_labelType != null) {
+            sb.append(cm).append("labelType");
+        }
+        if (sb.length() > cm.length()) {
+            sb.delete(0, cm.length()).insert(0, "(").append(")");
         }
         return sb.toString();
     }

@@ -17,6 +17,8 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
@@ -27,7 +29,9 @@ import jp.sf.fess.db.cbean.cq.DataConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.DataCrawlingConfigCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
 import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
@@ -53,10 +57,10 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsDataCrawlingConfigCQ(final ConditionQuery childQuery,
+    public AbstractBsDataCrawlingConfigCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -182,12 +186,12 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     }
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(DataCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(DataConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -196,27 +200,31 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void existsDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsDataConfigToRoleTypeMappingList</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
-     *     public void query(DataCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsDataConfigToRoleTypeMappingList</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -225,26 +233,31 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void existsDataConfigToRoleTypeMappingList(
             final SubQuery<DataConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_DataConfigToRoleTypeMappingList(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(DataCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(DataConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -253,27 +266,31 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void notExistsDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select DATA_CONFIG_ID from DATA_CONFIG_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsDataConfigToRoleTypeMappingList</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
-     *     public void query(DataCrawlingConfigCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsDataConfigToRoleTypeMappingList</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     *     public void query(DataConfigToRoleTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -282,18 +299,23 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void notExistsDataConfigToRoleTypeMappingList(
             final SubQuery<DataConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_DataConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_DataConfigToRoleTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_DataConfigToRoleTypeMappingList(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -303,19 +325,23 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void inScopeDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -325,18 +351,23 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void inScopeDataConfigToRoleTypeMappingList(
             final SubQuery<DataConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_DataConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_DataConfigToRoleTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_DataConfigToRoleTypeMappingList(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -346,19 +377,23 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void notInScopeDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -368,65 +403,77 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      */
     public void notInScopeDataConfigToRoleTypeMappingList(
             final SubQuery<DataConfigToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_DataConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID",
-                subQueryPropertyName, "dataConfigToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_DataConfigToRoleTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "DATA_CONFIG_ID", pp,
+                "dataConfigToRoleTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_DataConfigToRoleTypeMappingList(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
-    public void xsderiveDataConfigToLabelTypeMappingList(final String function,
-            final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xsderiveDataConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<DataConfigToLabelTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "DATA_CONFIG_ID", subQueryPropertyName,
-                "dataConfigToLabelTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "DATA_CONFIG_ID",
+                pp, "dataConfigToLabelTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
-    public void xsderiveDataConfigToRoleTypeMappingList(final String function,
-            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+    public void xsderiveDataConfigToRoleTypeMappingList(final String fn,
+            final SubQuery<DataConfigToRoleTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "DATA_CONFIG_ID", subQueryPropertyName,
-                "dataConfigToRoleTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "DATA_CONFIG_ID",
+                pp, "dataConfigToRoleTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_DataConfigToRoleTypeMappingList(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedDataConfigToLabelTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedDataConfigToLabelTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
      *     public void query(DataConfigToLabelTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -438,52 +485,52 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         return new HpQDRFunction<DataConfigToLabelTypeMappingCB>(
                 new HpQDRSetupper<DataConfigToLabelTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveDataConfigToLabelTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<DataConfigToLabelTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveDataConfigToLabelTypeMappingList(fn, sq, rd,
+                                vl, op);
                     }
                 });
     }
 
-    public void xqderiveDataConfigToLabelTypeMappingList(final String function,
-            final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xqderiveDataConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<DataConfigToLabelTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "DATA_CONFIG_ID", subQueryPropertyName,
-                "dataConfigToLabelTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "DATA_CONFIG_ID",
+                sqpp, "dataConfigToLabelTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from DATA_CONFIG_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_ROLE_TYPE_MAPPING by DATA_CONFIG_ID, named 'dataConfigToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedDataConfigToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedDataConfigToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;DataConfigToRoleTypeMappingCB&gt;() {
      *     public void query(DataConfigToRoleTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -495,39 +542,40 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         return new HpQDRFunction<DataConfigToRoleTypeMappingCB>(
                 new HpQDRSetupper<DataConfigToRoleTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveDataConfigToRoleTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<DataConfigToRoleTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveDataConfigToRoleTypeMappingList(fn, sq, rd, vl,
+                                op);
                     }
                 });
     }
 
-    public void xqderiveDataConfigToRoleTypeMappingList(final String function,
-            final SubQuery<DataConfigToRoleTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToRoleTypeMappingCB>", subQuery);
+    public void xqderiveDataConfigToRoleTypeMappingList(final String fn,
+            final SubQuery<DataConfigToRoleTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "DATA_CONFIG_ID", subQueryPropertyName,
-                "dataConfigToRoleTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "DATA_CONFIG_ID",
+                sqpp, "dataConfigToRoleTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingList(
-            DataConfigToRoleTypeMappingCQ subQuery);
+            DataConfigToRoleTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_DataConfigToRoleTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
@@ -545,11 +593,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -651,7 +699,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * NAME: {NotNull, VARCHAR(200)} <br />
-     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param name The value of name as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -672,11 +720,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regLSQ(CK_NLS, fRES(name), getCValueName(), "NAME", likeSearchOption);
     }
 
-    protected void regName(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueName(), "NAME");
+    protected void regName(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueName(), "NAME");
     }
 
-    abstract protected ConditionValue getCValueName();
+    protected abstract ConditionValue getCValueName();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -783,7 +831,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * HANDLER_NAME: {NotNull, VARCHAR(200)} <br />
-     * <pre>e.g. setHandlerName_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setHandlerName_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param handlerName The value of handlerName as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -806,11 +854,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
                 "HANDLER_NAME", likeSearchOption);
     }
 
-    protected void regHandlerName(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueHandlerName(), "HANDLER_NAME");
+    protected void regHandlerName(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueHandlerName(), "HANDLER_NAME");
     }
 
-    abstract protected ConditionValue getCValueHandlerName();
+    protected abstract ConditionValue getCValueHandlerName();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -918,7 +966,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * HANDLER_PARAMETER: {VARCHAR(4000)} <br />
-     * <pre>e.g. setHandlerParameter_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setHandlerParameter_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param handlerParameter The value of handlerParameter as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -966,11 +1014,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regHandlerParameter(CK_ISNN, DOBJ);
     }
 
-    protected void regHandlerParameter(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueHandlerParameter(), "HANDLER_PARAMETER");
+    protected void regHandlerParameter(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueHandlerParameter(), "HANDLER_PARAMETER");
     }
 
-    abstract protected ConditionValue getCValueHandlerParameter();
+    protected abstract ConditionValue getCValueHandlerParameter();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1078,7 +1126,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * HANDLER_SCRIPT: {VARCHAR(4000)} <br />
-     * <pre>e.g. setHandlerScript_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setHandlerScript_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param handlerScript The value of handlerScript as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1125,11 +1173,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regHandlerScript(CK_ISNN, DOBJ);
     }
 
-    protected void regHandlerScript(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueHandlerScript(), "HANDLER_SCRIPT");
+    protected void regHandlerScript(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueHandlerScript(), "HANDLER_SCRIPT");
     }
 
-    abstract protected ConditionValue getCValueHandlerScript();
+    protected abstract ConditionValue getCValueHandlerScript();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1238,11 +1286,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regINS(CK_NINS, cTL(boostList), getCValueBoost(), "BOOST");
     }
 
-    protected void regBoost(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueBoost(), "BOOST");
+    protected void regBoost(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueBoost(), "BOOST");
     }
 
-    abstract protected ConditionValue getCValueBoost();
+    protected abstract ConditionValue getCValueBoost();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1344,7 +1392,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * AVAILABLE: {NotNull, VARCHAR(1)} <br />
-     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setAvailable_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param available The value of available as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1367,11 +1415,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
                 likeSearchOption);
     }
 
-    protected void regAvailable(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueAvailable(), "AVAILABLE");
+    protected void regAvailable(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueAvailable(), "AVAILABLE");
     }
 
-    abstract protected ConditionValue getCValueAvailable();
+    protected abstract ConditionValue getCValueAvailable();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1478,11 +1526,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regINS(CK_NINS, cTL(sortOrderList), getCValueSortOrder(), "SORT_ORDER");
     }
 
-    protected void regSortOrder(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueSortOrder(), "SORT_ORDER");
+    protected void regSortOrder(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueSortOrder(), "SORT_ORDER");
     }
 
-    abstract protected ConditionValue getCValueSortOrder();
+    protected abstract ConditionValue getCValueSortOrder();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1584,7 +1632,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)} <br />
-     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param createdBy The value of createdBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1607,11 +1655,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
                 likeSearchOption);
     }
 
-    protected void regCreatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedBy(), "CREATED_BY");
+    protected void regCreatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedBy(), "CREATED_BY");
     }
 
-    abstract protected ConditionValue getCValueCreatedBy();
+    protected abstract ConditionValue getCValueCreatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1662,13 +1710,13 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
-     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setCreatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setCreatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1682,22 +1730,21 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no to-condition)
      */
-    public void setCreatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setCreatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setCreatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
 
-    protected void regCreatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedTime(), "CREATED_TIME");
+    protected void regCreatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedTime(), "CREATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueCreatedTime();
+    protected abstract ConditionValue getCValueCreatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1799,7 +1846,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * UPDATED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param updatedBy The value of updatedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1846,11 +1893,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regUpdatedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedBy(), "UPDATED_BY");
+    protected void regUpdatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedBy(), "UPDATED_BY");
     }
 
-    abstract protected ConditionValue getCValueUpdatedBy();
+    protected abstract ConditionValue getCValueUpdatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1901,13 +1948,13 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setUpdatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setUpdatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1921,13 +1968,12 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setUpdatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setUpdatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setUpdatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -1948,11 +1994,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regUpdatedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedTime(), "UPDATED_TIME");
+    protected void regUpdatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedTime(), "UPDATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueUpdatedTime();
+    protected abstract ConditionValue getCValueUpdatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -2054,7 +2100,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * DELETED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param deletedBy The value of deletedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -2101,11 +2147,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regDeletedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedBy(), "DELETED_BY");
+    protected void regDeletedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedBy(), "DELETED_BY");
     }
 
-    abstract protected ConditionValue getCValueDeletedBy();
+    protected abstract ConditionValue getCValueDeletedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2156,13 +2202,13 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setDeletedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setDeletedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -2176,13 +2222,12 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setDeletedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setDeletedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setDeletedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -2203,11 +2248,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regDeletedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedTime(), "DELETED_TIME");
+    protected void regDeletedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedTime(), "DELETED_TIME");
     }
 
-    abstract protected ConditionValue getCValueDeletedTime();
+    protected abstract ConditionValue getCValueDeletedTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2314,11 +2359,11 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
         regINS(CK_NINS, cTL(versionNoList), getCValueVersionNo(), "VERSION_NO");
     }
 
-    protected void regVersionNo(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueVersionNo(), "VERSION_NO");
+    protected void regVersionNo(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueVersionNo(), "VERSION_NO");
     }
 
-    abstract protected ConditionValue getCValueVersionNo();
+    protected abstract ConditionValue getCValueVersionNo();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -2327,7 +2372,7 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void query(DataCrawlingConfigCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2337,14 +2382,14 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataCrawlingConfigCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, DataCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void query(DataCrawlingConfigCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2354,14 +2399,14 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataCrawlingConfigCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, DataCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void query(DataCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2371,14 +2416,14 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataCrawlingConfigCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, DataCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void query(DataCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2388,14 +2433,14 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataCrawlingConfigCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, DataCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void query(DataCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2405,14 +2450,14 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataCrawlingConfigCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, DataCrawlingConfigCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;DataCrawlingConfigCB&gt;() {
      *     public void query(DataCrawlingConfigCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2422,44 +2467,31 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<DataCrawlingConfigCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, DataCrawlingConfigCB.class);
     }
 
-    protected HpSSQFunction<DataCrawlingConfigCB> xcreateSSQFunction(
-            final String operand) {
-        return new HpSSQFunction<DataCrawlingConfigCB>(
-                new HpSSQSetupper<DataCrawlingConfigCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<DataCrawlingConfigCB> subQuery,
-                            final HpSSQOption<DataCrawlingConfigCB> option) {
-                        xscalarCondition(function, subQuery, operand, option);
-                    }
-                });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<DataCrawlingConfigCB> subQuery,
-            final String operand, final HpSSQOption<DataCrawlingConfigCB> option) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final DataCrawlingConfigCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(DataCrawlingConfigCQ subQuery);
+    public abstract String keepScalarCondition(DataCrawlingConfigCQ sq);
 
     protected DataCrawlingConfigCB xcreateScalarConditionCB() {
-        final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
+        final DataCrawlingConfigCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected DataCrawlingConfigCB xcreateScalarConditionPartitionByCB() {
-        final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
+        final DataCrawlingConfigCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -2467,106 +2499,174 @@ public abstract class AbstractBsDataCrawlingConfigCQ extends
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<DataCrawlingConfigCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+    public void xsmyselfDerive(final String fn,
+            final SubQuery<DataCrawlingConfigCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(
-            DataCrawlingConfigCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(DataCrawlingConfigCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<DataCrawlingConfigCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(DataCrawlingConfigCB.class);
     }
 
-    protected HpQDRFunction<DataCrawlingConfigCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<DataCrawlingConfigCB>(
-                new HpQDRSetupper<DataCrawlingConfigCB>() {
-                    @Override
-                    public void setup(final String function,
-                            final SubQuery<DataCrawlingConfigCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveMyselfDerived(function, subQuery, operand,
-                                value, option);
-                    }
-                });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<DataCrawlingConfigCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(DataCrawlingConfigCQ subQuery);
+    public abstract String keepQueryMyselfDerived(DataCrawlingConfigCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<DataCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(DataCrawlingConfigCQ subQuery);
+    public abstract String keepMyselfExists(DataCrawlingConfigCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<DataCrawlingConfigCB> subQuery) {
-        assertObjectNotNull("subQuery<DataCrawlingConfigCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(DataCrawlingConfigCQ subQuery);
+    public abstract String keepMyselfInScope(DataCrawlingConfigCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return DataCrawlingConfigCB.class.getName();
+    protected DataCrawlingConfigCB newMyCB() {
+        return new DataCrawlingConfigCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return DataCrawlingConfigCQ.class.getName();
     }

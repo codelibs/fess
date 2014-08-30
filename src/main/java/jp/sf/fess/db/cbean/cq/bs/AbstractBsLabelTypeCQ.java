@@ -17,6 +17,8 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
@@ -31,7 +33,9 @@ import jp.sf.fess.db.cbean.cq.LabelTypeToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToLabelTypeMappingCQ;
 
 import org.seasar.dbflute.cbean.AbstractConditionQuery;
+import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.ConditionQuery;
+import org.seasar.dbflute.cbean.ManualOrderBean;
 import org.seasar.dbflute.cbean.SubQuery;
 import org.seasar.dbflute.cbean.chelper.HpQDRFunction;
 import org.seasar.dbflute.cbean.chelper.HpQDRSetupper;
@@ -56,10 +60,10 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public AbstractBsLabelTypeCQ(final ConditionQuery childQuery,
+    public AbstractBsLabelTypeCQ(final ConditionQuery referrerQuery,
             final SqlClause sqlClause, final String aliasName,
             final int nestLevel) {
-        super(childQuery, sqlClause, aliasName, nestLevel);
+        super(referrerQuery, sqlClause, aliasName, nestLevel);
     }
 
     // ===================================================================================
@@ -185,12 +189,12 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     }
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select LABEL_TYPE_ID from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(DataConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -199,27 +203,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void existsDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select LABEL_TYPE_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(FileConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -228,27 +236,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void existsFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select LABEL_TYPE_ID from LABEL_TYPE_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by LABEL_TYPE_ID, named 'labelTypeToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsLabelTypeToRoleTypeMappingList</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsLabelTypeToRoleTypeMappingList</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     *     public void query(LabelTypeToRoleTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -257,26 +269,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void existsLabelTypeToRoleTypeMappingList(
             final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<LabelTypeToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_LabelTypeToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "labelTypeToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_LabelTypeToRoleTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "labelTypeToRoleTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_LabelTypeToRoleTypeMappingList(
-            LabelTypeToRoleTypeMappingCQ subQuery);
+            LabelTypeToRoleTypeMappingCQ sq);
 
     /**
-     * Set up ExistsReferrer (co-related sub-query). <br />
+     * Set up ExistsReferrer (correlated sub-query). <br />
      * {exists (select LABEL_TYPE_ID from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">existsWebConfigToLabelTypeMappingList</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">existsWebConfigToLabelTypeMappingList</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(WebConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -285,26 +302,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void existsWebConfigToLabelTypeMappingList(
             final SubQuery<WebConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToLabelTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_ExistsReferrer_WebConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "webConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_ExistsReferrer_WebConfigToLabelTypeMappingList(cb
+                .query());
+        registerExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "webConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_ExistsReferrer_WebConfigToLabelTypeMappingList(
-            WebConfigToLabelTypeMappingCQ subQuery);
+            WebConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select LABEL_TYPE_ID from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsDataConfigToLabelTypeMappingList</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(DataConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -313,27 +335,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notExistsDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select LABEL_TYPE_ID from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsFileConfigToLabelTypeMappingList</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(FileConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -342,27 +368,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notExistsFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select LABEL_TYPE_ID from LABEL_TYPE_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by LABEL_TYPE_ID, named 'labelTypeToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsLabelTypeToRoleTypeMappingList</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsLabelTypeToRoleTypeMappingList</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     *     public void query(LabelTypeToRoleTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -371,26 +401,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notExistsLabelTypeToRoleTypeMappingList(
             final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<LabelTypeToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_LabelTypeToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "labelTypeToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_LabelTypeToRoleTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "labelTypeToRoleTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_LabelTypeToRoleTypeMappingList(
-            LabelTypeToRoleTypeMappingCQ subQuery);
+            LabelTypeToRoleTypeMappingCQ sq);
 
     /**
-     * Set up NotExistsReferrer (co-related sub-query). <br />
+     * Set up NotExistsReferrer (correlated sub-query). <br />
      * {not exists (select LABEL_TYPE_ID from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">notExistsWebConfigToLabelTypeMappingList</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
-     *     public void query(LabelTypeCB subCB) {
+     * cb.query().<span style="color: #DD4747">notExistsWebConfigToLabelTypeMappingList</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
+     *     public void query(WebConfigToLabelTypeMappingCB subCB) {
      *         subCB.query().setXxx...
      *     }
      * });
@@ -399,18 +434,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notExistsWebConfigToLabelTypeMappingList(
             final SubQuery<WebConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToLabelTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
         cb.xsetupForExistsReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotExistsReferrer_WebConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "webConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotExistsReferrer_WebConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotExistsReferrer(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "webConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotExistsReferrer_WebConfigToLabelTypeMappingList(
-            WebConfigToLabelTypeMappingCQ subQuery);
+            WebConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -420,19 +460,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void inScopeDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -442,19 +486,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void inScopeFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -464,18 +512,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void inScopeLabelTypeToRoleTypeMappingList(
             final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<LabelTypeToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_LabelTypeToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "labelTypeToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_LabelTypeToRoleTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "labelTypeToRoleTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_LabelTypeToRoleTypeMappingList(
-            LabelTypeToRoleTypeMappingCQ subQuery);
+            LabelTypeToRoleTypeMappingCQ sq);
 
     /**
      * Set up InScopeRelation (sub-query). <br />
@@ -485,18 +538,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void inScopeWebConfigToLabelTypeMappingList(
             final SubQuery<WebConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToLabelTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_InScopeRelation_WebConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "webConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_InScopeRelation_WebConfigToLabelTypeMappingList(cb
+                .query());
+        registerInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "webConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_InScopeRelation_WebConfigToLabelTypeMappingList(
-            WebConfigToLabelTypeMappingCQ subQuery);
+            WebConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -506,19 +564,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notInScopeDataConfigToLabelTypeMappingList(
             final SubQuery<DataConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "dataConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "dataConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -528,19 +590,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notInScopeFileConfigToLabelTypeMappingList(
             final SubQuery<FileConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "fileConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "fileConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -550,18 +616,23 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notInScopeLabelTypeToRoleTypeMappingList(
             final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<LabelTypeToRoleTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_LabelTypeToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "labelTypeToRoleTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_LabelTypeToRoleTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "labelTypeToRoleTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_LabelTypeToRoleTypeMappingList(
-            LabelTypeToRoleTypeMappingCQ subQuery);
+            LabelTypeToRoleTypeMappingCQ sq);
 
     /**
      * Set up NotInScopeRelation (sub-query). <br />
@@ -571,100 +642,119 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      */
     public void notInScopeWebConfigToLabelTypeMappingList(
             final SubQuery<WebConfigToLabelTypeMappingCB> subQuery) {
-        assertObjectNotNull("subQuery<WebConfigToLabelTypeMappingCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
         cb.xsetupForInScopeRelation(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_NotInScopeRelation_WebConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID",
-                subQueryPropertyName, "webConfigToLabelTypeMappingList");
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_NotInScopeRelation_WebConfigToLabelTypeMappingList(cb
+                .query());
+        registerNotInScopeRelation(cb.query(), "ID", "LABEL_TYPE_ID", pp,
+                "webConfigToLabelTypeMappingList");
     }
 
     public abstract String keepId_NotInScopeRelation_WebConfigToLabelTypeMappingList(
-            WebConfigToLabelTypeMappingCQ subQuery);
+            WebConfigToLabelTypeMappingCQ sq);
 
-    public void xsderiveDataConfigToLabelTypeMappingList(final String function,
-            final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xsderiveDataConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<DataConfigToLabelTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "dataConfigToLabelTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                pp, "dataConfigToLabelTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
-    public void xsderiveFileConfigToLabelTypeMappingList(final String function,
-            final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xsderiveFileConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<FileConfigToLabelTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "fileConfigToLabelTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                pp, "fileConfigToLabelTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
-    public void xsderiveLabelTypeToRoleTypeMappingList(final String function,
-            final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<LabelTypeToRoleTypeMappingCB>", subQuery);
+    public void xsderiveLabelTypeToRoleTypeMappingList(final String fn,
+            final SubQuery<LabelTypeToRoleTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "labelTypeToRoleTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                pp, "labelTypeToRoleTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_LabelTypeToRoleTypeMappingList(
-            LabelTypeToRoleTypeMappingCQ subQuery);
+            LabelTypeToRoleTypeMappingCQ sq);
 
-    public void xsderiveWebConfigToLabelTypeMappingList(final String function,
-            final SubQuery<WebConfigToLabelTypeMappingCB> subQuery,
-            final String aliasName, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<WebConfigToLabelTypeMappingCB>", subQuery);
+    public void xsderiveWebConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<WebConfigToLabelTypeMappingCB> sq, final String al,
+            final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_SpecifyDerivedReferrer_WebConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        registerSpecifyDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "webConfigToLabelTypeMappingList", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepId_SpecifyDerivedReferrer_WebConfigToLabelTypeMappingList(cb
+                .query());
+        registerSpecifyDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                pp, "webConfigToLabelTypeMappingList", al, op);
     }
 
     public abstract String keepId_SpecifyDerivedReferrer_WebConfigToLabelTypeMappingList(
-            WebConfigToLabelTypeMappingCQ subQuery);
+            WebConfigToLabelTypeMappingCQ sq);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from DATA_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * DATA_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'dataConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedDataConfigToLabelTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedDataConfigToLabelTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;DataConfigToLabelTypeMappingCB&gt;() {
      *     public void query(DataConfigToLabelTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -676,52 +766,52 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         return new HpQDRFunction<DataConfigToLabelTypeMappingCB>(
                 new HpQDRSetupper<DataConfigToLabelTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveDataConfigToLabelTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<DataConfigToLabelTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveDataConfigToLabelTypeMappingList(fn, sq, rd,
+                                vl, op);
                     }
                 });
     }
 
-    public void xqderiveDataConfigToLabelTypeMappingList(final String function,
-            final SubQuery<DataConfigToLabelTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<DataConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xqderiveDataConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<DataConfigToLabelTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "dataConfigToLabelTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                sqpp, "dataConfigToLabelTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingList(
-            DataConfigToLabelTypeMappingCQ subQuery);
+            DataConfigToLabelTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_DataConfigToLabelTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from FILE_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * FILE_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'fileConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedFileConfigToLabelTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedFileConfigToLabelTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;FileConfigToLabelTypeMappingCB&gt;() {
      *     public void query(FileConfigToLabelTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -733,52 +823,52 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         return new HpQDRFunction<FileConfigToLabelTypeMappingCB>(
                 new HpQDRSetupper<FileConfigToLabelTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveFileConfigToLabelTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<FileConfigToLabelTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveFileConfigToLabelTypeMappingList(fn, sq, rd,
+                                vl, op);
                     }
                 });
     }
 
-    public void xqderiveFileConfigToLabelTypeMappingList(final String function,
-            final SubQuery<FileConfigToLabelTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<FileConfigToLabelTypeMappingCB>",
-                subQuery);
+    public void xqderiveFileConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<FileConfigToLabelTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "fileConfigToLabelTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                sqpp, "fileConfigToLabelTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingList(
-            FileConfigToLabelTypeMappingCQ subQuery);
+            FileConfigToLabelTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_FileConfigToLabelTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from LABEL_TYPE_TO_ROLE_TYPE_MAPPING where ...)} <br />
      * LABEL_TYPE_TO_ROLE_TYPE_MAPPING by LABEL_TYPE_ID, named 'labelTypeToRoleTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedLabelTypeToRoleTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedLabelTypeToRoleTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;LabelTypeToRoleTypeMappingCB&gt;() {
      *     public void query(LabelTypeToRoleTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -790,51 +880,52 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         return new HpQDRFunction<LabelTypeToRoleTypeMappingCB>(
                 new HpQDRSetupper<LabelTypeToRoleTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveLabelTypeToRoleTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<LabelTypeToRoleTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveLabelTypeToRoleTypeMappingList(fn, sq, rd, vl,
+                                op);
                     }
                 });
     }
 
-    public void xqderiveLabelTypeToRoleTypeMappingList(final String function,
-            final SubQuery<LabelTypeToRoleTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<LabelTypeToRoleTypeMappingCB>", subQuery);
+    public void xqderiveLabelTypeToRoleTypeMappingList(final String fn,
+            final SubQuery<LabelTypeToRoleTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "labelTypeToRoleTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                sqpp, "labelTypeToRoleTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingList(
-            LabelTypeToRoleTypeMappingCQ subQuery);
+            LabelTypeToRoleTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_LabelTypeToRoleTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
-     * Prepare for (Query)DerivedReferrer. <br />
+     * Prepare for (Query)DerivedReferrer (correlated sub-query). <br />
      * {FOO &lt;= (select max(BAR) from WEB_CONFIG_TO_LABEL_TYPE_MAPPING where ...)} <br />
      * WEB_CONFIG_TO_LABEL_TYPE_MAPPING by LABEL_TYPE_ID, named 'webConfigToLabelTypeMappingAsOne'.
      * <pre>
-     * cb.query().<span style="color: #FD4747">derivedWebConfigToLabelTypeMappingList()</span>.<span style="color: #FD4747">max</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">derivedWebConfigToLabelTypeMappingList()</span>.<span style="color: #DD4747">max</span>(new SubQuery&lt;WebConfigToLabelTypeMappingCB&gt;() {
      *     public void query(WebConfigToLabelTypeMappingCB subCB) {
-     *         subCB.specify().<span style="color: #FD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
+     *         subCB.specify().<span style="color: #DD4747">columnFoo...</span> <span style="color: #3F7E5E">// derived column by function</span>
      *         subCB.query().setBar... <span style="color: #3F7E5E">// referrer condition</span>
      *     }
-     * }).<span style="color: #FD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
+     * }).<span style="color: #DD4747">greaterEqual</span>(123); <span style="color: #3F7E5E">// condition to derived column</span>
      * </pre>
      * @return The object to set up a function for referrer table. (NotNull)
      */
@@ -846,39 +937,40 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         return new HpQDRFunction<WebConfigToLabelTypeMappingCB>(
                 new HpQDRSetupper<WebConfigToLabelTypeMappingCB>() {
                     @Override
-                    public void setup(
-                            final String function,
-                            final SubQuery<WebConfigToLabelTypeMappingCB> subQuery,
-                            final String operand, final Object value,
-                            final DerivedReferrerOption option) {
-                        xqderiveWebConfigToLabelTypeMappingList(function,
-                                subQuery, operand, value, option);
+                    public void setup(final String fn,
+                            final SubQuery<WebConfigToLabelTypeMappingCB> sq,
+                            final String rd, final Object vl,
+                            final DerivedReferrerOption op) {
+                        xqderiveWebConfigToLabelTypeMappingList(fn, sq, rd, vl,
+                                op);
                     }
                 });
     }
 
-    public void xqderiveWebConfigToLabelTypeMappingList(final String function,
-            final SubQuery<WebConfigToLabelTypeMappingCB> subQuery,
-            final String operand, final Object value,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<WebConfigToLabelTypeMappingCB>", subQuery);
+    public void xqderiveWebConfigToLabelTypeMappingList(final String fn,
+            final SubQuery<WebConfigToLabelTypeMappingCB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepId_QueryDerivedReferrer_WebConfigToLabelTypeMappingList(cb
-                .query()); // for saving query-value.
-        final String parameterPropertyName = keepId_QueryDerivedReferrer_WebConfigToLabelTypeMappingListParameter(value);
-        registerQueryDerivedReferrer(function, cb.query(), "ID",
-                "LABEL_TYPE_ID", subQueryPropertyName,
-                "webConfigToLabelTypeMappingList", operand, value,
-                parameterPropertyName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String sqpp = keepId_QueryDerivedReferrer_WebConfigToLabelTypeMappingList(cb
+                .query());
+        final String prpp = keepId_QueryDerivedReferrer_WebConfigToLabelTypeMappingListParameter(vl);
+        registerQueryDerivedReferrer(fn, cb.query(), "ID", "LABEL_TYPE_ID",
+                sqpp, "webConfigToLabelTypeMappingList", rd, vl, prpp, op);
     }
 
     public abstract String keepId_QueryDerivedReferrer_WebConfigToLabelTypeMappingList(
-            WebConfigToLabelTypeMappingCQ subQuery);
+            WebConfigToLabelTypeMappingCQ sq);
 
     public abstract String keepId_QueryDerivedReferrer_WebConfigToLabelTypeMappingListParameter(
-            Object parameterValue);
+            Object vl);
 
     /**
      * IsNull {is null}. And OnlyOnceRegistered. <br />
@@ -896,11 +988,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regId(CK_ISNN, DOBJ);
     }
 
-    protected void regId(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueId(), "ID");
+    protected void regId(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueId(), "ID");
     }
 
-    abstract protected ConditionValue getCValueId();
+    protected abstract ConditionValue getCValueId();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1002,7 +1094,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * NAME: {NotNull, VARCHAR(100)} <br />
-     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setName_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param name The value of name as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1023,11 +1115,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regLSQ(CK_NLS, fRES(name), getCValueName(), "NAME", likeSearchOption);
     }
 
-    protected void regName(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueName(), "NAME");
+    protected void regName(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueName(), "NAME");
     }
 
-    abstract protected ConditionValue getCValueName();
+    protected abstract ConditionValue getCValueName();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1129,7 +1221,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * VALUE: {NotNull, VARCHAR(20)} <br />
-     * <pre>e.g. setValue_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setValue_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param value The value of value as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1150,11 +1242,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regLSQ(CK_NLS, fRES(value), getCValueValue(), "VALUE", likeSearchOption);
     }
 
-    protected void regValue(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueValue(), "VALUE");
+    protected void regValue(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueValue(), "VALUE");
     }
 
-    abstract protected ConditionValue getCValueValue();
+    protected abstract ConditionValue getCValueValue();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1262,7 +1354,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * INCLUDED_PATHS: {VARCHAR(4000)} <br />
-     * <pre>e.g. setIncludedPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setIncludedPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param includedPaths The value of includedPaths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1309,11 +1401,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regIncludedPaths(CK_ISNN, DOBJ);
     }
 
-    protected void regIncludedPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueIncludedPaths(), "INCLUDED_PATHS");
+    protected void regIncludedPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueIncludedPaths(), "INCLUDED_PATHS");
     }
 
-    abstract protected ConditionValue getCValueIncludedPaths();
+    protected abstract ConditionValue getCValueIncludedPaths();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1421,7 +1513,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * EXCLUDED_PATHS: {VARCHAR(4000)} <br />
-     * <pre>e.g. setExcludedPaths_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setExcludedPaths_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param excludedPaths The value of excludedPaths as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1468,11 +1560,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regExcludedPaths(CK_ISNN, DOBJ);
     }
 
-    protected void regExcludedPaths(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueExcludedPaths(), "EXCLUDED_PATHS");
+    protected void regExcludedPaths(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueExcludedPaths(), "EXCLUDED_PATHS");
     }
 
-    abstract protected ConditionValue getCValueExcludedPaths();
+    protected abstract ConditionValue getCValueExcludedPaths();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1579,11 +1671,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regINS(CK_NINS, cTL(sortOrderList), getCValueSortOrder(), "SORT_ORDER");
     }
 
-    protected void regSortOrder(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueSortOrder(), "SORT_ORDER");
+    protected void regSortOrder(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueSortOrder(), "SORT_ORDER");
     }
 
-    abstract protected ConditionValue getCValueSortOrder();
+    protected abstract ConditionValue getCValueSortOrder();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1685,7 +1777,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * CREATED_BY: {NotNull, VARCHAR(255)} <br />
-     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setCreatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param createdBy The value of createdBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1708,11 +1800,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
                 likeSearchOption);
     }
 
-    protected void regCreatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedBy(), "CREATED_BY");
+    protected void regCreatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedBy(), "CREATED_BY");
     }
 
-    abstract protected ConditionValue getCValueCreatedBy();
+    protected abstract ConditionValue getCValueCreatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -1763,13 +1855,13 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
-     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setCreatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of createdTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setCreatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setCreatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -1783,22 +1875,21 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * CREATED_TIME: {NotNull, TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of createdTime. (NullAllowed: if null, no to-condition)
      */
-    public void setCreatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setCreatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setCreatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
 
-    protected void regCreatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueCreatedTime(), "CREATED_TIME");
+    protected void regCreatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueCreatedTime(), "CREATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueCreatedTime();
+    protected abstract ConditionValue getCValueCreatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -1900,7 +1991,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * UPDATED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setUpdatedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param updatedBy The value of updatedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -1947,11 +2038,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regUpdatedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedBy(), "UPDATED_BY");
+    protected void regUpdatedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedBy(), "UPDATED_BY");
     }
 
-    abstract protected ConditionValue getCValueUpdatedBy();
+    protected abstract ConditionValue getCValueUpdatedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2002,13 +2093,13 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setUpdatedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of updatedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setUpdatedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setUpdatedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -2022,13 +2113,12 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * UPDATED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of updatedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setUpdatedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setUpdatedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setUpdatedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -2049,11 +2139,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regUpdatedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regUpdatedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueUpdatedTime(), "UPDATED_TIME");
+    protected void regUpdatedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueUpdatedTime(), "UPDATED_TIME");
     }
 
-    abstract protected ConditionValue getCValueUpdatedTime();
+    protected abstract ConditionValue getCValueUpdatedTime();
 
     /**
      * Equal(=). And NullOrEmptyIgnored, OnlyOnceRegistered. <br />
@@ -2155,7 +2245,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     /**
      * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br />
      * DELETED_BY: {VARCHAR(255)} <br />
-     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #FD4747">LikeSearchOption</span>().likeContain());</pre>
+     * <pre>e.g. setDeletedBy_LikeSearch("xxx", new <span style="color: #DD4747">LikeSearchOption</span>().likeContain());</pre>
      * @param deletedBy The value of deletedBy as likeSearch. (NullAllowed: if null (or empty), no condition)
      * @param likeSearchOption The option of like-search. (NotNull)
      */
@@ -2202,11 +2292,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regDeletedBy(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedBy(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedBy(), "DELETED_BY");
+    protected void regDeletedBy(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedBy(), "DELETED_BY");
     }
 
-    abstract protected ConditionValue getCValueDeletedBy();
+    protected abstract ConditionValue getCValueDeletedBy();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2257,13 +2347,13 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * FromTo with various options. (versatile) {(default) fromDatetime &lt;= column &lt;= toDatetime} <br />
      * And NullIgnored, OnlyOnceRegistered. <br />
      * DELETED_TIME: {TIMESTAMP(23, 10)}
-     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #FD4747">FromToOption</span>().compareAsDate());</pre>
+     * <pre>e.g. setDeletedTime_FromTo(fromDate, toDate, new <span style="color: #DD4747">FromToOption</span>().compareAsDate());</pre>
      * @param fromDatetime The from-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDatetime The to-datetime(yyyy/MM/dd HH:mm:ss.SSS) of deletedTime. (NullAllowed: if null, no to-condition)
      * @param fromToOption The option of from-to. (NotNull)
      */
-    public void setDeletedTime_FromTo(final java.util.Date fromDatetime,
-            final java.util.Date toDatetime, final FromToOption fromToOption) {
+    public void setDeletedTime_FromTo(final Date fromDatetime,
+            final Date toDatetime, final FromToOption fromToOption) {
         regFTQ(fromDatetime != null ? new java.sql.Timestamp(
                 fromDatetime.getTime()) : null,
                 toDatetime != null ? new java.sql.Timestamp(toDatetime
@@ -2277,13 +2367,12 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * DELETED_TIME: {TIMESTAMP(23, 10)}
      * <pre>
      * e.g. from:{2007/04/10 08:24:53} to:{2007/04/16 14:36:29}
-     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #FD4747">&lt; '2007/04/17 00:00:00'</span>
+     *  column &gt;= '2007/04/10 00:00:00' and column <span style="color: #DD4747">&lt; '2007/04/17 00:00:00'</span>
      * </pre>
      * @param fromDate The from-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no from-condition)
      * @param toDate The to-date(yyyy/MM/dd) of deletedTime. (NullAllowed: if null, no to-condition)
      */
-    public void setDeletedTime_DateFromTo(final java.util.Date fromDate,
-            final java.util.Date toDate) {
+    public void setDeletedTime_DateFromTo(final Date fromDate, final Date toDate) {
         setDeletedTime_FromTo(fromDate, toDate,
                 new FromToOption().compareAsDate());
     }
@@ -2304,11 +2393,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regDeletedTime(CK_ISNN, DOBJ);
     }
 
-    protected void regDeletedTime(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueDeletedTime(), "DELETED_TIME");
+    protected void regDeletedTime(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueDeletedTime(), "DELETED_TIME");
     }
 
-    abstract protected ConditionValue getCValueDeletedTime();
+    protected abstract ConditionValue getCValueDeletedTime();
 
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
@@ -2415,11 +2504,11 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
         regINS(CK_NINS, cTL(versionNoList), getCValueVersionNo(), "VERSION_NO");
     }
 
-    protected void regVersionNo(final ConditionKey k, final Object v) {
-        regQ(k, v, getCValueVersionNo(), "VERSION_NO");
+    protected void regVersionNo(final ConditionKey ky, final Object vl) {
+        regQ(ky, vl, getCValueVersionNo(), "VERSION_NO");
     }
 
-    abstract protected ConditionValue getCValueVersionNo();
+    protected abstract ConditionValue getCValueVersionNo();
 
     // ===================================================================================
     //                                                                     ScalarCondition
@@ -2428,7 +2517,7 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * Prepare ScalarCondition as equal. <br />
      * {where FOO = (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_Equal()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_Equal()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
      *     public void query(LabelTypeCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2438,14 +2527,14 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<LabelTypeCB> scalar_Equal() {
-        return xcreateSSQFunction(CK_EQ.getOperand());
+        return xcreateSSQFunction(CK_EQ, LabelTypeCB.class);
     }
 
     /**
      * Prepare ScalarCondition as equal. <br />
      * {where FOO &lt;&gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_NotEqual()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
      *     public void query(LabelTypeCB subCB) {
      *         subCB.specify().setXxx... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setYyy...
@@ -2455,14 +2544,14 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<LabelTypeCB> scalar_NotEqual() {
-        return xcreateSSQFunction(CK_NES.getOperand());
+        return xcreateSSQFunction(CK_NES, LabelTypeCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterThan. <br />
      * {where FOO &gt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterThan()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
      *     public void query(LabelTypeCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2472,14 +2561,14 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<LabelTypeCB> scalar_GreaterThan() {
-        return xcreateSSQFunction(CK_GT.getOperand());
+        return xcreateSSQFunction(CK_GT, LabelTypeCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessThan. <br />
      * {where FOO &lt; (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessThan()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessThan()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
      *     public void query(LabelTypeCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2489,14 +2578,14 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<LabelTypeCB> scalar_LessThan() {
-        return xcreateSSQFunction(CK_LT.getOperand());
+        return xcreateSSQFunction(CK_LT, LabelTypeCB.class);
     }
 
     /**
      * Prepare ScalarCondition as greaterEqual. <br />
      * {where FOO &gt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_GreaterEqual()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
      *     public void query(LabelTypeCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2506,14 +2595,14 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<LabelTypeCB> scalar_GreaterEqual() {
-        return xcreateSSQFunction(CK_GE.getOperand());
+        return xcreateSSQFunction(CK_GE, LabelTypeCB.class);
     }
 
     /**
      * Prepare ScalarCondition as lessEqual. <br />
      * {where FOO &lt;= (select max(BAR) from ...)
      * <pre>
-     * cb.query().<span style="color: #FD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
+     * cb.query().<span style="color: #DD4747">scalar_LessEqual()</span>.max(new SubQuery&lt;LabelTypeCB&gt;() {
      *     public void query(LabelTypeCB subCB) {
      *         subCB.specify().setFoo... <span style="color: #3F7E5E">// derived column for function</span>
      *         subCB.query().setBar...
@@ -2523,42 +2612,31 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
      * @return The object to set up a function. (NotNull)
      */
     public HpSSQFunction<LabelTypeCB> scalar_LessEqual() {
-        return xcreateSSQFunction(CK_LE.getOperand());
+        return xcreateSSQFunction(CK_LE, LabelTypeCB.class);
     }
 
-    protected HpSSQFunction<LabelTypeCB> xcreateSSQFunction(final String operand) {
-        return new HpSSQFunction<LabelTypeCB>(new HpSSQSetupper<LabelTypeCB>() {
-            @Override
-            public void setup(final String function,
-                    final SubQuery<LabelTypeCB> subQuery,
-                    final HpSSQOption<LabelTypeCB> option) {
-                xscalarCondition(function, subQuery, operand, option);
-            }
-        });
-    }
-
-    protected void xscalarCondition(final String function,
-            final SubQuery<LabelTypeCB> subQuery, final String operand,
-            final HpSSQOption<LabelTypeCB> option) {
-        assertObjectNotNull("subQuery<LabelTypeCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xscalarCondition(final String fn,
+            final SubQuery<CB> sq, final String rd, final HpSSQOption<CB> op) {
+        assertObjectNotNull("subQuery", sq);
         final LabelTypeCB cb = xcreateScalarConditionCB();
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepScalarCondition(cb.query()); // for saving query-value
-        option.setPartitionByCBean(xcreateScalarConditionPartitionByCB()); // for using partition-by
-        registerScalarCondition(function, cb.query(), subQueryPropertyName,
-                operand, option);
+        sq.query((CB) cb);
+        final String pp = keepScalarCondition(cb.query()); // for saving query-value
+        op.setPartitionByCBean((CB) xcreateScalarConditionPartitionByCB()); // for using partition-by
+        registerScalarCondition(fn, cb.query(), pp, rd, op);
     }
 
-    public abstract String keepScalarCondition(LabelTypeCQ subQuery);
+    public abstract String keepScalarCondition(LabelTypeCQ sq);
 
     protected LabelTypeCB xcreateScalarConditionCB() {
-        final LabelTypeCB cb = new LabelTypeCB();
+        final LabelTypeCB cb = newMyCB();
         cb.xsetupForScalarCondition(this);
         return cb;
     }
 
     protected LabelTypeCB xcreateScalarConditionPartitionByCB() {
-        final LabelTypeCB cb = new LabelTypeCB();
+        final LabelTypeCB cb = newMyCB();
         cb.xsetupForScalarConditionPartitionBy(this);
         return cb;
     }
@@ -2566,102 +2644,173 @@ public abstract class AbstractBsLabelTypeCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                       MyselfDerived
     //                                                                       =============
-    public void xsmyselfDerive(final String function,
-            final SubQuery<LabelTypeCB> subQuery, final String aliasName,
-            final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<LabelTypeCB>", subQuery);
+    public void xsmyselfDerive(final String fn, final SubQuery<LabelTypeCB> sq,
+            final String al, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final LabelTypeCB cb = new LabelTypeCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepSpecifyMyselfDerived(cb.query()); // for saving query-value.
-        registerSpecifyMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", aliasName, option);
+        try {
+            lock();
+            sq.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepSpecifyMyselfDerived(cb.query());
+        final String pk = "ID";
+        registerSpecifyMyselfDerived(fn, cb.query(), pk, pk, pp,
+                "myselfDerived", al, op);
     }
 
-    public abstract String keepSpecifyMyselfDerived(LabelTypeCQ subQuery);
+    public abstract String keepSpecifyMyselfDerived(LabelTypeCQ sq);
 
     /**
-     * Prepare for (Query)MyselfDerived (SubQuery).
+     * Prepare for (Query)MyselfDerived (correlated sub-query).
      * @return The object to set up a function for myself table. (NotNull)
      */
     public HpQDRFunction<LabelTypeCB> myselfDerived() {
-        return xcreateQDRFunctionMyselfDerived();
+        return xcreateQDRFunctionMyselfDerived(LabelTypeCB.class);
     }
 
-    protected HpQDRFunction<LabelTypeCB> xcreateQDRFunctionMyselfDerived() {
-        return new HpQDRFunction<LabelTypeCB>(new HpQDRSetupper<LabelTypeCB>() {
-            @Override
-            public void setup(final String function,
-                    final SubQuery<LabelTypeCB> subQuery, final String operand,
-                    final Object value, final DerivedReferrerOption option) {
-                xqderiveMyselfDerived(function, subQuery, operand, value,
-                        option);
-            }
-        });
-    }
-
-    public void xqderiveMyselfDerived(final String function,
-            final SubQuery<LabelTypeCB> subQuery, final String operand,
-            final Object value, final DerivedReferrerOption option) {
-        assertObjectNotNull("subQuery<LabelTypeCB>", subQuery);
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <CB extends ConditionBean> void xqderiveMyselfDerived(
+            final String fn, final SubQuery<CB> sq, final String rd,
+            final Object vl, final DerivedReferrerOption op) {
+        assertObjectNotNull("subQuery", sq);
         final LabelTypeCB cb = new LabelTypeCB();
         cb.xsetupForDerivedReferrer(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepQueryMyselfDerived(cb.query()); // for saving query-value.
-        final String parameterPropertyName = keepQueryMyselfDerivedParameter(value);
-        registerQueryMyselfDerived(function, cb.query(), "ID", "ID",
-                subQueryPropertyName, "myselfDerived", operand, value,
-                parameterPropertyName, option);
+        sq.query((CB) cb);
+        final String pk = "ID";
+        final String sqpp = keepQueryMyselfDerived(cb.query()); // for saving query-value.
+        final String prpp = keepQueryMyselfDerivedParameter(vl);
+        registerQueryMyselfDerived(fn, cb.query(), pk, pk, sqpp,
+                "myselfDerived", rd, vl, prpp, op);
     }
 
-    public abstract String keepQueryMyselfDerived(LabelTypeCQ subQuery);
+    public abstract String keepQueryMyselfDerived(LabelTypeCQ sq);
 
-    public abstract String keepQueryMyselfDerivedParameter(Object parameterValue);
+    public abstract String keepQueryMyselfDerivedParameter(Object vl);
 
     // ===================================================================================
     //                                                                        MyselfExists
     //                                                                        ============
     /**
-     * Prepare for MyselfExists (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfExists (correlated sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfExists(final SubQuery<LabelTypeCB> subQuery) {
-        assertObjectNotNull("subQuery<LabelTypeCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final LabelTypeCB cb = new LabelTypeCB();
         cb.xsetupForMyselfExists(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfExists(cb.query()); // for saving query-value.
-        registerMyselfExists(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfExists(cb.query());
+        registerMyselfExists(cb.query(), pp);
     }
 
-    public abstract String keepMyselfExists(LabelTypeCQ subQuery);
+    public abstract String keepMyselfExists(LabelTypeCQ sq);
 
     // ===================================================================================
     //                                                                       MyselfInScope
     //                                                                       =============
     /**
-     * Prepare for MyselfInScope (SubQuery).
-     * @param subQuery The implementation of sub query. (NotNull)
+     * Prepare for MyselfInScope (sub-query).
+     * @param subQuery The implementation of sub-query. (NotNull)
      */
     public void myselfInScope(final SubQuery<LabelTypeCB> subQuery) {
-        assertObjectNotNull("subQuery<LabelTypeCB>", subQuery);
+        assertObjectNotNull("subQuery", subQuery);
         final LabelTypeCB cb = new LabelTypeCB();
         cb.xsetupForMyselfInScope(this);
-        subQuery.query(cb);
-        final String subQueryPropertyName = keepMyselfInScope(cb.query()); // for saving query-value.
-        registerMyselfInScope(cb.query(), subQueryPropertyName);
+        try {
+            lock();
+            subQuery.query(cb);
+        } finally {
+            unlock();
+        }
+        final String pp = keepMyselfInScope(cb.query());
+        registerMyselfInScope(cb.query(), pp);
     }
 
-    public abstract String keepMyselfInScope(LabelTypeCQ subQuery);
+    public abstract String keepMyselfInScope(LabelTypeCQ sq);
+
+    /**
+     * Order along manual ordering information.
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_GreaterEqual</span>(priorityDate); <span style="color: #3F7E5E">// e.g. 2000/01/01</span>
+     * cb.query().addOrderBy_Birthdate_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when BIRTHDATE &gt;= '2000/01/01' then 0</span>
+     * <span style="color: #3F7E5E">//     else 1</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     *
+     * MemberCB cb = new MemberCB();
+     * ManualOrderBean mob = new ManualOrderBean();
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Withdrawal);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Formalized);
+     * mob.<span style="color: #DD4747">when_Equal</span>(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(mob)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * <p>This function with Union is unsupported!</p>
+     * <p>The order values are bound (treated as bind parameter).</p>
+     * @param mob The bean of manual order containing order values. (NotNull)
+     */
+    public void withManualOrder(final ManualOrderBean mob) { // is user public!
+        xdoWithManualOrder(mob);
+    }
+
+    // ===================================================================================
+    //                                                                          Compatible
+    //                                                                          ==========
+    /**
+     * Order along the list of manual values. #beforejava8 <br />
+     * This function with Union is unsupported! <br />
+     * The order values are bound (treated as bind parameter).
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * List&lt;CDef.MemberStatus&gt; orderValueList = new ArrayList&lt;CDef.MemberStatus&gt;();
+     * orderValueList.add(CDef.MemberStatus.Withdrawal);
+     * orderValueList.add(CDef.MemberStatus.Formalized);
+     * orderValueList.add(CDef.MemberStatus.Provisional);
+     * cb.query().addOrderBy_MemberStatusCode_Asc().<span style="color: #DD4747">withManualOrder(orderValueList)</span>;
+     * <span style="color: #3F7E5E">// order by </span>
+     * <span style="color: #3F7E5E">//   case</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'WDL' then 0</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'FML' then 1</span>
+     * <span style="color: #3F7E5E">//     when MEMBER_STATUS_CODE = 'PRV' then 2</span>
+     * <span style="color: #3F7E5E">//     else 3</span>
+     * <span style="color: #3F7E5E">//   end asc, ...</span>
+     * </pre>
+     * @param orderValueList The list of order values for manual ordering. (NotNull)
+     */
+    public void withManualOrder(final List<? extends Object> orderValueList) { // is user public!
+        assertObjectNotNull("withManualOrder(orderValueList)", orderValueList);
+        final ManualOrderBean manualOrderBean = new ManualOrderBean();
+        manualOrderBean.acceptOrderValueList(orderValueList);
+        withManualOrder(manualOrderBean);
+    }
 
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
-    // very internal (for suppressing warn about 'Not Use Import')
-    protected String xabCB() {
-        return LabelTypeCB.class.getName();
+    protected LabelTypeCB newMyCB() {
+        return new LabelTypeCB();
     }
 
+    // very internal (for suppressing warn about 'Not Use Import')
     protected String xabCQ() {
         return LabelTypeCQ.class.getName();
     }

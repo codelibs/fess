@@ -18,6 +18,7 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfOverlappingHost;
 import jp.sf.fess.db.bsentity.dbmeta.OverlappingHostDbm;
 import jp.sf.fess.db.cbean.OverlappingHostCB;
 import jp.sf.fess.db.exbhv.OverlappingHostBhv;
@@ -28,13 +29,26 @@ import org.seasar.dbflute.bhv.AbstractBehaviorWritable;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityAlreadyUpdatedException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -89,7 +103,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return OverlappingHostDbm.getInstance();
@@ -105,14 +119,14 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public OverlappingHost newEntity() {
+        return new OverlappingHost();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public OverlappingHostCB newConditionBean() {
+        return new OverlappingHostCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -134,12 +148,16 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <pre>
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
-     * int count = overlappingHostBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = overlappingHostBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final OverlappingHostCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final OverlappingHostCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -155,19 +173,21 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
-     * OverlappingHost overlappingHost = overlappingHostBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (overlappingHost != null) {
+     * OverlappingHost overlappingHost = overlappingHostBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (overlappingHost != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = overlappingHost.get...();
      * } else {
      *     ...
@@ -175,110 +195,114 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public OverlappingHost selectEntity(final OverlappingHostCB cb) {
-        return doSelectEntity(cb, OverlappingHost.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected OverlappingHost facadeSelectEntity(final OverlappingHostCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends OverlappingHost> ENTITY doSelectEntity(
-            final OverlappingHostCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(cb, entityType,
-                new InternalSelectEntityCallback<ENTITY, OverlappingHostCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final OverlappingHostCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final OverlappingHostCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends OverlappingHost> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final OverlappingHostCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
-     * OverlappingHost overlappingHost = overlappingHostBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * OverlappingHost overlappingHost = overlappingHostBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = overlappingHost.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public OverlappingHost selectEntityWithDeletedCheck(
             final OverlappingHostCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, OverlappingHost.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected OverlappingHost facadeSelectEntityWithDeletedCheck(
+            final OverlappingHostCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends OverlappingHost> ENTITY doSelectEntityWithDeletedCheck(
-            final OverlappingHostCB cb, final Class<ENTITY> entityType) {
+            final OverlappingHostCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, OverlappingHostCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final OverlappingHostCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public OverlappingHost selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, OverlappingHost.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends OverlappingHost> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected OverlappingHost facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends OverlappingHost> ENTITY doSelectByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends OverlappingHost> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public OverlappingHost selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, OverlappingHost.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends OverlappingHost> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends OverlappingHost> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private OverlappingHostCB buildPKCB(final Long id) {
+    protected OverlappingHostCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final OverlappingHostCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -290,38 +314,32 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;OverlappingHost&gt; overlappingHostList = overlappingHostBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;OverlappingHost&gt; overlappingHostList = overlappingHostBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (OverlappingHost overlappingHost : overlappingHostList) {
      *     ... = overlappingHost.get...();
      * }
      * </pre>
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<OverlappingHost> selectList(final OverlappingHostCB cb) {
-        return doSelectList(cb, OverlappingHost.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<OverlappingHost> facadeSelectList(
+            final OverlappingHostCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends OverlappingHost> ListResultBean<ENTITY> doSelectList(
-            final OverlappingHostCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, OverlappingHostCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final OverlappingHostCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final OverlappingHostCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -334,8 +352,8 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;OverlappingHost&gt; page = overlappingHostBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;OverlappingHost&gt; page = overlappingHostBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -347,37 +365,27 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<OverlappingHost> selectPage(
             final OverlappingHostCB cb) {
-        return doSelectPage(cb, OverlappingHost.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<OverlappingHost> facadeSelectPage(
+            final OverlappingHostCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends OverlappingHost> PagingResultBean<ENTITY> doSelectPage(
-            final OverlappingHostCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, OverlappingHostCB>() {
-                    @Override
-                    public int callbackSelectCount(final OverlappingHostCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final OverlappingHostCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final OverlappingHostCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -388,7 +396,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <pre>
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
-     * overlappingHostBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;OverlappingHost&gt;() {
+     * overlappingHostBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;OverlappingHost&gt;() {
      *     public void handle(OverlappingHost entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -399,35 +407,22 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final OverlappingHostCB cb,
             final EntityRowHandler<OverlappingHost> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, OverlappingHost.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final OverlappingHostCB cb,
+            final EntityRowHandler<OverlappingHost> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends OverlappingHost> void doSelectCursor(
-            final OverlappingHostCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final OverlappingHostCB cb, final EntityRowHandler<ENTITY> handler,
+            final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<OverlappingHost>",
-                entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(cb, entityRowHandler, entityType,
-                new InternalSelectCursorCallback<ENTITY, OverlappingHostCB>() {
-                    @Override
-                    public void callbackSelectCursor(
-                            final OverlappingHostCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final OverlappingHostCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -437,29 +432,41 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * overlappingHostBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * overlappingHostBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(OverlappingHostCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<OverlappingHostCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<OverlappingHostCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends OverlappingHostCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<OverlappingHostCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends OverlappingHostCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -473,9 +480,87 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
+    //                                                                       Load Referrer
+    //                                                                       =============
+    /**
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param overlappingHostList The entity list of overlappingHost. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final List<OverlappingHost> overlappingHostList,
+            final ReferrerLoaderHandler<LoaderOfOverlappingHost> handler) {
+        xassLRArg(overlappingHostList, handler);
+        handler.handle(new LoaderOfOverlappingHost().ready(overlappingHostList,
+                _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param overlappingHost The entity of overlappingHost. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final OverlappingHost overlappingHost,
+            final ReferrerLoaderHandler<LoaderOfOverlappingHost> handler) {
+        xassLRArg(overlappingHost, handler);
+        handler.handle(new LoaderOfOverlappingHost().ready(
+                xnewLRAryLs(overlappingHost), _behaviorSelector));
+    }
+
+    // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-
     // ===================================================================================
     //                                                                      Extract Column
     //                                                                      ==============
@@ -486,20 +571,14 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      */
     public List<Long> extractIdList(
             final List<OverlappingHost> overlappingHostList) {
-        return helpExtractListInternally(overlappingHostList,
-                new InternalExtractCallback<OverlappingHost, Long>() {
-                    @Override
-                    public Long getCV(final OverlappingHost e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(overlappingHostList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * OverlappingHost overlappingHost = new OverlappingHost();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -508,39 +587,38 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//overlappingHost.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//overlappingHost.set...;</span>
-     * overlappingHostBhv.<span style="color: #FD4747">insert</span>(overlappingHost);
+     * overlappingHostBhv.<span style="color: #DD4747">insert</span>(overlappingHost);
      * ... = overlappingHost.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param overlappingHost The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param overlappingHost The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final OverlappingHost overlappingHost) {
         doInsert(overlappingHost, null);
     }
 
-    protected void doInsert(final OverlappingHost overlappingHost,
-            final InsertOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
-        prepareInsertOption(option);
-        delegateInsert(overlappingHost, option);
+    protected void doInsert(final OverlappingHost et,
+            final InsertOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
-    protected void prepareInsertOption(
-            final InsertOption<OverlappingHostCB> option) {
-        if (option == null) {
+    protected void prepareInsertOption(final InsertOption<OverlappingHostCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -552,71 +630,59 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//overlappingHost.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//overlappingHost.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * overlappingHost.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * overlappingHost.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     overlappingHostBhv.<span style="color: #FD4747">update</span>(overlappingHost);
+     *     overlappingHostBhv.<span style="color: #DD4747">update</span>(overlappingHost);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param overlappingHost The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param overlappingHost The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final OverlappingHost overlappingHost) {
         doUpdate(overlappingHost, null);
     }
 
-    protected void doUpdate(final OverlappingHost overlappingHost,
-            final UpdateOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
-        prepareUpdateOption(option);
-        helpUpdateInternally(overlappingHost,
-                new InternalUpdateCallback<OverlappingHost>() {
-                    @Override
-                    public int callbackDelegateUpdate(
-                            final OverlappingHost entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final OverlappingHost et,
+            final UpdateOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
-    protected void prepareUpdateOption(
-            final UpdateOption<OverlappingHostCB> option) {
-        if (option == null) {
+    protected void prepareUpdateOption(final UpdateOption<OverlappingHostCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected OverlappingHostCB createCBForVaryingUpdate() {
-        final OverlappingHostCB cb = newMyConditionBean();
+        final OverlappingHostCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected OverlappingHostCB createCBForSpecifiedUpdate() {
-        final OverlappingHostCB cb = newMyConditionBean();
+        final OverlappingHostCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     /**
@@ -628,147 +694,85 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//overlappingHost.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//overlappingHost.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//overlappingHost.setVersionNo(value);</span>
-     * overlappingHostBhv.<span style="color: #FD4747">updateNonstrict</span>(overlappingHost);
+     * overlappingHostBhv.<span style="color: #DD4747">updateNonstrict</span>(overlappingHost);
      * </pre>
-     * @param overlappingHost The entity of update target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param overlappingHost The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void updateNonstrict(final OverlappingHost overlappingHost) {
         doUpdateNonstrict(overlappingHost, null);
     }
 
-    protected void doUpdateNonstrict(final OverlappingHost overlappingHost,
-            final UpdateOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
-        prepareUpdateOption(option);
-        helpUpdateNonstrictInternally(overlappingHost,
-                new InternalUpdateNonstrictCallback<OverlappingHost>() {
-                    @Override
-                    public int callbackDelegateUpdateNonstrict(
-                            final OverlappingHost entity) {
-                        return delegateUpdateNonstrict(entity, option);
-                    }
-                });
+    protected void doUpdateNonstrict(final OverlappingHost et,
+            final UpdateOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
+        prepareUpdateOption(op);
+        helpUpdateNonstrictInternally(et, op);
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            updateNonstrict(downcast(entity));
-        } else {
-            varyingUpdateNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdateNonstrict(downcast(et), downcast(op));
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param overlappingHost The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param overlappingHost The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final OverlappingHost overlappingHost) {
-        doInesrtOrUpdate(overlappingHost, null, null);
+        doInsertOrUpdate(overlappingHost, null, null);
     }
 
-    protected void doInesrtOrUpdate(final OverlappingHost overlappingHost,
-            final InsertOption<OverlappingHostCB> insertOption,
-            final UpdateOption<OverlappingHostCB> updateOption) {
-        helpInsertOrUpdateInternally(
-                overlappingHost,
-                new InternalInsertOrUpdateCallback<OverlappingHost, OverlappingHostCB>() {
-                    @Override
-                    public void callbackInsert(final OverlappingHost entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final OverlappingHost entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public OverlappingHostCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final OverlappingHostCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final OverlappingHost et,
+            final InsertOption<OverlappingHostCB> iop,
+            final UpdateOption<OverlappingHostCB> uop) {
+        assertObjectNotNull("overlappingHost", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<OverlappingHostCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<OverlappingHostCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param overlappingHost The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param overlappingHost The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdateNonstrict(final OverlappingHost overlappingHost) {
-        doInesrtOrUpdateNonstrict(overlappingHost, null, null);
+        doInsertOrUpdateNonstrict(overlappingHost, null, null);
     }
 
-    protected void doInesrtOrUpdateNonstrict(
-            final OverlappingHost overlappingHost,
-            final InsertOption<OverlappingHostCB> insertOption,
-            final UpdateOption<OverlappingHostCB> updateOption) {
-        helpInsertOrUpdateInternally(overlappingHost,
-                new InternalInsertOrUpdateNonstrictCallback<OverlappingHost>() {
-                    @Override
-                    public void callbackInsert(final OverlappingHost entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdateNonstrict(
-                            final OverlappingHost entity) {
-                        doUpdateNonstrict(entity, updateOption);
-                    }
-                });
+    protected void doInsertOrUpdateNonstrict(final OverlappingHost et,
+            final InsertOption<OverlappingHostCB> iop,
+            final UpdateOption<OverlappingHostCB> uop) {
+        assertObjectNotNull("overlappingHost", et);
+        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdateNonstrict(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<OverlappingHostCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<OverlappingHostCB>()
-                    : updateOption;
-            varyingInsertOrUpdateNonstrict(downcast(entity),
-                    downcast(insertOption), downcast(updateOption));
-        }
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -776,52 +780,39 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <pre>
      * OverlappingHost overlappingHost = new OverlappingHost();
      * overlappingHost.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * overlappingHost.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * overlappingHost.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     overlappingHostBhv.<span style="color: #FD4747">delete</span>(overlappingHost);
+     *     overlappingHostBhv.<span style="color: #DD4747">delete</span>(overlappingHost);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param overlappingHost The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param overlappingHost The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final OverlappingHost overlappingHost) {
         doDelete(overlappingHost, null);
     }
 
-    protected void doDelete(final OverlappingHost overlappingHost,
-            final DeleteOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
-        prepareDeleteOption(option);
-        helpDeleteInternally(overlappingHost,
-                new InternalDeleteCallback<OverlappingHost>() {
-                    @Override
-                    public int callbackDelegateDelete(
-                            final OverlappingHost entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final OverlappingHost et,
+            final DeleteOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
-    protected void prepareDeleteOption(
-            final DeleteOption<OverlappingHostCB> option) {
-        if (option == null) {
-            return;
+    protected void prepareDeleteOption(final DeleteOption<OverlappingHostCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
-        assertDeleteOptionStatus(option);
     }
 
     @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
-        }
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
     }
 
     /**
@@ -829,31 +820,24 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <pre>
      * OverlappingHost overlappingHost = new OverlappingHost();
      * overlappingHost.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//overlappingHost.setVersionNo(value);</span>
-     * overlappingHostBhv.<span style="color: #FD4747">deleteNonstrict</span>(overlappingHost);
+     * overlappingHostBhv.<span style="color: #DD4747">deleteNonstrict</span>(overlappingHost);
      * </pre>
-     * @param overlappingHost The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param overlappingHost The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrict(final OverlappingHost overlappingHost) {
         doDeleteNonstrict(overlappingHost, null);
     }
 
-    protected void doDeleteNonstrict(final OverlappingHost overlappingHost,
-            final DeleteOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictInternally(overlappingHost,
-                new InternalDeleteNonstrictCallback<OverlappingHost>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final OverlappingHost entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrict(final OverlappingHost et,
+            final DeleteOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -861,55 +845,57 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <pre>
      * OverlappingHost overlappingHost = new OverlappingHost();
      * overlappingHost.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//overlappingHost.setVersionNo(value);</span>
-     * overlappingHostBhv.<span style="color: #FD4747">deleteNonstrictIgnoreDeleted</span>(overlappingHost);
+     * overlappingHostBhv.<span style="color: #DD4747">deleteNonstrictIgnoreDeleted</span>(overlappingHost);
      * <span style="color: #3F7E5E">// if the target entity doesn't exist, no exception</span>
      * </pre>
-     * @param overlappingHost The entity of delete target. (NotNull, PrimaryKeyNotNull)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param overlappingHost The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void deleteNonstrictIgnoreDeleted(
             final OverlappingHost overlappingHost) {
         doDeleteNonstrictIgnoreDeleted(overlappingHost, null);
     }
 
-    protected void doDeleteNonstrictIgnoreDeleted(
-            final OverlappingHost overlappingHost,
-            final DeleteOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
-        prepareDeleteOption(option);
-        helpDeleteNonstrictIgnoreDeletedInternally(
-                overlappingHost,
-                new InternalDeleteNonstrictIgnoreDeletedCallback<OverlappingHost>() {
-                    @Override
-                    public int callbackDelegateDeleteNonstrict(
-                            final OverlappingHost entity) {
-                        return delegateDeleteNonstrict(entity, option);
-                    }
-                });
+    protected void doDeleteNonstrictIgnoreDeleted(final OverlappingHost et,
+            final DeleteOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
+        prepareDeleteOption(op);
+        helpDeleteNonstrictIgnoreDeletedInternally(et, op);
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            deleteNonstrict(downcast(entity));
-        } else {
-            varyingDeleteNonstrict(downcast(entity), downcast(option));
-        }
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     OverlappingHost overlappingHost = new OverlappingHost();
+     *     overlappingHost.setFooName("foo");
+     *     if (...) {
+     *         overlappingHost.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     overlappingHostList.add(overlappingHost);
+     * }
+     * overlappingHostBhv.<span style="color: #DD4747">batchInsert</span>(overlappingHostList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -917,92 +903,100 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
         return doBatchInsert(overlappingHostList, null);
     }
 
-    protected int[] doBatchInsert(
-            final List<OverlappingHost> overlappingHostList,
-            final InsertOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHostList", overlappingHostList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(overlappingHostList, option);
+    protected int[] doBatchInsert(final List<OverlappingHost> ls,
+            final InsertOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHostList", ls);
+        InsertOption<OverlappingHostCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<OverlappingHost> ls,
+            final InsertOption<OverlappingHostCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * overlappingHostBhv.<span style="color: #FD4747">batchUpdate</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
-     *     public void specify(OverlappingHostCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     OverlappingHost overlappingHost = new OverlappingHost();
+     *     overlappingHost.setFooName("foo");
+     *     if (...) {
+     *         overlappingHost.setFooPrice(123);
+     *     } else {
+     *         overlappingHost.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//overlappingHost.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     overlappingHostList.add(overlappingHost);
+     * }
+     * overlappingHostBhv.<span style="color: #DD4747">batchUpdate</span>(overlappingHostList);
      * </pre>
-     * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(final List<OverlappingHost> overlappingHostList) {
         return doBatchUpdate(overlappingHostList, null);
     }
 
-    protected int[] doBatchUpdate(
-            final List<OverlappingHost> overlappingHostList,
-            final UpdateOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHostList", overlappingHostList);
-        prepareBatchUpdateOption(overlappingHostList, option);
-        return delegateBatchUpdate(overlappingHostList, option);
+    protected int[] doBatchUpdate(final List<OverlappingHost> ls,
+            final UpdateOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHostList", ls);
+        UpdateOption<OverlappingHostCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(
-            final List<OverlappingHost> overlappingHostList,
-            final UpdateOption<OverlappingHostCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(overlappingHostList);
-        //}
+    protected void prepareBatchUpdateOption(final List<OverlappingHost> ls,
+            final UpdateOption<OverlappingHostCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, ExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * overlappingHostBhv.<span style="color: #FD4747">batchUpdate</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
+     * overlappingHostBhv.<span style="color: #DD4747">batchUpdate</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
      *     public void specify(OverlappingHostCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * overlappingHostBhv.<span style="color: #FD4747">batchUpdate</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
+     * overlappingHostBhv.<span style="color: #DD4747">batchUpdate</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
      *     public void specify(OverlappingHostCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1011,10 +1005,10 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * and an optimistic lock column because they are specified implicitly.</p>
      * <p>And you should specify columns that are modified in any entities (at least one entity).
      * But if you specify every column, it has no check.</p>
-     * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
+     * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchUpdate(final List<OverlappingHost> overlappingHostList,
             final SpecifyQuery<OverlappingHostCB> updateColumnSpec) {
@@ -1023,51 +1017,62 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * Batch-update the entity list non-strictly. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747">All columns are update target. {NOT modified only}</span>
-     * So you should the other batchUpdateNonstrict() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 140%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * overlappingHostBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
-     *     public void specify(OverlappingHostCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     OverlappingHost overlappingHost = new OverlappingHost();
+     *     overlappingHost.setFooName("foo");
+     *     if (...) {
+     *         overlappingHost.setFooPrice(123);
+     *     } else {
+     *         overlappingHost.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//overlappingHost.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     overlappingHostList.add(overlappingHost);
+     * }
+     * overlappingHostBhv.<span style="color: #DD4747">batchUpdate</span>(overlappingHostList);
      * </pre>
      * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(
             final List<OverlappingHost> overlappingHostList) {
         return doBatchUpdateNonstrict(overlappingHostList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(
-            final List<OverlappingHost> overlappingHostList,
-            final UpdateOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHostList", overlappingHostList);
-        prepareBatchUpdateOption(overlappingHostList, option);
-        return delegateBatchUpdateNonstrict(overlappingHostList, option);
+    protected int[] doBatchUpdateNonstrict(final List<OverlappingHost> ls,
+            final UpdateOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHostList", ls);
+        UpdateOption<OverlappingHostCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop);
+        return delegateBatchUpdateNonstrict(ls, rlop);
     }
 
     /**
-     * Batch-update the entity list non-strictly. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * overlappingHostBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
+     * overlappingHostBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
      *     public void specify(OverlappingHostCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * overlappingHostBhv.<span style="color: #FD4747">batchUpdateNonstrict</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
+     * overlappingHostBhv.<span style="color: #DD4747">batchUpdateNonstrict</span>(overlappingHostList, new SpecifyQuery<OverlappingHostCB>() {
      *     public void specify(OverlappingHostCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -1078,7 +1083,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdateNonstrict(
             final List<OverlappingHost> overlappingHostList,
@@ -1089,12 +1094,8 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdateNonstrict(downcast(ls));
-        } else {
-            return varyingBatchUpdateNonstrict(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
     }
 
     /**
@@ -1102,28 +1103,23 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
+     * @exception BatchEntityAlreadyUpdatedException When the entity has already been updated. This exception extends EntityAlreadyUpdatedException.
      */
     public int[] batchDelete(final List<OverlappingHost> overlappingHostList) {
         return doBatchDelete(overlappingHostList, null);
     }
 
-    protected int[] doBatchDelete(
-            final List<OverlappingHost> overlappingHostList,
-            final DeleteOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHostList", overlappingHostList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(overlappingHostList, option);
+    protected int[] doBatchDelete(final List<OverlappingHost> ls,
+            final DeleteOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHostList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1131,29 +1127,24 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param overlappingHostList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDeleteNonstrict(
             final List<OverlappingHost> overlappingHostList) {
         return doBatchDeleteNonstrict(overlappingHostList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(
-            final List<OverlappingHost> overlappingHostList,
-            final DeleteOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHostList", overlappingHostList);
-        prepareDeleteOption(option);
-        return delegateBatchDeleteNonstrict(overlappingHostList, option);
+    protected int[] doBatchDeleteNonstrict(final List<OverlappingHost> ls,
+            final DeleteOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHostList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDeleteNonstrict(ls, op);
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDeleteNonstrict(downcast(ls));
-        } else {
-            return varyingBatchDeleteNonstrict(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
     }
 
     // ===================================================================================
@@ -1162,7 +1153,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * overlappingHostBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;OverlappingHost, OverlappingHostCB&gt;() {
+     * overlappingHostBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;OverlappingHost, OverlappingHostCB&gt;() {
      *     public ConditionBean setup(overlappingHost entity, OverlappingHostCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -1175,7 +1166,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -1191,18 +1182,17 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<OverlappingHost, OverlappingHostCB> setupper,
-            final InsertOption<OverlappingHostCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final OverlappingHost entity = new OverlappingHost();
-        final OverlappingHostCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<OverlappingHost, OverlappingHostCB> sp,
+            final InsertOption<OverlappingHostCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final OverlappingHost et = newEntity();
+        final OverlappingHostCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected OverlappingHostCB createCBForQueryInsert() {
-        final OverlappingHostCB cb = newMyConditionBean();
+        final OverlappingHostCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -1210,12 +1200,8 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1228,42 +1214,36 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//overlappingHost.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//overlappingHost.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//overlappingHost.setVersionNo(value);</span>
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
-     * overlappingHostBhv.<span style="color: #FD4747">queryUpdate</span>(overlappingHost, cb);
+     * overlappingHostBhv.<span style="color: #DD4747">queryUpdate</span>(overlappingHost, cb);
      * </pre>
      * @param overlappingHost The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final OverlappingHost overlappingHost,
             final OverlappingHostCB cb) {
         return doQueryUpdate(overlappingHost, cb, null);
     }
 
-    protected int doQueryUpdate(final OverlappingHost overlappingHost,
-            final OverlappingHostCB cb,
-            final UpdateOption<OverlappingHostCB> option) {
-        assertObjectNotNull("overlappingHost", overlappingHost);
+    protected int doQueryUpdate(final OverlappingHost et,
+            final OverlappingHostCB cb, final UpdateOption<OverlappingHostCB> op) {
+        assertObjectNotNull("overlappingHost", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                overlappingHost, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (OverlappingHostCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity), (OverlappingHostCB) cb,
-                    downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1271,32 +1251,28 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <pre>
      * OverlappingHostCB cb = new OverlappingHostCB();
      * cb.query().setFoo...(value);
-     * overlappingHostBhv.<span style="color: #FD4747">queryDelete</span>(overlappingHost, cb);
+     * overlappingHostBhv.<span style="color: #DD4747">queryDelete</span>(overlappingHost, cb);
      * </pre>
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final OverlappingHostCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final OverlappingHostCB cb,
-            final DeleteOption<OverlappingHostCB> option) {
+            final DeleteOption<OverlappingHostCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((OverlappingHostCB) cb);
-        } else {
-            return varyingQueryDelete((OverlappingHostCB) cb, downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1317,12 +1293,12 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * InsertOption<OverlappingHostCB> option = new InsertOption<OverlappingHostCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * overlappingHostBhv.<span style="color: #FD4747">varyingInsert</span>(overlappingHost, option);
+     * overlappingHostBhv.<span style="color: #DD4747">varyingInsert</span>(overlappingHost, option);
      * ... = overlappingHost.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param overlappingHost The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param overlappingHost The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final OverlappingHost overlappingHost,
             final InsertOption<OverlappingHostCB> option) {
@@ -1338,26 +1314,26 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * OverlappingHost overlappingHost = new OverlappingHost();
      * overlappingHost.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * overlappingHost.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * overlappingHost.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * overlappingHost.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;OverlappingHostCB&gt; option = new UpdateOption&lt;OverlappingHostCB&gt;();
      *     option.self(new SpecifyQuery&lt;OverlappingHostCB&gt;() {
      *         public void specify(OverlappingHostCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     overlappingHostBhv.<span style="color: #FD4747">varyingUpdate</span>(overlappingHost, option);
+     *     overlappingHostBhv.<span style="color: #DD4747">varyingUpdate</span>(overlappingHost, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param overlappingHost The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param overlappingHost The entity of update. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final OverlappingHost overlappingHost,
             final UpdateOption<OverlappingHostCB> option) {
@@ -1374,22 +1350,22 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * OverlappingHost overlappingHost = new OverlappingHost();
      * overlappingHost.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * overlappingHost.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//overlappingHost.setVersionNo(value);</span>
      * UpdateOption&lt;OverlappingHostCB&gt; option = new UpdateOption&lt;OverlappingHostCB&gt;();
      * option.self(new SpecifyQuery&lt;OverlappingHostCB&gt;() {
      *     public void specify(OverlappingHostCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * overlappingHostBhv.<span style="color: #FD4747">varyingUpdateNonstrict</span>(overlappingHost, option);
+     * overlappingHostBhv.<span style="color: #DD4747">varyingUpdateNonstrict</span>(overlappingHost, option);
      * </pre>
-     * @param overlappingHost The entity of update target. (NotNull, PrimaryKeyNotNull)
+     * @param overlappingHost The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdateNonstrict(final OverlappingHost overlappingHost,
             final UpdateOption<OverlappingHostCB> option) {
@@ -1400,30 +1376,30 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param overlappingHost The entity of insert or update target. (NotNull)
+     * @param overlappingHost The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(final OverlappingHost overlappingHost,
             final InsertOption<OverlappingHostCB> insertOption,
             final UpdateOption<OverlappingHostCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(overlappingHost, insertOption, updateOption);
+        doInsertOrUpdate(overlappingHost, insertOption, updateOption);
     }
 
     /**
      * Insert or update the entity with varying requests non-strictly. (NonExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdateNonstrict(entity).
-     * @param overlappingHost The entity of insert or update target. (NotNull)
+     * @param overlappingHost The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdateNonstrict(
             final OverlappingHost overlappingHost,
@@ -1431,17 +1407,17 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
             final UpdateOption<OverlappingHostCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdateNonstrict(overlappingHost, insertOption, updateOption);
+        doInsertOrUpdateNonstrict(overlappingHost, insertOption, updateOption);
     }
 
     /**
      * Delete the entity with varying requests. (ZeroUpdateException, ExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param overlappingHost The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param overlappingHost The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyUpdatedException When the entity has already been updated.
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyUpdatedException When the entity has already been updated.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final OverlappingHost overlappingHost,
             final DeleteOption<OverlappingHostCB> option) {
@@ -1453,10 +1429,10 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * Delete the entity with varying requests non-strictly. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as deleteNonstrict(entity).
-     * @param overlappingHost The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param overlappingHost The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDeleteNonstrict(final OverlappingHost overlappingHost,
             final DeleteOption<OverlappingHostCB> option) {
@@ -1574,7 +1550,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//overlappingHost.setPK...(value);</span>
      * overlappingHost.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//overlappingHost.setVersionNo(value);</span>
      * OverlappingHostCB cb = new OverlappingHostCB();
@@ -1582,16 +1558,16 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;OverlappingHostCB&gt; option = new UpdateOption&lt;OverlappingHostCB&gt;();
      * option.self(new SpecifyQuery&lt;OverlappingHostCB&gt;() {
      *     public void specify(OverlappingHostCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * overlappingHostBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(overlappingHost, cb, option);
+     * overlappingHostBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(overlappingHost, cb, option);
      * </pre>
      * @param overlappingHost The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final OverlappingHost overlappingHost,
             final OverlappingHostCB cb,
@@ -1607,7 +1583,7 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of OverlappingHost. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final OverlappingHostCB cb,
             final DeleteOption<OverlappingHostCB> option) {
@@ -1654,170 +1630,22 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final OverlappingHostCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
-    }
-
-    protected int delegateSelectCountPlainly(final OverlappingHostCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends OverlappingHost> void delegateSelectCursor(
-            final OverlappingHostCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends OverlappingHost> List<ENTITY> delegateSelectList(
-            final OverlappingHostCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final OverlappingHost e,
-            final InsertOption<OverlappingHostCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final OverlappingHost e,
-            final UpdateOption<OverlappingHostCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateEntityCommand(e, op));
-    }
-
-    protected int delegateUpdateNonstrict(final OverlappingHost e,
-            final UpdateOption<OverlappingHostCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final OverlappingHost e,
-            final DeleteOption<OverlappingHostCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteEntityCommand(e, op));
-    }
-
-    protected int delegateDeleteNonstrict(final OverlappingHost e,
-            final DeleteOption<OverlappingHostCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<OverlappingHost> ls,
-            final InsertOption<OverlappingHostCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<OverlappingHost> ls,
-            final UpdateOption<OverlappingHostCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(
-            final List<OverlappingHost> ls,
-            final UpdateOption<OverlappingHostCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<OverlappingHost> ls,
-            final DeleteOption<OverlappingHostCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteCommand(
-                processBatchInternally(ls, op, false), op));
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(
-            final List<OverlappingHost> ls,
-            final DeleteOption<OverlappingHostCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final OverlappingHost e,
-            final OverlappingHostCB inCB, final ConditionBean resCB,
-            final InsertOption<OverlappingHostCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final OverlappingHost e,
-            final OverlappingHostCB cb, final UpdateOption<OverlappingHostCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final OverlappingHostCB cb,
-            final DeleteOption<OverlappingHostCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
     //                                                                Optimistic Lock Info
     //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return !(downcast(entity).getVersionNo() + "").equals("null");// For primitive type
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
+    protected boolean hasVersionNoValue(final Entity et) {
+        return downcast(et).getVersionNo() != null;
     }
 
     // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected OverlappingHost downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, OverlappingHost.class);
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<OverlappingHost> typeOfSelectedEntity() {
+        return OverlappingHost.class;
+    }
+
+    protected OverlappingHost downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, OverlappingHost.class);
     }
 
     protected OverlappingHostCB downcast(final ConditionBean cb) {
@@ -1825,32 +1653,31 @@ public abstract class BsOverlappingHostBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<OverlappingHost> downcast(
-            final List<? extends Entity> entityList) {
-        return (List<OverlappingHost>) entityList;
+    protected List<OverlappingHost> downcast(final List<? extends Entity> ls) {
+        return (List<OverlappingHost>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<OverlappingHostCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<OverlappingHostCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<OverlappingHostCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<OverlappingHostCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<OverlappingHostCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<OverlappingHostCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<OverlappingHostCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<OverlappingHostCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<OverlappingHostCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<OverlappingHost, OverlappingHostCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<OverlappingHost, OverlappingHostCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<OverlappingHost, OverlappingHostCB>) sp;
     }
 }

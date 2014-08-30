@@ -26,8 +26,6 @@ import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
 import jp.sf.fess.db.cbean.cq.RoleTypeCQ;
 import jp.sf.fess.db.cbean.cq.WebConfigToRoleTypeMappingCQ;
 import jp.sf.fess.db.cbean.cq.WebCrawlingConfigCQ;
-import jp.sf.fess.db.cbean.nss.RoleTypeNss;
-import jp.sf.fess.db.cbean.nss.WebCrawlingConfigNss;
 
 import org.seasar.dbflute.cbean.AbstractConditionBean;
 import org.seasar.dbflute.cbean.AndQuery;
@@ -112,6 +110,22 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                 PrimaryKey Handling
     //                                                                 ===================
+    /**
+     * Accept the query condition of primary key as equal.
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     * @return this. (NotNull)
+     */
+    public WebConfigToRoleTypeMappingCB acceptPK(final Long id) {
+        assertObjectNotNull("id", id);
+        final BsWebConfigToRoleTypeMappingCB cb = this;
+        cb.query().setId_Equal(id);
+        return (WebConfigToRoleTypeMappingCB) this;
+    }
+
+    /**
+     * Accept the query condition of primary key as equal. (old style)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
+     */
     public void acceptPrimaryKey(final Long id) {
         assertObjectNotNull("id", id);
         final BsWebConfigToRoleTypeMappingCB cb = this;
@@ -160,7 +174,7 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
      * cb.query().setBirthdate_IsNull();    <span style="color: #3F7E5E">// is null</span>
      * cb.query().setBirthdate_IsNotNull(); <span style="color: #3F7E5E">// is not null</span>
      *
-     * <span style="color: #3F7E5E">// ExistsReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// ExistsReferrer: (correlated sub-query)</span>
      * <span style="color: #3F7E5E">// {where exists (select PURCHASE_ID from PURCHASE where ...)}</span>
      * cb.query().existsPurchaseList(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
@@ -178,7 +192,7 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
      * });
      * cb.query().notInScopeMemberStatus...
      *
-     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (co-related sub-query)</span>
+     * <span style="color: #3F7E5E">// (Query)DerivedReferrer: (correlated sub-query)</span>
      * cb.query().derivedPurchaseList().max(new SubQuery&lt;PurchaseCB&gt;() {
      *     public void query(PurchaseCB subCB) {
      *         subCB.specify().columnPurchasePrice(); <span style="color: #3F7E5E">// derived column for function</span>
@@ -253,7 +267,7 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">union</span>(new UnionQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">union</span>(new UnionQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void query(WebConfigToRoleTypeMappingCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -265,7 +279,12 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
         final WebConfigToRoleTypeMappingCB cb = new WebConfigToRoleTypeMappingCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final WebConfigToRoleTypeMappingCQ cq = cb.query();
         query().xsetUnionQuery(cq);
@@ -276,7 +295,7 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
      * You don't need to call SetupSelect in union-query,
      * because it inherits calls before. (Don't call SetupSelect after here)
      * <pre>
-     * cb.query().<span style="color: #FD4747">unionAll</span>(new UnionQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * cb.query().<span style="color: #DD4747">unionAll</span>(new UnionQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void query(WebConfigToRoleTypeMappingCB unionCB) {
      *         unionCB.query().setXxx...
      *     }
@@ -289,7 +308,12 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
         final WebConfigToRoleTypeMappingCB cb = new WebConfigToRoleTypeMappingCB();
         cb.xsetupForUnion(this);
         xsyncUQ(cb);
-        unionQuery.query(cb);
+        try {
+            lock();
+            unionQuery.query(cb);
+        } finally {
+            unlock();
+        }
         xsaveUCB(cb);
         final WebConfigToRoleTypeMappingCQ cq = cb.query();
         query().xsetUnionAllQuery(cq);
@@ -298,67 +322,19 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
     // ===================================================================================
     //                                                                         SetupSelect
     //                                                                         ===========
-    protected WebCrawlingConfigNss _nssWebCrawlingConfig;
-
-    public WebCrawlingConfigNss getNssWebCrawlingConfig() {
-        if (_nssWebCrawlingConfig == null) {
-            _nssWebCrawlingConfig = new WebCrawlingConfigNss(null);
-        }
-        return _nssWebCrawlingConfig;
-    }
-
-    /**
-     * Set up relation columns to select clause. <br />
-     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
-     * <pre>
-     * WebConfigToRoleTypeMappingCB cb = new WebConfigToRoleTypeMappingCB();
-     * cb.<span style="color: #FD4747">setupSelect_WebCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
-     * cb.query().setFoo...(value);
-     * WebConfigToRoleTypeMapping webConfigToRoleTypeMapping = webConfigToRoleTypeMappingBhv.selectEntityWithDeletedCheck(cb);
-     * ... = webConfigToRoleTypeMapping.<span style="color: #FD4747">getWebCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
-     * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
-     */
-    public WebCrawlingConfigNss setupSelect_WebCrawlingConfig() {
-        if (hasSpecifiedColumn()) { // if reverse call
-            specify().columnWebConfigId();
-        }
-        doSetupSelect(new SsCall() {
-            @Override
-            public ConditionQuery qf() {
-                return query().queryWebCrawlingConfig();
-            }
-        });
-        if (_nssWebCrawlingConfig == null
-                || !_nssWebCrawlingConfig.hasConditionQuery()) {
-            _nssWebCrawlingConfig = new WebCrawlingConfigNss(query()
-                    .queryWebCrawlingConfig());
-        }
-        return _nssWebCrawlingConfig;
-    }
-
-    protected RoleTypeNss _nssRoleType;
-
-    public RoleTypeNss getNssRoleType() {
-        if (_nssRoleType == null) {
-            _nssRoleType = new RoleTypeNss(null);
-        }
-        return _nssRoleType;
-    }
-
     /**
      * Set up relation columns to select clause. <br />
      * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
      * <pre>
      * WebConfigToRoleTypeMappingCB cb = new WebConfigToRoleTypeMappingCB();
-     * cb.<span style="color: #FD4747">setupSelect_RoleType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.<span style="color: #DD4747">setupSelect_RoleType()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
      * cb.query().setFoo...(value);
      * WebConfigToRoleTypeMapping webConfigToRoleTypeMapping = webConfigToRoleTypeMappingBhv.selectEntityWithDeletedCheck(cb);
-     * ... = webConfigToRoleTypeMapping.<span style="color: #FD4747">getRoleType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * ... = webConfigToRoleTypeMapping.<span style="color: #DD4747">getRoleType()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
      * </pre>
-     * @return The set-upper of nested relation. {setupSelect...().with[nested-relation]} (NotNull)
      */
-    public RoleTypeNss setupSelect_RoleType() {
+    public void setupSelect_RoleType() {
+        assertSetupSelectPurpose("roleType");
         if (hasSpecifiedColumn()) { // if reverse call
             specify().columnRoleTypeId();
         }
@@ -368,10 +344,30 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
                 return query().queryRoleType();
             }
         });
-        if (_nssRoleType == null || !_nssRoleType.hasConditionQuery()) {
-            _nssRoleType = new RoleTypeNss(query().queryRoleType());
+    }
+
+    /**
+     * Set up relation columns to select clause. <br />
+     * WEB_CRAWLING_CONFIG by my WEB_CONFIG_ID, named 'webCrawlingConfig'.
+     * <pre>
+     * WebConfigToRoleTypeMappingCB cb = new WebConfigToRoleTypeMappingCB();
+     * cb.<span style="color: #DD4747">setupSelect_WebCrawlingConfig()</span>; <span style="color: #3F7E5E">// ...().with[nested-relation]()</span>
+     * cb.query().setFoo...(value);
+     * WebConfigToRoleTypeMapping webConfigToRoleTypeMapping = webConfigToRoleTypeMappingBhv.selectEntityWithDeletedCheck(cb);
+     * ... = webConfigToRoleTypeMapping.<span style="color: #DD4747">getWebCrawlingConfig()</span>; <span style="color: #3F7E5E">// you can get by using SetupSelect</span>
+     * </pre>
+     */
+    public void setupSelect_WebCrawlingConfig() {
+        assertSetupSelectPurpose("webCrawlingConfig");
+        if (hasSpecifiedColumn()) { // if reverse call
+            specify().columnWebConfigId();
         }
-        return _nssRoleType;
+        doSetupSelect(new SsCall() {
+            @Override
+            public ConditionQuery qf() {
+                return query().queryWebCrawlingConfig();
+            }
+        });
     }
 
     // [DBFlute-0.7.4]
@@ -428,9 +424,9 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
 
     public static class HpSpecification extends
             HpAbstractSpecification<WebConfigToRoleTypeMappingCQ> {
-        protected WebCrawlingConfigCB.HpSpecification _webCrawlingConfig;
-
         protected RoleTypeCB.HpSpecification _roleType;
+
+        protected WebCrawlingConfigCB.HpSpecification _webCrawlingConfig;
 
         public HpSpecification(final ConditionBean baseCB,
                 final HpSpQyCall<WebConfigToRoleTypeMappingCQ> qyCall,
@@ -475,19 +471,60 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
         @Override
         protected void doSpecifyRequiredColumn() {
             columnId(); // PK
-            if (qyCall().qy().hasConditionQueryWebCrawlingConfig()
-                    || qyCall().qy().xgetReferrerQuery() instanceof WebCrawlingConfigCQ) {
-                columnWebConfigId(); // FK or one-to-one referrer
-            }
             if (qyCall().qy().hasConditionQueryRoleType()
                     || qyCall().qy().xgetReferrerQuery() instanceof RoleTypeCQ) {
                 columnRoleTypeId(); // FK or one-to-one referrer
+            }
+            if (qyCall().qy().hasConditionQueryWebCrawlingConfig()
+                    || qyCall().qy().xgetReferrerQuery() instanceof WebCrawlingConfigCQ) {
+                columnWebConfigId(); // FK or one-to-one referrer
             }
         }
 
         @Override
         protected String getTableDbName() {
             return "WEB_CONFIG_TO_ROLE_TYPE_MAPPING";
+        }
+
+        /**
+         * Prepare to specify functions about relation table. <br />
+         * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
+         * @return The instance for specification for relation table to specify. (NotNull)
+         */
+        public RoleTypeCB.HpSpecification specifyRoleType() {
+            assertRelation("roleType");
+            if (_roleType == null) {
+                _roleType = new RoleTypeCB.HpSpecification(_baseCB,
+                        new HpSpQyCall<RoleTypeCQ>() {
+                            @Override
+                            public boolean has() {
+                                return _qyCall.has()
+                                        && _qyCall.qy()
+                                                .hasConditionQueryRoleType();
+                            }
+
+                            @Override
+                            public RoleTypeCQ qy() {
+                                return _qyCall.qy().queryRoleType();
+                            }
+                        }, _purpose, _dbmetaProvider);
+                if (xhasSyncQyCall()) { // inherits it
+                    _roleType.xsetSyncQyCall(new HpSpQyCall<RoleTypeCQ>() {
+                        @Override
+                        public boolean has() {
+                            return xsyncQyCall().has()
+                                    && xsyncQyCall().qy()
+                                            .hasConditionQueryRoleType();
+                        }
+
+                        @Override
+                        public RoleTypeCQ qy() {
+                            return xsyncQyCall().qy().queryRoleType();
+                        }
+                    });
+                }
+            }
+            return _roleType;
         }
 
         /**
@@ -536,47 +573,6 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
         }
 
         /**
-         * Prepare to specify functions about relation table. <br />
-         * ROLE_TYPE by my ROLE_TYPE_ID, named 'roleType'.
-         * @return The instance for specification for relation table to specify. (NotNull)
-         */
-        public RoleTypeCB.HpSpecification specifyRoleType() {
-            assertRelation("roleType");
-            if (_roleType == null) {
-                _roleType = new RoleTypeCB.HpSpecification(_baseCB,
-                        new HpSpQyCall<RoleTypeCQ>() {
-                            @Override
-                            public boolean has() {
-                                return _qyCall.has()
-                                        && _qyCall.qy()
-                                                .hasConditionQueryRoleType();
-                            }
-
-                            @Override
-                            public RoleTypeCQ qy() {
-                                return _qyCall.qy().queryRoleType();
-                            }
-                        }, _purpose, _dbmetaProvider);
-                if (xhasSyncQyCall()) { // inherits it
-                    _roleType.xsetSyncQyCall(new HpSpQyCall<RoleTypeCQ>() {
-                        @Override
-                        public boolean has() {
-                            return xsyncQyCall().has()
-                                    && xsyncQyCall().qy()
-                                            .hasConditionQueryRoleType();
-                        }
-
-                        @Override
-                        public RoleTypeCQ qy() {
-                            return xsyncQyCall().qy().queryRoleType();
-                        }
-                    });
-                }
-            }
-            return _roleType;
-        }
-
-        /**
          * Prepare for (Specify)MyselfDerived (SubQuery).
          * @return The object to set up a function for myself table. (NotNull)
          */
@@ -591,13 +587,11 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
                     new HpSDRSetupper<WebConfigToRoleTypeMappingCB, WebConfigToRoleTypeMappingCQ>() {
                         @Override
                         public void setup(
-                                final String function,
-                                final SubQuery<WebConfigToRoleTypeMappingCB> subQuery,
+                                final String fn,
+                                final SubQuery<WebConfigToRoleTypeMappingCB> sq,
                                 final WebConfigToRoleTypeMappingCQ cq,
-                                final String aliasName,
-                                final DerivedReferrerOption option) {
-                            cq.xsmyselfDerive(function, subQuery, aliasName,
-                                    option);
+                                final String al, final DerivedReferrerOption op) {
+                            cq.xsmyselfDerive(fn, sq, al, op);
                         }
                     }, _dbmetaProvider);
         }
@@ -605,19 +599,19 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.5.3]
     // ===================================================================================
-    //                                                                         ColumnQuery
-    //                                                                         ===========
+    //                                                                        Column Query
+    //                                                                        ============
     /**
      * Set up column-query. {column1 = column2}
      * <pre>
      * <span style="color: #3F7E5E">// where FOO &lt; BAR</span>
-     * cb.<span style="color: #FD4747">columnQuery</span>(new SpecifyQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">columnQuery</span>(new SpecifyQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void query(WebConfigToRoleTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
+     *         cb.specify().<span style="color: #DD4747">columnFoo()</span>; <span style="color: #3F7E5E">// left column</span>
      *     }
      * }).lessThan(new SpecifyQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void query(WebConfigToRoleTypeMappingCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
+     *         cb.specify().<span style="color: #DD4747">columnBar()</span>; <span style="color: #3F7E5E">// right column</span>
      *     }
      * }); <span style="color: #3F7E5E">// you can calculate for right column like '}).plus(3);'</span>
      * </pre>
@@ -666,14 +660,14 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
 
     // [DBFlute-0.9.6.3]
     // ===================================================================================
-    //                                                                        OrScopeQuery
-    //                                                                        ============
+    //                                                                       OrScope Query
+    //                                                                       =============
     /**
      * Set up the query for or-scope. <br />
      * (Same-column-and-same-condition-key conditions are allowed in or-scope)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or BAR = '...')</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void query(WebConfigToRoleTypeMappingCB orCB) {
      *         orCB.query().setFOO_Equal...
      *         orCB.query().setBAR_Equal...
@@ -686,15 +680,20 @@ public class BsWebConfigToRoleTypeMappingCB extends AbstractConditionBean {
         xorSQ((WebConfigToRoleTypeMappingCB) this, orQuery);
     }
 
+    @Override
+    protected HpCBPurpose xhandleOrSQPurposeChange() {
+        return null; // means no check
+    }
+
     /**
      * Set up the and-part of or-scope. <br />
      * (However nested or-scope query and as-or-split of like-search in and-part are unsupported)
      * <pre>
      * <span style="color: #3F7E5E">// where (FOO = '...' or (BAR = '...' and QUX = '...'))</span>
-     * cb.<span style="color: #FD4747">orScopeQuery</span>(new OrQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     * cb.<span style="color: #DD4747">orScopeQuery</span>(new OrQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *     public void query(WebConfigToRoleTypeMappingCB orCB) {
      *         orCB.query().setFOO_Equal...
-     *         orCB.<span style="color: #FD4747">orScopeQueryAndPart</span>(new AndQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
+     *         orCB.<span style="color: #DD4747">orScopeQueryAndPart</span>(new AndQuery&lt;WebConfigToRoleTypeMappingCB&gt;() {
      *             public void query(WebConfigToRoleTypeMappingCB andCB) {
      *                 andCB.query().setBar_...
      *                 andCB.query().setQux_...

@@ -18,6 +18,7 @@ package jp.sf.fess.db.bsbhv;
 
 import java.util.List;
 
+import jp.sf.fess.db.bsbhv.loader.LoaderOfFailureUrl;
 import jp.sf.fess.db.bsentity.dbmeta.FailureUrlDbm;
 import jp.sf.fess.db.cbean.FailureUrlCB;
 import jp.sf.fess.db.exbhv.FailureUrlBhv;
@@ -28,13 +29,24 @@ import org.seasar.dbflute.bhv.AbstractBehaviorWritable;
 import org.seasar.dbflute.bhv.DeleteOption;
 import org.seasar.dbflute.bhv.InsertOption;
 import org.seasar.dbflute.bhv.QueryInsertSetupper;
+import org.seasar.dbflute.bhv.ReferrerLoaderHandler;
 import org.seasar.dbflute.bhv.UpdateOption;
 import org.seasar.dbflute.cbean.ConditionBean;
 import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
+import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
+import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
 import org.seasar.dbflute.dbmeta.DBMeta;
+import org.seasar.dbflute.exception.DangerousResultSizeException;
+import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
+import org.seasar.dbflute.exception.EntityAlreadyExistsException;
+import org.seasar.dbflute.exception.EntityDuplicatedException;
+import org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException;
+import org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException;
+import org.seasar.dbflute.exception.SelectEntityConditionNotFoundException;
+import org.seasar.dbflute.optional.OptionalEntity;
 import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
 
 /**
@@ -89,7 +101,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
-    /** @return The instance of DBMeta. (NotNull) */
+    /** {@inheritDoc} */
     @Override
     public DBMeta getDBMeta() {
         return FailureUrlDbm.getInstance();
@@ -105,14 +117,14 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     //                                                                        ============
     /** {@inheritDoc} */
     @Override
-    public Entity newEntity() {
-        return newMyEntity();
+    public FailureUrl newEntity() {
+        return new FailureUrl();
     }
 
     /** {@inheritDoc} */
     @Override
-    public ConditionBean newConditionBean() {
-        return newMyConditionBean();
+    public FailureUrlCB newConditionBean() {
+        return new FailureUrlCB();
     }
 
     /** @return The instance of new entity as my table type. (NotNull) */
@@ -134,12 +146,16 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <pre>
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
-     * int count = failureUrlBhv.<span style="color: #FD4747">selectCount</span>(cb);
+     * int count = failureUrlBhv.<span style="color: #DD4747">selectCount</span>(cb);
      * </pre>
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The count for the condition. (NotMinus)
      */
     public int selectCount(final FailureUrlCB cb) {
+        return facadeSelectCount(cb);
+    }
+
+    protected int facadeSelectCount(final FailureUrlCB cb) {
         return doSelectCountUniquely(cb);
     }
 
@@ -155,19 +171,21 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int doReadCount(final ConditionBean cb) {
-        return selectCount(downcast(cb));
+        return facadeSelectCount(downcast(cb));
     }
 
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
     /**
-     * Select the entity by the condition-bean.
+     * Select the entity by the condition-bean. #beforejava8 <br />
+     * <span style="color: #AD4747; font-size: 120%">The return might be null if no data, so you should have null check.</span> <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, use selectEntityWithDeletedCheck().</span>
      * <pre>
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
-     * FailureUrl failureUrl = failureUrlBhv.<span style="color: #FD4747">selectEntity</span>(cb);
-     * if (failureUrl != null) {
+     * FailureUrl failureUrl = failureUrlBhv.<span style="color: #DD4747">selectEntity</span>(cb);
+     * if (failureUrl != null) { <span style="color: #3F7E5E">// null check</span>
      *     ... = failureUrl.get...();
      * } else {
      *     ...
@@ -175,109 +193,113 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The entity selected by the condition. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FailureUrl selectEntity(final FailureUrlCB cb) {
-        return doSelectEntity(cb, FailureUrl.class);
+        return facadeSelectEntity(cb);
+    }
+
+    protected FailureUrl facadeSelectEntity(final FailureUrlCB cb) {
+        return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FailureUrl> ENTITY doSelectEntity(
-            final FailureUrlCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        return helpSelectEntityInternally(cb, entityType,
-                new InternalSelectEntityCallback<ENTITY, FailureUrlCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FailureUrlCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final FailureUrlCB cb, final Class<ENTITY> tp) {
+        return helpSelectEntityInternally(cb, tp);
+    }
+
+    protected <ENTITY extends FailureUrl> OptionalEntity<ENTITY> doSelectOptionalEntity(
+            final FailureUrlCB cb, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
     protected Entity doReadEntity(final ConditionBean cb) {
-        return selectEntity(downcast(cb));
+        return facadeSelectEntity(downcast(cb));
     }
 
     /**
-     * Select the entity by the condition-bean with deleted check.
+     * Select the entity by the condition-bean with deleted check. <br />
+     * <span style="color: #AD4747; font-size: 120%">If the data always exists as your business rule, this method is good.</span>
      * <pre>
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
-     * FailureUrl failureUrl = failureUrlBhv.<span style="color: #FD4747">selectEntityWithDeletedCheck</span>(cb);
+     * FailureUrl failureUrl = failureUrlBhv.<span style="color: #DD4747">selectEntityWithDeletedCheck</span>(cb);
      * ... = failureUrl.get...(); <span style="color: #3F7E5E">// the entity always be not null</span>
      * </pre>
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The entity selected by the condition. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FailureUrl selectEntityWithDeletedCheck(final FailureUrlCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, FailureUrl.class);
+        return facadeSelectEntityWithDeletedCheck(cb);
+    }
+
+    protected FailureUrl facadeSelectEntityWithDeletedCheck(
+            final FailureUrlCB cb) {
+        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FailureUrl> ENTITY doSelectEntityWithDeletedCheck(
-            final FailureUrlCB cb, final Class<ENTITY> entityType) {
+            final FailureUrlCB cb, final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        return helpSelectEntityWithDeletedCheckInternally(
-                cb,
-                entityType,
-                new InternalSelectEntityWithDeletedCheckCallback<ENTITY, FailureUrlCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FailureUrlCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityType", tp);
+        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
     }
 
     @Override
     protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return selectEntityWithDeletedCheck(downcast(cb));
+        return facadeSelectEntityWithDeletedCheck(downcast(cb));
     }
 
     /**
      * Select the entity by the primary-key value.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NullAllowed: if no data, it returns null)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FailureUrl selectByPKValue(final Long id) {
-        return doSelectByPKValue(id, FailureUrl.class);
+        return facadeSelectByPKValue(id);
     }
 
-    protected <ENTITY extends FailureUrl> ENTITY doSelectByPKValue(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntity(buildPKCB(id), entityType);
+    protected FailureUrl facadeSelectByPKValue(final Long id) {
+        return doSelectByPK(id, typeOfSelectedEntity());
+    }
+
+    protected <ENTITY extends FailureUrl> ENTITY doSelectByPK(final Long id,
+            final Class<ENTITY> tp) {
+        return doSelectEntity(xprepareCBAsPK(id), tp);
+    }
+
+    protected <ENTITY extends FailureUrl> OptionalEntity<ENTITY> doSelectOptionalByPK(
+            final Long id, final Class<ENTITY> tp) {
+        return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     /**
      * Select the entity by the primary-key value with deleted check.
-     * @param id The one of primary key. (NotNull)
+     * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
      * @return The entity selected by the PK. (NotNull: if no data, throws exception)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception SelectEntityConditionNotFoundException When the condition for selecting an entity is not found.
      */
     public FailureUrl selectByPKValueWithDeletedCheck(final Long id) {
-        return doSelectByPKValueWithDeletedCheck(id, FailureUrl.class);
+        return doSelectByPKWithDeletedCheck(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FailureUrl> ENTITY doSelectByPKValueWithDeletedCheck(
-            final Long id, final Class<ENTITY> entityType) {
-        return doSelectEntityWithDeletedCheck(buildPKCB(id), entityType);
+    protected <ENTITY extends FailureUrl> ENTITY doSelectByPKWithDeletedCheck(
+            final Long id, final Class<ENTITY> tp) {
+        return doSelectEntityWithDeletedCheck(xprepareCBAsPK(id), tp);
     }
 
-    private FailureUrlCB buildPKCB(final Long id) {
+    protected FailureUrlCB xprepareCBAsPK(final Long id) {
         assertObjectNotNull("id", id);
-        final FailureUrlCB cb = newMyConditionBean();
-        cb.query().setId_Equal(id);
-        return cb;
+        return newConditionBean().acceptPK(id);
     }
 
     // ===================================================================================
@@ -289,38 +311,31 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * ListResultBean&lt;FailureUrl&gt; failureUrlList = failureUrlBhv.<span style="color: #FD4747">selectList</span>(cb);
+     * ListResultBean&lt;FailureUrl&gt; failureUrlList = failureUrlBhv.<span style="color: #DD4747">selectList</span>(cb);
      * for (FailureUrl failureUrl : failureUrlList) {
      *     ... = failureUrl.get...();
      * }
      * </pre>
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The result bean of selected list. (NotNull: if no data, returns empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public ListResultBean<FailureUrl> selectList(final FailureUrlCB cb) {
-        return doSelectList(cb, FailureUrl.class);
+        return facadeSelectList(cb);
+    }
+
+    protected ListResultBean<FailureUrl> facadeSelectList(final FailureUrlCB cb) {
+        return doSelectList(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FailureUrl> ListResultBean<ENTITY> doSelectList(
-            final FailureUrlCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        return helpSelectListInternally(cb, entityType,
-                new InternalSelectListCallback<ENTITY, FailureUrlCB>() {
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FailureUrlCB cb,
-                            final Class<ENTITY> entityType) {
-                        return delegateSelectList(cb, entityType);
-                    }
-                });
+            final FailureUrlCB cb, final Class<ENTITY> tp) {
+        return helpSelectListInternally(cb, tp);
     }
 
     @Override
     protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return selectList(downcast(cb));
+        return facadeSelectList(downcast(cb));
     }
 
     // ===================================================================================
@@ -333,8 +348,8 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
      * cb.query().addOrderBy_Bar...();
-     * cb.<span style="color: #FD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
-     * PagingResultBean&lt;FailureUrl&gt; page = failureUrlBhv.<span style="color: #FD4747">selectPage</span>(cb);
+     * cb.<span style="color: #DD4747">paging</span>(20, 3); <span style="color: #3F7E5E">// 20 records per a page and current page number is 3</span>
+     * PagingResultBean&lt;FailureUrl&gt; page = failureUrlBhv.<span style="color: #DD4747">selectPage</span>(cb);
      * int allRecordCount = page.getAllRecordCount();
      * int allPageCount = page.getAllPageCount();
      * boolean isExistPrePage = page.isExistPrePage();
@@ -346,36 +361,26 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * </pre>
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The result bean of selected page. (NotNull: if no data, returns bean as empty list)
-     * @exception org.seasar.dbflute.exception.DangerousResultSizeException When the result size is over the specified safety size.
+     * @exception DangerousResultSizeException When the result size is over the specified safety size.
      */
     public PagingResultBean<FailureUrl> selectPage(final FailureUrlCB cb) {
-        return doSelectPage(cb, FailureUrl.class);
+        return facadeSelectPage(cb);
+    }
+
+    protected PagingResultBean<FailureUrl> facadeSelectPage(
+            final FailureUrlCB cb) {
+        return doSelectPage(cb, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FailureUrl> PagingResultBean<ENTITY> doSelectPage(
-            final FailureUrlCB cb, final Class<ENTITY> entityType) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", entityType);
-        return helpSelectPageInternally(cb, entityType,
-                new InternalSelectPageCallback<ENTITY, FailureUrlCB>() {
-                    @Override
-                    public int callbackSelectCount(final FailureUrlCB cb) {
-                        return doSelectCountPlainly(cb);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FailureUrlCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+            final FailureUrlCB cb, final Class<ENTITY> tp) {
+        return helpSelectPageInternally(cb, tp);
     }
 
     @Override
     protected PagingResultBean<? extends Entity> doReadPage(
             final ConditionBean cb) {
-        return selectPage(downcast(cb));
+        return facadeSelectPage(downcast(cb));
     }
 
     // ===================================================================================
@@ -386,7 +391,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <pre>
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
-     * failureUrlBhv.<span style="color: #FD4747">selectCursor</span>(cb, new EntityRowHandler&lt;FailureUrl&gt;() {
+     * failureUrlBhv.<span style="color: #DD4747">selectCursor</span>(cb, new EntityRowHandler&lt;FailureUrl&gt;() {
      *     public void handle(FailureUrl entity) {
      *         ... = entity.getFoo...();
      *     }
@@ -397,33 +402,22 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      */
     public void selectCursor(final FailureUrlCB cb,
             final EntityRowHandler<FailureUrl> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, FailureUrl.class);
+        facadeSelectCursor(cb, entityRowHandler);
+    }
+
+    protected void facadeSelectCursor(final FailureUrlCB cb,
+            final EntityRowHandler<FailureUrl> entityRowHandler) {
+        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
     }
 
     protected <ENTITY extends FailureUrl> void doSelectCursor(
-            final FailureUrlCB cb,
-            final EntityRowHandler<ENTITY> entityRowHandler,
-            final Class<ENTITY> entityType) {
+            final FailureUrlCB cb, final EntityRowHandler<ENTITY> handler,
+            final Class<ENTITY> tp) {
         assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler<FailureUrl>", entityRowHandler);
-        assertObjectNotNull("entityType", entityType);
-        assertSpecifyDerivedReferrerEntityProperty(cb, entityType);
-        helpSelectCursorInternally(cb, entityRowHandler, entityType,
-                new InternalSelectCursorCallback<ENTITY, FailureUrlCB>() {
-                    @Override
-                    public void callbackSelectCursor(final FailureUrlCB cb,
-                            final EntityRowHandler<ENTITY> entityRowHandler,
-                            final Class<ENTITY> entityType) {
-                        delegateSelectCursor(cb, entityRowHandler, entityType);
-                    }
-
-                    @Override
-                    public List<ENTITY> callbackSelectList(
-                            final FailureUrlCB cb,
-                            final Class<ENTITY> entityType) {
-                        return doSelectList(cb, entityType);
-                    }
-                });
+        assertObjectNotNull("entityRowHandler", handler);
+        assertObjectNotNull("entityType", tp);
+        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
+        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -433,29 +427,41 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * Select the scalar value derived by a function from uniquely-selected records. <br />
      * You should call a function method after this method called like as follows:
      * <pre>
-     * failureUrlBhv.<span style="color: #FD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
+     * failureUrlBhv.<span style="color: #DD4747">scalarSelect</span>(Date.class).max(new ScalarQuery() {
      *     public void query(FailureUrlCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooDatetime()</span>; <span style="color: #3F7E5E">// required for a function</span>
      *         cb.query().setBarName_PrefixSearch("S");
      *     }
      * });
      * </pre>
      * @param <RESULT> The type of result.
      * @param resultType The type of result. (NotNull)
-     * @return The scalar value derived by a function. (NullAllowed)
+     * @return The scalar function object to specify function for scalar value. (NotNull)
      */
-    public <RESULT> SLFunction<FailureUrlCB, RESULT> scalarSelect(
+    public <RESULT> HpSLSFunction<FailureUrlCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newMyConditionBean());
+        return facadeScalarSelect(resultType);
     }
 
-    protected <RESULT, CB extends FailureUrlCB> SLFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> resultType, final CB cb) {
-        assertObjectNotNull("resultType", resultType);
+    protected <RESULT> HpSLSFunction<FailureUrlCB, RESULT> facadeScalarSelect(
+            final Class<RESULT> resultType) {
+        return doScalarSelect(resultType, newConditionBean());
+    }
+
+    protected <RESULT, CB extends FailureUrlCB> HpSLSFunction<CB, RESULT> doScalarSelect(
+            final Class<RESULT> tp, final CB cb) {
+        assertObjectNotNull("resultType", tp);
         assertCBStateValid(cb);
         cb.xsetupForScalarSelect();
         cb.getSqlClause().disableSelectIndex(); // for when you use union
-        return new SLFunction<CB, RESULT>(cb, resultType);
+        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
+        return createSLSFunction(cb, tp, executor);
+    }
+
+    @Override
+    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
+            final Class<RESULT> tp) {
+        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -469,9 +475,87 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
+    //                                                                       Load Referrer
+    //                                                                       =============
+    /**
+     * Load referrer by the the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * List&lt;Member&gt; memberList = memberBhv.selectList(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(memberList, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param failureUrlList The entity list of failureUrl. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final List<FailureUrl> failureUrlList,
+            final ReferrerLoaderHandler<LoaderOfFailureUrl> handler) {
+        xassLRArg(failureUrlList, handler);
+        handler.handle(new LoaderOfFailureUrl().ready(failureUrlList,
+                _behaviorSelector));
+    }
+
+    /**
+     * Load referrer of ${referrer.referrerJavaBeansRulePropertyName} by the referrer loader. <br />
+     * <pre>
+     * MemberCB cb = new MemberCB();
+     * cb.query().set...
+     * Member member = memberBhv.selectEntityWithDeletedCheck(cb);
+     * memberBhv.<span style="color: #DD4747">load</span>(member, loader -&gt; {
+     *     loader.<span style="color: #DD4747">loadPurchaseList</span>(purchaseCB -&gt; {
+     *         purchaseCB.query().set...
+     *         purchaseCB.query().addOrderBy_PurchasePrice_Desc();
+     *     }); <span style="color: #3F7E5E">// you can also load nested referrer from here</span>
+     *     <span style="color: #3F7E5E">//}).withNestedList(purchaseLoader -&gt {</span>
+     *     <span style="color: #3F7E5E">//    purchaseLoader.loadPurchasePaymentList(...);</span>
+     *     <span style="color: #3F7E5E">//});</span>
+     *
+     *     <span style="color: #3F7E5E">// you can also pull out foreign table and load its referrer</span>
+     *     <span style="color: #3F7E5E">// (setupSelect of the foreign table should be called)</span>
+     *     <span style="color: #3F7E5E">//loader.pulloutMemberStatus().loadMemberLoginList(...)</span>
+     * }
+     * for (Member member : memberList) {
+     *     List&lt;Purchase&gt; purchaseList = member.<span style="color: #DD4747">getPurchaseList()</span>;
+     *     for (Purchase purchase : purchaseList) {
+     *         ...
+     *     }
+     * }
+     * </pre>
+     * About internal policy, the value of primary key (and others too) is treated as case-insensitive. <br />
+     * The condition-bean, which the set-upper provides, has order by FK before callback.
+     * @param failureUrl The entity of failureUrl. (NotNull)
+     * @param handler The callback to handle the referrer loader for actually loading referrer. (NotNull)
+     */
+    public void load(final FailureUrl failureUrl,
+            final ReferrerLoaderHandler<LoaderOfFailureUrl> handler) {
+        xassLRArg(failureUrl, handler);
+        handler.handle(new LoaderOfFailureUrl().ready(xnewLRAryLs(failureUrl),
+                _behaviorSelector));
+    }
+
+    // ===================================================================================
     //                                                                   Pull out Relation
     //                                                                   =================
-
     // ===================================================================================
     //                                                                      Extract Column
     //                                                                      ==============
@@ -481,20 +565,14 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * @return The list of the column value. (NotNull, EmptyAllowed, NotNullElement)
      */
     public List<Long> extractIdList(final List<FailureUrl> failureUrlList) {
-        return helpExtractListInternally(failureUrlList,
-                new InternalExtractCallback<FailureUrl, Long>() {
-                    @Override
-                    public Long getCV(final FailureUrl e) {
-                        return e.getId();
-                    }
-                });
+        return helpExtractListInternally(failureUrlList, "id");
     }
 
     // ===================================================================================
     //                                                                       Entity Update
     //                                                                       =============
     /**
-     * Insert the entity. (DefaultConstraintsEnabled)
+     * Insert the entity modified-only. (DefaultConstraintsEnabled)
      * <pre>
      * FailureUrl failureUrl = new FailureUrl();
      * <span style="color: #3F7E5E">// if auto-increment, you don't need to set the PK value</span>
@@ -503,38 +581,38 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//failureUrl.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//failureUrl.set...;</span>
-     * failureUrlBhv.<span style="color: #FD4747">insert</span>(failureUrl);
+     * failureUrlBhv.<span style="color: #DD4747">insert</span>(failureUrl);
      * ... = failureUrl.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param failureUrl The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p>While, when the entity is created by select, all columns are registered.</p>
+     * @param failureUrl The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insert(final FailureUrl failureUrl) {
         doInsert(failureUrl, null);
     }
 
-    protected void doInsert(final FailureUrl failureUrl,
-            final InsertOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrl", failureUrl);
-        prepareInsertOption(option);
-        delegateInsert(failureUrl, option);
+    protected void doInsert(final FailureUrl et,
+            final InsertOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrl", et);
+        prepareInsertOption(op);
+        delegateInsert(et, op);
     }
 
-    protected void prepareInsertOption(final InsertOption<FailureUrlCB> option) {
-        if (option == null) {
+    protected void prepareInsertOption(final InsertOption<FailureUrlCB> op) {
+        if (op == null) {
             return;
         }
-        assertInsertOptionStatus(option);
+        assertInsertOptionStatus(op);
+        if (op.hasSpecifiedInsertColumn()) {
+            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
+        }
     }
 
     @Override
-    protected void doCreate(final Entity entity,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            insert(downcast(entity));
-        } else {
-            varyingInsert(downcast(entity), downcast(option));
-        }
+    protected void doCreate(final Entity et,
+            final InsertOption<? extends ConditionBean> op) {
+        doInsert(downcast(et), downcast(op));
     }
 
     /**
@@ -546,138 +624,99 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//failureUrl.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//failureUrl.set...;</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * failureUrl.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * failureUrl.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     failureUrlBhv.<span style="color: #FD4747">update</span>(failureUrl);
+     *     failureUrlBhv.<span style="color: #DD4747">update</span>(failureUrl);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param failureUrl The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @param failureUrl The entity of update. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void update(final FailureUrl failureUrl) {
         doUpdate(failureUrl, null);
     }
 
-    protected void doUpdate(final FailureUrl failureUrl,
-            final UpdateOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrl", failureUrl);
-        prepareUpdateOption(option);
-        helpUpdateInternally(failureUrl,
-                new InternalUpdateCallback<FailureUrl>() {
-                    @Override
-                    public int callbackDelegateUpdate(final FailureUrl entity) {
-                        return delegateUpdate(entity, option);
-                    }
-                });
+    protected void doUpdate(final FailureUrl et,
+            final UpdateOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrl", et);
+        prepareUpdateOption(op);
+        helpUpdateInternally(et, op);
     }
 
-    protected void prepareUpdateOption(final UpdateOption<FailureUrlCB> option) {
-        if (option == null) {
+    protected void prepareUpdateOption(final UpdateOption<FailureUrlCB> op) {
+        if (op == null) {
             return;
         }
-        assertUpdateOptionStatus(option);
-        if (option.hasSelfSpecification()) {
-            option.resolveSelfSpecification(createCBForVaryingUpdate());
+        assertUpdateOptionStatus(op);
+        if (op.hasSelfSpecification()) {
+            op.resolveSelfSpecification(createCBForVaryingUpdate());
         }
-        if (option.hasSpecifiedUpdateColumn()) {
-            option.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
+        if (op.hasSpecifiedUpdateColumn()) {
+            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
         }
     }
 
     protected FailureUrlCB createCBForVaryingUpdate() {
-        final FailureUrlCB cb = newMyConditionBean();
+        final FailureUrlCB cb = newConditionBean();
         cb.xsetupForVaryingUpdate();
         return cb;
     }
 
     protected FailureUrlCB createCBForSpecifiedUpdate() {
-        final FailureUrlCB cb = newMyConditionBean();
+        final FailureUrlCB cb = newConditionBean();
         cb.xsetupForSpecifiedUpdate();
         return cb;
     }
 
     @Override
-    protected void doModify(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            update(downcast(entity));
-        } else {
-            varyingUpdate(downcast(entity), downcast(option));
-        }
+    protected void doModify(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doUpdate(downcast(et), downcast(op));
     }
 
     @Override
-    protected void doModifyNonstrict(final Entity entity,
-            final UpdateOption<? extends ConditionBean> option) {
-        doModify(entity, option);
+    protected void doModifyNonstrict(final Entity et,
+            final UpdateOption<? extends ConditionBean> op) {
+        doModify(et, op);
     }
 
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
-     * @param failureUrl The entity of insert or update target. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * <p><span style="color: #DD4747; font-size: 120%">Attention, you cannot update by unique keys instead of PK.</span></p>
+     * @param failureUrl The entity of insert or update. (NotNull, ...depends on insert or update)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void insertOrUpdate(final FailureUrl failureUrl) {
-        doInesrtOrUpdate(failureUrl, null, null);
+        doInsertOrUpdate(failureUrl, null, null);
     }
 
-    protected void doInesrtOrUpdate(final FailureUrl failureUrl,
-            final InsertOption<FailureUrlCB> insertOption,
-            final UpdateOption<FailureUrlCB> updateOption) {
-        helpInsertOrUpdateInternally(failureUrl,
-                new InternalInsertOrUpdateCallback<FailureUrl, FailureUrlCB>() {
-                    @Override
-                    public void callbackInsert(final FailureUrl entity) {
-                        doInsert(entity, insertOption);
-                    }
-
-                    @Override
-                    public void callbackUpdate(final FailureUrl entity) {
-                        doUpdate(entity, updateOption);
-                    }
-
-                    @Override
-                    public FailureUrlCB callbackNewMyConditionBean() {
-                        return newMyConditionBean();
-                    }
-
-                    @Override
-                    public int callbackSelectCount(final FailureUrlCB cb) {
-                        return selectCount(cb);
-                    }
-                });
+    protected void doInsertOrUpdate(final FailureUrl et,
+            final InsertOption<FailureUrlCB> iop,
+            final UpdateOption<FailureUrlCB> uop) {
+        assertObjectNotNull("failureUrl", et);
+        helpInsertOrUpdateInternally(et, iop, uop);
     }
 
     @Override
-    protected void doCreateOrModify(final Entity entity,
-            InsertOption<? extends ConditionBean> insertOption,
-            UpdateOption<? extends ConditionBean> updateOption) {
-        if (insertOption == null && updateOption == null) {
-            insertOrUpdate(downcast(entity));
-        } else {
-            insertOption = insertOption == null ? new InsertOption<FailureUrlCB>()
-                    : insertOption;
-            updateOption = updateOption == null ? new UpdateOption<FailureUrlCB>()
-                    : updateOption;
-            varyingInsertOrUpdate(downcast(entity), downcast(insertOption),
-                    downcast(updateOption));
-        }
+    protected void doCreateOrModify(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     @Override
-    protected void doCreateOrModifyNonstrict(final Entity entity,
-            final InsertOption<? extends ConditionBean> insertOption,
-            final UpdateOption<? extends ConditionBean> updateOption) {
-        doCreateOrModify(entity, insertOption, updateOption);
+    protected void doCreateOrModifyNonstrict(final Entity et,
+            final InsertOption<? extends ConditionBean> iop,
+            final UpdateOption<? extends ConditionBean> uop) {
+        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -685,67 +724,71 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <pre>
      * FailureUrl failureUrl = new FailureUrl();
      * failureUrl.setPK...(value); <span style="color: #3F7E5E">// required</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * failureUrl.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * failureUrl.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
-     *     failureUrlBhv.<span style="color: #FD4747">delete</span>(failureUrl);
+     *     failureUrlBhv.<span style="color: #DD4747">delete</span>(failureUrl);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param failureUrl The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @param failureUrl The entity of delete. (NotNull, PrimaryKeyNotNull)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void delete(final FailureUrl failureUrl) {
         doDelete(failureUrl, null);
     }
 
-    protected void doDelete(final FailureUrl failureUrl,
-            final DeleteOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrl", failureUrl);
-        prepareDeleteOption(option);
-        helpDeleteInternally(failureUrl,
-                new InternalDeleteCallback<FailureUrl>() {
-                    @Override
-                    public int callbackDelegateDelete(final FailureUrl entity) {
-                        return delegateDelete(entity, option);
-                    }
-                });
+    protected void doDelete(final FailureUrl et,
+            final DeleteOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrl", et);
+        prepareDeleteOption(op);
+        helpDeleteInternally(et, op);
     }
 
-    protected void prepareDeleteOption(final DeleteOption<FailureUrlCB> option) {
-        if (option == null) {
-            return;
-        }
-        assertDeleteOptionStatus(option);
-    }
-
-    @Override
-    protected void doRemove(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            delete(downcast(entity));
-        } else {
-            varyingDelete(downcast(entity), downcast(option));
+    protected void prepareDeleteOption(final DeleteOption<FailureUrlCB> op) {
+        if (op != null) {
+            assertDeleteOptionStatus(op);
         }
     }
 
     @Override
-    protected void doRemoveNonstrict(final Entity entity,
-            final DeleteOption<? extends ConditionBean> option) {
-        doRemove(entity, option);
+    protected void doRemove(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doDelete(downcast(et), downcast(op));
+    }
+
+    @Override
+    protected void doRemoveNonstrict(final Entity et,
+            final DeleteOption<? extends ConditionBean> op) {
+        doRemove(et, op);
     }
 
     // ===================================================================================
     //                                                                        Batch Update
     //                                                                        ============
     /**
-     * Batch-insert the entity list. (DefaultConstraintsDisabled) <br />
-     * This method uses executeBatch() of java.sql.PreparedStatement.
-     * <p><span style="color: #FD4747; font-size: 120%">Attention, all columns are insert target. (so default constraints are not available)</span></p>
-     * And if the table has an identity, entities after the process don't have incremented values.
-     * When you use the (normal) insert(), an entity after the process has an incremented value.
+     * Batch-insert the entity list modified-only of same-set columns. (DefaultConstraintsEnabled) <br />
+     * This method uses executeBatch() of java.sql.PreparedStatement. <br />
+     * <p><span style="color: #DD4747; font-size: 120%">The columns of least common multiple are registered like this:</span></p>
+     * <pre>
+     * for (... : ...) {
+     *     FailureUrl failureUrl = new FailureUrl();
+     *     failureUrl.setFooName("foo");
+     *     if (...) {
+     *         failureUrl.setFooPrice(123);
+     *     }
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are registered</span>
+     *     <span style="color: #3F7E5E">// FOO_PRICE not-called in any entities are registered as null without default value</span>
+     *     <span style="color: #3F7E5E">// columns not-called in all entities are registered as null or default value</span>
+     *     failureUrlList.add(failureUrl);
+     * }
+     * failureUrlBhv.<span style="color: #DD4747">batchInsert</span>(failureUrlList);
+     * </pre>
+     * <p>While, when the entities are created by select, all columns are registered.</p>
+     * <p>And if the table has an identity, entities after the process don't have incremented values.
+     * (When you use the (normal) insert(), you can get the incremented value from your entity)</p>
      * @param failureUrlList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNullAllowed: when auto-increment)
      * @return The array of inserted count. (NotNull, EmptyAllowed)
      */
@@ -753,90 +796,100 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return doBatchInsert(failureUrlList, null);
     }
 
-    protected int[] doBatchInsert(final List<FailureUrl> failureUrlList,
-            final InsertOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrlList", failureUrlList);
-        prepareInsertOption(option);
-        return delegateBatchInsert(failureUrlList, option);
+    protected int[] doBatchInsert(final List<FailureUrl> ls,
+            final InsertOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrlList", ls);
+        InsertOption<FailureUrlCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainInsertOption();
+        }
+        prepareBatchInsertOption(ls, rlop); // required
+        return delegateBatchInsert(ls, rlop);
+    }
+
+    protected void prepareBatchInsertOption(final List<FailureUrl> ls,
+            final InsertOption<FailureUrlCB> op) {
+        op.xallowInsertColumnModifiedPropertiesFragmented();
+        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
+        prepareInsertOption(op);
     }
 
     @Override
     protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchInsert(downcast(ls));
-        } else {
-            return varyingBatchInsert(downcast(ls), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doBatchInsert(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (AllColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
-     * <span style="color: #FD4747; font-size: 140%">Attention, all columns are update target. {NOT modified only}</span> <br />
-     * So you should the other batchUpdate() (overload) method for performace,
-     * which you can specify update columns like this:
+     * <span style="color: #DD4747; font-size: 120%">You should specify same-set columns to all entities like this:</span>
      * <pre>
-     * failureUrlBhv.<span style="color: #FD4747">batchUpdate</span>(failureUrlList, new SpecifyQuery<FailureUrlCB>() {
-     *     public void specify(FailureUrlCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>;
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>;
+     * for (... : ...) {
+     *     FailureUrl failureUrl = new FailureUrl();
+     *     failureUrl.setFooName("foo");
+     *     if (...) {
+     *         failureUrl.setFooPrice(123);
+     *     } else {
+     *         failureUrl.setFooPrice(null); <span style="color: #3F7E5E">// updated as null</span>
+     *         <span style="color: #3F7E5E">//failureUrl.setFooDate(...); // *not allowed, fragmented</span>
      *     }
-     * });
+     *     <span style="color: #3F7E5E">// FOO_NAME and FOO_PRICE (and record meta columns) are updated</span>
+     *     <span style="color: #3F7E5E">// (others are not updated: their values are kept)</span>
+     *     failureUrlList.add(failureUrl);
+     * }
+     * failureUrlBhv.<span style="color: #DD4747">batchUpdate</span>(failureUrlList);
      * </pre>
      * @param failureUrlList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(final List<FailureUrl> failureUrlList) {
         return doBatchUpdate(failureUrlList, null);
     }
 
-    protected int[] doBatchUpdate(final List<FailureUrl> failureUrlList,
-            final UpdateOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrlList", failureUrlList);
-        prepareBatchUpdateOption(failureUrlList, option);
-        return delegateBatchUpdate(failureUrlList, option);
+    protected int[] doBatchUpdate(final List<FailureUrl> ls,
+            final UpdateOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrlList", ls);
+        UpdateOption<FailureUrlCB> rlop;
+        if (op != null) {
+            rlop = op;
+        } else {
+            rlop = createPlainUpdateOption();
+        }
+        prepareBatchUpdateOption(ls, rlop); // required
+        return delegateBatchUpdate(ls, rlop);
     }
 
-    protected void prepareBatchUpdateOption(
-            final List<FailureUrl> failureUrlList,
-            final UpdateOption<FailureUrlCB> option) {
-        if (option == null) {
-            return;
-        }
-        prepareUpdateOption(option);
-        // under review
-        //if (option.hasSpecifiedUpdateColumn()) {
-        //    option.xgatherUpdateColumnModifiedProperties(failureUrlList);
-        //}
+    protected void prepareBatchUpdateOption(final List<FailureUrl> ls,
+            final UpdateOption<FailureUrlCB> op) {
+        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
+        prepareUpdateOption(op);
     }
 
     @Override
     protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchUpdate(downcast(ls));
-        } else {
-            return varyingBatchUpdate(downcast(ls), downcast(option));
-        }
+            final UpdateOption<? extends ConditionBean> op) {
+        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
-     * Batch-update the entity list. (SpecifiedColumnsUpdated, NonExclusiveControl) <br />
+     * Batch-update the entity list specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * <pre>
      * <span style="color: #3F7E5E">// e.g. update two columns only</span>
-     * failureUrlBhv.<span style="color: #FD4747">batchUpdate</span>(failureUrlList, new SpecifyQuery<FailureUrlCB>() {
+     * failureUrlBhv.<span style="color: #DD4747">batchUpdate</span>(failureUrlList, new SpecifyQuery<FailureUrlCB>() {
      *     public void specify(FailureUrlCB cb) { <span style="color: #3F7E5E">// the two only updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
-     *         cb.specify().<span style="color: #FD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnFooStatusCode()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
+     *         cb.specify().<span style="color: #DD4747">columnBarDate()</span>; <span style="color: #3F7E5E">// should be modified in any entities</span>
      *     }
      * });
      * <span style="color: #3F7E5E">// e.g. update every column in the table</span>
-     * failureUrlBhv.<span style="color: #FD4747">batchUpdate</span>(failureUrlList, new SpecifyQuery<FailureUrlCB>() {
+     * failureUrlBhv.<span style="color: #DD4747">batchUpdate</span>(failureUrlList, new SpecifyQuery<FailureUrlCB>() {
      *     public void specify(FailureUrlCB cb) { <span style="color: #3F7E5E">// all columns are updated</span>
-     *         cb.specify().<span style="color: #FD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
+     *         cb.specify().<span style="color: #DD4747">columnEveryColumn()</span>; <span style="color: #3F7E5E">// no check of modified properties</span>
      *     }
      * });
      * </pre>
@@ -848,7 +901,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * @param failureUrlList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @param updateColumnSpec The specification of update columns. (NotNull)
      * @return The array of updated count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchUpdate(final List<FailureUrl> failureUrlList,
             final SpecifyQuery<FailureUrlCB> updateColumnSpec) {
@@ -858,8 +911,8 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
 
     @Override
     protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> option) {
-        return doLumpModify(ls, option);
+            final UpdateOption<? extends ConditionBean> op) {
+        return doLumpModify(ls, op);
     }
 
     /**
@@ -867,33 +920,29 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * This method uses executeBatch() of java.sql.PreparedStatement.
      * @param failureUrlList The list of the entity. (NotNull, EmptyAllowed, PrimaryKeyNotNull)
      * @return The array of deleted count. (NotNull, EmptyAllowed)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
      */
     public int[] batchDelete(final List<FailureUrl> failureUrlList) {
         return doBatchDelete(failureUrlList, null);
     }
 
-    protected int[] doBatchDelete(final List<FailureUrl> failureUrlList,
-            final DeleteOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrlList", failureUrlList);
-        prepareDeleteOption(option);
-        return delegateBatchDelete(failureUrlList, option);
+    protected int[] doBatchDelete(final List<FailureUrl> ls,
+            final DeleteOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrlList", ls);
+        prepareDeleteOption(op);
+        return delegateBatchDelete(ls, op);
     }
 
     @Override
     protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return batchDelete(downcast(ls));
-        } else {
-            return varyingBatchDelete(downcast(ls), downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     @Override
     protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> option) {
-        return doLumpRemove(ls, option);
+            final DeleteOption<? extends ConditionBean> op) {
+        return doLumpRemove(ls, op);
     }
 
     // ===================================================================================
@@ -902,7 +951,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     /**
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
-     * failureUrlBhv.<span style="color: #FD4747">queryInsert</span>(new QueryInsertSetupper&lt;FailureUrl, FailureUrlCB&gt;() {
+     * failureUrlBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;FailureUrl, FailureUrlCB&gt;() {
      *     public ConditionBean setup(failureUrl entity, FailureUrlCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
@@ -915,7 +964,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      *         <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      *         <span style="color: #3F7E5E">//entity.setRegisterUser(value);</span>
      *         <span style="color: #3F7E5E">//entity.set...;</span>
-     *         <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     *         <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      *         <span style="color: #3F7E5E">//entity.setVersionNo(value);</span>
      *
      *         return cb;
@@ -931,18 +980,17 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     }
 
     protected int doQueryInsert(
-            final QueryInsertSetupper<FailureUrl, FailureUrlCB> setupper,
-            final InsertOption<FailureUrlCB> option) {
-        assertObjectNotNull("setupper", setupper);
-        prepareInsertOption(option);
-        final FailureUrl entity = new FailureUrl();
-        final FailureUrlCB intoCB = createCBForQueryInsert();
-        final ConditionBean resourceCB = setupper.setup(entity, intoCB);
-        return delegateQueryInsert(entity, intoCB, resourceCB, option);
+            final QueryInsertSetupper<FailureUrl, FailureUrlCB> sp,
+            final InsertOption<FailureUrlCB> op) {
+        assertObjectNotNull("setupper", sp);
+        prepareInsertOption(op);
+        final FailureUrl et = newEntity();
+        final FailureUrlCB cb = createCBForQueryInsert();
+        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
     }
 
     protected FailureUrlCB createCBForQueryInsert() {
-        final FailureUrlCB cb = newMyConditionBean();
+        final FailureUrlCB cb = newConditionBean();
         cb.xsetupForQueryInsert();
         return cb;
     }
@@ -950,12 +998,8 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     @Override
     protected int doRangeCreate(
             final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryInsert(downcast(setupper));
-        } else {
-            return varyingQueryInsert(downcast(setupper), downcast(option));
-        }
+            final InsertOption<? extends ConditionBean> op) {
+        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -968,40 +1012,35 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set values of common columns</span>
      * <span style="color: #3F7E5E">//failureUrl.setRegisterUser(value);</span>
      * <span style="color: #3F7E5E">//failureUrl.set...;</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//failureUrl.setVersionNo(value);</span>
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
-     * failureUrlBhv.<span style="color: #FD4747">queryUpdate</span>(failureUrl, cb);
+     * failureUrlBhv.<span style="color: #DD4747">queryUpdate</span>(failureUrl, cb);
      * </pre>
      * @param failureUrl The entity that contains update values. (NotNull, PrimaryKeyNullAllowed)
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition.
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition.
      */
     public int queryUpdate(final FailureUrl failureUrl, final FailureUrlCB cb) {
         return doQueryUpdate(failureUrl, cb, null);
     }
 
-    protected int doQueryUpdate(final FailureUrl failureUrl,
-            final FailureUrlCB cb, final UpdateOption<FailureUrlCB> option) {
-        assertObjectNotNull("failureUrl", failureUrl);
+    protected int doQueryUpdate(final FailureUrl et, final FailureUrlCB cb,
+            final UpdateOption<FailureUrlCB> op) {
+        assertObjectNotNull("failureUrl", et);
         assertCBStateValid(cb);
-        prepareUpdateOption(option);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(
-                failureUrl, cb, option) : 0;
+        prepareUpdateOption(op);
+        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
+                cb, op) : 0;
     }
 
     @Override
-    protected int doRangeModify(final Entity entity, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryUpdate(downcast(entity), (FailureUrlCB) cb);
-        } else {
-            return varyingQueryUpdate(downcast(entity), (FailureUrlCB) cb,
-                    downcast(option));
-        }
+    protected int doRangeModify(final Entity et, final ConditionBean cb,
+            final UpdateOption<? extends ConditionBean> op) {
+        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
     }
 
     /**
@@ -1009,32 +1048,28 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <pre>
      * FailureUrlCB cb = new FailureUrlCB();
      * cb.query().setFoo...(value);
-     * failureUrlBhv.<span style="color: #FD4747">queryDelete</span>(failureUrl, cb);
+     * failureUrlBhv.<span style="color: #DD4747">queryDelete</span>(failureUrl, cb);
      * </pre>
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition.
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition.
      */
     public int queryDelete(final FailureUrlCB cb) {
         return doQueryDelete(cb, null);
     }
 
     protected int doQueryDelete(final FailureUrlCB cb,
-            final DeleteOption<FailureUrlCB> option) {
+            final DeleteOption<FailureUrlCB> op) {
         assertCBStateValid(cb);
-        prepareDeleteOption(option);
+        prepareDeleteOption(op);
         return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                option) : 0;
+                op) : 0;
     }
 
     @Override
     protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> option) {
-        if (option == null) {
-            return queryDelete((FailureUrlCB) cb);
-        } else {
-            return varyingQueryDelete((FailureUrlCB) cb, downcast(option));
-        }
+            final DeleteOption<? extends ConditionBean> op) {
+        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1055,12 +1090,12 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * InsertOption<FailureUrlCB> option = new InsertOption<FailureUrlCB>();
      * <span style="color: #3F7E5E">// you can insert by your values for common columns</span>
      * option.disableCommonColumnAutoSetup();
-     * failureUrlBhv.<span style="color: #FD4747">varyingInsert</span>(failureUrl, option);
+     * failureUrlBhv.<span style="color: #DD4747">varyingInsert</span>(failureUrl, option);
      * ... = failureUrl.getPK...(); <span style="color: #3F7E5E">// if auto-increment, you can get the value after</span>
      * </pre>
-     * @param failureUrl The entity of insert target. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
+     * @param failureUrl The entity of insert. (NotNull, PrimaryKeyNullAllowed: when auto-increment)
      * @param option The option of insert for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsert(final FailureUrl failureUrl,
             final InsertOption<FailureUrlCB> option) {
@@ -1076,26 +1111,26 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * FailureUrl failureUrl = new FailureUrl();
      * failureUrl.setPK...(value); <span style="color: #3F7E5E">// required</span>
      * failureUrl.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// if exclusive control, the value of exclusive control column is required</span>
-     * failureUrl.<span style="color: #FD4747">setVersionNo</span>(value);
+     * <span style="color: #3F7E5E">// if exclusive control, the value of concurrency column is required</span>
+     * failureUrl.<span style="color: #DD4747">setVersionNo</span>(value);
      * try {
      *     <span style="color: #3F7E5E">// you can update by self calculation values</span>
      *     UpdateOption&lt;FailureUrlCB&gt; option = new UpdateOption&lt;FailureUrlCB&gt;();
      *     option.self(new SpecifyQuery&lt;FailureUrlCB&gt;() {
      *         public void specify(FailureUrlCB cb) {
-     *             cb.specify().<span style="color: #FD4747">columnXxxCount()</span>;
+     *             cb.specify().<span style="color: #DD4747">columnXxxCount()</span>;
      *         }
      *     }).plus(1); <span style="color: #3F7E5E">// XXX_COUNT = XXX_COUNT + 1</span>
-     *     failureUrlBhv.<span style="color: #FD4747">varyingUpdate</span>(failureUrl, option);
+     *     failureUrlBhv.<span style="color: #DD4747">varyingUpdate</span>(failureUrl, option);
      * } catch (EntityAlreadyUpdatedException e) { <span style="color: #3F7E5E">// if concurrent update</span>
      *     ...
      * }
      * </pre>
-     * @param failureUrl The entity of update target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param failureUrl The entity of update. (NotNull, PrimaryKeyNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingUpdate(final FailureUrl failureUrl,
             final UpdateOption<FailureUrlCB> option) {
@@ -1106,29 +1141,29 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     /**
      * Insert or update the entity with varying requests. (ExclusiveControl: when update) <br />
      * Other specifications are same as insertOrUpdate(entity).
-     * @param failureUrl The entity of insert or update target. (NotNull)
+     * @param failureUrl The entity of insert or update. (NotNull)
      * @param insertOption The option of insert for varying requests. (NotNull)
      * @param updateOption The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
-     * @exception org.seasar.dbflute.exception.EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyExistsException When the entity already exists. (unique constraint violation)
      */
     public void varyingInsertOrUpdate(final FailureUrl failureUrl,
             final InsertOption<FailureUrlCB> insertOption,
             final UpdateOption<FailureUrlCB> updateOption) {
         assertInsertOptionNotNull(insertOption);
         assertUpdateOptionNotNull(updateOption);
-        doInesrtOrUpdate(failureUrl, insertOption, updateOption);
+        doInsertOrUpdate(failureUrl, insertOption, updateOption);
     }
 
     /**
      * Delete the entity with varying requests. (ZeroUpdateException, NonExclusiveControl) <br />
      * Now a valid option does not exist. <br />
      * Other specifications are same as delete(entity).
-     * @param failureUrl The entity of delete target. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnRequired)
+     * @param failureUrl The entity of delete. (NotNull, PrimaryKeyNotNull, ConcurrencyColumnNotNull)
      * @param option The option of update for varying requests. (NotNull)
-     * @exception org.seasar.dbflute.exception.EntityAlreadyDeletedException When the entity has already been deleted. (not found)
-     * @exception org.seasar.dbflute.exception.EntityDuplicatedException When the entity has been duplicated.
+     * @exception EntityAlreadyDeletedException When the entity has already been deleted. (not found)
+     * @exception EntityDuplicatedException When the entity has been duplicated.
      */
     public void varyingDelete(final FailureUrl failureUrl,
             final DeleteOption<FailureUrlCB> option) {
@@ -1212,7 +1247,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * <span style="color: #3F7E5E">// you don't need to set PK value</span>
      * <span style="color: #3F7E5E">//failureUrl.setPK...(value);</span>
      * failureUrl.setOther...(value); <span style="color: #3F7E5E">// you should set only modified columns</span>
-     * <span style="color: #3F7E5E">// you don't need to set a value of exclusive control column</span>
+     * <span style="color: #3F7E5E">// you don't need to set a value of concurrency column</span>
      * <span style="color: #3F7E5E">// (auto-increment for version number is valid though non-exclusive control)</span>
      * <span style="color: #3F7E5E">//failureUrl.setVersionNo(value);</span>
      * FailureUrlCB cb = new FailureUrlCB();
@@ -1220,16 +1255,16 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * UpdateOption&lt;FailureUrlCB&gt; option = new UpdateOption&lt;FailureUrlCB&gt;();
      * option.self(new SpecifyQuery&lt;FailureUrlCB&gt;() {
      *     public void specify(FailureUrlCB cb) {
-     *         cb.specify().<span style="color: #FD4747">columnFooCount()</span>;
+     *         cb.specify().<span style="color: #DD4747">columnFooCount()</span>;
      *     }
      * }).plus(1); <span style="color: #3F7E5E">// FOO_COUNT = FOO_COUNT + 1</span>
-     * failureUrlBhv.<span style="color: #FD4747">varyingQueryUpdate</span>(failureUrl, cb, option);
+     * failureUrlBhv.<span style="color: #DD4747">varyingQueryUpdate</span>(failureUrl, cb, option);
      * </pre>
      * @param failureUrl The entity that contains update values. (NotNull) {PrimaryKeyNotRequired}
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @param option The option of update for varying requests. (NotNull)
      * @return The updated count.
-     * @exception org.seasar.dbflute.exception.NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryUpdateNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryUpdate(final FailureUrl failureUrl,
             final FailureUrlCB cb, final UpdateOption<FailureUrlCB> option) {
@@ -1244,7 +1279,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * @param cb The condition-bean of FailureUrl. (NotNull)
      * @param option The option of delete for varying requests. (NotNull)
      * @return The deleted count.
-     * @exception org.seasar.dbflute.exception.NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
+     * @exception NonQueryDeleteNotAllowedException When the query has no condition (if not allowed).
      */
     public int varyingQueryDelete(final FailureUrlCB cb,
             final DeleteOption<FailureUrlCB> option) {
@@ -1291,166 +1326,14 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                     Delegate Method
-    //                                                                     ===============
-    // [Behavior Command]
-    // -----------------------------------------------------
-    //                                                Select
-    //                                                ------
-    protected int delegateSelectCountUniquely(final FailureUrlCB cb) {
-        return invoke(createSelectCountCBCommand(cb, true));
+    //                                                                       Assist Helper
+    //                                                                       =============
+    protected Class<FailureUrl> typeOfSelectedEntity() {
+        return FailureUrl.class;
     }
 
-    protected int delegateSelectCountPlainly(final FailureUrlCB cb) {
-        return invoke(createSelectCountCBCommand(cb, false));
-    }
-
-    protected <ENTITY extends FailureUrl> void delegateSelectCursor(
-            final FailureUrlCB cb, final EntityRowHandler<ENTITY> erh,
-            final Class<ENTITY> et) {
-        invoke(createSelectCursorCBCommand(cb, erh, et));
-    }
-
-    protected <ENTITY extends FailureUrl> List<ENTITY> delegateSelectList(
-            final FailureUrlCB cb, final Class<ENTITY> et) {
-        return invoke(createSelectListCBCommand(cb, et));
-    }
-
-    // -----------------------------------------------------
-    //                                                Update
-    //                                                ------
-    protected int delegateInsert(final FailureUrl e,
-            final InsertOption<FailureUrlCB> op) {
-        if (!processBeforeInsert(e, op)) {
-            return 0;
-        }
-        return invoke(createInsertEntityCommand(e, op));
-    }
-
-    protected int delegateUpdate(final FailureUrl e,
-            final UpdateOption<FailureUrlCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return delegateUpdateNonstrict(e, op);
-    }
-
-    protected int delegateUpdateNonstrict(final FailureUrl e,
-            final UpdateOption<FailureUrlCB> op) {
-        if (!processBeforeUpdate(e, op)) {
-            return 0;
-        }
-        return invoke(createUpdateNonstrictEntityCommand(e, op));
-    }
-
-    protected int delegateDelete(final FailureUrl e,
-            final DeleteOption<FailureUrlCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return delegateDeleteNonstrict(e, op);
-    }
-
-    protected int delegateDeleteNonstrict(final FailureUrl e,
-            final DeleteOption<FailureUrlCB> op) {
-        if (!processBeforeDelete(e, op)) {
-            return 0;
-        }
-        return invoke(createDeleteNonstrictEntityCommand(e, op));
-    }
-
-    protected int[] delegateBatchInsert(final List<FailureUrl> ls,
-            final InsertOption<FailureUrlCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchInsertCommand(processBatchInternally(ls, op),
-                op));
-    }
-
-    protected int[] delegateBatchUpdate(final List<FailureUrl> ls,
-            final UpdateOption<FailureUrlCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchUpdateNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchUpdateNonstrict(final List<FailureUrl> ls,
-            final UpdateOption<FailureUrlCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchUpdateNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int[] delegateBatchDelete(final List<FailureUrl> ls,
-            final DeleteOption<FailureUrlCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    protected int[] delegateBatchDeleteNonstrict(final List<FailureUrl> ls,
-            final DeleteOption<FailureUrlCB> op) {
-        if (ls.isEmpty()) {
-            return new int[] {};
-        }
-        return invoke(createBatchDeleteNonstrictCommand(
-                processBatchInternally(ls, op, true), op));
-    }
-
-    protected int delegateQueryInsert(final FailureUrl e,
-            final FailureUrlCB inCB, final ConditionBean resCB,
-            final InsertOption<FailureUrlCB> op) {
-        if (!processBeforeQueryInsert(e, inCB, resCB, op)) {
-            return 0;
-        }
-        return invoke(createQueryInsertCBCommand(e, inCB, resCB, op));
-    }
-
-    protected int delegateQueryUpdate(final FailureUrl e,
-            final FailureUrlCB cb, final UpdateOption<FailureUrlCB> op) {
-        if (!processBeforeQueryUpdate(e, cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryUpdateCBCommand(e, cb, op));
-    }
-
-    protected int delegateQueryDelete(final FailureUrlCB cb,
-            final DeleteOption<FailureUrlCB> op) {
-        if (!processBeforeQueryDelete(cb, op)) {
-            return 0;
-        }
-        return invoke(createQueryDeleteCBCommand(cb, op));
-    }
-
-    // ===================================================================================
-    //                                                                Optimistic Lock Info
-    //                                                                ====================
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasVersionNoValue(final Entity entity) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasUpdateDateValue(final Entity entity) {
-        return false;
-    }
-
-    // ===================================================================================
-    //                                                                     Downcast Helper
-    //                                                                     ===============
-    protected FailureUrl downcast(final Entity entity) {
-        return helpEntityDowncastInternally(entity, FailureUrl.class);
+    protected FailureUrl downcast(final Entity et) {
+        return helpEntityDowncastInternally(et, FailureUrl.class);
     }
 
     protected FailureUrlCB downcast(final ConditionBean cb) {
@@ -1458,31 +1341,31 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<FailureUrl> downcast(final List<? extends Entity> entityList) {
-        return (List<FailureUrl>) entityList;
+    protected List<FailureUrl> downcast(final List<? extends Entity> ls) {
+        return (List<FailureUrl>) ls;
     }
 
     @SuppressWarnings("unchecked")
     protected InsertOption<FailureUrlCB> downcast(
-            final InsertOption<? extends ConditionBean> option) {
-        return (InsertOption<FailureUrlCB>) option;
+            final InsertOption<? extends ConditionBean> op) {
+        return (InsertOption<FailureUrlCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected UpdateOption<FailureUrlCB> downcast(
-            final UpdateOption<? extends ConditionBean> option) {
-        return (UpdateOption<FailureUrlCB>) option;
+            final UpdateOption<? extends ConditionBean> op) {
+        return (UpdateOption<FailureUrlCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected DeleteOption<FailureUrlCB> downcast(
-            final DeleteOption<? extends ConditionBean> option) {
-        return (DeleteOption<FailureUrlCB>) option;
+            final DeleteOption<? extends ConditionBean> op) {
+        return (DeleteOption<FailureUrlCB>) op;
     }
 
     @SuppressWarnings("unchecked")
     protected QueryInsertSetupper<FailureUrl, FailureUrlCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> option) {
-        return (QueryInsertSetupper<FailureUrl, FailureUrlCB>) option;
+            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
+        return (QueryInsertSetupper<FailureUrl, FailureUrlCB>) sp;
     }
 }
