@@ -111,20 +111,19 @@ public abstract class AbstractFessFileTransformer extends
         final String mimeType = responseData.getMimeType();
         params.put(HttpHeaders.CONTENT_TYPE, mimeType);
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
-        final StringBuilder contentBuf = new StringBuilder(1000);
         final StringBuilder contentMetaBuf = new StringBuilder(1000);
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         final Map<String, Object> metaDataMap = new HashMap<>();
+        String content;
         try {
             final ExtractData extractData = extractor.getText(in, params);
-            if (ignoreEmptyContent
-                    && StringUtil.isBlank(extractData.getContent())) {
+            content = extractData.getContent();
+            if (ignoreEmptyContent && StringUtil.isBlank(content)) {
                 return null;
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("ExtractData: " + extractData);
             }
-            contentBuf.append(extractData.getContent());
             // meta
             for (final String key : extractData.getKeySet()) {
                 final String[] values = extractData.getValues(key);
@@ -158,12 +157,10 @@ public abstract class AbstractFessFileTransformer extends
         } finally {
             IOUtils.closeQuietly(in);
         }
-        final String content = contentBuf.toString();
-        final String contentMeta = contentMetaBuf.toString();
-
-        if (StringUtil.isBlank(content)) {
-            return null;
+        if (content == null) {
+            content = StringUtil.EMPTY;
         }
+        final String contentMeta = contentMetaBuf.toString();
 
         final ResultData resultData = new ResultData();
         resultData.setTransformerName(getName());
@@ -215,7 +212,7 @@ public abstract class AbstractFessFileTransformer extends
         // segment
         putResultDataBody(dataMap, "segment", sessionId);
         // content
-        final StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder(content.length() + 1000);
         if (appendBodyContentToContent) {
             buf.append(content);
         }
@@ -233,12 +230,8 @@ public abstract class AbstractFessFileTransformer extends
         }
         if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get("cache"))
                 || enableCache) {
-            String cache;
-            if (content == null) {
-                cache = StringUtil.EMPTY;
-            } else {
-                cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
-            }
+            final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+",
+                    " ");
             // text cache
             putResultDataBody(dataMap, "cache", cache);
             putResultDataBody(dataMap, systemHelper.hasCacheField,
