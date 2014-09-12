@@ -62,6 +62,10 @@ public class CrawlJob {
 
     protected int documentExpires = -2;
 
+    protected int retryCountToDeleteTempDir = 10;
+
+    protected long retryIntervalToDeleteTempDir = 5000;
+
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
         return this;
@@ -100,6 +104,12 @@ public class CrawlJob {
     public CrawlJob dataConfigIds(final String[] dataConfigIds) {
         this.dataConfigIds = dataConfigIds;
         return this;
+    }
+
+    public void retryToDeleteTempDir(final int retryCount,
+            final long retryInterval) {
+        retryCountToDeleteTempDir = retryCount;
+        retryIntervalToDeleteTempDir = retryInterval;
     }
 
     public String execute(final JobExecutor jobExecutor) {
@@ -332,12 +342,30 @@ public class CrawlJob {
         } catch (final Exception e) {
             throw new FessSystemException("Crawler Process terminated.", e);
         } finally {
-            jobHelper.destroyCrawlerProcess(sessionId);
-            if (ownTmpDir != null && !ownTmpDir.delete()) {
-                logger.warn("Could not delete a temp dir: "
-                        + ownTmpDir.getAbsolutePath());
+            try {
+                jobHelper.destroyCrawlerProcess(sessionId);
+            } finally {
+                deleteTempDir(ownTmpDir);
             }
         }
+    }
+
+    protected void deleteTempDir(final File ownTmpDir) {
+        if (ownTmpDir == null) {
+            return;
+        }
+        for (int i = 0; i < retryCountToDeleteTempDir; i++) {
+            if (ownTmpDir.delete()) {
+                return;
+            }
+            try {
+                Thread.sleep(retryIntervalToDeleteTempDir);
+            } catch (final InterruptedException e) {
+                // ignore
+            }
+        }
+        logger.warn("Could not delete a temp dir: "
+                + ownTmpDir.getAbsolutePath());
     }
 
     protected void appendJarFile(final String cpSeparator,
