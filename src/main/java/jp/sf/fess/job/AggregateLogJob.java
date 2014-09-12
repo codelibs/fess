@@ -22,11 +22,10 @@ import jp.sf.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
-public class MinutelyJob {
+public class AggregateLogJob {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(MinutelyJob.class);
+            .getLogger(AggregateLogJob.class);
 
     public String execute() {
         final SearchLogHelper searchLogHelper = ComponentUtil

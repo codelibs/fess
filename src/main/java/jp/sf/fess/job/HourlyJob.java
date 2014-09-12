@@ -23,6 +23,7 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class HourlyJob {
 
     private static final Logger logger = LoggerFactory

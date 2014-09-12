@@ -16,26 +16,26 @@
 
 package jp.sf.fess.job;
 
-import jp.sf.fess.helper.SearchLogHelper;
+import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
-public class MinutelyJob {
+public class UpdateHotWordJob {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(MinutelyJob.class);
+            .getLogger(UpdateHotWordJob.class);
 
     public String execute() {
-        final SearchLogHelper searchLogHelper = ComponentUtil
-                .getSearchLogHelper();
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
+                .getHotSearchWordHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 
+        // hot words
         try {
-            searchLogHelper.storeSearchLog();
+            hotSearchWordHelper.reload();
         } catch (final Exception e) {
             logger.error("Failed to store a search log.", e);
             resultBuf.append(e.getMessage()).append("\n");

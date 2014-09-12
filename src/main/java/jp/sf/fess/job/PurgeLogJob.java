@@ -19,7 +19,6 @@ package jp.sf.fess.job;
 import java.util.Date;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.service.CrawlingSessionService;
 import jp.sf.fess.service.JobLogService;
 import jp.sf.fess.service.SearchLogService;
@@ -31,11 +30,10 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
-public class DailyJob {
+public class PurgeLogJob {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(DailyJob.class);
+            .getLogger(PurgeLogJob.class);
 
     public String execute() {
         final CrawlingSessionService crawlingSessionService = SingletonS2Container
@@ -46,20 +44,10 @@ public class DailyJob {
                 .getComponent(JobLogService.class);
         final UserInfoService userInfoService = SingletonS2Container
                 .getComponent(UserInfoService.class);
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
-                .getHotSearchWordHelper();
         final DynamicProperties crawlerProperties = ComponentUtil
                 .getCrawlerProperties();
 
         final StringBuilder resultBuf = new StringBuilder();
-
-        // hot words
-        try {
-            hotSearchWordHelper.reload();
-        } catch (final Exception e) {
-            logger.error("Failed to store a search log.", e);
-            resultBuf.append(e.getMessage()).append("\n");
-        }
 
         // purge crawling sessions
         try {
