@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Stemming settings</title>
+    <author>Sone, Takaaki</author>
+  </properties>
+  <body>
+    <section name='About stemming'>
+      <p>In Fess when indexing and searching the stemming process done.</p>
+      <p>This is to normalize the English word processing, for example, words such as recharging and rechargable is normalized to form recharg. Hit and even if you search by recharging the word this word rechargable, less search leakage is expected.</p>
+    </section>
+    <section name='about protwords.txt'>
+      <p>You may not intended for the stemming process basic rule-based processing, normalization is done. For example, Maine (state name) Word will be normalized in the main.</p>
+      <p>In this case, by adding Maine to protwords.txt, you can exclude the stemming process.</p>
+    </section>
+  </body>
+</document>

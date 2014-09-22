@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Range searches</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Range searches'>
+      <p>If in the field containing the data in specified range, such as the number range search is possible for that field.</p>
+      <subsection name='How to use the'>
+        <p>To limit &quot;field name: value TO value &apos; fill in the search form.</p>
+        <p>For example, type to search document contentLength field against 1 k to 10 k bytes is shown below the search form. </p>
+        <source><![CDATA[
+contentLength:[1000 TO 10000]
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

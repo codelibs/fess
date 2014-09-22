@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Range searches</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Range searches'>
+      <p>If in the field containing the data in specified range, such as the number range search is possible for that field.</p>
+      <subsection name='How to use the'>
+        <p>To limit &quot;field name: value TO value &apos; fill in the search form.</p>
+        <p>For example, type to search document contentLength field against 1 k to 10 k bytes is shown below the search form. </p>
+        <source><![CDATA[
+contentLength:[1000 TO 10000]
+]]></source>
+        <p>To time range specified search &apos; lastModified: [date 1 TO date 2] &quot;(Re 1 [Re 2) fill out the search form.</p>
+      	<p>ISO 8601 with respect to re.</p>
+      	<table>
+		  <tr>
+		    <td>Date and time-resolved second and fractional part</td>
+		    <td>If the current relative to the date</td>
+		  </tr>
+		  <tr>
+		    <td>YYYY-MM-DDThh:mm:ss.sZ（ example ：2013-08-02T10:45:23.5Z)</td>
+		    <td>NOW (the current date), YEAR (this year), MONTH (month), DAY (today)</td>
+		  </tr>
+		</table>
+		<p>To relative to the current date and time NOW and DAY-(Adder, and production) and can sign and (round) like.</p>
+		<p>And a symbol for round / behind unit. Even if now-1DAY/day does today what time today 00: represents the day from 00 -1, the 00: 00.</p>
+        <p>For example, if you search for lastModified field from 2/21/2012 20: (current to date) 30 days prior to the updated document, type the following search form. </p>
+        <source><![CDATA[
+lastModified:[NOW-30DAY TO NOW](=[2012-01-23T00:00:00Z+TO+2012-02-21T20:00:00Z(現在日時)])
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

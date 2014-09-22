@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Log settings</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Log file'>
+      <p>The following summarizes the log file to output the Fess.</p>
+      <table class='table table-striped table-bordered table-condensed' columninfo='lp{10cm}'>
+        <caption>Log file list</caption>
+        <tbody>
+          <tr>
+            <th>File name</th>
+            <th>Contents</th>
+          </tr>
+          <tr>
+            <td>webapps/fess/WEB-INF/logs/fess.out</td>
+            <td>Fess server log. Output logging operation in the management and search screens, etc.</td>
+          </tr>
+          <tr>
+            <td>webapps/fess/WEB-INF/logs/fess_crawler.out</td>
+            <td>Crawl log. Crawling log output.</td>
+          </tr>
+          <tr>
+            <td>logs/Catalina,out</td>
+            <td>Log of the Fess Server (Tomcat). Tomcat logs are output.</td>
+          </tr>
+          <tr>
+            <td>logs/SOLR.log</td>
+            <td>Log server Fess (Solr). SOLR relevant log output.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>If you encounter problems to work check the log.</p>
+    </section>
+    <section name='Log settings'>
+      <p>Sets the output log information is at webapps/fess/WEB-INF/classes/log4j.xml. By default output INFO level.</p>
+      <p>For example, better Fess up to document for Solr log if you want to output in log4j.xml disconnect the commented-out section below.</p>
+      <source><![CDATA[
+<logger name="jp.sf.fess.solr" >
+    <level value ="debug" />
+</logger>
+]]></source>
+      <p>See the Log4J documentation if you need detailed settings for the log output.</p>
+      <subsection name='Communications content crawling'>
+        <p>You can check by changing the logging level of the HttpClient if you want to check HTTP access when crawling content to solve the problem.</p>
+        <source><![CDATA[
+<logger name="org.apache.http" >
+    <level value ="debug" />
+</logger>
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

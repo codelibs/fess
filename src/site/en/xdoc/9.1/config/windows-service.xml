@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Register for the Windows service</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Registered as a Windows service'>
+      <p>You can register the Fess as a Windows service in a Windows environment. How to register a service is similar to the Tomcat.</p>
+      <subsection name='Advance preparation'>
+        <p>Because if you registered as a Windows service, the crawling process is going to see Windows system environment variables<b>Is Java JAVA_HOME environment variables for the system to register</b>, As well as <b>Add %JAVA_HOME%\bin to Path</b>You must.</p>
+      </subsection>
+      <subsection name='Setting'>
+        <p>to edit the webapps \fess\WEB-INF\classes\fess.dicon, remove the-server option.</p>
+      <source><![CDATA[
+    <component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
+        <!--
+        <property name="adminRole">"fess"</property>
+        <property name="authenticatedRoles">"role1"</property>
+        -->
+        <property name="crawlerJavaOptions">new String[] {
+            "-Djava.awt.headless=true", "-XX:+UseGCOverheadLimit",
+            "-XX:+UseConcMarkSweepGC", "-XX:+CMSIncrementalMode",
+            "-XX:+UseTLAB", "-Xmx512m", "-XX:MaxPermSize=128m"
+        }</property>
+    </component>
+]]></source>
+      </subsection>
+      <subsection name='How to register'>
+        <p>First, after installing the Fess from the command prompt service.bat performs (such as Vista to launch as administrator you must). Fess was installed on C:\Java\fess-server-9.1.0.</p>
+      <source><![CDATA[
+> cd C:\Java\fess-server-9.1.0\bin
+> service.bat install fess
+...
+The service 'fess' has been installed.
+]]></source>
+      </subsection>
+      <subsection name='How to check the setting'>
+        <p>By making the following you can review properties for Fess. To run the following, Tomcat Properties window appears.</p>
+      <source><![CDATA[
+> tomcat7w.exe //ES//fess
+]]></source>
+      </subsection>
+      <subsection name='Service settings'>
+        <p>Control Panel - to display the management tool in administrative tools - services, you can set automatic start like normal Windows services.</p>
+      </subsection>
+    </section>
+    <section name='Other'>
+      <subsection name='available in 64-bit environment'>
+        <p>Distributed in the Fess is 64-bit binaries for Windows Tomcat builds based on. If you use 32-bit Windows<a href='http://tomcat.apache.org/download-70.cgi'>Tomcat</a> Of the site from, such as 32-bit Windows zip, please replace tomcat7.exe, tomcat7w.exe, tcnative-1.dll.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

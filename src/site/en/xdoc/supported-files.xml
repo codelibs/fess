@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Search for files</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <head>
+    <meta content='Full-text search, open source, free software, OSS, Solr, namazu, nutch' name='keywords'/>
+    <meta content='Possible to build open source easy-to full-text search server' name='Description'/>
+  </head>
+  <body>
+    <section name='File formats supported by the'>
+      <p>This is a list of the Fess found on the crawl and search file format.</p>
+      <table>
+<tr><th>Type</th><th>Extension</th></tr>
+
+<tr><td>Text</td><td>txt</td></tr>
+<tr><td>XML</td><td>XML</td></tr>
+<tr><td>XML</td><td>mm</td></tr>
+<tr><td>XML</td><td>XML</td></tr>
+<tr><td>HTML</td><td>HTML</td></tr>
+<tr><td>MS Office</td><td>PPT</td></tr>
+<tr><td>MS Office</td><td>doc</td></tr>
+<tr><td>MS Office</td><td>pptx</td></tr>
+<tr><td>MS Office</td><td>xls</td></tr>
+<tr><td>MS Office</td><td>xlsx</td></tr>
+<tr><td>MS Office</td><td>docx</td></tr>
+<tr><td>PDF</td><td>PDF</td></tr>
+<tr><td>Source code</td><td>JS</td></tr>
+<tr><td>Source code</td><td>c</td></tr>
+<tr><td>Source code</td><td>h</td></tr>
+<tr><td>Source code</td><td>Java</td></tr>
+<tr><td>Source code</td><td>HPP</td></tr>
+<tr><td>Source code</td><td>CPP</td></tr>
+<tr><td>Compressed file</td><td>gz</td></tr>
+<tr><td>Compressed file</td><td>tar</td></tr>
+<tr><td>Compressed file</td><td>zip</td></tr>
+
+      </table>
+      <p>Character string extraction from various kinds of unknown files Fess. Not listed in the above file also crawl and you can find. If you have files you want to check,<a href='https://github.com/codelibs/fess-testdata' target='_blank'>Search for system test data repository</a>To please pull requests.</p>
+    </section>
+    <section name='Other'>
+      <p>The following file corresponds with commercial support.</p>
+      <ul>
+        <li>A taro</li>
+        <li>OASYS for Windows</li>
+        <li>DocuWorks</li>
+        <li>AutoCAD</li>
+      </ul>
+    </section>
+  </body>
+</document>

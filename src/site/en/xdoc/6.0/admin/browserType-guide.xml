@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Setting the browser type</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Overview'>
+      <p>Describes the settings related to the browser type. Search results are browser type can be added to the data, for each type of browser browsing search results out into.</p>
+    </section>
+    <section name='How to set up'>
+      <subsection name='How to display'>
+        <p>In Administrator account after logging in, click menu browser types.</p>
+        <img alt='Setting the browser type' src='/images/ja/6.0/admin/browserType-1.png'/>
+      </subsection>
+    </section>
+    <section name='Setting item'>
+      <subsection name='Browser type'>
+        <p>You can set the display name and value. It is used if you want more new terminals. You do not need special customizations are used only where necessary.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

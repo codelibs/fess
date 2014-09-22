@@ -1,0 +1,26 @@
+#!/bin/sh
+CWD="${0%/*}"
+
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 input_xml_dir output_xml_dir" 1>&2
+  exit 1
+fi
+
+in_dir=$1
+out_dir=$2
+
+find $in_dir -name "*.xml" -print | while read in; do
+  out=${in/${in_dir}/${out_dir}}
+  d=$(dirname $out)
+  mkdir -p $d
+  echo $out 1>&2
+  ruby ${CWD}/translatexml.rb -f ja -t en -i $in | \
+  sed -e '
+    s/Croll/Crawl/g
+    s/croll/crawl/g
+    s/Crolling/Crawling/g
+    s/crolling/crawling/g
+    ' \
+  > $out
+done
+

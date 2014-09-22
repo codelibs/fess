@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>NOT search</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='NOT search'>
+      <p>If the document does not contain a word search NOT searching is available.</p>
+      <p><b>However, attention is required because NOT find expensive.</b></p>
+      <subsection name='How to use the'>
+        <p>Locate the NOT search as NOT in front of the Word does not contain. Is NOT in uppercase characters ago and need space.</p>
+        <p>For example, enter the following if you want to find documents that contain the search term 1 does not contain a search term 2 and the search.</p>
+        <source><![CDATA[
+検索語1 NOT 検索語2
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

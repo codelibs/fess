@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Introduction</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Intended audience'>
+<p>
+This document is targeted to users to Fess.
+</p>
+</section>
+<section name='Before you read the'>
+<p>
+This document demonstrates how to search in the Fess.
+Basic knowledge of computer operation becomes necessary.</p>
+</section>
+<section name='Online access'>
+<p>
+Download, professional services, support, and other developer information, visit the following.
+</p>
+<ul>
+<li>Project site: <a href='http://fess.codelibs.org/'>http://Fess.codelibs.org/</a></li>
+</ul>
+</section>
+<section name='Technical support contact information'>
+<p>
+Technical questions about our products, don&apos;t produce the document in solution, visit the following.
+</p>
+<ul>
+<li>Public forum: <a href='http://sourceforge.jp/forum/?group_id=18580'>http://sourceforge.jp/Forum/?group_id=18580</a></li>
+<li>Mailing list: <a href='http://sourceforge.jp/mail/?group_id=18580'>http://sourceforge.jp/mail/?group_id=18580</a></li>
+</ul>
+<subsection name='Commercial support'>
+<p>
+If you need commercial support, maintenance and technical support for this product<a href='http://www.n2sm.net/'>N2SM, Inc....</a>To consult.
+</p>
+</subsection>
+</section>
+<section name='Related third-party Web site references'>
+<p>
+About the effectiveness of the Web site&apos;s third party in the Fess project, described in this document has no responsibility.
+The Fess project through any such site or resource available content, advertising, products, services, and other documents regarding assumes no responsibility, obligations, guarantees.
+For the Fess project through such sites or resources and use of available content, advertising, products, services, and other documents, or or credit, related to it caused or alleged, any injury or damage assumes no responsibility or obligation.</p>
+</section>
+<section name='How to send comments and suggestions'>
+<p>
+Fess project is committed to the improvement of this document, and welcomes comments from readers, such as proposed.
+</p>
+<ul>
+<li>Mailing list: <a href='http://sourceforge.jp/mail/?group_id=18580'>http://sourceforge.jp/mail/?group_id=18580</a></li>
+</ul>
+</section>
+  </body>
+</document>

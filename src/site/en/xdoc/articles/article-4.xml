@@ -1,0 +1,268 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>In Fess make Apache Solr based search server-ed. REST API</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+
+    <section name='Introduction'>
+    <p>
+      The last time<a href='http://codezine.jp/article/detail/5605'>Part of the role-based search</a>The user permission is required in how available Fess or introduced.
+      An introduction of how to do search and the results display in the client-side (browser side), using the REST API is now Fess.
+    In the REST API, Fess to use as a search server Web system of the existing, and integrate changes only the HTML is possible too.</p>
+    <p>
+      In this article, explains Fess 8.1.0. About how to build a Fess<a href='http://codezine.jp/article/detail/4526'>Introduction chapter</a>Please see the.
+    </p>
+    </section>
+    <section name='Intended audience'>
+    <ul>
+      <li>Those who want to search functionality into existing Web systems</li>
+      <li>Those who want to build a search system with AJAX</li>
+    </ul>
+    </section>
+
+    <section name='Required environment'>
+    <p>
+      Regarding the content of this article in the following environment and behavior verification.
+    </p>
+    <ul>
+      <li>IE 10</li>
+      <li>Firefox 21</li>
+    </ul>
+    </section>
+
+    <section name='REST API'>
+    <p>
+      According to normal HTML Fess search expressions in addition to search results using XML and JSON (including JSONP) response is possible as the REST API.
+      Can also use the REST API should build a Fess server will contact only the search results from the existing system to easily.
+      I think independent development language such as XML or JSON results format, so easy-to-integrate Fess to non-Java System.
+    You can handle it easily even if it is XML or JSON support in JavaScript libraries, so as Ajax.</p>
+    <p>
+      See below about what return the REST API of Fess.
+    </p>
+    <ol>
+      <li><a href='http://fess.codelibs.org/ja/4.0/user/xml-response.html' target='_blank'>XML response</a></li>
+      <li><a href='http://fess.codelibs.org/ja/4.0/user/json-response.html' target='_blank'>JSON (JSONP) response</a></li>
+    </ol>
+    <p>
+      Fess uses Apache Solr as an internal search engine.
+      SOLR also provides XML and JSON API that Fess API is different.
+      Benefits as well as SOLR API, API Fess might Fess API in various Fess, such as control of search log management and viewing rights of specific features are available.
+    Would use the Solr case developed from the structure of the document crawling their own good, but easy to add and search features that Fess, can reduce the development cost of the many.</p>
+    </section>
+
+    <section name='Building a site using the REST API'>
+    <p>
+      Describes how to build a Fess REST API using this site.
+      Use the JSON response to Fess server interaction.
+      Fess server to utilize this time uses a Fess server in the Fess project released as a demo.
+      If the install the Fess 4.0.0 or later if you want to use the Fess server of your own.
+    Fess 4.0.0 or later supports JSONP.</p>
+
+    <subsection name='JSON and JSONP'>
+    <p>
+      Same-Origin policy should be aware when using the AJAX security model.
+      You must use the JSONP can use JSON if it displays in the browser HTML output and Fess server exists in the same domain, but different.
+    You can use the JSONP in Fess REST API in the JSON response request parameters with callback key value by passing.</p>
+    <div class='centerimg'>
+      <div class='caption'>Same-Origin policy. (B) the must Fess return search results (JSON) becomes another domain if you use the JSONP.</div>
+      <div class='img'>
+        <a href='/images/ja/article/4/sameorigin.png' rel='lightbox'><img alt='Same-Origin policy. (B) of if Fess return search results (JSON) another domain to you for must use the JSONP.' src='/images/ja/article/4/sameorigin.png'/></a>
+      </div>
+    </div>
+    <p>
+      Advances the story in case that this time there was HTML and Fess servers are in different domains.
+    So, please remove the callback from the request parameter if the good example, but in the same domain by using the JSONP.</p>
+    </subsection>
+
+    <subsection name='To create a file'>
+    <p>
+      Implements the search process, this time using JavaScript in HTML.
+      As a JavaScript library using jQuery.
+      You can also process, such as AJAX, such as easy to implement in jQuery.
+    Files you create will become.</p>
+    <ul>
+      <li>To display the search form and search results to HTML file &apos;index.html&apos;</li>
+      <li>JS file to communicate with Fess server &apos;fess.js&apos;</li>
+    </ul>
+    <p>
+      In the examples of this building has implemented the following features.
+    </p>
+    <ul>
+      <li>Search buttons send a search request.</li>
+      <li>In the search results list</li>
+      <li>Search results paging</li>
+    </ul>
+    </subsection>
+
+    <subsection name='Create a HTML file'>
+    <p>
+      Create the HTML search form and search results.
+      Easy-to-understand this time is to adjust the design with CSS, without to have simple tag structure.
+    In one of the following HTML file to use.</p>
+    <div class='src_frame'>
+      <div class='caption'>the contents of the index.html</div>
+<pre class='prettyprint'>
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
+&lt;title&gt;Search site&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;header&quot;&gt;
+  &lt;form id=&quot;searchForm&quot;&gt;
+    &lt;input id=&quot;searchQuery&quot; type=&quot;text&quot; name=&quot;query&quot; size=&quot;30&quot;&gt;
+    &lt;input id=&quot;searchButton&quot; type=&quot;submit&quot; value=&quot;検索&quot;&gt;
+    &lt;input id=&quot;searchStart&quot; type=&quot;hidden&quot; name=&quot;start&quot; value=&quot;0&quot;&gt;
+    &lt;input id=&quot;searchNum&quot; type=&quot;hidden&quot; name=&quot;num&quot; value=&quot;20&quot;&gt;
+  &lt;/form&gt;
+&lt;/div&gt;
+&lt;div id=&quot;subheader&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;result&quot;&gt;&lt;/div&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;fess.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+    </div>
+    <p>
+      We look below the body tag, and first id attribute in the header div tag where search input box and the search button located by.
+      Also, in the hidden form holds display start position (start) and the number (num).
+      Search requests submitted in JavaScript update will start and the num value.
+      However, show is 1 page per, and no ability to change the number displayed in this sample code, so the value of num is unchanged.
+    Also, you will not send this form page transitions occur if you have JavaScript enabled for on the search form submit search requests are communicated Ajax.</p>
+    <p>
+      Displays information such as the number of hits in the subheader for the following div tag where to search.
+    displays search results and paging links in the div tag of the result.</p>
+    <p>
+      Load the &apos;fess.js&apos; recently created this jQuery JS files and JavaScript.
+    I try to get via Google CDN may save the jQuery JS file in the same directory as index.html, but this time.</p>
+    </subsection>
+
+    <subsection name='Create a JS file'>
+    <p>
+      Create a JS file to display the search results, and then communicates with the Fess server &apos;fess.js&apos;.
+    And create a &apos;fess.js&apos; with the following contents will put in the same directory as index.html.</p>
+    <div class='src_frame'>
+      <div class='caption'>contents of Fess.js</div>
+<pre class='prettyprint'>
+$ (function() {/ / (1) Fess URL var baseUrl = &quot;http://search.n9sm.co.jp/JSON?callback=?</pre>
+    </div>
+    <p>
+      runs after the DOM of the HTML file is built &quot;fess.js&quot; process.
+      First, specify Fess server URL by 1.
+      In the specify Fess public demo server.
+      To get search results JSON data from external servers using JSONP.
+    If you use JSON, JSONP, without callback =? is not required.</p>
+    <p>
+      2 save the jQuery object for the search button.
+    Maintain the variable to use the jQuery object search button several times and reuse.</p>
+    <p>
+      3 defines search functions.
+    Contents of this function is described in the following sections.</p>
+    <p>
+      20 registers events when the search form is submitted.
+      Search button press or when the decision was made in the search input field Enter key press occurs when registered at 20.
+      Search processing function doSearch call when the event occurs.
+    used for paging is the value passed when calling the search processing function is the value of the Navi.</p>
+    <p>
+      Register the event at 21 and 22 be added paging links are clicked.
+      You need to register event by the delegate because these links are added dynamically.
+    20 Similarly, these events call the search functions.</p>
+    </subsection>
+
+    <subsection name='Search processing function doSearch'>
+    <p>
+      Describes the search processing function doSearch 3.
+    </p>
+    <p>
+      Gets the starting position and number of 4.
+      The value of these in the search form in the header area saved as a hidden value.
+    Display start position is set the default value if other values because 0 or more, the number of intended value from 1 to 100.</p>
+    <p>
+      Determines the value of parameter navi passed doSearch event registration, was 5 when the fix at the start of the show.
+    Here,-1 is previous page move, 1 following page move, otherwise, it will change to move to the first page.</p>
+    <p>
+      The decision to terminate the process and run a search if entered the search input field value is 6, if empty, without anything.
+    </p>
+    <p>
+      7 in order to prevent double sub Mitt Fess Server contact while search button to turn off in.
+    </p>
+    <p>
+      Assemble the URL to send Ajax requests in 8.
+    1 URL search, starting position, and number of joins.</p>
+    <p>
+      Send Ajax requests in 9.
+      Use the JSONP so specify the jsonp on dataType.
+      Change the json to use JSON.
+      Request comes back to normal, and runs the success function.
+    search results from Fess server returned success argument object is passed.</p>
+    <p>
+      First of all, in 10 has confirmed the contents of the response status.
+      0 is set if the search request was processed successfully. More information on Fess JSON response<a href='http://fess.codelibs.org/ja/4.0/user/json-response.html' target='_blank'>Fess sites</a>Please make sure.
+    </p>
+    <p>
+      Display a message if the search request is processed correctly, did not hit the search results 11 conditional statements in with content of the subheader area empty, did not hit results in the result area.
+    </p>
+    <p>
+      If you hit search results in the condition statement in the 12 search result processing.
+      Sets the execution time and number of messages in the 13 subheader area.
+      14 we will add a reault area search results.
+      Search results are stored as an array of data.response.result.
+    results [i]...-in by accessing search results can retrieve field values of the document.</p>
+    <p>
+      Page number in the 15 current page and add a link to the previous page and next page result.
+      With 16 saves current starting position and number of hidden in the search form.
+    The starting position and number of search requests at next reuse.</p>
+    <p>
+      Change the on-screen position of pages in 17.
+    For the page itself is not updated when clicked next page links to scrawlTop moves to the top of the page.</p>
+    <p>
+      18 the search process after search button to enable the.
+    The request succeeds or fails will perform complete to be called in.</p>
+    <p>
+      Avoid sending form or link after a search operation functions was called 19 returns false.
+    From this page transitions occur.</p>
+    </subsection>
+
+    <subsection name='Run'>
+    <p>
+      access the &apos;index.html&apos; in the browser.
+    Displays the search form:</p>
+    <div class='centerimg'>
+      <div class='caption'>Search form</div>
+      <div class='img'>
+        <a href='/images/ja/article/4/searchform.png' rel='lightbox'><img alt='Search form' src='/images/ja/article/4/searchform.png'/></a>
+      </div>
+    </div>
+    <p>
+      Enter a suitable search term and press the search button to display search results.
+    If there are 20 is the default display number, hit the number of search results displays links to the following pages in the bottom of the list.</p>
+    <div class='centerimg'>
+      <div class='caption'>Search results</div>
+      <div class='img'>
+        <a href='/images/ja/article/4/searchresult.png' rel='lightbox'><img alt='Search results' src='/images/ja/article/4/searchresult.png'/></a>
+      </div>
+    </div>
+    </subsection>
+
+    </section>
+
+    <section name='Summary'>
+    <p>
+      Using the REST API of the Fess and tried building jQuery-based client search site.
+    Build system not only browser-based applications that use the REST API, use the Fess called from another application.</p>
+    <p>
+      I want to show you how the next time the database scrawl functionality to add full-text search capabilities to an existing database.
+    </p>
+    </section>
+
+    <section name='Reference material'>
+    <ul>
+      <li><a href='http://fess.codelibs.org/ja/'>Fess</a></li>
+      <li><a href='http://jquery.com/'>jQuery</a></li>
+    </ul>
+    </section>
+  </body>
+</document>

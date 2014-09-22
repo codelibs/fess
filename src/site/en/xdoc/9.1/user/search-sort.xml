@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Search sort</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Sort search'>
+      <p>To sort the search results by specifying the fields such as search time.</p>
+      <subsection name='Sort field'>
+      <p>You can sort the following fields by default.</p>
+      <table>
+        <caption>Sort fields list</caption>
+        <tbody>
+          <tr>
+            <th>Field name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <th>Tstamp</th>
+            <td>On the crawl</td>
+          </tr>
+          <tr>
+            <th>contentLength</th>
+            <td>You crawl the content size</td>
+          </tr>
+          <tr>
+            <th>lastModified</th>
+            <td>Last update of the content you want to crawl</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Adding custom fields as sort in Customizing.</p>
+      </subsection>
+      <subsection name='How to use the'>
+        <p>You can select the sorting criteria when you search. Sorting criteria can be selected in the search options dialog by pressing the options button will appear.</p>
+        <img alt='Sorting criteria' src='/images/ja/9.1/user/search-sort-1.png'/>
+        <p>Also, for sorting in the search field sort: the field name to sort and field names separated by colon (:) fill out the search form, the search.</p>
+        <p>In ascending order sort the content size as a search term, Fess is below.</p>
+        <source><![CDATA[
+Fess sort:contentLength
+]]></source>
+        <p>To sort in descending order as below.</p>
+        <source><![CDATA[
+Fess sort:contentLength.desc
+]]></source>
+        <p>If you sort by multiple fields separated list, shown below.</p>
+        <source><![CDATA[
+Fess sort:contentLength.desc,lastModified
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

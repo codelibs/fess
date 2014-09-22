@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Mobile device information settings</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Mobile phone information update'>
+      <p>The mobile device information<a class='externalLink' href='http://valueengine.jp/'>ValueEngine Inc.</a>That provided more available. If you want to use the latest mobile device information downloaded device profile save the removed _YYYY-MM-DD and webapps/fess/WEB-INF/classes/device. After the restart to enable change.</p>
+      <source><![CDATA[
+ProfileData_YYYY-MM-DD.csv -> ProfileData.csv
+UserAgent_YYYY-MM-DD.csv -> UserAgent.csv
+DisplayInfo_YYYY-MM-DD.csv -> DisplayInfo.csv
+]]></source>
+    </section>
+  </body>
+</document>

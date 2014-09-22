@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Wildcard</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Wildcard'>
+      <p>You can use one or multiple character wildcard search terms within. The can be specified as a one-character wildcard, * is specified as the multiple-character wildcard. Wildcards are not available in the first character. You can use wildcards for words. Wildcard search for the sentence.</p>
+      <subsection name='How to use the'>
+        <p>If you use one character wildcard shown below? The available.</p>
+        <source><![CDATA[
+te?t
+]]></source>
+        <p>If the above is treated as a wildcard for one character, such as text or test.</p>
+        <p>If you use the multiple character wildcard use * below</p>
+        <source><![CDATA[
+test*
+]]></source>
+        <p>If the above is treated as a wildcard for multiple characters, such as test, tests or tester. Also,</p>
+        <source><![CDATA[
+te*t
+]]></source>
+        <p>The so can be also used in the search term.</p>
+      </subsection>
+      <subsection name='Terms of use'>
+        <p>The wildcard string indexed using target. Therefore, because if the index has been created, such as bi-gram be treated meaning fixed string length in Japan Japanese wildcard in Japan, not expected behavior. Use in the field, if you use a wildcard in Japan, that used morphological analysis.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

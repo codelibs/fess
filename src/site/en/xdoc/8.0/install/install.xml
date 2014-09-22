@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Installation</title>
+    <authors>
+      <person email='shinsuke@yahoo.co.jp' name='Shinsuke Sugaya'/>
+    </authors>
+  </properties>
+  <body>
+    <section name='Installation requirements'>
+<p>
+Fess can be available in these environments.
+</p>
+<ul>
+<li>OS: Windows, Unix, and Java can run OS environment</li>
+<li>Java: Java 7 or higher (Java 6 can operate in)</li>
+</ul>
+<p>
+If Java is not installed in the environment we want to Fess from http://java.sun.com/ get JDK for Java 7 and above, please install.
+</p>
+    </section>
+    <section name='Download'>
+<p>
+<a href='http://sourceforge.jp/projects/fess/releases/'>http://sourceforge.jp/projects/Fess/releases/</a> From the download the latest Fess package.
+</p>
+    </section>
+    <section name='Installation'>
+<p>
+Expand the downloaded fess-server-x.y.zip.
+If you installed in the UNIX environment, in the bin added the performing rights to a script.</p>
+<source><![CDATA[
+$ unzip fess-server-x.y.zip
+$ cd fess-server-x.y
+$ chmod +x bin/*.sh   # (Unix環境のみ)
+]]></source>
+    </section>
+    <section name='Changing the administrator password'>
+<p>
+Administrator account is managed by the application server. Fess Server standard available Tomcat, as well as to the user changing the Tomcat.
+Modify the password for the admin account of the conf/tomcat-user.xml if you want to change.</p>
+<source><![CDATA[
+<user username="admin" password="admin" roles="fess"/>
+]]></source>
+<p>
+see the Tomcat documentation or JAAS authentication specification to use Tomcat-user.XML file management method other than.
+</p>
+    </section>
+    <section name='SOLR server password change'>
+<p>
+To access the Solr into Fess server is password becomes necessary.
+Change the default passwords in production, etc.</p>
+<p>
+How to change the password, you must first change the password attribute of the conf/tomcat-user.xml solradmin.
+</p>
+<source><![CDATA[
+  <user username="solradmin" password="solradmin" roles="solr"/>
+]]></source>
+<p>
+Describes the provided password webapps/fess/WEB-INF/classes/solrlib.dicon the following points tomcat-user.xml to the next.
+</p>
+<source><![CDATA[
+<component class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+    <arg>"solradmin"</arg> <!-- ユーザー名 -->
+    <arg>"solradmin"</arg> <!-- パスワード -->
+</component>
+]]></source>
+    </section>
+    <section name='Change the password for the Tomcat console'>
+<p>
+To manage can manage Solr from Fess server deployed on Tomcat context need a password.
+Change the default passwords in production, etc.</p>
+<p>
+How to change password the change manager conf/tomcat-user.xml password attributes.
+</p>
+
+<source><![CDATA[
+  <user username="manager" password="manager" roles="manager-script"/>
+]]></source>
+<p>
+Describes the provided password webapps/fess/WEB-INF/classes/app.dicon the following points tomcat-user.xml to the next.
+</p>
+
+<source><![CDATA[
+<component class="jp.sf.fess.helper.impl.TomcatManagementHelperImpl$SolrInstance">
+  <property name="name">"solrServer1"</property>
+  <property name="managerUrl">"http://localhost:8080/manager/text/"</property>
+  <property name="contextPath">"/solr"</property>
+  <property name="username">"manager"</property>
+  <property name="password">"manager"</property> <!-- パスワード -->
+</component>
+]]></source>
+    </section>
+    <section name='Changing the encryption key'>
+<p>
+Login at return path settings, in the use encryption and decryption.
+Please change the default password, especially in production.</p>
+<p>
+How to change the change the key value in the webapps/fess/WEB-INF/classes/app.dicon.
+Set the 16-character alphanumeric.</p>
+<source><![CDATA[
+<!-- CHANGE THE FOLLOWING KEY -->
+<property name="key">"1234567890123456"</property>
+]]></source>
+    </section>
+  </body>
+</document>

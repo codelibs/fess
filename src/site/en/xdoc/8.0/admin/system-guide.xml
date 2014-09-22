@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>System settings</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Overview'>
+      <p>Describes the settings related to Solr, here are registered in the server settings for crawling and Fess. SOLR servers are grouped by file, has been registered.</p>
+    </section>
+    <section name='How to set up'>
+      <subsection name='How to display'>
+        <p>In Administrator account after logging in, click menu system settings.</p>
+        <img alt='System settings' src='/images/ja/8.0/admin/system-1.png'/>
+      </subsection>
+    </section>
+    <section name='Setting item'>
+      <subsection name='System State'>
+        <p>Update server appears as a running if additional documents, such as the. Crawl process displays the session ID when running. You can safely shut down and Fess server to shut down is not running when shut down. If the process does not terminate if you shut a Fess is running to finish crawling process.</p>
+        <p>You can manually crawling under the crawl start button press stop if it is that.</p>
+      </subsection>
+      <subsection name='Search for the update server'>
+        <p>Server group name to search for and update available will be shown.</p>
+      </subsection>
+      <subsection name='SOLR status settings'>
+        <p>In Fess Solr Server conducts a management server and index State States. Whether or not the server state can be access to the Solr Server manages. Whether or not successfully crawl index the State could manage. You can use search server status is in effect, regardless of the State of the index. The crawl Server State is enabled and can index State runs correctly if the preparation or completion. Running start crawl manually index State preparing changes automatically. Server recovery server status and auto-recovery enabled state.</p>
+      </subsection>
+      <subsection name='SOLR instance'>
+        <p>You can be sure SOLR server instance state. You can also, for each instance, start, stop, reload request.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

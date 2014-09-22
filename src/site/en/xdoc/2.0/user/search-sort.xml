@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Search sort</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Sort search'>
+      <p>To sort the search results by specifying the fields such as search time.</p>
+      <p>You can sort the following fields by default.</p>
+      <table>
+        <tbody>
+          <tr>
+            <th>Tstamp</th>
+            <td>On the crawl</td>
+          </tr>
+          <tr>
+            <th>contentLength</th>
+            <td>You crawl the content size</td>
+          </tr>
+          <tr>
+            <th>lastModified</th>
+            <td>Last update of the content you want to crawl</td>
+          </tr>
+        </tbody>
+      </table>
+      <subsection name='How to sort'>
+        <p>If you want to sort &apos; sort: field name &apos; in to fill out the search form, the search.</p>
+        <p>In ascending order sort the content size as a search term, Fess is below.</p>
+        <source><![CDATA[
+Fess sort:contentLength
+]]></source>
+        <p>To sort in descending order as below.</p>
+        <source><![CDATA[
+Fess sort:contentLength.desc
+]]></source>
+        <p>If you sort by multiple fields separated list, shown below.</p>
+        <source><![CDATA[
+Fess sort:contentLength.desc,lastModified
+]]></source>
+      </subsection>
+    </section>
+  </body>
+</document>

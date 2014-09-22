@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>GEO search</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Overview'>
+      <p>Together with Google maps, including document with latitude and longitude location information, GEO (GEO) you can use the search.</p>
+    </section>
+    <section name='Setting'>
+      <subsection name='When the index is generated'>
+        <p>Location is defined as a feed that contains the location information.
+        When generating the index in Solr latitude longitude set to location feeds in formats such as 45.17014,-93.87341, register the document.
+        Also sets the value as the latitude_s and longitude_s fields if you want to display latitude and longitude as a search result. * _s is available as a dynamic field of Solr string.</p>
+      </subsection>
+      <subsection name='Search:'>
+        <p>During the search specifies in the request parameter to latitude and longitude, the distance.
+        View the results in the distance (km) specified by distance-based latitude information (latitude, longitude). Latitude and longitude and distances is treated as double.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

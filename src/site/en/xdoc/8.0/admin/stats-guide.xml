@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Statistics</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Overview'>
+      <p>Here are statistics. You can search log and click log.</p>
+    </section>
+    <section name='How to use the'>
+      <subsection name='How to display'>
+        <p>In Administrator account after logging in, click the menu statistics.</p>
+        <img alt='Statistics' src='/images/ja/8.0/admin/stats-1.png'/>
+      </subsection>
+      <subsection name='Statistics'>
+        <p>You can select the target by selecting the type of report, to make sure. Displayed in order by the specified criteria.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

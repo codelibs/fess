@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Open source full-text search server Fess (Fess)</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <head>
+    <meta content='Full-text search, open source, free software, oss, solr, namazu, gsa' name='keywords'/>
+    <meta content='Possible to build open source easy-to full-text search server' name='Description'/>
+  </head>
+  <body>
+    <section name='Overview'>
+      <p>The Fess &apos;<b>Easily 5 minutes with full-text search server can be built</b>&quot;Is. Any operating system, it is possible to have a Java runtime environment. Fess is offered in the Apache license and offers free (freeware).</p>
+    </section>
+    <section name='Demo site'>
+      <div>
+        <div style='width:220px;float:left;'>
+          <a href='http://search.n2sm.co.jp/' target='_blank'><img src='/images/ja/demo-1.png'/></a>
+          <div>Standard demo</div>
+        </div>
+        <div style='width:220px;float:left;'>
+          <a href='http://demo.n2search.net/aspdemo/' target='_blank'><img src='/images/ja/demo-2.png'/></a>
+          <div>Sites within search demo</div>
+        </div>
+        <div style='width:220px;float:left;'>
+          <a href='http://demo.n2search.net/ecdemo/' target='_blank'><img src='/images/ja/demo-3.png'/></a>
+          <div>EC-friendly product search demo</div>
+        </div>
+        <div style='clear:both;'/>
+      </div>
+    </section>
+    <section name='Features'>
+      <ul>
+        <li>Easily 5 minutes with full-text search server can be built</li>
+        <li>In the Apache license (free soft, so made available free) offer</li>
+        <li>OS-independent (Java based build)</li>
+        <li>Web, file system, Windows shared folder and database crawling.</li>
+        <li>Support for many file formats, such as MS Office and PDF</li>
+        <li><a class='externalLink' href='http://lucene.apache.org/solr/' target='_blank'>Apache Solr</a> Available as a search engine</li>
+        <li>BASIC/DIGEST/NTLM authentication site can search</li>
+        <li>Log status enables out placement of search results (in an ionic environment such as ActiveDirectory available)</li>
+        <li>Josearch with map information</li>
+        <li>On the browser can crawl target setting and search screen editing</li>
+        <li>Sort search results by label</li>
+        <li>Path translation request header information added, overlapping domain settings, search results</li>
+        <li>Search results in XML/JSON/JSONP format output enables cooperation with external systems</li>
+        <li>Summary of search logs and click Log</li>
+        <li>Faceted drill-down support</li>
+        <li>AutoComplete / suggest feature</li>
+        <li>User dictionary and synonym dictionary editing function</li>
+        <li>Related documents view features</li>
+        <li>Search results cache feature and screen shots view features</li>
+        <li>Proxy function of search results</li>
+        <li>Click Open feature of desktop search and local files</li>
+        <li>Smartphone support (Responsive Web Design)</li>
+        <li>To the SOLR server group and for Motorsport</li>
+        <li>Depending on the application the flexibility to design available</li>
+      </ul>
+    </section>
+    <section name='News'>
+      <dl>
+        <dt>2014-06-28</dt>
+        <dd>
+          <a class='externalLink' href='http://sourceforge.jp/projects/fess/news/24682'>Fess 9.2 released</a>
+        </dd>
+        <dt>2014-03-26</dt>
+        <dd>
+          <a class='externalLink' href='http://sourceforge.jp/projects/fess/news/24607'>Fess 9.1 released</a>
+        </dd>
+        <dt>2014-02-07</dt>
+        <dd>
+          <a class='externalLink' href='http://sourceforge.jp/projects/fess/news/24562'>Fess 9.0.0 release</a>
+        </dd>
+      </dl>
+      <p>News of the past<a href='news.html'>Click here</a>Please visit.</p>
+    </section>
+    <section name='Commercial support'>
+      <p>Fess is Apache licensed open-source products, personal and commercial free in freely available.</p>
+      <a href='http://www.n2sm.net/n2search.html' target='_blank'><img src='/images/ja/n2search_225x50.png'/></a>
+      <p>If you need and Fess customization, implementation and support services<a href='http://www.n2sm.net/n2search.html' target='_blank'>Commercial support</a>Please visit. Performance tuning, such as, search quality and crawling slowly accommodated in commercial support.</p>
+    </section>
+  </body>
+</document>

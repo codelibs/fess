@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Uninstall</title>
+    <authors>
+      <person email='shinsuke@yahoo.co.jp' name='Shinsuke Sugaya'/>
+    </authors>
+  </properties>
+  <body>
+    <section name='Uninstall'>
+<p>
+You can uninstall by deleting the installation stops after the Fess fess-server-x.y directory.
+</p>
+<source><![CDATA[
+$ rm -r fess-server-x.y
+]]></source>
+    </section>
+  </body>
+</document>

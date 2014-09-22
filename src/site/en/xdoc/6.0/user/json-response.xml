@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Search results for JSON</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Search by the JSON response'>
+      <p>Outputs a JSON results of Fess. You must in order to emit JSON enabled keep JSON response in the General Management screen crawl settings.</p>
+      <subsection name='Request'>
+        <p>To get JSON output <code>http://localhost:8080/Fess/JSON? query = search terms</code> Of these sends a request. Request parameters are as follows.</p>
+        <table columninfo='lp{10cm}'>
+          <caption>Request parameter</caption>
+          <tbody>
+            <tr>
+              <th>query</th>
+              <td>Search language. Pass the URL encoding.</td>
+            </tr>
+            <tr>
+              <th>Start</th>
+              <td>The number of where to start. Starts at 0.</td>
+            </tr>
+            <tr>
+              <th>NUM</th>
+              <td>The number of display. The default is 20. You can display up to 100.</td>
+            </tr>
+            <tr>
+              <th>labelTypeValue</th>
+              <td>The label value. Use to specify the label.</td>
+            </tr>
+            <tr>
+              <th>callback</th>
+              <td>If you use the JSONP callback name. You do not need to specify if you do not use the JSONP.</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+      <subsection name='Responses to'>
+        <p>Returns the following response.</p>
+        <source><![CDATA[
+{
+    "response": {
+        "version": 1,
+        "status": 0,
+        "query": "\u30C6\u30B9\u30C8",
+        "execTime": 0.59,
+        "pageSize": 20,
+        "pageNumber": 1,
+        "recordCount": 101,
+        "pageCount": 6,
+        "result": [
+            {
+                "site": "speedtest.goo.ne.jp\u002F",
+                "contentDescription": "goo \u306E\u63D0\u4F9B\u3059\u308B\u30B9\u30D4\u3C..",
+                "host": "speedtest.goo.ne.jp",
+                "lastModified": "1284739487873",
+                "cache": "\u9FA0-->\n<meta http-equiv=\u0022Content-Type\u0022 content=\..",
+                "score": "4.98744",
+                "digest": "goo \u306E\u63D0\u4F9B\u3059\u308B\u30B9\u30D4\u30FC\u30C9<em>..",
+                "tstamp": "1284739487887",
+                "url": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F",
+                "id": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F;type=au,docomo,pc,softbank",
+                "mimetype": "text\u002Fhtml",
+                "title": "\ngoo \u30B9\u30D4\u30FC\u30C9\u30C6\u30B9\u30C8\n",
+                "contentTitle": "\ngoo \u30B9\u30D4\u30FC\u30C9\u30C6\u30B9\u30C8\n",
+                "boost": "1.0",
+                "contentLength": "17810",
+                "urlLink": "http:\u002F\u002Fspeedtest.goo.ne.jp\u002F"
+            },
+...
+        ]
+    }
+}
+]]></source>
+        <p>Each element is as follows.</p>
+        <table>
+          <caption>Responses to information</caption>
+          <tbody>
+            <tr>
+              <th>response</th>
+              <td>The root element.</td>
+            </tr>
+            <tr>
+              <th>version</th>
+              <td>Format version.</td>
+            </tr>
+            <tr>
+              <th>status</th>
+              <td>The status of the response. 0, the normal response.</td>
+            </tr>
+            <tr>
+              <th>query</th>
+              <td>Search language.</td>
+            </tr>
+            <tr>
+              <th>execTime</th>
+              <td>Response time. Unit is seconds.</td>
+            </tr>
+            <tr>
+              <th>pageSize</th>
+              <td>The number of display.</td>
+            </tr>
+            <tr>
+              <th>pageNumber</th>
+              <td>Page number.</td>
+            </tr>
+            <tr>
+              <th>recordCount</th>
+              <td>Number of hits for the search term.</td>
+            </tr>
+            <tr>
+              <th>pageCount</th>
+              <td>Page number of the number of hits for the search term.</td>
+            </tr>
+            <tr>
+              <th>result</th>
+              <td>Parent element of the search results.</td>
+            </tr>
+            <tr>
+              <th>site</th>
+              <td>The name of the site.</td>
+            </tr>
+            <tr>
+              <th>contentDescription</th>
+              <td>A description of the content.</td>
+            </tr>
+            <tr>
+              <th>host</th>
+              <td>The name of the host.</td>
+            </tr>
+            <tr>
+              <th>lastModified</th>
+              <td>Last update date. 1970 / 01 / 01 milliseconds starting at 00: 00: 00.</td>
+            </tr>
+            <tr>
+              <th>cache</th>
+              <td>The contents of the content.</td>
+            </tr>
+            <tr>
+              <th>score</th>
+              <td>Score values of the document.</td>
+            </tr>
+            <tr>
+              <th>Digest</th>
+              <td>Digest a string of documents.</td>
+            </tr>
+            <tr>
+              <th>Tstamp</th>
+              <td>Document creation date. 1970 / 01 / 01 milliseconds starting at 00: 00: 00.</td>
+            </tr>
+            <tr>
+              <th>URL</th>
+              <td>The URL of the document.</td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>The ID of the document.</td>
+            </tr>
+            <tr>
+              <th>mimetype</th>
+              <td>The MIME type.</td>
+            </tr>
+            <tr>
+              <th>title</th>
+              <td>The title of the document.</td>
+            </tr>
+            <tr>
+              <th>contentTitle</th>
+              <td>The title of the document for viewing.</td>
+            </tr>
+            <tr>
+              <th>contentLength</th>
+              <td>The size of the document.</td>
+            </tr>
+            <tr>
+              <th>urlLink</th>
+              <td>The URL as the search results.</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+    </section>
+  </body>
+</document>

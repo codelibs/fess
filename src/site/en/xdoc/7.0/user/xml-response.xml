@@ -1,0 +1,207 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>XML search results</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Search through XML response'>
+      <p>To emit the XML results of Fess. You need to do this output in XML Management screen crawl settings XML response enabled by you.</p>
+      <subsection name='Request'>
+        <p>To get the output XML <code>http://localhost:8080/Fess/XML? query = search terms</code> Of these sends a request. Request parameters are as follows.</p>
+        <table>
+          <caption>Request parameter</caption>
+          <tbody>
+            <tr>
+              <th>query</th>
+              <td>Search language. Pass the URL encoding.</td>
+            </tr>
+            <tr>
+              <th>Start</th>
+              <td>The number of where to start. Starts at 0.</td>
+            </tr>
+            <tr>
+              <th>NUM</th>
+              <td>The number of display. The default is 20. You can display up to 100.</td>
+            </tr>
+            <tr>
+              <th>fields.label</th>
+              <td>The label value. Use to specify the label.</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+      <subsection name='Responses to'>
+        <p>Returns the following response.</p>
+        <source><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <version>1</version>
+  <status>0</status>
+  <query>テスト</query>
+  <exec-time>0.64</exec-time>
+  <page-size>20</page-size>
+  <page-number>1</page-number>
+  <record-count>101</record-count>
+  <page-count>6</page-count>
+  <result>
+    <doc>
+      <site>speedtest.goo.ne.jp/</site>
+      <content-description>goo の提供するスピード&lt;em&gt;テスト&lt;/em&gt;ページです</content-description>
+      <host>speedtest.goo.ne.jp</host>
+      <last-modified>1284739487873</last-modified>
+      <cache>--&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"&gt;
+&lt;title&gt;
+goo スピード&lt;em&gt;テスト&lt;/em&gt;
+&lt;/title&gt;
+&lt;meta..."&gt;
+
+&lt;meta name="description" content="goo の提供するスピード&lt;em&gt;テスト&lt;/em&gt;ページです"&gt;
+&lt;meta name="keywords" content="ADSL,ブロードバンド,フレ...ッツ,BB,無線LAN,CATV,ISDN,スピード&lt;em&gt;
+テスト&lt;/em&gt;"&gt;
+&lt;meta name="Copyright" content="Copyright &amp;copy; ...://speedtest.goo.ne.jp/"
+&gt;&lt;img src="/img/h1/h1_76.gif" width="129" height="22" border="0" alt="スピード&lt;em&gt;テスト
+&lt;/em&gt;"&gt;&lt;img src..." color="#ffffff"&gt;goo スピード&lt;em&gt;テスト&lt;/em&gt;&lt;/font
+&gt;&lt;/a&gt;&lt;/b&gt;&lt;/td&gt;
+&lt;!--/NAME SERVICE--&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td</cache>
+      <score>4.98744</score>
+      <digest>goo の提供するスピード&lt;em&gt;テスト&lt;/em&gt;ページです</digest>
+      <tstamp>1284739487887</tstamp>
+      <url>http://speedtest.goo.ne.jp/</url>
+      <id>http://speedtest.goo.ne.jp/;type=au,docomo,pc,softbank</id>
+      <mimetype>text/html</mimetype>
+      <title>
+goo スピードテスト
+</title>
+      <content-title>
+goo スピードテスト
+</content-title>
+      <boost>1.0</boost>
+      <content-length>17810</content-length>
+      <url-link>http://speedtest.goo.ne.jp/</url-link>
+    </doc>
+...
+  </result>
+</response>
+]]></source>
+        <p>Each element is as follows.</p>
+        <table>
+          <caption>Responses to information</caption>
+          <tbody>
+            <tr>
+              <th>response</th>
+              <td>The root element.</td>
+            </tr>
+            <tr>
+              <th>version</th>
+              <td>Format version.</td>
+            </tr>
+            <tr>
+              <th>status</th>
+              <td>The status of the response. 0, the normal response.</td>
+            </tr>
+            <tr>
+              <th>query</th>
+              <td>Search language.</td>
+            </tr>
+            <tr>
+              <th>exec-time</th>
+              <td>Response time. Unit is seconds.</td>
+            </tr>
+            <tr>
+              <th>page-size</th>
+              <td>The number of display.</td>
+            </tr>
+            <tr>
+              <th>page-number</th>
+              <td>Page number.</td>
+            </tr>
+            <tr>
+              <th>record-count</th>
+              <td>Number of hits for the search term.</td>
+            </tr>
+            <tr>
+              <th>page-count</th>
+              <td>Page number of the number of hits for the search term.</td>
+            </tr>
+            <tr>
+              <th>result</th>
+              <td>Parent element of the search results.</td>
+            </tr>
+            <tr>
+              <th>doc</th>
+              <td>The elements of the search results.</td>
+            </tr>
+            <tr>
+              <th>site</th>
+              <td>The name of the site.</td>
+            </tr>
+            <tr>
+              <th>content-description</th>
+              <td>A description of the content.</td>
+            </tr>
+            <tr>
+              <th>host</th>
+              <td>The name of the host.</td>
+            </tr>
+            <tr>
+              <th>last-modified</th>
+              <td>Last update date. 1970 / 01 / 01 milliseconds starting at 00: 00: 00.</td>
+            </tr>
+            <tr>
+              <th>cache</th>
+              <td>The contents of the content.</td>
+            </tr>
+            <tr>
+              <th>score</th>
+              <td>Score values of the document.</td>
+            </tr>
+            <tr>
+              <th>Digest</th>
+              <td>Digest a string of documents.</td>
+            </tr>
+            <tr>
+              <th>Tstamp</th>
+              <td>Document creation date. 1970 / 01 / 01 milliseconds starting at 00: 00: 00.</td>
+            </tr>
+            <tr>
+              <th>URL</th>
+              <td>The URL of the document.</td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>The ID of the document.</td>
+            </tr>
+            <tr>
+              <th>mimetype</th>
+              <td>The MIME type.</td>
+            </tr>
+            <tr>
+              <th>title</th>
+              <td>The title of the document.</td>
+            </tr>
+            <tr>
+              <th>content-title</th>
+              <td>The title of the document for viewing.</td>
+            </tr>
+            <tr>
+              <th>content-length</th>
+              <td>The size of the document.</td>
+            </tr>
+            <tr>
+              <th>URL-link</th>
+              <td>The URL as the search results.</td>
+            </tr>
+          </tbody>
+        </table>
+      </subsection>
+    </section>
+  </body>
+</document>

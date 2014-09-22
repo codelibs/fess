@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Dictionary settings</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Overview'>
+      <p>Here are settings for the dictionary.</p>
+    </section>
+    <section name='How to set up'>
+      <subsection name='How to display'>
+        <p>In Administrator account after logging in, click the menu Dictionary. List the various dictionaries available for editing.</p>
+        <img alt='Dictionary list' src='/images/ja/9.1/admin/dict-1.png'/>
+      </subsection>
+    </section>
+    <section name='User dictionary'>
+      <p>You can register names, nouns, terminology. Registered click path to user dictionaries and dictionary word list is displayed.</p>
+      <img alt='User dictionary list' src='/images/ja/9.1/admin/dict-4.png'/>
+      <p>Displays the Edit screen and click the word you want to edit.</p>
+      <img alt='Create a user dictionary' src='/images/ja/9.1/admin/dict-5.png'/>
+      <subsection name='Token'>
+        <p>Type a Word to search for.</p>
+      </subsection>
+      <subsection name='Split'>
+          <p>Been searching the words compound word splitting the Word can to hit. For example, you can search any word by entering the full-text search engine and full-text search engine, have split.</p>
+      </subsection>
+      <subsection name='Read'>
+          <p>Enter the word reading in katakana.
+          　　Enter the split when you split. For example, enter Sembene search engine.</p>
+      </subsection>
+      <subsection name='Parts of speech'>
+          <p>Enter the words you entered.</p>
+      </subsection>
+    </section>
+    <section name='Synonym dictionary'>
+      <p>You can register the same meaning words (GB, gigabyte, etc.). Click the path of the synonym dictionary registered on dictionary word list is displayed.</p>
+      <img alt='Synonym list' src='/images/ja/9.1/admin/dict-2.png'/>
+      <p>Displays the Edit screen and click the word you want to edit.</p>
+      <img alt='Creating a synonym' src='/images/ja/9.1/admin/dict-3.png'/>
+      <subsection name='Source'>
+        <p>Type the word being treated as synonyms.</p>
+      </subsection>
+      <subsection name='After the conversion'>
+          <p>Expand the words you enter in the source in the word after the conversion. For example, &apos;TV&apos;, &apos;TV&apos; and &apos;television&apos; If you want to convert type &apos;TV&apos;, &apos;TV&apos; and &apos;TV&apos; type after conversion.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

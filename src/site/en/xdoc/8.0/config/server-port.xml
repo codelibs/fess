@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<document>
+  <properties>
+    <title>Ports changes</title>
+    <author>Shinsuke Sugaya</author>
+  </properties>
+  <body>
+    <section name='Changing the port'>
+      <p>Fess by default, you use the port 8080. Change in the following steps to change.</p>
+      <subsection name='Tomcat port changes'>
+        <p>Change the port Tomcat is Fess available. Modifies the following described conf/server.xml changes.</p>
+        <ul>
+          <li>8080: HTTP access port</li>
+          <li>8005: shut down port</li>
+          <li>8009: AJP port</li>
+          <li>: SSL HTTP access port 8443 (the default is off)</li>
+          <li>19092: database port (use h2database)</li>
+        </ul>
+      </subsection>
+      <subsection name='SOLR configuration'>
+        <p>May need to change if you change the Tomcat port using the settings in the standard configuration, the same Solr-Tomcat, so Fess Solr server referenced information.</p>
+        <p>change the webapps/fess/WEB-INF/classes/app.dicon the following points.</p>
+        <source><![CDATA[
+<property name="managerUrl">"http://localhost:8080/manager/text/"</property>
+]]></source>
+        <p>change the webapps/fess/WEB-INF/classes/solrlib.dicon the following points.</p>
+        <source><![CDATA[
+<arg>"http://localhost:8080/solr/core1"</arg>
+]]></source>
+        <p>
+          <b>Note: to display the error on search and index update: cannot access the Solr server and do not change if you change the Tomcat port similar to the above ports.</b>
+        </p>
+      </subsection>
+    </section>
+  </body>
+</document>
