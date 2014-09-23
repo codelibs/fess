@@ -9,7 +9,7 @@
       <p>You can crawl databases in Fess. Here are required to store settings.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click menu data store.</p>
-        <img alt='Data store configuration' src='/images/ja/4.0/dataStoreCrawling-1.png'/>
+        <img alt='Data store configuration' src='/images/en/4.0/dataStoreCrawling-1.png'/>
         <p>As an example, the following table database named testdb MySQL, user name hoge, fuga password connection and the will to make it.</p>
         <source><![CDATA[
 CREATE TABLE job (

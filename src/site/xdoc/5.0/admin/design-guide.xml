@@ -9,9 +9,9 @@
       <p>Here are settings for the design of search screens.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click the menu design.</p>
-        <img alt='Design' src='/images/ja/5.0/design-1.png'/>
+        <img alt='Design' src='/images/en/5.0/design-1.png'/>
         <p>You can edit the search screen in the screen below.</p>
-        <img alt='JSP compilation screen' src='/images/ja/5.0/design-2.png'/>
+        <img alt='JSP compilation screen' src='/images/en/5.0/design-2.png'/>
       </subsection>
       <subsection name='Image file'>
         <p>You can upload the image files to use in the search screen. Image file names are supported are jpg, gif and png.</p>

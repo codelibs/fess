@@ -9,8 +9,8 @@
       <p>Here are settings on the duplicate host. Available when the duplicate host to be treated as the same thing crawling at a different host name. For example, if you want the same site www.example.com and example.com in available.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click the menu duplicate host.</p>
-        <img alt='A list of the duplicate host' src='/images/ja/3.0/overlappingHost-1.png'/>
-        <img alt='Duplicate host settings' src='/images/ja/3.0/overlappingHost-2.png'/><!-- TODO -->
+        <img alt='A list of the duplicate host' src='/images/en/3.0/overlappingHost-1.png'/>
+        <img alt='Duplicate host settings' src='/images/en/3.0/overlappingHost-2.png'/><!-- TODO -->
       </subsection>
       <subsection name='Canonical name'>
         <p>Specify the canonical host name. Duplicate host names replace the canonical host name.</p>

@@ -11,14 +11,14 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click the menu Dictionary. List the various dictionaries available for editing.</p>
-        <img alt='Dictionary list' src='/images/ja/9.0/admin/dict-1.png'/>
+        <img alt='Dictionary list' src='/images/en/9.0/admin/dict-1.png'/>
       </subsection>
     </section>
     <section name='User dictionary'>
       <p>You can register names, nouns, terminology. Registered click path to user dictionaries and dictionary word list is displayed.</p>
-      <img alt='User dictionary list' src='/images/ja/9.0/admin/dict-4.png'/>
+      <img alt='User dictionary list' src='/images/en/9.0/admin/dict-4.png'/>
       <p>Displays the Edit screen and click the word you want to edit.</p>
-      <img alt='Create a user dictionary' src='/images/ja/9.0/admin/dict-5.png'/>
+      <img alt='Create a user dictionary' src='/images/en/9.0/admin/dict-5.png'/>
       <subsection name='Token'>
         <p>Type a Word to search for.</p>
       </subsection>
@@ -35,9 +35,9 @@
     </section>
     <section name='Synonym dictionary'>
       <p>You can register the same meaning words (GB, gigabyte, etc.). Click the path of the synonym dictionary registered on dictionary word list is displayed.</p>
-      <img alt='Synonym list' src='/images/ja/9.0/admin/dict-2.png'/>
+      <img alt='Synonym list' src='/images/en/9.0/admin/dict-2.png'/>
       <p>Displays the Edit screen and click the word you want to edit.</p>
-      <img alt='Creating a synonym' src='/images/ja/9.0/admin/dict-3.png'/>
+      <img alt='Creating a synonym' src='/images/en/9.0/admin/dict-3.png'/>
       <subsection name='Source'>
         <p>Type the word being treated as synonyms.</p>
       </subsection>

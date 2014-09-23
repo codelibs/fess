@@ -9,7 +9,7 @@
       <p>Here, describes Fess information backup and restore methods.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click the menu backup and restore.</p>
-        <img alt='Backup and restore' src='/images/ja/2.0/data-1.png'/>
+        <img alt='Backup and restore' src='/images/en/2.0/data-1.png'/>
       </subsection>
       <subsection name='Backup settings'>
         <p>Click the download link and Fess information output in XML format. Saved settings information is below.</p>

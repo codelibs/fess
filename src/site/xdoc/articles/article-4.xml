@@ -68,7 +68,7 @@
     <div class='centerimg'>
       <div class='caption'>Same-Origin policy. (B) the must Fess return search results (JSON) becomes another domain if you use the JSONP.</div>
       <div class='img'>
-        <a href='/images/ja/article/4/sameorigin.png' rel='lightbox'><img alt='Same-Origin policy. (B) of if Fess return search results (JSON) another domain to you for must use the JSONP.' src='/images/ja/article/4/sameorigin.png'/></a>
+        <a href='/images/en/article/4/sameorigin.png' rel='lightbox'><img alt='Same-Origin policy. (B) of if Fess return search results (JSON) another domain to you for must use the JSONP.' src='/images/en/article/4/sameorigin.png'/></a>
       </div>
     </div>
     <p>
@@ -233,7 +233,7 @@ $ (function() {/ / (1) Fess URL var baseUrl = &quot;http://search.n9sm.co.jp/JSO
     <div class='centerimg'>
       <div class='caption'>Search form</div>
       <div class='img'>
-        <a href='/images/ja/article/4/searchform.png' rel='lightbox'><img alt='Search form' src='/images/ja/article/4/searchform.png'/></a>
+        <a href='/images/en/article/4/searchform.png' rel='lightbox'><img alt='Search form' src='/images/en/article/4/searchform.png'/></a>
       </div>
     </div>
     <p>
@@ -242,7 +242,7 @@ $ (function() {/ / (1) Fess URL var baseUrl = &quot;http://search.n9sm.co.jp/JSO
     <div class='centerimg'>
       <div class='caption'>Search results</div>
       <div class='img'>
-        <a href='/images/ja/article/4/searchresult.png' rel='lightbox'><img alt='Search results' src='/images/ja/article/4/searchresult.png'/></a>
+        <a href='/images/en/article/4/searchresult.png' rel='lightbox'><img alt='Search results' src='/images/en/article/4/searchresult.png'/></a>
       </div>
     </div>
     </subsection>

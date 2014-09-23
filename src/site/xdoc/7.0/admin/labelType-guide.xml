@@ -11,8 +11,8 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click the menu label.</p>
-        <img alt='List of labels' src='/images/ja/7.0/admin/labelType-1.png'/>
-        <img alt='Setting a label' src='/images/ja/7.0/admin/labelType-2.png'/><!-- TODO -->
+        <img alt='List of labels' src='/images/en/7.0/admin/labelType-1.png'/>
+        <img alt='Setting a label' src='/images/en/7.0/admin/labelType-2.png'/><!-- TODO -->
       </subsection>
     </section>
     <section name='Setting item'>

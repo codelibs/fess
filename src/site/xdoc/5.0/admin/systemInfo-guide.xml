@@ -9,7 +9,7 @@
       <p>Here, you can currently check property information such as system environment variables.</p>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click system information menu.</p>
-        <img alt='System information' src='/images/ja/5.0/systemInfo-1.png'/>
+        <img alt='System information' src='/images/en/5.0/systemInfo-1.png'/>
       </subsection>
       <subsection name='Environment variables'>
         <p>You can list the server environment variable.</p>

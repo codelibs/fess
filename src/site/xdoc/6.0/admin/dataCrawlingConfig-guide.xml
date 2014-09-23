@@ -12,7 +12,7 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click menu data store.</p>
-        <img alt='Data store configuration' src='/images/ja/6.0/admin/dataStoreCrawling-1.png'/>
+        <img alt='Data store configuration' src='/images/en/6.0/admin/dataStoreCrawling-1.png'/>
         <p>As an example, the following table database named testdb MySQL, user name hoge, fuga password connection and the will to make it.</p>
         <source><![CDATA[
 CREATE TABLE doc (

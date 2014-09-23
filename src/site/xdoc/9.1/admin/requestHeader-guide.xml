@@ -11,8 +11,8 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click request header menu.</p>
-        <img alt='A list of request headers' src='/images/ja/9.1/admin/requestHeader-1.png'/>
-        <img alt='Setting a request header' src='/images/ja/9.1/admin/requestHeader-2.png'/>
+        <img alt='A list of request headers' src='/images/en/9.1/admin/requestHeader-1.png'/>
+        <img alt='Setting a request header' src='/images/en/9.1/admin/requestHeader-2.png'/>
       </subsection>
     </section>
     <section name='Setting item'>

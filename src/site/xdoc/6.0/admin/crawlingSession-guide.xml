@@ -15,11 +15,11 @@
     </section>
     <section name='Setting item'>
       <subsection name='Session information list'>
-        <img alt='Session information list' src='/images/ja/6.0/admin/crawlingSession-1.png'/>
+        <img alt='Session information list' src='/images/en/6.0/admin/crawlingSession-1.png'/>
         <p>You can remove all session information and click the Delete link all in the running.</p>
       </subsection>
       <subsection name='Session details'>
-        <img alt='Session details' src='/images/ja/6.0/admin/crawlingSession-2.png'/>
+        <img alt='Session details' src='/images/en/6.0/admin/crawlingSession-2.png'/>
         <p>To specify a session ID, you can see crawling content.</p>
         <ul>
           <li>Information about the entire crawl Cralwer *:</li>

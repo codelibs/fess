@@ -11,9 +11,9 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click the menu design.</p>
-        <img alt='Design' src='/images/ja/9.1/admin/design-1.png'/>
+        <img alt='Design' src='/images/en/9.1/admin/design-1.png'/>
         <p>You can edit the search screen in the screen below.</p>
-        <img alt='JSP compilation screen' src='/images/ja/9.1/admin/design-2.png'/>
+        <img alt='JSP compilation screen' src='/images/en/9.1/admin/design-2.png'/>
       </subsection>
       <subsection name='To view the registration date and modified date'>
         <p>If you want to display in the search results crawl in Fess and registered or modified files to get the search results page (content), write the following.</p>

@@ -9,7 +9,7 @@
       <p>Crawls using file system here, describes how to set file system authentication is required. Fess is corresponding to a crawl for a shared folder in Windows.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click the menu file system authentication.</p>
-        <img alt='File system settings' src='/images/ja/4.0/fileAuthentication-1.png'/>
+        <img alt='File system settings' src='/images/en/4.0/fileAuthentication-1.png'/>
       </subsection>
       <subsection name='Host name'>
         <p>Specifies the host name of the site that requires authentication. Is omitted, the specified file system Kroll set applicable in any host name.</p>

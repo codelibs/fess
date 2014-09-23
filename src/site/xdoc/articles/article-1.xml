@@ -59,7 +59,7 @@
     <div class='centerimg'>
       <div class='caption'>Fess structure</div>
       <div class='img'>
-        <a href='/images/ja/article/1/architecture.png' rel='lightbox'><img alt='Fess structure' src='/images/ja/article/1/architecture.png'/></a>
+        <a href='/images/en/article/1/architecture.png' rel='lightbox'><img alt='Fess structure' src='/images/en/article/1/architecture.png'/></a>
       </div>
     </div>
     <p>
@@ -126,7 +126,7 @@
     <div class='centerimg'>
       <div class='caption'>Download Fess</div>
       <div class='img'>
-        <a href='/images/ja/article/1/fess-download.png' rel='lightbox'><img alt='Download Fess' src='/images/ja/article/1/fess-download.png'/></a>
+        <a href='/images/en/article/1/fess-download.png' rel='lightbox'><img alt='Download Fess' src='/images/en/article/1/fess-download.png'/></a>
       </div>
     </div>
 
@@ -147,7 +147,7 @@ C:\fess\fess-Server-8.1.0 &gt; set &quot;JAVA_HOME = C:\Program Files \Java\jdk1
     <div class='centerimg'>
       <div class='caption'>Search top screen</div>
       <div class='img'>
-        <a href='/images/ja/article/1/top.png' rel='lightbox'><img alt='Search top screen' src='/images/ja/article/1/top.png'/></a>
+        <a href='/images/en/article/1/top.png' rel='lightbox'><img alt='Search top screen' src='/images/en/article/1/top.png'/></a>
       </div>
     </div>
 
@@ -208,7 +208,7 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Login to the management page</div>
       <div class='img'>
-        <a href='/images/ja/article/1/login.png' rel='lightbox'><img alt='Login' src='/images/ja/article/1/login.png'/></a>
+        <a href='/images/en/article/1/login.png' rel='lightbox'><img alt='Login' src='/images/en/article/1/login.png'/></a>
       </div>
     </div>
 
@@ -222,7 +222,7 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Select the [new]</div>
       <div class='img'>
-        <a href='/images/ja/article/1/web-crawl-conf-1.png' rel='lightbox'><img alt='Create a new' src='/images/ja/article/1/web-crawl-conf-1.png'/></a>
+        <a href='/images/en/article/1/web-crawl-conf-1.png' rel='lightbox'><img alt='Create a new' src='/images/en/article/1/web-crawl-conf-1.png'/></a>
       </div>
     </div>
 
@@ -233,7 +233,7 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Web crawl settings</div>
       <div class='img'>
-        <a href='/images/ja/article/1/web-crawl-conf-2.png' rel='lightbox'><img alt='Crawl settings' src='/images/ja/article/1/web-crawl-conf-2.png'/></a>
+        <a href='/images/en/article/1/web-crawl-conf-2.png' rel='lightbox'><img alt='Crawl settings' src='/images/en/article/1/web-crawl-conf-2.png'/></a>
       </div>
     </div>
 
@@ -244,7 +244,7 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Completing the registration Web crawl settings</div>
       <div class='img'>
-        <a href='/images/ja/article/1/web-crawl-conf-3.png' rel='lightbox'><img alt='Crawl settings for registering' src='/images/ja/article/1/web-crawl-conf-3.png'/></a>
+        <a href='/images/en/article/1/web-crawl-conf-3.png' rel='lightbox'><img alt='Crawl settings for registering' src='/images/en/article/1/web-crawl-conf-3.png'/></a>
       </div>
     </div>
 
@@ -261,7 +261,7 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Crawl schedule</div>
       <div class='img'>
-        <a href='/images/ja/article/1/crawl-schedule-conf.png' rel='lightbox'><img alt='Crawl schedule' src='/images/ja/article/1/crawl-schedule-conf.png'/></a>
+        <a href='/images/en/article/1/crawl-schedule-conf.png' rel='lightbox'><img alt='Crawl schedule' src='/images/en/article/1/crawl-schedule-conf.png'/></a>
       </div>
     </div>
 
@@ -272,14 +272,14 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Check the crawl status of</div>
       <div class='img'>
-          <a href='/images/ja/article/1/session-info-1.png' rel='lightbox'><img alt='Check the crawl status of' src='/images/ja/article/1/session-info-1.png'/></a>
+          <a href='/images/en/article/1/session-info-1.png' rel='lightbox'><img alt='Check the crawl status of' src='/images/en/article/1/session-info-1.png'/></a>
       </div>
     </div>
 
     <div class='centerimg'>
       <div class='caption'>If the crawl is complete example</div>
       <div class='img'>
-        <a href='/images/ja/article/1/session-info-2.png' rel='lightbox'><img alt='If the crawl is complete example' src='/images/ja/article/1/session-info-2.png'/></a>
+        <a href='/images/en/article/1/session-info-2.png' rel='lightbox'><img alt='If the crawl is complete example' src='/images/en/article/1/session-info-2.png'/></a>
       </div>
     </div>
 
@@ -292,7 +292,7 @@ Fess-Server-8.1.0/ |--LICENSE |--NOTICE |--RELEASE-NOTES |--RUNNING.txt |--bin /
     <div class='centerimg'>
       <div class='caption'>Search example</div>
       <div class='img'>
-        <a href='/images/ja/article/1/search-result.png' rel='lightbox'><img alt='Search example' src='/images/ja/article/1/search-result.png'/></a>
+        <a href='/images/en/article/1/search-result.png' rel='lightbox'><img alt='Search example' src='/images/en/article/1/search-result.png'/></a>
       </div>
     </div>
 

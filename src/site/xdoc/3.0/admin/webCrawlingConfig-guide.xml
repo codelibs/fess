@@ -10,7 +10,7 @@
       <p>Recommends that if you want to index document number 100000 over in Fess crawl settings for one to several tens of thousands of these. One crawl setting a target number 100000 from the indexed performance degrades.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click menu Web.</p>
-        <img alt='Web crawl settings' src='/images/ja/3.0/webCrawlingConfig-1.png'/>
+        <img alt='Web crawl settings' src='/images/en/3.0/webCrawlingConfig-1.png'/>
       </subsection>
       <subsection name='Setting name'>
         <p>Is the name that appears on the list page.</p>

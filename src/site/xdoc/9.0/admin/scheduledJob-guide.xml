@@ -11,8 +11,8 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click the job management.</p>
-        <img alt='Job list' src='/images/ja/9.0/admin/scheduledJob-1.png'/>
-        <img alt='Edit job' src='/images/ja/9.0/admin/scheduledJob-2.png'/>
+        <img alt='Job list' src='/images/en/9.0/admin/scheduledJob-1.png'/>
+        <img alt='Edit job' src='/images/en/9.0/admin/scheduledJob-2.png'/>
       </subsection>
     </section>
     <section name='Setting item'>

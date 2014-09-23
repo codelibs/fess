@@ -9,8 +9,8 @@
       <p>Here are settings for path mapping. You can use if you want replaced path mapping links appear in search results.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click menu path mappings.</p>
-        <img alt='List of path mapping' src='/images/ja/4.0/pathMapping-1.png'/>
-        <img alt='Path mapping settings' src='/images/ja/4.0/pathMapping-2.png'/><!-- TODO -->
+        <img alt='List of path mapping' src='/images/en/4.0/pathMapping-1.png'/>
+        <img alt='Path mapping settings' src='/images/en/4.0/pathMapping-2.png'/><!-- TODO -->
       </subsection>
       <subsection name='Path mapping'>
         <p>Path mapping is replaced by parts to match the specified regular expression, replace the string with. When crawling a local filesystem environment may search result links are not valid. Such cases using path mapping, you can control the search results link. You can specify multiple path mappings.</p>

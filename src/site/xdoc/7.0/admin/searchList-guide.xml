@@ -11,7 +11,7 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click the menu search.</p>
-        <img alt='Administrative search' src='/images/ja/7.0/admin/search-1.png'/>
+        <img alt='Administrative search' src='/images/en/7.0/admin/search-1.png'/>
       </subsection>
       <subsection name='Search list'>
         <p>You can search by criteria you specify. In the regular search screen role and browser requirements is added implicitly, but do not provide management for search. You can document a certain remove from index from the search results.</p>

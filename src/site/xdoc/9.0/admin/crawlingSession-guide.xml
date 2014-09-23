@@ -15,12 +15,12 @@
     </section>
     <section name='Setting item'>
       <subsection name='Session information list'>
-        <img alt='Session information list' src='/images/ja/9.0/admin/crawlingSession-1.png'/>
+        <img alt='Session information list' src='/images/en/9.0/admin/crawlingSession-1.png'/>
         <p>You can remove all session information and click the Delete link all in the running. Session has expired will be removed at next crawl.</p>
       </subsection>
       <subsection name='Session details'>
         <p>Sure you can crawl the contents of session ID. Crawl start and finish time, number of documents indexed and listed.</p>
-        <img alt='Session details' src='/images/ja/9.0/admin/crawlingSession-2.png'/>
+        <img alt='Session details' src='/images/en/9.0/admin/crawlingSession-2.png'/>
       </subsection>
     </section>
   </body>

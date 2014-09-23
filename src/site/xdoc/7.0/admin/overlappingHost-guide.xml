@@ -11,8 +11,8 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click the menu duplicate host.</p>
-        <img alt='A list of the duplicate host' src='/images/ja/7.0/admin/overlappingHost-1.png'/>
-        <img alt='Duplicate host settings' src='/images/ja/7.0/admin/overlappingHost-2.png'/><!-- TODO -->
+        <img alt='A list of the duplicate host' src='/images/en/7.0/admin/overlappingHost-1.png'/>
+        <img alt='Duplicate host settings' src='/images/en/7.0/admin/overlappingHost-2.png'/><!-- TODO -->
       </subsection>
     </section>
     <section name='Setting item'>

@@ -9,9 +9,9 @@
       <p>Describes the settings related to crawling.</p>
       <subsection name='How to set up'>
         <p>In Administrator account click crawl General menu after login.</p>
-        <img alt='Crawl General' src='/images/ja/3.0/crawl-1.png'/>
+        <img alt='Crawl General' src='/images/en/3.0/crawl-1.png'/>
         <p>You can specify the path to a generated index and replication capabilities to enable.</p>
-        <img alt='Replication features' src='/images/ja/3.0/crawl-2.png'/>
+        <img alt='Replication features' src='/images/en/3.0/crawl-2.png'/>
       </subsection>
       <subsection name='Scheduled full crawl frequency'>
         <p>You can set the interval at which the crawl for a Web site or file system. By default, the following.</p>

@@ -22,7 +22,7 @@
         <p>With JavaScript enabled for Oracle<a href='http://www.oracle.com/technetwork/java/javase/downloads/index.html' target='_blank'>Java SE Downloads page</a>To access the.</p>
         <p>* Different versions and follow these steps but<a href='http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html#jdk-7u25-oth-JPR' target='_blank'>Java 7u25</a>Install (recommended). [2014 / 3 / 13]</p>
         <p>Click the &apos;Download JDK&apos; JavaSE7. (JavaScript is disabled and download is valid and must)</p>
-        <img alt='Access' src='/images/ja/install/java-1.png'/>
+        <img alt='Access' src='/images/en/install/java-1.png'/>
         <blockquote>
           <p>Whether JavaScript is enabled you can check below. (If the Internet Explorer 9)</p>
           <ol>
@@ -38,7 +38,7 @@
       </subsection>
       <subsection name='License verification'>
         <p>When you accept the license, read &apos;The Oracle Binary Code License Agreement for Java SE&apos; turn to Accept License Agreement check.</p>
-        <img alt='License' src='/images/ja/install/java-2.png'/>
+        <img alt='License' src='/images/en/install/java-2.png'/>
       </subsection>
       <subsection name='Download start'>
         <p>Do the JDK download according to the OS you install. Windwos 64-bit if you select Windows 86 x 64 Windows, for Windows 32-bit (Windows 64-bit version of the example is below).</p>
@@ -48,30 +48,30 @@
             <li>In Control Panel-&amp;gt; system and security → [System] appears to the type of system.</li>
           </ol>
         </blockquote>
-        <img alt='Download' src='/images/ja/install/java-3.png'/>
+        <img alt='Download' src='/images/en/install/java-3.png'/>
       </subsection>
       <subsection name='Running JDK Installer'>
         <p>(XX is the downloaded update release version) run the JDK Installer (jdk-7uXX-windows-x64.exe). The following is an example Windows 64-bit Edition.</p>
-        <img alt='Run' src='/images/ja/install/java-4.png'/>
+        <img alt='Run' src='/images/en/install/java-4.png'/>
         <p>Depending on settings in Windows, see allow changes to this computer to the following program? &quot;That may receive dialog. If so, please click the [Yes] button.</p>
       </subsection>
       <subsection name='JDK installation'>
         <p>The installer will launch. Press the [next] button.</p>
-        <img alt='Run' src='/images/ja/install/java-5.png'/>
+        <img alt='Run' src='/images/en/install/java-5.png'/>
         <p>You can change the destination folder. Left at default without problem, press the [next] button.</p>
-        <img alt='Directory' src='/images/ja/install/java-6.png'/>
+        <img alt='Directory' src='/images/en/install/java-6.png'/>
         <p>Start installing the JDK, so wait.</p>
-        <img alt='JDK installation' src='/images/ja/install/java-7.png'/>
+        <img alt='JDK installation' src='/images/en/install/java-7.png'/>
       </subsection>
       <subsection name='JRE installation'>
         <p>Run the JRE installation after installing the JDK, JRE installed on your PC. In the JDK as well to change the destination folder is possible, but basically the same JDK folder no problem. Press the [next] button.</p>
-        <img alt='JRE' src='/images/ja/install/java-8.png'/>
+        <img alt='JRE' src='/images/en/install/java-8.png'/>
         <p>JRE installation starts, so wait a while.</p>
-        <img alt='JRE installation' src='/images/ja/install/java-9.png'/>
+        <img alt='JRE installation' src='/images/en/install/java-9.png'/>
       </subsection>
       <subsection name='Completing the installation'>
         <p>The installation complete message appears. Press the [close] button.</p>
-        <img alt='JRE installation' src='/images/ja/install/java-10.png'/>
+        <img alt='JRE installation' src='/images/en/install/java-10.png'/>
         <p>Installation is complete.</p>
         <blockquote>
           <p>The components is the following two. In the following you can check. (For Windows 7)</p>
@@ -88,34 +88,34 @@
       <subsection name='Setting environment variables'>
         <p>This is the setting information and environment variables passed to the program. In order to run the JDK command at the command prompt after the Java installation, setting environment variables is required.</p>
 <p>Windows 7 sets the following. Select the control panel → system and security → [System] → advanced system settings → environment variables.</p>
-<img alt='Control Panel' src='/images/ja/install/java-11.png'/>
+<img alt='Control Panel' src='/images/en/install/java-11.png'/>
 <p>Click system and security.</p>
-<img alt='System and security' src='/images/ja/install/java-12.png'/>
+<img alt='System and security' src='/images/en/install/java-12.png'/>
 <p>Click the &apos;system&apos;.</p>
-<img alt='System' src='/images/ja/install/java-13.png'/>
+<img alt='System' src='/images/en/install/java-13.png'/>
 <p>Click the &apos;advanced settings&apos;.</p>
-<img alt='Advanced system settings' src='/images/ja/install/java-14.png'/>
+<img alt='Advanced system settings' src='/images/en/install/java-14.png'/>
 <p>Click environment variables.</p>
-<img alt='Environment variables' src='/images/ja/install/java-15.png'/>
+<img alt='Environment variables' src='/images/en/install/java-15.png'/>
 <p>New system environment variables button at the bottom of screen.</p>
-<img src='/images/ja/install/java-16.png'/>
+<img src='/images/en/install/java-16.png'/>
 <p>Enter &quot;JAVA_HOME&quot; variable name.</p>
-<img src='/images/ja/install/java-17.png'/>
+<img src='/images/en/install/java-17.png'/>
 <p>Describes the directory where you installed the JDK to the variable value.</p>
 <p>Open the C:\Program Files zone\scripting in the Explorer, &apos; jdk... &apos; that describes its addresses, looking for a folder.</p>
 <p>For example if you have installed the jdk version 1.7.0_XX will be C:\Program Files \Java\jdk1.7.0_XX. (Contains the portion of the XX version)</p>
 <p>Description and then press &apos;OK&apos;.</p>
 <p>Locate the row from a list of system environment variables, see variables &apos;Path&apos;.</p>
-<img src='/images/ja/install/java-18.png'/>
+<img src='/images/en/install/java-18.png'/>
 <p>And then push open the Edit button, the row at the end of the variable value &quot;; %JAVA_HOME%\bin &apos; that adds a string, click the &apos;OK&apos;.</p>
-<img src='/images/ja/install/java-19.png'/>
+<img src='/images/en/install/java-19.png'/>
       </subsection>
     </section>
     <section name='Installation of the Fess'>
       <subsection name='Access to the download page of the Fess'>
         <p><a class='externalLink' href='http://sourceforge.jp/projects/fess/releases/'>http://sourceforge.jp/projects/Fess/releases/</a> From the download the latest Fess package.</p>
         <p>Release file list of the destination URL and then &apos;fess-server-9.x.y.zip&apos;.</p>
-        <img src='/images/ja/install/Fess-1.png'/>
+        <img src='/images/en/install/Fess-1.png'/>
       </subsection>
       <subsection name='Installation'>
         <p>Unzip the zip file you downloaded. If the Windows environment expand the zip decompression tool, in.</p>
@@ -127,11 +127,11 @@ $ cd fess-server-9.x.y
 $ chmod +x bin/*.sh   # (Unix環境のみ)
 ]]></source>
         </blockquote>
-        <img src='/images/ja/install/Fess-2.png'/>
+        <img src='/images/en/install/Fess-2.png'/>
         <p> Open the unzipped folder by double-clicking. </p>
-        <img src='/images/ja/install/Fess-3.png'/>
+        <img src='/images/en/install/Fess-3.png'/>
         <p> Open the bin folder by double-clicking. </p>
-        <img src='/images/ja/install/Fess-4.png'/>
+        <img src='/images/en/install/Fess-4.png'/>
       </subsection>
       <subsection name='Launch of the Fess'>
         <p>Double-click the startup.bat file in the bin folder, Fess up.</p>
@@ -141,9 +141,9 @@ $ chmod +x bin/*.sh   # (Unix環境のみ)
 $ ./bin/startup.sh
 ]]></source>
         </blockquote>
-        <img src='/images/ja/install/Fess-5.png'/>
+        <img src='/images/en/install/Fess-5.png'/>
         <p> Will start the command prompt appears. In the last sentence &quot;Server startup... &apos; is Setup complete appears.</p>
-        <img src='/images/ja/install/Fess-6.png'/>
+        <img src='/images/en/install/Fess-6.png'/>
       </subsection>
     </section>
     <section name='Operation check'>

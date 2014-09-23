@@ -9,7 +9,7 @@
       <p>Describes Web authentication is required when set against here, using Web crawling. Fess is corresponding to a crawl for BASIC authentication and DIGEST authentication.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click menu Web authentication.</p>
-        <img alt='Configuring Web authentication' src='/images/ja/2.0/webAuthentication-1.png'/>
+        <img alt='Configuring Web authentication' src='/images/en/2.0/webAuthentication-1.png'/>
       </subsection>
       <subsection name='Host name'>
         <p>Specifies the host name of the site that requires authentication. Web crawl settings you specify if applicable in any host name.</p>

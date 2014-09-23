@@ -11,9 +11,9 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account click crawl General menu after login.</p>
-        <img alt='Crawl General' src='/images/ja/7.0/admin/crawl-1.png'/>
+        <img alt='Crawl General' src='/images/en/7.0/admin/crawl-1.png'/>
         <p>You can specify the path to a generated index and replication capabilities to enable.</p>
-        <img alt='Replication features' src='/images/ja/7.0/admin/crawl-2.png'/>
+        <img alt='Replication features' src='/images/en/7.0/admin/crawl-2.png'/>
       </subsection>
     </section>
     <section name='Setting item'>

@@ -9,7 +9,7 @@
       <p>Describes the log files will be output in the Fess download.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click log file menu.</p>
-        <img alt='Session information' src='/images/ja/5.0/log-1.png'/>
+        <img alt='Session information' src='/images/en/5.0/log-1.png'/>
       </subsection>
       <subsection name='Download'>
         <p>You can download the log file and click the log file name.</p>

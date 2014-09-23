@@ -11,7 +11,7 @@
     <section name='How to use the'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click menu search logs.</p>
-        <img alt='Search log' src='/images/ja/9.1/admin/searchLog-1.png'/>
+        <img alt='Search log' src='/images/en/9.1/admin/searchLog-1.png'/>
       </subsection>
       <subsection name='Search log list'>
         <p>Search language and date are listed. You can review and detailed, you click the URL.</p>

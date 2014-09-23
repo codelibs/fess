@@ -11,8 +11,8 @@
     <section name='How to set up'>
       <subsection name='How to display'>
         <p>In Administrator account after logging in, click menu role.</p>
-        <img alt='The list of roles' src='/images/ja/8.0/admin/roleType-1.png'/>
-        <img alt='Settings for a role' src='/images/ja/8.0/admin/roleType-2.png'/><!-- TODO -->
+        <img alt='The list of roles' src='/images/en/8.0/admin/roleType-1.png'/>
+        <img alt='Settings for a role' src='/images/en/8.0/admin/roleType-2.png'/><!-- TODO -->
       </subsection>
     </section>
     <section name='Setting item'>

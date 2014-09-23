@@ -9,8 +9,8 @@
       <p>Here the request header. Feature request headers request header information added to requests when you get to crawl documents. Available if, for example, to see header information in the authentication system, if certain values are logged automatically.</p>
       <subsection name='How to set up'>
         <p>In Administrator account after logging in, click request header menu.</p>
-        <img alt='A list of request headers' src='/images/ja/2.0/requestHeader-1.png'/>
-        <img alt='Setting a request header' src='/images/ja/2.0/requestHeader-2.png'/><!-- TODO -->
+        <img alt='A list of request headers' src='/images/en/2.0/requestHeader-1.png'/>
+        <img alt='Setting a request header' src='/images/en/2.0/requestHeader-2.png'/><!-- TODO -->
       </subsection>
       <subsection name='The name'>
         <p>Specifies the request header name to append to the request.</p>
