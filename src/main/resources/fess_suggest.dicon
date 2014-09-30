@@ -45,63 +45,9 @@
 		</initMethod>
 	</component>
 
-	<!-- Solr Group Configuration -->
-	<component name="suggestSolrProperties" class="org.codelibs.core.util.DynamicProperties">
-		<arg>
-			@jp.sf.fess.util.ResourceUtil@getConfPath("solr-suggest.properties")
-		</arg>
-	</component>
-	<component name="suggestSolrGroupProperties" class="org.codelibs.core.util.DynamicProperties">
-		<arg>
-			@jp.sf.fess.util.ResourceUtil@getConfPath("suggestSolrGroup.properties")
-		</arg>
-	</component>
-
-
-	<component name="suggestSolrGroup" class="org.codelibs.solr.lib.SolrGroup">
-		<!-- Note: groupName cannot include ".". -->
-		<property name="groupName">"suggestSolrGroup"</property>
-		<property name="statusPolicy">
-			<component class="jp.sf.fess.solr.policy.FessStatusPolicy">
-				<property name="solrGroupProperties">suggestSolrGroupProperties</property>
-				<property name="minSelectServer">1</property>
-				<property name="minUpdateServer">1</property>
-				<property name="retrySelectQueryInterval">500</property>
-				<property name="retryUpdateQueryInterval">500</property>
-				<property name="maxErrorCount">3</property>
-				<property name="maxRetryUpdateQueryCount">3</property>
-				<property name="maxRetrySelectQueryCount">3</property>
-			</component>
-		</property>
-		<initMethod name="addServer">
-			<!-- Note: the server name cannot include ".". -->
-			<arg>"suggestSolrServer"</arg><!-- Group Name -->
-			<arg>suggestSolrServer</arg><!-- Solr Server -->
-		</initMethod>
-	</component>
-
-	<component name="clientConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
-		<arg>10</arg><!-- timeToLive -->
-		<arg>@java.util.concurrent.TimeUnit@MINUTES</arg><!-- tunit -->
-		<property name="maxTotal">50</property>
-		<property name="defaultMaxPerRoute">2</property>
-		<destroyMethod name="shutdown"></destroyMethod>
-	</component>
-	<component name="connectionMonitorTarget" class="org.codelibs.robot.client.http.HcConnectionMonitorTarget">
-		<arg>clientConnectionManager</arg>
-		<arg>300000</arg>
-	</component>
-	<component name="connectionMonitorTask">
-		@org.seasar.extension.timer.TimeoutManager@getInstance()
-			.addTimeoutTarget(
-                connectionMonitorTarget,
-                10,
-                true)
-		<destroyMethod name="cancel"></destroyMethod>
-	</component>
 
 	<!-- Solr Server Configuration -->
-	<component name="suggestSolrServer" class="org.codelibs.solr.lib.server.SolrLibHttpSolrServer">
+	<component name="suggestSolrLibSolrServer" class="org.codelibs.solr.lib.server.SolrLibHttpSolrServer">
 		<!-- Solr Server URL -->
 		<arg>"http://localhost:8080/solr/core1-suggest"</arg>
 		<property name="requestWriter">new org.apache.solr.client.solrj.impl.BinaryRequestWriter()</property>
@@ -124,6 +70,18 @@
 		</initMethod>
 		<initMethod name="init"></initMethod>
 		<destroyMethod name="shutdown"></destroyMethod>
+	</component>
+
+
+	<component name="suggestSolrServer" class="jp.sf.fess.suggest.server.SuggestSolrServer">
+		<arg>
+			suggestSolrLibSolrServer
+		</arg>
+	</component>
+	<component name="suggestService" class="jp.sf.fess.suggest.service.SuggestService">
+		<arg> suggester </arg>
+		<arg> spellchecker </arg>
+		<arg> suggestSolrServer </arg>
 	</component>
 
 </components>

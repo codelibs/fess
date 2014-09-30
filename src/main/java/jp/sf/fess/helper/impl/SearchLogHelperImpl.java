@@ -30,6 +30,7 @@ import jp.sf.fess.db.exbhv.ClickLogBhv;
 import jp.sf.fess.db.exbhv.SearchLogBhv;
 import jp.sf.fess.db.exbhv.UserInfoBhv;
 import jp.sf.fess.db.exentity.ClickLog;
+import jp.sf.fess.db.exentity.SearchFieldLog;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.helper.DocumentHelper;
@@ -81,6 +82,18 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             botNames = value.split(",");
         }
 
+        final boolean suggestAvailable = Constants.TRUE
+                .equals(crawlerProperties.getProperty(
+                        Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE));
+        final String dayForCleanupStr = crawlerProperties.getProperty(
+                Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
+        int dayForCleanup = -1;
+        try {
+            dayForCleanup = Integer.parseInt(dayForCleanupStr);
+        } catch (final NumberFormatException e) {
+        }
+
+        boolean addedSuggest = false;
         final Map<String, UserInfo> userInfoMap = new HashMap<String, UserInfo>();
         for (final SearchLog searchLog : queue) {
             boolean add = true;
@@ -102,7 +115,22 @@ public class SearchLogHelperImpl extends SearchLogHelper {
                     userInfoMap.put(code, userInfo);
                 }
                 searchLogList.add(searchLog);
+
+                if (suggestAvailable && searchLog.getHitCount() > 0) {
+                    final List<SearchFieldLog> searchFieldLogList = searchLog
+                            .getSearchFieldLogList();
+                    for (final SearchFieldLog searchFieldLog : searchFieldLogList) {
+                        if ("solrQuery".equals(searchFieldLog.getName())) {
+                            suggestService.addSolrParams(
+                                    searchFieldLog.getValue(), dayForCleanup);
+                            addedSuggest = true;
+                        }
+                    }
+                }
             }
+        }
+        if (addedSuggest) {
+            suggestService.commit();
         }
 
         if (!userInfoMap.isEmpty()) {

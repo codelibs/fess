@@ -54,8 +54,6 @@ import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.LoginInfo;
-import jp.sf.fess.entity.SpellCheckResponse;
-import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.DocumentHelper;
@@ -64,6 +62,7 @@ import jp.sf.fess.helper.HotSearchWordHelper.Range;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.OpenSearchHelper;
 import jp.sf.fess.helper.QueryHelper;
+import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.UserInfoHelper;
@@ -72,6 +71,9 @@ import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.FavoriteLogService;
 import jp.sf.fess.service.SearchService;
 import jp.sf.fess.suggest.Suggester;
+import jp.sf.fess.suggest.entity.SpellCheckResponse;
+import jp.sf.fess.suggest.entity.SuggestResponse;
+import jp.sf.fess.suggest.service.SuggestService;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.MoreLikeThisResponse;
@@ -150,6 +152,9 @@ public class IndexAction {
     protected QueryHelper queryHelper;
 
     @Resource
+    protected RoleQueryHelper roleQueryHelper;
+
+    @Resource
     protected UserInfoHelper userInfoHelper;
 
     @Resource
@@ -160,6 +165,9 @@ public class IndexAction {
 
     @Resource
     protected Suggester suggester;
+
+    @Resource
+    protected SuggestService suggestService;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -623,9 +631,16 @@ public class IndexAction {
         }
 
         try {
-            final SuggestResponse suggestResponse = searchService
+            final Set<String> roleSet;
+            if (roleQueryHelper != null) {
+                roleSet = roleQueryHelper.build();
+            } else {
+                roleSet = new HashSet<>();
+            }
+
+            final SuggestResponse suggestResponse = suggestService
                     .getSuggestResponse(indexForm.query, suggestFieldName,
-                            labelList, num);
+                            labelList, new ArrayList<String>(roleSet), num);
 
             if (!suggestResponse.isEmpty()) {
                 suggestResultList.add(suggestResponse);
@@ -682,9 +697,17 @@ public class IndexAction {
         }
 
         try {
-            final SpellCheckResponse spellCheckResponse = searchService
+            final Set<String> roleSet;
+            if (roleQueryHelper != null) {
+                roleSet = roleQueryHelper.build();
+            } else {
+                roleSet = new HashSet<>();
+            }
+
+            final SpellCheckResponse spellCheckResponse = suggestService
                     .getSpellCheckResponse(indexForm.query,
-                            spellCheckFieldName, labelList, num);
+                            spellCheckFieldName, labelList,
+                            new ArrayList<String>(roleSet), num);
 
             if (!spellCheckResponse.isEmpty()) {
                 spellCheckResultList.add(spellCheckResponse);

@@ -94,9 +94,6 @@ public class Crawler implements Serializable {
     @Resource
     protected SolrGroupManager solrGroupManager;
 
-    @Resource
-    SolrGroup suggestSolrGroup;
-
     @Binding(bindingType = BindingType.MAY)
     @Resource
     protected ScreenShotManager screenShotManager;
@@ -531,13 +528,6 @@ public class Crawler implements Serializable {
                 statusPolicy.activate(QueryType.OPTIMIZE, serverName);
             }
         }
-        final StatusPolicy suggestStatusPolicy = suggestSolrGroup
-                .getStatusPolicy();
-        for (final String serverName : suggestSolrGroup.getServerNames()) {
-            if (suggestStatusPolicy.isActive(QueryType.OPTIMIZE, serverName)) {
-                suggestStatusPolicy.activate(QueryType.OPTIMIZE, serverName);
-            }
-        }
 
         if (logger.isInfoEnabled()) {
             logger.info("[EXEC TIME] index optimize time: " + startTime + "ms");
@@ -562,13 +552,6 @@ public class Crawler implements Serializable {
         for (final String serverName : solrGroup.getServerNames()) {
             if (statusPolicy.isActive(QueryType.COMMIT, serverName)) {
                 statusPolicy.activate(QueryType.COMMIT, serverName);
-            }
-        }
-        final StatusPolicy suggestStatusPolicy = suggestSolrGroup
-                .getStatusPolicy();
-        for (final String serverName : suggestSolrGroup.getServerNames()) {
-            if (suggestStatusPolicy.isActive(QueryType.COMMIT, serverName)) {
-                suggestStatusPolicy.activate(QueryType.COMMIT, serverName);
             }
         }
 

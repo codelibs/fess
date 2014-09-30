@@ -48,4 +48,7 @@ public class DocumentForm implements Serializable {
 
     @Required(target = "startSolrInstance,stopSolrInstance,reloadSolrInstance")
     public String solrInstanceName;
+
+    @Required(target = "deleteSuggest")
+    public String deleteSuggestType;
 }

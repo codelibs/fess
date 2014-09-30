@@ -30,6 +30,7 @@ import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
 import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
+import jp.sf.fess.suggest.service.SuggestService;
 
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.robot.util.LruHashMap;
@@ -51,6 +52,9 @@ public abstract class SearchLogHelper {
     protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
 
     protected Map<String, Long> userInfoCache;
+
+    @Resource
+    protected SuggestService suggestService;
 
     @InitMethod
     public void init() {

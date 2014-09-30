@@ -71,9 +71,6 @@ public class SystemAction implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
-    protected SolrGroup suggestSolrGroup;
-
-    @Resource
     protected WebManagementHelper webManagementHelper;
 
     @Resource
@@ -98,23 +95,10 @@ public class SystemAction implements Serializable {
                 groupPropMap.put(groupName, props);
             }
         }
-        final DynamicProperties suggestProps = ComponentUtil
-                .getSolrGroupProperties(suggestSolrGroup.getGroupName());
-        if (suggestProps != null) {
-            groupPropMap.put(suggestSolrGroup.getGroupName(), suggestProps);
-        }
 
         final String[] serverNames = solrGroupManager.getSolrServerNames();
-        final String[] suggestServerNames = suggestSolrGroup.getServerNames();
-        for (int i = 0; i < suggestServerNames.length; i++) {
-            if (StringUtil.isNotBlank(suggestServerNames[i])) {
-                suggestServerNames[i] = suggestSolrGroup.getGroupName() + ":"
-                        + suggestServerNames[i];
-            }
-        }
         final List<String> serverNameList = new ArrayList<String>();
         serverNameList.addAll(Arrays.asList(serverNames));
-        serverNameList.addAll(Arrays.asList(suggestServerNames));
         for (final String name : serverNameList) {
             final String[] names = name.split(":");
             if (names.length == 2) {
@@ -193,11 +177,6 @@ public class SystemAction implements Serializable {
                 groupPropMap.put(groupName, props);
             }
         }
-        final DynamicProperties suggestProps = ComponentUtil
-                .getSolrGroupProperties(suggestSolrGroup.getGroupName());
-        if (suggestProps != null) {
-            groupPropMap.put(suggestSolrGroup.getGroupName(), suggestProps);
-        }
 
         try {
             // server status
@@ -257,14 +236,14 @@ public class SystemAction implements Serializable {
                 }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
                 RequestUtil.getRequest().getSession()
-                        .setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
+                .setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
             } else {
                 SAStrutsUtil
-                        .addSessionMessage("success.failed_to_start_crawl_process");
+                .addSessionMessage("success.failed_to_start_crawl_process");
             }
         } else {
             SAStrutsUtil
-                    .addSessionMessage("success.failed_to_start_crawl_process");
+            .addSessionMessage("success.failed_to_start_crawl_process");
         }
         return showIndex(true);
     }

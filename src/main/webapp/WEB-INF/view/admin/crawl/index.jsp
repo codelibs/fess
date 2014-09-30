@@ -207,6 +207,22 @@
 						<html:text property="failureCountThreshold" styleClass="small"/>
 					</td>
 				</tr>
+				<tr>
+					<th style="width:200px;">
+						<bean:message key="labels.suggest_search_log_enabled"/>
+					</th>
+					<td>
+						<html:checkbox property="suggestSearchLog"/><bean:message key="labels.enabled"/>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<bean:message key="labels.purge_suggest_search_log_day"/>
+					</th>
+					<td>
+						<html:text property="purgeSuggestSearchLogDay" styleClass="small"/>
+					</td>
+				</tr>
 			</tbody>
 			<tfoot>
 				<tr>

@@ -38,10 +38,10 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.PingResponse;
 import jp.sf.fess.entity.PingResponse.Target;
-import jp.sf.fess.entity.SpellCheckResponse;
-import jp.sf.fess.entity.SuggestResponse;
-import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.service.SearchService;
+import jp.sf.fess.suggest.entity.SpellCheckResponse;
+import jp.sf.fess.suggest.entity.SuggestResponse;
+import jp.sf.fess.suggest.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
@@ -113,8 +113,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected void processPingRequest(HttpServletRequest request,
-            HttpServletResponse response, FilterChain chain) {
+    protected void processPingRequest(final HttpServletRequest request,
+            final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getSearchService();
         int status;
         final StringBuilder buf = new StringBuilder(1000);
