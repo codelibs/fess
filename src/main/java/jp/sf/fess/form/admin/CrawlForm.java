@@ -95,4 +95,10 @@ public class CrawlForm implements Serializable {
 
     @Maxbytelength(maxbytelength = 1000)
     public String notificationTo;
+
+    @Maxbytelength(maxbytelength = 10)
+    public String suggestSearchLog;
+
+    @IntRange(min = 0, max = 100000)
+    public String purgeSuggestSearchLogDay;
 }

@@ -31,6 +31,9 @@ import jp.sf.fess.form.admin.DocumentForm;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
+import jp.sf.fess.suggest.SuggestConstants;
+import jp.sf.fess.suggest.server.SuggestSolrServer;
+import jp.sf.fess.suggest.service.SuggestService;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -69,9 +72,6 @@ public class DocumentAction implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
-    protected SolrGroup suggestSolrGroup;
-
-    @Resource
     protected WebManagementHelper webManagementHelper;
 
     @Resource
@@ -79,6 +79,11 @@ public class DocumentAction implements Serializable {
 
     @Resource
     protected JobHelper jobHelper;
+
+    @Resource
+    protected SuggestService suggestService;
+
+    public Map<String, Long> suggestDocumentNums;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("document");
@@ -124,6 +129,9 @@ public class DocumentAction implements Serializable {
                 documentForm.serverStatusList.add(map);
             }
         }
+
+        suggestDocumentNums = getSuggestDocumentNum();
+
         // select group status
         documentForm.currentServerForSelect = solrProperties
                 .getProperty(SolrLibConstants.SELECT_GROUP);
@@ -174,15 +182,6 @@ public class DocumentAction implements Serializable {
             throw new SSCActionMessagesException(
                     "errors.failed_to_commit_solr_index");
         } else {
-            final boolean isUpdateSolrGroup;
-            final SolrGroup updateSolrGroup = solrGroupManager
-                    .getSolrGroup(QueryType.ADD);
-            if (updateSolrGroup.getGroupName().equals(solrGroup.getGroupName())) {
-                isUpdateSolrGroup = true;
-            } else {
-                isUpdateSolrGroup = false;
-            }
-
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -190,18 +189,9 @@ public class DocumentAction implements Serializable {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
-                            if (isUpdateSolrGroup) {
-                                systemHelper.updateStatus(suggestSolrGroup,
-                                        QueryType.ADD);
-                            }
                             solrGroup.commit(true, true, false, true);
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.COMMIT);
-                            if (isUpdateSolrGroup) {
-                                systemHelper.updateStatus(suggestSolrGroup,
-                                        QueryType.COMMIT);
-                            }
-
                             if (logger.isInfoEnabled()) {
                                 logger.info("[EXEC TIME] index commit time: "
                                         + (System.currentTimeMillis() - execTime)
@@ -237,15 +227,6 @@ public class DocumentAction implements Serializable {
             throw new SSCActionMessagesException(
                     "errors.failed_to_optimize_solr_index");
         } else {
-            final boolean isUpdateSolrGroup;
-            final SolrGroup updateSolrGroup = solrGroupManager
-                    .getSolrGroup(QueryType.ADD);
-            if (updateSolrGroup.getGroupName().equals(solrGroup.getGroupName())) {
-                isUpdateSolrGroup = true;
-            } else {
-                isUpdateSolrGroup = false;
-            }
-
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -253,17 +234,9 @@ public class DocumentAction implements Serializable {
                         final long execTime = System.currentTimeMillis();
                         try {
                             systemHelper.updateStatus(solrGroup, QueryType.ADD);
-                            if (isUpdateSolrGroup) {
-                                systemHelper.updateStatus(suggestSolrGroup,
-                                        QueryType.ADD);
-                            }
                             solrGroup.optimize();
                             systemHelper.updateStatus(solrGroup,
                                     QueryType.OPTIMIZE);
-                            if (isUpdateSolrGroup) {
-                                systemHelper.updateStatus(suggestSolrGroup,
-                                        QueryType.OPTIMIZE);
-                            }
                             if (logger.isInfoEnabled()) {
                                 logger.info("[EXEC TIME] index optimize time: "
                                         + (System.currentTimeMillis() - execTime)
@@ -423,6 +396,59 @@ public class DocumentAction implements Serializable {
 
     public Set<String> getRunningSessionIdSet() {
         return jobHelper.getRunningSessionIdSet();
+    }
+
+    protected Map<String, Long> getSuggestDocumentNum() {
+        final Map<String, Long> map = new HashMap<String, Long>();
+        map.put("content", suggestService.getContentDocumentNum());
+        map.put("searchLog", suggestService.getSearchLogDocumentNum());
+        map.put("all", map.get("content") + map.get("searchLog"));
+        return map;
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "index")
+    public String deleteSuggest() {
+        final SuggestSolrServer suggestSolrServer = suggestService
+                .getSuggestSolrServer();
+        final String query;
+        if ("content".equals(documentForm.deleteSuggestType)) {
+            query = "*:* NOT " + SuggestConstants.SuggestFieldNames.SEGMENT
+                    + ":0";
+        } else if ("searchLog".equals(documentForm.deleteSuggestType)) {
+            query = SuggestConstants.SuggestFieldNames.SEGMENT + ":0";
+        } else {
+            query = "*:*";
+        }
+
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!jobHelper.isCrawlProcessRunning()) {
+                    final long execTime = System.currentTimeMillis();
+                    try {
+                        suggestSolrServer.deleteByQuery(query);
+                        suggestSolrServer.commit();
+                        if (logger.isInfoEnabled()) {
+                            logger.info("[EXEC TIME] suggest index cleanup time: "
+                                    + (System.currentTimeMillis() - execTime)
+                                    + "ms");
+                        }
+                    } catch (final Exception e) {
+                        logger.error("Failed to delete suggest index (query="
+                                + query + ").", e);
+                    }
+                } else {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("could not start index cleanup process"
+                                + " because of running solr process.");
+                    }
+                }
+            }
+        });
+        thread.start();
+        SAStrutsUtil.addSessionMessage("success.delete_solr_index");
+        return showIndex(true);
     }
 
     private static class SessionIdList<E> extends ArrayList<E> {

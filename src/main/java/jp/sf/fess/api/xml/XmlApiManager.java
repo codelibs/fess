@@ -37,10 +37,10 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.entity.FieldAnalysisResponse;
 import jp.sf.fess.entity.PingResponse;
 import jp.sf.fess.entity.PingResponse.Target;
-import jp.sf.fess.entity.SpellCheckResponse;
-import jp.sf.fess.entity.SuggestResponse;
-import jp.sf.fess.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.service.SearchService;
+import jp.sf.fess.suggest.entity.SpellCheckResponse;
+import jp.sf.fess.suggest.entity.SuggestResponse;
+import jp.sf.fess.suggest.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.FacetResponse;
 import jp.sf.fess.util.FacetResponse.Field;
@@ -74,7 +74,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     @Override
     public void process(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+                    throws IOException, ServletException {
         final String formatType = request.getParameter("type");
         switch (getFormatType(formatType)) {
         case SEARCH:
@@ -206,7 +206,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                     if (StringUtil.isNotBlank(name)
                             && entry.getValue() != null
                             && ComponentUtil.getQueryHelper()
-                                    .isApiResponseField(name)) {
+                            .isApiResponseField(name)) {
                         final String tagName = convertTagName(name);
                         buf.append('<');
                         buf.append(tagName);
@@ -523,12 +523,12 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         .entrySet()) {
 
                     buf.append("<field name=\"")
-                            .append(escapeXml(fEntry.getKey())).append("\">");
+                    .append(escapeXml(fEntry.getKey())).append("\">");
                     for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
                             .getValue().entrySet()) {
                         buf.append("<analysis name=\"")
-                                .append(escapeXml(aEntry.getKey()))
-                                .append("\">");
+                        .append(escapeXml(aEntry.getKey()))
+                        .append("\">");
                         for (final Map<String, Object> dataMap : aEntry
                                 .getValue()) {
                             buf.append("<token>");
@@ -538,10 +538,10 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                                 final Object value = dEntry.getValue();
                                 if (StringUtil.isNotBlank(key) && value != null) {
                                     buf.append("<value name=\"")
-                                            .append(escapeXml(key))
-                                            .append("\">")
-                                            .append(escapeXml(value))
-                                            .append("</value>");
+                                    .append(escapeXml(key))
+                                    .append("\">")
+                                    .append(escapeXml(value))
+                                    .append("</value>");
                                 }
                             }
                             buf.append("</token>");
@@ -605,8 +605,8 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
 
                 buf.append("<name>").append(escapeXml(entry.getKey()))
-                        .append("</name><value>")
-                        .append(escapeXml(entry.getValue())).append("</value>");
+                .append("</name><value>")
+                .append(escapeXml(entry.getValue())).append("</value>");
             }
             buf.append("</data>");
         } else if (obj instanceof Date) {

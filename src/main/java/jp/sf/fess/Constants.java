@@ -163,6 +163,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";
 
+    public static final String SUGGEST_SEARCH_LOG_PROPERTY = "suggest.searchlog";
+
+    public static final String PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY = "purge.suggest.searchlog.day";
+
     public static final String AUTH_CIPHER = "authenticationCipher";
 
     public static final String RETURN_PATH = "jp.sf.fess.ReturnPath";
@@ -249,7 +253,7 @@ public class Constants extends CoreLibConstants {
     public static final String SAMBA = "SAMBA";
 
     public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(",
-            ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
+        ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
 
     public static final Pattern SOLR_FIELD_RESERVED_PATTERN = Pattern
             .compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",

@@ -141,7 +141,65 @@
 					</tbody>
 				</table>
 			</div>
-</c:if>
+			<div style="margin-top: 5px;">
+				<h3>
+					<bean:message key="labels.suggest_document_title" />
+				</h3>
+				<table class="bordered-table zebra-striped">
+					<thead>
+						<tr>
+							<th style="width:200px;"><bean:message key="labels.suggest_type" /></th>
+							<th><bean:message key="labels.solr_num_of_docs" /></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><bean:message key="labels.suggest_type_all" /></td>
+							<td align="center">${suggestDocumentNums.all}</td>
+							<td align="center">
+								<s:form>
+									<html:hidden property="deleteSuggestType"
+										value="all" />
+									<html:submit styleClass="btn" property="deleteSuggest"
+										disabled="${solrProcessRunning}">
+										<bean:message key="labels.solr_action_delete" />
+									</html:submit>
+								</s:form>
+							</td>
+						</tr>
+						<tr>
+							<td><bean:message key="labels.suggest_type_content" /></td>
+							<td align="center">${suggestDocumentNums.content}</td>
+							<td align="center">
+								<s:form>
+									<html:hidden property="deleteSuggestType"
+										value="content" />
+									<html:submit styleClass="btn" property="deleteSuggest"
+										disabled="${solrProcessRunning}">
+										<bean:message key="labels.solr_action_delete" />
+									</html:submit>
+								</s:form>
+							</td>
+						</tr>
+						<tr>
+							<td><bean:message key="labels.suggest_type_searchlog" /></td>
+							<td align="center">${suggestDocumentNums.searchLog}</td>
+							<td align="center">
+								<s:form>
+									<html:hidden property="deleteSuggestType"
+										value="searchLog" />
+									<html:submit styleClass="btn" property="deleteSuggest"
+										disabled="${solrProcessRunning}">
+										<bean:message key="labels.solr_action_delete" />
+									</html:submit>
+								</s:form>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			</c:if>
 		</div>
 
 		<c:if test="${solrProcessRunning}">

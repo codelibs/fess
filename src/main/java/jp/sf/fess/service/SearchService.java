@@ -17,9 +17,7 @@
 package jp.sf.fess.service;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,14 +34,9 @@ import jp.sf.fess.entity.MoreLikeThisInfo;
 import jp.sf.fess.entity.PingResponse;
 import jp.sf.fess.entity.SearchQuery;
 import jp.sf.fess.entity.SearchQuery.SortField;
-import jp.sf.fess.entity.SpellCheckResponse;
-import jp.sf.fess.entity.SuggestResponse;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.solr.FessSolrQueryException;
-import jp.sf.fess.suggest.SpellChecker;
-import jp.sf.fess.suggest.SuggestConstants;
-import jp.sf.fess.suggest.Suggester;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.QueryResponseList;
 
@@ -65,19 +58,10 @@ public class SearchService implements Serializable {
     protected SolrGroupManager solrGroupManager;
 
     @Resource
-    protected SolrGroup suggestSolrGroup;
-
-    @Resource
     protected QueryHelper queryHelper;
 
     @Resource
     protected RoleQueryHelper roleQueryHelper;
-
-    @Resource
-    protected Suggester suggester;
-
-    @Resource
-    protected SpellChecker spellChecker;
 
     public PingResponse ping() {
         final SolrGroup solrGroup = solrGroupManager
@@ -289,89 +273,6 @@ public class SearchService implements Serializable {
         queryResponseList.setSolrQuery(solrQuery.toString());
         queryResponseList.setExecTime(execTime);
         return queryResponseList;
-    }
-
-    public SuggestResponse getSuggestResponse(final String q,
-            final List<String> fieldNames, final List<String> labels,
-            final int rows) {
-
-        final Set<String> roleSet;
-        if (roleQueryHelper != null) {
-            roleSet = roleQueryHelper.build();
-        } else {
-            roleSet = new HashSet<>();
-        }
-
-        final List<String> roleList = new ArrayList<>(roleSet); // TODO
-        final String suggestQuery = suggester.buildSuggestQuery(q, fieldNames,
-                labels, roleList);
-
-        final long startTime = System.currentTimeMillis();
-
-        QueryResponse queryResponse = null;
-        final SolrQuery solrQuery = new SolrQuery();
-        if (StringUtil.isNotBlank(suggestQuery)) {
-            // query
-            solrQuery.setQuery(suggestQuery);
-            // size
-            solrQuery.setRows(rows);
-            //sort
-            solrQuery.setSort(SuggestConstants.SuggestFieldNames.COUNT,
-                    SolrQuery.ORDER.desc);
-
-            if (queryHelper.getTimeAllowed() >= 0) {
-                solrQuery.setTimeAllowed(queryHelper.getTimeAllowed());
-            }
-
-            queryResponse = suggestSolrGroup.query(solrQuery,
-                    SolrRequest.METHOD.POST);
-        }
-        final long execTime = System.currentTimeMillis() - startTime;
-        final SuggestResponse suggestResponse = new SuggestResponse(
-                queryResponse, rows, q);
-        suggestResponse.setExecTime(execTime);
-        return suggestResponse;
-    }
-
-    public SpellCheckResponse getSpellCheckResponse(final String q,
-            final List<String> fieldNames, final List<String> labels,
-            final int rows) {
-        final Set<String> roleSet;
-        if (roleQueryHelper != null) {
-            roleSet = roleQueryHelper.build();
-        } else {
-            roleSet = new HashSet<>();
-        }
-
-        final List<String> roleList = new ArrayList<>(roleSet);
-        final String spellCheckQuery = spellChecker.buildSpellCheckQuery(q,
-                fieldNames, labels, roleList);
-
-        final long startTime = System.currentTimeMillis();
-
-        QueryResponse queryResponse = null;
-        final SolrQuery solrQuery = new SolrQuery();
-        if (StringUtil.isNotBlank(spellCheckQuery)) {
-            // query
-            solrQuery.setQuery(spellCheckQuery);
-            // size
-            solrQuery.setRows(rows);
-            //sort
-            solrQuery.setSort(SuggestConstants.SuggestFieldNames.COUNT,
-                    SolrQuery.ORDER.desc);
-
-            if (queryHelper.getTimeAllowed() >= 0) {
-                solrQuery.setTimeAllowed(queryHelper.getTimeAllowed());
-            }
-
-            queryResponse = suggestSolrGroup.query(solrQuery,
-                    SolrRequest.METHOD.POST);
-        }
-        final long execTime = System.currentTimeMillis() - startTime;
-        final SpellCheckResponse spellCheckResponse = new SpellCheckResponse(
-                queryResponse, rows, q);
-        spellCheckResponse.setExecTime(execTime);
-        return spellCheckResponse;
     }
 
     public FieldAnalysisResponse getFieldAnalysisResponse(

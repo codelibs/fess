@@ -85,8 +85,8 @@ public class AdLoginInfoFilter implements Filter {
                 final String servletPath = ((HttpServletRequest) request)
                         .getServletPath();
                 if (redirectLoginError && "/index.do".equals(servletPath)) {
-                    ((HttpServletResponse) response)
-                            .sendRedirect("/n2search/error/badRequest");
+                    ((HttpServletResponse) response).sendRedirect(httpRequest
+                            .getContextPath() + "error/badRequest");
                     return;
                 }
             }
