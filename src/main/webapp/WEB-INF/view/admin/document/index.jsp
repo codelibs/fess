@@ -86,7 +86,7 @@
 								</td>
 							</tr>
 							<tr>
-								<td>
+								<td style="vertical-align: middle;">
 									<bean:message key="labels.solr_action_url_delete" />
 									<html:text property="deleteUrl" style="width:150px;"
 										disabled="${solrProcessRunning}"></html:text> <html:submit
@@ -155,10 +155,10 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><bean:message key="labels.suggest_type_all" /></td>
-							<td align="center">${suggestDocumentNums.all}</td>
+							<td style="vertical-align: middle;"><bean:message key="labels.suggest_type_all" /></td>
+							<td align="center" style="vertical-align: middle;">${suggestDocumentNums.all}</td>
 							<td align="center">
-								<s:form>
+								<s:form style="margin-bottom:0;">
 									<html:hidden property="deleteSuggestType"
 										value="all" />
 									<html:submit styleClass="btn" property="deleteSuggest"
@@ -169,10 +169,10 @@
 							</td>
 						</tr>
 						<tr>
-							<td><bean:message key="labels.suggest_type_content" /></td>
-							<td align="center">${suggestDocumentNums.content}</td>
+							<td style="vertical-align: middle;"><bean:message key="labels.suggest_type_content" /></td>
+							<td align="center" style="vertical-align: middle;">${suggestDocumentNums.content}</td>
 							<td align="center">
-								<s:form>
+								<s:form style="margin-bottom:0;">
 									<html:hidden property="deleteSuggestType"
 										value="content" />
 									<html:submit styleClass="btn" property="deleteSuggest"
@@ -183,10 +183,10 @@
 							</td>
 						</tr>
 						<tr>
-							<td><bean:message key="labels.suggest_type_searchlog" /></td>
-							<td align="center">${suggestDocumentNums.searchLog}</td>
+							<td style="vertical-align: middle;"><bean:message key="labels.suggest_type_searchlog" /></td>
+							<td align="center" style="vertical-align: middle;">${suggestDocumentNums.searchLog}</td>
 							<td align="center">
-								<s:form>
+								<s:form style="margin-bottom:0;">
 									<html:hidden property="deleteSuggestType"
 										value="searchLog" />
 									<html:submit styleClass="btn" property="deleteSuggest"
