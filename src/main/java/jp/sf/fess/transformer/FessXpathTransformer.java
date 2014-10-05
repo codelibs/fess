@@ -305,8 +305,10 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         putResultDataBody(dataMap, "contentLength",
                 Long.toString(responseData.getContentLength()));
         //  lastModified
-        putResultDataBody(dataMap, "lastModified",
-                FessFunctions.formatDate(responseData.getLastModified()));
+        if (responseData.getLastModified() != null) {
+            putResultDataBody(dataMap, "lastModified",
+                    FessFunctions.formatDate(responseData.getLastModified()));
+        }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
