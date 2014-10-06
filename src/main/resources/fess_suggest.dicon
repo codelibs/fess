@@ -82,6 +82,7 @@
 		<arg> suggester </arg>
 		<arg> spellchecker </arg>
 		<arg> suggestSolrServer </arg>
+		<destroyMethod name="shutdown"/>
 	</component>
 
 </components>
