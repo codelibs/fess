@@ -17,6 +17,7 @@
 package jp.sf.fess.service;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import jp.sf.fess.crud.service.BsBoostDocumentRuleService;
@@ -66,6 +67,13 @@ public class BoostDocumentRuleService extends BsBoostDocumentRuleService
 
         // setup condition
 
+    }
+
+    public List<BoostDocumentRule> getAvailableBoostDocumentRuleList() {
+        final BoostDocumentRuleCB cb = new BoostDocumentRuleCB();
+        cb.query().setDeletedBy_IsNull();
+        cb.query().addOrderBy_SortOrder_Asc();
+        return boostDocumentRuleBhv.selectList(cb);
     }
 
 }

@@ -24,9 +24,11 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import jp.sf.fess.Constants;
+import jp.sf.fess.db.exentity.BoostDocumentRule;
 import jp.sf.fess.db.exentity.FileCrawlingConfig;
 import jp.sf.fess.db.exentity.WebCrawlingConfig;
 import jp.sf.fess.interval.FessIntervalController;
+import jp.sf.fess.service.BoostDocumentRuleService;
 import jp.sf.fess.service.FailureUrlService;
 import jp.sf.fess.service.FileAuthenticationService;
 import jp.sf.fess.service.FileCrawlingConfigService;
@@ -67,6 +69,9 @@ public class WebFsIndexHelper implements Serializable {
 
     @Resource
     public FailureUrlService failureUrlService;
+
+    @Resource
+    protected BoostDocumentRuleService boostDocumentRuleService;
 
     @Resource
     protected CrawlingConfigHelper crawlingConfigHelper;
@@ -410,6 +415,12 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setDaemon(true);
         indexUpdater.setCommitPerCount(commitPerCount);
         indexUpdater.setS2RobotList(s2RobotList);
+        for (final BoostDocumentRule rule : boostDocumentRuleService
+                .getAvailableBoostDocumentRuleList()) {
+            indexUpdater
+                    .addBoostDocumentRule(new jp.sf.fess.solr.BoostDocumentRule(
+                            rule));
+        }
         indexUpdater.start();
 
         int startedCrawlerNum = 0;

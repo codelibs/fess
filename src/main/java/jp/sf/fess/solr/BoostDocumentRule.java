@@ -30,6 +30,15 @@ public class BoostDocumentRule {
 
     private String matchExpression;
 
+    public BoostDocumentRule() {
+        // nothing
+    }
+
+    public BoostDocumentRule(final jp.sf.fess.db.exentity.BoostDocumentRule rule) {
+        matchExpression = rule.getUrlExpr();
+        boostExpression = rule.getBoostExpr();
+    }
+
     public boolean match(final Map<String, Object> map) {
 
         if (map == null || map.isEmpty() || matchExpression == null) {
