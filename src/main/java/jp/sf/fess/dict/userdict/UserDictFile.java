@@ -324,4 +324,10 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         StreamUtil.drain(in, file);
         reload(null);
     }
+
+    @Override
+    public String toString() {
+        return "UserDictFile [file=" + file + ", userDictItemList="
+                + userDictItemList + ", id=" + id + "]";
+    }
 }

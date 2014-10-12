@@ -116,10 +116,10 @@ public class DictionaryManager {
             synchronized (DictionaryManager.this) {
                 if (lifetime <= System.currentTimeMillis()
                         && dicFileMap != null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Cleaning synonym files: " + dicFileMap);
-                    }
                     dicFileMap = null;
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Clear dictionary cache: " + dicFileMap);
+                    }
                 }
             }
         }

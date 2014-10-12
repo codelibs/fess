@@ -397,4 +397,10 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         StreamUtil.drain(in, file);
         reload(null);
     }
+
+    @Override
+    public String toString() {
+        return "SynonymFile [file=" + file + ", synonymItemList="
+                + synonymItemList + ", id=" + id + "]";
+    }
 }
