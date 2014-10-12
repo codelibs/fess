@@ -37,9 +37,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -84,7 +82,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
+public abstract class BsFileAuthenticationBhv extends
+        AbstractBehaviorWritable<FileAuthentication, FileAuthenticationCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -93,20 +92,11 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "FILE_AUTHENTICATION";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public FileAuthenticationDbm getDBMeta() {
         return FileAuthenticationDbm.getInstance();
     }
 
@@ -118,12 +108,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public FileAuthentication newEntity() {
-        return new FileAuthentication();
-    }
-
     /** {@inheritDoc} */
     @Override
     public FileAuthenticationCB newConditionBean() {
@@ -158,25 +142,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final FileAuthenticationCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final FileAuthenticationCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final FileAuthenticationCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -208,13 +173,8 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FileAuthentication> ENTITY doSelectEntity(
-            final FileAuthenticationCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends FileAuthentication> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final FileAuthenticationCB cb, final Class<ENTITY> tp) {
+            final FileAuthenticationCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -243,23 +203,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected FileAuthentication facadeSelectEntityWithDeletedCheck(
-            final FileAuthenticationCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileAuthentication> ENTITY doSelectEntityWithDeletedCheck(
-            final FileAuthenticationCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -276,12 +219,12 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends FileAuthentication> ENTITY doSelectByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends FileAuthentication> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -330,21 +273,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<FileAuthentication> facadeSelectList(
-            final FileAuthenticationCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileAuthentication> ListResultBean<ENTITY> doSelectList(
-            final FileAuthenticationCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -375,22 +303,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<FileAuthentication> facadeSelectPage(
-            final FileAuthenticationCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileAuthentication> PagingResultBean<ENTITY> doSelectPage(
-            final FileAuthenticationCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -411,21 +323,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     public void selectCursor(final FileAuthenticationCB cb,
             final EntityRowHandler<FileAuthentication> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final FileAuthenticationCB cb,
-            final EntityRowHandler<FileAuthentication> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileAuthentication> void doSelectCursor(
-            final FileAuthenticationCB cb,
-            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -449,27 +346,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<FileAuthenticationCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<FileAuthenticationCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends FileAuthenticationCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -612,30 +488,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         doInsert(fileAuthentication, null);
     }
 
-    protected void doInsert(final FileAuthentication et,
-            final InsertOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthentication", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(
-            final InsertOption<FileAuthenticationCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -662,45 +514,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         doUpdate(fileAuthentication, null);
     }
 
-    protected void doUpdate(final FileAuthentication et,
-            final UpdateOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthentication", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(
-            final UpdateOption<FileAuthenticationCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected FileAuthenticationCB createCBForVaryingUpdate() {
-        final FileAuthenticationCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected FileAuthenticationCB createCBForSpecifiedUpdate() {
-        final FileAuthenticationCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -724,19 +537,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(fileAuthentication, null);
     }
 
-    protected void doUpdateNonstrict(final FileAuthentication et,
-            final UpdateOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthentication", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -748,20 +548,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final FileAuthentication fileAuthentication) {
         doInsertOrUpdate(fileAuthentication, null, null);
-    }
-
-    protected void doInsertOrUpdate(final FileAuthentication et,
-            final InsertOption<FileAuthenticationCB> iop,
-            final UpdateOption<FileAuthenticationCB> uop) {
-        assertObjectNotNull("fileAuthentication", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -776,20 +562,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     public void insertOrUpdateNonstrict(
             final FileAuthentication fileAuthentication) {
         doInsertOrUpdateNonstrict(fileAuthentication, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final FileAuthentication et,
-            final InsertOption<FileAuthenticationCB> iop,
-            final UpdateOption<FileAuthenticationCB> uop) {
-        assertObjectNotNull("fileAuthentication", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -813,26 +585,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         doDelete(fileAuthentication, null);
     }
 
-    protected void doDelete(final FileAuthentication et,
-            final DeleteOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthentication", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(
-            final DeleteOption<FileAuthenticationCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -849,13 +601,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final FileAuthentication fileAuthentication) {
         doDeleteNonstrict(fileAuthentication, null);
-    }
-
-    protected void doDeleteNonstrict(final FileAuthentication et,
-            final DeleteOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthentication", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -882,12 +627,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("fileAuthentication", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -922,32 +661,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return doBatchInsert(fileAuthenticationList, null);
     }
 
-    protected int[] doBatchInsert(final List<FileAuthentication> ls,
-            final InsertOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthenticationList", ls);
-        InsertOption<FileAuthenticationCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<FileAuthentication> ls,
-            final InsertOption<FileAuthenticationCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -975,31 +688,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     public int[] batchUpdate(
             final List<FileAuthentication> fileAuthenticationList) {
         return doBatchUpdate(fileAuthenticationList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<FileAuthentication> ls,
-            final UpdateOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthenticationList", ls);
-        UpdateOption<FileAuthenticationCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<FileAuthentication> ls,
-            final UpdateOption<FileAuthenticationCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1066,19 +754,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(fileAuthenticationList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<FileAuthentication> ls,
-            final UpdateOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthenticationList", ls);
-        UpdateOption<FileAuthenticationCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1113,12 +788,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1129,19 +798,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     public int[] batchDelete(
             final List<FileAuthentication> fileAuthenticationList) {
         return doBatchDelete(fileAuthenticationList, null);
-    }
-
-    protected int[] doBatchDelete(final List<FileAuthentication> ls,
-            final DeleteOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthenticationList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1156,19 +812,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(fileAuthenticationList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<FileAuthentication> ls,
-            final DeleteOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthenticationList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1176,7 +819,7 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * fileAuthenticationBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;FileAuthentication, FileAuthenticationCB&gt;() {
-     *     public ConditionBean setup(fileAuthentication entity, FileAuthenticationCB intoCB) {
+     *     public ConditionBean setup(FileAuthentication entity, FileAuthenticationCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1195,35 +838,12 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<FileAuthentication, FileAuthenticationCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<FileAuthentication, FileAuthenticationCB> sp,
-            final InsertOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final FileAuthentication et = newEntity();
-        final FileAuthenticationCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected FileAuthenticationCB createCBForQueryInsert() {
-        final FileAuthenticationCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1253,22 +873,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(fileAuthentication, cb, null);
     }
 
-    protected int doQueryUpdate(final FileAuthentication et,
-            final FileAuthenticationCB cb,
-            final UpdateOption<FileAuthenticationCB> op) {
-        assertObjectNotNull("fileAuthentication", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1282,20 +886,6 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final FileAuthenticationCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final FileAuthenticationCB cb,
-            final DeleteOption<FileAuthenticationCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1555,7 +1145,7 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1665,47 +1255,20 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<FileAuthentication> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends FileAuthentication> typeOfSelectedEntity() {
         return FileAuthentication.class;
     }
 
-    protected FileAuthentication downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, FileAuthentication.class);
+    @Override
+    protected Class<FileAuthentication> typeOfHandlingEntity() {
+        return FileAuthentication.class;
     }
 
-    protected FileAuthenticationCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb,
-                FileAuthenticationCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<FileAuthentication> downcast(final List<? extends Entity> ls) {
-        return (List<FileAuthentication>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<FileAuthenticationCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<FileAuthenticationCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<FileAuthenticationCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<FileAuthenticationCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<FileAuthenticationCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<FileAuthenticationCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<FileAuthentication, FileAuthenticationCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<FileAuthentication, FileAuthenticationCB>) sp;
+    @Override
+    protected Class<FileAuthenticationCB> typeOfHandlingConditionBean() {
+        return FileAuthenticationCB.class;
     }
 }

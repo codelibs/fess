@@ -36,9 +36,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -81,7 +79,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
+public abstract class BsFailureUrlBhv extends
+        AbstractBehaviorWritable<FailureUrl, FailureUrlCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -90,20 +89,11 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "FAILURE_URL";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public FailureUrlDbm getDBMeta() {
         return FailureUrlDbm.getInstance();
     }
 
@@ -115,12 +105,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public FailureUrl newEntity() {
-        return new FailureUrl();
-    }
-
     /** {@inheritDoc} */
     @Override
     public FailureUrlCB newConditionBean() {
@@ -155,25 +139,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final FailureUrlCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final FailureUrlCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final FailureUrlCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -204,13 +169,8 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FailureUrl> ENTITY doSelectEntity(
-            final FailureUrlCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends FailureUrl> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final FailureUrlCB cb, final Class<ENTITY> tp) {
+            final FailureUrlCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -238,23 +198,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected FailureUrl facadeSelectEntityWithDeletedCheck(
-            final FailureUrlCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FailureUrl> ENTITY doSelectEntityWithDeletedCheck(
-            final FailureUrlCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -271,12 +214,12 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends FailureUrl> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends FailureUrl> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -324,20 +267,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<FailureUrl> facadeSelectList(final FailureUrlCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FailureUrl> ListResultBean<ENTITY> doSelectList(
-            final FailureUrlCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -367,22 +296,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<FailureUrl> facadeSelectPage(
-            final FailureUrlCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FailureUrl> PagingResultBean<ENTITY> doSelectPage(
-            final FailureUrlCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -403,21 +316,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     public void selectCursor(final FailureUrlCB cb,
             final EntityRowHandler<FailureUrl> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final FailureUrlCB cb,
-            final EntityRowHandler<FailureUrl> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FailureUrl> void doSelectCursor(
-            final FailureUrlCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -441,27 +339,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<FailureUrlCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<FailureUrlCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends FailureUrlCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -592,29 +469,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         doInsert(failureUrl, null);
     }
 
-    protected void doInsert(final FailureUrl et,
-            final InsertOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrl", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<FailureUrlCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -641,50 +495,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         doUpdate(failureUrl, null);
     }
 
-    protected void doUpdate(final FailureUrl et,
-            final UpdateOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrl", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<FailureUrlCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected FailureUrlCB createCBForVaryingUpdate() {
-        final FailureUrlCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected FailureUrlCB createCBForSpecifiedUpdate() {
-        final FailureUrlCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -696,27 +506,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final FailureUrl failureUrl) {
         doInsertOrUpdate(failureUrl, null, null);
-    }
-
-    protected void doInsertOrUpdate(final FailureUrl et,
-            final InsertOption<FailureUrlCB> iop,
-            final UpdateOption<FailureUrlCB> uop) {
-        assertObjectNotNull("failureUrl", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -738,31 +527,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      */
     public void delete(final FailureUrl failureUrl) {
         doDelete(failureUrl, null);
-    }
-
-    protected void doDelete(final FailureUrl et,
-            final DeleteOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrl", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<FailureUrlCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -796,32 +560,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return doBatchInsert(failureUrlList, null);
     }
 
-    protected int[] doBatchInsert(final List<FailureUrl> ls,
-            final InsertOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrlList", ls);
-        InsertOption<FailureUrlCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<FailureUrl> ls,
-            final InsertOption<FailureUrlCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -848,31 +586,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<FailureUrl> failureUrlList) {
         return doBatchUpdate(failureUrlList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<FailureUrl> ls,
-            final UpdateOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrlList", ls);
-        UpdateOption<FailureUrlCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<FailureUrl> ls,
-            final UpdateOption<FailureUrlCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -909,12 +622,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -926,25 +633,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return doBatchDelete(failureUrlList, null);
     }
 
-    protected int[] doBatchDelete(final List<FailureUrl> ls,
-            final DeleteOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrlList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -952,7 +640,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * failureUrlBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;FailureUrl, FailureUrlCB&gt;() {
-     *     public ConditionBean setup(failureUrl entity, FailureUrlCB intoCB) {
+     *     public ConditionBean setup(FailureUrl entity, FailureUrlCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -971,35 +659,12 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<FailureUrl, FailureUrlCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<FailureUrl, FailureUrlCB> sp,
-            final InsertOption<FailureUrlCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final FailureUrl et = newEntity();
-        final FailureUrlCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected FailureUrlCB createCBForQueryInsert() {
-        final FailureUrlCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1028,21 +693,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(failureUrl, cb, null);
     }
 
-    protected int doQueryUpdate(final FailureUrl et, final FailureUrlCB cb,
-            final UpdateOption<FailureUrlCB> op) {
-        assertObjectNotNull("failureUrl", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1056,20 +706,6 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final FailureUrlCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final FailureUrlCB cb,
-            final DeleteOption<FailureUrlCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1225,7 +861,7 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1326,46 +962,20 @@ public abstract class BsFailureUrlBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<FailureUrl> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends FailureUrl> typeOfSelectedEntity() {
         return FailureUrl.class;
     }
 
-    protected FailureUrl downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, FailureUrl.class);
+    @Override
+    protected Class<FailureUrl> typeOfHandlingEntity() {
+        return FailureUrl.class;
     }
 
-    protected FailureUrlCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, FailureUrlCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<FailureUrl> downcast(final List<? extends Entity> ls) {
-        return (List<FailureUrl>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<FailureUrlCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<FailureUrlCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<FailureUrlCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<FailureUrlCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<FailureUrlCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<FailureUrlCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<FailureUrl, FailureUrlCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<FailureUrl, FailureUrlCB>) sp;
+    @Override
+    protected Class<FailureUrlCB> typeOfHandlingConditionBean() {
+        return FailureUrlCB.class;
     }
 }

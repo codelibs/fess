@@ -47,9 +47,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -94,7 +92,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
+public abstract class BsRoleTypeBhv extends
+        AbstractBehaviorWritable<RoleType, RoleTypeCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -103,20 +102,11 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "ROLE_TYPE";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public RoleTypeDbm getDBMeta() {
         return RoleTypeDbm.getInstance();
     }
 
@@ -128,12 +118,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public RoleType newEntity() {
-        return new RoleType();
-    }
-
     /** {@inheritDoc} */
     @Override
     public RoleTypeCB newConditionBean() {
@@ -168,25 +152,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final RoleTypeCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final RoleTypeCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final RoleTypeCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -217,13 +182,8 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends RoleType> ENTITY doSelectEntity(
-            final RoleTypeCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends RoleType> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final RoleTypeCB cb, final Class<ENTITY> tp) {
+            final RoleTypeCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -251,22 +211,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected RoleType facadeSelectEntityWithDeletedCheck(final RoleTypeCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RoleType> ENTITY doSelectEntityWithDeletedCheck(
-            final RoleTypeCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -283,12 +227,12 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends RoleType> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends RoleType> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -336,20 +280,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<RoleType> facadeSelectList(final RoleTypeCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RoleType> ListResultBean<ENTITY> doSelectList(
-            final RoleTypeCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -379,21 +309,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<RoleType> facadeSelectPage(final RoleTypeCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RoleType> PagingResultBean<ENTITY> doSelectPage(
-            final RoleTypeCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -414,21 +329,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     public void selectCursor(final RoleTypeCB cb,
             final EntityRowHandler<RoleType> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final RoleTypeCB cb,
-            final EntityRowHandler<RoleType> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RoleType> void doSelectCursor(
-            final RoleTypeCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -452,27 +352,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<RoleTypeCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<RoleTypeCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends RoleTypeCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -653,7 +532,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -766,7 +645,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -879,7 +758,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -992,7 +871,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param roleTypeList The entity list of roleType. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -1055,28 +934,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         doInsert(roleType, null);
     }
 
-    protected void doInsert(final RoleType et, final InsertOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleType", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<RoleTypeCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -1103,43 +960,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         doUpdate(roleType, null);
     }
 
-    protected void doUpdate(final RoleType et, final UpdateOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleType", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<RoleTypeCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected RoleTypeCB createCBForVaryingUpdate() {
-        final RoleTypeCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected RoleTypeCB createCBForSpecifiedUpdate() {
-        final RoleTypeCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -1163,19 +983,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(roleType, null);
     }
 
-    protected void doUpdateNonstrict(final RoleType et,
-            final UpdateOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleType", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -1189,20 +996,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         doInsertOrUpdate(roleType, null, null);
     }
 
-    protected void doInsertOrUpdate(final RoleType et,
-            final InsertOption<RoleTypeCB> iop,
-            final UpdateOption<RoleTypeCB> uop) {
-        assertObjectNotNull("roleType", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
@@ -1214,20 +1007,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdateNonstrict(final RoleType roleType) {
         doInsertOrUpdateNonstrict(roleType, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final RoleType et,
-            final InsertOption<RoleTypeCB> iop,
-            final UpdateOption<RoleTypeCB> uop) {
-        assertObjectNotNull("roleType", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1251,24 +1030,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         doDelete(roleType, null);
     }
 
-    protected void doDelete(final RoleType et, final DeleteOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleType", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<RoleTypeCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -1285,13 +1046,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final RoleType roleType) {
         doDeleteNonstrict(roleType, null);
-    }
-
-    protected void doDeleteNonstrict(final RoleType et,
-            final DeleteOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleType", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -1317,12 +1071,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("roleType", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -1356,32 +1104,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return doBatchInsert(roleTypeList, null);
     }
 
-    protected int[] doBatchInsert(final List<RoleType> ls,
-            final InsertOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleTypeList", ls);
-        InsertOption<RoleTypeCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<RoleType> ls,
-            final InsertOption<RoleTypeCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -1408,31 +1130,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<RoleType> roleTypeList) {
         return doBatchUpdate(roleTypeList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<RoleType> ls,
-            final UpdateOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleTypeList", ls);
-        UpdateOption<RoleTypeCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<RoleType> ls,
-            final UpdateOption<RoleTypeCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1497,19 +1194,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(roleTypeList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<RoleType> ls,
-            final UpdateOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleTypeList", ls);
-        UpdateOption<RoleTypeCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1543,12 +1227,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1558,19 +1236,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      */
     public int[] batchDelete(final List<RoleType> roleTypeList) {
         return doBatchDelete(roleTypeList, null);
-    }
-
-    protected int[] doBatchDelete(final List<RoleType> ls,
-            final DeleteOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleTypeList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1584,19 +1249,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(roleTypeList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<RoleType> ls,
-            final DeleteOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleTypeList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1604,7 +1256,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * roleTypeBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;RoleType, RoleTypeCB&gt;() {
-     *     public ConditionBean setup(roleType entity, RoleTypeCB intoCB) {
+     *     public ConditionBean setup(RoleType entity, RoleTypeCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1623,35 +1275,12 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<RoleType, RoleTypeCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<RoleType, RoleTypeCB> sp,
-            final InsertOption<RoleTypeCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final RoleType et = newEntity();
-        final RoleTypeCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected RoleTypeCB createCBForQueryInsert() {
-        final RoleTypeCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1680,21 +1309,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(roleType, cb, null);
     }
 
-    protected int doQueryUpdate(final RoleType et, final RoleTypeCB cb,
-            final UpdateOption<RoleTypeCB> op) {
-        assertObjectNotNull("roleType", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1708,20 +1322,6 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final RoleTypeCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final RoleTypeCB cb,
-            final DeleteOption<RoleTypeCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1971,7 +1571,7 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -2080,46 +1680,20 @@ public abstract class BsRoleTypeBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<RoleType> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends RoleType> typeOfSelectedEntity() {
         return RoleType.class;
     }
 
-    protected RoleType downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, RoleType.class);
+    @Override
+    protected Class<RoleType> typeOfHandlingEntity() {
+        return RoleType.class;
     }
 
-    protected RoleTypeCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, RoleTypeCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<RoleType> downcast(final List<? extends Entity> ls) {
-        return (List<RoleType>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<RoleTypeCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<RoleTypeCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<RoleTypeCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<RoleTypeCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<RoleTypeCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<RoleTypeCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<RoleType, RoleTypeCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<RoleType, RoleTypeCB>) sp;
+    @Override
+    protected Class<RoleTypeCB> typeOfHandlingConditionBean() {
+        return RoleTypeCB.class;
     }
 }

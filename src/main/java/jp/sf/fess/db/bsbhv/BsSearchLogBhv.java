@@ -44,9 +44,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -89,7 +87,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
+public abstract class BsSearchLogBhv extends
+        AbstractBehaviorWritable<SearchLog, SearchLogCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -114,20 +113,11 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "SEARCH_LOG";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public SearchLogDbm getDBMeta() {
         return SearchLogDbm.getInstance();
     }
 
@@ -139,12 +129,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public SearchLog newEntity() {
-        return new SearchLog();
-    }
-
     /** {@inheritDoc} */
     @Override
     public SearchLogCB newConditionBean() {
@@ -179,25 +163,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final SearchLogCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final SearchLogCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final SearchLogCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -228,13 +193,8 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SearchLog> ENTITY doSelectEntity(
-            final SearchLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends SearchLog> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final SearchLogCB cb, final Class<ENTITY> tp) {
+            final SearchLogCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -262,22 +222,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected SearchLog facadeSelectEntityWithDeletedCheck(final SearchLogCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends SearchLog> ENTITY doSelectEntityWithDeletedCheck(
-            final SearchLogCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -294,12 +238,12 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends SearchLog> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends SearchLog> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -347,20 +291,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<SearchLog> facadeSelectList(final SearchLogCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends SearchLog> ListResultBean<ENTITY> doSelectList(
-            final SearchLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -390,21 +320,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<SearchLog> facadeSelectPage(final SearchLogCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends SearchLog> PagingResultBean<ENTITY> doSelectPage(
-            final SearchLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -425,21 +340,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     public void selectCursor(final SearchLogCB cb,
             final EntityRowHandler<SearchLog> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final SearchLogCB cb,
-            final EntityRowHandler<SearchLog> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends SearchLog> void doSelectCursor(
-            final SearchLogCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -463,27 +363,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<SearchLogCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<SearchLogCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends SearchLogCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -659,7 +538,7 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param searchLogList The entity list of searchLog. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -767,7 +646,7 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param searchLogList The entity list of searchLog. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -838,29 +717,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         doInsert(searchLog, null);
     }
 
-    protected void doInsert(final SearchLog et,
-            final InsertOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLog", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<SearchLogCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -887,50 +743,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         doUpdate(searchLog, null);
     }
 
-    protected void doUpdate(final SearchLog et,
-            final UpdateOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLog", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<SearchLogCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected SearchLogCB createCBForVaryingUpdate() {
-        final SearchLogCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected SearchLogCB createCBForSpecifiedUpdate() {
-        final SearchLogCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -942,27 +754,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final SearchLog searchLog) {
         doInsertOrUpdate(searchLog, null, null);
-    }
-
-    protected void doInsertOrUpdate(final SearchLog et,
-            final InsertOption<SearchLogCB> iop,
-            final UpdateOption<SearchLogCB> uop) {
-        assertObjectNotNull("searchLog", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -984,31 +775,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      */
     public void delete(final SearchLog searchLog) {
         doDelete(searchLog, null);
-    }
-
-    protected void doDelete(final SearchLog et,
-            final DeleteOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLog", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<SearchLogCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -1042,32 +808,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return doBatchInsert(searchLogList, null);
     }
 
-    protected int[] doBatchInsert(final List<SearchLog> ls,
-            final InsertOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLogList", ls);
-        InsertOption<SearchLogCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<SearchLog> ls,
-            final InsertOption<SearchLogCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -1094,31 +834,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<SearchLog> searchLogList) {
         return doBatchUpdate(searchLogList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<SearchLog> ls,
-            final UpdateOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLogList", ls);
-        UpdateOption<SearchLogCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<SearchLog> ls,
-            final UpdateOption<SearchLogCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1155,12 +870,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1172,25 +881,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return doBatchDelete(searchLogList, null);
     }
 
-    protected int[] doBatchDelete(final List<SearchLog> ls,
-            final DeleteOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLogList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1198,7 +888,7 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * searchLogBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;SearchLog, SearchLogCB&gt;() {
-     *     public ConditionBean setup(searchLog entity, SearchLogCB intoCB) {
+     *     public ConditionBean setup(SearchLog entity, SearchLogCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1217,35 +907,12 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<SearchLog, SearchLogCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<SearchLog, SearchLogCB> sp,
-            final InsertOption<SearchLogCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final SearchLog et = newEntity();
-        final SearchLogCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected SearchLogCB createCBForQueryInsert() {
-        final SearchLogCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1274,21 +941,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(searchLog, cb, null);
     }
 
-    protected int doQueryUpdate(final SearchLog et, final SearchLogCB cb,
-            final UpdateOption<SearchLogCB> op) {
-        assertObjectNotNull("searchLog", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1302,20 +954,6 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final SearchLogCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final SearchLogCB cb,
-            final DeleteOption<SearchLogCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1471,7 +1109,7 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1572,46 +1210,20 @@ public abstract class BsSearchLogBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<SearchLog> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends SearchLog> typeOfSelectedEntity() {
         return SearchLog.class;
     }
 
-    protected SearchLog downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, SearchLog.class);
+    @Override
+    protected Class<SearchLog> typeOfHandlingEntity() {
+        return SearchLog.class;
     }
 
-    protected SearchLogCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, SearchLogCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<SearchLog> downcast(final List<? extends Entity> ls) {
-        return (List<SearchLog>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<SearchLogCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<SearchLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<SearchLogCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<SearchLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<SearchLogCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<SearchLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<SearchLog, SearchLogCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<SearchLog, SearchLogCB>) sp;
+    @Override
+    protected Class<SearchLogCB> typeOfHandlingConditionBean() {
+        return SearchLogCB.class;
     }
 }

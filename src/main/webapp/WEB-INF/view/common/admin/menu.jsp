@@ -140,6 +140,16 @@
 			</span>
 		</c:if>
 		<br />
+		<c:if test="${menuType=='boostDocumentRule'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="${contextPath}/admin/boostDocumentRule/index">
+			<bean:message key="labels.menu.boost_document_rule" />
+		</s:link>
+		<c:if test="${menuType=='boostDocumentRule'}">
+			</span>
+		</c:if>
+		<br />
 		<c:if test="${menuType=='pathMapping'}">
 			<span class="selected">
 		</c:if>
@@ -197,6 +207,31 @@
 			<bean:message key="labels.menu.role_type" />
 		</s:link>
 		<c:if test="${menuType=='roleType'}">
+			</span>
+		</c:if>
+		<br />
+	</p>
+	<h3>
+		<bean:message key="labels.menu_suggest" />
+	</h3>
+	<p>
+		<c:if test="${menuType=='suggestElevateWord'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="${contextPath}/admin/suggestElevateWord/index">
+			<bean:message key="labels.menu.suggest_elevate_word" />
+		</s:link>
+		<c:if test="${menuType=='suggestElevateWord'}">
+			</span>
+		</c:if>
+		<br />
+		<c:if test="${menuType=='suggestBadWord'}">
+			<span class="selected">
+		</c:if>
+		<s:link href="${contextPath}/admin/suggestBadWord/index">
+			<bean:message key="labels.menu.suggest_bad_word" />
+		</s:link>
+		<c:if test="${menuType=='suggestBadWord'}">
 			</span>
 		</c:if>
 		<br />

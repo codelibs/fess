@@ -28,6 +28,7 @@ import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.IllegalBehaviorStateException;
 import org.seasar.dbflute.util.DfTraceViewUtil;
 import org.seasar.dbflute.util.DfTypeUtil;
+import org.seasar.dbflute.util.Srl;
 import org.seasar.framework.container.ComponentNotFoundRuntimeException;
 import org.seasar.framework.container.S2Container;
 
@@ -187,6 +188,11 @@ public class ImplementedBehaviorSelector implements BehaviorSelector {
     // ===================================================================================
     //                                                                      General Helper
     //                                                                      ==============
+    protected String replace(final String str, final String fromStr,
+            final String toStr) {
+        return Srl.replace(str, fromStr, toStr);
+    }
+
     protected String initUncap(final String str) {
         return str.substring(0, 1).toLowerCase() + str.substring(1);
     }

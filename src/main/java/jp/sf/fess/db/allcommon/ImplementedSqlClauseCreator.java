@@ -175,16 +175,23 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
     //                                                                              ======
     protected void setupSqlClauseOption(final SqlClause sqlClause) {
         if (isInnerJoinAutoDetect()) {
-            sqlClause.allowInnerJoinAutoDetect();
+            sqlClause.enableInnerJoinAutoDetect();
         }
         if (isThatsBadTimingDetect()) {
-            sqlClause.allowThatsBadTimingDetect();
+            sqlClause.enableThatsBadTimingDetect();
+        }
+        if (isNullOrEmptyQueryAllowed()) { // default for 1.0.5
+            sqlClause.ignoreNullOrEmptyQuery();
+        } else { // default for 1.1
+            sqlClause.checkNullOrEmptyQuery();
         }
         if (isEmptyStringQueryAllowed()) {
-            sqlClause.allowEmptyStringQuery();
+            sqlClause.enableEmptyStringQuery();
         }
-        if (isInvalidQueryChecked()) {
-            sqlClause.checkInvalidQuery();
+        if (isOverridingQueryAllowed()) { // default for 1.0.5
+            sqlClause.enableOverridingQuery();
+        } else { // default for 1.1
+            sqlClause.disableOverridingQuery();
         }
         if (isDisableSelectIndex()) {
             sqlClause.disableSelectIndex();
@@ -206,12 +213,16 @@ public class ImplementedSqlClauseCreator implements SqlClauseCreator {
         return DBFluteConfig.getInstance().isThatsBadTimingDetect();
     }
 
+    protected boolean isNullOrEmptyQueryAllowed() {
+        return DBFluteConfig.getInstance().isNullOrEmptyQueryAllowed();
+    }
+
     protected boolean isEmptyStringQueryAllowed() {
         return DBFluteConfig.getInstance().isEmptyStringQueryAllowed();
     }
 
-    protected boolean isInvalidQueryChecked() {
-        return DBFluteConfig.getInstance().isInvalidQueryChecked();
+    protected boolean isOverridingQueryAllowed() {
+        return DBFluteConfig.getInstance().isOverridingQueryAllowed();
     }
 
     protected boolean isDisableSelectIndex() {

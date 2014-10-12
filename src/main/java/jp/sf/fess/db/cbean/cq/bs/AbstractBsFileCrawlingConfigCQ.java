@@ -84,7 +84,6 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
@@ -3746,6 +3745,9 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
 
     public abstract String keepMyselfInScope(FileCrawlingConfigCQ sq);
 
+    // ===================================================================================
+    //                                                                        Manual Order
+    //                                                                        ============
     /**
      * Order along manual ordering information.
      * <pre>
@@ -3782,8 +3784,8 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     }
 
     // ===================================================================================
-    //                                                                          Compatible
-    //                                                                          ==========
+    //                                                                    Small Adjustment
+    //                                                                    ================
     /**
      * Order along the list of manual values. #beforejava8 <br />
      * This function with Union is unsupported! <br />
@@ -3812,6 +3814,11 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
         withManualOrder(manualOrderBean);
     }
 
+    @Override
+    protected void filterFromToOption(final FromToOption option) {
+        option.allowOneSide();
+    }
+
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
@@ -3820,6 +3827,10 @@ public abstract class AbstractBsFileCrawlingConfigCQ extends
     }
 
     // very internal (for suppressing warn about 'Not Use Import')
+    protected String xabUDT() {
+        return Date.class.getName();
+    }
+
     protected String xabCQ() {
         return FileCrawlingConfigCQ.class.getName();
     }

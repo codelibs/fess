@@ -35,6 +35,8 @@ public class KeyMatchService extends BsKeyMatchService implements Serializable {
         super.setupListCondition(cb, keyMatchPager);
 
         // setup condition
+        cb.query().setDeletedBy_IsNull();
+        cb.query().addOrderBy_Term_Asc();
 
         // search
 

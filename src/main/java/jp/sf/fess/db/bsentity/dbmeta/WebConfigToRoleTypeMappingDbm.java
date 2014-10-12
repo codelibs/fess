@@ -199,7 +199,7 @@ public class WebConfigToRoleTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_3498664F_AE93_4441_9780_8D6D8C62011B",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_105A1870_C2AD_4635_BE01_6360711F5509",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnWebConfigId = cci("WEB_CONFIG_ID",

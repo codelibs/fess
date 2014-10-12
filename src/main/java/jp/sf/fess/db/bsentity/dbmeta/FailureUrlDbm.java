@@ -222,7 +222,7 @@ public class FailureUrlDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_4FF7C61F_EA19_46A8_AD20_9C681D07CA6A",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_275DAA65_E8B1_48D7_AC90_CAC87877E583",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnUrl = cci("URL", "URL", null, null,

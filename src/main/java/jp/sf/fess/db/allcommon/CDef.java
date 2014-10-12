@@ -26,6 +26,7 @@ import java.util.Map;
 import org.seasar.dbflute.jdbc.Classification;
 import org.seasar.dbflute.jdbc.ClassificationCodeType;
 import org.seasar.dbflute.jdbc.ClassificationMeta;
+import org.seasar.dbflute.jdbc.ClassificationUndefinedHandlingType;
 
 /**
  * The definition of classification.
@@ -280,6 +281,11 @@ public interface CDef extends Classification {
         /** Access Type */
         AccessType;
         @Override
+        public String classificationName() {
+            return name(); // same as definition name
+        }
+
+        @Override
         public Classification codeOf(final Object code) {
             if ("ProcessType".equals(name())) {
                 return CDef.ProcessType.codeOf(code);
@@ -337,6 +343,17 @@ public interface CDef extends Classification {
                 return ClassificationCodeType.String;
             }
             return ClassificationCodeType.String; // as default
+        }
+
+        @Override
+        public ClassificationUndefinedHandlingType undefinedHandlingType() {
+            if ("ProcessType".equals(name())) {
+                return ClassificationUndefinedHandlingType.EXCEPTION;
+            }
+            if ("AccessType".equals(name())) {
+                return ClassificationUndefinedHandlingType.EXCEPTION;
+            }
+            return ClassificationUndefinedHandlingType.LOGGING; // as default
         }
     }
 }

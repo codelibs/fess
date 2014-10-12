@@ -41,7 +41,7 @@
 new String[] {
 "-Djava.awt.headless=true",
 "-server",
-"-Xmx512m",
+"-Xmx256m",
 "-XX:MaxPermSize=128m",
 "-XX:-UseGCOverheadLimit",
 "-XX:+UseConcMarkSweepGC",
@@ -56,9 +56,11 @@ new String[] {
 }
 :
 new String[] {
+"-Xdebug",
+"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
 "-Djava.awt.headless=true",
 "-server",
-"-Xmx512m",
+"-Xmx256m",
 "-XX:MaxMetaspaceSize=128m",
 "-XX:CompressedClassSpaceSize=32m",
 "-XX:-UseGCOverheadLimit",

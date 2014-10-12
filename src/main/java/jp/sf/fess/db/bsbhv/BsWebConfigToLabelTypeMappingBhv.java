@@ -38,9 +38,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -83,8 +81,9 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsWebConfigToLabelTypeMappingBhv extends
-        AbstractBehaviorWritable {
+public abstract class BsWebConfigToLabelTypeMappingBhv
+        extends
+        AbstractBehaviorWritable<WebConfigToLabelTypeMapping, WebConfigToLabelTypeMappingCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -93,20 +92,11 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "WEB_CONFIG_TO_LABEL_TYPE_MAPPING";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public WebConfigToLabelTypeMappingDbm getDBMeta() {
         return WebConfigToLabelTypeMappingDbm.getInstance();
     }
 
@@ -118,12 +108,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public WebConfigToLabelTypeMapping newEntity() {
-        return new WebConfigToLabelTypeMapping();
-    }
-
     /** {@inheritDoc} */
     @Override
     public WebConfigToLabelTypeMappingCB newConditionBean() {
@@ -158,25 +142,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final WebConfigToLabelTypeMappingCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final WebConfigToLabelTypeMappingCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final WebConfigToLabelTypeMappingCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -209,13 +174,9 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends WebConfigToLabelTypeMapping> ENTITY doSelectEntity(
-            final WebConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends WebConfigToLabelTypeMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final WebConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
+            final WebConfigToLabelTypeMappingCB cb,
+            final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -244,23 +205,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected WebConfigToLabelTypeMapping facadeSelectEntityWithDeletedCheck(
-            final WebConfigToLabelTypeMappingCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebConfigToLabelTypeMapping> ENTITY doSelectEntityWithDeletedCheck(
-            final WebConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -277,12 +221,12 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     }
 
     protected <ENTITY extends WebConfigToLabelTypeMapping> ENTITY doSelectByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends WebConfigToLabelTypeMapping> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -332,21 +276,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<WebConfigToLabelTypeMapping> facadeSelectList(
-            final WebConfigToLabelTypeMappingCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebConfigToLabelTypeMapping> ListResultBean<ENTITY> doSelectList(
-            final WebConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -377,22 +306,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<WebConfigToLabelTypeMapping> facadeSelectPage(
-            final WebConfigToLabelTypeMappingCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebConfigToLabelTypeMapping> PagingResultBean<ENTITY> doSelectPage(
-            final WebConfigToLabelTypeMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -413,21 +326,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     public void selectCursor(final WebConfigToLabelTypeMappingCB cb,
             final EntityRowHandler<WebConfigToLabelTypeMapping> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final WebConfigToLabelTypeMappingCB cb,
-            final EntityRowHandler<WebConfigToLabelTypeMapping> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebConfigToLabelTypeMapping> void doSelectCursor(
-            final WebConfigToLabelTypeMappingCB cb,
-            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -451,27 +349,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     public <RESULT> HpSLSFunction<WebConfigToLabelTypeMappingCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<WebConfigToLabelTypeMappingCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends WebConfigToLabelTypeMappingCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -628,30 +505,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         doInsert(webConfigToLabelTypeMapping, null);
     }
 
-    protected void doInsert(final WebConfigToLabelTypeMapping et,
-            final InsertOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMapping", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(
-            final InsertOption<WebConfigToLabelTypeMappingCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -679,51 +532,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         doUpdate(webConfigToLabelTypeMapping, null);
     }
 
-    protected void doUpdate(final WebConfigToLabelTypeMapping et,
-            final UpdateOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMapping", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(
-            final UpdateOption<WebConfigToLabelTypeMappingCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected WebConfigToLabelTypeMappingCB createCBForVaryingUpdate() {
-        final WebConfigToLabelTypeMappingCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected WebConfigToLabelTypeMappingCB createCBForSpecifiedUpdate() {
-        final WebConfigToLabelTypeMappingCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -736,27 +544,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     public void insertOrUpdate(
             final WebConfigToLabelTypeMapping webConfigToLabelTypeMapping) {
         doInsertOrUpdate(webConfigToLabelTypeMapping, null, null);
-    }
-
-    protected void doInsertOrUpdate(final WebConfigToLabelTypeMapping et,
-            final InsertOption<WebConfigToLabelTypeMappingCB> iop,
-            final UpdateOption<WebConfigToLabelTypeMappingCB> uop) {
-        assertObjectNotNull("webConfigToLabelTypeMapping", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -779,32 +566,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     public void delete(
             final WebConfigToLabelTypeMapping webConfigToLabelTypeMapping) {
         doDelete(webConfigToLabelTypeMapping, null);
-    }
-
-    protected void doDelete(final WebConfigToLabelTypeMapping et,
-            final DeleteOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMapping", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(
-            final DeleteOption<WebConfigToLabelTypeMappingCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -839,33 +600,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return doBatchInsert(webConfigToLabelTypeMappingList, null);
     }
 
-    protected int[] doBatchInsert(final List<WebConfigToLabelTypeMapping> ls,
-            final InsertOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMappingList", ls);
-        InsertOption<WebConfigToLabelTypeMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(
-            final List<WebConfigToLabelTypeMapping> ls,
-            final InsertOption<WebConfigToLabelTypeMappingCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -893,32 +627,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     public int[] batchUpdate(
             final List<WebConfigToLabelTypeMapping> webConfigToLabelTypeMappingList) {
         return doBatchUpdate(webConfigToLabelTypeMappingList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<WebConfigToLabelTypeMapping> ls,
-            final UpdateOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMappingList", ls);
-        UpdateOption<WebConfigToLabelTypeMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(
-            final List<WebConfigToLabelTypeMapping> ls,
-            final UpdateOption<WebConfigToLabelTypeMappingCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -956,12 +664,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -974,25 +676,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return doBatchDelete(webConfigToLabelTypeMappingList, null);
     }
 
-    protected int[] doBatchDelete(final List<WebConfigToLabelTypeMapping> ls,
-            final DeleteOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMappingList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1000,7 +683,7 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * webConfigToLabelTypeMappingBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;WebConfigToLabelTypeMapping, WebConfigToLabelTypeMappingCB&gt;() {
-     *     public ConditionBean setup(webConfigToLabelTypeMapping entity, WebConfigToLabelTypeMappingCB intoCB) {
+     *     public ConditionBean setup(WebConfigToLabelTypeMapping entity, WebConfigToLabelTypeMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1019,35 +702,12 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<WebConfigToLabelTypeMapping, WebConfigToLabelTypeMappingCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<WebConfigToLabelTypeMapping, WebConfigToLabelTypeMappingCB> sp,
-            final InsertOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final WebConfigToLabelTypeMapping et = newEntity();
-        final WebConfigToLabelTypeMappingCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected WebConfigToLabelTypeMappingCB createCBForQueryInsert() {
-        final WebConfigToLabelTypeMappingCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1078,22 +738,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
         return doQueryUpdate(webConfigToLabelTypeMapping, cb, null);
     }
 
-    protected int doQueryUpdate(final WebConfigToLabelTypeMapping et,
-            final WebConfigToLabelTypeMappingCB cb,
-            final UpdateOption<WebConfigToLabelTypeMappingCB> op) {
-        assertObjectNotNull("webConfigToLabelTypeMapping", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1107,20 +751,6 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
      */
     public int queryDelete(final WebConfigToLabelTypeMappingCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final WebConfigToLabelTypeMappingCB cb,
-            final DeleteOption<WebConfigToLabelTypeMappingCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1284,7 +914,7 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1387,49 +1017,20 @@ public abstract class BsWebConfigToLabelTypeMappingBhv extends
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<WebConfigToLabelTypeMapping> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends WebConfigToLabelTypeMapping> typeOfSelectedEntity() {
         return WebConfigToLabelTypeMapping.class;
     }
 
-    protected WebConfigToLabelTypeMapping downcast(final Entity et) {
-        return helpEntityDowncastInternally(et,
-                WebConfigToLabelTypeMapping.class);
+    @Override
+    protected Class<WebConfigToLabelTypeMapping> typeOfHandlingEntity() {
+        return WebConfigToLabelTypeMapping.class;
     }
 
-    protected WebConfigToLabelTypeMappingCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb,
-                WebConfigToLabelTypeMappingCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<WebConfigToLabelTypeMapping> downcast(
-            final List<? extends Entity> ls) {
-        return (List<WebConfigToLabelTypeMapping>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<WebConfigToLabelTypeMappingCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<WebConfigToLabelTypeMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<WebConfigToLabelTypeMappingCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<WebConfigToLabelTypeMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<WebConfigToLabelTypeMappingCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<WebConfigToLabelTypeMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<WebConfigToLabelTypeMapping, WebConfigToLabelTypeMappingCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<WebConfigToLabelTypeMapping, WebConfigToLabelTypeMappingCB>) sp;
+    @Override
+    protected Class<WebConfigToLabelTypeMappingCB> typeOfHandlingConditionBean() {
+        return WebConfigToLabelTypeMappingCB.class;
     }
 }

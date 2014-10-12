@@ -95,6 +95,7 @@ public abstract class BsFileCrawlingConfigForm {
 
     @Required(target = "confirmfromupdate,update,delete")
     @IntegerType
+    @IntRange(min = 0, max = 2147483647)
     public String sortOrder;
 
     @Required(target = "confirmfromupdate,update,delete")

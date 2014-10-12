@@ -37,9 +37,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -82,7 +80,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
+public abstract class BsClickLogBhv extends
+        AbstractBehaviorWritable<ClickLog, ClickLogCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -93,20 +92,11 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "CLICK_LOG";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public ClickLogDbm getDBMeta() {
         return ClickLogDbm.getInstance();
     }
 
@@ -118,12 +108,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public ClickLog newEntity() {
-        return new ClickLog();
-    }
-
     /** {@inheritDoc} */
     @Override
     public ClickLogCB newConditionBean() {
@@ -158,25 +142,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final ClickLogCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final ClickLogCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final ClickLogCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -207,13 +172,8 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends ClickLog> ENTITY doSelectEntity(
-            final ClickLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends ClickLog> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final ClickLogCB cb, final Class<ENTITY> tp) {
+            final ClickLogCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -241,22 +201,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected ClickLog facadeSelectEntityWithDeletedCheck(final ClickLogCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ClickLog> ENTITY doSelectEntityWithDeletedCheck(
-            final ClickLogCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -273,12 +217,12 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends ClickLog> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends ClickLog> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -326,20 +270,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<ClickLog> facadeSelectList(final ClickLogCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ClickLog> ListResultBean<ENTITY> doSelectList(
-            final ClickLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -369,21 +299,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<ClickLog> facadeSelectPage(final ClickLogCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ClickLog> PagingResultBean<ENTITY> doSelectPage(
-            final ClickLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -404,21 +319,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
     public void selectCursor(final ClickLogCB cb,
             final EntityRowHandler<ClickLog> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final ClickLogCB cb,
-            final EntityRowHandler<ClickLog> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ClickLog> void doSelectCursor(
-            final ClickLogCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -442,27 +342,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<ClickLogCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<ClickLogCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends ClickLogCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -602,28 +481,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         doInsert(clickLog, null);
     }
 
-    protected void doInsert(final ClickLog et, final InsertOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLog", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<ClickLogCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -650,49 +507,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         doUpdate(clickLog, null);
     }
 
-    protected void doUpdate(final ClickLog et, final UpdateOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLog", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<ClickLogCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected ClickLogCB createCBForVaryingUpdate() {
-        final ClickLogCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected ClickLogCB createCBForSpecifiedUpdate() {
-        final ClickLogCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -704,27 +518,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final ClickLog clickLog) {
         doInsertOrUpdate(clickLog, null, null);
-    }
-
-    protected void doInsertOrUpdate(final ClickLog et,
-            final InsertOption<ClickLogCB> iop,
-            final UpdateOption<ClickLogCB> uop) {
-        assertObjectNotNull("clickLog", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -746,30 +539,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      */
     public void delete(final ClickLog clickLog) {
         doDelete(clickLog, null);
-    }
-
-    protected void doDelete(final ClickLog et, final DeleteOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLog", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<ClickLogCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -803,32 +572,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return doBatchInsert(clickLogList, null);
     }
 
-    protected int[] doBatchInsert(final List<ClickLog> ls,
-            final InsertOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLogList", ls);
-        InsertOption<ClickLogCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<ClickLog> ls,
-            final InsertOption<ClickLogCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -855,31 +598,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<ClickLog> clickLogList) {
         return doBatchUpdate(clickLogList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<ClickLog> ls,
-            final UpdateOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLogList", ls);
-        UpdateOption<ClickLogCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<ClickLog> ls,
-            final UpdateOption<ClickLogCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -916,12 +634,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -933,25 +645,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return doBatchDelete(clickLogList, null);
     }
 
-    protected int[] doBatchDelete(final List<ClickLog> ls,
-            final DeleteOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLogList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -959,7 +652,7 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * clickLogBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;ClickLog, ClickLogCB&gt;() {
-     *     public ConditionBean setup(clickLog entity, ClickLogCB intoCB) {
+     *     public ConditionBean setup(ClickLog entity, ClickLogCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -978,35 +671,12 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<ClickLog, ClickLogCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<ClickLog, ClickLogCB> sp,
-            final InsertOption<ClickLogCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final ClickLog et = newEntity();
-        final ClickLogCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected ClickLogCB createCBForQueryInsert() {
-        final ClickLogCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1035,21 +705,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(clickLog, cb, null);
     }
 
-    protected int doQueryUpdate(final ClickLog et, final ClickLogCB cb,
-            final UpdateOption<ClickLogCB> op) {
-        assertObjectNotNull("clickLog", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1063,20 +718,6 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final ClickLogCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final ClickLogCB cb,
-            final DeleteOption<ClickLogCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1232,7 +873,7 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1333,46 +974,20 @@ public abstract class BsClickLogBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<ClickLog> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends ClickLog> typeOfSelectedEntity() {
         return ClickLog.class;
     }
 
-    protected ClickLog downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, ClickLog.class);
+    @Override
+    protected Class<ClickLog> typeOfHandlingEntity() {
+        return ClickLog.class;
     }
 
-    protected ClickLogCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, ClickLogCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<ClickLog> downcast(final List<? extends Entity> ls) {
-        return (List<ClickLog>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<ClickLogCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<ClickLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<ClickLogCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<ClickLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<ClickLogCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<ClickLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<ClickLog, ClickLogCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<ClickLog, ClickLogCB>) sp;
+    @Override
+    protected Class<ClickLogCB> typeOfHandlingConditionBean() {
+        return ClickLogCB.class;
     }
 }

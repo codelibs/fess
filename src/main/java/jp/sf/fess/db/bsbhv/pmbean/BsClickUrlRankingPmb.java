@@ -175,7 +175,7 @@ public class BsClickUrlRankingPmb extends SimplePagingBean implements
     //                                                                            ========
     /**
      * [get] fromRequestedTime <br />
-     * @return The value of fromRequestedTime. (Nullable, NotEmptyString(when String): if empty string, returns null)
+     * @return The value of fromRequestedTime. (NullAllowed, NotEmptyString(when String): if empty string, returns null)
      */
     public java.sql.Timestamp getFromRequestedTime() {
         return _fromRequestedTime;
@@ -191,7 +191,7 @@ public class BsClickUrlRankingPmb extends SimplePagingBean implements
 
     /**
      * [get] toRequestedTime <br />
-     * @return The value of toRequestedTime. (Nullable, NotEmptyString(when String): if empty string, returns null)
+     * @return The value of toRequestedTime. (NullAllowed, NotEmptyString(when String): if empty string, returns null)
      */
     public java.sql.Timestamp getToRequestedTime() {
         return _toRequestedTime;

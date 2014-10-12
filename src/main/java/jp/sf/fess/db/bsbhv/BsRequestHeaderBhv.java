@@ -37,9 +37,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -84,7 +82,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
+public abstract class BsRequestHeaderBhv extends
+        AbstractBehaviorWritable<RequestHeader, RequestHeaderCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -93,20 +92,11 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "REQUEST_HEADER";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public RequestHeaderDbm getDBMeta() {
         return RequestHeaderDbm.getInstance();
     }
 
@@ -118,12 +108,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public RequestHeader newEntity() {
-        return new RequestHeader();
-    }
-
     /** {@inheritDoc} */
     @Override
     public RequestHeaderCB newConditionBean() {
@@ -158,25 +142,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final RequestHeaderCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final RequestHeaderCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final RequestHeaderCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -207,13 +172,8 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends RequestHeader> ENTITY doSelectEntity(
-            final RequestHeaderCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends RequestHeader> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final RequestHeaderCB cb, final Class<ENTITY> tp) {
+            final RequestHeaderCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -241,23 +201,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected RequestHeader facadeSelectEntityWithDeletedCheck(
-            final RequestHeaderCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RequestHeader> ENTITY doSelectEntityWithDeletedCheck(
-            final RequestHeaderCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -274,12 +217,12 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends RequestHeader> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends RequestHeader> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -327,21 +270,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<RequestHeader> facadeSelectList(
-            final RequestHeaderCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RequestHeader> ListResultBean<ENTITY> doSelectList(
-            final RequestHeaderCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -371,22 +299,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<RequestHeader> facadeSelectPage(
-            final RequestHeaderCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RequestHeader> PagingResultBean<ENTITY> doSelectPage(
-            final RequestHeaderCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -407,21 +319,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
     public void selectCursor(final RequestHeaderCB cb,
             final EntityRowHandler<RequestHeader> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final RequestHeaderCB cb,
-            final EntityRowHandler<RequestHeader> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends RequestHeader> void doSelectCursor(
-            final RequestHeaderCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -445,27 +342,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<RequestHeaderCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<RequestHeaderCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends RequestHeaderCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -606,29 +482,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         doInsert(requestHeader, null);
     }
 
-    protected void doInsert(final RequestHeader et,
-            final InsertOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeader", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<RequestHeaderCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -655,44 +508,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         doUpdate(requestHeader, null);
     }
 
-    protected void doUpdate(final RequestHeader et,
-            final UpdateOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeader", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<RequestHeaderCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected RequestHeaderCB createCBForVaryingUpdate() {
-        final RequestHeaderCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected RequestHeaderCB createCBForSpecifiedUpdate() {
-        final RequestHeaderCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -716,19 +531,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(requestHeader, null);
     }
 
-    protected void doUpdateNonstrict(final RequestHeader et,
-            final UpdateOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeader", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -742,20 +544,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         doInsertOrUpdate(requestHeader, null, null);
     }
 
-    protected void doInsertOrUpdate(final RequestHeader et,
-            final InsertOption<RequestHeaderCB> iop,
-            final UpdateOption<RequestHeaderCB> uop) {
-        assertObjectNotNull("requestHeader", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
@@ -767,20 +555,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdateNonstrict(final RequestHeader requestHeader) {
         doInsertOrUpdateNonstrict(requestHeader, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final RequestHeader et,
-            final InsertOption<RequestHeaderCB> iop,
-            final UpdateOption<RequestHeaderCB> uop) {
-        assertObjectNotNull("requestHeader", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -804,25 +578,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         doDelete(requestHeader, null);
     }
 
-    protected void doDelete(final RequestHeader et,
-            final DeleteOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeader", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<RequestHeaderCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -839,13 +594,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final RequestHeader requestHeader) {
         doDeleteNonstrict(requestHeader, null);
-    }
-
-    protected void doDeleteNonstrict(final RequestHeader et,
-            final DeleteOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeader", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -871,12 +619,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("requestHeader", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -910,32 +652,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return doBatchInsert(requestHeaderList, null);
     }
 
-    protected int[] doBatchInsert(final List<RequestHeader> ls,
-            final InsertOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeaderList", ls);
-        InsertOption<RequestHeaderCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<RequestHeader> ls,
-            final InsertOption<RequestHeaderCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -962,31 +678,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<RequestHeader> requestHeaderList) {
         return doBatchUpdate(requestHeaderList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<RequestHeader> ls,
-            final UpdateOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeaderList", ls);
-        UpdateOption<RequestHeaderCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<RequestHeader> ls,
-            final UpdateOption<RequestHeaderCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1052,19 +743,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(requestHeaderList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<RequestHeader> ls,
-            final UpdateOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeaderList", ls);
-        UpdateOption<RequestHeaderCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1099,12 +777,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1114,19 +786,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      */
     public int[] batchDelete(final List<RequestHeader> requestHeaderList) {
         return doBatchDelete(requestHeaderList, null);
-    }
-
-    protected int[] doBatchDelete(final List<RequestHeader> ls,
-            final DeleteOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeaderList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1141,19 +800,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(requestHeaderList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<RequestHeader> ls,
-            final DeleteOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeaderList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1161,7 +807,7 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * requestHeaderBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;RequestHeader, RequestHeaderCB&gt;() {
-     *     public ConditionBean setup(requestHeader entity, RequestHeaderCB intoCB) {
+     *     public ConditionBean setup(RequestHeader entity, RequestHeaderCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1180,35 +826,12 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<RequestHeader, RequestHeaderCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<RequestHeader, RequestHeaderCB> sp,
-            final InsertOption<RequestHeaderCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final RequestHeader et = newEntity();
-        final RequestHeaderCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected RequestHeaderCB createCBForQueryInsert() {
-        final RequestHeaderCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1238,21 +861,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(requestHeader, cb, null);
     }
 
-    protected int doQueryUpdate(final RequestHeader et,
-            final RequestHeaderCB cb, final UpdateOption<RequestHeaderCB> op) {
-        assertObjectNotNull("requestHeader", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1266,20 +874,6 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final RequestHeaderCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final RequestHeaderCB cb,
-            final DeleteOption<RequestHeaderCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1535,7 +1129,7 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1644,46 +1238,20 @@ public abstract class BsRequestHeaderBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<RequestHeader> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends RequestHeader> typeOfSelectedEntity() {
         return RequestHeader.class;
     }
 
-    protected RequestHeader downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, RequestHeader.class);
+    @Override
+    protected Class<RequestHeader> typeOfHandlingEntity() {
+        return RequestHeader.class;
     }
 
-    protected RequestHeaderCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, RequestHeaderCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<RequestHeader> downcast(final List<? extends Entity> ls) {
-        return (List<RequestHeader>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<RequestHeaderCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<RequestHeaderCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<RequestHeaderCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<RequestHeaderCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<RequestHeaderCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<RequestHeaderCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<RequestHeader, RequestHeaderCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<RequestHeader, RequestHeaderCB>) sp;
+    @Override
+    protected Class<RequestHeaderCB> typeOfHandlingConditionBean() {
+        return RequestHeaderCB.class;
     }
 }

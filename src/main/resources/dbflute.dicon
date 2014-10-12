@@ -13,6 +13,7 @@
     <component name="behaviorCommandInvoker" class="org.seasar.dbflute.bhv.core.BehaviorCommandInvoker"/>
 
     <!-- The components of Behavior. -->
+    <component name="boostDocumentRuleBhv" class="jp.sf.fess.db.exbhv.BoostDocumentRuleBhv"/>
     <component name="clickLogBhv" class="jp.sf.fess.db.exbhv.ClickLogBhv"/>
     <component name="crawlingSessionBhv" class="jp.sf.fess.db.exbhv.CrawlingSessionBhv"/>
     <component name="crawlingSessionInfoBhv" class="jp.sf.fess.db.exbhv.CrawlingSessionInfoBhv"/>
@@ -36,6 +37,8 @@
     <component name="scheduledJobBhv" class="jp.sf.fess.db.exbhv.ScheduledJobBhv"/>
     <component name="searchFieldLogBhv" class="jp.sf.fess.db.exbhv.SearchFieldLogBhv"/>
     <component name="searchLogBhv" class="jp.sf.fess.db.exbhv.SearchLogBhv"/>
+    <component name="suggestBadWordBhv" class="jp.sf.fess.db.exbhv.SuggestBadWordBhv"/>
+    <component name="suggestElevateWordBhv" class="jp.sf.fess.db.exbhv.SuggestElevateWordBhv"/>
     <component name="userInfoBhv" class="jp.sf.fess.db.exbhv.UserInfoBhv"/>
     <component name="webAuthenticationBhv" class="jp.sf.fess.db.exbhv.WebAuthenticationBhv"/>
     <component name="webConfigToLabelTypeMappingBhv" class="jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv"/>

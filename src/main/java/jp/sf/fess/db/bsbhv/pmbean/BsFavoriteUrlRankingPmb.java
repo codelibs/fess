@@ -175,7 +175,7 @@ public class BsFavoriteUrlRankingPmb extends SimplePagingBean implements
     //                                                                            ========
     /**
      * [get] fromCreatedTime <br />
-     * @return The value of fromCreatedTime. (Nullable, NotEmptyString(when String): if empty string, returns null)
+     * @return The value of fromCreatedTime. (NullAllowed, NotEmptyString(when String): if empty string, returns null)
      */
     public java.sql.Timestamp getFromCreatedTime() {
         return _fromCreatedTime;
@@ -191,7 +191,7 @@ public class BsFavoriteUrlRankingPmb extends SimplePagingBean implements
 
     /**
      * [get] toCreatedTime <br />
-     * @return The value of toCreatedTime. (Nullable, NotEmptyString(when String): if empty string, returns null)
+     * @return The value of toCreatedTime. (NullAllowed, NotEmptyString(when String): if empty string, returns null)
      */
     public java.sql.Timestamp getToCreatedTime() {
         return _toCreatedTime;

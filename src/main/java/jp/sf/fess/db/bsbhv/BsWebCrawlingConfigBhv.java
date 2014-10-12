@@ -47,9 +47,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -94,7 +92,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
+public abstract class BsWebCrawlingConfigBhv extends
+        AbstractBehaviorWritable<WebCrawlingConfig, WebCrawlingConfigCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -103,20 +102,11 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "WEB_CRAWLING_CONFIG";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public WebCrawlingConfigDbm getDBMeta() {
         return WebCrawlingConfigDbm.getInstance();
     }
 
@@ -128,12 +118,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public WebCrawlingConfig newEntity() {
-        return new WebCrawlingConfig();
-    }
-
     /** {@inheritDoc} */
     @Override
     public WebCrawlingConfigCB newConditionBean() {
@@ -168,25 +152,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final WebCrawlingConfigCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final WebCrawlingConfigCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final WebCrawlingConfigCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -217,13 +182,8 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectEntity(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends WebCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
+            final WebCrawlingConfigCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -252,23 +212,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected WebCrawlingConfig facadeSelectEntityWithDeletedCheck(
-            final WebCrawlingConfigCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectEntityWithDeletedCheck(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -285,12 +228,12 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends WebCrawlingConfig> ENTITY doSelectByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends WebCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -339,21 +282,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<WebCrawlingConfig> facadeSelectList(
-            final WebCrawlingConfigCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebCrawlingConfig> ListResultBean<ENTITY> doSelectList(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -384,22 +312,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<WebCrawlingConfig> facadeSelectPage(
-            final WebCrawlingConfigCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebCrawlingConfig> PagingResultBean<ENTITY> doSelectPage(
-            final WebCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -420,21 +332,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     public void selectCursor(final WebCrawlingConfigCB cb,
             final EntityRowHandler<WebCrawlingConfig> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final WebCrawlingConfigCB cb,
-            final EntityRowHandler<WebCrawlingConfig> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends WebCrawlingConfig> void doSelectCursor(
-            final WebCrawlingConfigCB cb,
-            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -458,27 +355,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<WebCrawlingConfigCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<WebCrawlingConfigCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends WebCrawlingConfigCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -657,7 +533,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -770,7 +646,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -883,7 +759,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -996,7 +872,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param webCrawlingConfigList The entity list of webCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -1060,30 +936,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         doInsert(webCrawlingConfig, null);
     }
 
-    protected void doInsert(final WebCrawlingConfig et,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(
-            final InsertOption<WebCrawlingConfigCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -1110,45 +962,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         doUpdate(webCrawlingConfig, null);
     }
 
-    protected void doUpdate(final WebCrawlingConfig et,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected WebCrawlingConfigCB createCBForVaryingUpdate() {
-        final WebCrawlingConfigCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected WebCrawlingConfigCB createCBForSpecifiedUpdate() {
-        final WebCrawlingConfigCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -1172,19 +985,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(webCrawlingConfig, null);
     }
 
-    protected void doUpdateNonstrict(final WebCrawlingConfig et,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -1196,20 +996,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final WebCrawlingConfig webCrawlingConfig) {
         doInsertOrUpdate(webCrawlingConfig, null, null);
-    }
-
-    protected void doInsertOrUpdate(final WebCrawlingConfig et,
-            final InsertOption<WebCrawlingConfigCB> iop,
-            final UpdateOption<WebCrawlingConfigCB> uop) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1224,20 +1010,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     public void insertOrUpdateNonstrict(
             final WebCrawlingConfig webCrawlingConfig) {
         doInsertOrUpdateNonstrict(webCrawlingConfig, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final WebCrawlingConfig et,
-            final InsertOption<WebCrawlingConfigCB> iop,
-            final UpdateOption<WebCrawlingConfigCB> uop) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1261,26 +1033,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         doDelete(webCrawlingConfig, null);
     }
 
-    protected void doDelete(final WebCrawlingConfig et,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -1297,13 +1049,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final WebCrawlingConfig webCrawlingConfig) {
         doDeleteNonstrict(webCrawlingConfig, null);
-    }
-
-    protected void doDeleteNonstrict(final WebCrawlingConfig et,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -1330,12 +1075,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("webCrawlingConfig", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -1369,32 +1108,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchInsert(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchInsert(final List<WebCrawlingConfig> ls,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfigList", ls);
-        InsertOption<WebCrawlingConfigCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<WebCrawlingConfig> ls,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -1421,31 +1134,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<WebCrawlingConfig> webCrawlingConfigList) {
         return doBatchUpdate(webCrawlingConfigList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<WebCrawlingConfig> ls,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfigList", ls);
-        UpdateOption<WebCrawlingConfigCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<WebCrawlingConfig> ls,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1512,19 +1200,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<WebCrawlingConfig> ls,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfigList", ls);
-        UpdateOption<WebCrawlingConfigCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1559,12 +1234,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1574,19 +1243,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public int[] batchDelete(final List<WebCrawlingConfig> webCrawlingConfigList) {
         return doBatchDelete(webCrawlingConfigList, null);
-    }
-
-    protected int[] doBatchDelete(final List<WebCrawlingConfig> ls,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfigList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1601,19 +1257,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(webCrawlingConfigList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<WebCrawlingConfig> ls,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfigList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1621,7 +1264,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * webCrawlingConfigBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;WebCrawlingConfig, WebCrawlingConfigCB&gt;() {
-     *     public ConditionBean setup(webCrawlingConfig entity, WebCrawlingConfigCB intoCB) {
+     *     public ConditionBean setup(WebCrawlingConfig entity, WebCrawlingConfigCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1640,35 +1283,12 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB> sp,
-            final InsertOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final WebCrawlingConfig et = newEntity();
-        final WebCrawlingConfigCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected WebCrawlingConfigCB createCBForQueryInsert() {
-        final WebCrawlingConfigCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1698,22 +1318,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(webCrawlingConfig, cb, null);
     }
 
-    protected int doQueryUpdate(final WebCrawlingConfig et,
-            final WebCrawlingConfigCB cb,
-            final UpdateOption<WebCrawlingConfigCB> op) {
-        assertObjectNotNull("webCrawlingConfig", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1727,20 +1331,6 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final WebCrawlingConfigCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final WebCrawlingConfigCB cb,
-            final DeleteOption<WebCrawlingConfigCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1999,7 +1589,7 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -2109,47 +1699,20 @@ public abstract class BsWebCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<WebCrawlingConfig> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends WebCrawlingConfig> typeOfSelectedEntity() {
         return WebCrawlingConfig.class;
     }
 
-    protected WebCrawlingConfig downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, WebCrawlingConfig.class);
+    @Override
+    protected Class<WebCrawlingConfig> typeOfHandlingEntity() {
+        return WebCrawlingConfig.class;
     }
 
-    protected WebCrawlingConfigCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb,
-                WebCrawlingConfigCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<WebCrawlingConfig> downcast(final List<? extends Entity> ls) {
-        return (List<WebCrawlingConfig>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<WebCrawlingConfigCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<WebCrawlingConfigCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<WebCrawlingConfigCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<WebCrawlingConfigCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<WebCrawlingConfigCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<WebCrawlingConfigCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<WebCrawlingConfig, WebCrawlingConfigCB>) sp;
+    @Override
+    protected Class<WebCrawlingConfigCB> typeOfHandlingConditionBean() {
+        return WebCrawlingConfigCB.class;
     }
 }

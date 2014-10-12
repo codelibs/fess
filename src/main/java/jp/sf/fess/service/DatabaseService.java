@@ -37,6 +37,7 @@ import javax.transaction.UserTransaction;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
+import jp.sf.fess.db.cbean.BoostDocumentRuleCB;
 import jp.sf.fess.db.cbean.CrawlingSessionCB;
 import jp.sf.fess.db.cbean.CrawlingSessionInfoCB;
 import jp.sf.fess.db.cbean.DataConfigToLabelTypeMappingCB;
@@ -54,10 +55,13 @@ import jp.sf.fess.db.cbean.PathMappingCB;
 import jp.sf.fess.db.cbean.RequestHeaderCB;
 import jp.sf.fess.db.cbean.RoleTypeCB;
 import jp.sf.fess.db.cbean.ScheduledJobCB;
+import jp.sf.fess.db.cbean.SuggestBadWordCB;
+import jp.sf.fess.db.cbean.SuggestElevateWordCB;
 import jp.sf.fess.db.cbean.WebAuthenticationCB;
 import jp.sf.fess.db.cbean.WebConfigToLabelTypeMappingCB;
 import jp.sf.fess.db.cbean.WebConfigToRoleTypeMappingCB;
 import jp.sf.fess.db.cbean.WebCrawlingConfigCB;
+import jp.sf.fess.db.exbhv.BoostDocumentRuleBhv;
 import jp.sf.fess.db.exbhv.CrawlingSessionBhv;
 import jp.sf.fess.db.exbhv.CrawlingSessionInfoBhv;
 import jp.sf.fess.db.exbhv.DataConfigToLabelTypeMappingBhv;
@@ -75,10 +79,13 @@ import jp.sf.fess.db.exbhv.PathMappingBhv;
 import jp.sf.fess.db.exbhv.RequestHeaderBhv;
 import jp.sf.fess.db.exbhv.RoleTypeBhv;
 import jp.sf.fess.db.exbhv.ScheduledJobBhv;
+import jp.sf.fess.db.exbhv.SuggestBadWordBhv;
+import jp.sf.fess.db.exbhv.SuggestElevateWordBhv;
 import jp.sf.fess.db.exbhv.WebAuthenticationBhv;
 import jp.sf.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
 import jp.sf.fess.db.exbhv.WebCrawlingConfigBhv;
+import jp.sf.fess.db.exentity.BoostDocumentRule;
 import jp.sf.fess.db.exentity.CrawlingSession;
 import jp.sf.fess.db.exentity.CrawlingSessionInfo;
 import jp.sf.fess.db.exentity.DataConfigToLabelTypeMapping;
@@ -96,6 +103,8 @@ import jp.sf.fess.db.exentity.PathMapping;
 import jp.sf.fess.db.exentity.RequestHeader;
 import jp.sf.fess.db.exentity.RoleType;
 import jp.sf.fess.db.exentity.ScheduledJob;
+import jp.sf.fess.db.exentity.SuggestBadWord;
+import jp.sf.fess.db.exentity.SuggestElevateWord;
 import jp.sf.fess.db.exentity.WebAuthentication;
 import jp.sf.fess.db.exentity.WebConfigToLabelTypeMapping;
 import jp.sf.fess.db.exentity.WebConfigToRoleTypeMapping;
@@ -161,6 +170,12 @@ public class DatabaseService {
 
     private static final String KEY_MATCH_KEY = "keyMatch";
 
+    private static final String BOOST_DOCUMENT_RULE_KEY = "boostDocumentRule";
+
+    private static final String SUGGEST_ELEVATE_WORD_KEY = "suggestElevateWord";
+
+    private static final String SUGGEST_BAD_WORD_KEY = "suggestBadWord";
+
     private static final String OVERLAPPING_HOST_KEY = "overlappingHost";
 
     @Resource
@@ -225,6 +240,15 @@ public class DatabaseService {
 
     @Resource
     protected KeyMatchBhv keyMatchBhv;
+
+    @Resource
+    protected BoostDocumentRuleBhv boostDocumentRuleBhv;
+
+    @Resource
+    protected SuggestElevateWordBhv suggestElevateWordBhv;
+
+    @Resource
+    protected SuggestBadWordBhv suggestBadWordBhv;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -332,6 +356,15 @@ public class DatabaseService {
         // keyMatch
         dataSet.put(KEY_MATCH_KEY + LIST_SUFFIX,
                 keyMatchBhv.selectList(new KeyMatchCB()));
+        // boostDocumentRule
+        dataSet.put(BOOST_DOCUMENT_RULE_KEY + LIST_SUFFIX,
+                boostDocumentRuleBhv.selectList(new BoostDocumentRuleCB()));
+        // suggestElevateWord
+        dataSet.put(SUGGEST_ELEVATE_WORD_KEY + LIST_SUFFIX,
+                suggestElevateWordBhv.selectList(new SuggestElevateWordCB()));
+        // suggestBadWord
+        dataSet.put(SUGGEST_BAD_WORD_KEY + LIST_SUFFIX,
+                suggestBadWordBhv.selectList(new SuggestBadWordCB()));
 
         // crawlerProperties
         final Map<String, String> crawlerPropertyMap = new HashMap<String, String>();
@@ -1279,6 +1312,121 @@ public class DatabaseService {
                 userTransaction.commit();
             } catch (final Exception e) {
                 rollback(KEY_MATCH_KEY, e);
+            }
+            // boostDocumentRule
+            try {
+                userTransaction.begin();
+
+                final List<BoostDocumentRule> boostDocumentRuleList = (List<BoostDocumentRule>) dataSet
+                        .get(BOOST_DOCUMENT_RULE_KEY + LIST_SUFFIX);
+                if (boostDocumentRuleList != null) {
+                    for (BoostDocumentRule boostDocumentRule : boostDocumentRuleList) {
+                        final Long id = boostDocumentRule.getId();
+
+                        final BoostDocumentRuleCB cb = new BoostDocumentRuleCB();
+                        cb.query().setUrlExpr_Equal(
+                                boostDocumentRule.getUrlExpr());
+                        final BoostDocumentRule entity = boostDocumentRuleBhv
+                                .selectEntity(cb);
+                        boostDocumentRule.setId(null);
+                        if (entity == null) {
+                            boostDocumentRuleBhv.insert(boostDocumentRule);
+                        } else {
+                            if (overwrite) {
+                                boostDocumentRule.setVersionNo(null);
+                                Beans.copy(boostDocumentRule, entity)
+                                        .excludesNull().execute();
+                                boostDocumentRule = entity;
+                                boostDocumentRuleBhv.update(boostDocumentRule);
+                            } else {
+                                boostDocumentRuleBhv.insert(boostDocumentRule);
+                            }
+                        }
+                        idMap.put(
+                                BOOST_DOCUMENT_RULE_KEY + ":" + id.toString(),
+                                boostDocumentRule.getId());
+                    }
+                }
+                userTransaction.commit();
+            } catch (final Exception e) {
+                rollback(BOOST_DOCUMENT_RULE_KEY, e);
+            }
+            // suggestElevateWord
+            try {
+                userTransaction.begin();
+
+                final List<SuggestElevateWord> suggestElevateWordList = (List<SuggestElevateWord>) dataSet
+                        .get(SUGGEST_ELEVATE_WORD_KEY + LIST_SUFFIX);
+                if (suggestElevateWordList != null) {
+                    for (SuggestElevateWord suggestElevateWord : suggestElevateWordList) {
+                        final Long id = suggestElevateWord.getId();
+
+                        final SuggestElevateWordCB cb = new SuggestElevateWordCB();
+                        cb.query().setSuggestWord_Equal(
+                                suggestElevateWord.getSuggestWord());
+                        final SuggestElevateWord entity = suggestElevateWordBhv
+                                .selectEntity(cb);
+                        suggestElevateWord.setId(null);
+                        if (entity == null) {
+                            suggestElevateWordBhv.insert(suggestElevateWord);
+                        } else {
+                            if (overwrite) {
+                                suggestElevateWord.setVersionNo(null);
+                                Beans.copy(suggestElevateWord, entity)
+                                        .excludesNull().execute();
+                                suggestElevateWord = entity;
+                                suggestElevateWordBhv
+                                        .update(suggestElevateWord);
+                            } else {
+                                suggestElevateWordBhv
+                                        .insert(suggestElevateWord);
+                            }
+                        }
+                        idMap.put(
+                                SUGGEST_ELEVATE_WORD_KEY + ":" + id.toString(),
+                                suggestElevateWord.getId());
+                    }
+                }
+                userTransaction.commit();
+            } catch (final Exception e) {
+                rollback(SUGGEST_ELEVATE_WORD_KEY, e);
+            }
+            // suggestNGWord
+            try {
+                userTransaction.begin();
+
+                final List<SuggestBadWord> suggestNGWordList = (List<SuggestBadWord>) dataSet
+                        .get(SUGGEST_BAD_WORD_KEY + LIST_SUFFIX);
+                if (suggestNGWordList != null) {
+                    for (SuggestBadWord suggestNGWord : suggestNGWordList) {
+                        final Long id = suggestNGWord.getId();
+
+                        final SuggestBadWordCB cb = new SuggestBadWordCB();
+                        cb.query().setSuggestWord_Equal(
+                                suggestNGWord.getSuggestWord());
+                        final SuggestBadWord entity = suggestBadWordBhv
+                                .selectEntity(cb);
+                        suggestNGWord.setId(null);
+                        if (entity == null) {
+                            suggestBadWordBhv.insert(suggestNGWord);
+                        } else {
+                            if (overwrite) {
+                                suggestNGWord.setVersionNo(null);
+                                Beans.copy(suggestNGWord, entity)
+                                        .excludesNull().execute();
+                                suggestNGWord = entity;
+                                suggestBadWordBhv.update(suggestNGWord);
+                            } else {
+                                suggestBadWordBhv.insert(suggestNGWord);
+                            }
+                        }
+                        idMap.put(SUGGEST_BAD_WORD_KEY + ":" + id.toString(),
+                                suggestNGWord.getId());
+                    }
+                }
+                userTransaction.commit();
+            } catch (final Exception e) {
+                rollback(SUGGEST_BAD_WORD_KEY, e);
             }
 
             // crawlerProperties

@@ -45,9 +45,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -92,7 +90,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
+public abstract class BsFileCrawlingConfigBhv extends
+        AbstractBehaviorWritable<FileCrawlingConfig, FileCrawlingConfigCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -101,20 +100,11 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "FILE_CRAWLING_CONFIG";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public FileCrawlingConfigDbm getDBMeta() {
         return FileCrawlingConfigDbm.getInstance();
     }
 
@@ -126,12 +116,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public FileCrawlingConfig newEntity() {
-        return new FileCrawlingConfig();
-    }
-
     /** {@inheritDoc} */
     @Override
     public FileCrawlingConfigCB newConditionBean() {
@@ -166,25 +150,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final FileCrawlingConfigCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final FileCrawlingConfigCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final FileCrawlingConfigCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -216,13 +181,8 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FileCrawlingConfig> ENTITY doSelectEntity(
-            final FileCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends FileCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final FileCrawlingConfigCB cb, final Class<ENTITY> tp) {
+            final FileCrawlingConfigCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -251,23 +211,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected FileCrawlingConfig facadeSelectEntityWithDeletedCheck(
-            final FileCrawlingConfigCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileCrawlingConfig> ENTITY doSelectEntityWithDeletedCheck(
-            final FileCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -284,12 +227,12 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends FileCrawlingConfig> ENTITY doSelectByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends FileCrawlingConfig> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -338,21 +281,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<FileCrawlingConfig> facadeSelectList(
-            final FileCrawlingConfigCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileCrawlingConfig> ListResultBean<ENTITY> doSelectList(
-            final FileCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -383,22 +311,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<FileCrawlingConfig> facadeSelectPage(
-            final FileCrawlingConfigCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileCrawlingConfig> PagingResultBean<ENTITY> doSelectPage(
-            final FileCrawlingConfigCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -419,21 +331,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     public void selectCursor(final FileCrawlingConfigCB cb,
             final EntityRowHandler<FileCrawlingConfig> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final FileCrawlingConfigCB cb,
-            final EntityRowHandler<FileCrawlingConfig> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FileCrawlingConfig> void doSelectCursor(
-            final FileCrawlingConfigCB cb,
-            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -457,27 +354,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<FileCrawlingConfigCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<FileCrawlingConfigCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends FileCrawlingConfigCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -658,7 +534,7 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -771,7 +647,7 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -884,7 +760,7 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param fileCrawlingConfigList The entity list of fileCrawlingConfig. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -948,30 +824,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         doInsert(fileCrawlingConfig, null);
     }
 
-    protected void doInsert(final FileCrawlingConfig et,
-            final InsertOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(
-            final InsertOption<FileCrawlingConfigCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -998,45 +850,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         doUpdate(fileCrawlingConfig, null);
     }
 
-    protected void doUpdate(final FileCrawlingConfig et,
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected FileCrawlingConfigCB createCBForVaryingUpdate() {
-        final FileCrawlingConfigCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected FileCrawlingConfigCB createCBForSpecifiedUpdate() {
-        final FileCrawlingConfigCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -1060,19 +873,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(fileCrawlingConfig, null);
     }
 
-    protected void doUpdateNonstrict(final FileCrawlingConfig et,
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -1084,20 +884,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final FileCrawlingConfig fileCrawlingConfig) {
         doInsertOrUpdate(fileCrawlingConfig, null, null);
-    }
-
-    protected void doInsertOrUpdate(final FileCrawlingConfig et,
-            final InsertOption<FileCrawlingConfigCB> iop,
-            final UpdateOption<FileCrawlingConfigCB> uop) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1112,20 +898,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     public void insertOrUpdateNonstrict(
             final FileCrawlingConfig fileCrawlingConfig) {
         doInsertOrUpdateNonstrict(fileCrawlingConfig, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final FileCrawlingConfig et,
-            final InsertOption<FileCrawlingConfigCB> iop,
-            final UpdateOption<FileCrawlingConfigCB> uop) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -1149,26 +921,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         doDelete(fileCrawlingConfig, null);
     }
 
-    protected void doDelete(final FileCrawlingConfig et,
-            final DeleteOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(
-            final DeleteOption<FileCrawlingConfigCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -1185,13 +937,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final FileCrawlingConfig fileCrawlingConfig) {
         doDeleteNonstrict(fileCrawlingConfig, null);
-    }
-
-    protected void doDeleteNonstrict(final FileCrawlingConfig et,
-            final DeleteOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -1218,12 +963,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("fileCrawlingConfig", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -1258,32 +997,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchInsert(fileCrawlingConfigList, null);
     }
 
-    protected int[] doBatchInsert(final List<FileCrawlingConfig> ls,
-            final InsertOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfigList", ls);
-        InsertOption<FileCrawlingConfigCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<FileCrawlingConfig> ls,
-            final InsertOption<FileCrawlingConfigCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -1311,31 +1024,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     public int[] batchUpdate(
             final List<FileCrawlingConfig> fileCrawlingConfigList) {
         return doBatchUpdate(fileCrawlingConfigList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<FileCrawlingConfig> ls,
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfigList", ls);
-        UpdateOption<FileCrawlingConfigCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<FileCrawlingConfig> ls,
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1402,19 +1090,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(fileCrawlingConfigList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<FileCrawlingConfig> ls,
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfigList", ls);
-        UpdateOption<FileCrawlingConfigCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1449,12 +1124,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1465,19 +1134,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     public int[] batchDelete(
             final List<FileCrawlingConfig> fileCrawlingConfigList) {
         return doBatchDelete(fileCrawlingConfigList, null);
-    }
-
-    protected int[] doBatchDelete(final List<FileCrawlingConfig> ls,
-            final DeleteOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfigList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1492,19 +1148,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(fileCrawlingConfigList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<FileCrawlingConfig> ls,
-            final DeleteOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfigList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1512,7 +1155,7 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * fileCrawlingConfigBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;FileCrawlingConfig, FileCrawlingConfigCB&gt;() {
-     *     public ConditionBean setup(fileCrawlingConfig entity, FileCrawlingConfigCB intoCB) {
+     *     public ConditionBean setup(FileCrawlingConfig entity, FileCrawlingConfigCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1531,35 +1174,12 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<FileCrawlingConfig, FileCrawlingConfigCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<FileCrawlingConfig, FileCrawlingConfigCB> sp,
-            final InsertOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final FileCrawlingConfig et = newEntity();
-        final FileCrawlingConfigCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected FileCrawlingConfigCB createCBForQueryInsert() {
-        final FileCrawlingConfigCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1589,22 +1209,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(fileCrawlingConfig, cb, null);
     }
 
-    protected int doQueryUpdate(final FileCrawlingConfig et,
-            final FileCrawlingConfigCB cb,
-            final UpdateOption<FileCrawlingConfigCB> op) {
-        assertObjectNotNull("fileCrawlingConfig", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1618,20 +1222,6 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final FileCrawlingConfigCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final FileCrawlingConfigCB cb,
-            final DeleteOption<FileCrawlingConfigCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1891,7 +1481,7 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -2001,47 +1591,20 @@ public abstract class BsFileCrawlingConfigBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<FileCrawlingConfig> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends FileCrawlingConfig> typeOfSelectedEntity() {
         return FileCrawlingConfig.class;
     }
 
-    protected FileCrawlingConfig downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, FileCrawlingConfig.class);
+    @Override
+    protected Class<FileCrawlingConfig> typeOfHandlingEntity() {
+        return FileCrawlingConfig.class;
     }
 
-    protected FileCrawlingConfigCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb,
-                FileCrawlingConfigCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<FileCrawlingConfig> downcast(final List<? extends Entity> ls) {
-        return (List<FileCrawlingConfig>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<FileCrawlingConfigCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<FileCrawlingConfigCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<FileCrawlingConfigCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<FileCrawlingConfigCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<FileCrawlingConfigCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<FileCrawlingConfigCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<FileCrawlingConfig, FileCrawlingConfigCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<FileCrawlingConfig, FileCrawlingConfigCB>) sp;
+    @Override
+    protected Class<FileCrawlingConfigCB> typeOfHandlingConditionBean() {
+        return FileCrawlingConfigCB.class;
     }
 }

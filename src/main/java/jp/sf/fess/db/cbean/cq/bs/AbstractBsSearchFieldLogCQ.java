@@ -17,6 +17,7 @@
 package jp.sf.fess.db.cbean.cq.bs;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import jp.sf.fess.db.allcommon.DBMetaInstanceHandler;
@@ -36,6 +37,7 @@ import org.seasar.dbflute.cbean.chelper.HpSSQOption;
 import org.seasar.dbflute.cbean.chelper.HpSSQSetupper;
 import org.seasar.dbflute.cbean.ckey.ConditionKey;
 import org.seasar.dbflute.cbean.coption.DerivedReferrerOption;
+import org.seasar.dbflute.cbean.coption.FromToOption;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
 import org.seasar.dbflute.cbean.coption.RangeOfOption;
 import org.seasar.dbflute.cbean.cvalue.ConditionValue;
@@ -76,7 +78,6 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
@@ -838,6 +839,9 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
 
     public abstract String keepMyselfInScope(SearchFieldLogCQ sq);
 
+    // ===================================================================================
+    //                                                                        Manual Order
+    //                                                                        ============
     /**
      * Order along manual ordering information.
      * <pre>
@@ -874,8 +878,8 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     }
 
     // ===================================================================================
-    //                                                                          Compatible
-    //                                                                          ==========
+    //                                                                    Small Adjustment
+    //                                                                    ================
     /**
      * Order along the list of manual values. #beforejava8 <br />
      * This function with Union is unsupported! <br />
@@ -904,6 +908,11 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
         withManualOrder(manualOrderBean);
     }
 
+    @Override
+    protected void filterFromToOption(final FromToOption option) {
+        option.allowOneSide();
+    }
+
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
@@ -912,6 +921,10 @@ public abstract class AbstractBsSearchFieldLogCQ extends AbstractConditionQuery 
     }
 
     // very internal (for suppressing warn about 'Not Use Import')
+    protected String xabUDT() {
+        return Date.class.getName();
+    }
+
     protected String xabCQ() {
         return SearchFieldLogCQ.class.getName();
     }

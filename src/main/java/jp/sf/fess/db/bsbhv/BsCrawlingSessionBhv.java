@@ -41,9 +41,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -86,7 +84,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
+public abstract class BsCrawlingSessionBhv extends
+        AbstractBehaviorWritable<CrawlingSession, CrawlingSessionCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -95,20 +94,11 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "CRAWLING_SESSION";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public CrawlingSessionDbm getDBMeta() {
         return CrawlingSessionDbm.getInstance();
     }
 
@@ -120,12 +110,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public CrawlingSession newEntity() {
-        return new CrawlingSession();
-    }
-
     /** {@inheritDoc} */
     @Override
     public CrawlingSessionCB newConditionBean() {
@@ -160,25 +144,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final CrawlingSessionCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final CrawlingSessionCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final CrawlingSessionCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -209,13 +174,8 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends CrawlingSession> ENTITY doSelectEntity(
-            final CrawlingSessionCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends CrawlingSession> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final CrawlingSessionCB cb, final Class<ENTITY> tp) {
+            final CrawlingSessionCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -244,23 +204,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected CrawlingSession facadeSelectEntityWithDeletedCheck(
-            final CrawlingSessionCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends CrawlingSession> ENTITY doSelectEntityWithDeletedCheck(
-            final CrawlingSessionCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -277,12 +220,12 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends CrawlingSession> ENTITY doSelectByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends CrawlingSession> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -330,21 +273,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<CrawlingSession> facadeSelectList(
-            final CrawlingSessionCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends CrawlingSession> ListResultBean<ENTITY> doSelectList(
-            final CrawlingSessionCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -375,22 +303,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<CrawlingSession> facadeSelectPage(
-            final CrawlingSessionCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends CrawlingSession> PagingResultBean<ENTITY> doSelectPage(
-            final CrawlingSessionCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -411,21 +323,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     public void selectCursor(final CrawlingSessionCB cb,
             final EntityRowHandler<CrawlingSession> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final CrawlingSessionCB cb,
-            final EntityRowHandler<CrawlingSession> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends CrawlingSession> void doSelectCursor(
-            final CrawlingSessionCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -449,27 +346,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<CrawlingSessionCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<CrawlingSessionCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends CrawlingSessionCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -650,7 +526,7 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     }
 
     /**
-     * {Refer to overload method that has an argument of condition-bean setupper.} #beforejava8
+     * {Refer to overload method that has an argument of condition-bean set-upper} #beforejava8
      * @param crawlingSessionList The entity list of crawlingSession. (NotNull)
      * @param loadReferrerOption The option of load-referrer. (NotNull)
      * @return The callback interface which you can load nested referrer by calling withNestedReferrer(). (NotNull)
@@ -714,29 +590,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         doInsert(crawlingSession, null);
     }
 
-    protected void doInsert(final CrawlingSession et,
-            final InsertOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSession", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<CrawlingSessionCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -763,50 +616,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         doUpdate(crawlingSession, null);
     }
 
-    protected void doUpdate(final CrawlingSession et,
-            final UpdateOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSession", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<CrawlingSessionCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected CrawlingSessionCB createCBForVaryingUpdate() {
-        final CrawlingSessionCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected CrawlingSessionCB createCBForSpecifiedUpdate() {
-        final CrawlingSessionCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -818,27 +627,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final CrawlingSession crawlingSession) {
         doInsertOrUpdate(crawlingSession, null, null);
-    }
-
-    protected void doInsertOrUpdate(final CrawlingSession et,
-            final InsertOption<CrawlingSessionCB> iop,
-            final UpdateOption<CrawlingSessionCB> uop) {
-        assertObjectNotNull("crawlingSession", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -860,31 +648,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      */
     public void delete(final CrawlingSession crawlingSession) {
         doDelete(crawlingSession, null);
-    }
-
-    protected void doDelete(final CrawlingSession et,
-            final DeleteOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSession", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<CrawlingSessionCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -918,32 +681,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return doBatchInsert(crawlingSessionList, null);
     }
 
-    protected int[] doBatchInsert(final List<CrawlingSession> ls,
-            final InsertOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSessionList", ls);
-        InsertOption<CrawlingSessionCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<CrawlingSession> ls,
-            final InsertOption<CrawlingSessionCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -970,31 +707,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<CrawlingSession> crawlingSessionList) {
         return doBatchUpdate(crawlingSessionList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<CrawlingSession> ls,
-            final UpdateOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSessionList", ls);
-        UpdateOption<CrawlingSessionCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<CrawlingSession> ls,
-            final UpdateOption<CrawlingSessionCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1031,12 +743,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1048,25 +754,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return doBatchDelete(crawlingSessionList, null);
     }
 
-    protected int[] doBatchDelete(final List<CrawlingSession> ls,
-            final DeleteOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSessionList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1074,7 +761,7 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * crawlingSessionBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;CrawlingSession, CrawlingSessionCB&gt;() {
-     *     public ConditionBean setup(crawlingSession entity, CrawlingSessionCB intoCB) {
+     *     public ConditionBean setup(CrawlingSession entity, CrawlingSessionCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1093,35 +780,12 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<CrawlingSession, CrawlingSessionCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<CrawlingSession, CrawlingSessionCB> sp,
-            final InsertOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final CrawlingSession et = newEntity();
-        final CrawlingSessionCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected CrawlingSessionCB createCBForQueryInsert() {
-        final CrawlingSessionCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1151,21 +815,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(crawlingSession, cb, null);
     }
 
-    protected int doQueryUpdate(final CrawlingSession et,
-            final CrawlingSessionCB cb, final UpdateOption<CrawlingSessionCB> op) {
-        assertObjectNotNull("crawlingSession", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1179,20 +828,6 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final CrawlingSessionCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final CrawlingSessionCB cb,
-            final DeleteOption<CrawlingSessionCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1351,7 +986,7 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1453,46 +1088,20 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<CrawlingSession> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends CrawlingSession> typeOfSelectedEntity() {
         return CrawlingSession.class;
     }
 
-    protected CrawlingSession downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, CrawlingSession.class);
+    @Override
+    protected Class<CrawlingSession> typeOfHandlingEntity() {
+        return CrawlingSession.class;
     }
 
-    protected CrawlingSessionCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, CrawlingSessionCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<CrawlingSession> downcast(final List<? extends Entity> ls) {
-        return (List<CrawlingSession>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<CrawlingSessionCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<CrawlingSessionCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<CrawlingSessionCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<CrawlingSessionCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<CrawlingSessionCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<CrawlingSessionCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<CrawlingSession, CrawlingSessionCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<CrawlingSession, CrawlingSessionCB>) sp;
+    @Override
+    protected Class<CrawlingSessionCB> typeOfHandlingConditionBean() {
+        return CrawlingSessionCB.class;
     }
 }

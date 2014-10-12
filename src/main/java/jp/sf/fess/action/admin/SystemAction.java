@@ -236,14 +236,14 @@ public class SystemAction implements Serializable {
                 }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
                 RequestUtil.getRequest().getSession()
-                .setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
+                        .setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
             } else {
                 SAStrutsUtil
-                .addSessionMessage("success.failed_to_start_crawl_process");
+                        .addSessionMessage("success.failed_to_start_crawl_process");
             }
         } else {
             SAStrutsUtil
-            .addSessionMessage("success.failed_to_start_crawl_process");
+                    .addSessionMessage("success.failed_to_start_crawl_process");
         }
         return showIndex(true);
     }

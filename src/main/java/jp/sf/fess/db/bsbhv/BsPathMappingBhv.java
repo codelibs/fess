@@ -36,9 +36,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -83,7 +81,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
+public abstract class BsPathMappingBhv extends
+        AbstractBehaviorWritable<PathMapping, PathMappingCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -92,20 +91,11 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "PATH_MAPPING";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public PathMappingDbm getDBMeta() {
         return PathMappingDbm.getInstance();
     }
 
@@ -117,12 +107,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public PathMapping newEntity() {
-        return new PathMapping();
-    }
-
     /** {@inheritDoc} */
     @Override
     public PathMappingCB newConditionBean() {
@@ -157,25 +141,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final PathMappingCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final PathMappingCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final PathMappingCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -206,13 +171,8 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends PathMapping> ENTITY doSelectEntity(
-            final PathMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends PathMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final PathMappingCB cb, final Class<ENTITY> tp) {
+            final PathMappingCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -240,23 +200,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected PathMapping facadeSelectEntityWithDeletedCheck(
-            final PathMappingCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends PathMapping> ENTITY doSelectEntityWithDeletedCheck(
-            final PathMappingCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -273,12 +216,12 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends PathMapping> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends PathMapping> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -326,21 +269,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<PathMapping> facadeSelectList(
-            final PathMappingCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends PathMapping> ListResultBean<ENTITY> doSelectList(
-            final PathMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -370,22 +298,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<PathMapping> facadeSelectPage(
-            final PathMappingCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends PathMapping> PagingResultBean<ENTITY> doSelectPage(
-            final PathMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -406,21 +318,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
     public void selectCursor(final PathMappingCB cb,
             final EntityRowHandler<PathMapping> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final PathMappingCB cb,
-            final EntityRowHandler<PathMapping> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends PathMapping> void doSelectCursor(
-            final PathMappingCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -444,27 +341,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<PathMappingCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<PathMappingCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends PathMappingCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -595,29 +471,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         doInsert(pathMapping, null);
     }
 
-    protected void doInsert(final PathMapping et,
-            final InsertOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMapping", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<PathMappingCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -644,44 +497,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         doUpdate(pathMapping, null);
     }
 
-    protected void doUpdate(final PathMapping et,
-            final UpdateOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMapping", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<PathMappingCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected PathMappingCB createCBForVaryingUpdate() {
-        final PathMappingCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected PathMappingCB createCBForSpecifiedUpdate() {
-        final PathMappingCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -705,19 +520,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(pathMapping, null);
     }
 
-    protected void doUpdateNonstrict(final PathMapping et,
-            final UpdateOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMapping", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -731,20 +533,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         doInsertOrUpdate(pathMapping, null, null);
     }
 
-    protected void doInsertOrUpdate(final PathMapping et,
-            final InsertOption<PathMappingCB> iop,
-            final UpdateOption<PathMappingCB> uop) {
-        assertObjectNotNull("pathMapping", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
@@ -756,20 +544,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdateNonstrict(final PathMapping pathMapping) {
         doInsertOrUpdateNonstrict(pathMapping, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final PathMapping et,
-            final InsertOption<PathMappingCB> iop,
-            final UpdateOption<PathMappingCB> uop) {
-        assertObjectNotNull("pathMapping", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -793,25 +567,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         doDelete(pathMapping, null);
     }
 
-    protected void doDelete(final PathMapping et,
-            final DeleteOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMapping", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<PathMappingCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -828,13 +583,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final PathMapping pathMapping) {
         doDeleteNonstrict(pathMapping, null);
-    }
-
-    protected void doDeleteNonstrict(final PathMapping et,
-            final DeleteOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMapping", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -860,12 +608,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("pathMapping", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -899,32 +641,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return doBatchInsert(pathMappingList, null);
     }
 
-    protected int[] doBatchInsert(final List<PathMapping> ls,
-            final InsertOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMappingList", ls);
-        InsertOption<PathMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<PathMapping> ls,
-            final InsertOption<PathMappingCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -951,31 +667,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<PathMapping> pathMappingList) {
         return doBatchUpdate(pathMappingList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<PathMapping> ls,
-            final UpdateOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMappingList", ls);
-        UpdateOption<PathMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<PathMapping> ls,
-            final UpdateOption<PathMappingCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1040,19 +731,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(pathMappingList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<PathMapping> ls,
-            final UpdateOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMappingList", ls);
-        UpdateOption<PathMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1086,12 +764,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1101,19 +773,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      */
     public int[] batchDelete(final List<PathMapping> pathMappingList) {
         return doBatchDelete(pathMappingList, null);
-    }
-
-    protected int[] doBatchDelete(final List<PathMapping> ls,
-            final DeleteOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMappingList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1127,19 +786,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(pathMappingList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<PathMapping> ls,
-            final DeleteOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMappingList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1147,7 +793,7 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * pathMappingBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;PathMapping, PathMappingCB&gt;() {
-     *     public ConditionBean setup(pathMapping entity, PathMappingCB intoCB) {
+     *     public ConditionBean setup(PathMapping entity, PathMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1166,35 +812,12 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<PathMapping, PathMappingCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<PathMapping, PathMappingCB> sp,
-            final InsertOption<PathMappingCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final PathMapping et = newEntity();
-        final PathMappingCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected PathMappingCB createCBForQueryInsert() {
-        final PathMappingCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1223,21 +846,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(pathMapping, cb, null);
     }
 
-    protected int doQueryUpdate(final PathMapping et, final PathMappingCB cb,
-            final UpdateOption<PathMappingCB> op) {
-        assertObjectNotNull("pathMapping", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1251,20 +859,6 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final PathMappingCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final PathMappingCB cb,
-            final DeleteOption<PathMappingCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1516,7 +1110,7 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1625,46 +1219,20 @@ public abstract class BsPathMappingBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<PathMapping> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends PathMapping> typeOfSelectedEntity() {
         return PathMapping.class;
     }
 
-    protected PathMapping downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, PathMapping.class);
+    @Override
+    protected Class<PathMapping> typeOfHandlingEntity() {
+        return PathMapping.class;
     }
 
-    protected PathMappingCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, PathMappingCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<PathMapping> downcast(final List<? extends Entity> ls) {
-        return (List<PathMapping>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<PathMappingCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<PathMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<PathMappingCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<PathMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<PathMappingCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<PathMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<PathMapping, PathMappingCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<PathMapping, PathMappingCB>) sp;
+    @Override
+    protected Class<PathMappingCB> typeOfHandlingConditionBean() {
+        return PathMappingCB.class;
     }
 }

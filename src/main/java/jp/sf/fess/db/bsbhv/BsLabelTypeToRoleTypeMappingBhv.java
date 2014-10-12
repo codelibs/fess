@@ -38,9 +38,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -83,8 +81,9 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsLabelTypeToRoleTypeMappingBhv extends
-        AbstractBehaviorWritable {
+public abstract class BsLabelTypeToRoleTypeMappingBhv
+        extends
+        AbstractBehaviorWritable<LabelTypeToRoleTypeMapping, LabelTypeToRoleTypeMappingCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -93,20 +92,11 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "LABEL_TYPE_TO_ROLE_TYPE_MAPPING";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public LabelTypeToRoleTypeMappingDbm getDBMeta() {
         return LabelTypeToRoleTypeMappingDbm.getInstance();
     }
 
@@ -118,12 +108,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public LabelTypeToRoleTypeMapping newEntity() {
-        return new LabelTypeToRoleTypeMapping();
-    }
-
     /** {@inheritDoc} */
     @Override
     public LabelTypeToRoleTypeMappingCB newConditionBean() {
@@ -158,25 +142,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final LabelTypeToRoleTypeMappingCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final LabelTypeToRoleTypeMappingCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final LabelTypeToRoleTypeMappingCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -209,13 +174,9 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends LabelTypeToRoleTypeMapping> ENTITY doSelectEntity(
-            final LabelTypeToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends LabelTypeToRoleTypeMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final LabelTypeToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
+            final LabelTypeToRoleTypeMappingCB cb,
+            final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -244,23 +205,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected LabelTypeToRoleTypeMapping facadeSelectEntityWithDeletedCheck(
-            final LabelTypeToRoleTypeMappingCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends LabelTypeToRoleTypeMapping> ENTITY doSelectEntityWithDeletedCheck(
-            final LabelTypeToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -277,12 +221,12 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     }
 
     protected <ENTITY extends LabelTypeToRoleTypeMapping> ENTITY doSelectByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends LabelTypeToRoleTypeMapping> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -332,21 +276,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<LabelTypeToRoleTypeMapping> facadeSelectList(
-            final LabelTypeToRoleTypeMappingCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends LabelTypeToRoleTypeMapping> ListResultBean<ENTITY> doSelectList(
-            final LabelTypeToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -377,22 +306,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<LabelTypeToRoleTypeMapping> facadeSelectPage(
-            final LabelTypeToRoleTypeMappingCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends LabelTypeToRoleTypeMapping> PagingResultBean<ENTITY> doSelectPage(
-            final LabelTypeToRoleTypeMappingCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -413,21 +326,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     public void selectCursor(final LabelTypeToRoleTypeMappingCB cb,
             final EntityRowHandler<LabelTypeToRoleTypeMapping> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final LabelTypeToRoleTypeMappingCB cb,
-            final EntityRowHandler<LabelTypeToRoleTypeMapping> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends LabelTypeToRoleTypeMapping> void doSelectCursor(
-            final LabelTypeToRoleTypeMappingCB cb,
-            final EntityRowHandler<ENTITY> handler, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -451,27 +349,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     public <RESULT> HpSLSFunction<LabelTypeToRoleTypeMappingCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<LabelTypeToRoleTypeMappingCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends LabelTypeToRoleTypeMappingCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -627,30 +504,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         doInsert(labelTypeToRoleTypeMapping, null);
     }
 
-    protected void doInsert(final LabelTypeToRoleTypeMapping et,
-            final InsertOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMapping", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(
-            final InsertOption<LabelTypeToRoleTypeMappingCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -678,51 +531,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         doUpdate(labelTypeToRoleTypeMapping, null);
     }
 
-    protected void doUpdate(final LabelTypeToRoleTypeMapping et,
-            final UpdateOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMapping", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(
-            final UpdateOption<LabelTypeToRoleTypeMappingCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected LabelTypeToRoleTypeMappingCB createCBForVaryingUpdate() {
-        final LabelTypeToRoleTypeMappingCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected LabelTypeToRoleTypeMappingCB createCBForSpecifiedUpdate() {
-        final LabelTypeToRoleTypeMappingCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -735,27 +543,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     public void insertOrUpdate(
             final LabelTypeToRoleTypeMapping labelTypeToRoleTypeMapping) {
         doInsertOrUpdate(labelTypeToRoleTypeMapping, null, null);
-    }
-
-    protected void doInsertOrUpdate(final LabelTypeToRoleTypeMapping et,
-            final InsertOption<LabelTypeToRoleTypeMappingCB> iop,
-            final UpdateOption<LabelTypeToRoleTypeMappingCB> uop) {
-        assertObjectNotNull("labelTypeToRoleTypeMapping", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -778,32 +565,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     public void delete(
             final LabelTypeToRoleTypeMapping labelTypeToRoleTypeMapping) {
         doDelete(labelTypeToRoleTypeMapping, null);
-    }
-
-    protected void doDelete(final LabelTypeToRoleTypeMapping et,
-            final DeleteOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMapping", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(
-            final DeleteOption<LabelTypeToRoleTypeMappingCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -838,33 +599,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return doBatchInsert(labelTypeToRoleTypeMappingList, null);
     }
 
-    protected int[] doBatchInsert(final List<LabelTypeToRoleTypeMapping> ls,
-            final InsertOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMappingList", ls);
-        InsertOption<LabelTypeToRoleTypeMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(
-            final List<LabelTypeToRoleTypeMapping> ls,
-            final InsertOption<LabelTypeToRoleTypeMappingCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -892,32 +626,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     public int[] batchUpdate(
             final List<LabelTypeToRoleTypeMapping> labelTypeToRoleTypeMappingList) {
         return doBatchUpdate(labelTypeToRoleTypeMappingList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<LabelTypeToRoleTypeMapping> ls,
-            final UpdateOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMappingList", ls);
-        UpdateOption<LabelTypeToRoleTypeMappingCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(
-            final List<LabelTypeToRoleTypeMapping> ls,
-            final UpdateOption<LabelTypeToRoleTypeMappingCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -955,12 +663,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -973,25 +675,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return doBatchDelete(labelTypeToRoleTypeMappingList, null);
     }
 
-    protected int[] doBatchDelete(final List<LabelTypeToRoleTypeMapping> ls,
-            final DeleteOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMappingList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -999,7 +682,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * labelTypeToRoleTypeMappingBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;LabelTypeToRoleTypeMapping, LabelTypeToRoleTypeMappingCB&gt;() {
-     *     public ConditionBean setup(labelTypeToRoleTypeMapping entity, LabelTypeToRoleTypeMappingCB intoCB) {
+     *     public ConditionBean setup(LabelTypeToRoleTypeMapping entity, LabelTypeToRoleTypeMappingCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1018,35 +701,12 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<LabelTypeToRoleTypeMapping, LabelTypeToRoleTypeMappingCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<LabelTypeToRoleTypeMapping, LabelTypeToRoleTypeMappingCB> sp,
-            final InsertOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final LabelTypeToRoleTypeMapping et = newEntity();
-        final LabelTypeToRoleTypeMappingCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected LabelTypeToRoleTypeMappingCB createCBForQueryInsert() {
-        final LabelTypeToRoleTypeMappingCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1077,22 +737,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
         return doQueryUpdate(labelTypeToRoleTypeMapping, cb, null);
     }
 
-    protected int doQueryUpdate(final LabelTypeToRoleTypeMapping et,
-            final LabelTypeToRoleTypeMappingCB cb,
-            final UpdateOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertObjectNotNull("labelTypeToRoleTypeMapping", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1106,20 +750,6 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      */
     public int queryDelete(final LabelTypeToRoleTypeMappingCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final LabelTypeToRoleTypeMappingCB cb,
-            final DeleteOption<LabelTypeToRoleTypeMappingCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1282,7 +912,7 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1385,49 +1015,20 @@ public abstract class BsLabelTypeToRoleTypeMappingBhv extends
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<LabelTypeToRoleTypeMapping> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends LabelTypeToRoleTypeMapping> typeOfSelectedEntity() {
         return LabelTypeToRoleTypeMapping.class;
     }
 
-    protected LabelTypeToRoleTypeMapping downcast(final Entity et) {
-        return helpEntityDowncastInternally(et,
-                LabelTypeToRoleTypeMapping.class);
+    @Override
+    protected Class<LabelTypeToRoleTypeMapping> typeOfHandlingEntity() {
+        return LabelTypeToRoleTypeMapping.class;
     }
 
-    protected LabelTypeToRoleTypeMappingCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb,
-                LabelTypeToRoleTypeMappingCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<LabelTypeToRoleTypeMapping> downcast(
-            final List<? extends Entity> ls) {
-        return (List<LabelTypeToRoleTypeMapping>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<LabelTypeToRoleTypeMappingCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<LabelTypeToRoleTypeMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<LabelTypeToRoleTypeMappingCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<LabelTypeToRoleTypeMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<LabelTypeToRoleTypeMappingCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<LabelTypeToRoleTypeMappingCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<LabelTypeToRoleTypeMapping, LabelTypeToRoleTypeMappingCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<LabelTypeToRoleTypeMapping, LabelTypeToRoleTypeMappingCB>) sp;
+    @Override
+    protected Class<LabelTypeToRoleTypeMappingCB> typeOfHandlingConditionBean() {
+        return LabelTypeToRoleTypeMappingCB.class;
     }
 }

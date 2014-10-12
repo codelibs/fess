@@ -339,7 +339,7 @@ public class ScheduledJobDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_B76470FB_53A8_401B_9095_426F84B5B7B8",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_B6A4FF05_ABF5_4436_B82A_CC1845FCFBA1",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnName = cci("NAME", "NAME", null, null,

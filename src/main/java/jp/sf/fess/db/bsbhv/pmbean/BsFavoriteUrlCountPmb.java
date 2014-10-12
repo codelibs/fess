@@ -171,7 +171,7 @@ public class BsFavoriteUrlCountPmb extends SimplePagingBean implements
     //                                                                            ========
     /**
      * [get] url <br />
-     * @return The value of url. (Nullable, NotEmptyString(when String): if empty string, returns null)
+     * @return The value of url. (NullAllowed, NotEmptyString(when String): if empty string, returns null)
      */
     public String getUrl() {
         return filterStringParameter(_url);

@@ -36,9 +36,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -83,7 +81,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
+public abstract class BsKeyMatchBhv extends
+        AbstractBehaviorWritable<KeyMatch, KeyMatchCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -92,20 +91,11 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "KEY_MATCH";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public KeyMatchDbm getDBMeta() {
         return KeyMatchDbm.getInstance();
     }
 
@@ -117,12 +107,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public KeyMatch newEntity() {
-        return new KeyMatch();
-    }
-
     /** {@inheritDoc} */
     @Override
     public KeyMatchCB newConditionBean() {
@@ -157,25 +141,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final KeyMatchCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final KeyMatchCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final KeyMatchCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -206,13 +171,8 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends KeyMatch> ENTITY doSelectEntity(
-            final KeyMatchCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends KeyMatch> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final KeyMatchCB cb, final Class<ENTITY> tp) {
+            final KeyMatchCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -240,22 +200,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected KeyMatch facadeSelectEntityWithDeletedCheck(final KeyMatchCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends KeyMatch> ENTITY doSelectEntityWithDeletedCheck(
-            final KeyMatchCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -272,12 +216,12 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends KeyMatch> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends KeyMatch> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -325,20 +269,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<KeyMatch> facadeSelectList(final KeyMatchCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends KeyMatch> ListResultBean<ENTITY> doSelectList(
-            final KeyMatchCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -368,21 +298,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<KeyMatch> facadeSelectPage(final KeyMatchCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends KeyMatch> PagingResultBean<ENTITY> doSelectPage(
-            final KeyMatchCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -403,21 +318,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
     public void selectCursor(final KeyMatchCB cb,
             final EntityRowHandler<KeyMatch> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final KeyMatchCB cb,
-            final EntityRowHandler<KeyMatch> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends KeyMatch> void doSelectCursor(
-            final KeyMatchCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -441,27 +341,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<KeyMatchCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<KeyMatchCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends KeyMatchCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -592,28 +471,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         doInsert(keyMatch, null);
     }
 
-    protected void doInsert(final KeyMatch et, final InsertOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatch", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<KeyMatchCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -640,43 +497,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         doUpdate(keyMatch, null);
     }
 
-    protected void doUpdate(final KeyMatch et, final UpdateOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatch", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<KeyMatchCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected KeyMatchCB createCBForVaryingUpdate() {
-        final KeyMatchCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected KeyMatchCB createCBForSpecifiedUpdate() {
-        final KeyMatchCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -700,19 +520,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(keyMatch, null);
     }
 
-    protected void doUpdateNonstrict(final KeyMatch et,
-            final UpdateOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatch", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -726,20 +533,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         doInsertOrUpdate(keyMatch, null, null);
     }
 
-    protected void doInsertOrUpdate(final KeyMatch et,
-            final InsertOption<KeyMatchCB> iop,
-            final UpdateOption<KeyMatchCB> uop) {
-        assertObjectNotNull("keyMatch", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
@@ -751,20 +544,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdateNonstrict(final KeyMatch keyMatch) {
         doInsertOrUpdateNonstrict(keyMatch, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final KeyMatch et,
-            final InsertOption<KeyMatchCB> iop,
-            final UpdateOption<KeyMatchCB> uop) {
-        assertObjectNotNull("keyMatch", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -788,24 +567,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         doDelete(keyMatch, null);
     }
 
-    protected void doDelete(final KeyMatch et, final DeleteOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatch", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<KeyMatchCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -822,13 +583,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final KeyMatch keyMatch) {
         doDeleteNonstrict(keyMatch, null);
-    }
-
-    protected void doDeleteNonstrict(final KeyMatch et,
-            final DeleteOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatch", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -854,12 +608,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("keyMatch", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -893,32 +641,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return doBatchInsert(keyMatchList, null);
     }
 
-    protected int[] doBatchInsert(final List<KeyMatch> ls,
-            final InsertOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatchList", ls);
-        InsertOption<KeyMatchCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<KeyMatch> ls,
-            final InsertOption<KeyMatchCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -945,31 +667,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<KeyMatch> keyMatchList) {
         return doBatchUpdate(keyMatchList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<KeyMatch> ls,
-            final UpdateOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatchList", ls);
-        UpdateOption<KeyMatchCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<KeyMatch> ls,
-            final UpdateOption<KeyMatchCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1034,19 +731,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(keyMatchList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<KeyMatch> ls,
-            final UpdateOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatchList", ls);
-        UpdateOption<KeyMatchCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1080,12 +764,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1095,19 +773,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      */
     public int[] batchDelete(final List<KeyMatch> keyMatchList) {
         return doBatchDelete(keyMatchList, null);
-    }
-
-    protected int[] doBatchDelete(final List<KeyMatch> ls,
-            final DeleteOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatchList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1121,19 +786,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(keyMatchList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<KeyMatch> ls,
-            final DeleteOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatchList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1141,7 +793,7 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * keyMatchBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;KeyMatch, KeyMatchCB&gt;() {
-     *     public ConditionBean setup(keyMatch entity, KeyMatchCB intoCB) {
+     *     public ConditionBean setup(KeyMatch entity, KeyMatchCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1160,35 +812,12 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<KeyMatch, KeyMatchCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<KeyMatch, KeyMatchCB> sp,
-            final InsertOption<KeyMatchCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final KeyMatch et = newEntity();
-        final KeyMatchCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected KeyMatchCB createCBForQueryInsert() {
-        final KeyMatchCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1217,21 +846,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(keyMatch, cb, null);
     }
 
-    protected int doQueryUpdate(final KeyMatch et, final KeyMatchCB cb,
-            final UpdateOption<KeyMatchCB> op) {
-        assertObjectNotNull("keyMatch", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1245,20 +859,6 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final KeyMatchCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final KeyMatchCB cb,
-            final DeleteOption<KeyMatchCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1508,7 +1108,7 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1617,46 +1217,20 @@ public abstract class BsKeyMatchBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<KeyMatch> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends KeyMatch> typeOfSelectedEntity() {
         return KeyMatch.class;
     }
 
-    protected KeyMatch downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, KeyMatch.class);
+    @Override
+    protected Class<KeyMatch> typeOfHandlingEntity() {
+        return KeyMatch.class;
     }
 
-    protected KeyMatchCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, KeyMatchCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<KeyMatch> downcast(final List<? extends Entity> ls) {
-        return (List<KeyMatch>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<KeyMatchCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<KeyMatchCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<KeyMatchCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<KeyMatchCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<KeyMatchCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<KeyMatchCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<KeyMatch, KeyMatchCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<KeyMatch, KeyMatchCB>) sp;
+    @Override
+    protected Class<KeyMatchCB> typeOfHandlingConditionBean() {
+        return KeyMatchCB.class;
     }
 }

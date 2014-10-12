@@ -253,7 +253,7 @@ public class Constants extends CoreLibConstants {
     public static final String SAMBA = "SAMBA";
 
     public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(",
-        ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
+            ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
 
     public static final Pattern SOLR_FIELD_RESERVED_PATTERN = Pattern
             .compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",

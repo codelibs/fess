@@ -47,6 +47,8 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
     protected static final Map<String, String> _tableDbNameClassNameMap;
     static {
         final Map<String, String> tmpMap = newHashMap();
+        tmpMap.put("BOOST_DOCUMENT_RULE",
+                "jp.sf.fess.db.bsentity.dbmeta.BoostDocumentRuleDbm");
         tmpMap.put("CLICK_LOG", "jp.sf.fess.db.bsentity.dbmeta.ClickLogDbm");
         tmpMap.put("CRAWLING_SESSION",
                 "jp.sf.fess.db.bsentity.dbmeta.CrawlingSessionDbm");
@@ -86,6 +88,10 @@ public class DBMetaInstanceHandler implements DBMetaProvider {
         tmpMap.put("SEARCH_FIELD_LOG",
                 "jp.sf.fess.db.bsentity.dbmeta.SearchFieldLogDbm");
         tmpMap.put("SEARCH_LOG", "jp.sf.fess.db.bsentity.dbmeta.SearchLogDbm");
+        tmpMap.put("SUGGEST_BAD_WORD",
+                "jp.sf.fess.db.bsentity.dbmeta.SuggestBadWordDbm");
+        tmpMap.put("SUGGEST_ELEVATE_WORD",
+                "jp.sf.fess.db.bsentity.dbmeta.SuggestElevateWordDbm");
         tmpMap.put("USER_INFO", "jp.sf.fess.db.bsentity.dbmeta.UserInfoDbm");
         tmpMap.put("WEB_AUTHENTICATION",
                 "jp.sf.fess.db.bsentity.dbmeta.WebAuthenticationDbm");

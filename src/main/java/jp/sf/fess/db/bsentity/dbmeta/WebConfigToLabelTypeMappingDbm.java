@@ -199,7 +199,7 @@ public class WebConfigToLabelTypeMappingDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D01534A7_E100_49A9_A6C6_ED0C525E0111",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_D6257AC4_F6DD_4CFC_B688_EC04598F8751",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnWebConfigId = cci("WEB_CONFIG_ID",

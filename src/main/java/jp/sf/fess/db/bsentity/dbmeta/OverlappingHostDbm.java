@@ -261,7 +261,7 @@ public class OverlappingHostDbm extends AbstractDBMeta {
             "BIGINT",
             19,
             0,
-            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_1754F480_A0A6_476F_BA83_17293AD5DBFE",
+            "NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_7831BA07_C376_450B_BFBA_69716B6395E1",
             false, null, null, null, null, null);
 
     protected final ColumnInfo _columnRegularName = cci("REGULAR_NAME",

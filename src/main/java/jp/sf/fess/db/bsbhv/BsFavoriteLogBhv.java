@@ -37,9 +37,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
 import org.seasar.dbflute.exception.EntityAlreadyExistsException;
@@ -82,7 +80,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
+public abstract class BsFavoriteLogBhv extends
+        AbstractBehaviorWritable<FavoriteLog, FavoriteLogCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -95,20 +94,11 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "FAVORITE_LOG";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public FavoriteLogDbm getDBMeta() {
         return FavoriteLogDbm.getInstance();
     }
 
@@ -120,12 +110,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public FavoriteLog newEntity() {
-        return new FavoriteLog();
-    }
-
     /** {@inheritDoc} */
     @Override
     public FavoriteLogCB newConditionBean() {
@@ -160,25 +144,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final FavoriteLogCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final FavoriteLogCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final FavoriteLogCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -209,13 +174,8 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FavoriteLog> ENTITY doSelectEntity(
-            final FavoriteLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends FavoriteLog> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final FavoriteLogCB cb, final Class<ENTITY> tp) {
+            final FavoriteLogCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -243,23 +203,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected FavoriteLog facadeSelectEntityWithDeletedCheck(
-            final FavoriteLogCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FavoriteLog> ENTITY doSelectEntityWithDeletedCheck(
-            final FavoriteLogCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -276,12 +219,12 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends FavoriteLog> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends FavoriteLog> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -327,7 +270,8 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends FavoriteLog> OptionalEntity<ENTITY> doSelectByUniqueOf(
-            final Long userId, final String url, final Class<ENTITY> tp) {
+            final Long userId, final String url,
+            final Class<? extends ENTITY> tp) {
         return createOptionalEntity(
                 doSelectEntity(xprepareCBAsUniqueOf(userId, url), tp), userId,
                 url);
@@ -362,21 +306,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<FavoriteLog> facadeSelectList(
-            final FavoriteLogCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FavoriteLog> ListResultBean<ENTITY> doSelectList(
-            final FavoriteLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -406,22 +335,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<FavoriteLog> facadeSelectPage(
-            final FavoriteLogCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FavoriteLog> PagingResultBean<ENTITY> doSelectPage(
-            final FavoriteLogCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -442,21 +355,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     public void selectCursor(final FavoriteLogCB cb,
             final EntityRowHandler<FavoriteLog> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final FavoriteLogCB cb,
-            final EntityRowHandler<FavoriteLog> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends FavoriteLog> void doSelectCursor(
-            final FavoriteLogCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -480,27 +378,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<FavoriteLogCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<FavoriteLogCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends FavoriteLogCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -641,29 +518,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         doInsert(favoriteLog, null);
     }
 
-    protected void doInsert(final FavoriteLog et,
-            final InsertOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLog", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<FavoriteLogCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -690,50 +544,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         doUpdate(favoriteLog, null);
     }
 
-    protected void doUpdate(final FavoriteLog et,
-            final UpdateOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLog", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<FavoriteLogCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected FavoriteLogCB createCBForVaryingUpdate() {
-        final FavoriteLogCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected FavoriteLogCB createCBForSpecifiedUpdate() {
-        final FavoriteLogCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doModify(et, op);
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -745,27 +555,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdate(final FavoriteLog favoriteLog) {
         doInsertOrUpdate(favoriteLog, null, null);
-    }
-
-    protected void doInsertOrUpdate(final FavoriteLog et,
-            final InsertOption<FavoriteLogCB> iop,
-            final UpdateOption<FavoriteLogCB> uop) {
-        assertObjectNotNull("favoriteLog", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doCreateOrModify(et, iop, uop);
     }
 
     /**
@@ -787,31 +576,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      */
     public void delete(final FavoriteLog favoriteLog) {
         doDelete(favoriteLog, null);
-    }
-
-    protected void doDelete(final FavoriteLog et,
-            final DeleteOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLog", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<FavoriteLogCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doRemove(et, op);
     }
 
     // ===================================================================================
@@ -845,32 +609,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return doBatchInsert(favoriteLogList, null);
     }
 
-    protected int[] doBatchInsert(final List<FavoriteLog> ls,
-            final InsertOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLogList", ls);
-        InsertOption<FavoriteLogCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<FavoriteLog> ls,
-            final InsertOption<FavoriteLogCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -897,31 +635,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<FavoriteLog> favoriteLogList) {
         return doBatchUpdate(favoriteLogList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<FavoriteLog> ls,
-            final UpdateOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLogList", ls);
-        UpdateOption<FavoriteLogCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<FavoriteLog> ls,
-            final UpdateOption<FavoriteLogCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -958,12 +671,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doLumpModify(ls, op);
-    }
-
     /**
      * Batch-delete the entity list. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -975,25 +682,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return doBatchDelete(favoriteLogList, null);
     }
 
-    protected int[] doBatchDelete(final List<FavoriteLog> ls,
-            final DeleteOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLogList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doLumpRemove(ls, op);
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1001,7 +689,7 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * favoriteLogBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;FavoriteLog, FavoriteLogCB&gt;() {
-     *     public ConditionBean setup(favoriteLog entity, FavoriteLogCB intoCB) {
+     *     public ConditionBean setup(FavoriteLog entity, FavoriteLogCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1020,35 +708,12 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<FavoriteLog, FavoriteLogCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<FavoriteLog, FavoriteLogCB> sp,
-            final InsertOption<FavoriteLogCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final FavoriteLog et = newEntity();
-        final FavoriteLogCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected FavoriteLogCB createCBForQueryInsert() {
-        final FavoriteLogCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1077,21 +742,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(favoriteLog, cb, null);
     }
 
-    protected int doQueryUpdate(final FavoriteLog et, final FavoriteLogCB cb,
-            final UpdateOption<FavoriteLogCB> op) {
-        assertObjectNotNull("favoriteLog", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1105,20 +755,6 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final FavoriteLogCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final FavoriteLogCB cb,
-            final DeleteOption<FavoriteLogCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1274,7 +910,7 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1375,46 +1011,20 @@ public abstract class BsFavoriteLogBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<FavoriteLog> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends FavoriteLog> typeOfSelectedEntity() {
         return FavoriteLog.class;
     }
 
-    protected FavoriteLog downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, FavoriteLog.class);
+    @Override
+    protected Class<FavoriteLog> typeOfHandlingEntity() {
+        return FavoriteLog.class;
     }
 
-    protected FavoriteLogCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, FavoriteLogCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<FavoriteLog> downcast(final List<? extends Entity> ls) {
-        return (List<FavoriteLog>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<FavoriteLogCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<FavoriteLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<FavoriteLogCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<FavoriteLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<FavoriteLogCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<FavoriteLogCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<FavoriteLog, FavoriteLogCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<FavoriteLog, FavoriteLogCB>) sp;
+    @Override
+    protected Class<FavoriteLogCB> typeOfHandlingConditionBean() {
+        return FavoriteLogCB.class;
     }
 }

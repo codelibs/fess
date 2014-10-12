@@ -71,8 +71,8 @@ public class BsDataCrawlingConfigCB extends AbstractConditionBean {
         if (DBFluteConfig.getInstance().isPagingCountLeastJoin()) {
             enablePagingCountLeastJoin();
         }
-        if (DBFluteConfig.getInstance().isCheckCountBeforeQueryUpdate()) {
-            enableCheckCountBeforeQueryUpdate();
+        if (DBFluteConfig.getInstance().isQueryUpdateCountPreCheck()) {
+            enableQueryUpdateCountPreCheck();
         }
     }
 
@@ -636,17 +636,15 @@ public class BsDataCrawlingConfigCB extends AbstractConditionBean {
      */
     public HpColQyOperand<DataCrawlingConfigCB> columnQuery(
             final SpecifyQuery<DataCrawlingConfigCB> leftSpecifyQuery) {
-        return new HpColQyOperand<DataCrawlingConfigCB>(
-                new HpColQyHandler<DataCrawlingConfigCB>() {
-                    @Override
-                    public HpCalculator handle(
-                            final SpecifyQuery<DataCrawlingConfigCB> rightSp,
-                            final String operand) {
-                        return xcolqy(xcreateColumnQueryCB(),
-                                xcreateColumnQueryCB(), leftSpecifyQuery,
-                                rightSp, operand);
-                    }
-                });
+        return xcreateColQyOperand(new HpColQyHandler<DataCrawlingConfigCB>() {
+            @Override
+            public HpCalculator handle(
+                    final SpecifyQuery<DataCrawlingConfigCB> rightSp,
+                    final String operand) {
+                return xcolqy(xcreateColumnQueryCB(), xcreateColumnQueryCB(),
+                        leftSpecifyQuery, rightSp, operand);
+            }
+        });
     }
 
     protected DataCrawlingConfigCB xcreateColumnQueryCB() {
@@ -723,6 +721,107 @@ public class BsDataCrawlingConfigCB extends AbstractConditionBean {
     public void orScopeQueryAndPart(
             final AndQuery<DataCrawlingConfigCB> andQuery) {
         xorSQAP((DataCrawlingConfigCB) this, andQuery);
+    }
+
+    /**
+     * Check invalid query when query is set. <br />
+     * (it throws an exception if set query is invalid) <br />
+     * You should call this before registrations of where clause and other queries. <br />
+     * Union and SubQuery and other sub condition-bean inherit this. <br />
+     *
+     * <p>renamed to checkNullOrEmptyQuery() since 1.1,
+     * but not deprecated because it might have many use.</p>
+     *
+     * #java8 compatible option
+     */
+    public void checkInvalidQuery() {
+        checkNullOrEmptyQuery();
+    }
+
+    /**
+     * Accept (no check) an invalid query when a query is set. <br />
+     * (no condition if a set query is invalid) <br />
+     * You should call this before registrations of where clause and other queries. <br />
+     * Union and SubQuery and other sub condition-bean inherit this.
+     * @deprecated use ignoreNullOrEmptyQuery()
+     */
+    @Deprecated
+    public void acceptInvalidQuery() {
+        getSqlClause().ignoreNullOrEmptyQuery();
+    }
+
+    /**
+     * Allow to auto-detect joins that can be inner-join. <br />
+     * <pre>
+     * o You should call this before registrations of where clause.
+     * o Union and SubQuery and other sub condition-bean inherit this.
+     * o You should confirm your SQL on the log to be tuned by inner-join correctly.
+     * </pre>
+     * @deprecated use enableInnerJoinAutoDetect()
+     */
+    @Deprecated
+    public void allowInnerJoinAutoDetect() {
+        enableInnerJoinAutoDetect();
+    }
+
+    /**
+     * Suppress auto-detecting inner-join. <br />
+     * You should call this before registrations of where clause.
+     * @deprecated use disableInnerJoinAutoDetect()
+     */
+    @Deprecated
+    public void suppressInnerJoinAutoDetect() {
+        disableInnerJoinAutoDetect();
+    }
+
+    /**
+     * Allow an empty string for query. <br />
+     * (you can use an empty string as condition) <br />
+     * You should call this before registrations of where clause and other queries. <br />
+     * Union and SubQuery and other sub condition-bean inherit this.
+     * @deprecated use enableEmptyStringQuery()
+     */
+    @Deprecated
+    public void allowEmptyStringQuery() {
+        enableEmptyStringQuery();
+    }
+
+    /**
+     * Enable checking record count before QueryUpdate (contains QueryDelete). (default is disabled) <br />
+     * No query update if zero count. (basically for MySQL's deadlock by next-key lock)
+     * @deprecated use enableQueryUpdateCountPreCheck()
+     */
+    @Deprecated
+    public void enableCheckCountBeforeQueryUpdate() {
+        enableQueryUpdateCountPreCheck();
+    }
+
+    /**
+     * Disable checking record count before QueryUpdate (contains QueryDelete). (back to default) <br />
+     * Executes query update even if zero count. (normal specification)
+     * @deprecated use disableQueryUpdateCountPreCheck()
+     */
+    @Deprecated
+    public void disableCheckCountBeforeQueryUpdate() {
+        disableQueryUpdateCountPreCheck();
+    }
+
+    /**
+     * Allow "that's bad timing" check.
+     * @deprecated use enableThatsBadTiming()
+     */
+    @Deprecated
+    public void allowThatsBadTiming() {
+        enableThatsBadTiming();
+    }
+
+    /**
+     * Suppress "that's bad timing" check.
+     * @deprecated use disableThatsBadTiming()
+     */
+    @Deprecated
+    public void suppressThatsBadTiming() {
+        disableThatsBadTiming();
     }
 
     // ===================================================================================

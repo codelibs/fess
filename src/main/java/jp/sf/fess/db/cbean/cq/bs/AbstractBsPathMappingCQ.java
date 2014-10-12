@@ -77,7 +77,6 @@ public abstract class AbstractBsPathMappingCQ extends AbstractConditionQuery {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-
     /**
      * Equal(=). And NullIgnored, OnlyOnceRegistered. <br />
      * ID: {PK, ID, NotNull, BIGINT(19)}
@@ -1789,6 +1788,9 @@ public abstract class AbstractBsPathMappingCQ extends AbstractConditionQuery {
 
     public abstract String keepMyselfInScope(PathMappingCQ sq);
 
+    // ===================================================================================
+    //                                                                        Manual Order
+    //                                                                        ============
     /**
      * Order along manual ordering information.
      * <pre>
@@ -1825,8 +1827,8 @@ public abstract class AbstractBsPathMappingCQ extends AbstractConditionQuery {
     }
 
     // ===================================================================================
-    //                                                                          Compatible
-    //                                                                          ==========
+    //                                                                    Small Adjustment
+    //                                                                    ================
     /**
      * Order along the list of manual values. #beforejava8 <br />
      * This function with Union is unsupported! <br />
@@ -1855,6 +1857,11 @@ public abstract class AbstractBsPathMappingCQ extends AbstractConditionQuery {
         withManualOrder(manualOrderBean);
     }
 
+    @Override
+    protected void filterFromToOption(final FromToOption option) {
+        option.allowOneSide();
+    }
+
     // ===================================================================================
     //                                                                       Very Internal
     //                                                                       =============
@@ -1863,6 +1870,10 @@ public abstract class AbstractBsPathMappingCQ extends AbstractConditionQuery {
     }
 
     // very internal (for suppressing warn about 'Not Use Import')
+    protected String xabUDT() {
+        return Date.class.getName();
+    }
+
     protected String xabCQ() {
         return PathMappingCQ.class.getName();
     }

@@ -36,9 +36,7 @@ import org.seasar.dbflute.cbean.EntityRowHandler;
 import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.PagingResultBean;
 import org.seasar.dbflute.cbean.SpecifyQuery;
-import org.seasar.dbflute.cbean.chelper.HpSLSExecutor;
 import org.seasar.dbflute.cbean.chelper.HpSLSFunction;
-import org.seasar.dbflute.dbmeta.DBMeta;
 import org.seasar.dbflute.exception.BatchEntityAlreadyUpdatedException;
 import org.seasar.dbflute.exception.DangerousResultSizeException;
 import org.seasar.dbflute.exception.EntityAlreadyDeletedException;
@@ -83,7 +81,8 @@ import org.seasar.dbflute.outsidesql.executor.OutsideSqlBasicExecutor;
  * </pre>
  * @author DBFlute(AutoGenerator)
  */
-public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
+public abstract class BsScheduledJobBhv extends
+        AbstractBehaviorWritable<ScheduledJob, ScheduledJobCB> {
 
     // ===================================================================================
     //                                                                          Definition
@@ -92,20 +91,11 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
     /*df:endQueryPath*/
 
     // ===================================================================================
-    //                                                                          Table name
-    //                                                                          ==========
-    /** @return The name on database of table. (NotNull) */
-    @Override
-    public String getTableDbName() {
-        return "SCHEDULED_JOB";
-    }
-
-    // ===================================================================================
     //                                                                              DBMeta
     //                                                                              ======
     /** {@inheritDoc} */
     @Override
-    public DBMeta getDBMeta() {
+    public ScheduledJobDbm getDBMeta() {
         return ScheduledJobDbm.getInstance();
     }
 
@@ -117,12 +107,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
     // ===================================================================================
     //                                                                        New Instance
     //                                                                        ============
-    /** {@inheritDoc} */
-    @Override
-    public ScheduledJob newEntity() {
-        return new ScheduledJob();
-    }
-
     /** {@inheritDoc} */
     @Override
     public ScheduledJobCB newConditionBean() {
@@ -157,25 +141,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return facadeSelectCount(cb);
     }
 
-    protected int facadeSelectCount(final ScheduledJobCB cb) {
-        return doSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountUniquely(final ScheduledJobCB cb) { // called by selectCount(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountUniquely(cb);
-    }
-
-    protected int doSelectCountPlainly(final ScheduledJobCB cb) { // called by selectPage(cb)
-        assertCBStateValid(cb);
-        return delegateSelectCountPlainly(cb);
-    }
-
-    @Override
-    protected int doReadCount(final ConditionBean cb) {
-        return facadeSelectCount(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Entity Select
     //                                                                       =============
@@ -206,13 +171,8 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return doSelectEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends ScheduledJob> ENTITY doSelectEntity(
-            final ScheduledJobCB cb, final Class<ENTITY> tp) {
-        return helpSelectEntityInternally(cb, tp);
-    }
-
     protected <ENTITY extends ScheduledJob> OptionalEntity<ENTITY> doSelectOptionalEntity(
-            final ScheduledJobCB cb, final Class<ENTITY> tp) {
+            final ScheduledJobCB cb, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -240,23 +200,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return facadeSelectEntityWithDeletedCheck(cb);
     }
 
-    protected ScheduledJob facadeSelectEntityWithDeletedCheck(
-            final ScheduledJobCB cb) {
-        return doSelectEntityWithDeletedCheck(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ScheduledJob> ENTITY doSelectEntityWithDeletedCheck(
-            final ScheduledJobCB cb, final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityType", tp);
-        return helpSelectEntityWithDeletedCheckInternally(cb, tp);
-    }
-
-    @Override
-    protected Entity doReadEntityWithDeletedCheck(final ConditionBean cb) {
-        return facadeSelectEntityWithDeletedCheck(downcast(cb));
-    }
-
     /**
      * Select the entity by the primary-key value.
      * @param id : PK, ID, NotNull, BIGINT(19). (NotNull)
@@ -273,12 +216,12 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
     }
 
     protected <ENTITY extends ScheduledJob> ENTITY doSelectByPK(final Long id,
-            final Class<ENTITY> tp) {
+            final Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
     protected <ENTITY extends ScheduledJob> OptionalEntity<ENTITY> doSelectOptionalByPK(
-            final Long id, final Class<ENTITY> tp) {
+            final Long id, final Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
@@ -326,21 +269,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return facadeSelectList(cb);
     }
 
-    protected ListResultBean<ScheduledJob> facadeSelectList(
-            final ScheduledJobCB cb) {
-        return doSelectList(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ScheduledJob> ListResultBean<ENTITY> doSelectList(
-            final ScheduledJobCB cb, final Class<ENTITY> tp) {
-        return helpSelectListInternally(cb, tp);
-    }
-
-    @Override
-    protected ListResultBean<? extends Entity> doReadList(final ConditionBean cb) {
-        return facadeSelectList(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                         Page Select
     //                                                                         ===========
@@ -370,22 +298,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return facadeSelectPage(cb);
     }
 
-    protected PagingResultBean<ScheduledJob> facadeSelectPage(
-            final ScheduledJobCB cb) {
-        return doSelectPage(cb, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ScheduledJob> PagingResultBean<ENTITY> doSelectPage(
-            final ScheduledJobCB cb, final Class<ENTITY> tp) {
-        return helpSelectPageInternally(cb, tp);
-    }
-
-    @Override
-    protected PagingResultBean<? extends Entity> doReadPage(
-            final ConditionBean cb) {
-        return facadeSelectPage(downcast(cb));
-    }
-
     // ===================================================================================
     //                                                                       Cursor Select
     //                                                                       =============
@@ -406,21 +318,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
     public void selectCursor(final ScheduledJobCB cb,
             final EntityRowHandler<ScheduledJob> entityRowHandler) {
         facadeSelectCursor(cb, entityRowHandler);
-    }
-
-    protected void facadeSelectCursor(final ScheduledJobCB cb,
-            final EntityRowHandler<ScheduledJob> entityRowHandler) {
-        doSelectCursor(cb, entityRowHandler, typeOfSelectedEntity());
-    }
-
-    protected <ENTITY extends ScheduledJob> void doSelectCursor(
-            final ScheduledJobCB cb, final EntityRowHandler<ENTITY> handler,
-            final Class<ENTITY> tp) {
-        assertCBStateValid(cb);
-        assertObjectNotNull("entityRowHandler", handler);
-        assertObjectNotNull("entityType", tp);
-        assertSpecifyDerivedReferrerEntityProperty(cb, tp);
-        helpSelectCursorInternally(cb, handler, tp);
     }
 
     // ===================================================================================
@@ -444,27 +341,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
     public <RESULT> HpSLSFunction<ScheduledJobCB, RESULT> scalarSelect(
             final Class<RESULT> resultType) {
         return facadeScalarSelect(resultType);
-    }
-
-    protected <RESULT> HpSLSFunction<ScheduledJobCB, RESULT> facadeScalarSelect(
-            final Class<RESULT> resultType) {
-        return doScalarSelect(resultType, newConditionBean());
-    }
-
-    protected <RESULT, CB extends ScheduledJobCB> HpSLSFunction<CB, RESULT> doScalarSelect(
-            final Class<RESULT> tp, final CB cb) {
-        assertObjectNotNull("resultType", tp);
-        assertCBStateValid(cb);
-        cb.xsetupForScalarSelect();
-        cb.getSqlClause().disableSelectIndex(); // for when you use union
-        final HpSLSExecutor<CB, RESULT> executor = createHpSLSExecutor(); // variable to resolve generic
-        return createSLSFunction(cb, tp, executor);
-    }
-
-    @Override
-    protected <RESULT> HpSLSFunction<? extends ConditionBean, RESULT> doReadScalar(
-            final Class<RESULT> tp) {
-        return facadeScalarSelect(tp);
     }
 
     // ===================================================================================
@@ -595,29 +471,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         doInsert(scheduledJob, null);
     }
 
-    protected void doInsert(final ScheduledJob et,
-            final InsertOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJob", et);
-        prepareInsertOption(op);
-        delegateInsert(et, op);
-    }
-
-    protected void prepareInsertOption(final InsertOption<ScheduledJobCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertInsertOptionStatus(op);
-        if (op.hasSpecifiedInsertColumn()) {
-            op.resolveInsertColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    @Override
-    protected void doCreate(final Entity et,
-            final InsertOption<? extends ConditionBean> op) {
-        doInsert(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity modified-only. (ZeroUpdateException, ExclusiveControl)
      * <pre>
@@ -644,44 +497,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         doUpdate(scheduledJob, null);
     }
 
-    protected void doUpdate(final ScheduledJob et,
-            final UpdateOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJob", et);
-        prepareUpdateOption(op);
-        helpUpdateInternally(et, op);
-    }
-
-    protected void prepareUpdateOption(final UpdateOption<ScheduledJobCB> op) {
-        if (op == null) {
-            return;
-        }
-        assertUpdateOptionStatus(op);
-        if (op.hasSelfSpecification()) {
-            op.resolveSelfSpecification(createCBForVaryingUpdate());
-        }
-        if (op.hasSpecifiedUpdateColumn()) {
-            op.resolveUpdateColumnSpecification(createCBForSpecifiedUpdate());
-        }
-    }
-
-    protected ScheduledJobCB createCBForVaryingUpdate() {
-        final ScheduledJobCB cb = newConditionBean();
-        cb.xsetupForVaryingUpdate();
-        return cb;
-    }
-
-    protected ScheduledJobCB createCBForSpecifiedUpdate() {
-        final ScheduledJobCB cb = newConditionBean();
-        cb.xsetupForSpecifiedUpdate();
-        return cb;
-    }
-
-    @Override
-    protected void doModify(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdate(downcast(et), downcast(op));
-    }
-
     /**
      * Update the entity non-strictly modified-only. (ZeroUpdateException, NonExclusiveControl)
      * <pre>
@@ -705,19 +520,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         doUpdateNonstrict(scheduledJob, null);
     }
 
-    protected void doUpdateNonstrict(final ScheduledJob et,
-            final UpdateOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJob", et);
-        prepareUpdateOption(op);
-        helpUpdateNonstrictInternally(et, op);
-    }
-
-    @Override
-    protected void doModifyNonstrict(final Entity et,
-            final UpdateOption<? extends ConditionBean> op) {
-        doUpdateNonstrict(downcast(et), downcast(op));
-    }
-
     /**
      * Insert or update the entity modified-only. (DefaultConstraintsEnabled, ExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() } <br />
@@ -731,20 +533,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         doInsertOrUpdate(scheduledJob, null, null);
     }
 
-    protected void doInsertOrUpdate(final ScheduledJob et,
-            final InsertOption<ScheduledJobCB> iop,
-            final UpdateOption<ScheduledJobCB> uop) {
-        assertObjectNotNull("scheduledJob", et);
-        helpInsertOrUpdateInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModify(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdate(downcast(et), downcast(iop), downcast(uop));
-    }
-
     /**
      * Insert or update the entity non-strictly modified-only. (DefaultConstraintsEnabled, NonExclusiveControl) <br />
      * if (the entity has no PK) { insert() } else { update(), but no data, insert() }
@@ -756,20 +544,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      */
     public void insertOrUpdateNonstrict(final ScheduledJob scheduledJob) {
         doInsertOrUpdateNonstrict(scheduledJob, null, null);
-    }
-
-    protected void doInsertOrUpdateNonstrict(final ScheduledJob et,
-            final InsertOption<ScheduledJobCB> iop,
-            final UpdateOption<ScheduledJobCB> uop) {
-        assertObjectNotNull("scheduledJob", et);
-        helpInsertOrUpdateNonstrictInternally(et, iop, uop);
-    }
-
-    @Override
-    protected void doCreateOrModifyNonstrict(final Entity et,
-            final InsertOption<? extends ConditionBean> iop,
-            final UpdateOption<? extends ConditionBean> uop) {
-        doInsertOrUpdateNonstrict(downcast(et), downcast(iop), downcast(uop));
     }
 
     /**
@@ -793,25 +567,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         doDelete(scheduledJob, null);
     }
 
-    protected void doDelete(final ScheduledJob et,
-            final DeleteOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJob", et);
-        prepareDeleteOption(op);
-        helpDeleteInternally(et, op);
-    }
-
-    protected void prepareDeleteOption(final DeleteOption<ScheduledJobCB> op) {
-        if (op != null) {
-            assertDeleteOptionStatus(op);
-        }
-    }
-
-    @Override
-    protected void doRemove(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDelete(downcast(et), downcast(op));
-    }
-
     /**
      * Delete the entity non-strictly. {ZeroUpdateException, NonExclusiveControl}
      * <pre>
@@ -828,13 +583,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      */
     public void deleteNonstrict(final ScheduledJob scheduledJob) {
         doDeleteNonstrict(scheduledJob, null);
-    }
-
-    protected void doDeleteNonstrict(final ScheduledJob et,
-            final DeleteOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJob", et);
-        prepareDeleteOption(op);
-        helpDeleteNonstrictInternally(et, op);
     }
 
     /**
@@ -860,12 +608,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         assertObjectNotNull("scheduledJob", et);
         prepareDeleteOption(op);
         helpDeleteNonstrictIgnoreDeletedInternally(et, op);
-    }
-
-    @Override
-    protected void doRemoveNonstrict(final Entity et,
-            final DeleteOption<? extends ConditionBean> op) {
-        doDeleteNonstrict(downcast(et), downcast(op));
     }
 
     // ===================================================================================
@@ -899,32 +641,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return doBatchInsert(scheduledJobList, null);
     }
 
-    protected int[] doBatchInsert(final List<ScheduledJob> ls,
-            final InsertOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJobList", ls);
-        InsertOption<ScheduledJobCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainInsertOption();
-        }
-        prepareBatchInsertOption(ls, rlop); // required
-        return delegateBatchInsert(ls, rlop);
-    }
-
-    protected void prepareBatchInsertOption(final List<ScheduledJob> ls,
-            final InsertOption<ScheduledJobCB> op) {
-        op.xallowInsertColumnModifiedPropertiesFragmented();
-        op.xacceptInsertColumnModifiedPropertiesIfNeeds(ls);
-        prepareInsertOption(op);
-    }
-
-    @Override
-    protected int[] doLumpCreate(final List<Entity> ls,
-            final InsertOption<? extends ConditionBean> op) {
-        return doBatchInsert(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-update the entity list modified-only of same-set columns. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement. <br />
@@ -951,31 +667,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      */
     public int[] batchUpdate(final List<ScheduledJob> scheduledJobList) {
         return doBatchUpdate(scheduledJobList, null);
-    }
-
-    protected int[] doBatchUpdate(final List<ScheduledJob> ls,
-            final UpdateOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJobList", ls);
-        UpdateOption<ScheduledJobCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop); // required
-        return delegateBatchUpdate(ls, rlop);
-    }
-
-    protected void prepareBatchUpdateOption(final List<ScheduledJob> ls,
-            final UpdateOption<ScheduledJobCB> op) {
-        op.xacceptUpdateColumnModifiedPropertiesIfNeeds(ls);
-        prepareUpdateOption(op);
-    }
-
-    @Override
-    protected int[] doLumpModify(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdate(downcast(ls), downcast(op));
     }
 
     /**
@@ -1040,19 +731,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return doBatchUpdateNonstrict(scheduledJobList, null);
     }
 
-    protected int[] doBatchUpdateNonstrict(final List<ScheduledJob> ls,
-            final UpdateOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJobList", ls);
-        UpdateOption<ScheduledJobCB> rlop;
-        if (op != null) {
-            rlop = op;
-        } else {
-            rlop = createPlainUpdateOption();
-        }
-        prepareBatchUpdateOption(ls, rlop);
-        return delegateBatchUpdateNonstrict(ls, rlop);
-    }
-
     /**
      * Batch-update the entity list non-strictly specified-only. (NonExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1087,12 +765,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
                 createSpecifiedUpdateOption(updateColumnSpec));
     }
 
-    @Override
-    protected int[] doLumpModifyNonstrict(final List<Entity> ls,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doBatchUpdateNonstrict(downcast(ls), downcast(op));
-    }
-
     /**
      * Batch-delete the entity list. (ExclusiveControl) <br />
      * This method uses executeBatch() of java.sql.PreparedStatement.
@@ -1102,19 +774,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      */
     public int[] batchDelete(final List<ScheduledJob> scheduledJobList) {
         return doBatchDelete(scheduledJobList, null);
-    }
-
-    protected int[] doBatchDelete(final List<ScheduledJob> ls,
-            final DeleteOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJobList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDelete(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemove(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDelete(downcast(ls), downcast(op));
     }
 
     /**
@@ -1128,19 +787,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return doBatchDeleteNonstrict(scheduledJobList, null);
     }
 
-    protected int[] doBatchDeleteNonstrict(final List<ScheduledJob> ls,
-            final DeleteOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJobList", ls);
-        prepareDeleteOption(op);
-        return delegateBatchDeleteNonstrict(ls, op);
-    }
-
-    @Override
-    protected int[] doLumpRemoveNonstrict(final List<Entity> ls,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doBatchDeleteNonstrict(downcast(ls), downcast(op));
-    }
-
     // ===================================================================================
     //                                                                        Query Update
     //                                                                        ============
@@ -1148,7 +794,7 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query (modified-only for fixed value).
      * <pre>
      * scheduledJobBhv.<span style="color: #DD4747">queryInsert</span>(new QueryInsertSetupper&lt;ScheduledJob, ScheduledJobCB&gt;() {
-     *     public ConditionBean setup(scheduledJob entity, ScheduledJobCB intoCB) {
+     *     public ConditionBean setup(ScheduledJob entity, ScheduledJobCB intoCB) {
      *         FooCB cb = FooCB();
      *         cb.setupSelect_Bar();
      *
@@ -1167,35 +813,12 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      *     }
      * });
      * </pre>
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @return The inserted count.
      */
     public int queryInsert(
             final QueryInsertSetupper<ScheduledJob, ScheduledJobCB> setupper) {
         return doQueryInsert(setupper, null);
-    }
-
-    protected int doQueryInsert(
-            final QueryInsertSetupper<ScheduledJob, ScheduledJobCB> sp,
-            final InsertOption<ScheduledJobCB> op) {
-        assertObjectNotNull("setupper", sp);
-        prepareInsertOption(op);
-        final ScheduledJob et = newEntity();
-        final ScheduledJobCB cb = createCBForQueryInsert();
-        return delegateQueryInsert(et, cb, sp.setup(et, cb), op);
-    }
-
-    protected ScheduledJobCB createCBForQueryInsert() {
-        final ScheduledJobCB cb = newConditionBean();
-        cb.xsetupForQueryInsert();
-        return cb;
-    }
-
-    @Override
-    protected int doRangeCreate(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> setupper,
-            final InsertOption<? extends ConditionBean> op) {
-        return doQueryInsert(downcast(setupper), downcast(op));
     }
 
     /**
@@ -1225,21 +848,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
         return doQueryUpdate(scheduledJob, cb, null);
     }
 
-    protected int doQueryUpdate(final ScheduledJob et, final ScheduledJobCB cb,
-            final UpdateOption<ScheduledJobCB> op) {
-        assertObjectNotNull("scheduledJob", et);
-        assertCBStateValid(cb);
-        prepareUpdateOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryUpdate(et,
-                cb, op) : 0;
-    }
-
-    @Override
-    protected int doRangeModify(final Entity et, final ConditionBean cb,
-            final UpdateOption<? extends ConditionBean> op) {
-        return doQueryUpdate(downcast(et), downcast(cb), downcast(op));
-    }
-
     /**
      * Delete the several entities by query. (NonExclusiveControl)
      * <pre>
@@ -1253,20 +861,6 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      */
     public int queryDelete(final ScheduledJobCB cb) {
         return doQueryDelete(cb, null);
-    }
-
-    protected int doQueryDelete(final ScheduledJobCB cb,
-            final DeleteOption<ScheduledJobCB> op) {
-        assertCBStateValid(cb);
-        prepareDeleteOption(op);
-        return checkCountBeforeQueryUpdateIfNeeds(cb) ? delegateQueryDelete(cb,
-                op) : 0;
-    }
-
-    @Override
-    protected int doRangeRemove(final ConditionBean cb,
-            final DeleteOption<? extends ConditionBean> op) {
-        return doQueryDelete(downcast(cb), downcast(op));
     }
 
     // ===================================================================================
@@ -1518,7 +1112,7 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
      * Insert the several entities by query with varying requests (modified-only for fixed value). <br />
      * For example, disableCommonColumnAutoSetup(), disablePrimaryKeyIdentity(). <br />
      * Other specifications are same as queryInsert(entity, setupper).
-     * @param setupper The setup-per of query-insert. (NotNull)
+     * @param setupper The set-upper of query-insert. (NotNull)
      * @param option The option of insert for varying requests. (NotNull)
      * @return The inserted count.
      */
@@ -1627,46 +1221,20 @@ public abstract class BsScheduledJobBhv extends AbstractBehaviorWritable {
     }
 
     // ===================================================================================
-    //                                                                       Assist Helper
-    //                                                                       =============
-    protected Class<ScheduledJob> typeOfSelectedEntity() {
+    //                                                                         Type Helper
+    //                                                                         ===========
+    @Override
+    protected Class<? extends ScheduledJob> typeOfSelectedEntity() {
         return ScheduledJob.class;
     }
 
-    protected ScheduledJob downcast(final Entity et) {
-        return helpEntityDowncastInternally(et, ScheduledJob.class);
+    @Override
+    protected Class<ScheduledJob> typeOfHandlingEntity() {
+        return ScheduledJob.class;
     }
 
-    protected ScheduledJobCB downcast(final ConditionBean cb) {
-        return helpConditionBeanDowncastInternally(cb, ScheduledJobCB.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<ScheduledJob> downcast(final List<? extends Entity> ls) {
-        return (List<ScheduledJob>) ls;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected InsertOption<ScheduledJobCB> downcast(
-            final InsertOption<? extends ConditionBean> op) {
-        return (InsertOption<ScheduledJobCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected UpdateOption<ScheduledJobCB> downcast(
-            final UpdateOption<? extends ConditionBean> op) {
-        return (UpdateOption<ScheduledJobCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected DeleteOption<ScheduledJobCB> downcast(
-            final DeleteOption<? extends ConditionBean> op) {
-        return (DeleteOption<ScheduledJobCB>) op;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected QueryInsertSetupper<ScheduledJob, ScheduledJobCB> downcast(
-            final QueryInsertSetupper<? extends Entity, ? extends ConditionBean> sp) {
-        return (QueryInsertSetupper<ScheduledJob, ScheduledJobCB>) sp;
+    @Override
+    protected Class<ScheduledJobCB> typeOfHandlingConditionBean() {
+        return ScheduledJobCB.class;
     }
 }
