@@ -315,10 +315,23 @@ public class Crawler implements Serializable {
             }
             databaseHelper.optimize();
 
+            final Map<String, String> infoMap = crawlingSessionHelper
+                    .getInfoMap(options.sessionId);
+
+            final StringBuilder buf = new StringBuilder(500);
+            for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
+                if (buf.length() != 0) {
+                    buf.append(',');
+                }
+                buf.append(entry.getKey()).append('=').append(entry.getValue());
+            }
+            if (buf.length() != 0) {
+                logger.info("[CRAWL INFO] " + buf.toString());
+            }
+
             // notification
             try {
-                crawler.sendMail(crawlingSessionHelper
-                        .getInfoMap(options.sessionId));
+                crawler.sendMail(infoMap);
             } catch (final Exception e) {
                 logger.warn("Failed to send a mail.", e);
             }
