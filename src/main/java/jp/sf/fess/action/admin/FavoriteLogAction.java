@@ -55,7 +55,7 @@ public class FavoriteLogAction extends BsFavoriteLogAction {
     @Execute(validator = false, input = "error.jsp")
     public String deleteall() {
         favoriteLogService.deleteAll(favoriteLogPager);
-        SAStrutsUtil.addSessionMessage("success.search_log_delete_all");
+        SAStrutsUtil.addSessionMessage("success.favorite_log_delete_all");
         return displayList(true);
     }
 

@@ -110,9 +110,7 @@
 						<span><bean:message key="labels.pagination_page_guide_msg"
 								arg0="${f:h(webCrawlingConfigPager.currentPageNumber)}"
 								arg1="${f:h(webCrawlingConfigPager.allPageCount)}"
-								arg2="${f:h(webCrawlingConfigPager.allRecordCount)}" /></span> <span>
-							${webCrawlingConfigPager.currentPageNumber}/${webCrawlingConfigPager.allPageCount}
-							(${webCrawlingConfigPager.allRecordCount}) </span>
+								arg2="${f:h(webCrawlingConfigPager.allRecordCount)}" /></span>
 					</div>
 				</div>
 				<%-- Page Navigation: END --%>
