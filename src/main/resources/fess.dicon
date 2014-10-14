@@ -56,8 +56,6 @@ new String[] {
 }
 :
 new String[] {
-"-Xdebug",
-"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
 "-Djava.awt.headless=true",
 "-server",
 "-Xmx256m",
