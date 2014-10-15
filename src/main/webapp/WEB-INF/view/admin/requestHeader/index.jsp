@@ -41,7 +41,7 @@
 					</s:link>
 				</c:if>
 			</div>
-			<c:if test="${requestHeaderPager.allRecordCount == 0}">
+			<c:if test="${displayCreateLink && requestHeaderPager.allRecordCount == 0}">
 				<p class="alert-message warning">
 					<bean:message key="labels.list_could_not_find_crud_table" />
 				</p>
