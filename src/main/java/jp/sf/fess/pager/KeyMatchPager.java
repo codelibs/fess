@@ -16,6 +16,7 @@
 
 package jp.sf.fess.pager;
 
+import jp.sf.fess.Constants;
 import jp.sf.fess.crud.pager.BsKeyMatchPager;
 
 public class KeyMatchPager extends BsKeyMatchPager {
@@ -33,7 +34,7 @@ public class KeyMatchPager extends BsKeyMatchPager {
 
     @Override
     protected int getDefaultPageSize() {
-        return super.getDefaultPageSize();
+        return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }
 
 }
