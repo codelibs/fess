@@ -16,6 +16,7 @@
 
 package jp.sf.fess.pager;
 
+import jp.sf.fess.Constants;
 import jp.sf.fess.crud.pager.BsSuggestElevateWordPager;
 
 public class SuggestElevateWordPager extends BsSuggestElevateWordPager {
@@ -33,7 +34,7 @@ public class SuggestElevateWordPager extends BsSuggestElevateWordPager {
 
     @Override
     protected int getDefaultPageSize() {
-        return super.getDefaultPageSize();
+        return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }
 
 }
