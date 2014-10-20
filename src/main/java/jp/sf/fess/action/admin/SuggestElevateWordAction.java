@@ -25,11 +25,13 @@ import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.action.admin.BsSuggestElevateWordAction;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.db.exentity.SuggestElevateWord;
+import jp.sf.fess.helper.SuggestHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.FessBeans;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
@@ -43,6 +45,9 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected SuggestHelper suggestHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("suggestElevateWord");
@@ -93,6 +98,54 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
     }
 
     @Override
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String create() {
+        try {
+            final SuggestElevateWord suggestElevateWord = createSuggestElevateWord();
+            suggestElevateWordService.store(suggestElevateWord);
+            suggestHelper.storeAllElevateWords();
+            SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException(
+                    "errors.crud_failed_to_create_crud_table");
+        }
+    }
+
+    @Override
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String update() {
+        try {
+            final SuggestElevateWord suggestElevateWord = createSuggestElevateWord();
+            suggestElevateWordService.store(suggestElevateWord);
+            suggestHelper.storeAllElevateWords();
+            SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException(
+                    "errors.crud_failed_to_update_crud_table");
+        }
+    }
+
+    @Override
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (suggestElevateWordForm.crudMode != CommonConstants.DELETE_MODE) {
@@ -117,6 +170,7 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
             suggestElevateWord.setDeletedBy(username);
             suggestElevateWord.setDeletedTime(timestamp);
             suggestElevateWordService.store(suggestElevateWord);
+            suggestHelper.storeAllElevateWords();
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);

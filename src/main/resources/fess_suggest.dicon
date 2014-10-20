@@ -84,5 +84,4 @@
 		<arg> suggestSolrServer </arg>
 		<destroyMethod name="shutdown"/>
 	</component>
-
 </components>
