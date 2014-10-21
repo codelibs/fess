@@ -158,14 +158,6 @@
 							<td style="vertical-align: middle;"><bean:message key="labels.suggest_type_all" /></td>
 							<td align="center" style="vertical-align: middle;">${suggestDocumentNums.all}</td>
 							<td align="center">
-								<s:form style="margin-bottom:0;">
-									<html:hidden property="deleteSuggestType"
-										value="all" />
-									<html:submit styleClass="btn" property="deleteSuggest"
-										disabled="${solrProcessRunning}">
-										<bean:message key="labels.solr_action_delete" />
-									</html:submit>
-								</s:form>
 							</td>
 						</tr>
 						<tr>

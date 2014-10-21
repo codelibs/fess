@@ -402,7 +402,7 @@ public class DocumentAction implements Serializable {
         final Map<String, Long> map = new HashMap<String, Long>();
         map.put("content", suggestService.getContentDocumentNum());
         map.put("searchLog", suggestService.getSearchLogDocumentNum());
-        map.put("all", map.get("content") + map.get("searchLog"));
+        map.put("all", suggestService.getDocumentNum());
         return map;
     }
 
@@ -414,40 +414,46 @@ public class DocumentAction implements Serializable {
         final String query;
         if ("content".equals(documentForm.deleteSuggestType)) {
             query = "*:* NOT " + SuggestConstants.SuggestFieldNames.SEGMENT
-                    + ":0";
+                    + ":" + SuggestConstants.SEGMENT_ELEVATE + " NOT "
+                    + SuggestConstants.SuggestFieldNames.SEGMENT + ":"
+                    + SuggestConstants.SEGMENT_QUERY;
         } else if ("searchLog".equals(documentForm.deleteSuggestType)) {
-            query = SuggestConstants.SuggestFieldNames.SEGMENT + ":0";
+            query = SuggestConstants.SuggestFieldNames.SEGMENT + ":"
+                    + SuggestConstants.SEGMENT_QUERY;
         } else {
-            query = "*:*";
+            query = "";
         }
 
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (!jobHelper.isCrawlProcessRunning()) {
-                    final long execTime = System.currentTimeMillis();
-                    try {
-                        suggestSolrServer.deleteByQuery(query);
-                        suggestSolrServer.commit();
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[EXEC TIME] suggest index cleanup time: "
-                                    + (System.currentTimeMillis() - execTime)
-                                    + "ms");
+        if (StringUtil.isNotBlank(query)) {
+            final Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!jobHelper.isCrawlProcessRunning()) {
+                        final long execTime = System.currentTimeMillis();
+                        try {
+                            suggestSolrServer.deleteByQuery(query);
+                            suggestSolrServer.commit();
+                            if (logger.isInfoEnabled()) {
+                                logger.info("[EXEC TIME] suggest index cleanup time: "
+                                        + (System.currentTimeMillis() - execTime)
+                                        + "ms");
+                            }
+                        } catch (final Exception e) {
+                            logger.error(
+                                    "Failed to delete suggest index (query="
+                                            + query + ").", e);
                         }
-                    } catch (final Exception e) {
-                        logger.error("Failed to delete suggest index (query="
-                                + query + ").", e);
-                    }
-                } else {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("could not start index cleanup process"
-                                + " because of running solr process.");
+                    } else {
+                        if (logger.isInfoEnabled()) {
+                            logger.info("could not start index cleanup process"
+                                    + " because of running solr process.");
+                        }
                     }
                 }
-            }
-        });
-        thread.start();
-        SAStrutsUtil.addSessionMessage("success.delete_solr_index");
+            });
+            thread.start();
+            SAStrutsUtil.addSessionMessage("success.delete_solr_index");
+        }
         return showIndex(true);
     }
 
