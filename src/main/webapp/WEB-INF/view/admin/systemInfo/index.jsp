@@ -62,11 +62,19 @@
 				<table>
 					<tbody>
 						<tr>
+<c:if test="${empty fessPropItems}">
+							<td><textarea id="fessPropData"
+									style="height: 300px;" class="xxlarge">
+<bean:message key="labels.system_info_crawler_properties_does_not_exist" />
+							    </textarea></td>
+</c:if>
+<c:if test="${!empty fessPropItems}">
 							<td><textarea id="fessPropData"
 									style="height: 300px;" class="xxlarge">
 <c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
 								</textarea></td>
+</c:if>
 						</tr>
 					</tbody>
 				</table>

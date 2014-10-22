@@ -32,12 +32,8 @@ import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SystemInfoAction implements Serializable {
-    private static final Logger logger = LoggerFactory
-            .getLogger(CrawlAction.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -77,45 +73,6 @@ public class SystemInfoAction implements Serializable {
         for (final Map.Entry<Object, Object> entry : System.getProperties()
                 .entrySet()) {
             propItems.add(createItem(entry.getKey(), entry.getValue()));
-        }
-
-        if (crawlerProperties.isEmpty()) {
-            crawlerProperties.setProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
-            crawlerProperties.setProperty(Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
-            crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
-            crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
-            crawlerProperties.setProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
-            crawlerProperties.setProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
-            crawlerProperties.setProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
-            crawlerProperties.setProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                    Constants.SUPPORTED_SEARCH_WEB);
-            crawlerProperties.setProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY,
-                    Constants.DEFAULT_IGNORE_FAILURE_TYPE);
-            crawlerProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
-                    Constants.DEFAULT_FAILURE_COUNT);
-            crawlerProperties.setProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-            crawlerProperties.setProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
-                    Constants.DEFAULT_PURGE_DAY);
-            crawlerProperties.setProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY,
-                    Constants.DEFAULT_PURGE_DAY);
-            crawlerProperties.setProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY,
-                    Constants.DEFAULT_PURGE_DAY);
-            crawlerProperties.setProperty(Constants.PURGE_BY_BOTS_PROPERTY,
-                    Constants.DEFAULT_PURGE_BY_BOTS);
-            crawlerProperties.setProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
-            crawlerProperties.setProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
-            crawlerProperties.setProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
-            try {
-                crawlerProperties.store();
-            } catch (final Exception e) {
-                logger.error("Failed to initialize crawler parameters.", e);
-            }
         }
 
         for (final Map.Entry<Object, Object> entry : crawlerProperties
