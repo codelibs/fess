@@ -44,6 +44,12 @@
 					<li class="active"><a href="#"><bean:message
 								key="labels.suggest_elevate_word_link_confirm" /></a></li>
 					</c:if>
+					<li><s:link href="downloadpage">
+							<bean:message key="labels.suggest_elevate_word_link_download" />
+						</s:link></li>
+					<li><s:link href="uploadpage">
+							<bean:message key="labels.suggest_elevate_word_link_upload" />
+						</s:link></li>
 				</ul>
 			</div>
 

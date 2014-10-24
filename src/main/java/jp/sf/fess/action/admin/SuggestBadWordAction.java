@@ -16,10 +16,14 @@
 
 package jp.sf.fess.action.admin;
 
+import java.io.*;
 import java.sql.Timestamp;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
+import jp.sf.fess.Constants;
+import jp.sf.fess.FessSystemException;
 import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.action.admin.BsSuggestBadWordAction;
@@ -29,12 +33,16 @@ import jp.sf.fess.helper.SuggestHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.FessBeans;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.robot.util.StreamUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
+import org.seasar.struts.util.ResponseUtil;
 
 public class SuggestBadWordAction extends BsSuggestBadWordAction {
 
@@ -48,6 +56,9 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
 
     @Resource
     protected SuggestHelper suggestHelper;
+
+    @Resource
+    protected DynamicProperties crawlerProperties;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("suggestBadWord");
@@ -191,4 +202,123 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         }
     }
 
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "downloadpage")
+    public String downloadpage() {
+        return "download.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = false, input = "downloadpage")
+    public String download() {
+
+        final HttpServletResponse response = ResponseUtil.getResponse();
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\""
+                + "suggestbadword.csv" + "\"");
+
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(
+                    response.getOutputStream(), crawlerProperties.getProperty(
+                    Constants.CSV_FILE_ENCODING_PROPERTY,
+                    Constants.UTF_8)));
+            suggestBadWordService.exportCsv(writer);
+            writer.flush();
+            return null;
+        } catch (final Exception e) {
+            log.error("Failed to export data.", e);
+            throw new SSCActionMessagesException(e,
+                    "errors.failed_to_export_data");
+        } finally {
+            IOUtils.closeQuietly(writer);
+        }
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "uploadpage")
+    public String uploadpage() {
+        return "upload.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "uploadpage")
+    public String upload() {
+        BufferedInputStream is = null;
+        File tempFile = null;
+        FileOutputStream fos = null;
+        final byte[] b = new byte[20];
+        try {
+            tempFile = File.createTempFile("suggestbadword-import-", ".csv");
+            is = new BufferedInputStream(suggestBadWordForm.suggestBadWordFile.getInputStream());
+            is.mark(20);
+            if (is.read(b, 0, 20) <= 0) {
+                throw new FessSystemException("no import data.");
+            }
+            is.reset();
+            fos = new FileOutputStream(tempFile);
+            StreamUtil.drain(is, fos);
+        } catch (final Exception e) {
+            if (tempFile != null && !tempFile.delete()) {
+                log.warn("Could not delete "
+                        + tempFile.getAbsolutePath());
+            }
+            log.error("Failed to import data.", e);
+            throw new SSCActionMessagesException(e,
+                    "errors.failed_to_import_data");
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(fos);
+        }
+
+        final File oFile = tempFile;
+        try {
+            final String head = new String(b, Constants.UTF_8);
+            if (!head.startsWith("\"SuggestWord\",")) {
+                log.error("Unknown file: " + suggestBadWordForm.suggestBadWordFile);
+                throw new SSCActionMessagesException(
+                        "errors.unknown_import_file");
+            }
+            final String enc = crawlerProperties.getProperty(
+                    Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Reader reader = null;
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(
+                                new FileInputStream(oFile), enc));
+                        suggestBadWordService.importCsv(reader);
+                    } catch (final Exception e) {
+                        log.error("Failed to import data.", e);
+                        throw new FessSystemException(
+                                "Failed to import data.", e);
+                    } finally {
+                        if (!oFile.delete()) {
+                            log.warn("Could not delete "
+                                    + oFile.getAbsolutePath());
+                        }
+                        IOUtils.closeQuietly(reader);
+                        suggestHelper.deleteAllBadWord();
+                        suggestHelper.updateSolrBadwordFile();
+                    }
+                }
+            }).start();
+        } catch (final ActionMessagesException e) {
+            if (!oFile.delete()) {
+                log.warn("Could not delete " + oFile.getAbsolutePath());
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (!oFile.delete()) {
+                log.warn("Could not delete " + oFile.getAbsolutePath());
+            }
+            log.error("Failed to import data.", e);
+            throw new SSCActionMessagesException(e,
+                    "errors.failed_to_import_data");
+        }
+        SAStrutsUtil.addSessionMessage("success.upload_suggest_bad_word");
+
+        return "uploadpage?redirect=true";
+    }
 }

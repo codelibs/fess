@@ -19,11 +19,16 @@ package jp.sf.fess.form.admin;
 import java.io.Serializable;
 
 import jp.sf.fess.crud.form.admin.BsSuggestElevateWordForm;
+import org.apache.struts.upload.FormFile;
+import org.seasar.struts.annotation.Required;
 
 public class SuggestElevateWordForm extends BsSuggestElevateWordForm implements
         Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @Required(target = "upload")
+    public FormFile suggestElevateWordFile;
 
     @Override
     public void initialize() {

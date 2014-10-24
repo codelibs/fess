@@ -32,6 +32,12 @@
 					<li><s:link href="createpage">
 							<bean:message key="labels.suggest_bad_word_link_create_new" />
 						</s:link></li>
+					<li><s:link href="downloadpage">
+							<bean:message key="labels.suggest_bad_word_link_download" />
+						</s:link></li>
+					<li><s:link href="uploadpage">
+							<bean:message key="labels.suggest_bad_word_link_upload" />
+						</s:link></li>
 				</ul>
 			</div>
 			<c:if test="${suggestBadWordPager.allRecordCount == 0}">

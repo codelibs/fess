@@ -16,6 +16,8 @@
 
 package jp.sf.fess.db.exentity;
 
+import java.math.BigDecimal;
+
 import jp.sf.fess.db.bsentity.BsSuggestElevateWord;
 
 /**
@@ -30,4 +32,25 @@ public class SuggestElevateWord extends BsSuggestElevateWord {
 
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;
+
+    public SuggestElevateWord() {
+        super();
+        setBoost(BigDecimal.ONE);
+    }
+
+    public String getBoostValue() {
+        if (_boost != null) {
+            return Integer.toString(_boost.intValue());
+        }
+        return null;
+    }
+
+    public void setBoostValue(final String value) {
+        if (value != null) {
+            try {
+                _boost = new BigDecimal(value);
+            } catch (final Exception e) {
+            }
+        }
+    }
 }
