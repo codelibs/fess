@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -15,6 +17,8 @@ import jp.sf.fess.db.exbhv.SuggestBadWordBhv;
 import jp.sf.fess.db.exbhv.SuggestElevateWordBhv;
 import jp.sf.fess.db.exentity.SuggestBadWord;
 import jp.sf.fess.db.exentity.SuggestElevateWord;
+import jp.sf.fess.entity.PingResponse;
+import jp.sf.fess.service.SearchService;
 import jp.sf.fess.suggest.SuggestConstants;
 import jp.sf.fess.suggest.service.SuggestService;
 
@@ -27,6 +31,9 @@ public class SuggestHelper {
             .getLogger(SuggestHelper.class);
 
     @Resource
+    protected SearchService searchService;
+
+    @Resource
     protected SuggestService suggestService;
 
     @Resource
@@ -36,6 +43,36 @@ public class SuggestHelper {
     protected SuggestBadWordBhv suggestBadWordBhv;
 
     public String badwordFileDir = "./solr/core1/conf/";
+
+    public void init() {
+        final Thread th = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    final PingResponse response = searchService.ping();
+                    final int status = response.getStatus();
+                    if (status == 0) {
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Solr server was availabled. Refresh suggest words.");
+                        }
+                        refreshWords();
+                        break;
+                    }
+                    try {
+                        Thread.sleep(1 * 1000);
+                    } catch (final InterruptedException e) {
+                        //ignore
+                    }
+                }
+            }
+        });
+        th.start();
+    }
+
+    public void refreshWords() {
+        deleteAllBadWord();
+        storeAllElevateWords();
+    }
 
     public void storeAllElevateWords() {
         suggestService.deleteAllElevateWords();
@@ -99,10 +136,13 @@ public class SuggestHelper {
         final SuggestBadWordCB cb = new SuggestBadWordCB();
         cb.query().setDeletedBy_IsNull();
         final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb);
+        final Set<String> badWords = new HashSet<String>();
         for (final SuggestBadWord suggestBadWord : list) {
             final String word = suggestBadWord.getSuggestWord();
-            suggestService.deleteBadWord(word);
+            badWords.add(word);
         }
+        suggestService.updateBadWords(badWords);
+        suggestService.deleteBadWords();
         suggestService.commit();
     }
 

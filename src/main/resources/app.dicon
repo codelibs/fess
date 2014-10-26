@@ -293,6 +293,9 @@
 		</initMethod>
 	</component>
 
-	<component name="suggestHelper" class="jp.sf.fess.helper.SuggestHelper" />
+	<component name="suggestHelper" class="jp.sf.fess.helper.SuggestHelper">
+		<initMethod name="init">
+		</initMethod>
+	</component>
 
 </components>

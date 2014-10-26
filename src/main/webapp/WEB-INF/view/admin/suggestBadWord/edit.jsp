@@ -70,14 +70,6 @@
 									key="labels.suggest_bad_word_suggest_word" /></th>
 							<td><html:text property="suggestWord" style="width:98%;" /></td>
 						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_bad_word_target_role" /></th>
-							<td><html:text property="targetRole" style="width:98%;" /></td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_bad_word_target_label" /></th>
-							<td><html:text property="targetLabel" style="width:98%;" /></td>
-						</tr>
 					</tbody>
 					<tfoot>
 						<tr>
