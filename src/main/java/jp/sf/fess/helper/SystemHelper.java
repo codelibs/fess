@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.ibm.icu.util.ULocale;
 
 public class SystemHelper implements Serializable {
 
@@ -200,7 +201,8 @@ public class SystemHelper implements Serializable {
                     @Override
                     public List<Map<String, String>> load(final String key)
                             throws Exception {
-                        final Locale displayLocale = LocaleUtils.toLocale(key);
+                        final ULocale uLocale = new ULocale(key);
+                        final Locale displayLocale = uLocale.toLocale();
                         final List<Map<String, String>> langItems = new ArrayList<>(
                                 supportedLanguages.length);
                         final String msg = MessageResourcesUtil.getMessage(
@@ -497,7 +499,8 @@ public class SystemHelper implements Serializable {
 
     public List<Map<String, String>> getLanguageItems(final Locale locale) {
         try {
-            return langItemsCache.get(locale.toString());
+            final String localeStr = locale.toString();
+            return langItemsCache.get(localeStr);
         } catch (final ExecutionException e) {
             final List<Map<String, String>> langItems = new ArrayList<>(
                     supportedLanguages.length);
