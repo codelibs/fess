@@ -16,7 +16,16 @@
 
 package jp.sf.fess.action.admin;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.Timestamp;
 
 import javax.annotation.Resource;
@@ -77,8 +86,8 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         }
 
         FessBeans.copy(suggestBadWord, suggestBadWordForm)
-        .commonColumnDateConverter().excludes("searchParams", "mode")
-        .execute();
+                .commonColumnDateConverter().excludes("searchParams", "mode")
+                .execute();
     }
 
     @Override
@@ -103,7 +112,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         suggestBadWord.setUpdatedBy(username);
         suggestBadWord.setUpdatedTime(timestamp);
         FessBeans.copy(suggestBadWordForm, suggestBadWord)
-        .excludesCommonColumns().execute();
+                .excludesCommonColumns().execute();
 
         return suggestBadWord;
     }
@@ -114,7 +123,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         if (suggestBadWordForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new SSCActionMessagesException("errors.crud_invalid_mode",
                     new Object[] { CommonConstants.DELETE_MODE,
-                    suggestBadWordForm.crudMode });
+                            suggestBadWordForm.crudMode });
         }
 
         try {
@@ -221,8 +230,8 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
                     response.getOutputStream(), crawlerProperties.getProperty(
-                    Constants.CSV_FILE_ENCODING_PROPERTY,
-                    Constants.UTF_8)));
+                            Constants.CSV_FILE_ENCODING_PROPERTY,
+                            Constants.UTF_8)));
             suggestBadWordService.exportCsv(writer);
             writer.flush();
             return null;
@@ -250,7 +259,8 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         final byte[] b = new byte[20];
         try {
             tempFile = File.createTempFile("suggestbadword-import-", ".csv");
-            is = new BufferedInputStream(suggestBadWordForm.suggestBadWordFile.getInputStream());
+            is = new BufferedInputStream(
+                    suggestBadWordForm.suggestBadWordFile.getInputStream());
             is.mark(20);
             if (is.read(b, 0, 20) <= 0) {
                 throw new FessSystemException("no import data.");
@@ -260,8 +270,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
             StreamUtil.drain(is, fos);
         } catch (final Exception e) {
             if (tempFile != null && !tempFile.delete()) {
-                log.warn("Could not delete "
-                        + tempFile.getAbsolutePath());
+                log.warn("Could not delete " + tempFile.getAbsolutePath());
             }
             log.error("Failed to import data.", e);
             throw new SSCActionMessagesException(e,
@@ -275,7 +284,8 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         try {
             final String head = new String(b, Constants.UTF_8);
             if (!head.startsWith("\"SuggestWord\",")) {
-                log.error("Unknown file: " + suggestBadWordForm.suggestBadWordFile);
+                log.error("Unknown file: "
+                        + suggestBadWordForm.suggestBadWordFile);
                 throw new SSCActionMessagesException(
                         "errors.unknown_import_file");
             }
@@ -291,8 +301,8 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
                         suggestBadWordService.importCsv(reader);
                     } catch (final Exception e) {
                         log.error("Failed to import data.", e);
-                        throw new FessSystemException(
-                                "Failed to import data.", e);
+                        throw new FessSystemException("Failed to import data.",
+                                e);
                     } finally {
                         if (!oFile.delete()) {
                             log.warn("Could not delete "

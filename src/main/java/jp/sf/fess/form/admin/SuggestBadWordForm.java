@@ -19,6 +19,7 @@ package jp.sf.fess.form.admin;
 import java.io.Serializable;
 
 import jp.sf.fess.crud.form.admin.BsSuggestBadWordForm;
+
 import org.apache.struts.upload.FormFile;
 import org.seasar.struts.annotation.Required;
 

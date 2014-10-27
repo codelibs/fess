@@ -33,6 +33,7 @@ import jp.sf.fess.pager.SuggestElevateWordPager;
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 import jp.sf.orangesignal.csv.CsvWriter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.util.StringUtil;
@@ -103,23 +104,28 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
                         suggestElevateWord.setReading(strip(list.get(1)));
                         suggestElevateWord.setTargetRole(strip(list.get(2)));
                         suggestElevateWord.setTargetLabel(strip(list.get(3)));
-                        suggestElevateWord.setBoost(new BigDecimal(strip(list.get(4))));
+                        suggestElevateWord.setBoost(new BigDecimal(strip(list
+                                .get(4))));
                         suggestElevateWord.setCreatedBy("system");
-                        suggestElevateWord.setCreatedTime(new Timestamp(System.currentTimeMillis()));
+                        suggestElevateWord.setCreatedTime(new Timestamp(System
+                                .currentTimeMillis()));
                         suggestElevateWordBhv.insert(suggestElevateWord);
-                    } else if (list.get(1).equals("\"\"") &&
-                            list.get(2).equals("\"\"") &&
-                            list.get(3).equals("\"\"")) {
+                    } else if (list.get(1).equals("\"\"")
+                            && list.get(2).equals("\"\"")
+                            && list.get(3).equals("\"\"")) {
                         suggestElevateWord.setDeletedBy("system");
-                        suggestElevateWord.setDeletedTime(new Timestamp(System.currentTimeMillis()));
+                        suggestElevateWord.setDeletedTime(new Timestamp(System
+                                .currentTimeMillis()));
                         suggestElevateWordBhv.update(suggestElevateWord);
                     } else {
                         suggestElevateWord.setReading(strip(list.get(1)));
                         suggestElevateWord.setTargetRole(strip(list.get(2)));
                         suggestElevateWord.setTargetLabel(strip(list.get(3)));
-                        suggestElevateWord.setBoost(new BigDecimal(strip(list.get(4))));
+                        suggestElevateWord.setBoost(new BigDecimal(strip(list
+                                .get(4))));
                         suggestElevateWord.setUpdatedBy("system");
-                        suggestElevateWord.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+                        suggestElevateWord.setUpdatedTime(new Timestamp(System
+                                .currentTimeMillis()));
                         suggestElevateWordBhv.update(suggestElevateWord);
                     }
                 } catch (final Exception e) {
@@ -167,7 +173,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
                         }
 
                         private void addToList(final List<String> list,
-                                               final Object value) {
+                                final Object value) {
                             if (value == null) {
                                 list.add(StringUtil.EMPTY);
                             } else {
@@ -181,7 +187,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
         }
     }
 
-    private static String strip(String item) {
+    private static String strip(final String item) {
         return item.substring(1, item.length() - 1);
     }
 }

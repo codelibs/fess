@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import jp.sf.fess.action.admin.SuggestBadWordAction;
 import jp.sf.fess.crud.service.BsSuggestBadWordService;
 import jp.sf.fess.db.cbean.SuggestBadWordCB;
 import jp.sf.fess.db.exentity.SuggestBadWord;
@@ -33,6 +32,7 @@ import jp.sf.fess.pager.SuggestBadWordPager;
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 import jp.sf.orangesignal.csv.CsvWriter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.util.StringUtil;
@@ -101,18 +101,21 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
                         suggestBadWord.setTargetRole(strip(list.get(1)));
                         suggestBadWord.setTargetLabel(strip(list.get(2)));
                         suggestBadWord.setCreatedBy("system");
-                        suggestBadWord.setCreatedTime(new Timestamp(System.currentTimeMillis()));
+                        suggestBadWord.setCreatedTime(new Timestamp(System
+                                .currentTimeMillis()));
                         suggestBadWordBhv.insert(suggestBadWord);
-                    } else if (list.get(1).equals("\"\"") &&
-                            list.get(2).equals("\"\"")) {
+                    } else if (list.get(1).equals("\"\"")
+                            && list.get(2).equals("\"\"")) {
                         suggestBadWord.setDeletedBy("system");
-                        suggestBadWord.setDeletedTime(new Timestamp(System.currentTimeMillis()));
+                        suggestBadWord.setDeletedTime(new Timestamp(System
+                                .currentTimeMillis()));
                         suggestBadWordBhv.update(suggestBadWord);
                     } else {
                         suggestBadWord.setTargetRole(strip(list.get(1)));
                         suggestBadWord.setTargetLabel(strip(list.get(2)));
                         suggestBadWord.setUpdatedBy("system");
-                        suggestBadWord.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+                        suggestBadWord.setUpdatedTime(new Timestamp(System
+                                .currentTimeMillis()));
                         suggestBadWordBhv.update(suggestBadWord);
                     }
                 } catch (final Exception e) {
@@ -123,7 +126,6 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
             log.warn("Failed to read a sugget elevate word.", e);
         }
     }
-
 
     public void exportCsv(final Writer writer) {
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
@@ -150,14 +152,13 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
                             try {
                                 csvWriter.writeValues(list);
                             } catch (final IOException e) {
-                                log.warn(
-                                        "Failed to write a sugget bad word: "
-                                                + entity, e);
+                                log.warn("Failed to write a sugget bad word: "
+                                        + entity, e);
                             }
                         }
 
                         private void addToList(final List<String> list,
-                                               final Object value) {
+                                final Object value) {
                             if (value == null) {
                                 list.add(StringUtil.EMPTY);
                             } else {
@@ -171,7 +172,7 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
         }
     }
 
-    private static String strip(String item) {
+    private static String strip(final String item) {
         return item.substring(1, item.length() - 1);
     }
 }

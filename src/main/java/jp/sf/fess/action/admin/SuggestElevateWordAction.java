@@ -16,7 +16,16 @@
 
 package jp.sf.fess.action.admin;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.Timestamp;
 
 import javax.annotation.Resource;
@@ -218,8 +227,8 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
                     response.getOutputStream(), crawlerProperties.getProperty(
-                    Constants.CSV_FILE_ENCODING_PROPERTY,
-                    Constants.UTF_8)));
+                            Constants.CSV_FILE_ENCODING_PROPERTY,
+                            Constants.UTF_8)));
             suggestElevateWordService.exportCsv(writer);
             writer.flush();
             return null;
@@ -246,8 +255,11 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
         FileOutputStream fos = null;
         final byte[] b = new byte[20];
         try {
-            tempFile = File.createTempFile("suggestelevateword-import-", ".csv");
-            is = new BufferedInputStream(suggestElevateWordForm.suggestElevateWordFile.getInputStream());
+            tempFile = File
+                    .createTempFile("suggestelevateword-import-", ".csv");
+            is = new BufferedInputStream(
+                    suggestElevateWordForm.suggestElevateWordFile
+                            .getInputStream());
             is.mark(20);
             if (is.read(b, 0, 20) <= 0) {
                 throw new FessSystemException("no import data.");
@@ -257,8 +269,7 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
             StreamUtil.drain(is, fos);
         } catch (final Exception e) {
             if (tempFile != null && !tempFile.delete()) {
-                log.warn("Could not delete "
-                        + tempFile.getAbsolutePath());
+                log.warn("Could not delete " + tempFile.getAbsolutePath());
             }
             log.error("Failed to import data.", e);
             throw new SSCActionMessagesException(e,
@@ -272,7 +283,8 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
         try {
             final String head = new String(b, Constants.UTF_8);
             if (!head.startsWith("\"SuggestWord\",")) {
-                log.error("Unknown file: " + suggestElevateWordForm.suggestElevateWordFile);
+                log.error("Unknown file: "
+                        + suggestElevateWordForm.suggestElevateWordFile);
                 throw new SSCActionMessagesException(
                         "errors.unknown_import_file");
             }
@@ -288,8 +300,8 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
                         suggestElevateWordService.importCsv(reader);
                     } catch (final Exception e) {
                         log.error("Failed to import data.", e);
-                        throw new FessSystemException(
-                                "Failed to import data.", e);
+                        throw new FessSystemException("Failed to import data.",
+                                e);
                     } finally {
                         if (!oFile.delete()) {
                             log.warn("Could not delete "
@@ -313,8 +325,8 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
             throw new SSCActionMessagesException(e,
                     "errors.failed_to_import_data");
         }
-    SAStrutsUtil.addSessionMessage("success.upload_suggest_elevate_word");
+        SAStrutsUtil.addSessionMessage("success.upload_suggest_elevate_word");
 
-    return "uploadpage?redirect=true";
+        return "uploadpage?redirect=true";
     }
 }
