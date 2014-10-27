@@ -48,6 +48,22 @@ public class RoleTypeAction extends BsRoleTypeAction {
     }
 
     @Override
+    @Token(save = false, validate = true, keep = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String confirmfromcreate() {
+        roleTypeForm.value = roleTypeForm.value.trim();
+        return "confirm.jsp";
+    }
+
+    @Override
+    @Token(save = false, validate = true, keep = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String confirmfromupdate() {
+        roleTypeForm.value = roleTypeForm.value.trim();
+        return "confirm.jsp";
+    }
+
+    @Override
     protected void loadRoleType() {
 
         final RoleType roleType = roleTypeService.getRoleType(createKeyMap());
@@ -82,6 +98,7 @@ public class RoleTypeAction extends BsRoleTypeAction {
         }
         roleType.setUpdatedBy(username);
         roleType.setUpdatedTime(timestamp);
+        roleTypeForm.value = roleTypeForm.value.trim();
         FessBeans.copy(roleTypeForm, roleType).excludesCommonColumns()
                 .execute();
 
