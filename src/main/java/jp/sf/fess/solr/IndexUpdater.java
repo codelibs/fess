@@ -17,6 +17,7 @@
 package jp.sf.fess.solr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,11 @@ import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.robot.S2Robot;
@@ -614,12 +620,61 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private void deleteDocuments(final List<SolrInputDocument> docList) {
+        final List<String> ids = new ArrayList<String>();
+        for (final SolrInputDocument inputDoc : docList) {
+            final Collection<Object> roleList = inputDoc.getFieldValues("role");
+            final StringBuilder query = new StringBuilder();
+            query.append("url:\"");
+            query.append(ClientUtils.escapeQueryChars((String) inputDoc
+                    .getFieldValue("url")));
+            query.append("\"");
+
+            final SolrQuery sq = new SolrQuery();
+            sq.setRows(1);
+            sq.setFields(new String[] { "id", "role" });
+            sq.setQuery(query.toString());
+            final SolrDocumentList docs = solrGroup.query(sq).getResults();
+            if (docs.size() > 0) {
+                for (final SolrDocument doc : docs) {
+                    // checking changed roles
+                    final Collection<Object> docRoleList = doc
+                            .getFieldValues("role");
+
+                    if (CollectionUtils.isEmpty(roleList)
+                            && CollectionUtils.isEmpty(docRoleList)) {
+                        // neither have role
+                        continue;
+                    }
+                    if (CollectionUtils.isNotEmpty(roleList)
+                            && CollectionUtils.isNotEmpty(docRoleList)) {
+                        final List<String> diff = (List<String>) CollectionUtils
+                                .disjunction(roleList, docRoleList);
+                        if (diff.size() == 0) {
+                            // has same role(s)
+                            continue;
+                        }
+                    }
+                    // has different role(s)
+                    ids.add((String) doc.getFieldValue("id"));
+                }
+            }
+        }
+        if (ids.size() > 0) {
+            synchronized (solrGroup) {
+                solrGroup.deleteById(ids);
+            }
+        }
+    }
+
     private void sendDocuments(final List<SolrInputDocument> docList) {
         final long execTime = System.currentTimeMillis();
         if (logger.isInfoEnabled()) {
             logger.info("Sending " + docList.size() + " document to a server.");
         }
         synchronized (solrGroup) {
+            deleteDocuments(docList);
             solrGroup.add(docList);
         }
         if (logger.isInfoEnabled()) {
