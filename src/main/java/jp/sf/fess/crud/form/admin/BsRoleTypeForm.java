@@ -53,7 +53,7 @@ public abstract class BsRoleTypeForm {
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @Maxbytelength(maxbytelength = 20)
-    @Mask(mask = "^[a-zA-Z0-9_-]+$", msg = @Msg(key = "errors.alphaDigitOnly"))
+    @Mask(mask = "^[a-zA-Z0-9_-| ]+$", msg = @Msg(key = "errors.alphaDigitOnly"))
     public String value;
 
     @Required(target = "confirmfromupdate,update,delete")
