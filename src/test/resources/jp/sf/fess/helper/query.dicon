@@ -2,6 +2,8 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
+	<component name="fieldHelper" class="jp.sf.fess.helper.FieldHelper">
+	</component>
 	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
 	</component>
 	<component name="queryHelper" class="jp.sf.fess.helper.QueryHelper">

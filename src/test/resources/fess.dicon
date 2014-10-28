@@ -11,6 +11,8 @@
 		</arg>
 	</component>
 
+	<component name="fieldHelper" class="jp.sf.fess.helper.FieldHelper">
+	</component>
 	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
 		<!--
 		<property name="adminRole">"fess"</property>
