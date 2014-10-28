@@ -107,13 +107,13 @@ public class QueryHelper implements Serializable {
     protected String[] responseFields = new String[] { "id", "docId", "score",
             "boost", "contentLength", "host", "site", "lastModified",
             "mimetype", "filetype_s", "created", TITLE_FIELD, "digest", "url",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "cid_s_s", "lang_s",
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "cid_s", "lang_s",
             "hasCache_s_s" };
 
     protected String[] cacheResponseFields = new String[] { "id", "docId",
             "score", "boost", "contentLength", "host", "site", "lastModified",
             "mimetype", "filetype_s", "created", TITLE_FIELD, "digest", "url",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "cid_s_s", "lang_s",
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "cid_s", "lang_s",
             "cache" };
 
     protected String[] responseDocValuesFields = new String[] {

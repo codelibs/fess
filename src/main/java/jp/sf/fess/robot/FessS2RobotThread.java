@@ -31,15 +31,13 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.IndexingHelper;
 import jp.sf.fess.helper.SambaHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.codelibs.core.util.DynamicProperties;
@@ -61,10 +59,6 @@ public class FessS2RobotThread extends S2RobotThread {
     private static final Logger logger = LoggerFactory
             .getLogger(FessS2RobotThread.class);
 
-    public int maxSolrQueryRetryCount = 5;
-
-    public int childUrlSize = 10000;
-
     @Override
     protected boolean isContentUpdated(final S2RobotClient client,
             final UrlQueue urlQueue) {
@@ -82,34 +76,35 @@ public class FessS2RobotThread extends S2RobotThread {
                     .getCrawlingSessionHelper();
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+            final IndexingHelper indexingHelper = ComponentUtil
+                    .getIndexingHelper();
+            final SolrGroupManager solrGroupManager = ComponentUtil
+                    .getSolrGroupManager();
             final boolean useAclAsRole = crawlerProperties.getProperty(
                     Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
                     Constants.TRUE);
-            final String expiresField = systemHelper.expiresField;
 
+            final SolrGroup solrGroup = solrGroupManager
+                    .getSolrGroup(QueryType.ADD);
+
+            final String url = urlQueue.getUrl();
             ResponseData responseData = null;
             try {
-                //  head method
-                responseData = client
-                        .execute(RequestDataBuilder.newRequestData().head()
-                                .url(urlQueue.getUrl()).build());
-                if (responseData == null) {
-                    return true;
-                }
-
-                SolrDocumentList oldDocWithRoleList = null;
                 final CrawlingConfig crawlingConfig = crawlingConfigHelper
                         .get(robotContext.getSessionId());
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
-                dataMap.put("url", urlQueue.getUrl());
+                dataMap.put(systemHelper.urlField, url);
                 final List<String> roleTypeList = new ArrayList<String>();
                 for (final String roleType : crawlingConfig.getRoleTypeValues()) {
                     roleTypeList.add(roleType);
                 }
-                if (useAclAsRole && responseData.getUrl().startsWith("smb://")) {
-                    final String id = crawlingSessionHelper.generateId(dataMap);
-                    oldDocWithRoleList = getSolrDocumentList(id, true,
-                            expiresField);
+                if (useAclAsRole && url.startsWith("smb://")) {
+                    //  head method
+                    responseData = client.execute(RequestDataBuilder
+                            .newRequestData().head().url(url).build());
+                    if (responseData == null) {
+                        return true;
+                    }
 
                     final ACE[] aces = (ACE[]) responseData.getMetaDataMap()
                             .get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
@@ -124,36 +119,40 @@ public class FessS2RobotThread extends S2RobotThread {
                         }
                     }
                 }
-                dataMap.put("role", roleTypeList);
+                dataMap.put(systemHelper.roleField, roleTypeList);
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
-                final SolrDocumentList solrDocumentList = getSolrDocumentList(
-                        id, false, expiresField);
-                if (solrDocumentList == null) {
-                    deleteSolrDocumentList(oldDocWithRoleList);
-                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(id));
+                final SolrDocument solrDocument = indexingHelper
+                        .getSolrDocument(solrGroup, id, new String[] {
+                                systemHelper.idField,
+                                systemHelper.lastModifiedField,
+                                systemHelper.anchorField,
+                                systemHelper.segmentField,
+                                systemHelper.expiresField,
+                                systemHelper.clickCountField,
+                                systemHelper.favoriteCountField });
+                if (solrDocument == null) {
+                    storeChildUrlsToQueue(urlQueue,
+                            getChildUrlSet(solrGroup, id)); // TODO
                     return true;
                 }
 
-                if (solrDocumentList.size() > 1) {
-                    // invalid state
-                    deleteSolrDocumentList(oldDocWithRoleList);
-                    deleteSolrDocumentList(solrDocumentList);
-                    return true;
-                }
-
-                final SolrDocument solrDocument = solrDocumentList.get(0);
-                final Date expires = (Date) solrDocument.get(expiresField);
+                final Date expires = (Date) solrDocument
+                        .get(systemHelper.expiresField);
                 if (expires != null
                         && expires.getTime() < System.currentTimeMillis()) {
-                    deleteSolrDocumentList(oldDocWithRoleList);
+                    final Object idValue = solrDocument
+                            .getFieldValue(systemHelper.idField);
+                    if (idValue != null) {
+                        indexingHelper.deleteDocument(solrGroup,
+                                idValue.toString());
+                    }
                     return true;
                 }
 
                 final Date lastModified = (Date) solrDocument
-                        .get("lastModified");
+                        .get(systemHelper.lastModifiedField);
                 if (lastModified == null) {
-                    deleteSolrDocumentList(oldDocWithRoleList);
                     return true;
                 }
 
@@ -162,10 +161,8 @@ public class FessS2RobotThread extends S2RobotThread {
                 if (clickCount != null) {
                     final SearchLogHelper searchLogHelper = ComponentUtil
                             .getSearchLogHelper();
-                    final int count = searchLogHelper.getClickCount(urlQueue
-                            .getUrl());
+                    final int count = searchLogHelper.getClickCount(url);
                     if (count != clickCount.intValue()) {
-                        deleteSolrDocumentList(oldDocWithRoleList);
                         return true;
                     }
                 }
@@ -175,23 +172,28 @@ public class FessS2RobotThread extends S2RobotThread {
                 if (favoriteCount != null) {
                     final SearchLogHelper searchLogHelper = ComponentUtil
                             .getSearchLogHelper();
-                    final long count = searchLogHelper
-                            .getFavoriteCount(urlQueue.getUrl());
+                    final long count = searchLogHelper.getFavoriteCount(url);
                     if (count != favoriteCount.longValue()) {
-                        deleteSolrDocumentList(oldDocWithRoleList);
+                        return true;
+                    }
+                }
+
+                if (responseData == null) {
+                    //  head method
+                    responseData = client.execute(RequestDataBuilder
+                            .newRequestData().head().url(url).build());
+                    if (responseData == null) {
                         return true;
                     }
                 }
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
-                    deleteSolrDocument(id);
-                    deleteSolrDocumentList(oldDocWithRoleList);
                     storeChildUrlsToQueue(urlQueue,
                             getAnchorSet(solrDocument.get("anchor")));
+                    indexingHelper.deleteDocument(solrGroup, id);
                     return false;
                 } else if (responseData.getLastModified() == null) {
-                    deleteSolrDocumentList(oldDocWithRoleList);
                     return true;
                 } else if (responseData.getLastModified().getTime() <= lastModified
                         .getTime() && httpStatusCode == 200) {
@@ -256,134 +258,28 @@ public class FessS2RobotThread extends S2RobotThread {
         return childUrlSet;
     }
 
-    protected SolrDocumentList getSolrDocumentList(final String id,
-            final boolean wildcard, final String expiresField) {
-        final SolrGroupManager solrGroupManager = ComponentUtil
-                .getSolrGroupManager();
+    protected Set<RequestData> getChildUrlSet(final SolrGroup solrGroup,
+            final String id) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.ADD);
-        final SolrQuery solrQuery = new SolrQuery();
-        final StringBuilder queryBuf = new StringBuilder(200);
-        if (wildcard) {
-            queryBuf.append("{!prefix f=id}");
-        } else {
-            queryBuf.append("{!raw f=id}");
+        final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
+        final SolrDocumentList docList = indexingHelper
+                .getChildSolrDocumentList(solrGroup, id,
+                        new String[] { systemHelper.urlField });
+        if (docList.isEmpty()) {
+            return null;
         }
-        queryBuf.append(id);
-        solrQuery.setQuery(queryBuf.toString());
-        solrQuery.setFields("id", "lastModified", "anchor", "segment", "role",
-                expiresField, systemHelper.clickCountField,
-                systemHelper.favoriteCountField);
-        for (int i = 0; i < maxSolrQueryRetryCount; i++) {
-            try {
-                final QueryResponse response = solrGroup.query(solrQuery);
-                final SolrDocumentList docList = response.getResults();
-                if (docList.isEmpty()) {
-                    return null;
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Found solr documents: " + docList);
-                }
-                return docList;
-            } catch (final Exception e) {
-                logger.info("Could not get a response from Solr."
-                        + " It might be busy. " + "Retrying.. id:" + id
-                        + ", cause: " + e.getMessage());
-            }
-            try {
-                Thread.sleep(500);
-            } catch (final InterruptedException e) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Found solr documents: " + docList);
+        }
+        final Set<RequestData> urlSet = new HashSet<>(docList.size());
+        for (final SolrDocument doc : docList) {
+            final Object obj = doc.get(systemHelper.urlField);
+            if (obj != null) {
+                urlSet.add(RequestDataBuilder.newRequestData().get()
+                        .url(obj.toString()).build());
             }
         }
-        return null;
+        return urlSet;
     }
 
-    protected Set<RequestData> getChildUrlSet(final String id) {
-        final SolrGroupManager solrGroupManager = ComponentUtil
-                .getSolrGroupManager();
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.ADD);
-        final SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setQuery("{!raw f=parentId v=\"" + id + "\"}");
-        solrQuery.setFields("url");
-        solrQuery.setRows(childUrlSize);
-        for (int i = 0; i < maxSolrQueryRetryCount; i++) {
-            try {
-                final QueryResponse response = solrGroup.query(solrQuery);
-                final SolrDocumentList docList = response.getResults();
-                if (docList.isEmpty()) {
-                    return null;
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Found solr documents: " + docList);
-                }
-                final Set<RequestData> urlSet = new HashSet<>(docList.size());
-                for (final SolrDocument doc : docList) {
-                    final Object obj = doc.get("url");
-                    if (obj != null) {
-                        urlSet.add(RequestDataBuilder.newRequestData().get()
-                                .url(obj.toString()).build());
-                    }
-                }
-                return urlSet;
-            } catch (final Exception e) {
-                logger.info("Could not get a response from Solr."
-                        + " It might be busy. " + "Retrying.. id:" + id
-                        + ", cause: " + e.getMessage());
-            }
-            try {
-                Thread.sleep(500);
-            } catch (final InterruptedException e) {
-            }
-        }
-        return null;
-    }
-
-    protected void deleteSolrDocument(final String id) {
-        final SolrGroupManager solrGroupManager = ComponentUtil
-                .getSolrGroupManager();
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.DELETE);
-        final String query = "{!raw f=parentId v=\"" + id + "\"}";
-        for (int i = 0; i < maxSolrQueryRetryCount; i++) {
-            boolean done = true;
-            try {
-                for (final UpdateResponse response : solrGroup
-                        .deleteByQuery(query)) {
-                    if (response.getStatus() != 200) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Failed to delete: " + response);
-                        }
-                        done = false;
-                    }
-                }
-            } catch (final Exception e) {
-                logger.info("Could not delete a document from Solr."
-                        + " It might be busy. " + "Retrying.. id:" + id
-                        + ", cause: " + e.getMessage());
-                done = false;
-            }
-            if (done) {
-                logger.info("Deleted from Solr: " + id);
-                break;
-            }
-            try {
-                Thread.sleep(500);
-            } catch (final InterruptedException e) {
-            }
-        }
-    }
-
-    protected void deleteSolrDocumentList(
-            final SolrDocumentList solrDocumentList) {
-        if (solrDocumentList != null) {
-            for (final SolrDocument solrDocument : solrDocumentList) {
-                final Object idObj = solrDocument.get("id");
-                if (idObj != null) {
-                    deleteSolrDocument(idObj.toString());
-                }
-            }
-        }
-    }
 }

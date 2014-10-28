@@ -25,6 +25,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.IndexingHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
@@ -40,7 +41,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected SolrGroup solrGroup;
 
-    public int maxDocumentCacheSize = 10;
+    public int maxDocumentCacheSize = 5;
 
     public boolean clickCountEnabled = true;
 
@@ -71,6 +72,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             throw new FessSystemException("url is null. dataMap=" + dataMap);
         }
 
+        final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
                 .getCrawlingSessionHelper();
         dataMap.put("id", crawlingSessionHelper.generateId(dataMap));
@@ -85,13 +87,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (docList.size() >= maxDocumentCacheSize) {
-            sendDocuments();
+            indexingHelper.sendDocuments(solrGroup, docList);
         }
         documentSize.getAndIncrement();
         // commit
         if (commitPerCount > 0 && documentSize.get() % commitPerCount == 0) {
             if (!docList.isEmpty()) {
-                sendDocuments();
+                indexingHelper.sendDocuments(solrGroup, docList);
             }
             commitDocuments();
         }
@@ -142,7 +144,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     @Override
     public void commit() {
         if (!docList.isEmpty()) {
-            sendDocuments();
+            final IndexingHelper indexingHelper = ComponentUtil
+                    .getIndexingHelper();
+            indexingHelper.sendDocuments(solrGroup, docList);
         }
         commitDocuments();
     }
@@ -159,22 +163,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.info("Committed documents. The execution time is "
                     + (System.currentTimeMillis() - execTime) + "ms.");
         }
-    }
-
-    protected void sendDocuments() {
-        final long execTime = System.currentTimeMillis();
-        if (logger.isInfoEnabled()) {
-            logger.info("Sending " + docList.size() + " document to a server.");
-        }
-        synchronized (solrGroup) {
-            solrGroup.add(docList);
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Sent " + docList.size()
-                    + " documents. The execution time is "
-                    + (System.currentTimeMillis() - execTime) + "ms.");
-        }
-        docList.clear();
     }
 
     protected void addClickCountField(final SolrInputDocument doc,

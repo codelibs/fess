@@ -81,7 +81,7 @@
             "boost", "contentLength", "host", "site", "lastModified",
             "mimetype", "filetype_s", "created", "title", "digest", "url",
             "clickCount_l_x_dv", "favoriteCount_l_x_dv",
-            "cid_s_s", "lang_s", "hasCache_s_s" }</property>
+            "cid_s", "lang_s", "hasCache_s_s" }</property>
 		<property name="responseDocValuesFields">new String[]{
             "clickCount_l_x_dv", "favoriteCount_l_x_dv"}</property>
 		<property name="highlightingFields">new String[]{"digest", "cache" }</property>

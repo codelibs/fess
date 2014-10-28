@@ -122,7 +122,7 @@ public class SystemHelper implements Serializable {
 
     public String clickCountField = "clickCount_l_x_dv";
 
-    public String configIdField = "cid_s_s";
+    public String configIdField = "cid_s";
 
     public String expiresField = "expires_dt";
 
@@ -135,6 +135,14 @@ public class SystemHelper implements Serializable {
     public String langField = "lang_s";
 
     public String hasCacheField = "hasCache_s_s";
+
+    public String lastModifiedField = "lastModified";
+
+    public String anchorField = "anchor";
+
+    public String segmentField = "segment";
+
+    public String roleField = "role";
 
     protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
             "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",

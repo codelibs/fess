@@ -17,7 +17,6 @@
 package jp.sf.fess.solr;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +31,11 @@ import jp.sf.fess.db.exbhv.ClickLogBhv;
 import jp.sf.fess.db.exbhv.FavoriteLogBhv;
 import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
 import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
+import jp.sf.fess.helper.IndexingHelper;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.util.ComponentUtil;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.util.ClientUtils;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.robot.S2Robot;
@@ -95,7 +90,12 @@ public class IndexUpdater extends Thread {
     @Resource
     protected SystemHelper systemHelper;
 
+    @Resource
+    protected IndexingHelper indexingHelper;
+
     public int maxDocumentCacheSize = 5;
+
+    public int maxInvalidDocumentSize = 100;
 
     protected boolean finishCrawling = false;
 
@@ -243,7 +243,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     if (!docList.isEmpty()) {
-                        sendDocuments(docList);
+                        indexingHelper.sendDocuments(solrGroup, docList);
                     }
 
                     synchronized (finishedSessionIdList) {
@@ -395,14 +395,14 @@ public class IndexUpdater extends Thread {
                     }
 
                     if (docList.size() >= maxDocumentCacheSize) {
-                        sendDocuments(docList);
+                        indexingHelper.sendDocuments(solrGroup, docList);
                     }
                     documentSize++;
                     // commit
                     if (commitPerCount > 0
                             && documentSize % commitPerCount == 0) {
                         if (!docList.isEmpty()) {
-                            sendDocuments(docList);
+                            indexingHelper.sendDocuments(solrGroup, docList);
                         }
                         commitDocuments();
                     }
@@ -563,17 +563,15 @@ public class IndexUpdater extends Thread {
             }
         }
         if (logger.isInfoEnabled()) {
-            logger.info("The number of a crawled document is "
-                    + arList.getAllRecordCount() + ". The processing size is "
-                    + arList.size() + ". The execution time is "
-                    + (System.currentTimeMillis() - execTime) + "ms.");
+            logger.info("Processing " + arList.size() + "/"
+                    + arList.getAllRecordCount() + " docs (DB: "
+                    + (System.currentTimeMillis() - execTime) + "ms)");
         }
         if (arList.getAllRecordCount() > unprocessedDocumentSize) {
             if (logger.isInfoEnabled()) {
                 logger.info("Stopped all crawler threads. " + " You have "
                         + arList.getAllRecordCount() + " (>"
-                        + unprocessedDocumentSize + ") "
-                        + " unprocessed documents.");
+                        + unprocessedDocumentSize + ") " + " unprocessed docs.");
             }
             final IntervalControlHelper intervalControlHelper = ComponentUtil
                     .getIntervalControlHelper();
@@ -618,71 +616,6 @@ public class IndexUpdater extends Thread {
             logger.info("Committed documents. The execution time is "
                     + (System.currentTimeMillis() - execTime) + "ms.");
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void deleteDocuments(final List<SolrInputDocument> docList) {
-        final List<String> ids = new ArrayList<String>();
-        for (final SolrInputDocument inputDoc : docList) {
-            final Collection<Object> roleList = inputDoc.getFieldValues("role");
-            final StringBuilder query = new StringBuilder();
-            query.append("url:\"");
-            query.append(ClientUtils.escapeQueryChars((String) inputDoc
-                    .getFieldValue("url")));
-            query.append("\"");
-
-            final SolrQuery sq = new SolrQuery();
-            sq.setRows(1);
-            sq.setFields(new String[] { "id", "role" });
-            sq.setQuery(query.toString());
-            final SolrDocumentList docs = solrGroup.query(sq).getResults();
-            if (docs.size() > 0) {
-                for (final SolrDocument doc : docs) {
-                    // checking changed roles
-                    final Collection<Object> docRoleList = doc
-                            .getFieldValues("role");
-
-                    if (CollectionUtils.isEmpty(roleList)
-                            && CollectionUtils.isEmpty(docRoleList)) {
-                        // neither have role
-                        continue;
-                    }
-                    if (CollectionUtils.isNotEmpty(roleList)
-                            && CollectionUtils.isNotEmpty(docRoleList)) {
-                        final List<String> diff = (List<String>) CollectionUtils
-                                .disjunction(roleList, docRoleList);
-                        if (diff.size() == 0) {
-                            // has same role(s)
-                            continue;
-                        }
-                    }
-                    // has different role(s)
-                    ids.add((String) doc.getFieldValue("id"));
-                }
-            }
-        }
-        if (ids.size() > 0) {
-            synchronized (solrGroup) {
-                solrGroup.deleteById(ids);
-            }
-        }
-    }
-
-    private void sendDocuments(final List<SolrInputDocument> docList) {
-        final long execTime = System.currentTimeMillis();
-        if (logger.isInfoEnabled()) {
-            logger.info("Sending " + docList.size() + " document to a server.");
-        }
-        synchronized (solrGroup) {
-            deleteDocuments(docList);
-            solrGroup.add(docList);
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Sent " + docList.size()
-                    + " documents. The execution time is "
-                    + (System.currentTimeMillis() - execTime) + "ms.");
-        }
-        docList.clear();
     }
 
     private void forceStop() {

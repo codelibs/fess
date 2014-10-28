@@ -10,6 +10,8 @@
 
 	<include path="s2robot_db.dicon" />
 
+	<component name="indexingHelper" class="jp.sf.fess.helper.IndexingHelper">
+	</component>
 	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
 	</component>
 	<component name="webFsIndexHelper" class="jp.sf.fess.helper.WebFsIndexHelper">
