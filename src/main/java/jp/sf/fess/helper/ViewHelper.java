@@ -38,6 +38,7 @@ import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.entity.FacetQueryView;
 import jp.sf.fess.helper.UserAgentHelper.UserAgentType;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.fess.util.ResourceUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -134,12 +135,12 @@ public class ViewHelper implements Serializable {
 
     public String getContentTitle(final Map<String, Object> document) {
         final int size = titleLength;
-
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         String title;
-        if (StringUtil.isNotBlank(getString(document, "title"))) {
-            title = getString(document, "title");
+        if (StringUtil.isNotBlank(getString(document, fieldHelper.titleField))) {
+            title = getString(document, fieldHelper.titleField);
         } else {
-            title = getString(document, "url");
+            title = getString(document, fieldHelper.urlField);
         }
         return StringUtils.abbreviate(title, size);
     }
@@ -317,7 +318,9 @@ public class ViewHelper implements Serializable {
             final String url) {
         if (Constants.TRUE.equals(crawlerProperties
                 .get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
-            final String mimetype = getString(document, "mimetype");
+            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            final String mimetype = getString(document,
+                    fieldHelper.mimetypeField);
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
                     return appendPDFSearchWord(url);
@@ -409,7 +412,7 @@ public class ViewHelper implements Serializable {
 
     public String createCacheContent(final Map<String, Object> doc,
             final String[] queries) {
-
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final FileTemplateLoader loader = new FileTemplateLoader(new File(
                 ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
         final Handlebars handlebars = new Handlebars(loader);
@@ -423,7 +426,7 @@ public class ViewHelper implements Serializable {
             url = MessageResourcesUtil.getMessage(locale,
                     "labels.search_unknown");
         }
-        Object created = doc.get("created");
+        Object created = doc.get(fieldHelper.createdField);
         if (created instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(
                     CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
@@ -437,7 +440,7 @@ public class ViewHelper implements Serializable {
 
         doc.put("queries", queries);
 
-        String cache = (String) doc.get("cache");
+        String cache = (String) doc.get(fieldHelper.cacheField);
         if (cache != null) {
             cache = pathMappingHelper.replaceUrls(cache);
             if (queries != null && queries.length > 0) {
@@ -446,7 +449,7 @@ public class ViewHelper implements Serializable {
                 doc.put("hlCache", cache);
             }
         } else {
-            doc.put("cache", StringUtil.EMPTY);
+            doc.put(fieldHelper.cacheField, StringUtil.EMPTY);
             doc.put("hlCache", StringUtil.EMPTY);
         }
 

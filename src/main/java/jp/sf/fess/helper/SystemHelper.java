@@ -118,32 +118,6 @@ public class SystemHelper implements Serializable {
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
-    public String favoriteCountField = "favoriteCount_l_x_dv";
-
-    public String clickCountField = "clickCount_l_x_dv";
-
-    public String configIdField = "cid_s";
-
-    public String expiresField = "expires_dt";
-
-    public String urlField = "url";
-
-    public String docIdField = "docId";
-
-    public String idField = "id";
-
-    public String langField = "lang_s";
-
-    public String hasCacheField = "hasCache_s_s";
-
-    public String lastModifiedField = "lastModified";
-
-    public String anchorField = "anchor";
-
-    public String segmentField = "segment";
-
-    public String roleField = "role";
-
     protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
             "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
             "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",

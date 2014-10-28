@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.IndexingHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.SystemHelper;
@@ -32,6 +32,7 @@ import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.solr.lib.SolrGroup;
+import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
 
+    private FieldHelper fieldHelper;
+
+    @InitMethod
+    public void init() {
+        fieldHelper = ComponentUtil.getFieldHelper();
+    }
+
     /* (non-Javadoc)
      * @see jp.sf.fess.ds.impl.IndexUpdateCallback#store(java.util.Map)
      */
@@ -67,7 +75,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         //   required check
-        final Object urlObj = dataMap.get("url");
+        final Object urlObj = dataMap.get(fieldHelper.urlField);
         if (urlObj == null) {
             throw new FessSystemException("url is null. dataMap=" + dataMap);
         }
@@ -75,7 +83,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
                 .getCrawlingSessionHelper();
-        dataMap.put("id", crawlingSessionHelper.generateId(dataMap));
+        dataMap.put(fieldHelper.idField,
+                crawlingSessionHelper.generateId(dataMap));
 
         final SolrInputDocument doc = createSolrDocument(dataMap);
 
@@ -108,11 +117,11 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected SolrInputDocument createSolrDocument(
             final Map<String, Object> dataMap) {
-        final String url = dataMap.get("url").toString();
+        final String url = dataMap.get(fieldHelper.urlField).toString();
 
         final SolrInputDocument doc = new SolrInputDocument();
         for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            if ("boost".equals(entry.getKey())) {
+            if (fieldHelper.boostField.equals(entry.getKey())) {
                 // boost
                 final float documentBoost = Float.valueOf(entry.getValue()
                         .toString());
@@ -126,16 +135,17 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (clickCountEnabled) {
-            addClickCountField(doc, url);
+            addClickCountField(doc, url, fieldHelper.clickCountField);
         }
 
         if (favoriteCountEnabled) {
-            addFavoriteCountField(doc, url);
+            addFavoriteCountField(doc, url, fieldHelper.favoriteCountField);
         }
 
-        if (!dataMap.containsKey(Constants.DOC_ID)) {
+        if (!dataMap.containsKey(fieldHelper.docIdField)) {
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-            doc.addField(Constants.DOC_ID, systemHelper.generateDocId(dataMap));
+            doc.addField(fieldHelper.docIdField,
+                    systemHelper.generateDocId(dataMap));
         }
 
         return doc;
@@ -166,24 +176,22 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     protected void addClickCountField(final SolrInputDocument doc,
-            final String url) {
+            final String url, final String clickCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil
                 .getSearchLogHelper();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final int count = searchLogHelper.getClickCount(url);
-        doc.addField(systemHelper.clickCountField, count);
+        doc.addField(clickCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Click Count: " + count + ", url: " + url);
         }
     }
 
     protected void addFavoriteCountField(final SolrInputDocument doc,
-            final String url) {
+            final String url, final String favoriteCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil
                 .getSearchLogHelper();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final long count = searchLogHelper.getFavoriteCount(url);
-        doc.addField(systemHelper.favoriteCountField, count);
+        doc.addField(favoriteCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Favorite Count: " + count + ", url: " + url);
         }

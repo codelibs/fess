@@ -137,8 +137,8 @@ public class CrawlingConfigHelper implements Serializable {
         if (logger.isDebugEnabled()) {
             logger.debug("writing the content of: " + doc);
         }
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final Object configIdObj = doc.get(systemHelper.configIdField);
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final Object configIdObj = doc.get(fieldHelper.configIdField);
         if (configIdObj == null) {
             throw new FessSystemException("configId is null.");
         }
@@ -171,7 +171,7 @@ public class CrawlingConfigHelper implements Serializable {
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);
         }
-        final String url = (String) doc.get(systemHelper.urlField);
+        final String url = (String) doc.get(fieldHelper.urlField);
         final S2RobotClientFactory robotClientFactory = SingletonS2Container
                 .getComponent(S2RobotClientFactory.class);
         config.initializeClientFactory(robotClientFactory);

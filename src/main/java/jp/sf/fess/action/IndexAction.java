@@ -57,6 +57,7 @@ import jp.sf.fess.entity.LoginInfo;
 import jp.sf.fess.form.IndexForm;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.DocumentHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.HotSearchWordHelper.Range;
 import jp.sf.fess.helper.LabelTypeHelper;
@@ -162,6 +163,9 @@ public class IndexAction {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected FieldHelper fieldHelper;
 
     @Resource
     protected Suggester suggester;
@@ -351,8 +355,9 @@ public class IndexAction {
     public String cache() {
         Map<String, Object> doc = null;
         try {
-            doc = searchService.getDocument("docId:" + indexForm.docId,
-                    queryHelper.getCacheResponseFields(), null);
+            doc = searchService.getDocument(fieldHelper.docIdField + ":"
+                    + indexForm.docId, queryHelper.getCacheResponseFields(),
+                    null);
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -379,9 +384,9 @@ public class IndexAction {
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
-            doc = searchService.getDocument("docId:" + indexForm.docId,
-                    queryHelper.getResponseFields(),
-                    new String[] { systemHelper.clickCountField });
+            doc = searchService.getDocument(fieldHelper.docIdField + ":"
+                    + indexForm.docId, queryHelper.getResponseFields(),
+                    new String[] { fieldHelper.clickCountField });
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -391,7 +396,7 @@ public class IndexAction {
                     indexForm.docId);
             return "error.jsp";
         }
-        final Object urlObj = doc.get("url");
+        final Object urlObj = doc.get(fieldHelper.urlField);
         if (urlObj == null) {
             errorMessage = MessageResourcesUtil.getMessage(RequestUtil
                     .getRequest().getLocale(), "errors.document_not_found",
@@ -415,7 +420,7 @@ public class IndexAction {
                 clickLog.setUserSessionId(userSessionId);
                 clickLog.setDocId(indexForm.docId);
                 long clickCount = 0;
-                final Object count = doc.get(systemHelper.clickCountField);
+                final Object count = doc.get(fieldHelper.clickCountField);
                 if (count instanceof Long) {
                     clickCount = ((Long) count).longValue();
                 }
@@ -532,9 +537,10 @@ public class IndexAction {
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
-            final Map<String, Object> doc = searchService.getDocument("docId:"
-                    + indexForm.docId);
-            final String url = doc == null ? null : (String) doc.get("url");
+            final Map<String, Object> doc = searchService
+                    .getDocument(fieldHelper.docIdField + ":" + indexForm.docId);
+            final String url = doc == null ? null : (String) doc
+                    .get(fieldHelper.urlField);
             if (StringUtil.isBlank(indexForm.queryId)
                     || StringUtil.isBlank(url) || screenShotManager == null) {
                 // 404
@@ -798,12 +804,12 @@ public class IndexAction {
 
         try {
             final Map<String, Object> doc = indexForm.docId == null ? null
-                    : searchService.getDocument("docId:" + indexForm.docId,
-                            queryHelper.getResponseFields(),
-                            new String[] { systemHelper.favoriteCountField });
+                    : searchService.getDocument(fieldHelper.docIdField + ":"
+                            + indexForm.docId, queryHelper.getResponseFields(),
+                            new String[] { fieldHelper.favoriteCountField });
             final String userCode = userInfoHelper.getUserCode();
             final String favoriteUrl = doc == null ? null : (String) doc
-                    .get("url");
+                    .get(fieldHelper.urlField);
 
             if (StringUtil.isBlank(userCode)) {
                 WebApiUtil.setError(2, "No user session.");
@@ -839,10 +845,10 @@ public class IndexAction {
 
             final DocumentHelper documentHelper = ComponentUtil
                     .getDocumentHelper();
-            final Object count = doc.get(systemHelper.favoriteCountField);
+            final Object count = doc.get(fieldHelper.favoriteCountField);
             if (count instanceof Long) {
                 documentHelper.update(indexForm.docId,
-                        systemHelper.favoriteCountField,
+                        fieldHelper.favoriteCountField,
                         ((Long) count).longValue() + 1);
             } else {
                 WebApiUtil
@@ -880,11 +886,11 @@ public class IndexAction {
             final List<Map<String, Object>> docList = searchService
                     .getDocumentListByDocIds(docIds,
                             queryHelper.getResponseFields(),
-                            new String[] { systemHelper.favoriteCountField },
+                            new String[] { fieldHelper.favoriteCountField },
                             MAX_PAGE_SIZE);
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
-                final Object urlObj = doc.get("url");
+                final Object urlObj = doc.get(fieldHelper.urlField);
                 if (urlObj != null) {
                     urlList.add(urlObj.toString());
                 }
@@ -892,9 +898,9 @@ public class IndexAction {
             urlList = favoriteLogService.getUrlList(userCode, urlList);
             final List<String> docIdList = new ArrayList<String>(urlList.size());
             for (final Map<String, Object> doc : docList) {
-                final Object urlObj = doc.get("url");
+                final Object urlObj = doc.get(fieldHelper.urlField);
                 if (urlObj != null && urlList.contains(urlObj.toString())) {
-                    final Object docIdObj = doc.get(Constants.DOC_ID);
+                    final Object docIdObj = doc.get(fieldHelper.docIdField);
                     if (docIdObj != null) {
                         docIdList.add(docIdObj.toString());
                     }
@@ -1173,7 +1179,7 @@ public class IndexAction {
     private void appendLangQuery(final StringBuilder queryBuf,
             final Set<String> langSet) {
         if (langSet.size() == 1) {
-            queryBuf.append(' ').append(systemHelper.langField).append(':')
+            queryBuf.append(' ').append(fieldHelper.langField).append(':')
                     .append(langSet.iterator().next());
         } else if (langSet.size() > 1) {
             boolean first = true;
@@ -1184,8 +1190,7 @@ public class IndexAction {
                 } else {
                     queryBuf.append(" OR ");
                 }
-                queryBuf.append(systemHelper.langField).append(':')
-                        .append(lang);
+                queryBuf.append(fieldHelper.langField).append(':').append(lang);
             }
             queryBuf.append(')');
         }

@@ -27,7 +27,7 @@ import jp.sf.fess.db.exentity.DataCrawlingConfig;
 import jp.sf.fess.ds.DataStore;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
-import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.taglib.FessFunctions;
 import jp.sf.fess.util.ComponentUtil;
 
@@ -61,7 +61,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
                 .getCrawlingSessionHelper();
         final Date documentExpires = crawlingSessionHelper.getDocumentExpires();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         initParamMap.putAll(configParamMap);
         final Map<String, String> paramMap = initParamMap;
@@ -72,33 +72,35 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // cid
         final String configId = config.getConfigId();
         if (configId != null) {
-            defaultDataMap.put(systemHelper.configIdField, configId);
+            defaultDataMap.put(fieldHelper.configIdField, configId);
         }
         //  expires
         if (documentExpires != null) {
-            defaultDataMap.put(systemHelper.expiresField,
+            defaultDataMap.put(fieldHelper.expiresField,
                     FessFunctions.formatDate(documentExpires));
         }
         // segment
-        defaultDataMap.put("segment", initParamMap.get(Constants.SESSION_ID));
+        defaultDataMap.put(fieldHelper.segmentField,
+                initParamMap.get(Constants.SESSION_ID));
         // created
-        defaultDataMap.put("created", "NOW");
+        defaultDataMap.put(fieldHelper.createdField, "NOW");
         // boost
-        defaultDataMap.put("boost", config.getBoost().toString());
+        defaultDataMap
+                .put(fieldHelper.boostField, config.getBoost().toString());
         // label: labelType
         final List<String> labelTypeList = new ArrayList<String>();
         for (final String labelType : config.getLabelTypeValues()) {
             labelTypeList.add(labelType);
         }
-        defaultDataMap.put("label", labelTypeList);
+        defaultDataMap.put(fieldHelper.labelField, labelTypeList);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
         for (final String roleType : config.getRoleTypeValues()) {
             roleTypeList.add(roleType);
         }
-        defaultDataMap.put("role", roleTypeList);
+        defaultDataMap.put(fieldHelper.roleField, roleTypeList);
         // mimetype
-        defaultDataMap.put("mimetype", mimeType);
+        defaultDataMap.put(fieldHelper.mimetypeField, mimeType);
         // title
         // content
         // cache

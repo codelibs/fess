@@ -34,8 +34,8 @@ import jp.sf.fess.db.exentity.SearchFieldLog;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.db.exentity.UserInfo;
 import jp.sf.fess.helper.DocumentHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.SearchLogHelper;
-import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.service.SearchLogService;
 import jp.sf.fess.service.UserInfoService;
 import jp.sf.fess.util.ComponentUtil;
@@ -212,11 +212,11 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         }
 
         final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final Map.Entry<String, Long> entry : clickCountMap.entrySet()) {
             try {
                 documentHelper.update(entry.getKey(),
-                        systemHelper.clickCountField, entry.getValue() + 1);
+                        fieldHelper.clickCountField, entry.getValue() + 1);
             } catch (final Exception e) {
                 logger.warn("Failed to update a clickCount(" + entry.getValue()
                         + ") for " + entry.getKey(), e);

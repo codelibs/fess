@@ -23,6 +23,7 @@ import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.DatabaseHelper;
 import jp.sf.fess.helper.DocumentHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.HotSearchWordHelper;
 import jp.sf.fess.helper.IndexingHelper;
@@ -113,6 +114,8 @@ public final class ComponentUtil {
     private static final String KEY_MATCH_HELPER = "keyMatchHelper";
 
     private static final String INDEXING_HELPER = "indexingHelper";
+
+    private static final String FIELD_HELPER = "fieldHelper";
 
     private ComponentUtil() {
     }
@@ -248,5 +251,9 @@ public final class ComponentUtil {
 
     public static IndexingHelper getIndexingHelper() {
         return SingletonS2Container.getComponent(INDEXING_HELPER);
+    }
+
+    public static FieldHelper getFieldHelper() {
+        return SingletonS2Container.getComponent(FIELD_HELPER);
     }
 }

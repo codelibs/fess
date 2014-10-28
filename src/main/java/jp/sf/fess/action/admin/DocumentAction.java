@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.form.admin.DocumentForm;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebManagementHelper;
@@ -56,6 +57,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DocumentAction implements Serializable {
+    private static final String SUGGEST_TYPE_ALL = "all";
+
+    private static final String SUGGEST_TYPE_SEARCH_LOG = "searchLog";
+
+    private static final String SUGGEST_TYPE_CONTENT = "content";
+
     private static final Logger logger = LoggerFactory
             .getLogger(DocumentAction.class);
 
@@ -76,6 +83,9 @@ public class DocumentAction implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected FieldHelper fieldHelper;
 
     @Resource
     protected JobHelper jobHelper;
@@ -266,7 +276,8 @@ public class DocumentAction implements Serializable {
         if ("*".equals(documentForm.sessionId)) {
             deleteQuery = "*:*";
         } else {
-            deleteQuery = "segment:" + documentForm.sessionId;
+            deleteQuery = fieldHelper.segmentField + ":"
+                    + documentForm.sessionId;
         }
         return deleteByQuery(deleteQuery);
     }
@@ -274,7 +285,8 @@ public class DocumentAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String confirmByUrl() {
-        final String confirmQuery = "url:\"" + documentForm.deleteUrl + "\"";
+        final String confirmQuery = fieldHelper.urlField + ":\""
+                + documentForm.deleteUrl + "\"";
         return "/admin/searchList/search?query=" + S2Functions.u(confirmQuery)
                 + "&redirect=true";
     }
@@ -283,7 +295,8 @@ public class DocumentAction implements Serializable {
     @Execute(validator = true, input = "index")
     public String deleteByUrl() {
         final String deleteUrl = documentForm.deleteUrl;
-        final String deleteQuery = "url:\"" + deleteUrl + "\"";
+        final String deleteQuery = fieldHelper.urlField + ":\"" + deleteUrl
+                + "\"";
         return deleteByQuery(deleteQuery);
     }
 
@@ -367,8 +380,8 @@ public class DocumentAction implements Serializable {
         final SolrQuery query = new SolrQuery();
         query.setQuery("*:*");
         query.setFacet(true);
-        query.addFacetField("segment");
-        query.addSort("segment", ORDER.desc);
+        query.addFacetField(fieldHelper.segmentField);
+        query.addSort(fieldHelper.segmentField, ORDER.desc);
 
         final QueryResponse queryResponse = serverGroup.query(query);
         final List<FacetField> facets = queryResponse.getFacetFields();
@@ -400,9 +413,10 @@ public class DocumentAction implements Serializable {
 
     protected Map<String, Long> getSuggestDocumentNum() {
         final Map<String, Long> map = new HashMap<String, Long>();
-        map.put("content", suggestService.getContentDocumentNum());
-        map.put("searchLog", suggestService.getSearchLogDocumentNum());
-        map.put("all", suggestService.getDocumentNum());
+        map.put(SUGGEST_TYPE_CONTENT, suggestService.getContentDocumentNum());
+        map.put(SUGGEST_TYPE_SEARCH_LOG,
+                suggestService.getSearchLogDocumentNum());
+        map.put(SUGGEST_TYPE_ALL, suggestService.getDocumentNum());
         return map;
     }
 
@@ -412,12 +426,13 @@ public class DocumentAction implements Serializable {
         final SuggestSolrServer suggestSolrServer = suggestService
                 .getSuggestSolrServer();
         final String query;
-        if ("content".equals(documentForm.deleteSuggestType)) {
+        if (SUGGEST_TYPE_CONTENT.equals(documentForm.deleteSuggestType)) {
             query = "*:* NOT " + SuggestConstants.SuggestFieldNames.SEGMENT
                     + ":" + SuggestConstants.SEGMENT_ELEVATE + " NOT "
                     + SuggestConstants.SuggestFieldNames.SEGMENT + ":"
                     + SuggestConstants.SEGMENT_QUERY;
-        } else if ("searchLog".equals(documentForm.deleteSuggestType)) {
+        } else if (SUGGEST_TYPE_SEARCH_LOG
+                .equals(documentForm.deleteSuggestType)) {
             query = SuggestConstants.SuggestFieldNames.SEGMENT + ":"
                     + SuggestConstants.SEGMENT_QUERY;
         } else {

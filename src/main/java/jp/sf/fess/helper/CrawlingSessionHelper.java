@@ -31,6 +31,7 @@ import jp.sf.fess.FessSystemException;
 import jp.sf.fess.db.exentity.CrawlingSession;
 import jp.sf.fess.db.exentity.CrawlingSessionInfo;
 import jp.sf.fess.service.CrawlingSessionService;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -48,8 +49,6 @@ public class CrawlingSessionHelper implements Serializable {
             .getLogger(CrawlingSessionHelper.class);
 
     public static final String FACET_COUNT_KEY = "count";
-
-    public static final String FACET_SEGMENT_KEY = "segment";
 
     private static final long serialVersionUID = 1L;
 
@@ -151,21 +150,24 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public String generateId(final Map<String, Object> dataMap) {
-        final String url = (String) dataMap.get("url");
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final String url = (String) dataMap.get(fieldHelper.urlField);
         @SuppressWarnings("unchecked")
-        final List<String> roleTypeList = (List<String>) dataMap.get("role");
+        final List<String> roleTypeList = (List<String>) dataMap
+                .get(fieldHelper.roleField);
         return generateId(url, roleTypeList);
     }
 
     public List<Map<String, String>> getSessionIdList(
             final SolrGroup serverGroup) {
         final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         final SolrQuery query = new SolrQuery();
         query.setQuery("*:*");
         query.setFacet(true);
-        query.addFacetField(FACET_SEGMENT_KEY);
-        query.addSort(FACET_SEGMENT_KEY, ORDER.desc);
+        query.addFacetField(fieldHelper.segmentField);
+        query.addSort(fieldHelper.segmentField, ORDER.desc);
 
         final QueryResponse queryResponse = serverGroup.query(query);
         final List<FacetField> facets = queryResponse.getFacetFields();
@@ -175,7 +177,7 @@ public class CrawlingSessionHelper implements Serializable {
                 for (final FacetField.Count fcount : facetEntries) {
                     final Map<String, String> map = new HashMap<String, String>(
                             2);
-                    map.put(FACET_SEGMENT_KEY, fcount.getName());
+                    map.put(fieldHelper.segmentField, fcount.getName());
                     map.put(FACET_COUNT_KEY, Long.toString(fcount.getCount()));
                     sessionIdList.add(map);
                 }

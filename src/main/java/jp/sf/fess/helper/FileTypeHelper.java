@@ -22,7 +22,6 @@ import java.util.Map;
 import org.codelibs.core.util.StringUtil;
 
 public class FileTypeHelper {
-    protected String fieldName = "filetype_s";
 
     protected String defaultValue = "others";
 
@@ -38,14 +37,6 @@ public class FileTypeHelper {
             return defaultValue;
         }
         return filetype;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(final String fieldName) {
-        this.fieldName = fieldName;
     }
 
     public String getDefaultValue() {

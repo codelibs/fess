@@ -28,6 +28,7 @@ import jp.sf.fess.InvalidQueryException;
 import jp.sf.fess.ResultOffsetExceededException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
 import jp.sf.fess.form.admin.SearchListForm;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.JobHelper;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.SystemHelper;
@@ -77,6 +78,9 @@ public class SearchListAction implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected FieldHelper fieldHelper;
 
     @Resource
     protected QueryHelper queryHelper;
@@ -160,8 +164,8 @@ public class SearchListAction implements Serializable {
         try {
             documentItems = searchService.getDocumentList(query, offset, size,
                     null, null, null, queryHelper.getResponseFields(),
-                    new String[] { systemHelper.clickCountField,
-                            systemHelper.favoriteCountField }, false);
+                    new String[] { fieldHelper.clickCountField,
+                            fieldHelper.favoriteCountField }, false);
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);

@@ -59,17 +59,14 @@ import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.StringUtil;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
+import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.struts.util.RequestUtil;
 
 public class QueryHelper implements Serializable {
 
-    private static final String LABEL_FIELD = "label";
+    private static final String SCORE_FIELD = "score";
 
     private static final String INURL_FIELD = "inurl";
-
-    private static final String TITLE_FIELD = "title";
-
-    private static final String CONTENT_FIELD = "content";
 
     private static final String NOT_ = "NOT ";
 
@@ -96,6 +93,9 @@ public class QueryHelper implements Serializable {
     @Resource
     protected SystemHelper systemHelper;
 
+    @Resource
+    protected FieldHelper fieldHelper;
+
     @Binding(bindingType = BindingType.MAY)
     @Resource
     protected KeyMatchHelper keyMatchHelper;
@@ -104,43 +104,25 @@ public class QueryHelper implements Serializable {
 
     protected Set<String> highlightFieldSet = new HashSet<>();
 
-    protected String[] responseFields = new String[] { "id", "docId", "score",
-            "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "filetype_s", "created", TITLE_FIELD, "digest", "url",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "cid_s", "lang_s",
-            "hasCache_s_s" };
+    protected String[] responseFields;
 
-    protected String[] cacheResponseFields = new String[] { "id", "docId",
-            "score", "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "filetype_s", "created", TITLE_FIELD, "digest", "url",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv", "cid_s", "lang_s",
-            "cache" };
+    protected String[] cacheResponseFields;
 
-    protected String[] responseDocValuesFields = new String[] {
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv" };
+    protected String[] responseDocValuesFields;
 
-    protected String[] highlightingFields = new String[] { CONTENT_FIELD };
+    protected String[] highlightingFields;
 
-    protected String[] searchFields = new String[] { "url", "docId", "host",
-            TITLE_FIELD, CONTENT_FIELD, "contentLength", "lastModified",
-            "mimetype", "filetype_s", LABEL_FIELD, "segment",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv", INURL_FIELD, "lang_s" };
+    protected String[] searchFields;
 
-    protected String[] facetFields = new String[] { "url", "host", TITLE_FIELD,
-            CONTENT_FIELD, "contentLength", "lastModified", "mimetype",
-            "filetype_s", LABEL_FIELD, "segment" };
+    protected String[] facetFields;
 
     protected String sortPrefix = "sort:";
 
-    protected String[] supportedSortFields = new String[] { "created",
-            "contentLength", "lastModified", "clickCount_l_x_dv",
-            "favoriteCount_l_x_dv" };
+    protected String[] supportedSortFields;
 
-    protected String[] supportedMltFields = new String[] { CONTENT_FIELD,
-            "content_ja" };
+    protected String[] supportedMltFields;
 
-    protected String[] supportedAnalysisFields = new String[] { CONTENT_FIELD,
-            "content_ja" };
+    protected String[] supportedAnalysisFields;
 
     protected int highlightSnippetSize = 5;
 
@@ -179,6 +161,73 @@ public class QueryHelper implements Serializable {
     protected String defaultQueryLanguage;
 
     protected Map<String, String[]> additionalQueryParamMap = new HashMap<String, String[]>();
+
+    @InitMethod
+    public void init() {
+        if (responseFields == null) {
+            responseFields = new String[] { SCORE_FIELD, fieldHelper.idField,
+                    fieldHelper.docIdField, fieldHelper.boostField,
+                    fieldHelper.contentLengthField, fieldHelper.hostField,
+                    fieldHelper.siteField, fieldHelper.lastModifiedField,
+                    fieldHelper.mimetypeField, fieldHelper.filetypeField,
+                    fieldHelper.createdField, fieldHelper.titleField,
+                    fieldHelper.digestField, fieldHelper.urlField,
+                    fieldHelper.clickCountField,
+                    fieldHelper.favoriteCountField, fieldHelper.configIdField,
+                    fieldHelper.langField, fieldHelper.hasCacheField };
+        }
+        if (cacheResponseFields == null) {
+            cacheResponseFields = new String[] { SCORE_FIELD,
+                    fieldHelper.idField, fieldHelper.docIdField,
+                    fieldHelper.boostField, fieldHelper.contentLengthField,
+                    fieldHelper.hostField, fieldHelper.siteField,
+                    fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
+                    fieldHelper.filetypeField, fieldHelper.createdField,
+                    fieldHelper.titleField, fieldHelper.digestField,
+                    fieldHelper.urlField, fieldHelper.clickCountField,
+                    fieldHelper.favoriteCountField, fieldHelper.configIdField,
+                    fieldHelper.langField, fieldHelper.cacheField };
+        }
+        if (responseDocValuesFields == null) {
+            responseDocValuesFields = new String[] {
+                    fieldHelper.clickCountField, fieldHelper.favoriteCountField };
+        }
+        if (highlightingFields == null) {
+            highlightingFields = new String[] { fieldHelper.contentField };
+        }
+        if (searchFields == null) {
+            searchFields = new String[] { INURL_FIELD, fieldHelper.urlField,
+                    fieldHelper.docIdField, fieldHelper.hostField,
+                    fieldHelper.titleField, fieldHelper.contentField,
+                    fieldHelper.contentLengthField,
+                    fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
+                    fieldHelper.filetypeField, fieldHelper.labelField,
+                    fieldHelper.segmentField, fieldHelper.clickCountField,
+                    fieldHelper.favoriteCountField, fieldHelper.langField };
+        }
+        if (facetFields == null) {
+            facetFields = new String[] { fieldHelper.urlField,
+                    fieldHelper.hostField, fieldHelper.titleField,
+                    fieldHelper.contentField, fieldHelper.contentLengthField,
+                    fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
+                    fieldHelper.filetypeField, fieldHelper.labelField,
+                    fieldHelper.segmentField };
+        }
+        if (supportedSortFields == null) {
+            supportedSortFields = new String[] { fieldHelper.createdField,
+                    fieldHelper.contentLengthField,
+                    fieldHelper.lastModifiedField, fieldHelper.clickCountField,
+                    fieldHelper.favoriteCountField };
+        }
+        if (supportedMltFields == null) {
+            supportedMltFields = new String[] { fieldHelper.contentField,
+                    "content_ja" };
+        }
+        if (supportedAnalysisFields == null) {
+            supportedAnalysisFields = new String[] { fieldHelper.contentField,
+                    "content_ja" };
+        }
+    }
 
     /*
      * (non-Javadoc)
@@ -261,7 +310,8 @@ public class QueryHelper implements Serializable {
                 queryBuf.append(_OR_);
 
             }
-            queryBuf.append("role:");
+            queryBuf.append(fieldHelper.roleField);
+            queryBuf.append(':');
             queryBuf.append(QueryUtil.escapeValue(role));
         }
         return queryBuf.toString();
@@ -368,7 +418,7 @@ public class QueryHelper implements Serializable {
                     boolean isInUrl = false;
                     final String targetWord = value.substring(prefix.length());
                     if (INURL_FIELD.equals(field)) {
-                        prefix = "url:";
+                        prefix = fieldHelper.urlField + ":";
                         isInUrl = true;
                     }
                     String fieldLogWord;
@@ -449,8 +499,8 @@ public class QueryHelper implements Serializable {
                     highLightQueryList.add(value);
 
                     if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, CONTENT_FIELD, NOT_
-                                + value);
+                        addFieldLogValue(fieldLogMap, fieldHelper.contentField,
+                                NOT_ + value);
                     }
                 } else {
                     // content
@@ -464,7 +514,8 @@ public class QueryHelper implements Serializable {
                     highLightQueryList.add(value);
 
                     if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, CONTENT_FIELD, value);
+                        addFieldLogValue(fieldLogMap, fieldHelper.contentField,
+                                value);
                     }
 
                     if (keyMatchHelper != null) {
@@ -929,10 +980,10 @@ public class QueryHelper implements Serializable {
     protected void buildContentQueryWithLang(final StringBuilder buf,
             final String value, final String queryLanguage) {
         buf.append('(');
-        buf.append(TITLE_FIELD).append(':');
+        buf.append(fieldHelper.titleField).append(':');
         appendQueryValue(buf, value, useBigram);
         buf.append(_OR_);
-        buf.append(CONTENT_FIELD).append(':');
+        buf.append(fieldHelper.contentField).append(':');
         appendQueryValue(buf, value, useBigram);
         if (StringUtil.isNotBlank(queryLanguage)) {
             buf.append(_OR_);

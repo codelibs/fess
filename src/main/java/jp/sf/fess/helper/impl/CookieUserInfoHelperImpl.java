@@ -27,8 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import jp.sf.fess.Constants;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.SearchLogHelper;
 import jp.sf.fess.helper.UserInfoHelper;
+import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.robot.util.LruHashMap;
@@ -120,11 +122,13 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
             final List<Map<String, Object>> documentItems) {
         final HttpSession session = RequestUtil.getRequest().getSession(false);
         if (session != null) {
+            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+
             final String queryId = getId();
 
             final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentItems) {
-                final Object docId = map.get(Constants.DOC_ID);
+                final Object docId = map.get(fieldHelper.docIdField);
                 if (docId != null && docId.toString().length() > 0) {
                     docIdList.add(docId.toString());
                 }

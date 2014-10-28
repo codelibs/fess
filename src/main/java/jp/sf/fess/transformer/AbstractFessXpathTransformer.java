@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import jp.sf.fess.helper.FieldHelper;
+import jp.sf.fess.util.ComponentUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.robot.transformer.impl.XpathTransformer;
@@ -118,7 +121,8 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
     protected void putResultDataBody(final Map<String, Object> dataMap,
             final String key, final Object value) {
-        if ("url".equals(key)) {
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        if (fieldHelper.urlField.equals(key)) {
             dataMap.put(key, value);
         } else if (dataMap.containsKey(key)) {
             if (appendResultData) {

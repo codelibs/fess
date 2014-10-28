@@ -35,11 +35,11 @@ import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.db.exentity.CrawlingConfig.ConfigName;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.PathMappingHelper;
 import jp.sf.fess.helper.SambaHelper;
-import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.taglib.FessFunctions;
 import jp.sf.fess.util.ComponentUtil;
 
@@ -182,7 +182,7 @@ public abstract class AbstractFessFileTransformer extends
                 .getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
@@ -202,15 +202,15 @@ public abstract class AbstractFessFileTransformer extends
         // cid
         final String configId = crawlingConfig.getConfigId();
         if (configId != null) {
-            putResultDataBody(dataMap, systemHelper.configIdField, configId);
+            putResultDataBody(dataMap, fieldHelper.configIdField, configId);
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, systemHelper.expiresField,
+            putResultDataBody(dataMap, fieldHelper.expiresField,
                     FessFunctions.formatDate(documentExpires));
         }
         // segment
-        putResultDataBody(dataMap, "segment", sessionId);
+        putResultDataBody(dataMap, fieldHelper.segmentField, sessionId);
         // content
         final StringBuilder buf = new StringBuilder(content.length() + 1000);
         if (appendBodyContentToContent) {
@@ -224,70 +224,78 @@ public abstract class AbstractFessFileTransformer extends
         }
         final String body = normalizeContent(buf.toString());
         if (StringUtil.isNotBlank(body)) {
-            putResultDataBody(dataMap, "content", body);
+            putResultDataBody(dataMap, fieldHelper.contentField, body);
         } else {
-            putResultDataBody(dataMap, "content", StringUtil.EMPTY);
+            putResultDataBody(dataMap, fieldHelper.contentField,
+                    StringUtil.EMPTY);
         }
-        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get("cache"))
-                || enableCache) {
+        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap
+                .get(fieldHelper.cacheField)) || enableCache) {
             final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+",
                     " ");
             // text cache
-            putResultDataBody(dataMap, "cache", cache);
-            putResultDataBody(dataMap, systemHelper.hasCacheField,
+            putResultDataBody(dataMap, fieldHelper.cacheField, cache);
+            putResultDataBody(dataMap, fieldHelper.hasCacheField,
                     Constants.TRUE);
         }
         // digest
-        putResultDataBody(dataMap, "digest", Constants.DIGEST_PREFIX
-                + abbreviate(normalizeContent(content), maxDigestLength));
+        putResultDataBody(
+                dataMap,
+                fieldHelper.digestField,
+                Constants.DIGEST_PREFIX
+                        + abbreviate(normalizeContent(content), maxDigestLength));
         // title
-        if (!dataMap.containsKey("title")) {
+        if (!dataMap.containsKey(fieldHelper.titleField)) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
-                    putResultDataBody(dataMap, "title",
+                    putResultDataBody(dataMap, fieldHelper.titleField,
                             abbreviate(body, maxTitleLength));
                 } else {
-                    putResultDataBody(dataMap, "title", noTitleLabel);
+                    putResultDataBody(dataMap, fieldHelper.titleField,
+                            noTitleLabel);
                 }
             } else {
                 final String u = decodeUrlAsName(url, url.startsWith("file:"));
                 final int pos = u.lastIndexOf('/');
                 if (pos == -1) {
-                    putResultDataBody(dataMap, "title", u);
+                    putResultDataBody(dataMap, fieldHelper.titleField, u);
                 } else {
-                    putResultDataBody(dataMap, "title", u.substring(pos + 1));
+                    putResultDataBody(dataMap, fieldHelper.titleField,
+                            u.substring(pos + 1));
                 }
             }
         }
         // host
-        putResultDataBody(dataMap, "host", getHost(url));
+        putResultDataBody(dataMap, fieldHelper.hostField, getHost(url));
         // site
-        putResultDataBody(dataMap, "site", getSite(url, urlEncoding));
+        putResultDataBody(dataMap, fieldHelper.siteField,
+                getSite(url, urlEncoding));
         // url
-        putResultDataBody(dataMap, "url", url);
+        putResultDataBody(dataMap, fieldHelper.urlField, url);
         // created
-        putResultDataBody(dataMap, "created", "NOW");
+        putResultDataBody(dataMap, fieldHelper.createdField, Constants.NOW);
         // TODO anchor
-        putResultDataBody(dataMap, "anchor", StringUtil.EMPTY);
+        putResultDataBody(dataMap, fieldHelper.anchorField, StringUtil.EMPTY);
         // mimetype
-        putResultDataBody(dataMap, "mimetype", mimeType);
+        putResultDataBody(dataMap, fieldHelper.mimetypeField, mimeType);
         if (fileTypeHelper != null) {
             // filetype
-            putResultDataBody(dataMap, fileTypeHelper.getFieldName(),
+            putResultDataBody(dataMap, fieldHelper.filetypeField,
                     fileTypeHelper.get(mimeType));
         }
         // contentLength
-        putResultDataBody(dataMap, "contentLength",
+        putResultDataBody(dataMap, fieldHelper.contentLengthField,
                 Long.toString(responseData.getContentLength()));
         //  lastModified
         if (responseData.getLastModified() != null) {
-            putResultDataBody(dataMap, "lastModified",
+            putResultDataBody(dataMap, fieldHelper.lastModifiedField,
                     FessFunctions.formatDate(responseData.getLastModified()));
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
-        putResultDataBody(dataMap, "boost", crawlingConfig.getDocumentBoost());
+        putResultDataBody(dataMap, fieldHelper.boostField,
+                crawlingConfig.getDocumentBoost());
         // label: labelType
         final Set<String> labelTypeSet = new HashSet<String>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
@@ -296,7 +304,7 @@ public abstract class AbstractFessFileTransformer extends
         final LabelTypeHelper labelTypeHelper = ComponentUtil
                 .getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
-        putResultDataBody(dataMap, "label", labelTypeSet);
+        putResultDataBody(dataMap, fieldHelper.labelField, labelTypeSet);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
         for (final String roleType : crawlingConfig.getRoleTypeValues()) {
@@ -316,20 +324,20 @@ public abstract class AbstractFessFileTransformer extends
                 }
             }
         }
-        putResultDataBody(dataMap, "role", roleTypeList);
+        putResultDataBody(dataMap, fieldHelper.roleField, roleTypeList);
         // TODO date
         // TODO lang
         // id
-        putResultDataBody(dataMap, "id",
+        putResultDataBody(dataMap, fieldHelper.idField,
                 crawlingSessionHelper.generateId(dataMap));
         // parentId
         String parentUrl = responseData.getParentUrl();
         if (StringUtil.isNotBlank(parentUrl)) {
             parentUrl = pathMappingHelper.replaceUrl(sessionId, parentUrl);
-            putResultDataBody(dataMap, "url", parentUrl);
-            putResultDataBody(dataMap, "parentId",
+            putResultDataBody(dataMap, fieldHelper.urlField, parentUrl);
+            putResultDataBody(dataMap, fieldHelper.parentIdField,
                     crawlingSessionHelper.generateId(dataMap));
-            putResultDataBody(dataMap, "url", url); // set again
+            putResultDataBody(dataMap, fieldHelper.urlField, url); // set again
         }
 
         // from config

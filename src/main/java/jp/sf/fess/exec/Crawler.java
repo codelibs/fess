@@ -39,10 +39,10 @@ import jp.sf.fess.db.allcommon.CDef;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.DataIndexHelper;
 import jp.sf.fess.helper.DatabaseHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.MailHelper;
 import jp.sf.fess.helper.OverlappingHostHelper;
 import jp.sf.fess.helper.PathMappingHelper;
-import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.helper.WebFsIndexHelper;
 import jp.sf.fess.screenshot.ScreenShotManager;
 import jp.sf.fess.service.CrawlingSessionService;
@@ -389,7 +389,7 @@ public class Crawler implements Serializable {
 
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
                 .getCrawlingSessionHelper();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         boolean completed = false;
         int exitCode = Constants.EXIT_OK;
@@ -471,7 +471,7 @@ public class Crawler implements Serializable {
 
             // clean up
             try {
-                updateSolrGroup.deleteByQuery(systemHelper.expiresField
+                updateSolrGroup.deleteByQuery(fieldHelper.expiresField
                         + ":[* TO " + FessFunctions.formatDate(new Date())
                         + "] NOT segment:" + options.sessionId);
             } catch (final Exception e) {

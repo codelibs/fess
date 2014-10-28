@@ -37,6 +37,7 @@ import jp.sf.fess.db.exentity.CrawlingConfig;
 import jp.sf.fess.db.exentity.CrawlingConfig.ConfigName;
 import jp.sf.fess.helper.CrawlingConfigHelper;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.FileTypeHelper;
 import jp.sf.fess.helper.LabelTypeHelper;
 import jp.sf.fess.helper.OverlappingHostHelper;
@@ -221,6 +222,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final CrawlingConfig crawlingConfig = crawlingConfigHelper
                 .get(responseData.getSessionId());
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
@@ -240,25 +242,25 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // cid
         final String configId = crawlingConfig.getConfigId();
         if (configId != null) {
-            putResultDataBody(dataMap, systemHelper.configIdField, configId);
+            putResultDataBody(dataMap, fieldHelper.configIdField, configId);
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, systemHelper.expiresField,
+            putResultDataBody(dataMap, fieldHelper.expiresField,
                     FessFunctions.formatDate(documentExpires));
         }
         // lang
         final String lang = systemHelper.normalizeLang(getSingleNodeValue(
                 document, langXpath, true));
         if (lang != null) {
-            putResultDataBody(dataMap, systemHelper.langField, lang);
+            putResultDataBody(dataMap, fieldHelper.langField, lang);
         }
         // title
         // content
-        putResultDataBody(dataMap, "content",
+        putResultDataBody(dataMap, fieldHelper.contentField,
                 getDocumentContent(responseData, document));
-        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get("cache"))
-                || enableCache) {
+        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap
+                .get(fieldHelper.cacheField)) || enableCache) {
             String charSet = responseData.getCharSet();
             if (charSet == null) {
                 charSet = Constants.UTF_8;
@@ -267,10 +269,10 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 // cache
                 putResultDataBody(
                         dataMap,
-                        "cache",
+                        fieldHelper.cacheField,
                         new String(InputStreamUtil.getBytes(responseData
                                 .getResponseBody()), charSet));
-                putResultDataBody(dataMap, systemHelper.hasCacheField,
+                putResultDataBody(dataMap, fieldHelper.hasCacheField,
                         Constants.TRUE);
             } catch (final Exception e) {
                 logger.warn("Failed to write a cache: " + sessionId + ":"
@@ -278,41 +280,43 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             }
         }
         // digest
-        putResultDataBody(dataMap, "digest",
+        putResultDataBody(dataMap, fieldHelper.digestField,
                 getDocumentDigest(responseData, document));
         // segment
-        putResultDataBody(dataMap, "segment", sessionId);
+        putResultDataBody(dataMap, fieldHelper.segmentField, sessionId);
         // host
-        putResultDataBody(dataMap, "host", getHost(url));
+        putResultDataBody(dataMap, fieldHelper.hostField, getHost(url));
         // site
-        putResultDataBody(dataMap, "site", getSite(url, urlEncoding));
+        putResultDataBody(dataMap, fieldHelper.siteField,
+                getSite(url, urlEncoding));
         // url
-        putResultDataBody(dataMap, "url", url);
+        putResultDataBody(dataMap, fieldHelper.urlField, url);
         // created
-        putResultDataBody(dataMap, "created", "NOW");
+        putResultDataBody(dataMap, fieldHelper.createdField, Constants.NOW);
         // anchor
-        putResultDataBody(dataMap, "anchor",
+        putResultDataBody(dataMap, fieldHelper.anchorField,
                 getAnchorList(document, responseData));
         // mimetype
         final String mimeType = responseData.getMimeType();
-        putResultDataBody(dataMap, "mimetype", mimeType);
+        putResultDataBody(dataMap, fieldHelper.mimetypeField, mimeType);
         if (fileTypeHelper != null) {
             // filetype
-            putResultDataBody(dataMap, fileTypeHelper.getFieldName(),
+            putResultDataBody(dataMap, fieldHelper.filetypeField,
                     fileTypeHelper.get(mimeType));
         }
         // contentLength
-        putResultDataBody(dataMap, "contentLength",
+        putResultDataBody(dataMap, fieldHelper.contentLengthField,
                 Long.toString(responseData.getContentLength()));
         //  lastModified
         if (responseData.getLastModified() != null) {
-            putResultDataBody(dataMap, "lastModified",
+            putResultDataBody(dataMap, fieldHelper.lastModifiedField,
                     FessFunctions.formatDate(responseData.getLastModified()));
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
-        putResultDataBody(dataMap, "boost", crawlingConfig.getDocumentBoost());
+        putResultDataBody(dataMap, fieldHelper.boostField,
+                crawlingConfig.getDocumentBoost());
         // label: labelType
         final Set<String> labelTypeSet = new HashSet<String>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
@@ -321,24 +325,24 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final LabelTypeHelper labelTypeHelper = ComponentUtil
                 .getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
-        putResultDataBody(dataMap, "label", labelTypeSet);
+        putResultDataBody(dataMap, fieldHelper.labelField, labelTypeSet);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
         for (final String roleType : crawlingConfig.getRoleTypeValues()) {
             roleTypeList.add(roleType);
         }
-        putResultDataBody(dataMap, "role", roleTypeList);
+        putResultDataBody(dataMap, fieldHelper.roleField, roleTypeList);
         // id
-        putResultDataBody(dataMap, "id",
+        putResultDataBody(dataMap, fieldHelper.idField,
                 crawlingSessionHelper.generateId(dataMap));
         // parentId
         String parentUrl = responseData.getParentUrl();
         if (StringUtil.isNotBlank(parentUrl)) {
             parentUrl = pathMappingHelper.replaceUrl(sessionId, parentUrl);
-            putResultDataBody(dataMap, "url", parentUrl);
-            putResultDataBody(dataMap, "parentId",
+            putResultDataBody(dataMap, fieldHelper.urlField, parentUrl);
+            putResultDataBody(dataMap, fieldHelper.parentIdField,
                     crawlingSessionHelper.generateId(dataMap));
-            putResultDataBody(dataMap, "url", url); // set again
+            putResultDataBody(dataMap, fieldHelper.urlField, url); // set again
         }
 
         // from config

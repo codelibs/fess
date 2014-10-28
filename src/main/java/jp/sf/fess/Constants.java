@@ -318,8 +318,6 @@ public class Constants extends CoreLibConstants {
 
     public static final int EXIT_FAIL = 1;
 
-    public static final String DOC_ID = "docId";
-
     public static final String DCF = "dcf";
 
     public static final String ALL_LANGUAGES = "all";
@@ -327,5 +325,7 @@ public class Constants extends CoreLibConstants {
     public static final String DEFAULT_OPERATOR = "defaultOperator";
 
     public static final String INVALID_NUMERIC_PARAMETER = "-1";
+
+    public static final String NOW = "NOW";
 
 }

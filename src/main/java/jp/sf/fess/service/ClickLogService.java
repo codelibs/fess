@@ -103,7 +103,7 @@ public class ClickLogService implements Serializable {
         try {
             final List<String> list = new ArrayList<String>();
             list.add("SearchId");
-            list.add("Url");
+            list.add("URL");
             list.add("RequestedTime");
             list.add("QueryRequestedTime");
             list.add("UserSessionId");

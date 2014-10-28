@@ -31,6 +31,7 @@ import jp.sf.fess.db.exbhv.ClickLogBhv;
 import jp.sf.fess.db.exbhv.FavoriteLogBhv;
 import jp.sf.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
 import jp.sf.fess.db.exentity.customize.FavoriteUrlCount;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.IndexingHelper;
 import jp.sf.fess.helper.IntervalControlHelper;
 import jp.sf.fess.helper.SystemHelper;
@@ -89,6 +90,9 @@ public class IndexUpdater extends Thread {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    protected FieldHelper fieldHelper;
 
     @Resource
     protected IndexingHelper indexingHelper;
@@ -430,7 +434,7 @@ public class IndexUpdater extends Thread {
         float documentBoost = 0.0f;
         // add data
         for (final Map.Entry<String, Object> entry : map.entrySet()) {
-            if ("boost".equals(entry.getKey())) {
+            if (fieldHelper.boostField.equals(entry.getKey())) {
                 // boost
                 documentBoost = Float.valueOf(entry.getValue().toString());
             } else {
@@ -466,8 +470,9 @@ public class IndexUpdater extends Thread {
             addBoostValue(map, documentBoost, doc);
         }
 
-        if (!map.containsKey(Constants.DOC_ID)) {
-            doc.addField(Constants.DOC_ID, systemHelper.generateDocId(map));
+        if (!map.containsKey(fieldHelper.docIdField)) {
+            doc.addField(fieldHelper.docIdField,
+                    systemHelper.generateDocId(map));
         }
 
         return doc;
@@ -475,7 +480,7 @@ public class IndexUpdater extends Thread {
 
     protected void addBoostValue(final Map<String, Object> map,
             final float documentBoost, final SolrInputDocument doc) {
-        doc.addField("boost", documentBoost);
+        doc.addField(fieldHelper.boostField, documentBoost);
         doc.setDocumentBoost(documentBoost);
         if (logger.isDebugEnabled()) {
             logger.debug("Set a document boost (" + documentBoost + ").");
@@ -484,13 +489,13 @@ public class IndexUpdater extends Thread {
 
     protected void addClickCountField(final Map<String, Object> map,
             final SolrInputDocument doc) {
-        final String url = (String) map.get("url");
+        final String url = (String) map.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
             final ClickLogCB cb = new ClickLogCB();
             cb.query().setUrl_Equal(url);
             final int count = clickLogBhv.selectCount(cb);
-            doc.addField(systemHelper.clickCountField, count);
-            map.put(systemHelper.clickCountField, count);
+            doc.addField(fieldHelper.clickCountField, count);
+            map.put(fieldHelper.clickCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Click Count: " + count + ", url: " + url);
             }
@@ -499,7 +504,7 @@ public class IndexUpdater extends Thread {
 
     protected void addFavoriteCountField(final Map<String, Object> map,
             final SolrInputDocument doc) {
-        final String url = (String) map.get("url");
+        final String url = (String) map.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
             final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
             pmb.setUrl(url);
@@ -512,8 +517,8 @@ public class IndexUpdater extends Thread {
                 count = list.get(0).getCnt().longValue();
             }
 
-            doc.addField(systemHelper.favoriteCountField, count);
-            map.put(systemHelper.favoriteCountField, count);
+            doc.addField(fieldHelper.favoriteCountField, count);
+            map.put(fieldHelper.favoriteCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Favorite Count: " + count + ", url: " + url);
             }

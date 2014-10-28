@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.ViewHelper;
 
@@ -43,8 +44,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
     private static final String MORE_LIKE_THIS = "moreLikeThis";
 
     private static final String DOC_VALUES = "docValues";
-
-    private static final String ID_FIELD = "id";
 
     private static final Logger logger = LoggerFactory
             .getLogger(QueryResponseList.class);
@@ -115,13 +114,14 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
             // build highlighting fields
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             final String hlPrefix = queryHelper.getHighlightingPrefix();
             for (final SolrDocument solrDocMap : sdList) {
                 final Map<String, Object> docMap = new HashMap<String, Object>();
                 docMap.putAll(solrDocMap);
 
                 try {
-                    final Object idValue = docMap.get(ID_FIELD);
+                    final Object idValue = docMap.get(fieldHelper.idField);
                     if (queryResponse.getHighlighting().get(idValue) != null) {
                         for (final String hf : queryHelper
                                 .getHighlightingFields()) {

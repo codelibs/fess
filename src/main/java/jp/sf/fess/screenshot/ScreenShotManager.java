@@ -30,7 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import jp.sf.fess.Constants;
 import jp.sf.fess.FessSystemException;
-import jp.sf.fess.helper.SystemHelper;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.util.ComponentUtil;
 
 import org.codelibs.core.util.StringUtil;
@@ -115,9 +115,10 @@ public class ScreenShotManager {
     }
 
     public void generate(final Map<String, Object> docMap) {
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final ScreenShotGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
-                final String url = (String) docMap.get("url");
+                final String url = (String) docMap.get(fieldHelper.urlField);
                 final String path = getImageFilename(docMap);
                 if (!screenShotTaskQueue.offer(new ScreenShotTask(url,
                         new File(baseDir, path), generator))) {
@@ -131,8 +132,8 @@ public class ScreenShotManager {
 
     protected String getImageFilename(final Map<String, Object> docMap) {
         final StringBuilder buf = new StringBuilder(50);
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final String docid = (String) docMap.get(systemHelper.docIdField);
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final String docid = (String) docMap.get(fieldHelper.docIdField);
         for (int i = 0; i < docid.length(); i++) {
             if (i > 0 && i % splitSize == 0) {
                 buf.append('/');
@@ -145,11 +146,11 @@ public class ScreenShotManager {
 
     public void storeRequest(final String queryId,
             final List<Map<String, Object>> documentItems) {
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final Map<String, String> dataMap = new HashMap<String, String>(
                 documentItems.size());
         for (final Map<String, Object> docMap : documentItems) {
-            final String docid = (String) docMap.get(systemHelper.docIdField);
+            final String docid = (String) docMap.get(fieldHelper.docIdField);
             final String screenShotPath = getImageFilename(docMap);
             if (StringUtil.isNotBlank(docid)
                     && StringUtil.isNotBlank(screenShotPath)) {

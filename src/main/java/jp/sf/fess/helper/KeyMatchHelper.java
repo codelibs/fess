@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jp.sf.fess.Constants;
 import jp.sf.fess.db.exentity.KeyMatch;
 import jp.sf.fess.service.KeyMatchService;
 import jp.sf.fess.service.SearchService;
@@ -55,6 +54,7 @@ public class KeyMatchHelper {
     }
 
     protected void reload(final long interval) {
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final KeyMatchService keyMatchService = SingletonS2Container
                 .getComponent(KeyMatchService.class);
         final List<KeyMatch> list = keyMatchService.getAvailableKeyMatchList();
@@ -64,9 +64,9 @@ public class KeyMatchHelper {
             final List<Map<String, Object>> documentList = getDocumentList(keyMatch);
             final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentList) {
-                final String docId = (String) map.get(Constants.DOC_ID);
+                final String docId = (String) map.get(fieldHelper.docIdField);
                 if (StringUtil.isNotBlank(docId)) {
-                    docIdList.add(Constants.DOC_ID + ":" + docId + "^"
+                    docIdList.add(fieldHelper.docIdField + ":" + docId + "^"
                             + keyMatch.getBoost());
                 }
             }
@@ -88,10 +88,11 @@ public class KeyMatchHelper {
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final SearchService searchService = ComponentUtil.getSearchService();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final List<Map<String, Object>> documentList = searchService
                 .getDocumentList(keyMatch.getQuery(), 0, keyMatch.getMaxSize(),
-                        null, null, null, new String[] { Constants.DOC_ID },
-                        null, false);
+                        null, null, null,
+                        new String[] { fieldHelper.docIdField }, null, false);
         return documentList;
     }
 

@@ -29,7 +29,7 @@ import org.codelibs.solr.lib.policy.QueryType;
 public class DocumentHelper {
 
     @Resource
-    protected SystemHelper systemHelper;
+    protected FieldHelper fieldHelper;
 
     @Resource
     protected SolrGroupManager solrGroupManager;
@@ -45,15 +45,15 @@ public class DocumentHelper {
         }
 
         final SolrInputDocument doc = new SolrInputDocument();
-        doc.setField(systemHelper.idField, "none");
-        doc.setField(systemHelper.urlField, "none");
-        doc.setField(systemHelper.docIdField, docId);
+        doc.setField(fieldHelper.idField, "none");
+        doc.setField(fieldHelper.urlField, "none");
+        doc.setField(fieldHelper.docIdField, docId);
         doc.setField(fieldName, num);
 
         final UpdateRequest req = new UpdateRequest();
         req.add(doc);
         req.setParam("excmd", "update");
-        req.setParam("term", systemHelper.docIdField);
+        req.setParam("term", fieldHelper.docIdField);
         solrGroup.request(req);
         solrGroup.commit(false, false, true);
     }

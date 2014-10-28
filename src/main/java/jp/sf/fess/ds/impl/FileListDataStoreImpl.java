@@ -28,6 +28,8 @@ import jp.sf.fess.ds.DataStoreCrawlingException;
 import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
+import jp.sf.fess.helper.FieldHelper;
+import jp.sf.fess.util.ComponentUtil;
 import jp.sf.orangesignal.csv.CsvConfig;
 
 import org.codelibs.robot.RobotSystemException;
@@ -66,8 +68,6 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
     public String deleteEventName = "delete";
 
     public String eventTypeField = "event_type";
-
-    public String urlField = "url";
 
     public int maxDeleteDocumentCacheSize = 100;
 
@@ -179,15 +179,16 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         protected boolean addDocument(final Map<String, Object> dataMap) {
+            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             synchronized (indexUpdateCallback) {
                 //   required check
-                if (!dataMap.containsKey(urlField)
-                        || dataMap.get(urlField) == null) {
+                if (!dataMap.containsKey(fieldHelper.urlField)
+                        || dataMap.get(fieldHelper.urlField) == null) {
                     logger.warn("Could not add a doc. Invalid data: " + dataMap);
                     return false;
                 }
 
-                final String url = dataMap.get(urlField).toString();
+                final String url = dataMap.get(fieldHelper.urlField).toString();
                 try {
                     final S2RobotClient client = robotClientFactory
                             .getClient(url);
@@ -259,8 +260,11 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 logger.debug("Deleting " + dataMap);
             }
 
+            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+
             //   required check
-            if (!dataMap.containsKey(urlField) || dataMap.get(urlField) == null) {
+            if (!dataMap.containsKey(fieldHelper.urlField)
+                    || dataMap.get(fieldHelper.urlField) == null) {
                 logger.warn("Could not delete a doc. Invalid data: " + dataMap);
                 return false;
             }

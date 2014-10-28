@@ -62,39 +62,39 @@ public class IndexingHelper {
 
     private void deleteOldDocuments(final SolrGroup solrGroup,
             final List<SolrInputDocument> docList) {
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         final List<String> ids = new ArrayList<String>();
         final StringBuilder q = new StringBuilder(1000);
         final StringBuilder fq = new StringBuilder(100);
         for (final SolrInputDocument inputDoc : docList) {
-            final Object idValue = inputDoc.getFieldValue(systemHelper.idField);
+            final Object idValue = inputDoc.getFieldValue(fieldHelper.idField);
             if (idValue == null) {
                 continue;
             }
 
             final Object configIdValue = inputDoc
-                    .getFieldValue(systemHelper.configIdField);
+                    .getFieldValue(fieldHelper.configIdField);
             if (configIdValue == null) {
                 continue;
             }
 
             q.setLength(0);
-            q.append(systemHelper.urlField).append(":\"");
+            q.append(fieldHelper.urlField).append(":\"");
             q.append(ClientUtils.escapeQueryChars((String) inputDoc
-                    .getFieldValue(systemHelper.urlField)));
+                    .getFieldValue(fieldHelper.urlField)));
             q.append('"');
 
             fq.setLength(0);
-            fq.append(systemHelper.configIdField).append(':');
+            fq.append(fieldHelper.configIdField).append(':');
             fq.append(configIdValue.toString());
 
             final SolrDocumentList docs = getSolrDocumentList(solrGroup,
                     fq.toString(), q.toString(),
-                    new String[] { systemHelper.idField });
+                    new String[] { fieldHelper.idField });
             for (final SolrDocument doc : docs) {
                 final Object oldIdValue = doc
-                        .getFieldValue(systemHelper.idField);
+                        .getFieldValue(fieldHelper.idField);
                 if (!idValue.equals(oldIdValue) && oldIdValue != null) {
                     ids.add(oldIdValue.toString());
                 }
@@ -136,7 +136,8 @@ public class IndexingHelper {
     }
 
     public void deleteDocument(final SolrGroup solrGroup, final String id) {
-        final String query = "{!raw f=id}" + id;
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final String query = "{!raw f=" + fieldHelper.idField + "}" + id;
         for (int i = 0; i < maxRetryCount; i++) {
             boolean done = true;
             try {
@@ -168,9 +169,11 @@ public class IndexingHelper {
 
     public SolrDocument getSolrDocument(final SolrGroup solrGroup,
             final String id, final String[] fields) {
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+
         final SolrQuery solrQuery = new SolrQuery();
         final StringBuilder queryBuf = new StringBuilder(200);
-        queryBuf.append("{!raw f=id}");
+        queryBuf.append("{!raw f=").append(fieldHelper.idField).append("}");
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
         if (fields != null) {
@@ -183,9 +186,8 @@ public class IndexingHelper {
         }
         if (docList.size() > 1) {
             logger.error("Invalid multiple docs for " + id);
-            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             for (final SolrDocument doc : docList) {
-                final Object idValue = doc.getFieldValue(systemHelper.idField);
+                final Object idValue = doc.getFieldValue(fieldHelper.idField);
                 if (idValue != null) {
                     deleteDocument(solrGroup, idValue.toString());
                 }
@@ -197,9 +199,10 @@ public class IndexingHelper {
 
     public SolrDocumentList getSolrDocumentListByPrefixId(
             final SolrGroup solrGroup, final String id, final String[] fields) {
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SolrQuery solrQuery = new SolrQuery();
         final StringBuilder queryBuf = new StringBuilder(200);
-        queryBuf.append("{!prefix f=id}");
+        queryBuf.append("{!prefix f=").append(fieldHelper.idField).append("}");
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
         if (fields != null) {
@@ -218,7 +221,9 @@ public class IndexingHelper {
 
     public void deleteChildSolrDocument(final SolrGroup solrGroup,
             final String id) {
-        final String query = "{!raw f=parentId v=\"" + id + "\"}";
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final String query = "{!raw f=" + fieldHelper.parentIdField + " v=\""
+                + id + "\"}";
         for (final UpdateResponse response : solrGroup.deleteByQuery(query)) {
             if (response.getStatus() != 200) {
                 if (logger.isDebugEnabled()) {
@@ -236,8 +241,10 @@ public class IndexingHelper {
     protected SolrDocumentList getChildSolrDocumentList(
             final SolrGroup solrGroup, final String id, final String[] fields,
             final int row) {
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setQuery("{!raw f=parentId v=\"" + id + "\"}");
+        solrQuery.setQuery("{!raw f=" + fieldHelper.parentIdField + " v=\""
+                + id + "\"}");
         if (fields != null) {
             solrQuery.setFields(fields);
         }

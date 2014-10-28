@@ -34,6 +34,7 @@ import jp.sf.fess.entity.MoreLikeThisInfo;
 import jp.sf.fess.entity.PingResponse;
 import jp.sf.fess.entity.SearchQuery;
 import jp.sf.fess.entity.SearchQuery.SortField;
+import jp.sf.fess.helper.FieldHelper;
 import jp.sf.fess.helper.QueryHelper;
 import jp.sf.fess.helper.RoleQueryHelper;
 import jp.sf.fess.solr.FessSolrQueryException;
@@ -89,13 +90,13 @@ public class SearchService implements Serializable {
         if (docIds == null || docIds.length == 0) {
             return Collections.emptyList();
         }
-
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final StringBuilder buf = new StringBuilder(1000);
         for (int i = 0; i < docIds.length; i++) {
             if (i != 0) {
                 buf.append(" OR ");
             }
-            buf.append("docId:").append(docIds[i]);
+            buf.append(fieldHelper.docIdField + ":").append(docIds[i]);
         }
         return getDocumentList(buf.toString(), 0, pageSize, null, null, null,
                 responseFields, docValuesFields);
