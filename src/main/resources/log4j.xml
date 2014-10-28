@@ -4,14 +4,14 @@
   <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
     <param name="Target" value="System.out"/>
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+      <param name="ConversionPattern" value="%d [%t] %-5p %m%n"/>
     </layout>
   </appender>
   <appender name="file" class="org.apache.log4j.FileAppender">
     <param name="File" value="${fess.log.file}"/>
     <param name="Append" value="false"/>
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+      <param name="ConversionPattern" value="%d [%t] %-5p %m%n"/>
     </layout>
   </appender>
   <appender name="rollingFile" class="org.apache.log4j.RollingFileAppender">
@@ -20,7 +20,7 @@
     <param name="MaxFileSize" value="10MB"/>
     <param name="MaxBackupIndex" value="20"/>
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n"/>
+      <param name="ConversionPattern" value="%d [%t] %-5p %m%n"/>
     </layout>
   </appender>
 <!--
