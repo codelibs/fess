@@ -224,24 +224,18 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         final HttpServletResponse response = ResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
-                + "suggestbadword.csv" + "\"");
+                + "badword.csv" + "\"");
 
-        Writer writer = null;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(
-                    response.getOutputStream(), crawlerProperties.getProperty(
-                            Constants.CSV_FILE_ENCODING_PROPERTY,
-                            Constants.UTF_8)));
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                response.getOutputStream(), crawlerProperties.getProperty(
+                        Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)))) {
             suggestBadWordService.exportCsv(writer);
-            writer.flush();
-            return null;
         } catch (final Exception e) {
             log.error("Failed to export data.", e);
             throw new SSCActionMessagesException(e,
                     "errors.failed_to_export_data");
-        } finally {
-            IOUtils.closeQuietly(writer);
         }
+        return null;
     }
 
     @Token(save = true, validate = false)

@@ -143,8 +143,6 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
         cfg.setQuoteDisabled(false);
         @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
-        final SuggestElevateWordCB cb = new SuggestElevateWordCB();
-        cb.query().setDeletedBy_IsNull();
         try {
             final List<String> list = new ArrayList<String>();
             list.add("SuggestWord");
@@ -153,6 +151,9 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
             list.add("Label");
             list.add("Boost");
             csvWriter.writeValues(list);
+
+            final SuggestElevateWordCB cb = new SuggestElevateWordCB();
+            cb.query().setDeletedBy_IsNull();
             suggestElevateWordBhv.selectCursor(cb,
                     new EntityRowHandler<SuggestElevateWord>() {
                         @Override
@@ -181,6 +182,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
                             }
                         }
                     });
+
             csvWriter.flush();
         } catch (final IOException e) {
             log.warn("Failed to write a sugget elevate word.", e);

@@ -133,14 +133,15 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
         cfg.setQuoteDisabled(false);
         @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
-        final SuggestBadWordCB cb = new SuggestBadWordCB();
-        cb.query().setDeletedBy_IsNull();
         try {
-            final List<String> list = new ArrayList<String>();
+            final List<String> list = new ArrayList<>();
             list.add("SuggestWord");
             list.add("Role");
             list.add("Label");
             csvWriter.writeValues(list);
+
+            final SuggestBadWordCB cb = new SuggestBadWordCB();
+            cb.query().setDeletedBy_IsNull();
             suggestBadWordBhv.selectCursor(cb,
                     new EntityRowHandler<SuggestBadWord>() {
                         @Override
@@ -166,6 +167,7 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
                             }
                         }
                     });
+
             csvWriter.flush();
         } catch (final IOException e) {
             log.warn("Failed to write a sugget bad word.", e);
