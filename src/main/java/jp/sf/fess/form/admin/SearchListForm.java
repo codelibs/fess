@@ -39,5 +39,9 @@ public class SearchListForm implements Serializable {
     public String num;
 
     @Required(target = "confirmDelete,delete")
-    public String id;
+    public String docId;
+
+    @Required(target = "confirmDelete")
+    public String url;
+
 }

@@ -32,8 +32,8 @@
 						<tr>
 							<th style="width: 100px;"><bean:message
 									key="labels.search_list_id" /></th>
-							<td style="width: 400px;">${f:h(id)}<html:hidden
-									property="id" /></td>
+							<td style="width: 400px;">${f:h(url)}<html:hidden
+									property="docId" /></td>
 						</tr>
 					</tbody>
 					<tfoot>

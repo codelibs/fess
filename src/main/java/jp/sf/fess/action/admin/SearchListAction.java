@@ -257,10 +257,10 @@ public class SearchListAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String delete() {
-        return deleteByQuery(searchListForm.id);
+        return deleteByQuery(searchListForm.docId);
     }
 
-    private String deleteByQuery(final String deleteId) {
+    private String deleteByQuery(final String docId) {
         if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException(
                     "errors.failed_to_start_solr_process_because_of_running");
@@ -277,7 +277,8 @@ public class SearchListAction implements Serializable {
                     if (!jobHelper.isCrawlProcessRunning()) {
                         final long time = System.currentTimeMillis();
                         try {
-                            solrGroup.deleteById(deleteId);
+                            solrGroup.deleteByQuery(fieldHelper.docIdField
+                                    + ":" + docId);
                             solrGroup.optimize();
                             if (logger.isInfoEnabled()) {
                                 logger.info("[EXEC TIME] index cleanup time: "
@@ -286,7 +287,8 @@ public class SearchListAction implements Serializable {
                             }
                         } catch (final Exception e) {
                             logger.error("Failed to delete index (query="
-                                    + deleteId + ").", e);
+                                    + fieldHelper.docIdField + ":" + docId
+                                    + ").", e);
                         }
                     } else {
                         if (logger.isInfoEnabled()) {

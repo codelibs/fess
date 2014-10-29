@@ -29,6 +29,7 @@ import jp.sf.fess.ds.DataStoreException;
 import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.helper.CrawlingSessionHelper;
 import jp.sf.fess.helper.FieldHelper;
+import jp.sf.fess.helper.IndexingHelper;
 import jp.sf.fess.util.ComponentUtil;
 import jp.sf.orangesignal.csv.CsvConfig;
 
@@ -273,7 +274,12 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 deleteIdList.add(crawlingSessionHelper.generateId(dataMap));
 
                 if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
-                    indexUpdateCallback.getSolrGroup().deleteById(deleteIdList);
+                    final IndexingHelper indexingHelper = ComponentUtil
+                            .getIndexingHelper();
+                    for (final String id : deleteIdList) {
+                        indexingHelper.deleteDocument(
+                                indexUpdateCallback.getSolrGroup(), id);
+                    }
                     if (logger.isDebugEnabled()) {
                         logger.debug("Deleted " + deleteIdList);
                     }
@@ -307,7 +313,12 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         @Override
         public void commit() {
             if (!deleteIdList.isEmpty()) {
-                indexUpdateCallback.getSolrGroup().deleteById(deleteIdList);
+                final IndexingHelper indexingHelper = ComponentUtil
+                        .getIndexingHelper();
+                for (final String id : deleteIdList) {
+                    indexingHelper.deleteDocument(
+                            indexUpdateCallback.getSolrGroup(), id);
+                }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Deleted " + deleteIdList);
                 }

@@ -65,7 +65,7 @@
 										<div style="text-align: right;">
 											<c:if test="${!solrProcessRunning}">
 												<html:link
-													href="confirmDelete?query=${f:u(query)}&id=${f:u(doc.id)}">
+													href="confirmDelete?query=${f:u(query)}&docId=${f:u(doc.docId)}&url=${f:u(doc.url)}">
 													<bean:message key="labels.search_list_delete_link" />
 												</html:link>
 											</c:if>
