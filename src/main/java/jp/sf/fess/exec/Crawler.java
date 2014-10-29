@@ -85,9 +85,9 @@ public class Crawler implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
 
-    private static final String WEB_CRAWLING_PROCESS = "Web Crawling Process";
+    private static final String WEB_FS_CRAWLING_PROCESS = "WebFsCrawler";
 
-    private static final String DATA_CRAWLING_PROCESS = "Data Crawling Process";
+    private static final String DATA_CRAWLING_PROCESS = "DataStoreCrawler";
 
     private static final String MAIL_TEMPLATE_NAME = "crawler";
 
@@ -446,7 +446,7 @@ public class Crawler implements Serializable {
                         writeTimeToSessionInfo(crawlingSessionHelper,
                                 Constants.WEB_FS_CRAWLER_END_TIME);
                     }
-                }, WEB_CRAWLING_PROCESS);
+                }, WEB_FS_CRAWLING_PROCESS);
                 webFsCrawlerThread.start();
             }
 
