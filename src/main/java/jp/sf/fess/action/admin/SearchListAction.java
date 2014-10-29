@@ -279,7 +279,7 @@ public class SearchListAction implements Serializable {
                         try {
                             solrGroup.deleteByQuery(fieldHelper.docIdField
                                     + ":" + docId);
-                            solrGroup.optimize();
+                            solrGroup.commit(true, true, false, true);
                             if (logger.isInfoEnabled()) {
                                 logger.info("[EXEC TIME] index cleanup time: "
                                         + (System.currentTimeMillis() - time)
