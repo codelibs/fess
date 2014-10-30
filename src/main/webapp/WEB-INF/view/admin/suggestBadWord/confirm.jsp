@@ -70,14 +70,6 @@
 									key="labels.suggest_bad_word_suggest_word" /></th>
 							<td>${f:h(suggestWord)}<html:hidden property="suggestWord" /></td>
 						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_bad_word_target_role" /></th>
-							<td>${f:h(targetRole)}<html:hidden property="targetRole" /></td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_bad_word_target_label" /></th>
-							<td>${f:h(targetLabel)}<html:hidden property="targetLabel" /></td>
-						</tr>
 					</tbody>
 					<tfoot>
 						<tr>
