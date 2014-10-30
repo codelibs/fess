@@ -34,5 +34,6 @@ public class SuggestElevateWordForm extends BsSuggestElevateWordForm implements
     @Override
     public void initialize() {
         super.initialize();
+        boost = "100";
     }
 }
