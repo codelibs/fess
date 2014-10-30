@@ -93,36 +93,50 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
             List<String> list;
             csvReader.readValues(); // ignore header
             while ((list = csvReader.readValues()) != null) {
+                final String suggestWord = getValue(list, 0);
+                if (StringUtil.isBlank(suggestWord)) {
+                    // skip
+                    continue;
+                }
                 try {
                     final SuggestElevateWordCB cb = new SuggestElevateWordCB();
-                    cb.query().setSuggestWord_Equal(strip(list.get(0)));
+                    final String role = getValue(list, 2);
+                    final String label = getValue(list, 3);
+                    cb.query().setSuggestWord_Equal(suggestWord);
+                    if (StringUtil.isNotBlank(role)) {
+                        cb.query().setTargetRole_Equal(role);
+                    }
+                    if (StringUtil.isNotBlank(label)) {
+                        cb.query().setTargetLabel_Equal(label);
+                    }
                     SuggestElevateWord suggestElevateWord = suggestElevateWordBhv
                             .selectEntity(cb);
+                    final String reading = getValue(list, 1);
+                    final String boost = getValue(list, 4);
                     if (suggestElevateWord == null) {
                         suggestElevateWord = new SuggestElevateWord();
-                        suggestElevateWord.setSuggestWord(strip(list.get(0)));
-                        suggestElevateWord.setReading(strip(list.get(1)));
-                        suggestElevateWord.setTargetRole(strip(list.get(2)));
-                        suggestElevateWord.setTargetLabel(strip(list.get(3)));
-                        suggestElevateWord.setBoost(new BigDecimal(strip(list
-                                .get(4))));
+                        suggestElevateWord.setSuggestWord(suggestWord);
+                        suggestElevateWord.setReading(reading);
+                        suggestElevateWord.setTargetRole(role);
+                        suggestElevateWord.setTargetLabel(label);
+                        suggestElevateWord
+                                .setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE
+                                        : new BigDecimal(boost));
                         suggestElevateWord.setCreatedBy("system");
                         suggestElevateWord.setCreatedTime(new Timestamp(System
                                 .currentTimeMillis()));
                         suggestElevateWordBhv.insert(suggestElevateWord);
-                    } else if (list.get(1).equals("\"\"")
-                            && list.get(2).equals("\"\"")
-                            && list.get(3).equals("\"\"")) {
+                    } else if (StringUtil.isBlank(reading)
+                            && StringUtil.isBlank(boost)) {
                         suggestElevateWord.setDeletedBy("system");
                         suggestElevateWord.setDeletedTime(new Timestamp(System
                                 .currentTimeMillis()));
                         suggestElevateWordBhv.update(suggestElevateWord);
                     } else {
-                        suggestElevateWord.setReading(strip(list.get(1)));
-                        suggestElevateWord.setTargetRole(strip(list.get(2)));
-                        suggestElevateWord.setTargetLabel(strip(list.get(3)));
-                        suggestElevateWord.setBoost(new BigDecimal(strip(list
-                                .get(4))));
+                        suggestElevateWord.setReading(reading);
+                        suggestElevateWord
+                                .setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE
+                                        : new BigDecimal(boost));
                         suggestElevateWord.setUpdatedBy("system");
                         suggestElevateWord.setUpdatedTime(new Timestamp(System
                                 .currentTimeMillis()));
@@ -189,7 +203,19 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
         }
     }
 
-    private static String strip(final String item) {
-        return item.substring(1, item.length() - 1);
+    static String getValue(final List<String> list, final int index) {
+        if (index < list.size()) {
+            return StringUtil.EMPTY;
+        }
+        String item = list.get(index).trim();
+        if (StringUtil.isBlank(item)) {
+            return StringUtil.EMPTY;
+        }
+        if (item.length() > 1 && item.charAt(0) == '"'
+                && item.charAt(item.length() - 1) == '"') {
+            item = item.substring(1, item.length() - 2);
+        }
+        return item;
     }
+
 }
