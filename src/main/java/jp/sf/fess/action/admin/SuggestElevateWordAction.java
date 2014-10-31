@@ -276,7 +276,7 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
         final File oFile = tempFile;
         try {
             final String head = new String(b, Constants.UTF_8);
-            if (!head.startsWith("\"SuggestWord\",")) {
+            if (!(head.startsWith("\"SuggestWord\"") || head.startsWith("SuggestWord"))) {
                 log.error("Unknown file: "
                         + suggestElevateWordForm.suggestElevateWordFile);
                 throw new SSCActionMessagesException(

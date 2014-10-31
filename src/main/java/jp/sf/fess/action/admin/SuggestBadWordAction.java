@@ -277,7 +277,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         final File oFile = tempFile;
         try {
             final String head = new String(b, Constants.UTF_8);
-            if (!head.startsWith("\"SuggestWord\",")) {
+            if (!(head.startsWith("\"BadWord\"") || head.startsWith("BadWord"))) {
                 log.error("Unknown file: "
                         + suggestBadWordForm.suggestBadWordFile);
                 throw new SSCActionMessagesException(
