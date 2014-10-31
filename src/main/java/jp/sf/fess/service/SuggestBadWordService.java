@@ -178,7 +178,7 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
     }
 
     private static String getValue(final List<String> list, final int index) {
-        if (index < list.size()) {
+        if (index >= list.size()) {
             return StringUtil.EMPTY;
         }
         String item = list.get(index).trim();
@@ -187,7 +187,7 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
         }
         if (item.length() > 1 && item.charAt(0) == '"'
                 && item.charAt(item.length() - 1) == '"') {
-            item = item.substring(1, item.length() - 2);
+            item = item.substring(1, item.length() - 1);
         }
         return item;
     }
