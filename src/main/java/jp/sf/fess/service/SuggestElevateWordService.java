@@ -204,6 +204,9 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
     }
 
     static String getValue(final List<String> list, final int index) {
+        if (index >= list.size()) {
+            return StringUtil.EMPTY;
+        }
         String item = list.get(index).trim();
         if (StringUtil.isBlank(item)) {
             return StringUtil.EMPTY;
