@@ -109,7 +109,7 @@
   <properties>
     <dbflute.version>1.0.5L</dbflute.version>
     <s2robot.version>0.8.0</s2robot.version>
-    <solr.version>4.10.1</solr.version>
+    <solr.version>4.10.2</solr.version>
     <slf4j.version>1.7.7</slf4j.version>
     <tika.version>1.6</tika.version>
     <poi.version>3.11-beta2</poi.version>
