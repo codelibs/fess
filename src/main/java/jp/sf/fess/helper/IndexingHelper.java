@@ -64,7 +64,7 @@ public class IndexingHelper {
             final List<SolrInputDocument> docList) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
-        final List<String> ids = new ArrayList<String>();
+        final List<String> docIdList = new ArrayList<String>();
         final StringBuilder q = new StringBuilder(1000);
         final StringBuilder fq = new StringBuilder(100);
         for (final SolrInputDocument inputDoc : docList) {
@@ -90,23 +90,25 @@ public class IndexingHelper {
             fq.append(configIdValue.toString());
 
             final SolrDocumentList docs = getSolrDocumentList(solrGroup,
-                    fq.toString(), q.toString(),
-                    new String[] { fieldHelper.idField });
+                    fq.toString(), q.toString(), new String[] {
+                            fieldHelper.idField, fieldHelper.docIdField });
             for (final SolrDocument doc : docs) {
                 final Object oldIdValue = doc
                         .getFieldValue(fieldHelper.idField);
                 if (!idValue.equals(oldIdValue) && oldIdValue != null) {
-                    ids.add(oldIdValue.toString());
+                    final Object oldDocIdValue = doc
+                            .getFieldValue(fieldHelper.docIdField);
+                    if (oldDocIdValue != null) {
+                        docIdList.add(oldDocIdValue.toString());
+                    }
                 }
             }
             if (logger.isDebugEnabled()) {
                 logger.debug(q + " in " + fq + " => " + docs);
             }
         }
-        if (!ids.isEmpty()) {
-            for (final String id : ids) {
-                deleteDocument(solrGroup, id);
-            }
+        if (!docIdList.isEmpty()) {
+            deleteDocumentsByDocId(solrGroup, docIdList);
         }
     }
 
@@ -136,6 +138,7 @@ public class IndexingHelper {
     }
 
     public void deleteDocument(final SolrGroup solrGroup, final String id) {
+        final long start = System.currentTimeMillis();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final String query = "{!raw f=" + fieldHelper.idField + "}" + id;
         for (int i = 0; i < maxRetryCount; i++) {
@@ -143,10 +146,8 @@ public class IndexingHelper {
             try {
                 for (final UpdateResponse response : solrGroup
                         .deleteByQuery(query)) {
-                    if (response.getStatus() != 200) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Failed to delete: " + response);
-                        }
+                    if (response.getStatus() != 0) {
+                        logger.warn("Failed to delete: " + response);
                         done = false;
                     }
                 }
@@ -157,8 +158,61 @@ public class IndexingHelper {
                 done = false;
             }
             if (done) {
-                logger.info("Deleted from Solr: " + id);
-                break;
+                if (logger.isDebugEnabled()) {
+                    logger.info("Deleted 1 doc (Solr: "
+                            + (System.currentTimeMillis() - start)
+                            + "ms) => id:" + id);
+                } else {
+                    logger.info("Deleted 1 doc (Solr: "
+                            + (System.currentTimeMillis() - start) + "ms)");
+                }
+                return;
+            }
+            try {
+                Thread.sleep(requestInterval);
+            } catch (final InterruptedException e) {
+            }
+        }
+    }
+
+    public void deleteDocumentsByDocId(final SolrGroup solrGroup,
+            final List<String> docIdList) {
+        final long start = System.currentTimeMillis();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final StringBuilder buf = new StringBuilder(500);
+        for (final String docId : docIdList) {
+            if (buf.length() != 0) {
+                buf.append(" OR ");
+            }
+            buf.append(fieldHelper.docIdField).append(':').append(docId);
+        }
+        final String query = buf.toString();
+        for (int i = 0; i < maxRetryCount; i++) {
+            boolean done = true;
+            try {
+                for (final UpdateResponse response : solrGroup
+                        .deleteByQuery(query)) {
+                    if (response.getStatus() != 0) {
+                        logger.warn("Failed to delete: " + response);
+                        done = false;
+                    }
+                }
+            } catch (final Exception e) {
+                logger.warn("Could not delete a document from Solr."
+                        + " It might be busy. " + "Retrying.. id:" + docIdList
+                        + ", cause: " + e.getMessage());
+                done = false;
+            }
+            if (done) {
+                if (logger.isDebugEnabled()) {
+                    logger.info("Deleted " + docIdList.size() + " docs (Solr: "
+                            + (System.currentTimeMillis() - start)
+                            + "ms) => docId:" + docIdList);
+                } else {
+                    logger.info("Deleted " + docIdList.size() + " docs (Solr: "
+                            + (System.currentTimeMillis() - start) + "ms)");
+                }
+                return;
             }
             try {
                 Thread.sleep(requestInterval);
@@ -172,7 +226,7 @@ public class IndexingHelper {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         final SolrQuery solrQuery = new SolrQuery();
-        final StringBuilder queryBuf = new StringBuilder(200);
+        final StringBuilder queryBuf = new StringBuilder(500);
         queryBuf.append("{!raw f=").append(fieldHelper.idField).append("}");
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
@@ -201,7 +255,7 @@ public class IndexingHelper {
             final SolrGroup solrGroup, final String id, final String[] fields) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SolrQuery solrQuery = new SolrQuery();
-        final StringBuilder queryBuf = new StringBuilder(200);
+        final StringBuilder queryBuf = new StringBuilder(500);
         queryBuf.append("{!prefix f=").append(fieldHelper.idField).append("}");
         queryBuf.append(id);
         solrQuery.setQuery(queryBuf.toString());
@@ -225,10 +279,8 @@ public class IndexingHelper {
         final String query = "{!raw f=" + fieldHelper.parentIdField + " v=\""
                 + id + "\"}";
         for (final UpdateResponse response : solrGroup.deleteByQuery(query)) {
-            if (response.getStatus() != 200) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to delete: " + response);
-                }
+            if (response.getStatus() != 0) {
+                logger.warn("Failed to delete: " + response);
             }
         }
     }
