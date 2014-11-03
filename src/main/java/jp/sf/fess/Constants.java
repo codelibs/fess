@@ -240,6 +240,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SESSION_ID = "sessionId";
 
+    public static final String CRAWLING_SESSION_ID = "crawlingSessionId";
+
     public static final String INDEXING_TARGET = "indexingTarget";
 
     public static final String DIGEST_PREFIX = "...";

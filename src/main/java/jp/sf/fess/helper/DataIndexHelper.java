@@ -33,7 +33,9 @@ import jp.sf.fess.ds.IndexUpdateCallback;
 import jp.sf.fess.service.DataCrawlingConfigService;
 import jp.sf.fess.util.ComponentUtil;
 
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
@@ -131,7 +133,7 @@ public class DataIndexHelper implements Serializable {
             sessionIdList.add(sid);
 
             initParamMap.put(Constants.SESSION_ID, sessionId);
-            initParamMap.put("crawlingSessionId", sid);
+            initParamMap.put(Constants.CRAWLING_SESSION_ID, sid);
 
             final DataCrawlingThread dataCrawlingThread = new DataCrawlingThread(
                     dataCrawlingConfig, indexUpdateCallback, initParamMap);
@@ -273,10 +275,35 @@ public class DataIndexHelper implements Serializable {
                 } catch (final Exception e) {
                     logger.error("Failed to process a data crawling: "
                             + dataCrawlingConfig.getName(), e);
+                } finally {
+                    deleteOldDocs();
                 }
             }
             running = false;
             finished = true;
+        }
+
+        private void deleteOldDocs() {
+            final String sessionId = initParamMap.get(Constants.SESSION_ID);
+            if (StringUtil.isBlank(sessionId)) {
+                logger.warn("Invalid sessionId at " + dataCrawlingConfig);
+                return;
+            }
+            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            final StringBuilder buf = new StringBuilder(100);
+            buf.append(fieldHelper.configIdField).append(':')
+                    .append(dataCrawlingConfig.getConfigId());
+            buf.append(" NOT ");
+            buf.append(fieldHelper.segmentField).append(':')
+                    .append(ClientUtils.escapeQueryChars(sessionId));
+
+            try {
+                indexUpdateCallback.getSolrGroup()
+                        .deleteByQuery(buf.toString());
+            } catch (final Exception e) {
+                logger.error("Could not delete old docs at "
+                        + dataCrawlingConfig, e);
+            }
         }
 
         public boolean isFinished() {
@@ -290,7 +317,7 @@ public class DataIndexHelper implements Serializable {
         }
 
         public String getCrawlingSessionId() {
-            return initParamMap.get("crawlingSessionId");
+            return initParamMap.get(Constants.CRAWLING_SESSION_ID);
         }
 
         public boolean isRunning() {
