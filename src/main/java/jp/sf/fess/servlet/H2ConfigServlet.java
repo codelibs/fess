@@ -23,6 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.h2.tools.Server;
+import org.seasar.framework.util.Disposable;
+import org.seasar.framework.util.DisposableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,8 +86,19 @@ public class H2ConfigServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        if (server != null) {
-            server.stop();
+        if (System.getProperty("java.specification.version").equals("1.7")) {
+            DisposableUtil.add(new Disposable() {
+                @Override
+                public void dispose() {
+                    if (server != null) {
+                        server.stop();
+                    }
+                }
+            });
+        } else {
+            if (server != null) {
+                server.stop();
+            }
         }
     }
 
