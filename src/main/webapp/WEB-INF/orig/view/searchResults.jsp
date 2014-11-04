@@ -28,13 +28,13 @@
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
-					<h3 class="title">
+					<h3 class="title ellipsis">
 						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.docId}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
 						<div class="description">${doc.contentDescription}</div>
 						<div class="site ellipsis">
-							<cite>${f:h(doc.site)}</cite>
+							<cite>${f:h(doc.sitePath)}</cite>
 							<c:if test="${doc.hasCache_s_s=='true'}">
 								<a href="cache?docId=${doc.docId}${appendHighlightQueries}" class="cache"><bean:message
 										key="labels.search_result_cache" /></a>
