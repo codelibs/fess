@@ -138,6 +138,10 @@ new String[] {
 			<arg>"errorBadRequest"</arg>
 			<arg>"error/badRequest.jsp"</arg>
 		</initMethod>
+		<initMethod name="addDesignJspFileName">
+			<arg>"cache"</arg>
+			<arg>"cache.hbs"</arg>
+		</initMethod>
 	</component>
 	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
 	</component>

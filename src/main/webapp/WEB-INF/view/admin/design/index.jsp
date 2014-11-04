@@ -107,10 +107,11 @@
 									<html:option value="searchResults"><bean:message key="labels.design_file_searchResults" /></html:option>
 									<html:option value="searchNoResult"><bean:message key="labels.design_file_searchNoResult" /></html:option>
 									<html:option value="help"><bean:message key="labels.design_file_help" /></html:option>
-									<html:option value="error"><bean:message key="labels.design_file_error" /></html:option>
+									<html:option value="cache"><bean:message key="labels.design_file_cache" /></html:option>
 									<%-- Applet --%>
 									<html:option value="appletLauncher"><bean:message key="labels.design_file_appletLauncher" /></html:option>
 									<%-- Error --%>
+									<html:option value="error"><bean:message key="labels.design_file_error" /></html:option>
 									<html:option value="errorHeader"><bean:message key="labels.design_file_errorHeader" /></html:option>
 									<html:option value="errorFooter"><bean:message key="labels.design_file_errorFooter" /></html:option>
 									<html:option value="errorNotFound"><bean:message key="labels.design_file_errorNotFound" /></html:option>
