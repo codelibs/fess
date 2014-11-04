@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <properties>
+    <title>ファイルシステムのクロールに関する設定</title>
+    <author>菅谷 信介</author>
+  </properties>
+  <body>
+    <section name="概要">
+      <p>ここでは、ファイルシステムを対象としたクロールに関する設定について説明します。</p>
+      <p>Fess で数十万件以上のドキュメントをインデックス化したい場合は、1 つのクロール設定を数万件以下にすることを推奨しています。1 つのクロール設定で数十万件を対象すると、インデックス化のパフォーマンスが低下する場合があります。</p>
+    </section>
+    <section name="設定方法">
+      <subsection name="表示方法">
+        <p>管理者アカウントでログイン後、メニューのファイルシステムをクリックします。</p>
+        <img src="/images/ja/9.3/admin/fileCrawlingConfig-1.png" alt="ファイルシステムクロールの設定" sizeinfo="height=23cm"/>
+      </subsection>
+    </section>
+    <section name="設定項目">
+      <subsection name="設定名">
+        <p>一覧ページで表示される名前です。</p>
+      </subsection>
+      <subsection name="パスの指定">
+        <p>パスは複数指定できます。file: または smb: で始まるように指定します。たとえば、</p>
+        <source><![CDATA[
+file:/home/taro/
+file:/home/documents/
+smb://host1/share/
+]]></source>
+        <p>のように指定します。指定されたディレクトリ以下を巡回します。</p>
+        <p>Windows 環境の場合は URI で記述する必要があるので、c:\Documents\taro というパスであれば file:/c:/Documents/taro と指定します。</p>
+        <p>Windows の共有フォルダについては、たとえば、host1のshareフォルダをクロール対象にしたい場合は、クロール設定でsmb://host1/share/とします(最後に/が必要)。共有フォルダに認証がある場合にはファイルシステム認証画面で認証情報を設定します。</p>
+      </subsection>
+      <subsection name="パスのフィルタリング">
+        <p>正規表現で指定することによって、特定のパスパターンをクロールや検索の対象にしたり、除外できます。</p>
+        <table class="table table-striped table-bordered table-condensed" columninfo="lp{10cm}">
+<caption>パスフィルタリング内容一覧</caption>
+<tbody>
+<tr>
+<th>クロール対象とするパス</th>
+<td>指定された正規表現のパスをクロールします。</td>
+</tr>
+<tr>
+<th>クロール対象から除外するパス</th>
+<td>指定された正規表現のパスをクロール対象としません。クロール対象とするパスが指定されていても、ここでの指定が優先されます。</td>
+</tr>
+<tr>
+<th>検索対象とするパス</th>
+<td>指定された正規表現のパスを検索対象します。検索除外対象とするパスと指定されていても、ここでの指定が優先されます。</td>
+</tr>
+<tr>
+<th>検索対象から除外するパス</th>
+<td>指定された正規表現のパスを検索対象としません。クロール対象から除外してしまうと以降の全てのリンクが検索対象とすることができませんが、クロール対象の一部だけ検索対象としない場合に指定します。</td>
+</tr>
+</tbody>
+</table>
+        <p>たとえば、/home/ 以下しかクロールしない場合は、対象とするパスに</p>
+        <source><![CDATA[
+file:/home/.*
+]]></source>
+        <p>また、拡張子が png のものを対象から除外したい場合は、除外するパスに</p>
+        <source><![CDATA[
+.*\.png$
+]]></source>
+        <p>と指定します。改行をすることで複数指定することが可能です。</p>
+        <p>指定方法はjava.io.File が扱う URI に従います。以下のようになります。</p>
+        <source><![CDATA[
+/home/taro -> file:/home/taro
+c:\memo.txt -> file:/c:/memo.txt
+\\server\memo.txt -> file:////server/memo.txt
+]]></source>
+      </subsection>
+      <subsection name="設定パラメータ">
+        <p>クロールに必要な設定情報を指定することができます。</p>
+      </subsection>
+      <subsection name="深さ">
+        <p>ディレクトリ階層の深さを指定します。</p>
+      </subsection>
+      <subsection name="最大アクセス数">
+        <p>クロールして取得するドキュメント数を指定できます。</p>
+      </subsection>
+      <subsection name="スレッド数">
+        <p>クロールするスレッド数を指定します。5 を指定した場合、5 個のスレッドで同時にウェブサイトをクロールします。</p>
+      </subsection>
+      <subsection name="間隔">
+        <p>ドキュメントをクロールする間隔です。5000 とした場合は 1 つのスレッドが 5 秒間隔でドキュメントを取得しにいきます。</p>
+        <p>スレッド数を 5 個、間隔を 1000 ミリ秒とした場合、1 秒間で 5 ドキュメントを取得しにいくことになります。</p>
+      </subsection>
+      <subsection name="ブースト値">
+        <p>このクロール設定で検索対象とした URL に重みを付けることができます。検索結果において、他のものより上に表示したい場合に利用します。標準では 1 です。大きい値ほど優先されて、検索結果の上位に表示されます。他の結果より確実に優先して表示したい場合は、10000 などの十分に大きな値を指定します。</p>
+        <p>指定できる値は 0 以上の整数です。この値は Solr にドキュメントを追加する際のブースト値として利用されます。</p>
+      </subsection>
+      <subsection name="ロール">
+        <p>利用するユーザーが特定のロールのときだけに検索結果に表示できるように制御することができます。ロールはあらかじめ設定しておく必要があります。たとえば、ポータルサーバーなどログインを必要とするシステムにおいて、利用するユーザーにより検索結果を出し分けたい場合に利用できます。</p>
+      </subsection>
+      <subsection name="ラベル">
+        <p>検索結果をラベル付けすることができます。ラベルを指定すると、検索画面において、ラベルごとの検索などが可能になります。</p>
+      </subsection>
+      <subsection name="状態">
+        <p>有効にすることで、設定されているクロール時刻にクロールされます。一時的にクロールしないようにしたい場合に利用できます。</p>
+      </subsection>
+    </section>
+  </body>
+</document>
