@@ -206,7 +206,7 @@ public class FessS2RobotThread extends S2RobotThread {
                     responseData.setParentUrl(urlQueue.getParentUrl());
                     responseData.setSessionId(robotContext.getSessionId());
                     responseData
-                            .setStatus(org.codelibs.robot.Constants.NOT_MODIFIED_STATUS);
+                            .setHttpStatusCode(org.codelibs.robot.Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
                     storeChildUrlsToQueue(urlQueue,
