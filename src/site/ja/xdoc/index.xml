@@ -59,6 +59,10 @@
     </section>
     <section name="ニュース">
       <dl>
+        <dt>2014-11-06</dt>
+        <dd>
+          <a href="http://sourceforge.jp/projects/fess/news/24783" class="externalLink">Fess 9.3 リリース</a>
+        </dd>
         <dt>2014-06-28</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24682" class="externalLink">Fess 9.2 リリース</a>
@@ -66,10 +70,6 @@
         <dt>2014-03-26</dt>
         <dd>
           <a href="http://sourceforge.jp/projects/fess/news/24607" class="externalLink">Fess 9.1 リリース</a>
-        </dd>
-        <dt>2014-02-07</dt>
-        <dd>
-          <a href="http://sourceforge.jp/projects/fess/news/24562" class="externalLink">Fess 9.0.0 リリース</a>
         </dd>
       </dl>
       <p>過去のニュースは<a href="news.html">こちら</a>をご覧ください。</p>
