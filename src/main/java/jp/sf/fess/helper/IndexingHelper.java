@@ -130,7 +130,7 @@ public class IndexingHelper {
         }
         sq.setRows(row);
         final SolrDocumentList docList = solrGroup.query(sq).getResults();
-        if (docList.getNumFound() < row) {
+        if (docList.getNumFound() <= row) {
             return docList;
         }
         return getSolrDocumentList(solrGroup, fq, q, fields,
@@ -303,7 +303,7 @@ public class IndexingHelper {
         solrQuery.setRows(row);
         final SolrDocumentList docList = solrGroup.query(solrQuery)
                 .getResults();
-        if (docList.getNumFound() < row) {
+        if (docList.getNumFound() <= row) {
             return docList;
         }
         return getChildSolrDocumentList(solrGroup, id, fields,
