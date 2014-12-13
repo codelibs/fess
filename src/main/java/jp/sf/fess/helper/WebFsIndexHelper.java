@@ -350,31 +350,49 @@ public class WebFsIndexHelper implements Serializable {
             }
 
             // set included paths
+            boolean urlEncodeDisabled = false;
             final String[] includedPaths = includedPathsStr.split("[\r\n]");
             for (final String u : includedPaths) {
                 if (StringUtil.isNotBlank(u)) {
-                    final String urlValue = u.trim();
-                    if (!urlValue.startsWith("#")) {
-                        s2Robot.addIncludeFilter(systemHelper
-                                .encodeUrlFilter(urlValue));
+                    final String line = u.trim();
+                    if (!line.startsWith("#")) {
+                        final String urlValue;
+                        if (urlEncodeDisabled) {
+                            urlValue = line;
+                            urlEncodeDisabled = false;
+                        } else {
+                            urlValue = systemHelper.encodeUrlFilter(line);
+                        }
+                        s2Robot.addIncludeFilter(urlValue);
                         if (logger.isInfoEnabled()) {
                             logger.info("Included Path: " + urlValue);
                         }
+                    } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
+                        urlEncodeDisabled = true;
                     }
                 }
             }
 
             // set excluded paths
+            urlEncodeDisabled = false;
             final String[] excludedPaths = excludedPathsStr.split("[\r\n]");
             for (final String u : excludedPaths) {
                 if (StringUtil.isNotBlank(u)) {
-                    final String urlValue = u.trim();
-                    if (!urlValue.startsWith("#")) {
-                        s2Robot.addExcludeFilter(systemHelper
-                                .encodeUrlFilter(urlValue));
+                    final String line = u.trim();
+                    if (!line.startsWith("#")) {
+                        final String urlValue;
+                        if (urlEncodeDisabled) {
+                            urlValue = line;
+                            urlEncodeDisabled = false;
+                        } else {
+                            urlValue = systemHelper.encodeUrlFilter(line);
+                        }
+                        s2Robot.addExcludeFilter(urlValue);
                         if (logger.isInfoEnabled()) {
                             logger.info("Excluded Path: " + urlValue);
                         }
+                    } else if (line.startsWith("#DISABLE_URL_ENCODE")) {
+                        urlEncodeDisabled = true;
                     }
                 }
             }
