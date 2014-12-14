@@ -31,7 +31,7 @@
 					<tbody>
 						<tr>
 							<th style="width: 100px;"><bean:message
-									key="labels.search_list_id" /></th>
+									key="labels.search_list_url" /></th>
 							<td style="width: 400px;">${f:h(url)}<html:hidden
 									property="docId" /></td>
 						</tr>
