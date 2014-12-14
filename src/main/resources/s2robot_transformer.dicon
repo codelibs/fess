@@ -45,7 +45,7 @@
 			<arg>"title"</arg>
 		</initMethod>
 		<initMethod name="addMetaContentMapping">
-			<arg>"Subject"</arg>
+			<arg>"Title"</arg>
 			<arg>"title"</arg>
 		</initMethod>
 		<!-- 
