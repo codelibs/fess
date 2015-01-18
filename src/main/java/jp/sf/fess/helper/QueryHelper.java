@@ -162,6 +162,8 @@ public class QueryHelper implements Serializable {
 
     protected Map<String, String[]> additionalQueryParamMap = new HashMap<String, String[]>();
 
+    protected Map<String, String> fieldBoostMap = new HashMap<String, String>();
+
     @InitMethod
     public void init() {
         if (responseFields == null) {
@@ -449,6 +451,8 @@ public class QueryHelper implements Serializable {
                         queryOperandCount++;
                         fieldLogWord = targetWord;
                     }
+                    appendFieldBoostValue(queryBuf, field, targetWord);
+
                     nonPrefix = true;
                     operator = defaultOperator;
                     if (highlightFieldSet.contains(field)) {
@@ -982,15 +986,18 @@ public class QueryHelper implements Serializable {
         buf.append('(');
         buf.append(fieldHelper.titleField).append(':');
         appendQueryValue(buf, value, useBigram);
+        appendFieldBoostValue(buf, fieldHelper.titleField, value);
         buf.append(_OR_);
         buf.append(fieldHelper.contentField).append(':');
         appendQueryValue(buf, value, useBigram);
+        appendFieldBoostValue(buf, fieldHelper.contentField, value);
         if (StringUtil.isNotBlank(queryLanguage)) {
+            final String languageField = "content_" + queryLanguage;
             buf.append(_OR_);
-            buf.append("content_");
-            buf.append(queryLanguage);
+            buf.append(languageField);
             buf.append(':');
             appendQueryValue(buf, value, false);
+            appendFieldBoostValue(buf, languageField, value);
         }
         buf.append(')');
     }
@@ -1536,6 +1543,15 @@ public class QueryHelper implements Serializable {
         additionalQueryParamMap.put(key, values);
     }
 
+    public void addFieldBoost(final String field, final String value) {
+        try {
+            Float.parseFloat(value);
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException(value + " was not number.", e);
+        }
+        fieldBoostMap.put(field, value);
+    }
+
     protected String getDefaultOperator() {
         final HttpServletRequest request = RequestUtil.getRequest();
         if (request != null) {
@@ -1548,6 +1564,14 @@ public class QueryHelper implements Serializable {
             }
         }
         return DEFAULT_OPERATOR;
+    }
+
+    protected void appendFieldBoostValue(final StringBuilder buf,
+            final String field, final String value) {
+        if (fieldBoostMap.containsKey(field) && value.indexOf('^') == -1
+                && value.indexOf('~') == -1) {
+            buf.append('^').append(fieldBoostMap.get(field));
+        }
     }
 
     public static class QueryPart {
