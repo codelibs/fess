@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>jp.sf.fess</groupId>
   <artifactId>fess</artifactId>
-  <version>9.4.0-SNAPSHOT</version>
+  <version>9.3.3-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Fess</name>
   <description>Fess is Full tExt Search System.</description>
@@ -107,9 +107,10 @@
     </profile>
   </profiles>
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <dbflute.version>1.0.5L</dbflute.version>
     <s2robot.version>0.8.0</s2robot.version>
-    <solr.version>4.10.2</solr.version>
+    <solr.version>4.10.3</solr.version>
     <slf4j.version>1.7.7</slf4j.version>
     <tika.version>1.6</tika.version>
     <poi.version>3.11-beta2</poi.version>
@@ -190,6 +191,13 @@
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
         <version>1.5.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <header>${basedir}/src/etc/header.txt</header>
           <includes>
@@ -200,6 +208,18 @@
             <headerDefinition>${basedir}/src/etc/header-definition.xml</headerDefinition>
           </headerDefinitions>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.marvinformatics.formatter</groupId>
+        <artifactId>formatter-maven-plugin</artifactId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-site-plugin</artifactId>
@@ -359,7 +379,7 @@
     <dependency>
       <groupId>jp.sf.fess</groupId>
       <artifactId>fess-suggest</artifactId>
-      <version>1.3.1</version>
+      <version>1.3.2</version>
     </dependency>
     <dependency>
       <groupId>jp.sf.fess</groupId>
@@ -531,7 +551,7 @@
     <dependency>
       <groupId>org.codelibs</groupId>
       <artifactId>corelib</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.codelibs.solr</groupId>
@@ -799,6 +819,12 @@
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.seasar.dbflute</groupId>
+      <artifactId>utflute-seasar</artifactId>
+      <version>0.4.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

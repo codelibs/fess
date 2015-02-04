@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,20 +100,20 @@ public class CrawlingConfigHelper implements Serializable {
             return null;
         }
         switch (configType) {
-        case WEB:
-            final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
-                    .getComponent(WebCrawlingConfigService.class);
-            return webCrawlingConfigService.getWebCrawlingConfig(id);
-        case FILE:
-            final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container
-                    .getComponent(FileCrawlingConfigService.class);
-            return fileCrawlingConfigService.getFileCrawlingConfig(id);
-        case DATA:
-            final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container
-                    .getComponent(DataCrawlingConfigService.class);
-            return dataCrawlingConfigService.getDataCrawlingConfig(id);
-        default:
-            return null;
+            case WEB:
+                final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
+                        .getComponent(WebCrawlingConfigService.class);
+                return webCrawlingConfigService.getWebCrawlingConfig(id);
+            case FILE:
+                final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container
+                        .getComponent(FileCrawlingConfigService.class);
+                return fileCrawlingConfigService.getFileCrawlingConfig(id);
+            case DATA:
+                final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container
+                        .getComponent(DataCrawlingConfigService.class);
+                return dataCrawlingConfigService.getDataCrawlingConfig(id);
+            default:
+                return null;
         }
     }
 
@@ -240,33 +240,34 @@ public class CrawlingConfigHelper implements Serializable {
             }
 
             switch (userAgentType) {
-            case IE:
-                response.setHeader(
-                        "Content-Disposition",
-                        "attachment; filename=\""
-                                + URLEncoder.encode(name, Constants.UTF_8)
-                                + "\"");
-                break;
-            case OPERA:
-                response.setHeader(
-                        "Content-Disposition",
-                        "attachment; filename*=utf-8'ja'"
-                                + URLEncoder.encode(name, Constants.UTF_8));
-                break;
-            case SAFARI:
-                response.setHeader("Content-Disposition",
-                        "attachment; filename=\"" + name + "\"");
-                break;
-            case CHROME:
-            case FIREFOX:
-            case OTHER:
-            default:
-                response.setHeader(
-                        "Content-Disposition",
-                        "attachment; filename=\"=?utf-8?B?"
-                                + Base64Util.encode(name
-                                        .getBytes(Constants.UTF_8)) + "?=\"");
-                break;
+                case IE:
+                    response.setHeader(
+                            "Content-Disposition",
+                            "attachment; filename=\""
+                                    + URLEncoder.encode(name, Constants.UTF_8)
+                                    + "\"");
+                    break;
+                case OPERA:
+                    response.setHeader(
+                            "Content-Disposition",
+                            "attachment; filename*=utf-8'ja'"
+                                    + URLEncoder.encode(name, Constants.UTF_8));
+                    break;
+                case SAFARI:
+                    response.setHeader("Content-Disposition",
+                            "attachment; filename=\"" + name + "\"");
+                    break;
+                case CHROME:
+                case FIREFOX:
+                case OTHER:
+                default:
+                    response.setHeader(
+                            "Content-Disposition",
+                            "attachment; filename=\"=?utf-8?B?"
+                                    + Base64Util.encode(name
+                                            .getBytes(Constants.UTF_8))
+                                    + "?=\"");
+                    break;
             }
         } catch (final Exception e) {
             logger.warn("Failed to write a filename: " + responseData, e);

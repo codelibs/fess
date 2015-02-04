@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,11 @@ public interface CDef extends Classification {
             }
         }
 
-        private String _code;
+        private final String _code;
 
-        private String _alias;
+        private final String _alias;
 
-        private String[] _sisters;
+        private final String[] _sisters;
 
         private ProcessType(final String code, final String alias,
                 final String[] sisters) {
@@ -179,11 +179,11 @@ public interface CDef extends Classification {
             }
         }
 
-        private String _code;
+        private final String _code;
 
-        private String _alias;
+        private final String _alias;
 
-        private String[] _sisters;
+        private final String[] _sisters;
 
         private AccessType(final String code, final String alias,
                 final String[] sisters) {

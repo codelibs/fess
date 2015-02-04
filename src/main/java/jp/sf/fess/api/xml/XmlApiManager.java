@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,27 +77,27 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             throws IOException, ServletException {
         final String formatType = request.getParameter("type");
         switch (getFormatType(formatType)) {
-        case SEARCH:
-            processSearchRequest(request, response, chain);
-            break;
-        case LABEL:
-            processLabelRequest(request, response, chain);
-            break;
-        case SUGGEST:
-            processSuggestRequest(request, response, chain);
-            break;
-        case SPELLCHECK:
-            processSpellCheckRequest(request, response, chain);
-            break;
-        case ANALYSIS:
-            processAnalysisRequest(request, response, chain);
-            break;
-        case PING:
-            processPingRequest(request, response, chain);
-            break;
-        default:
-            writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
-            break;
+            case SEARCH:
+                processSearchRequest(request, response, chain);
+                break;
+            case LABEL:
+                processLabelRequest(request, response, chain);
+                break;
+            case SUGGEST:
+                processSuggestRequest(request, response, chain);
+                break;
+            case SPELLCHECK:
+                processSpellCheckRequest(request, response, chain);
+                break;
+            case ANALYSIS:
+                processAnalysisRequest(request, response, chain);
+                break;
+            case PING:
+                processPingRequest(request, response, chain);
+                break;
+            default:
+                writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
+                break;
         }
 
     }

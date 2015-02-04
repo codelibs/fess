@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1156,8 +1156,26 @@ public class DatabaseService {
 
                         final WebAuthenticationCB cb = new WebAuthenticationCB();
                         cb.query().setWebCrawlingConfigId_Equal(webConfigId);
-                        final WebAuthentication entity = webAuthenticationBhv
-                                .selectEntity(cb);
+                        cb.query().setDeletedBy_IsNull();
+                        WebAuthentication entity = null;
+                        final List<WebAuthentication> list = webAuthenticationBhv
+                                .selectList(cb);
+                        for (final WebAuthentication e : list) {
+                            if (StringUtil.equals(
+                                    webAuthentication.getAuthRealm(),
+                                    e.getAuthRealm())
+                                    && StringUtil.equals(
+                                            webAuthentication.getHostname(),
+                                            e.getHostname())
+                                    && StringUtil.equals(webAuthentication
+                                            .getProtocolScheme(), e
+                                            .getProtocolScheme())
+                                    && equalusNumber(
+                                            webAuthentication.getPort(),
+                                            e.getPort())) {
+                                entity = e;
+                            }
+                        }
                         webAuthentication.setId(null);
                         webAuthentication.setWebCrawlingConfigId(webConfigId);
                         if (entity == null) {
@@ -1191,22 +1209,38 @@ public class DatabaseService {
                     for (FileAuthentication fileAuthentication : fileAuthenticationList) {
                         final Long id = fileAuthentication.getId();
 
-                        final Long webConfigId = idMap
+                        final Long fileConfigId = idMap
                                 .get(FILE_CRAWLING_CONFIG_KEY
                                         + ":"
                                         + fileAuthentication
                                                 .getFileCrawlingConfigId());
-                        if (webConfigId == null) {
+                        if (fileConfigId == null) {
                             // skip
                             continue;
                         }
 
                         final FileAuthenticationCB cb = new FileAuthenticationCB();
-                        cb.query().setFileCrawlingConfigId_Equal(webConfigId);
-                        final FileAuthentication entity = fileAuthenticationBhv
-                                .selectEntity(cb);
+                        cb.query().setFileCrawlingConfigId_Equal(fileConfigId);
+                        cb.query().setDeletedBy_IsNull();
+                        FileAuthentication entity = null;
+                        final List<FileAuthentication> list = fileAuthenticationBhv
+                                .selectList(cb);
+                        for (final FileAuthentication e : list) {
+                            if (StringUtil.equals(
+                                    fileAuthentication.getHostname(),
+                                    e.getHostname())
+                                    && StringUtil.equals(fileAuthentication
+                                            .getProtocolScheme(), e
+                                            .getProtocolScheme())
+                                    && equalusNumber(
+                                            fileAuthentication.getPort(),
+                                            e.getPort())) {
+                                entity = e;
+                            }
+                        }
                         fileAuthentication.setId(null);
-                        fileAuthentication.setFileCrawlingConfigId(webConfigId);
+                        fileAuthentication
+                                .setFileCrawlingConfigId(fileConfigId);
                         if (entity == null) {
                             fileAuthenticationBhv.insert(fileAuthentication);
                         } else {
@@ -1253,8 +1287,16 @@ public class DatabaseService {
 
                         final RequestHeaderCB cb = new RequestHeaderCB();
                         cb.query().setWebCrawlingConfigId_Equal(webConfigId);
-                        final RequestHeader entity = requestHeaderBhv
-                                .selectEntity(cb);
+                        cb.query().setDeletedBy_IsNull();
+                        RequestHeader entity = null;
+                        final List<RequestHeader> list = requestHeaderBhv
+                                .selectList(cb);
+                        for (final RequestHeader e : list) {
+                            if (StringUtil.equals(requestHeader.getName(),
+                                    e.getName())) {
+                                entity = e;
+                            }
+                        }
                         requestHeader.setId(null);
                         requestHeader.setWebCrawlingConfigId(webConfigId);
                         if (entity == null) {
@@ -1290,6 +1332,7 @@ public class DatabaseService {
 
                         final KeyMatchCB cb = new KeyMatchCB();
                         cb.query().setTerm_Equal(keyMatch.getTerm());
+                        cb.query().setDeletedBy_IsNull();
                         final KeyMatch entity = keyMatchBhv.selectEntity(cb);
                         keyMatch.setId(null);
                         if (entity == null) {
@@ -1326,6 +1369,7 @@ public class DatabaseService {
                         final BoostDocumentRuleCB cb = new BoostDocumentRuleCB();
                         cb.query().setUrlExpr_Equal(
                                 boostDocumentRule.getUrlExpr());
+                        cb.query().setDeletedBy_IsNull();
                         final BoostDocumentRule entity = boostDocumentRuleBhv
                                 .selectEntity(cb);
                         boostDocumentRule.setId(null);
@@ -1364,6 +1408,7 @@ public class DatabaseService {
                         final SuggestElevateWordCB cb = new SuggestElevateWordCB();
                         cb.query().setSuggestWord_Equal(
                                 suggestElevateWord.getSuggestWord());
+                        cb.query().setDeletedBy_IsNull();
                         final SuggestElevateWord entity = suggestElevateWordBhv
                                 .selectEntity(cb);
                         suggestElevateWord.setId(null);
@@ -1404,6 +1449,7 @@ public class DatabaseService {
                         final SuggestBadWordCB cb = new SuggestBadWordCB();
                         cb.query().setSuggestWord_Equal(
                                 suggestNGWord.getSuggestWord());
+                        cb.query().setDeletedBy_IsNull();
                         final SuggestBadWord entity = suggestBadWordBhv
                                 .selectEntity(cb);
                         suggestNGWord.setId(null);
@@ -1446,6 +1492,15 @@ public class DatabaseService {
                         + CRAWLER_PROPERTIES_KEY, e);
             }
 
+        }
+
+        private boolean equalusNumber(final Integer port1, final Integer port2) {
+            if (port1 == null) {
+                return port2 == null;
+            } else if (port2 == null) {
+                return false;
+            }
+            return port1.intValue() == port2.intValue();
         }
 
         private void rollback(final String key, final Exception e) {

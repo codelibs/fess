@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ public class CrawlJob {
 
     protected String sessionId;
 
+    protected String namespace = Constants.CRAWLING_SESSION_SYSTEM_NAME;
+
     protected String[] webConfigIds;
 
     protected String[] fileConfigIds;
@@ -73,6 +75,11 @@ public class CrawlJob {
 
     public CrawlJob sessionId(final String sessionId) {
         this.sessionId = sessionId;
+        return this;
+    }
+
+    public CrawlJob namespace(final String namespace) {
+        this.namespace = namespace;
         return this;
     }
 
@@ -280,7 +287,7 @@ public class CrawlJob {
         crawlerCmdList.add("--sessionId");
         crawlerCmdList.add(sessionId);
         crawlerCmdList.add("--name");
-        crawlerCmdList.add(Constants.CRAWLING_SESSION_SYSTEM_NAME);
+        crawlerCmdList.add(namespace);
 
         if (webConfigIds != null && webConfigIds.length > 0) {
             crawlerCmdList.add("-w");

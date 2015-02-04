@@ -99,7 +99,7 @@
 								</li>
 							</c:forEach>
 							<c:if test="${synonymPager.existNextPage}">
-								<li class="next disabled"><s:link
+								<li class="next"><s:link
 										href="list/${f:u(dictId)}/${synonymPager.currentPageNumber + 1}">
 										<bean:message key="labels.dict_link_next_page" />
 									</s:link></li>

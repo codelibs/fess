@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -887,7 +887,7 @@ public class IndexAction {
                     .getDocumentListByDocIds(docIds,
                             queryHelper.getResponseFields(),
                             new String[] { fieldHelper.favoriteCountField },
-                            MAX_PAGE_SIZE);
+                            getMaxPageSize());
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final Object urlObj = doc.get(fieldHelper.urlField);
@@ -936,6 +936,19 @@ public class IndexAction {
         if (StringUtil.isNotBlank(indexForm.op)) {
             request.setAttribute(Constants.DEFAULT_OPERATOR, indexForm.op);
         }
+        if (indexForm.additional != null) {
+            final Set<String> fieldSet = new HashSet<String>();
+            for (final String additional : indexForm.additional) {
+                if (StringUtil.isNotBlank(additional)
+                        && additional.length() < 1000
+                        && !hasFieldInQuery(fieldSet, additional)) {
+                    queryBuf.append(' ').append(additional);
+                }
+            }
+        }
+        if (queryBuf.indexOf(" OR ") >= 0) {
+            queryBuf.insert(0, '(').append(')');
+        }
         if (!indexForm.fields.isEmpty()) {
             for (final Map.Entry<String, String[]> entry : indexForm.fields
                     .entrySet()) {
@@ -966,16 +979,6 @@ public class IndexAction {
         }
         if (StringUtil.isNotBlank(indexForm.sort)) {
             queryBuf.append(" sort:").append(indexForm.sort);
-        }
-        if (indexForm.additional != null) {
-            final Set<String> fieldSet = new HashSet<String>();
-            for (final String additional : indexForm.additional) {
-                if (StringUtil.isNotBlank(additional)
-                        && additional.length() < 1000
-                        && !hasFieldInQuery(fieldSet, additional)) {
-                    queryBuf.append(' ').append(additional);
-                }
-            }
         }
         if (indexForm.lang != null) {
             final Set<String> langSet = new HashSet<>();
@@ -1393,7 +1396,16 @@ public class IndexAction {
     }
 
     protected int getMaxPageSize() {
-        return MAX_PAGE_SIZE;
+        Object maxPageSize = crawlerProperties
+                .get(Constants.SEARCH_RESULT_MAX_PAGE_SIZE);
+        if (maxPageSize == null) {
+            return MAX_PAGE_SIZE;
+        }
+        try {
+            return Integer.parseInt(maxPageSize.toString());
+        } catch (NumberFormatException e) {
+            return MAX_PAGE_SIZE;
+        }
     }
 
     public boolean isOsddLink() {

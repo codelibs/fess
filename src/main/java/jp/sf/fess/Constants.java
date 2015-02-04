@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,6 +158,8 @@ public class Constants extends CoreLibConstants {
     public static final String SEARCH_DESKTOP_PROPERTY = "search.desktop";
 
     public static final String SEARCH_FILE_LAUNCHER_PROPERTY = "search.file.launcher";
+
+    public static final String SEARCH_RESULT_MAX_PAGE_SIZE = "search.result.max_page_size";
 
     public static final String NOTIFICATION_TO_PROPERTY = "notification.to";
 
