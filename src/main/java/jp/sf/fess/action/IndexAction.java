@@ -936,6 +936,9 @@ public class IndexAction {
         if (StringUtil.isNotBlank(indexForm.op)) {
             request.setAttribute(Constants.DEFAULT_OPERATOR, indexForm.op);
         }
+        if (queryBuf.indexOf(" OR ") >= 0) {
+            queryBuf.insert(0, '(').append(')');
+        }
         if (indexForm.additional != null) {
             final Set<String> fieldSet = new HashSet<String>();
             for (final String additional : indexForm.additional) {
@@ -945,9 +948,6 @@ public class IndexAction {
                     queryBuf.append(' ').append(additional);
                 }
             }
-        }
-        if (queryBuf.indexOf(" OR ") >= 0) {
-            queryBuf.insert(0, '(').append(')');
         }
         if (!indexForm.fields.isEmpty()) {
             for (final Map.Entry<String, String[]> entry : indexForm.fields
