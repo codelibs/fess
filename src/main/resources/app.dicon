@@ -75,6 +75,10 @@
 		<initMethod name="addHighlightField">
 			<arg>"content"</arg>
 		</initMethod>
+		<initMethod name="addFieldBoost">
+			<arg>"label"</arg>
+			<arg>"0.0"</arg>
+		</initMethod>
 		<!-- 
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{ "id", "docId", "score",

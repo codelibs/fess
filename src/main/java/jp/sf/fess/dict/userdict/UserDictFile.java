@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,16 +175,16 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                 String reading = null;
                 String pos = null;
                 switch (values.length) {
-                case 4:
-                    pos = values[3];
-                case 3:
-                    reading = values[2];
-                case 2:
-                    segmentation = values[1];
-                case 1:
-                    token = values[0];
-                default:
-                    break;
+                    case 4:
+                        pos = values[3];
+                    case 3:
+                        reading = values[2];
+                    case 2:
+                        segmentation = values[1];
+                    case 1:
+                        token = values[0];
+                    default:
+                        break;
                 }
 
                 id++;

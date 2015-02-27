@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,30 +65,30 @@ public class FessStatusPolicy extends StatusPolicyImpl {
         }
 
         switch (queryType) {
-        case COMMIT:
-        case OPTIMIZE:
-        case ROLLBACK:
-            if (StringUtil.isNotBlank(indexValue)
-                    && UNFINISHED.equals(indexValue)) {
-                // index: UNFINISHED -> COMPLETED
-                dataMap.put("indexBefore", UNFINISHED.toUpperCase());
-                dataMap.put("indexAfter", COMPLETED.toUpperCase());
-            }
-            break;
-        case ADD:
-        case DELETE:
-            if (StringUtil.isNotBlank(indexValue)
-                    && UNFINISHED.equals(indexValue)) {
-                // index: UNFINISHED -> READY
-                dataMap.put("indexBefore", UNFINISHED.toUpperCase());
-                dataMap.put("indexAfter", READY.toUpperCase());
-            }
-            break;
-        case PING:
-        case QUERY:
-        case REQUEST:
-        default:
-            break;
+            case COMMIT:
+            case OPTIMIZE:
+            case ROLLBACK:
+                if (StringUtil.isNotBlank(indexValue)
+                        && UNFINISHED.equals(indexValue)) {
+                    // index: UNFINISHED -> COMPLETED
+                    dataMap.put("indexBefore", UNFINISHED.toUpperCase());
+                    dataMap.put("indexAfter", COMPLETED.toUpperCase());
+                }
+                break;
+            case ADD:
+            case DELETE:
+                if (StringUtil.isNotBlank(indexValue)
+                        && UNFINISHED.equals(indexValue)) {
+                    // index: UNFINISHED -> READY
+                    dataMap.put("indexBefore", UNFINISHED.toUpperCase());
+                    dataMap.put("indexAfter", READY.toUpperCase());
+                }
+                break;
+            case PING:
+            case QUERY:
+            case REQUEST:
+            default:
+                break;
         }
 
         if (!dataMap.isEmpty()) {
@@ -119,24 +119,24 @@ public class FessStatusPolicy extends StatusPolicyImpl {
         }
 
         switch (queryType) {
-        case COMMIT:
-        case OPTIMIZE:
-        case ROLLBACK:
-        case ADD:
-        case DELETE:
-            if (StringUtil.isNotBlank(indexValue)
-                    && !UNFINISHED.equals(indexValue)) {
-                // index: READY/COMPLETED -> UNFINISHED
-                dataMap.put("indexBefore", indexValue == null ? "UNKNOWN"
-                        : indexValue.toUpperCase());
-                dataMap.put("indexAfter", UNFINISHED.toUpperCase());
-            }
-            break;
-        case PING:
-        case QUERY:
-        case REQUEST:
-        default:
-            break;
+            case COMMIT:
+            case OPTIMIZE:
+            case ROLLBACK:
+            case ADD:
+            case DELETE:
+                if (StringUtil.isNotBlank(indexValue)
+                        && !UNFINISHED.equals(indexValue)) {
+                    // index: READY/COMPLETED -> UNFINISHED
+                    dataMap.put("indexBefore", indexValue == null ? "UNKNOWN"
+                            : indexValue.toUpperCase());
+                    dataMap.put("indexAfter", UNFINISHED.toUpperCase());
+                }
+                break;
+            case PING:
+            case QUERY:
+            case REQUEST:
+            default:
+                break;
         }
 
         if (!dataMap.isEmpty()) {

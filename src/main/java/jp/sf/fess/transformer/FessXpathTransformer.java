@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,31 +137,32 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                     final XObject xObj = getXPathAPI().eval(document, path);
                     final int type = xObj.getType();
                     switch (type) {
-                    case XObject.CLASS_BOOLEAN:
-                        final boolean b = xObj.bool();
-                        putResultDataBody(dataMap, entry.getKey(),
-                                Boolean.toString(b));
-                        break;
-                    case XObject.CLASS_NUMBER:
-                        final double d = xObj.num();
-                        putResultDataBody(dataMap, entry.getKey(),
-                                Double.toString(d));
-                        break;
-                    case XObject.CLASS_STRING:
-                        final String str = xObj.str();
-                        putResultDataBody(dataMap, entry.getKey(), str);
-                        break;
-                    case XObject.CLASS_NULL:
-                    case XObject.CLASS_UNKNOWN:
-                    case XObject.CLASS_NODESET:
-                    case XObject.CLASS_RTREEFRAG:
-                    case XObject.CLASS_UNRESOLVEDVARIABLE:
-                    default:
-                        final Node value = getXPathAPI().selectSingleNode(
-                                document, entry.getValue());
-                        putResultDataBody(dataMap, entry.getKey(),
-                                value != null ? value.getTextContent() : null);
-                        break;
+                        case XObject.CLASS_BOOLEAN:
+                            final boolean b = xObj.bool();
+                            putResultDataBody(dataMap, entry.getKey(),
+                                    Boolean.toString(b));
+                            break;
+                        case XObject.CLASS_NUMBER:
+                            final double d = xObj.num();
+                            putResultDataBody(dataMap, entry.getKey(),
+                                    Double.toString(d));
+                            break;
+                        case XObject.CLASS_STRING:
+                            final String str = xObj.str();
+                            putResultDataBody(dataMap, entry.getKey(), str);
+                            break;
+                        case XObject.CLASS_NULL:
+                        case XObject.CLASS_UNKNOWN:
+                        case XObject.CLASS_NODESET:
+                        case XObject.CLASS_RTREEFRAG:
+                        case XObject.CLASS_UNRESOLVEDVARIABLE:
+                        default:
+                            final Node value = getXPathAPI().selectSingleNode(
+                                    document, entry.getValue());
+                            putResultDataBody(dataMap, entry.getKey(),
+                                    value != null ? value.getTextContent()
+                                            : null);
+                            break;
                     }
                 } catch (final TransformerException e) {
                     logger.warn("Could not parse a value of " + entry.getKey()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,7 +276,8 @@ public class SuggestElevateWordAction extends BsSuggestElevateWordAction {
         final File oFile = tempFile;
         try {
             final String head = new String(b, Constants.UTF_8);
-            if (!(head.startsWith("\"SuggestWord\"") || head.startsWith("SuggestWord"))) {
+            if (!(head.startsWith("\"SuggestWord\"") || head
+                    .startsWith("SuggestWord"))) {
                 log.error("Unknown file: "
                         + suggestElevateWordForm.suggestElevateWordFile);
                 throw new SSCActionMessagesException(

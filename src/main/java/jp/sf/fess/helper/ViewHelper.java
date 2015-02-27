@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,68 +232,70 @@ public class ViewHelper implements Serializable {
 
             final UserAgentType ua = userAgentHelper.getUserAgentType();
             switch (ua) {
-            case IE:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+",
-                            crawlerProperties.getProperty(
-                                    "file.protocol.winlocal.ie", "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.ie", "file://"));
-                }
-                break;
-            case FIREFOX:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.winlocal.firefox",
-                                    "file://"));
-                } else {
-                    url = url
-                            .replaceFirst("file:/+", crawlerProperties
-                                    .getProperty("file.protocol.firefox",
-                                            "file://///"));
-                }
-                break;
-            case CHROME:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.winlocal.chrome",
-                                    "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.chrome", "file://"));
-                }
-                break;
-            case SAFARI:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.winlocal.safari",
-                                    "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.safari", "file:////"));
-                }
-                break;
-            case OPERA:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.winlocal.opera",
-                                    "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.opera", "file://"));
-                }
-                break;
-            default:
-                if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.winlocal.other",
-                                    "file://"));
-                } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties
-                            .getProperty("file.protocol.other", "file://"));
-                }
-                break;
+                case IE:
+                    if (isLocalFile) {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.winlocal.ie",
+                                        "file://"));
+                    } else {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.ie", "file://"));
+                    }
+                    break;
+                case FIREFOX:
+                    if (isLocalFile) {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.winlocal.firefox",
+                                        "file://"));
+                    } else {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.firefox",
+                                        "file://///"));
+                    }
+                    break;
+                case CHROME:
+                    if (isLocalFile) {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.winlocal.chrome",
+                                        "file://"));
+                    } else {
+                        url = url
+                                .replaceFirst("file:/+", crawlerProperties
+                                        .getProperty("file.protocol.chrome",
+                                                "file://"));
+                    }
+                    break;
+                case SAFARI:
+                    if (isLocalFile) {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.winlocal.safari",
+                                        "file://"));
+                    } else {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.safari",
+                                        "file:////"));
+                    }
+                    break;
+                case OPERA:
+                    if (isLocalFile) {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.winlocal.opera",
+                                        "file://"));
+                    } else {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.opera", "file://"));
+                    }
+                    break;
+                default:
+                    if (isLocalFile) {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.winlocal.other",
+                                        "file://"));
+                    } else {
+                        url = url.replaceFirst("file:/+", crawlerProperties
+                                .getProperty("file.protocol.other", "file://"));
+                    }
+                    break;
             }
 
             if (encodeUrlLink) {

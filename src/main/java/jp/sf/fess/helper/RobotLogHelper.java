@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,39 +37,39 @@ public class RobotLogHelper extends LogHelperImpl {
     public void log(final LogType key, final Object... objs) {
         try {
             switch (key) {
-            case CRAWLING_ACCESS_EXCEPTION: {
-                final S2RobotContext robotContext = (S2RobotContext) objs[0];
-                final UrlQueue urlQueue = (UrlQueue) objs[1];
-                Throwable e = (Throwable) objs[2];
-                if (e instanceof RobotMultipleCrawlAccessException) {
-                    final Throwable[] causes = ((RobotMultipleCrawlAccessException) e)
-                            .getCauses();
-                    if (causes.length > 0) {
-                        e = causes[causes.length - 1];
+                case CRAWLING_ACCESS_EXCEPTION: {
+                    final S2RobotContext robotContext = (S2RobotContext) objs[0];
+                    final UrlQueue urlQueue = (UrlQueue) objs[1];
+                    Throwable e = (Throwable) objs[2];
+                    if (e instanceof RobotMultipleCrawlAccessException) {
+                        final Throwable[] causes = ((RobotMultipleCrawlAccessException) e)
+                                .getCauses();
+                        if (causes.length > 0) {
+                            e = causes[causes.length - 1];
+                        }
                     }
-                }
 
-                String errorName;
-                final Throwable cause = e.getCause();
-                if (cause != null) {
-                    errorName = cause.getClass().getCanonicalName();
-                } else {
-                    errorName = e.getClass().getCanonicalName();
+                    String errorName;
+                    final Throwable cause = e.getCause();
+                    if (cause != null) {
+                        errorName = cause.getClass().getCanonicalName();
+                    } else {
+                        errorName = e.getClass().getCanonicalName();
+                    }
+                    storeFailureUrl(robotContext, urlQueue, errorName, e);
+                    break;
                 }
-                storeFailureUrl(robotContext, urlQueue, errorName, e);
-                break;
-            }
-            case CRAWLING_EXCETPION: {
-                final S2RobotContext robotContext = (S2RobotContext) objs[0];
-                final UrlQueue urlQueue = (UrlQueue) objs[1];
-                final Throwable e = (Throwable) objs[2];
+                case CRAWLING_EXCETPION: {
+                    final S2RobotContext robotContext = (S2RobotContext) objs[0];
+                    final UrlQueue urlQueue = (UrlQueue) objs[1];
+                    final Throwable e = (Throwable) objs[2];
 
-                storeFailureUrl(robotContext, urlQueue, e.getClass()
-                        .getCanonicalName(), e);
-                break;
-            }
-            default:
-                break;
+                    storeFailureUrl(robotContext, urlQueue, e.getClass()
+                            .getCanonicalName(), e);
+                    break;
+                }
+                default:
+                    break;
             }
         } catch (final Exception e) {
             logger.warn("Failed to store a failure url.", e);

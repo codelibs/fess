@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,36 +80,36 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             throws IOException, ServletException {
         final String formatType = request.getParameter("type");
         switch (getFormatType(formatType)) {
-        case SEARCH:
-            processSearchRequest(request, response, chain);
-            break;
-        case LABEL:
-            processLabelRequest(request, response, chain);
-            break;
-        case SUGGEST:
-            processSuggestRequest(request, response, chain);
-            break;
-        case SPELLCHECK:
-            processSpellCheckRequest(request, response, chain);
-            break;
-        case ANALYSIS:
-            processAnalysisRequest(request, response, chain);
-            break;
-        case HOTSEARCHWORD:
-            processHotSearchWordRequest(request, response, chain);
-            break;
-        case FAVORITE:
-            processFavoriteRequest(request, response, chain);
-            break;
-        case FAVORITES:
-            processFavoritesRequest(request, response, chain);
-            break;
-        case PING:
-            processPingRequest(request, response, chain);
-            break;
-        default:
-            writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
-            break;
+            case SEARCH:
+                processSearchRequest(request, response, chain);
+                break;
+            case LABEL:
+                processLabelRequest(request, response, chain);
+                break;
+            case SUGGEST:
+                processSuggestRequest(request, response, chain);
+                break;
+            case SPELLCHECK:
+                processSpellCheckRequest(request, response, chain);
+                break;
+            case ANALYSIS:
+                processAnalysisRequest(request, response, chain);
+                break;
+            case HOTSEARCHWORD:
+                processHotSearchWordRequest(request, response, chain);
+                break;
+            case FAVORITE:
+                processFavoriteRequest(request, response, chain);
+                break;
+            case FAVORITES:
+                processFavoritesRequest(request, response, chain);
+                break;
+            case PING:
+                processPingRequest(request, response, chain);
+                break;
+            default:
+                writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
+                break;
         }
     }
 
@@ -871,50 +871,50 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 out.write(hex(ch));
             } else if (ch < 32) {
                 switch (ch) {
-                case '\b':
-                    out.write('\\');
-                    out.write('b');
-                    break;
-                case '\n':
-                    out.write('\\');
-                    out.write('n');
-                    break;
-                case '\t':
-                    out.write('\\');
-                    out.write('t');
-                    break;
-                case '\f':
-                    out.write('\\');
-                    out.write('f');
-                    break;
-                case '\r':
-                    out.write('\\');
-                    out.write('r');
-                    break;
-                default:
-                    if (ch > 0xf) {
-                        out.write("\\u00");
-                        out.write(hex(ch));
-                    } else {
-                        out.write("\\u000");
-                        out.write(hex(ch));
-                    }
-                    break;
+                    case '\b':
+                        out.write('\\');
+                        out.write('b');
+                        break;
+                    case '\n':
+                        out.write('\\');
+                        out.write('n');
+                        break;
+                    case '\t':
+                        out.write('\\');
+                        out.write('t');
+                        break;
+                    case '\f':
+                        out.write('\\');
+                        out.write('f');
+                        break;
+                    case '\r':
+                        out.write('\\');
+                        out.write('r');
+                        break;
+                    default:
+                        if (ch > 0xf) {
+                            out.write("\\u00");
+                            out.write(hex(ch));
+                        } else {
+                            out.write("\\u000");
+                            out.write(hex(ch));
+                        }
+                        break;
                 }
             } else {
                 switch (ch) {
-                case '"':
-                    out.write("\\u0022");
-                    break;
-                case '\\':
-                    out.write("\\u005C");
-                    break;
-                case '/':
-                    out.write("\\u002F");
-                    break;
-                default:
-                    out.write(ch);
-                    break;
+                    case '"':
+                        out.write("\\u0022");
+                        break;
+                    case '\\':
+                        out.write("\\u005C");
+                        break;
+                    case '/':
+                        out.write("\\u002F");
+                        break;
+                    default:
+                        out.write(ch);
+                        break;
                 }
             }
         }
