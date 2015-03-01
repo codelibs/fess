@@ -16,7 +16,7 @@
       Returns a label name.
     </description>
     <name>labelexists</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.Boolean labelExists(java.lang.String)</function-signature>
     <example>
       ${fe:labelexists("value")}
@@ -28,7 +28,7 @@
       Returns a label name.
     </description>
     <name>label</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String label(java.lang.String)</function-signature>
     <example>
       ${fe:label("value")}
@@ -40,7 +40,7 @@
       Returns a list of hot search words.
     </description>
     <name>hsw</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.util.List hsw(java.lang.String, java.lang.Integer)</function-signature>
     <example>
       ${fe:hsw("week", 5)}
@@ -52,7 +52,7 @@
       Returns a size of hot search words.
     </description>
     <name>hswsize</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.Integer hswsize(java.lang.String)</function-signature>
     <example>
       ${fe:hswsize("week")}
@@ -64,7 +64,7 @@
       Returns Date from a given value.
     </description>
     <name>date</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.util.Date date(java.lang.Long)</function-signature>
     <example>
       ${fe:date(doc.tstamp)}
@@ -76,7 +76,7 @@
       Returns Date from a given value.
     </description>
     <name>parseDate</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.util.Date parseDate(java.lang.String)</function-signature>
     <example>
       ${fe:parseDate(doc.tstamp)}
@@ -88,7 +88,7 @@
       Returns query parameters for Facet.
     </description>
     <name>facetQuery</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String facetQuery()</function-signature>
     <example>
       ${fe:facetQuery()}
@@ -100,7 +100,7 @@
       Returns query parameters for More Like This.
     </description>
     <name>mltQuery</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String mltQuery()</function-signature>
     <example>
       ${fe:mltQuery()}
@@ -112,7 +112,7 @@
       Returns query parameters for Geo.
     </description>
     <name>geoQuery</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String geoQuery()</function-signature>
     <example>
       ${fe:geoQuery()}
@@ -124,7 +124,7 @@
       Returns a hidden form for Facet.
     </description>
     <name>facetForm</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String facetForm()</function-signature>
     <example>
       ${fe:facetForm()}
@@ -136,7 +136,7 @@
       Returns a hidden form for More Like This.
     </description>
     <name>mltForm</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String mltForm()</function-signature>
     <example>
       ${fe:mltForm()}
@@ -148,7 +148,7 @@
       Returns a hidden form for Geo.
     </description>
     <name>geoForm</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String geoForm()</function-signature>
     <example>
       ${fe:geoForm()}
@@ -160,7 +160,7 @@
       Returns a list of FacetQueryView.
     </description>
     <name>facetQueryViewList</name>
-    <function-class>jp.sf.fess.taglib.FessFunctions</function-class>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.util.List facetQueryViewList()</function-signature>
     <example>
       ${fe:facetQueryViewList()}

@@ -27,7 +27,7 @@
 
   <filter>
     <filter-name>encodingfilter</filter-name>
-    <filter-class>jp.sf.fess.filter.FessEncodingFilter</filter-class>
+    <filter-class>org.codelibs.fess.filter.FessEncodingFilter</filter-class>
     <init-param>
       <param-name>encoding</param-name>
       <param-value>UTF-8</param-value>
@@ -50,7 +50,7 @@
 
   <filter>
     <filter-name>authenticationFilter</filter-name>
-    <filter-class>jp.sf.fess.filter.AdminAuthFilter</filter-class>
+    <filter-class>org.codelibs.fess.filter.AdminAuthFilter</filter-class>
     <init-param>
       <param-name>urlPatterns</param-name>
       <param-value>/fess/admin.*</param-value>
@@ -67,7 +67,7 @@
 
   <filter>
     <filter-name>webApiFilter</filter-name>
-    <filter-class>jp.sf.fess.filter.WebApiFilter</filter-class>
+    <filter-class>org.codelibs.fess.filter.WebApiFilter</filter-class>
   </filter>
 
   <filter>
@@ -82,7 +82,7 @@
   <!--
   <filter>
     <filter-name>adLoginInfoFilter</filter-name>
-    <filter-class>jp.sf.fess.filter.AdLoginInfoFilter</filter-class>
+    <filter-class>org.codelibs.fess.filter.AdLoginInfoFilter</filter-class>
     <init-param>
       <param-name>redirectLoginError</param-name>
       <param-value>true</param-value>
@@ -231,7 +231,7 @@
   <!--
   <servlet>
     <servlet-name>h2ConfigServlet</servlet-name>
-    <servlet-class>jp.sf.fess.servlet.H2ConfigServlet</servlet-class>
+    <servlet-class>org.codelibs.fess.servlet.H2ConfigServlet</servlet-class>
     <init-param>
       <param-name>tcpPort</param-name>
       <param-value>19092</param-value>
@@ -242,7 +242,7 @@
 
   <servlet>
     <servlet-name>tomcat7ConfigServlet</servlet-name>
-    <servlet-class>jp.sf.fess.servlet.Tomcat7ConfigServlet</servlet-class>
+    <servlet-class>org.codelibs.fess.servlet.Tomcat7ConfigServlet</servlet-class>
     <load-on-startup>3</load-on-startup>
   </servlet>
 

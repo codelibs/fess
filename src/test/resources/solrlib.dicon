@@ -6,13 +6,13 @@
 	<!-- Properties Files (solr.properties and [groupName].properties) -->
 	<component name="solrProperties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>
-			@org.seasar.framework.util.ResourceUtil@getBuildDir(@jp.sf.fess.FessClass@class).getCanonicalPath()
+			@org.seasar.framework.util.ResourceUtil@getBuildDir(@org.codelibs.fess.FessClass@class).getCanonicalPath()
 					+ "/conf/solr.properties"
 		</arg>
 	</component>
 	<component name="solrGroup1Properties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>
-			@org.seasar.framework.util.ResourceUtil@getBuildDir(@jp.sf.fess.FessClass@class).getCanonicalPath()
+			@org.seasar.framework.util.ResourceUtil@getBuildDir(@org.codelibs.fess.FessClass@class).getCanonicalPath()
 					+ "solrGroup1.properties"
 		</arg>
 	</component>

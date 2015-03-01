@@ -29,7 +29,7 @@
         </property>
         <property name="URL">
             "jdbc:h2:file:"
-            + @org.seasar.framework.util.ResourceUtil@getBuildDir(@jp.sf.fess.FessClass@class).getCanonicalPath()
+            + @org.seasar.framework.util.ResourceUtil@getBuildDir(@org.codelibs.fess.FessClass@class).getCanonicalPath()
             + "/db/fess;DB_CLOSE_ON_EXIT=FALSE;LOG=2;MVCC=true"
         </property>
         <property name="user">"sa"</property>

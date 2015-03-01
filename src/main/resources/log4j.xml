@@ -27,7 +27,7 @@
   <logger name="org.seasar" >
     <level value ="debug" />
   </logger>
-  <logger name="jp.sf.fess" >
+  <logger name="org.codelibs.fess" >
     <level value ="debug" />
   </logger>
   <logger name="org.codelibs.robot" >

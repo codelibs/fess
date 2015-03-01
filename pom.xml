@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>jp.sf.fess</groupId>
+  <groupId>org.codelibs.fess</groupId>
   <artifactId>fess</artifactId>
   <version>10.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
@@ -20,45 +20,19 @@
     <name>CodeLibs</name>
     <url>http://www.codelibs.org/</url>
   </organization>
-  <developers>
-    <developer>
-      <id>shinsuke</id>
-      <name>Shinsuke Sugaya</name>
-      <email>shinsuke_at_yahoo.co.jp</email>
-      <url>http://d.hatena.ne.jp/shinsuke_sugaya/</url>
-    </developer>
-    <developer>
-      <id>sone</id>
-      <name>Takaaki SONE</name>
-    </developer>
-  </developers>
   <issueManagement>
     <url>https://github.com/codelibs/fess/issues</url>
   </issueManagement>
-  <distributionManagement>
-    <repository>
-      <id>codelibs-repository</id>
-      <url>ftp://maven.codelibs.org/home/codelibs/maven/</url>
-    </repository>
-    <site>
-      <id>codelibs-site</id>
-      <url>ftp://maven.codelibs.org/home/codelibs/fess/</url>
-    </site>
-  </distributionManagement>
   <scm>
     <connection>scm:git:git@github.com:codelibs/fess.git</connection>
     <developerConnection>scm:git:git@github.com:codelibs/fess.git</developerConnection>
     <url>https://github.com/codelibs/fess</url>
   </scm>
-  <mailingLists>
-    <mailingList>
-      <name>User List</name>
-      <subscribe>http://lists.sourceforge.jp/mailman/listinfo/fess-user</subscribe>
-      <unsubscribe>http://lists.sourceforge.jp/mailman/listinfo/fess-user</unsubscribe>
-      <post>fess-user@lists.sourceforge.jp</post>
-      <archive>http://sourceforge.jp/projects/fess/lists/archive/user/</archive>
-    </mailingList>
-  </mailingLists>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>9</version>
+  </parent>
   <profiles>
     <profile>
       <id>h2</id>
@@ -91,24 +65,10 @@
         <databasePassword>fess_pass</databasePassword>
       </properties>
     </profile>
-    <profile>
-      <id>oracle</id>
-      <properties>
-        <database>oracle</database>
-        <databaseGroupId>com.oracle</databaseGroupId>
-        <databaseArtifactId>ojdbc6</databaseArtifactId>
-        <databaseVersion>11.2.0.3</databaseVersion>
-        <databaseDriver>oracle.jdbc.driver.OracleDriver</databaseDriver>
-        <databaseUrl>jdbc:oracle:thin:@localhost:1521:XE</databaseUrl>
-        <databaseTestUrl>jdbc:oracle:thin:@localhost:1521:XE</databaseTestUrl>
-        <databaseUsername>fess</databaseUsername>
-        <databasePassword>fess</databasePassword>
-      </properties>
-    </profile>
   </profiles>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dbflute.version>1.0.5L</dbflute.version>
+    <dbflute.version>1.1.0-sp1</dbflute.version>
     <s2robot.version>0.8.0</s2robot.version>
     <solr.version>4.10.3</solr.version>
     <slf4j.version>1.7.7</slf4j.version>
@@ -131,8 +91,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -161,31 +121,6 @@
             </resource>
           </webResources>
           <warSourceExcludes>WEB-INF/classes/**/*.*,WEB-INF/lib/*.jar</warSourceExcludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.seasar.dbflute</groupId>
-        <artifactId>dbflute-maven-plugin</artifactId>
-        <version>1.0.2</version>
-        <dependencies>
-          <dependency>
-            <groupId>jp.sf.fess</groupId>
-            <artifactId>fess-crud-template</artifactId>
-            <version>1.0.1</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <dbfluteVersion>${dbflute.version}</dbfluteVersion>
-          <rootPackage>jp.sf.fess</rootPackage>
-          <dbPackage>jp.sf.fess.db</dbPackage>
-          <actionPackageName>action.admin</actionPackageName>
-          <formPackageName>form.admin</formPackageName>
-          <jspDir>${basedir}/src/main/webapp/WEB-INF/view/admin</jspDir>
-          <!-- schemaName>fess</schemaName -->
-          <clientProject>${database}</clientProject>
-          <dbfluteClientDir>${basedir}/dbflute_${database}</dbfluteClientDir>
-          <schemaFile>${basedir}/dbflute_${database}/schema/project-schema-fess.xml</schemaFile>
-          <databaseUrl>${databaseUrl}</databaseUrl>
         </configuration>
       </plugin>
       <plugin>
@@ -309,13 +244,6 @@
         </configuration>
       </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ftp</artifactId>
-        <version>2.6</version>
-      </extension>
-    </extensions>
   </build>
   <pluginRepositories>
     <pluginRepository>
@@ -350,6 +278,7 @@
       <id>oss.sonatype.org</id>
       <url>http://oss.sonatype.org/content/groups/public/</url>
     </repository>
+    <!-- TODO: remove -->
     <repository>
       <id>maven.seasar.org</id>
       <name>The Seasar Foundation Maven2 Repository</name>
@@ -376,6 +305,11 @@
       <groupId>${databaseGroupId}</groupId>
       <artifactId>${databaseArtifactId}</artifactId>
       <version>${databaseVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codelibs.fess</groupId>
+      <artifactId>fess-db-${database}</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>jp.sf.fess</groupId>
@@ -608,7 +542,7 @@
       <version>${s2robot.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.seasar.dbflute</groupId>
+      <groupId>org.dbflute</groupId>
       <artifactId>dbflute-runtime</artifactId>
       <version>${dbflute.version}</version>
     </dependency>
@@ -839,9 +773,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.seasar.dbflute</groupId>
+      <groupId>org.dbflute.utflute</groupId>
       <artifactId>utflute-seasar</artifactId>
-      <version>0.4.3</version>
+      <version>0.5.0-sp1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -32,17 +32,14 @@
     <controller
         maxFileSize="10M"
         bufferSize="1024"
-        processorClass="jp.sf.fess.struts.action.FessRequestProcessor"
-        multipartClass="org.codelibs.sastruts.core.upload.SSCMultipartRequestHandler"/>
-
+        processorClass="org.codelibs.fess.struts.action.FessRequestProcessor"
+        multipartClass="org.dbflute.saflute.web.action.processor.ActionMultipartRequestHandler"/>
 
 <!-- ================================ Message Resources Definitions -->
 
     <message-resources parameter="application"
-        factory="org.seasar.struts.util.S2PropertyMessageResourcesFactory">
-        <set-property property="escape" value="false"/>
+        factory="org.dbflute.saflute.web.action.message.PropertiesMessageResourcesFactory">
     </message-resources>
-
 
 <!-- ======================================= Plug Ins Configuration -->
 

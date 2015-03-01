@@ -2,27 +2,20 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="jobScheduler" class="jp.sf.fess.job.JobScheduler">
+	<component name="jobScheduler" class="org.codelibs.fess.job.JobScheduler">
 	</component>
-	<component name="groovyJobExecutor" class="jp.sf.fess.job.impl.GroovyExecutor" instance="prototype">
+	<component name="groovyJobExecutor" class="org.codelibs.fess.job.impl.GroovyExecutor" instance="prototype">
 	</component>
 
 	<!-- Jobs -->
-	<component name="crawlJob" class="jp.sf.fess.job.CrawlJob" instance="prototype">
+	<component name="crawlJob" class="org.codelibs.fess.job.CrawlJob" instance="prototype">
 	</component>
-	<component name="aggregateLogJob" class="jp.sf.fess.job.AggregateLogJob" instance="prototype">
+	<component name="aggregateLogJob" class="org.codelibs.fess.job.AggregateLogJob" instance="prototype">
 	</component>
-	<component name="purgeLogJob" class="jp.sf.fess.job.PurgeLogJob" instance="prototype">
+	<component name="purgeLogJob" class="org.codelibs.fess.job.PurgeLogJob" instance="prototype">
 	</component>
-	<component name="updateHotWordJob" class="jp.sf.fess.job.UpdateHotWordJob" instance="prototype">
+	<component name="updateHotWordJob" class="org.codelibs.fess.job.UpdateHotWordJob" instance="prototype">
 	</component>
-	<component name="updateStatsJob" class="jp.sf.fess.job.UpdateStatsJob" instance="prototype">
-	</component>
-	<!-- Deprecated -->
-	<component name="minutelyJob" class="jp.sf.fess.job.MinutelyJob" instance="prototype">
-	</component>
-	<component name="hourlyJob" class="jp.sf.fess.job.HourlyJob" instance="prototype">
-	</component>
-	<component name="dailyJob" class="jp.sf.fess.job.DailyJob" instance="prototype">
+	<component name="updateStatsJob" class="org.codelibs.fess.job.UpdateStatsJob" instance="prototype">
 	</component>
 </components>

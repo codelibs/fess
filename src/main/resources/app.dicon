@@ -4,6 +4,7 @@
 <components>
 	<include path="convention.dicon"/>
 	<include path="aop.dicon"/>
+	<include path="saflute.dicon"/>
 	<include path="dbflute.dicon"/>
 
 	<include path="fess.dicon"/>
@@ -14,19 +15,19 @@
 	<include path="s2robot_client.dicon" />
 	<include path="s2robot_mimetype.dicon" />
 
-	<component name="actionMessagesThrowsInterceptor" class="jp.sf.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
+	<component name="actionMessagesThrowsInterceptor" class="org.codelibs.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
 
 	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
         <!-- CHANGE THE FOLLOWING KEY -->
 		<property name="key">"1234567890123456"</property>
 	</component>
-	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
+	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
-	<component name="keyMatchHelper" class="jp.sf.fess.helper.KeyMatchHelper">
+	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">
 	</component>
-	<component name="queryHelper" class="jp.sf.fess.helper.QueryHelper">
+	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
 		<property name="defaultFacetInfo">
-			<component class="jp.sf.fess.entity.FacetInfo">
+			<component class="org.codelibs.fess.entity.FacetInfo">
 				<property name="minCount">1</property>
 				<property name="field">new String[] {"label"}</property>
 				<property name="query">new String[] {
@@ -119,10 +120,10 @@
 		</initMethod>
 		-->
 	</component>
-	<component name="viewHelper" class="jp.sf.fess.helper.ViewHelper">
+	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
 		<initMethod name="addFacetQueryView">
 			<arg>
-				<component class="jp.sf.fess.entity.FacetQueryView">
+				<component class="org.codelibs.fess.entity.FacetQueryView">
 					<property name="title">"label.facet_lastModified_title"</property>
 					<initMethod name="addQuery">
 						<arg>"label.facet_lastModified_1day"</arg>
@@ -145,7 +146,7 @@
 		</initMethod>
 		<initMethod name="addFacetQueryView">
 			<arg>
-				<component class="jp.sf.fess.entity.FacetQueryView">
+				<component class="org.codelibs.fess.entity.FacetQueryView">
 					<property name="title">"label.facet_contentLength_title"</property>
 					<initMethod name="addQuery">
 						<arg>"label.facet_contentLength_10k"</arg>
@@ -172,7 +173,7 @@
 		</initMethod>
 		<initMethod name="addFacetQueryView">
 			<arg>
-				<component class="jp.sf.fess.entity.FacetQueryView">
+				<component class="org.codelibs.fess.entity.FacetQueryView">
 					<property name="title">"label.facet_filetype_title"</property>
 					<initMethod name="addQuery">
 						<arg>"label.facet_filetype_html"</arg>
@@ -214,12 +215,12 @@
 		</initMethod>
 		 -->
 	</component>
-	<component name="userAgentHelper" class="jp.sf.fess.helper.UserAgentHelper">
+	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
-	<component name="webManagementHelper" class="jp.sf.fess.helper.impl.TomcatManagementHelperImpl">
+	<component name="webManagementHelper" class="org.codelibs.fess.helper.impl.TomcatManagementHelperImpl">
 		<initMethod name="addSolrInstance">
 			<arg>
-				<component class="jp.sf.fess.helper.impl.TomcatManagementHelperImpl$SolrInstance">
+				<component class="org.codelibs.fess.helper.impl.TomcatManagementHelperImpl$SolrInstance">
 					<property name="name">"solrServer1"</property>
 					<property name="managerUrl">"http://localhost:8080/manager/text/"</property>
 					<property name="contextPath">"/solr"</property>
@@ -229,13 +230,13 @@
 			</arg>
 		</initMethod>
 	</component>
-	<component name="hotSearchWordHelper" class="jp.sf.fess.helper.HotSearchWordHelper">
+	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
 		<property name="excludedWordPattern">@java.util.regex.Pattern@compile(".*[a-zA-Z0-9_]+:.*")</property>
 		<!-- 
 		<property name="size">10</property>
 		 -->
 	</component>
-	<component name="userInfoHelper" class="jp.sf.fess.helper.impl.CookieUserInfoHelperImpl">
+	<component name="userInfoHelper" class="org.codelibs.fess.helper.impl.CookieUserInfoHelperImpl">
 		<!-- 
 		<property name="cookieName">"fu"</property>
 		<property name="cookieDomain">""</property>
@@ -244,16 +245,16 @@
 		<property name="cookieSecure">false</property>
 		 -->
 	</component>
-	<component name="openSearchHelper" class="jp.sf.fess.helper.OpenSearchHelper">
+	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
 		<property name="encoding">"UTF-8"</property>
 	</component>
-	<component name="documentHelper" class="jp.sf.fess.helper.DocumentHelper">
+	<component name="documentHelper" class="org.codelibs.fess.helper.DocumentHelper">
 	</component>
-	<component name="queryResponseList" class="jp.sf.fess.util.QueryResponseList" instance="prototype">
+	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
 	</component>
 	<component name="userAgentName" class="java.lang.String">
-		<arg>"Mozilla/5.0 (compatible; Fess/" + @jp.sf.fess.Constants@FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
+		<arg>"Mozilla/5.0 (compatible; Fess/" + @org.codelibs.fess.Constants@FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
 	</component>
 
 	<component name="adProperties" class="java.util.Properties">
@@ -291,13 +292,13 @@
 		</initMethod>
 	</component>
 
-	<component name="adRoleHelper" class="jp.sf.fess.helper.AdRoleHelper">
+	<component name="adRoleHelper" class="org.codelibs.fess.helper.AdRoleHelper">
 		<initMethod name="setAdProperties">
 			<arg>adProperties</arg>
 		</initMethod>
 	</component>
 
-	<component name="suggestHelper" class="jp.sf.fess.helper.SuggestHelper">
+	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
 		<initMethod name="init">
 		</initMethod>
 	</component>

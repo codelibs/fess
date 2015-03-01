@@ -10,5 +10,5 @@
     <component class="org.seasar.framework.container.creator.ServiceCreator"/>
     <component class="org.seasar.framework.container.creator.DtoCreator"/>
     <component class="org.seasar.framework.container.creator.InterceptorCreator"/>
-    <component class="jp.sf.fess.crud.creator.PagerCreator"/>
+    <component class="org.codelibs.fess.crud.creator.PagerCreator"/>
 </components>

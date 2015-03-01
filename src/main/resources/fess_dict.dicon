@@ -2,7 +2,7 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="dictionaryManager" class="jp.sf.fess.dict.DictionaryManager">
+	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
 		<initMethod name="addLocator">
 			<arg>userDictLocator</arg>
 		</initMethod>
@@ -11,7 +11,7 @@
 		</initMethod>
 	</component>
 
-	<component name="synonymLocator" class="jp.sf.fess.dict.synonym.SynonymLocator">
+	<component name="synonymLocator" class="org.codelibs.fess.dict.synonym.SynonymLocator">
 		<property name="excludedSynonymList">{"data", "txlog",
 			"lib", "bin", "contrib"}</property>
 		<initMethod name="addSearchPath">
@@ -19,7 +19,7 @@
 		</initMethod>
 	</component>
 
-	<component name="userDictLocator" class="jp.sf.fess.dict.userdict.UserDictLocator">
+	<component name="userDictLocator" class="org.codelibs.fess.dict.userdict.UserDictLocator">
 		<property name="excludedUserDictList">{"data", "txlog",
 			"lib", "bin", "contrib"}</property>
 		<initMethod name="addSearchPath">

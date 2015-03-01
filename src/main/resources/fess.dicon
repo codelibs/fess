@@ -8,25 +8,25 @@
 
 	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>
-			@jp.sf.fess.util.ResourceUtil@getConfPath("crawler.properties")
+			@org.codelibs.fess.util.ResourceUtil@getConfPath("crawler.properties")
 		</arg>
 	</component>
 
-	<component name="searchLogHelper" class="jp.sf.fess.helper.impl.SearchLogHelperImpl">
+	<component name="searchLogHelper" class="org.codelibs.fess.helper.impl.SearchLogHelperImpl">
 		<!-- 
 		<property name="userCheckInterval">5 * 60 * 1000</property>
 		<property name="userInfoCacheSize">1000</property>
 		 -->
 	</component>
-	<component name="crawlingConfigHelper" class="jp.sf.fess.helper.CrawlingConfigHelper">
+	<component name="crawlingConfigHelper" class="org.codelibs.fess.helper.CrawlingConfigHelper">
 	</component>
-    <component name="pathMappingHelper" class="jp.sf.fess.helper.PathMappingHelper">
+    <component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
     </component>
-	<component name="jobHelper" class="jp.sf.fess.helper.JobHelper">
+	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">
 	</component>
-	<component name="fieldHelper" class="jp.sf.fess.helper.FieldHelper">
+	<component name="fieldHelper" class="org.codelibs.fess.helper.FieldHelper">
 	</component>
-	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
+	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
 		<!--
 		<property name="javaCommandPath">"java"</property>
 		<property name="filterPathEncoding">"UTF-8"</property>
@@ -143,9 +143,9 @@ new String[] {
 			<arg>"cache.hbs"</arg>
 		</initMethod>
 	</component>
-	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
+	<component name="crawlingSessionHelper" class="org.codelibs.fess.helper.CrawlingSessionHelper">
 	</component>
-	<component name="mailHelper" class="jp.sf.fess.helper.MailHelper">
+	<component name="mailHelper" class="org.codelibs.fess.helper.MailHelper">
 		<initMethod name="addProperty">
 			<arg>"mail.smtp.host"</arg>
 			<arg>"localhost"</arg>
@@ -154,7 +154,7 @@ new String[] {
 		<property name="from">"Administrator &lt;root@localhost&gt;"</property>
 		-->
 	</component>
-	<component name="roleQueryHelper" class="jp.sf.fess.helper.impl.RoleQueryHelperImpl">
+	<component name="roleQueryHelper" class="org.codelibs.fess.helper.impl.RoleQueryHelperImpl">
 		<!-- ex. parameter: fessRoles=123%0aadmin -->
 		<!-- 
 		<property name="parameterKey">"fessRoles"</property>
@@ -176,7 +176,7 @@ new String[] {
 		 -->
 	</component>
 <!--
-	<component name="screenShotManager" class="jp.sf.fess.screenshot.ScreenShotManager">
+	<component name="screenShotManager" class="org.codelibs.fess.screenshot.ScreenShotManager">
 		<initMethod name="add">
 			<arg>htmlScreenShotGenerator</arg>
 		</initMethod>
@@ -192,7 +192,7 @@ new String[] {
 		</arg>
 		<destroyMethod name="quit"></destroyMethod>
 	</component>
-	<component name="htmlScreenShotGenerator" class="jp.sf.fess.screenshot.impl.WebDriverGenerator">
+	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.WebDriverGenerator">
 		<property name="webDriver">webDriver</property>
 		<initMethod name="addCondition">
 			<arg>"mimetype"</arg>
@@ -201,7 +201,7 @@ new String[] {
 	</component>
 -->
 <!--
-	<component name="htmlScreenShotGenerator" class="jp.sf.fess.screenshot.impl.CommandGenerator">
+	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.CommandGenerator">
 		<property name="commandList">
 			{"bash", 
 			"/opt/fess/bin/html-screenshot.sh",

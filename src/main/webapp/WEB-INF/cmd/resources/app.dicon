@@ -10,17 +10,17 @@
 
 	<include path="s2robot_db.dicon" />
 
-	<component name="indexingHelper" class="jp.sf.fess.helper.IndexingHelper">
+	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>
-	<component name="labelTypeHelper" class="jp.sf.fess.helper.LabelTypeHelper">
+	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
-	<component name="webFsIndexHelper" class="jp.sf.fess.helper.WebFsIndexHelper">
+	<component name="webFsIndexHelper" class="org.codelibs.fess.helper.WebFsIndexHelper">
 	</component>
-	<component name="dataIndexHelper" class="jp.sf.fess.helper.DataIndexHelper">
+	<component name="dataIndexHelper" class="org.codelibs.fess.helper.DataIndexHelper">
 	</component>
-	<component name="overlappingHostHelper" class="jp.sf.fess.helper.OverlappingHostHelper">
+	<component name="overlappingHostHelper" class="org.codelibs.fess.helper.OverlappingHostHelper">
 	</component>
-	<component name="intervalControlHelper" class="jp.sf.fess.helper.IntervalControlHelper">
+	<component name="intervalControlHelper" class="org.codelibs.fess.helper.IntervalControlHelper">
 		<!-- 
 		<initMethod name="addIntervalRule">
 			<arg>"5:00"</arg>
@@ -30,9 +30,9 @@
 		</initMethod>
 		 -->
 	</component>
-	<component name="sambaHelper" class="jp.sf.fess.helper.SambaHelper">
+	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>
-	<component name="indexUpdater" class="jp.sf.fess.solr.IndexUpdater"
+	<component name="indexUpdater" class="org.codelibs.fess.solr.IndexUpdater"
 		instance="prototype">
 		<!-- 
 		<property name="maxDocumentCacheSize">5</property>
@@ -40,7 +40,7 @@
 		<property name="threadDump">false</property>
 		<initMethod name="addBoostDocumentRule">
 			<arg>
-				<component class="jp.sf.fess.solr.BoostDocumentRule">
+				<component class="org.codelibs.fess.solr.BoostDocumentRule">
 					<property name="matchExpression">"url.matches(\".*fess.*\")"</property>
 					<property name="boostExpression">"1000.0"</property>
 				</component>
@@ -52,7 +52,7 @@
 		</initMethod>
 		 -->
 	</component>
-	<component name="fileTypeHelper" class="jp.sf.fess.helper.FileTypeHelper">
+	<component name="fileTypeHelper" class="org.codelibs.fess.helper.FileTypeHelper">
 		<initMethod name="add">
 			<arg>"text/html"</arg>
 			<arg>"html"</arg>
@@ -87,15 +87,15 @@
 		</initMethod>
 	</component>
 	<!-- for H2 -->
-	<component name="databaseHelper" class="jp.sf.fess.helper.impl.H2DatabaseHelperImpl">
+	<component name="databaseHelper" class="org.codelibs.fess.helper.impl.H2DatabaseHelperImpl">
 		<!--
-		<component name="databaseHelper" class="jp.sf.fess.helper.impl.DatabaseHelperImpl">
+		<component name="databaseHelper" class="org.codelibs.fess.helper.impl.DatabaseHelperImpl">
 		 -->
 		<aspect pointcut="optimize">
 			j2ee.requiresNewTx
 		</aspect>
 	</component>
-	<component name="fessCrawler" class="jp.sf.fess.exec.Crawler"
+	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
 	</component>
 

@@ -19,7 +19,7 @@
 	</component>
 
 	<!-- Robot Thread -->
-	<component name="robotThread" class="jp.sf.fess.robot.FessS2RobotThread" instance="prototype" >
+	<component name="robotThread" class="org.codelibs.fess.robot.FessS2RobotThread" instance="prototype" >
 		<property name="noWaitOnFolder">true</property>
 	</component>
 

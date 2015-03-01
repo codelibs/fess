@@ -4,7 +4,7 @@
 <components>
 	<include path="s2robot_transformer_basic.dicon"/>
 
-	<component name="fessXpathTransformer" class="jp.sf.fess.transformer.FessXpathTransformer" instance="singleton">
+	<component name="fessXpathTransformer" class="org.codelibs.fess.transformer.FessXpathTransformer" instance="singleton">
 		<property name="name">"fessXpathTransformer"</property>
 		<property name="featureMap">defaultFeatureMap</property>
 		<property name="propertyMap">defaultPropertyMap</property>
@@ -36,7 +36,7 @@
 		</initMethod>
 	</component>
 
-	<component name="fessFileTransformer" class="jp.sf.fess.transformer.FessFileTransformer" instance="singleton">
+	<component name="fessFileTransformer" class="org.codelibs.fess.transformer.FessFileTransformer" instance="singleton">
 		<property name="name">"fessFileTransformer"</property>
 		<property name="replaceSiteEncodingWhenEnglish">true</property>
 		<property name="siteEncoding">"UTF-8"</property>
@@ -57,7 +57,7 @@
 		 -->
 	</component>
 
-	<component name="fessTikaTransformer" class="jp.sf.fess.transformer.FessTikaTransformer" instance="singleton">
+	<component name="fessTikaTransformer" class="org.codelibs.fess.transformer.FessTikaTransformer" instance="singleton">
 		<property name="name">"fessTikaTransformer"</property>
 		<property name="replaceSiteEncodingWhenEnglish">true</property>
 		<property name="siteEncoding">"UTF-8"</property>

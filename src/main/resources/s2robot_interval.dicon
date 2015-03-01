@@ -2,6 +2,6 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="intervalController" class="jp.sf.fess.interval.FessIntervalController" instance="prototype">
+	<component name="intervalController" class="org.codelibs.fess.interval.FessIntervalController" instance="prototype">
 	</component>
 </components>

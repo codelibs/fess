@@ -4,7 +4,7 @@
 <components>
 	<component class="org.seasar.framework.convention.impl.NamingConventionImpl">
 		<initMethod name="addRootPackageName">
-			<arg>"jp.sf.fess"</arg>
+			<arg>"org.codelibs.fess"</arg>
 		</initMethod>
 		<initMethod name="addRootPackageName">
 			<arg>"org.codelibs.sastruts.core"</arg>

@@ -2,7 +2,7 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="webApiManagerFactory" class="jp.sf.fess.api.WebApiManagerFactory">
+	<component name="webApiManagerFactory" class="org.codelibs.fess.api.WebApiManagerFactory">
 		<initMethod name="add">
  			<arg>xmlApiManager</arg>
 		</initMethod>
@@ -11,9 +11,9 @@
 		</initMethod>
 	</component>
 
-	<component name="xmlApiManager" class="jp.sf.fess.api.xml.XmlApiManager">
+	<component name="xmlApiManager" class="org.codelibs.fess.api.xml.XmlApiManager">
 	</component>
-	<component name="jsonApiManager" class="jp.sf.fess.api.json.JsonApiManager">
+	<component name="jsonApiManager" class="org.codelibs.fess.api.json.JsonApiManager">
 	</component>
 
 </components>

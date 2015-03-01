@@ -6,20 +6,20 @@
 
 	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>
-			@org.seasar.framework.util.ResourceUtil@getBuildDir(@jp.sf.fess.FessClass@class).getCanonicalPath()
+			@org.seasar.framework.util.ResourceUtil@getBuildDir(@org.codelibs.fess.FessClass@class).getCanonicalPath()
 			+ "/conf/crawler.properties"
 		</arg>
 	</component>
 
-	<component name="fieldHelper" class="jp.sf.fess.helper.FieldHelper">
+	<component name="fieldHelper" class="org.codelibs.fess.helper.FieldHelper">
 	</component>
-	<component name="systemHelper" class="jp.sf.fess.helper.SystemHelper">
+	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
 		<!--
 		<property name="adminRole">"fess"</property>
 		<property name="authenticatedRoles">"role1"</property>
 		-->
 	</component>
-	<component name="crawlingSessionHelper" class="jp.sf.fess.helper.CrawlingSessionHelper">
+	<component name="crawlingSessionHelper" class="org.codelibs.fess.helper.CrawlingSessionHelper">
 	</component>
 
 </components>

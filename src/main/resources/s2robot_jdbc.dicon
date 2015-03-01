@@ -12,7 +12,7 @@
         </property>
         <property name="URL">
             "jdbc:h2:file:"
-            + @jp.sf.fess.util.ResourceUtil@getDbPath("robot")
+            + @org.codelibs.fess.util.ResourceUtil@getDbPath("robot")
             + ";DB_CLOSE_ON_EXIT=FALSE;LOG=2;MVCC=true"
         </property>
         <property name="user">"sa"</property>

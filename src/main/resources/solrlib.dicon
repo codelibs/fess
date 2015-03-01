@@ -6,12 +6,12 @@
 	<!-- Properties Files (solr.properties and [groupName].properties) -->
 	<component name="solrProperties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>
-			@jp.sf.fess.util.ResourceUtil@getConfPath("solr.properties")
+			@org.codelibs.fess.util.ResourceUtil@getConfPath("solr.properties")
 		</arg>
 	</component>
 	<component name="solrGroup1Properties" class="org.codelibs.core.util.DynamicProperties">
 		<arg>
-			@jp.sf.fess.util.ResourceUtil@getConfPath("solrGroup1.properties")
+			@org.codelibs.fess.util.ResourceUtil@getConfPath("solrGroup1.properties")
 		</arg>
 	</component>
 
@@ -31,7 +31,7 @@
 		<!-- Note: groupName cannot include ".". -->
 		<property name="groupName">"solrGroup1"</property>
 		<property name="statusPolicy">
-			<component class="jp.sf.fess.solr.policy.FessStatusPolicy">
+			<component class="org.codelibs.fess.solr.policy.FessStatusPolicy">
 				<property name="solrGroupProperties">solrGroup1Properties</property>
 				<property name="minSelectServer">1</property>
 				<property name="minUpdateServer">1</property>

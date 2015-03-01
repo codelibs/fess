@@ -336,7 +336,7 @@
                   msg="errors.range"/>
                   
      <validator name="cronExpression"
-            classname="jp.sf.fess.validator.CronExpressionChecks"
+            classname="org.codelibs.fess.validator.CronExpressionChecks"
                method="validateCronExpression"
          methodParams="java.lang.Object,
                        org.apache.commons.validator.ValidatorAction,
@@ -348,7 +348,7 @@
                   msg="errors.cronexpression"/>
 
      <validator name="uriType"
-            classname="jp.sf.fess.validator.UriTypeChecks"
+            classname="org.codelibs.fess.validator.UriTypeChecks"
                method="validateUriType"
          methodParams="java.lang.Object,
                        org.apache.commons.validator.ValidatorAction,
