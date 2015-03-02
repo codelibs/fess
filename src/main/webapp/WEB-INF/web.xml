@@ -72,7 +72,10 @@
 
   <filter>
     <filter-name>routingfilter</filter-name>
+    <filter-class>org.seasar.struts.filter.RoutingFilter</filter-class>
+    <!-- 
     <filter-class>org.dbflute.saflute.web.servlet.filter.RequestRoutingFilter</filter-class>
+     -->
     <init-param>
       <param-name>jspDirectAccess</param-name>
       <param-value>false</param-value>
