@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.util;
+package org.codelibs.fess.beans;
 
 public class FessBeans {
     protected FessBeans() {

@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.action.admin.BsRequestHeaderAction;
@@ -34,7 +35,6 @@ import org.codelibs.fess.db.exentity.RequestHeader;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.service.WebCrawlingConfigService;
-import org.codelibs.fess.util.FessBeans;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
