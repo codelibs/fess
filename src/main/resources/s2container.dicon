@@ -5,4 +5,10 @@
     <include condition="#ENV == 'ut'" path="warmdeploy.dicon"/>
     <include condition="#ENV == 'ct'" path="hotdeploy.dicon"/>
     <include condition="#ENV != 'ut' and #ENV != 'ct'" path="cooldeploy.dicon"/>
+
+    <!-- = = = = = = = = = = -->
+    <!-- for S2ClassBuilder  -->
+    <!-- = = = = = = = = = = -->
+    <component name="dicon" class="org.seasar.cms.classbuilder.impl.RedefinableXmlS2ContainerBuilder" />
+    <component class="org.seasar.cms.classbuilder.impl.RedefinableResourceResolver" />
 </components>

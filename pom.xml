@@ -468,6 +468,21 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.seasar.cms.s2-classbuilder</groupId>
+      <artifactId>s2-classbuilder</artifactId>
+      <version>0.0.11</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.seasar.container</groupId>
+          <artifactId>s2-framework</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seasar.container</groupId>
+          <artifactId>s2-extension</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.codelibs.struts</groupId>
       <artifactId>cl-struts</artifactId>
       <version>1.2.9.1</version>

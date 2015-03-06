@@ -21,7 +21,7 @@ import java.util.Map;
 import org.codelibs.fess.util.SearchParamMap;
 import org.seasar.struts.action.S2RequestProcessor;
 
-public class FessRequestProcessor extends S2RequestProcessor/*ActionRequestProcessor*/ {
+public class FessRequestProcessor extends S2RequestProcessor/*ActionRequestProcessor*/{
     @Override
     @SuppressWarnings("unchecked")
     protected void setMapProperty(final Map map, final String name,

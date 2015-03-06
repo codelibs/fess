@@ -5,7 +5,7 @@
     <include path="default-customizer.dicon"/>
 	
     <component name="serviceCustomizer"
-        class="org.seasar.framework.container.customizer.CustomizerChain">
+        class="org.dbflute.saflute.core.interceptor.ConcreteDrivenCustomizerChain">
         <initMethod name="addAspectCustomizer">
             <arg>"aop.traceInterceptor"</arg>
         </initMethod>

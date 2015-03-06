@@ -82,6 +82,11 @@
     </init-param>
   </filter>
 
+  <filter>
+    <filter-name>requestLoggingFilter</filter-name>
+    <filter-class>org.dbflute.saflute.web.servlet.filter.RequestLoggingFilter</filter-class>
+  </filter>
+
   <!--
   <filter>
     <filter-name>adLoginInfoFilter</filter-name>
@@ -187,6 +192,16 @@
     <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
 
+  <!--
+   basically you should set original filters after Seasar's basic filters
+   because request and session might be filtered by the filters
+   (e.g. session attributes are wrapped in holder when hot-deploy)
+   -->
+  <filter-mapping>
+    <filter-name>requestLoggingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <filter-mapping>
     <filter-name>authenticationFilter</filter-name>
     <url-pattern>/*</url-pattern>
@@ -251,7 +266,7 @@
 
   <servlet>
     <servlet-name>s2container</servlet-name>
-    <servlet-class>org.seasar.framework.container.servlet.S2ContainerServlet</servlet-class>
+    <servlet-class>org.dbflute.saflute.web.servlet.ContainerManagementServlet</servlet-class>
     <load-on-startup>4</load-on-startup>
   </servlet>
 
