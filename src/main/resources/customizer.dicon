@@ -5,7 +5,7 @@
     <include path="default-customizer.dicon"/>
 	
     <component name="actionCustomizer"
-        class="org.seasar.framework.container.customizer.CustomizerChain">
+        class="org.dbflute.saflute.web.action.interceptor.ActionCustomizerChain">
         <initMethod name="addAspectCustomizer">
             <arg>"aop.traceInterceptor"</arg>
         </initMethod>
@@ -24,11 +24,11 @@
     </component>
     
     <component name="formCustomizer"
-        class="org.seasar.framework.container.customizer.CustomizerChain">
+        class="org.dbflute.saflute.core.interceptor.ConcreteDrivenCustomizerChain">
     </component>
 	
     <component name="serviceCustomizer"
-        class="org.seasar.framework.container.customizer.CustomizerChain">
+        class="org.dbflute.saflute.core.interceptor.ConcreteDrivenCustomizerChain">
         <initMethod name="addAspectCustomizer">
             <arg>"aop.traceInterceptor"</arg>
         </initMethod>
