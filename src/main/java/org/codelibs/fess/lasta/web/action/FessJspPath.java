@@ -339,9 +339,6 @@ public interface FessJspPath {
     /** The path of the JSP: /admin/wizard/startCrawling.jsp */
     String path_AdminWizard_StartCrawlingJsp = "/admin/wizard/startCrawling.jsp";
 
-    /** The path of the JSP: /applet/launcher.jsp */
-    String path_Applet_LauncherJsp = "/applet/launcher.jsp";
-
     /** The path of the JSP: /error/badRequest.jsp */
     String path_Error_BadRequestJsp = "/error/badRequest.jsp";
 
