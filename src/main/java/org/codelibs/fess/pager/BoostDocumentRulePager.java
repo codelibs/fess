@@ -16,23 +16,124 @@
 
 package org.codelibs.fess.pager;
 
+import java.io.Serializable;
+import java.util.List;
+
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.pager.BsBoostDocumentRulePager;
 
-public class BoostDocumentRulePager extends BsBoostDocumentRulePager {
-
+public class BoostDocumentRulePager implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public BoostDocumentRulePager() {
-        super();
-    }
+    public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
-    @Override
+    private int allRecordCount;
+
+    private int allPageCount;
+
+    private boolean existPrePage;
+
+    private boolean existNextPage;
+
+    private List<Integer> pageNumberList;
+
+    private int pageSize;
+
+    private int currentPageNumber;
+
+    public String id;
+
+    public String urlExpr;
+
+    public String boostExpr;
+
+    public String sortOrder;
+
+    public String createdBy;
+
+    public String createdTime;
+
+    public String versionNo;
+
     public void clear() {
-        super.clear();
+        pageSize = getDefaultPageSize();
+        currentPageNumber = getDefaultCurrentPageNumber();
+
+        id = null;
+        urlExpr = null;
+        boostExpr = null;
+        sortOrder = null;
+        createdBy = null;
+        createdTime = null;
+        versionNo = null;
+
     }
 
-    @Override
+    public int getAllRecordCount() {
+        return allRecordCount;
+    }
+
+    public void setAllRecordCount(final int allRecordCount) {
+        this.allRecordCount = allRecordCount;
+    }
+
+    public int getAllPageCount() {
+        return allPageCount;
+    }
+
+    public void setAllPageCount(final int allPageCount) {
+        this.allPageCount = allPageCount;
+    }
+
+    public boolean isExistPrePage() {
+        return existPrePage;
+    }
+
+    public void setExistPrePage(final boolean existPrePage) {
+        this.existPrePage = existPrePage;
+    }
+
+    public boolean isExistNextPage() {
+        return existNextPage;
+    }
+
+    public void setExistNextPage(final boolean existNextPage) {
+        this.existNextPage = existNextPage;
+    }
+
+    public int getPageSize() {
+        if (pageSize <= 0) {
+            pageSize = getDefaultPageSize();
+        }
+        return pageSize;
+    }
+
+    public void setPageSize(final int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public int getCurrentPageNumber() {
+        if (currentPageNumber <= 0) {
+            currentPageNumber = getDefaultCurrentPageNumber();
+        }
+        return currentPageNumber;
+    }
+
+    public void setCurrentPageNumber(final int currentPageNumber) {
+        this.currentPageNumber = currentPageNumber;
+    }
+
+    public List<Integer> getPageNumberList() {
+        return pageNumberList;
+    }
+
+    public void setPageNumberList(final List<Integer> pageNumberList) {
+        this.pageNumberList = pageNumberList;
+    }
+
+    protected int getDefaultCurrentPageNumber() {
+        return Constants.DEFAULT_ADMIN_PAGE_NUMBER;
+    }
+
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }
