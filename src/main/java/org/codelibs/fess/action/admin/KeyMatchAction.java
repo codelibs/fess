@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.action.admin.BsKeyMatchAction;
@@ -29,7 +30,6 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.KeyMatch;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.FessBeans;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.Execute;

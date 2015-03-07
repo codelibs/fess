@@ -14,14 +14,22 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.util;
+package org.codelibs.fess.lasta;
 
-public class FessBeans {
-    protected FessBeans() {
-        // nothing
-    }
+import javax.annotation.Resource;
 
-    public static FessCopy copy(final Object src, final Object dest) {
-        return new FessCopy(src, dest);
+import org.codelibs.fess.lasta.core.direction.FessConfig;
+import org.codelibs.fess.unit.UnitFessContainerTestCase;
+
+/**
+ * @author jflute
+ */
+public class LastaEnvTest extends UnitFessContainerTestCase {
+
+    @Resource
+    protected FessConfig fessConfig;
+
+    public void test_boot() throws Exception {
+        assertNotNull(fessConfig);
     }
 }

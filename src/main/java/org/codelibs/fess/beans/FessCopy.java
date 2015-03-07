@@ -14,15 +14,25 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.util;
+package org.codelibs.fess.beans;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.beans.converter.LocalDateTimeConverter;
+import org.seasar.framework.beans.Converter;
+import org.seasar.framework.beans.converter.DateConverter;
 import org.seasar.framework.beans.util.Copy;
+import org.seasar.framework.util.TimestampConversionUtil;
 
 public class FessCopy extends Copy {
+
+    protected static final Converter DEFAULT_LOCALDATETIME_CONVERTER = new LocalDateTimeConverter(TimestampConversionUtil.getPattern(Locale
+            .getDefault()));
+
     public FessCopy(final Object src, final Object dest) {
         super(src, dest);
     }
@@ -54,4 +64,10 @@ public class FessCopy extends Copy {
         return dateConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime", "updatedTime", "deletedTime");
     }
 
+    protected Converter findDefaultConverter(Class<?> clazz) {
+        if (LocalDateTime.class.isAssignableFrom(clazz)) {
+            return DEFAULT_LOCALDATETIME_CONVERTER;
+        }
+        return super.findDefaultConverter(clazz);
+    }
 }

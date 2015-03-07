@@ -19,9 +19,9 @@ package org.codelibs.fess.struts.action;
 import java.util.Map;
 
 import org.codelibs.fess.util.SearchParamMap;
-import org.dbflute.saflute.web.action.processor.ActionRequestProcessor;
+import org.seasar.struts.action.S2RequestProcessor;
 
-public class FessRequestProcessor extends ActionRequestProcessor {
+public class FessRequestProcessor extends S2RequestProcessor/*ActionRequestProcessor*/{
     @Override
     @SuppressWarnings("unchecked")
     protected void setMapProperty(final Map map, final String name, final Object value) {

@@ -38,7 +38,10 @@
 <!-- ================================ Message Resources Definitions -->
 
     <message-resources parameter="application"
+        factory="org.seasar.struts.util.S2PropertyMessageResourcesFactory">
+        <!-- 
         factory="org.dbflute.saflute.web.action.message.PropertiesMessageResourcesFactory">
+         -->
     </message-resources>
 
 <!-- ======================================= Plug Ins Configuration -->

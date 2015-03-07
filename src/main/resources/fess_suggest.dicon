@@ -2,23 +2,23 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>	
-    <component name="suggestIntegrateConverter" class="org.codelibs.fess.suggest.converter.SuggestIntegrateConverter">
+    <component name="suggestIntegrateConverter" class="jp.sf.fess.suggest.converter.SuggestIntegrateConverter">
 		<initMethod name="addConverter">
 			<arg>
-				<component name="alphabetConverter" class="org.codelibs.fess.suggest.converter.AlphabetConverter" />
+				<component name="alphabetConverter" class="jp.sf.fess.suggest.converter.AlphabetConverter" />
             </arg>
 		</initMethod>
 		<initMethod name="start"/>
     </component>
-    <component name="suggestIntegrateNormalizer" class="org.codelibs.fess.suggest.normalizer.SuggestIntegrateNormalizer">
+    <component name="suggestIntegrateNormalizer" class="jp.sf.fess.suggest.normalizer.SuggestIntegrateNormalizer">
 		<initMethod name="addNormalizer">
 			<arg>
-				<component name="fullWidthToHalfWidthAlphabetNormalizer" class="org.codelibs.fess.suggest.normalizer.FullWidthToHalfWidthAlphabetNormalizer" />
+				<component name="fullWidthToHalfWidthAlphabetNormalizer" class="jp.sf.fess.suggest.normalizer.FullWidthToHalfWidthAlphabetNormalizer" />
 			</arg>
 		</initMethod>
 		<initMethod name="addNormalizer">
 			<arg>
-				<component name="icuNormalizer" class="org.codelibs.fess.suggest.normalizer.ICUNormalizer">
+				<component name="icuNormalizer" class="jp.sf.fess.suggest.normalizer.ICUNormalizer">
 					<property name="transliteratorId">"Any-Lower"</property>
 				</component>
 			</arg>
@@ -26,7 +26,7 @@
 		<initMethod name="start"/>
 	</component>
 
-	<component name="suggester" class="org.codelibs.fess.suggest.Suggester">
+	<component name="suggester" class="jp.sf.fess.suggest.Suggester">
 		<initMethod name="setConverter">
 			<arg>suggestIntegrateConverter</arg>
 		</initMethod>
@@ -35,7 +35,7 @@
 		</initMethod>
 	</component>
 
-	<component name="spellchecker" class="org.codelibs.fess.suggest.SpellChecker">
+	<component name="spellchecker" class="jp.sf.fess.suggest.SpellChecker">
 		<property name="fuzzyValue">0.5</property>
 		<initMethod name="setConverter">
 			<arg>suggestIntegrateConverter</arg>
@@ -73,12 +73,12 @@
 	</component>
 
 
-	<component name="suggestSolrServer" class="org.codelibs.fess.suggest.server.SuggestSolrServer">
+	<component name="suggestSolrServer" class="jp.sf.fess.suggest.server.SuggestSolrServer">
 		<arg>
 			suggestSolrLibSolrServer
 		</arg>
 	</component>
-	<component name="suggestService" class="org.codelibs.fess.suggest.service.SuggestService">
+	<component name="suggestService" class="jp.sf.fess.suggest.service.SuggestService">
 		<arg> suggester </arg>
 		<arg> spellchecker </arg>
 		<arg> suggestSolrServer </arg>

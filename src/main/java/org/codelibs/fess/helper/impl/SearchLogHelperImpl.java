@@ -25,6 +25,7 @@ import java.util.Queue;
 
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
 import org.codelibs.fess.db.exbhv.UserInfoBhv;
@@ -38,7 +39,6 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.service.SearchLogService;
 import org.codelibs.fess.service.UserInfoService;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.FessBeans;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
