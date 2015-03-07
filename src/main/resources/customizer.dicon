@@ -40,29 +40,6 @@
         </initMethod>
     </component>
 
-    <component name="taskSupportAspectCustomizer" class="org.seasar.framework.container.customizer.AspectCustomizer">
-        <initMethod name="addInterceptorName">
-            <arg>"aop.traceInterceptor"</arg>
-        </initMethod>
-        <property name="pointcut">"do.*, initialize, destroy"</property>
-    </component>
-    <component name="taskCustomizer" class="org.seasar.framework.container.customizer.CustomizerChain">
-        <initMethod name="addCustomizer">
-            <arg>taskSupportAspectCustomizer</arg>
-        </initMethod>
-    </component>
-    <component name="triggerSupportAspectCustomizer" class="org.seasar.framework.container.customizer.AspectCustomizer">
-        <initMethod name="addInterceptorName">
-            <arg>"aop.traceInterceptor"</arg>
-        </initMethod>
-        <property name="pointcut">".*"</property>
-    </component>
-    <component name="triggerCustomizer" class="org.seasar.framework.container.customizer.CustomizerChain">
-        <initMethod name="addCustomizer">
-            <arg>triggerSupportAspectCustomizer</arg>
-        </initMethod>
-    </component>
-    
     <component name="pagerCustomizer" class="org.seasar.framework.container.customizer.CustomizerChain">
     </component>
 
