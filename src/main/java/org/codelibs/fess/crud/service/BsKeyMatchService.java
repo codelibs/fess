@@ -41,16 +41,13 @@ public abstract class BsKeyMatchService {
 
     public List<KeyMatch> getKeyMatchList(final KeyMatchPager keyMatchPager) {
 
-        final PagingResultBean<KeyMatch> keyMatchList = keyMatchBhv
-                .selectPage(cb -> {
-                    cb.paging(keyMatchPager.getPageSize(),
-                            keyMatchPager.getCurrentPageNumber());
-                    setupListCondition(cb, keyMatchPager);
-                });
+        final PagingResultBean<KeyMatch> keyMatchList = keyMatchBhv.selectPage(cb -> {
+            cb.paging(keyMatchPager.getPageSize(), keyMatchPager.getCurrentPageNumber());
+            setupListCondition(cb, keyMatchPager);
+        });
 
         // update pager
-        Beans.copy(keyMatchList, keyMatchPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(keyMatchList, keyMatchPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         keyMatchPager.setPageNumberList(keyMatchList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -85,8 +82,7 @@ public abstract class BsKeyMatchService {
 
     }
 
-    protected void setupListCondition(final KeyMatchCB cb,
-            final KeyMatchPager keyMatchPager) {
+    protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
 
         if (keyMatchPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(keyMatchPager.id));
@@ -94,8 +90,7 @@ public abstract class BsKeyMatchService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final KeyMatchCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final KeyMatchCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final KeyMatch keyMatch) {

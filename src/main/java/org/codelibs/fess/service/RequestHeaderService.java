@@ -25,14 +25,12 @@ import org.codelibs.fess.db.cbean.RequestHeaderCB;
 import org.codelibs.fess.db.exentity.RequestHeader;
 import org.codelibs.fess.pager.RequestHeaderPager;
 
-public class RequestHeaderService extends BsRequestHeaderService implements
-        Serializable {
+public class RequestHeaderService extends BsRequestHeaderService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final RequestHeaderCB cb,
-            final RequestHeaderPager requestHeaderPager) {
+    protected void setupListCondition(final RequestHeaderCB cb, final RequestHeaderPager requestHeaderPager) {
         super.setupListCondition(cb, requestHeaderPager);
 
         // setup condition
@@ -46,8 +44,7 @@ public class RequestHeaderService extends BsRequestHeaderService implements
     }
 
     @Override
-    protected void setupEntityCondition(final RequestHeaderCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final RequestHeaderCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -71,8 +68,7 @@ public class RequestHeaderService extends BsRequestHeaderService implements
 
     }
 
-    public List<RequestHeader> getRequestHeaderList(
-            final Long webCrawlingConfigId) {
+    public List<RequestHeader> getRequestHeaderList(final Long webCrawlingConfigId) {
         return requestHeaderBhv.selectList(cb -> {
             cb.query().setWebCrawlingConfigId_Equal(webCrawlingConfigId);
             cb.query().setDeletedBy_IsNull();

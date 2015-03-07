@@ -23,8 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BoostDocumentRule {
-    private static final Logger logger = LoggerFactory
-            .getLogger(BoostDocumentRule.class);
+    private static final Logger logger = LoggerFactory.getLogger(BoostDocumentRule.class);
 
     private String boostExpression = "0";
 
@@ -34,8 +33,7 @@ public class BoostDocumentRule {
         // nothing
     }
 
-    public BoostDocumentRule(
-            final org.codelibs.fess.db.exentity.BoostDocumentRule rule) {
+    public BoostDocumentRule(final org.codelibs.fess.db.exentity.BoostDocumentRule rule) {
         matchExpression = rule.getUrlExpr();
         boostExpression = rule.getBoostExpr();
     }

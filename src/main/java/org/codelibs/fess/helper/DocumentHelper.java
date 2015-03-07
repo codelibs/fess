@@ -33,14 +33,11 @@ public class DocumentHelper {
     @Resource
     protected SolrGroupManager solrGroupManager;
 
-    public void update(final String docId, final String fieldName,
-            final long num) {
+    public void update(final String docId, final String fieldName, final long num) {
 
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.ADD);
+        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.ADD);
         if (!solrGroup.isActive(QueryType.ADD)) {
-            throw new FessSystemException("SolrGroup "
-                    + solrGroup.getGroupName() + " is not available.");
+            throw new FessSystemException("SolrGroup " + solrGroup.getGroupName() + " is not available.");
         }
 
         final SolrInputDocument doc = new SolrInputDocument();

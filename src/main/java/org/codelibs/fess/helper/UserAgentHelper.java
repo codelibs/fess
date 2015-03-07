@@ -27,13 +27,11 @@ public class UserAgentHelper {
 
     public UserAgentType getUserAgentType() {
         final HttpServletRequest request = RequestUtil.getRequest();
-        UserAgentType uaType = (UserAgentType) request
-                .getAttribute(USER_AGENT_TYPE);
+        UserAgentType uaType = (UserAgentType) request.getAttribute(USER_AGENT_TYPE);
         if (uaType == null) {
             final String userAgent = request.getHeader(USER_AGENT);
             if (userAgent != null) {
-                if (userAgent.indexOf("MSIE") >= 0
-                        || userAgent.indexOf("Trident") >= 0) {
+                if (userAgent.indexOf("MSIE") >= 0 || userAgent.indexOf("Trident") >= 0) {
                     uaType = UserAgentType.IE;
                 } else if (userAgent.indexOf("Firefox") >= 0) {
                     uaType = UserAgentType.FIREFOX;

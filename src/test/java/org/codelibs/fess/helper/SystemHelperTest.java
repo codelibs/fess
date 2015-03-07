@@ -34,8 +34,7 @@ public class SystemHelperTest extends S2TestCase {
         assertEquals(path, systemHelper.encodeUrlFilter(path));
 
         path = "あいう";
-        assertEquals("%E3%81%82%E3%81%84%E3%81%86",
-                systemHelper.encodeUrlFilter(path));
+        assertEquals("%E3%81%82%E3%81%84%E3%81%86", systemHelper.encodeUrlFilter(path));
 
         path = "[]^$.*+?,{}|%\\";
         assertEquals(path, systemHelper.encodeUrlFilter(path));

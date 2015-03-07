@@ -43,8 +43,7 @@ public class BsWebCrawlingConfigAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsWebCrawlingConfigAction.class);
+    private static final Log log = LogFactory.getLog(BsWebCrawlingConfigAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsWebCrawlingConfigAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        webCrawlingConfigItems = webCrawlingConfigService
-                .getWebCrawlingConfigList(webCrawlingConfigPager);
+        webCrawlingConfigItems = webCrawlingConfigService.getWebCrawlingConfigList(webCrawlingConfigPager);
 
         // restore from pager
-        Beans.copy(webCrawlingConfigPager, webCrawlingConfigForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(webCrawlingConfigPager, webCrawlingConfigForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsWebCrawlingConfigAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(webCrawlingConfigForm.pageNumber)) {
             try {
-                webCrawlingConfigPager.setCurrentPageNumber(Integer
-                        .parseInt(webCrawlingConfigForm.pageNumber));
+                webCrawlingConfigPager.setCurrentPageNumber(Integer.parseInt(webCrawlingConfigForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: "
-                            + webCrawlingConfigForm.pageNumber, e);
+                    log.debug("Invalid value: " + webCrawlingConfigForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsWebCrawlingConfigAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(webCrawlingConfigForm.searchParams, webCrawlingConfigPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(webCrawlingConfigForm.searchParams, webCrawlingConfigPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsWebCrawlingConfigAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (webCrawlingConfigForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            webCrawlingConfigForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    webCrawlingConfigForm.crudMode });
         }
 
         loadWebCrawlingConfig();
@@ -158,9 +151,8 @@ public class BsWebCrawlingConfigAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (webCrawlingConfigForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            webCrawlingConfigForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    webCrawlingConfigForm.crudMode });
         }
 
         loadWebCrawlingConfig();
@@ -194,9 +186,8 @@ public class BsWebCrawlingConfigAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (webCrawlingConfigForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            webCrawlingConfigForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    webCrawlingConfigForm.crudMode });
         }
 
         loadWebCrawlingConfig();
@@ -231,8 +222,7 @@ public class BsWebCrawlingConfigAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsWebCrawlingConfigAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsWebCrawlingConfigAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (webCrawlingConfigForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            webCrawlingConfigForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    webCrawlingConfigForm.crudMode });
         }
 
         try {
-            final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigService
-                    .getWebCrawlingConfig(createKeyMap());
+            final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigService.getWebCrawlingConfig(createKeyMap());
             if (webCrawlingConfig == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { webCrawlingConfigForm.id });
+                new Object[] { webCrawlingConfigForm.id });
 
             }
 
@@ -291,50 +277,43 @@ public class BsWebCrawlingConfigAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadWebCrawlingConfig() {
 
-        final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigService
-                .getWebCrawlingConfig(createKeyMap());
+        final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigService.getWebCrawlingConfig(createKeyMap());
         if (webCrawlingConfig == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { webCrawlingConfigForm.id });
+            new Object[] { webCrawlingConfigForm.id });
 
         }
 
-        Beans.copy(webCrawlingConfig, webCrawlingConfigForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(webCrawlingConfig, webCrawlingConfigForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected WebCrawlingConfig createWebCrawlingConfig() {
         WebCrawlingConfig webCrawlingConfig;
         if (webCrawlingConfigForm.crudMode == CommonConstants.EDIT_MODE) {
-            webCrawlingConfig = webCrawlingConfigService
-                    .getWebCrawlingConfig(createKeyMap());
+            webCrawlingConfig = webCrawlingConfigService.getWebCrawlingConfig(createKeyMap());
             if (webCrawlingConfig == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { webCrawlingConfigForm.id });
+                new Object[] { webCrawlingConfigForm.id });
 
             }
         } else {
             webCrawlingConfig = new WebCrawlingConfig();
         }
-        Beans.copy(webCrawlingConfigForm, webCrawlingConfig)
-                .excludes("searchParams", "mode")
+        Beans.copy(webCrawlingConfigForm, webCrawlingConfig).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return webCrawlingConfig;
     }

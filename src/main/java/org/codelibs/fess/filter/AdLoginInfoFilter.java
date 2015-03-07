@@ -40,8 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AdLoginInfoFilter implements Filter {
-    private static final Logger logger = LoggerFactory
-            .getLogger(AdLoginInfoFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdLoginInfoFilter.class);
 
     private long updateInterval = 60 * 60 * 1000L; // 1h
 
@@ -53,24 +52,21 @@ public class AdLoginInfoFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-        redirectLoginError = "true".equalsIgnoreCase(filterConfig
-                .getInitParameter("redirectLoginError"));
+        redirectLoginError = "true".equalsIgnoreCase(filterConfig.getInitParameter("redirectLoginError"));
 
         final String value = filterConfig.getInitParameter("updateInterval");
         if (value != null) {
             updateInterval = Long.parseLong(value);
         }
 
-        useTestUser = "true".equalsIgnoreCase(filterConfig
-                .getInitParameter("useTestUser"));
+        useTestUser = "true".equalsIgnoreCase(filterConfig.getInitParameter("useTestUser"));
 
         testUserName = filterConfig.getInitParameter("testUserName");
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         if (request instanceof HttpServletRequest) {
             final HttpServletRequest httpRequest = (HttpServletRequest) request;
             final HttpSession session = httpRequest.getSession();
@@ -81,17 +77,14 @@ public class AdLoginInfoFilter implements Filter {
             }
 
             if (StringUtil.isEmpty(userId)) {
-                final String servletPath = ((HttpServletRequest) request)
-                        .getServletPath();
+                final String servletPath = ((HttpServletRequest) request).getServletPath();
                 if (redirectLoginError && "/index.do".equals(servletPath)) {
-                    ((HttpServletResponse) response).sendRedirect(httpRequest
-                            .getContextPath() + "error/badRequest");
+                    ((HttpServletResponse) response).sendRedirect(httpRequest.getContextPath() + "error/badRequest");
                     return;
                 }
             }
 
-            LoginInfo loginInfo = (LoginInfo) session
-                    .getAttribute(SSCConstants.USER_INFO);
+            LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
             if (loginInfo == null) {
                 loginInfo = new LoginInfo();
                 loginInfo.setUsername(userId);

@@ -49,8 +49,7 @@ public class SuggestElevateWord extends BsSuggestElevateWord {
         if (value != null) {
             try {
                 _boost = new BigDecimal(value);
-            } catch (final Exception e) {
-            }
+            } catch (final Exception e) {}
         }
     }
 }

@@ -97,8 +97,7 @@ public class DatabaseService {
 
     private static final String LIST_SUFFIX = "List";
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(DatabaseService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseService.class);
 
     private static final String VERSION_KEY = "version";
 
@@ -251,135 +250,101 @@ public class DatabaseService {
         dataSet.put(VERSION_KEY, Constants.FESS_VERSION);
 
         // scheduledJob
-        dataSet.put(SCHEDULED_JOB_KEY + LIST_SUFFIX,
-                scheduledJobBhv.selectList(scheduledJobCB -> {
-                    scheduledJobCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(SCHEDULED_JOB_KEY + LIST_SUFFIX, scheduledJobBhv.selectList(scheduledJobCB -> {
+            scheduledJobCB.query().setDeletedBy_IsNull();
+        }));
         // labelType
-        dataSet.put(LABEL_TYPE_KEY + LIST_SUFFIX,
-                labelTypeBhv.selectList(labelTypeCB -> {
-                    labelTypeCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(LABEL_TYPE_KEY + LIST_SUFFIX, labelTypeBhv.selectList(labelTypeCB -> {
+            labelTypeCB.query().setDeletedBy_IsNull();
+        }));
         // roleType
-        dataSet.put(ROLE_TYPE_KEY + LIST_SUFFIX,
-                roleTypeBhv.selectList(roleTypeCB -> {
-                    roleTypeCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(ROLE_TYPE_KEY + LIST_SUFFIX, roleTypeBhv.selectList(roleTypeCB -> {
+            roleTypeCB.query().setDeletedBy_IsNull();
+        }));
         // fileCrawlingConfig
-        dataSet.put(FILE_CRAWLING_CONFIG_KEY + LIST_SUFFIX,
-                fileCrawlingConfigBhv.selectList(fileCrawlingConfigCB -> {
-                    fileCrawlingConfigCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(FILE_CRAWLING_CONFIG_KEY + LIST_SUFFIX, fileCrawlingConfigBhv.selectList(fileCrawlingConfigCB -> {
+            fileCrawlingConfigCB.query().setDeletedBy_IsNull();
+        }));
         // dataCrawlingConfig
-        dataSet.put(DATA_CRAWLING_CONFIG_KEY + LIST_SUFFIX,
-                dataCrawlingConfigBhv.selectList(dataCrawlingConfigCB -> {
-                    dataCrawlingConfigCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(DATA_CRAWLING_CONFIG_KEY + LIST_SUFFIX, dataCrawlingConfigBhv.selectList(dataCrawlingConfigCB -> {
+            dataCrawlingConfigCB.query().setDeletedBy_IsNull();
+        }));
         // pathMapping
-        dataSet.put(PATH_MAPPING_KEY + LIST_SUFFIX,
-                pathMappingBhv.selectList(pathMappingCB -> {
-                    pathMappingCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(PATH_MAPPING_KEY + LIST_SUFFIX, pathMappingBhv.selectList(pathMappingCB -> {
+            pathMappingCB.query().setDeletedBy_IsNull();
+        }));
         // overlappingHost
-        dataSet.put(OVERLAPPING_HOST_KEY + LIST_SUFFIX,
-                overlappingHostBhv.selectList(overlappingHostCB -> {
-                    overlappingHostCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(OVERLAPPING_HOST_KEY + LIST_SUFFIX, overlappingHostBhv.selectList(overlappingHostCB -> {
+            overlappingHostCB.query().setDeletedBy_IsNull();
+        }));
         // webCrawlingConfig
-        dataSet.put(WEB_CRAWLING_CONFIG_KEY + LIST_SUFFIX,
-                webCrawlingConfigBhv.selectList(webCrawlingConfigCB -> {
-                    webCrawlingConfigCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(WEB_CRAWLING_CONFIG_KEY + LIST_SUFFIX, webCrawlingConfigBhv.selectList(webCrawlingConfigCB -> {
+            webCrawlingConfigCB.query().setDeletedBy_IsNull();
+        }));
         // fileConfigToLabelTypeMapping
         dataSet.put(FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                fileConfigToLabelTypeMappingBhv
-                        .selectList(fileConfigToLabelTypeMappingCB -> {
-                        }));
+                fileConfigToLabelTypeMappingBhv.selectList(fileConfigToLabelTypeMappingCB -> {}));
         // dataConfigToLabelTypeMapping
         dataSet.put(DATA_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                dataConfigToLabelTypeMappingBhv
-                        .selectList(dataConfigToLabelTypeMappingCB -> {
-                        }));
+                dataConfigToLabelTypeMappingBhv.selectList(dataConfigToLabelTypeMappingCB -> {}));
         // webConfigToLabelTypeMapping
         dataSet.put(WEB_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                webConfigToLabelTypeMappingBhv
-                        .selectList(webConfigToLabelTypeMappingCB -> {
-                        }));
+                webConfigToLabelTypeMappingBhv.selectList(webConfigToLabelTypeMappingCB -> {}));
         // fileConfigToRoleTypeMapping
         dataSet.put(FILE_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                fileConfigToRoleTypeMappingBhv
-                        .selectList(fileConfigToRoleTypeMappingCB -> {
-                        }));
+                fileConfigToRoleTypeMappingBhv.selectList(fileConfigToRoleTypeMappingCB -> {}));
         // dataConfigToRoleTypeMapping
         dataSet.put(DATA_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                dataConfigToRoleTypeMappingBhv
-                        .selectList(dataConfigToRoleTypeMappingCB -> {
-                        }));
+                dataConfigToRoleTypeMappingBhv.selectList(dataConfigToRoleTypeMappingCB -> {}));
         // webConfigToRoleTypeMapping
         dataSet.put(WEB_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                webConfigToRoleTypeMappingBhv
-                        .selectList(webConfigToRoleTypeMappingCB -> {
-                        }));
+                webConfigToRoleTypeMappingBhv.selectList(webConfigToRoleTypeMappingCB -> {}));
         // webConfigToRoleTypeMapping
         dataSet.put(LABEL_TYPE_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX,
-                labelTypeToRoleTypeMappingBhv
-                        .selectList(labelTypeToRoleTypeMappingCB -> {
-                        }));
+                labelTypeToRoleTypeMappingBhv.selectList(labelTypeToRoleTypeMappingCB -> {}));
         // webAuthentication
-        dataSet.put(WEB_AUTHENTICATION_KEY + LIST_SUFFIX,
-                webAuthenticationBhv.selectList(webAuthenticationCB -> {
-                    webAuthenticationCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(WEB_AUTHENTICATION_KEY + LIST_SUFFIX, webAuthenticationBhv.selectList(webAuthenticationCB -> {
+            webAuthenticationCB.query().setDeletedBy_IsNull();
+        }));
         // fileAuthentication
-        dataSet.put(FILE_AUTHENTICATION_KEY + LIST_SUFFIX,
-                fileAuthenticationBhv.selectList(fileAuthenticationCB -> {
-                    fileAuthenticationCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(FILE_AUTHENTICATION_KEY + LIST_SUFFIX, fileAuthenticationBhv.selectList(fileAuthenticationCB -> {
+            fileAuthenticationCB.query().setDeletedBy_IsNull();
+        }));
         // requestHeader
-        dataSet.put(REQUEST_HEADER_KEY + LIST_SUFFIX,
-                requestHeaderBhv.selectList(requestHeaderCB -> {
-                    requestHeaderCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(REQUEST_HEADER_KEY + LIST_SUFFIX, requestHeaderBhv.selectList(requestHeaderCB -> {
+            requestHeaderCB.query().setDeletedBy_IsNull();
+        }));
         // keyMatch
-        dataSet.put(KEY_MATCH_KEY + LIST_SUFFIX,
-                keyMatchBhv.selectList(keyMatchCB -> {
-                    keyMatchCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(KEY_MATCH_KEY + LIST_SUFFIX, keyMatchBhv.selectList(keyMatchCB -> {
+            keyMatchCB.query().setDeletedBy_IsNull();
+        }));
         // boostDocumentRule
-        dataSet.put(BOOST_DOCUMENT_RULE_KEY + LIST_SUFFIX,
-                boostDocumentRuleBhv.selectList(boostDocumentRuleCB -> {
-                    boostDocumentRuleCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(BOOST_DOCUMENT_RULE_KEY + LIST_SUFFIX, boostDocumentRuleBhv.selectList(boostDocumentRuleCB -> {
+            boostDocumentRuleCB.query().setDeletedBy_IsNull();
+        }));
         // suggestElevateWord
-        dataSet.put(SUGGEST_ELEVATE_WORD_KEY + LIST_SUFFIX,
-                suggestElevateWordBhv.selectList(suggestElevateWordCB -> {
-                    suggestElevateWordCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(SUGGEST_ELEVATE_WORD_KEY + LIST_SUFFIX, suggestElevateWordBhv.selectList(suggestElevateWordCB -> {
+            suggestElevateWordCB.query().setDeletedBy_IsNull();
+        }));
         // suggestBadWord
-        dataSet.put(SUGGEST_BAD_WORD_KEY + LIST_SUFFIX,
-                suggestBadWordBhv.selectList(suggestBadWordCB -> {
-                    suggestBadWordCB.query().setDeletedBy_IsNull();
-                }));
+        dataSet.put(SUGGEST_BAD_WORD_KEY + LIST_SUFFIX, suggestBadWordBhv.selectList(suggestBadWordCB -> {
+            suggestBadWordCB.query().setDeletedBy_IsNull();
+        }));
 
         // crawlerProperties
         final Map<String, String> crawlerPropertyMap = new HashMap<String, String>();
-        for (final Map.Entry<Object, Object> entry : crawlerProperties
-                .entrySet()) {
+        for (final Map.Entry<Object, Object> entry : crawlerProperties.entrySet()) {
             try {
-                crawlerPropertyMap.put(entry.getKey().toString(), entry
-                        .getValue().toString());
+                crawlerPropertyMap.put(entry.getKey().toString(), entry.getValue().toString());
             } catch (final Exception e) {
-                logger.warn("Invalid data. key: " + entry.getKey()
-                        + ", value: " + entry.getValue(), e);
+                logger.warn("Invalid data. key: " + entry.getKey() + ", value: " + entry.getValue(), e);
             }
         }
         dataSet.put(CRAWLER_PROPERTIES_KEY, crawlerPropertyMap);
 
         try {
-            final XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(
-                    out));
-            final PersistenceDelegate pd = encoder
-                    .getPersistenceDelegate(Date.class);
+            final XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(out));
+            final PersistenceDelegate pd = encoder.getPersistenceDelegate(Date.class);
             encoder.setPersistenceDelegate(Timestamp.class, pd);
             encoder.writeObject(dataSet);
             encoder.close();
@@ -396,8 +361,7 @@ public class DatabaseService {
 
         Map<String, Object> dataSet;
         try {
-            final XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(
-                    in));
+            final XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(in));
             dataSet = (Map<String, Object>) decoder.readObject();
         } catch (final Exception e) {
             throw new FessSystemException("Could not read a data set.", e);
@@ -419,8 +383,7 @@ public class DatabaseService {
 
         protected Map<String, Object> dataSet;
 
-        protected DataImporter(final Map<String, Object> dataSet,
-                final boolean overwrite) {
+        protected DataImporter(final Map<String, Object> dataSet, final boolean overwrite) {
             this.dataSet = dataSet;
             this.overwrite = overwrite;
         }
@@ -433,34 +396,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<ScheduledJob> scheduledJobList = (List<ScheduledJob>) dataSet
-                        .get(SCHEDULED_JOB_KEY + LIST_SUFFIX);
+                final List<ScheduledJob> scheduledJobList = (List<ScheduledJob>) dataSet.get(SCHEDULED_JOB_KEY + LIST_SUFFIX);
                 if (scheduledJobList != null) {
                     for (ScheduledJob scheduledJob : scheduledJobList) {
                         final Long id = scheduledJob.getId();
 
                         final String name = scheduledJob.getName();
-                        final ScheduledJob entity = scheduledJobBhv
-                                .selectEntity(cb -> {
-                                    cb.query().setName_Equal(name);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final ScheduledJob entity = scheduledJobBhv.selectEntity(cb -> {
+                            cb.query().setName_Equal(name);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         scheduledJob.setId(null);
                         if (entity == null) {
                             scheduledJobBhv.insert(scheduledJob);
                         } else {
                             if (overwrite) {
                                 scheduledJob.setVersionNo(null);
-                                Beans.copy(scheduledJob, entity).excludesNull()
-                                        .execute();
+                                Beans.copy(scheduledJob, entity).excludesNull().execute();
                                 scheduledJob = entity;
                                 scheduledJobBhv.update(scheduledJob);
                             } else {
                                 scheduledJobBhv.insert(scheduledJob);
                             }
                         }
-                        idMap.put(SCHEDULED_JOB_KEY + ":" + id.toString(),
-                                scheduledJob.getId());
+                        idMap.put(SCHEDULED_JOB_KEY + ":" + id.toString(), scheduledJob.getId());
                     }
                 }
                 userTransaction.commit();
@@ -471,18 +430,16 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<LabelType> labelTypeList = (List<LabelType>) dataSet
-                        .get(LABEL_TYPE_KEY + LIST_SUFFIX);
+                final List<LabelType> labelTypeList = (List<LabelType>) dataSet.get(LABEL_TYPE_KEY + LIST_SUFFIX);
                 if (labelTypeList != null) {
                     for (LabelType labelType : labelTypeList) {
                         final Long id = labelType.getId();
 
                         final String value = labelType.getValue();
-                        final LabelType entity = labelTypeBhv.selectEntity(
-                                cb -> {
-                                    cb.query().setValue_Equal(value);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final LabelType entity = labelTypeBhv.selectEntity(cb -> {
+                            cb.query().setValue_Equal(value);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         labelType.setId(null);
                         if (entity == null) {
                             labelTypeBhv.insert(labelType);
@@ -490,21 +447,18 @@ public class DatabaseService {
                             // always overwrite
                             // if (overwrite) {
                             labelType.setVersionNo(null);
-                            Beans.copy(labelType, entity).excludesNull()
-                                    .execute();
+                            Beans.copy(labelType, entity).excludesNull().execute();
                             labelType = entity;
                             labelTypeBhv.update(labelType);
                             // } else {
                             // labelTypeBhv.insert(labelType);
                             // }
                         }
-                        idMap.put(LABEL_TYPE_KEY + ":" + id.toString(),
-                                labelType.getId());
+                        idMap.put(LABEL_TYPE_KEY + ":" + id.toString(), labelType.getId());
                     }
                 }
                 // restore labels
-                final LabelTypeHelper labelTypeHelper = ComponentUtil
-                        .getLabelTypeHelper();
+                final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
                 if (labelTypeHelper != null) {
                     labelTypeHelper.init();
                 }
@@ -516,18 +470,16 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<RoleType> roleTypeList = (List<RoleType>) dataSet
-                        .get(ROLE_TYPE_KEY + LIST_SUFFIX);
+                final List<RoleType> roleTypeList = (List<RoleType>) dataSet.get(ROLE_TYPE_KEY + LIST_SUFFIX);
                 if (roleTypeList != null) {
                     for (RoleType roleType : roleTypeList) {
                         final Long id = roleType.getId();
 
                         final String value = roleType.getValue();
-                        final RoleType entity = roleTypeBhv.selectEntity(
-                                cb -> {
-                                    cb.query().setValue_Equal(value);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final RoleType entity = roleTypeBhv.selectEntity(cb -> {
+                            cb.query().setValue_Equal(value);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         roleType.setId(null);
                         if (entity == null) {
                             roleTypeBhv.insert(roleType);
@@ -535,16 +487,14 @@ public class DatabaseService {
                             // always overwrite
                             // if (overwrite) {
                             roleType.setVersionNo(null);
-                            Beans.copy(roleType, entity).excludesNull()
-                                    .execute();
+                            Beans.copy(roleType, entity).excludesNull().execute();
                             roleType = entity;
                             roleTypeBhv.update(roleType);
                             // } else {
                             // roleTypeBhv.insert(roleType);
                             // }
                         }
-                        idMap.put(ROLE_TYPE_KEY + ":" + id.toString(),
-                                roleType.getId());
+                        idMap.put(ROLE_TYPE_KEY + ":" + id.toString(), roleType.getId());
                     }
                 }
                 userTransaction.commit();
@@ -555,36 +505,29 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<CrawlingSession> crawlingSessionList = (List<CrawlingSession>) dataSet
-                        .get(CRAWLING_SESSION_KEY + LIST_SUFFIX);
+                final List<CrawlingSession> crawlingSessionList = (List<CrawlingSession>) dataSet.get(CRAWLING_SESSION_KEY + LIST_SUFFIX);
                 if (crawlingSessionList != null) {
                     for (CrawlingSession crawlingSession : crawlingSessionList) {
                         final Long id = crawlingSession.getId();
 
                         final String sessionId = crawlingSession.getSessionId();
-                        final CrawlingSession entity = crawlingSessionBhv
-                                .selectEntity(cb -> {
-                                    cb.query().setSessionId_Equal(sessionId);
-                                }).orElse(null);//TODO
+                        final CrawlingSession entity = crawlingSessionBhv.selectEntity(cb -> {
+                            cb.query().setSessionId_Equal(sessionId);
+                        }).orElse(null);//TODO
                         crawlingSession.setId(null);
                         if (entity == null) {
                             crawlingSessionBhv.insert(crawlingSession);
                         } else {
-                            Beans.copy(crawlingSession, entity).excludesNull()
-                                    .execute();
+                            Beans.copy(crawlingSession, entity).excludesNull().execute();
                             crawlingSession = entity;
                             crawlingSessionBhv.update(crawlingSession);
-                            final Long crawlingSessionId = crawlingSession
-                                    .getId();
+                            final Long crawlingSessionId = crawlingSession.getId();
                             // delete info
-                            crawlingSessionInfoBhv.varyingQueryDelete(
-                                    cb2 -> {
-                                        cb2.query().setCrawlingSessionId_Equal(
-                                                crawlingSessionId);
-                                    }, op -> op.allowNonQueryDelete());
+                            crawlingSessionInfoBhv.varyingQueryDelete(cb2 -> {
+                                cb2.query().setCrawlingSessionId_Equal(crawlingSessionId);
+                            }, op -> op.allowNonQueryDelete());
                         }
-                        idMap.put(CRAWLING_SESSION_KEY + ":" + id.toString(),
-                                crawlingSession.getId());
+                        idMap.put(CRAWLING_SESSION_KEY + ":" + id.toString(), crawlingSession.getId());
                     }
                 }
                 userTransaction.commit();
@@ -595,22 +538,17 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<CrawlingSessionInfo> crawlingSessionInfoList = (List<CrawlingSessionInfo>) dataSet
-                        .get(CRAWLING_SESSION_INFO_KEY + LIST_SUFFIX);
+                final List<CrawlingSessionInfo> crawlingSessionInfoList =
+                        (List<CrawlingSessionInfo>) dataSet.get(CRAWLING_SESSION_INFO_KEY + LIST_SUFFIX);
                 if (crawlingSessionInfoList != null) {
                     for (final CrawlingSessionInfo crawlingSessionInfo : crawlingSessionInfoList) {
                         final Long id = crawlingSessionInfo.getId();
                         // relations
-                        crawlingSessionInfo.setCrawlingSessionId(idMap
-                                .get(CRAWLING_SESSION_KEY
-                                        + ":"
-                                        + crawlingSessionInfo
-                                                .getCrawlingSessionId()));
+                        crawlingSessionInfo.setCrawlingSessionId(idMap.get(CRAWLING_SESSION_KEY + ":"
+                                + crawlingSessionInfo.getCrawlingSessionId()));
                         crawlingSessionInfo.setId(null);
                         crawlingSessionInfoBhv.insert(crawlingSessionInfo);
-                        idMap.put(
-                                CRAWLING_SESSION_INFO_KEY + ":" + id.toString(),
-                                crawlingSessionInfo.getId());
+                        idMap.put(CRAWLING_SESSION_INFO_KEY + ":" + id.toString(), crawlingSessionInfo.getId());
                     }
                 }
                 userTransaction.commit();
@@ -621,37 +559,31 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<FileCrawlingConfig> fileCrawlingConfigList = (List<FileCrawlingConfig>) dataSet
-                        .get(FILE_CRAWLING_CONFIG_KEY + LIST_SUFFIX);
+                final List<FileCrawlingConfig> fileCrawlingConfigList =
+                        (List<FileCrawlingConfig>) dataSet.get(FILE_CRAWLING_CONFIG_KEY + LIST_SUFFIX);
                 if (fileCrawlingConfigList != null) {
                     for (FileCrawlingConfig fileCrawlingConfig : fileCrawlingConfigList) {
                         final Long id = fileCrawlingConfig.getId();
 
                         final String name = fileCrawlingConfig.getName();
-                        final FileCrawlingConfig entity = fileCrawlingConfigBhv
-                                .selectEntity(cb -> {
-                                    cb.query().setName_Equal(name);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final FileCrawlingConfig entity = fileCrawlingConfigBhv.selectEntity(cb -> {
+                            cb.query().setName_Equal(name);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         fileCrawlingConfig.setId(null);
                         if (entity == null) {
                             fileCrawlingConfigBhv.insert(fileCrawlingConfig);
                         } else {
                             if (overwrite) {
                                 fileCrawlingConfig.setVersionNo(null);
-                                Beans.copy(fileCrawlingConfig, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(fileCrawlingConfig, entity).excludesNull().execute();
                                 fileCrawlingConfig = entity;
-                                fileCrawlingConfigBhv
-                                        .update(fileCrawlingConfig);
+                                fileCrawlingConfigBhv.update(fileCrawlingConfig);
                             } else {
-                                fileCrawlingConfigBhv
-                                        .insert(fileCrawlingConfig);
+                                fileCrawlingConfigBhv.insert(fileCrawlingConfig);
                             }
                         }
-                        idMap.put(
-                                FILE_CRAWLING_CONFIG_KEY + ":" + id.toString(),
-                                fileCrawlingConfig.getId());
+                        idMap.put(FILE_CRAWLING_CONFIG_KEY + ":" + id.toString(), fileCrawlingConfig.getId());
                     }
                 }
                 userTransaction.commit();
@@ -662,37 +594,31 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<DataCrawlingConfig> dataCrawlingConfigList = (List<DataCrawlingConfig>) dataSet
-                        .get(DATA_CRAWLING_CONFIG_KEY + LIST_SUFFIX);
+                final List<DataCrawlingConfig> dataCrawlingConfigList =
+                        (List<DataCrawlingConfig>) dataSet.get(DATA_CRAWLING_CONFIG_KEY + LIST_SUFFIX);
                 if (dataCrawlingConfigList != null) {
                     for (DataCrawlingConfig dataCrawlingConfig : dataCrawlingConfigList) {
                         final Long id = dataCrawlingConfig.getId();
 
                         final String name = dataCrawlingConfig.getName();
-                        final DataCrawlingConfig entity = dataCrawlingConfigBhv
-                                .selectEntity(cb -> {
-                                    cb.query().setName_Equal(name);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final DataCrawlingConfig entity = dataCrawlingConfigBhv.selectEntity(cb -> {
+                            cb.query().setName_Equal(name);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         dataCrawlingConfig.setId(null);
                         if (entity == null) {
                             dataCrawlingConfigBhv.insert(dataCrawlingConfig);
                         } else {
                             if (overwrite) {
                                 dataCrawlingConfig.setVersionNo(null);
-                                Beans.copy(dataCrawlingConfig, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(dataCrawlingConfig, entity).excludesNull().execute();
                                 dataCrawlingConfig = entity;
-                                dataCrawlingConfigBhv
-                                        .update(dataCrawlingConfig);
+                                dataCrawlingConfigBhv.update(dataCrawlingConfig);
                             } else {
-                                dataCrawlingConfigBhv
-                                        .insert(dataCrawlingConfig);
+                                dataCrawlingConfigBhv.insert(dataCrawlingConfig);
                             }
                         }
-                        idMap.put(
-                                DATA_CRAWLING_CONFIG_KEY + ":" + id.toString(),
-                                dataCrawlingConfig.getId());
+                        idMap.put(DATA_CRAWLING_CONFIG_KEY + ":" + id.toString(), dataCrawlingConfig.getId());
                     }
                 }
                 userTransaction.commit();
@@ -703,18 +629,16 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<PathMapping> pathMappingList = (List<PathMapping>) dataSet
-                        .get(PATH_MAPPING_KEY + LIST_SUFFIX);
+                final List<PathMapping> pathMappingList = (List<PathMapping>) dataSet.get(PATH_MAPPING_KEY + LIST_SUFFIX);
                 if (pathMappingList != null) {
                     for (PathMapping pathMapping : pathMappingList) {
                         final Long id = pathMapping.getId();
 
                         final String regex = pathMapping.getRegex();
-                        final PathMapping entity = pathMappingBhv.selectEntity(
-                                cb -> {
-                                    cb.query().setRegex_Equal(regex);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final PathMapping entity = pathMappingBhv.selectEntity(cb -> {
+                            cb.query().setRegex_Equal(regex);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         pathMapping.setId(null);
                         if (pathMapping.getProcessType() == null) {
                             pathMapping.setProcessType_Crawling();
@@ -724,16 +648,14 @@ public class DatabaseService {
                         } else {
                             if (overwrite) {
                                 pathMapping.setVersionNo(null);
-                                Beans.copy(pathMapping, entity).excludesNull()
-                                        .execute();
+                                Beans.copy(pathMapping, entity).excludesNull().execute();
                                 pathMapping = entity;
                                 pathMappingBhv.update(pathMapping);
                             } else {
                                 pathMappingBhv.insert(pathMapping);
                             }
                         }
-                        idMap.put(PATH_MAPPING_KEY + ":" + id.toString(),
-                                pathMapping.getId());
+                        idMap.put(PATH_MAPPING_KEY + ":" + id.toString(), pathMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -744,42 +666,32 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<OverlappingHost> overlappingHostList = (List<OverlappingHost>) dataSet
-                        .get(OVERLAPPING_HOST_KEY + LIST_SUFFIX);
+                final List<OverlappingHost> overlappingHostList = (List<OverlappingHost>) dataSet.get(OVERLAPPING_HOST_KEY + LIST_SUFFIX);
                 if (overlappingHostList != null) {
                     for (OverlappingHost overlappingHost : overlappingHostList) {
                         final Long id = overlappingHost.getId();
 
-                        final String regularName = overlappingHost
-                                .getRegularName();
-                        final String overlappingName = overlappingHost
-                                .getOverlappingName();
-                        final OverlappingHost entity = overlappingHostBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setRegularName_Equal(
-                                                    regularName);
-                                            cb.query()
-                                                    .setOverlappingName_Equal(
-                                                            overlappingName);
-                                            cb.query().setDeletedBy_IsNull();
-                                        }).orElse(null);//TODO
+                        final String regularName = overlappingHost.getRegularName();
+                        final String overlappingName = overlappingHost.getOverlappingName();
+                        final OverlappingHost entity = overlappingHostBhv.selectEntity(cb -> {
+                            cb.query().setRegularName_Equal(regularName);
+                            cb.query().setOverlappingName_Equal(overlappingName);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         overlappingHost.setId(null);
                         if (entity == null) {
                             overlappingHostBhv.insert(overlappingHost);
                         } else {
                             if (overwrite) {
                                 overlappingHost.setVersionNo(null);
-                                Beans.copy(overlappingHost, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(overlappingHost, entity).excludesNull().execute();
                                 overlappingHost = entity;
                                 overlappingHostBhv.update(overlappingHost);
                             } else {
                                 overlappingHostBhv.insert(overlappingHost);
                             }
                         }
-                        idMap.put(OVERLAPPING_HOST_KEY + ":" + id.toString(),
-                                overlappingHost.getId());
+                        idMap.put(OVERLAPPING_HOST_KEY + ":" + id.toString(), overlappingHost.getId());
                     }
                 }
                 userTransaction.commit();
@@ -790,35 +702,31 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<WebCrawlingConfig> webCrawlingConfigList = (List<WebCrawlingConfig>) dataSet
-                        .get(WEB_CRAWLING_CONFIG_KEY + LIST_SUFFIX);
+                final List<WebCrawlingConfig> webCrawlingConfigList =
+                        (List<WebCrawlingConfig>) dataSet.get(WEB_CRAWLING_CONFIG_KEY + LIST_SUFFIX);
                 if (webCrawlingConfigList != null) {
                     for (WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
                         final Long id = webCrawlingConfig.getId();
 
                         final String name = webCrawlingConfig.getName();
-                        final WebCrawlingConfig entity = webCrawlingConfigBhv
-                                .selectEntity(cb -> {
-                                    cb.query().setName_Equal(name);
-                                    cb.query().setDeletedBy_IsNull();
-                                }).orElse(null);//TODO
+                        final WebCrawlingConfig entity = webCrawlingConfigBhv.selectEntity(cb -> {
+                            cb.query().setName_Equal(name);
+                            cb.query().setDeletedBy_IsNull();
+                        }).orElse(null);//TODO
                         webCrawlingConfig.setId(null);
                         if (entity == null) {
                             webCrawlingConfigBhv.insert(webCrawlingConfig);
                         } else {
                             if (overwrite) {
                                 webCrawlingConfig.setVersionNo(null);
-                                Beans.copy(webCrawlingConfig, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(webCrawlingConfig, entity).excludesNull().execute();
                                 webCrawlingConfig = entity;
                                 webCrawlingConfigBhv.update(webCrawlingConfig);
                             } else {
                                 webCrawlingConfigBhv.insert(webCrawlingConfig);
                             }
                         }
-                        idMap.put(
-                                WEB_CRAWLING_CONFIG_KEY + ":" + id.toString(),
-                                webCrawlingConfig.getId());
+                        idMap.put(WEB_CRAWLING_CONFIG_KEY + ":" + id.toString(), webCrawlingConfig.getId());
                     }
                 }
                 userTransaction.commit();
@@ -829,48 +737,31 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList = (List<FileConfigToLabelTypeMapping>) dataSet
-                        .get(FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY
-                                + LIST_SUFFIX);
+                final List<FileConfigToLabelTypeMapping> fileConfigToLabelTypeMappingList =
+                        (List<FileConfigToLabelTypeMapping>) dataSet.get(FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (fileConfigToLabelTypeMappingList != null) {
                     for (FileConfigToLabelTypeMapping fileConfigToLabelTypeMapping : fileConfigToLabelTypeMappingList) {
                         final Long id = fileConfigToLabelTypeMapping.getId();
 
-                        final Long labelTypeId = idMap
-                                .get(LABEL_TYPE_KEY
-                                        + ":"
-                                        + fileConfigToLabelTypeMapping
-                                                .getLabelTypeId());
-                        final Long fileConfigId = idMap
-                                .get(FILE_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + fileConfigToLabelTypeMapping
-                                                .getFileConfigId());
+                        final Long labelTypeId = idMap.get(LABEL_TYPE_KEY + ":" + fileConfigToLabelTypeMapping.getLabelTypeId());
+                        final Long fileConfigId =
+                                idMap.get(FILE_CRAWLING_CONFIG_KEY + ":" + fileConfigToLabelTypeMapping.getFileConfigId());
                         if (labelTypeId == null || fileConfigId == null) {
                             // skip
                             continue;
                         }
 
-                        final FileConfigToLabelTypeMapping entity = fileConfigToLabelTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setLabelTypeId_Equal(
-                                                    labelTypeId);
-                                            cb.query().setFileConfigId_Equal(
-                                                    fileConfigId);
-                                        }).orElse(null);//TODO
+                        final FileConfigToLabelTypeMapping entity = fileConfigToLabelTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setLabelTypeId_Equal(labelTypeId);
+                            cb.query().setFileConfigId_Equal(fileConfigId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
-                            fileConfigToLabelTypeMapping
-                                    .setLabelTypeId(labelTypeId);
-                            fileConfigToLabelTypeMapping
-                                    .setFileConfigId(fileConfigId);
-                            fileConfigToLabelTypeMappingBhv
-                                    .insert(fileConfigToLabelTypeMapping);
+                            fileConfigToLabelTypeMapping.setLabelTypeId(labelTypeId);
+                            fileConfigToLabelTypeMapping.setFileConfigId(fileConfigId);
+                            fileConfigToLabelTypeMappingBhv.insert(fileConfigToLabelTypeMapping);
                         }
-                        idMap.put(FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                fileConfigToLabelTypeMapping.getId());
+                        idMap.put(FILE_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + ":" + id.toString(), fileConfigToLabelTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -881,48 +772,31 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<DataConfigToLabelTypeMapping> dataConfigToLabelTypeMappingList = (List<DataConfigToLabelTypeMapping>) dataSet
-                        .get(DATA_CONFIG_TO_LABEL_TYPE_MAPPING_KEY
-                                + LIST_SUFFIX);
+                final List<DataConfigToLabelTypeMapping> dataConfigToLabelTypeMappingList =
+                        (List<DataConfigToLabelTypeMapping>) dataSet.get(DATA_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (dataConfigToLabelTypeMappingList != null) {
                     for (DataConfigToLabelTypeMapping dataConfigToLabelTypeMapping : dataConfigToLabelTypeMappingList) {
                         final Long id = dataConfigToLabelTypeMapping.getId();
 
-                        final Long labelTypeId = idMap
-                                .get(LABEL_TYPE_KEY
-                                        + ":"
-                                        + dataConfigToLabelTypeMapping
-                                                .getLabelTypeId());
-                        final Long dataConfigId = idMap
-                                .get(DATA_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + dataConfigToLabelTypeMapping
-                                                .getDataConfigId());
+                        final Long labelTypeId = idMap.get(LABEL_TYPE_KEY + ":" + dataConfigToLabelTypeMapping.getLabelTypeId());
+                        final Long dataConfigId =
+                                idMap.get(DATA_CRAWLING_CONFIG_KEY + ":" + dataConfigToLabelTypeMapping.getDataConfigId());
                         if (labelTypeId == null || dataConfigId == null) {
                             // skip
                             continue;
                         }
 
-                        final DataConfigToLabelTypeMapping entity = dataConfigToLabelTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setLabelTypeId_Equal(
-                                                    labelTypeId);
-                                            cb.query().setDataConfigId_Equal(
-                                                    dataConfigId);
-                                        }).orElse(null);//TODO
+                        final DataConfigToLabelTypeMapping entity = dataConfigToLabelTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setLabelTypeId_Equal(labelTypeId);
+                            cb.query().setDataConfigId_Equal(dataConfigId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             dataConfigToLabelTypeMapping = new DataConfigToLabelTypeMapping();
-                            dataConfigToLabelTypeMapping
-                                    .setLabelTypeId(labelTypeId);
-                            dataConfigToLabelTypeMapping
-                                    .setDataConfigId(dataConfigId);
-                            dataConfigToLabelTypeMappingBhv
-                                    .insert(dataConfigToLabelTypeMapping);
+                            dataConfigToLabelTypeMapping.setLabelTypeId(labelTypeId);
+                            dataConfigToLabelTypeMapping.setDataConfigId(dataConfigId);
+                            dataConfigToLabelTypeMappingBhv.insert(dataConfigToLabelTypeMapping);
                         }
-                        idMap.put(DATA_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                dataConfigToLabelTypeMapping.getId());
+                        idMap.put(DATA_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + ":" + id.toString(), dataConfigToLabelTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -933,44 +807,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<WebConfigToLabelTypeMapping> webConfigToLabelTypeMappingList = (List<WebConfigToLabelTypeMapping>) dataSet
-                        .get(WEB_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX);
+                final List<WebConfigToLabelTypeMapping> webConfigToLabelTypeMappingList =
+                        (List<WebConfigToLabelTypeMapping>) dataSet.get(WEB_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (webConfigToLabelTypeMappingList != null) {
                     for (WebConfigToLabelTypeMapping webConfigToLabelTypeMapping : webConfigToLabelTypeMappingList) {
                         final Long id = webConfigToLabelTypeMapping.getId();
 
-                        final Long labelTypeId = idMap.get(LABEL_TYPE_KEY + ":"
-                                + webConfigToLabelTypeMapping.getLabelTypeId());
-                        final Long webConfigId = idMap
-                                .get(WEB_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + webConfigToLabelTypeMapping
-                                                .getWebConfigId());
+                        final Long labelTypeId = idMap.get(LABEL_TYPE_KEY + ":" + webConfigToLabelTypeMapping.getLabelTypeId());
+                        final Long webConfigId = idMap.get(WEB_CRAWLING_CONFIG_KEY + ":" + webConfigToLabelTypeMapping.getWebConfigId());
                         if (labelTypeId == null || webConfigId == null) {
                             // skip
                             continue;
                         }
 
-                        final WebConfigToLabelTypeMapping entity = webConfigToLabelTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setLabelTypeId_Equal(
-                                                    labelTypeId);
-                                            cb.query().setWebConfigId_Equal(
-                                                    webConfigId);
-                                        }).orElse(null);//TODO
+                        final WebConfigToLabelTypeMapping entity = webConfigToLabelTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setLabelTypeId_Equal(labelTypeId);
+                            cb.query().setWebConfigId_Equal(webConfigId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             webConfigToLabelTypeMapping = new WebConfigToLabelTypeMapping();
-                            webConfigToLabelTypeMapping
-                                    .setLabelTypeId(labelTypeId);
-                            webConfigToLabelTypeMapping
-                                    .setWebConfigId(webConfigId);
-                            webConfigToLabelTypeMappingBhv
-                                    .insert(webConfigToLabelTypeMapping);
+                            webConfigToLabelTypeMapping.setLabelTypeId(labelTypeId);
+                            webConfigToLabelTypeMapping.setWebConfigId(webConfigId);
+                            webConfigToLabelTypeMappingBhv.insert(webConfigToLabelTypeMapping);
                         }
-                        idMap.put(WEB_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                webConfigToLabelTypeMapping.getId());
+                        idMap.put(WEB_CONFIG_TO_LABEL_TYPE_MAPPING_KEY + ":" + id.toString(), webConfigToLabelTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -981,44 +841,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<FileConfigToRoleTypeMapping> fileConfigToRoleTypeMappingList = (List<FileConfigToRoleTypeMapping>) dataSet
-                        .get(FILE_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
+                final List<FileConfigToRoleTypeMapping> fileConfigToRoleTypeMappingList =
+                        (List<FileConfigToRoleTypeMapping>) dataSet.get(FILE_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (fileConfigToRoleTypeMappingList != null) {
                     for (FileConfigToRoleTypeMapping fileConfigToRoleTypeMapping : fileConfigToRoleTypeMappingList) {
                         final Long id = fileConfigToRoleTypeMapping.getId();
 
-                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":"
-                                + fileConfigToRoleTypeMapping.getRoleTypeId());
-                        final Long fileConfigId = idMap
-                                .get(FILE_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + fileConfigToRoleTypeMapping
-                                                .getFileConfigId());
+                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":" + fileConfigToRoleTypeMapping.getRoleTypeId());
+                        final Long fileConfigId = idMap.get(FILE_CRAWLING_CONFIG_KEY + ":" + fileConfigToRoleTypeMapping.getFileConfigId());
                         if (roleTypeId == null || fileConfigId == null) {
                             // skip
                             continue;
                         }
 
-                        final FileConfigToRoleTypeMapping entity = fileConfigToRoleTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setRoleTypeId_Equal(
-                                                    roleTypeId);
-                                            cb.query().setFileConfigId_Equal(
-                                                    fileConfigId);
-                                        }).orElse(null);//TODO
+                        final FileConfigToRoleTypeMapping entity = fileConfigToRoleTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setRoleTypeId_Equal(roleTypeId);
+                            cb.query().setFileConfigId_Equal(fileConfigId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             fileConfigToRoleTypeMapping = new FileConfigToRoleTypeMapping();
-                            fileConfigToRoleTypeMapping
-                                    .setRoleTypeId(roleTypeId);
-                            fileConfigToRoleTypeMapping
-                                    .setFileConfigId(fileConfigId);
-                            fileConfigToRoleTypeMappingBhv
-                                    .insert(fileConfigToRoleTypeMapping);
+                            fileConfigToRoleTypeMapping.setRoleTypeId(roleTypeId);
+                            fileConfigToRoleTypeMapping.setFileConfigId(fileConfigId);
+                            fileConfigToRoleTypeMappingBhv.insert(fileConfigToRoleTypeMapping);
                         }
-                        idMap.put(FILE_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                fileConfigToRoleTypeMapping.getId());
+                        idMap.put(FILE_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + ":" + id.toString(), fileConfigToRoleTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1029,44 +875,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList = (List<DataConfigToRoleTypeMapping>) dataSet
-                        .get(DATA_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
+                final List<DataConfigToRoleTypeMapping> dataConfigToRoleTypeMappingList =
+                        (List<DataConfigToRoleTypeMapping>) dataSet.get(DATA_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (dataConfigToRoleTypeMappingList != null) {
                     for (DataConfigToRoleTypeMapping dataConfigToRoleTypeMapping : dataConfigToRoleTypeMappingList) {
                         final Long id = dataConfigToRoleTypeMapping.getId();
 
-                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":"
-                                + dataConfigToRoleTypeMapping.getRoleTypeId());
-                        final Long dataConfigId = idMap
-                                .get(DATA_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + dataConfigToRoleTypeMapping
-                                                .getDataConfigId());
+                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":" + dataConfigToRoleTypeMapping.getRoleTypeId());
+                        final Long dataConfigId = idMap.get(DATA_CRAWLING_CONFIG_KEY + ":" + dataConfigToRoleTypeMapping.getDataConfigId());
                         if (roleTypeId == null || dataConfigId == null) {
                             // skip
                             continue;
                         }
 
-                        final DataConfigToRoleTypeMapping entity = dataConfigToRoleTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setRoleTypeId_Equal(
-                                                    roleTypeId);
-                                            cb.query().setDataConfigId_Equal(
-                                                    dataConfigId);
-                                        }).orElse(null);//TODO
+                        final DataConfigToRoleTypeMapping entity = dataConfigToRoleTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setRoleTypeId_Equal(roleTypeId);
+                            cb.query().setDataConfigId_Equal(dataConfigId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
-                            dataConfigToRoleTypeMapping
-                                    .setRoleTypeId(roleTypeId);
-                            dataConfigToRoleTypeMapping
-                                    .setDataConfigId(dataConfigId);
-                            dataConfigToRoleTypeMappingBhv
-                                    .insert(dataConfigToRoleTypeMapping);
+                            dataConfigToRoleTypeMapping.setRoleTypeId(roleTypeId);
+                            dataConfigToRoleTypeMapping.setDataConfigId(dataConfigId);
+                            dataConfigToRoleTypeMappingBhv.insert(dataConfigToRoleTypeMapping);
                         }
-                        idMap.put(DATA_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                dataConfigToRoleTypeMapping.getId());
+                        idMap.put(DATA_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + ":" + id.toString(), dataConfigToRoleTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1077,44 +909,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<WebConfigToRoleTypeMapping> webConfigToRoleTypeMappingList = (List<WebConfigToRoleTypeMapping>) dataSet
-                        .get(WEB_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
+                final List<WebConfigToRoleTypeMapping> webConfigToRoleTypeMappingList =
+                        (List<WebConfigToRoleTypeMapping>) dataSet.get(WEB_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (webConfigToRoleTypeMappingList != null) {
                     for (WebConfigToRoleTypeMapping webConfigToRoleTypeMapping : webConfigToRoleTypeMappingList) {
                         final Long id = webConfigToRoleTypeMapping.getId();
 
-                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":"
-                                + webConfigToRoleTypeMapping.getRoleTypeId());
-                        final Long webConfigId = idMap
-                                .get(WEB_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + webConfigToRoleTypeMapping
-                                                .getWebConfigId());
+                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":" + webConfigToRoleTypeMapping.getRoleTypeId());
+                        final Long webConfigId = idMap.get(WEB_CRAWLING_CONFIG_KEY + ":" + webConfigToRoleTypeMapping.getWebConfigId());
                         if (roleTypeId == null || webConfigId == null) {
                             // skip
                             continue;
                         }
 
-                        final WebConfigToRoleTypeMapping entity = webConfigToRoleTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setRoleTypeId_Equal(
-                                                    roleTypeId);
-                                            cb.query().setWebConfigId_Equal(
-                                                    webConfigId);
-                                        }).orElse(null);//TODO
+                        final WebConfigToRoleTypeMapping entity = webConfigToRoleTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setRoleTypeId_Equal(roleTypeId);
+                            cb.query().setWebConfigId_Equal(webConfigId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             webConfigToRoleTypeMapping = new WebConfigToRoleTypeMapping();
-                            webConfigToRoleTypeMapping
-                                    .setRoleTypeId(roleTypeId);
-                            webConfigToRoleTypeMapping
-                                    .setWebConfigId(webConfigId);
-                            webConfigToRoleTypeMappingBhv
-                                    .insert(webConfigToRoleTypeMapping);
+                            webConfigToRoleTypeMapping.setRoleTypeId(roleTypeId);
+                            webConfigToRoleTypeMapping.setWebConfigId(webConfigId);
+                            webConfigToRoleTypeMappingBhv.insert(webConfigToRoleTypeMapping);
                         }
-                        idMap.put(WEB_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                webConfigToRoleTypeMapping.getId());
+                        idMap.put(WEB_CONFIG_TO_ROLE_TYPE_MAPPING_KEY + ":" + id.toString(), webConfigToRoleTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1125,41 +943,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<LabelTypeToRoleTypeMapping> labelTypeToRoleTypeMappingList = (List<LabelTypeToRoleTypeMapping>) dataSet
-                        .get(LABEL_TYPE_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
+                final List<LabelTypeToRoleTypeMapping> labelTypeToRoleTypeMappingList =
+                        (List<LabelTypeToRoleTypeMapping>) dataSet.get(LABEL_TYPE_TO_ROLE_TYPE_MAPPING_KEY + LIST_SUFFIX);
                 if (labelTypeToRoleTypeMappingList != null) {
                     for (LabelTypeToRoleTypeMapping labelTypeToRoleTypeMapping : labelTypeToRoleTypeMappingList) {
                         final Long id = labelTypeToRoleTypeMapping.getId();
 
-                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":"
-                                + labelTypeToRoleTypeMapping.getRoleTypeId());
-                        final Long labelTypeId = idMap.get(LABEL_TYPE_KEY + ":"
-                                + labelTypeToRoleTypeMapping.getLabelTypeId());
+                        final Long roleTypeId = idMap.get(ROLE_TYPE_KEY + ":" + labelTypeToRoleTypeMapping.getRoleTypeId());
+                        final Long labelTypeId = idMap.get(LABEL_TYPE_KEY + ":" + labelTypeToRoleTypeMapping.getLabelTypeId());
                         if (roleTypeId == null || labelTypeId == null) {
                             // skip
                             continue;
                         }
 
-                        final LabelTypeToRoleTypeMapping entity = labelTypeToRoleTypeMappingBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setRoleTypeId_Equal(
-                                                    roleTypeId);
-                                            cb.query().setLabelTypeId_Equal(
-                                                    labelTypeId);
-                                        }).orElse(null);//TODO
+                        final LabelTypeToRoleTypeMapping entity = labelTypeToRoleTypeMappingBhv.selectEntity(cb -> {
+                            cb.query().setRoleTypeId_Equal(roleTypeId);
+                            cb.query().setLabelTypeId_Equal(labelTypeId);
+                        }).orElse(null);//TODO
                         if (entity == null) {
                             labelTypeToRoleTypeMapping = new LabelTypeToRoleTypeMapping();
-                            labelTypeToRoleTypeMapping
-                                    .setRoleTypeId(roleTypeId);
-                            labelTypeToRoleTypeMapping
-                                    .setLabelTypeId(labelTypeId);
-                            labelTypeToRoleTypeMappingBhv
-                                    .insert(labelTypeToRoleTypeMapping);
+                            labelTypeToRoleTypeMapping.setRoleTypeId(roleTypeId);
+                            labelTypeToRoleTypeMapping.setLabelTypeId(labelTypeId);
+                            labelTypeToRoleTypeMappingBhv.insert(labelTypeToRoleTypeMapping);
                         }
-                        idMap.put(LABEL_TYPE_TO_ROLE_TYPE_MAPPING_KEY + ":"
-                                + id.toString(),
-                                labelTypeToRoleTypeMapping.getId());
+                        idMap.put(LABEL_TYPE_TO_ROLE_TYPE_MAPPING_KEY + ":" + id.toString(), labelTypeToRoleTypeMapping.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1170,42 +977,28 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<WebAuthentication> webAuthenticationList = (List<WebAuthentication>) dataSet
-                        .get(WEB_AUTHENTICATION_KEY + LIST_SUFFIX);
+                final List<WebAuthentication> webAuthenticationList =
+                        (List<WebAuthentication>) dataSet.get(WEB_AUTHENTICATION_KEY + LIST_SUFFIX);
                 if (webAuthenticationList != null) {
                     for (WebAuthentication webAuthentication : webAuthenticationList) {
                         final Long id = webAuthentication.getId();
 
-                        final Long webConfigId = idMap
-                                .get(WEB_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + webAuthentication
-                                                .getWebCrawlingConfigId());
+                        final Long webConfigId = idMap.get(WEB_CRAWLING_CONFIG_KEY + ":" + webAuthentication.getWebCrawlingConfigId());
                         if (webConfigId == null) {
                             // skip
                             continue;
                         }
 
                         WebAuthentication entity = null;
-                        final List<WebAuthentication> list = webAuthenticationBhv
-                                .selectList(cb -> {
-                                    cb.query().setWebCrawlingConfigId_Equal(
-                                            webConfigId);
-                                    cb.query().setDeletedBy_IsNull();
-                                });
+                        final List<WebAuthentication> list = webAuthenticationBhv.selectList(cb -> {
+                            cb.query().setWebCrawlingConfigId_Equal(webConfigId);
+                            cb.query().setDeletedBy_IsNull();
+                        });
                         for (final WebAuthentication e : list) {
-                            if (StringUtil.equals(
-                                    webAuthentication.getAuthRealm(),
-                                    e.getAuthRealm())
-                                    && StringUtil.equals(
-                                            webAuthentication.getHostname(),
-                                            e.getHostname())
-                                    && StringUtil.equals(webAuthentication
-                                            .getProtocolScheme(), e
-                                            .getProtocolScheme())
-                                    && equalusNumber(
-                                            webAuthentication.getPort(),
-                                            e.getPort())) {
+                            if (StringUtil.equals(webAuthentication.getAuthRealm(), e.getAuthRealm())
+                                    && StringUtil.equals(webAuthentication.getHostname(), e.getHostname())
+                                    && StringUtil.equals(webAuthentication.getProtocolScheme(), e.getProtocolScheme())
+                                    && equalusNumber(webAuthentication.getPort(), e.getPort())) {
                                 entity = e;
                             }
                         }
@@ -1216,16 +1009,14 @@ public class DatabaseService {
                         } else {
                             if (overwrite) {
                                 webAuthentication.setVersionNo(null);
-                                Beans.copy(webAuthentication, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(webAuthentication, entity).excludesNull().execute();
                                 webAuthentication = entity;
                                 webAuthenticationBhv.update(webAuthentication);
                             } else {
                                 webAuthenticationBhv.insert(webAuthentication);
                             }
                         }
-                        idMap.put(WEB_AUTHENTICATION_KEY + ":" + id.toString(),
-                                webAuthentication.getId());
+                        idMap.put(WEB_AUTHENTICATION_KEY + ":" + id.toString(), webAuthentication.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1236,63 +1027,45 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<FileAuthentication> fileAuthenticationList = (List<FileAuthentication>) dataSet
-                        .get(FILE_AUTHENTICATION_KEY + LIST_SUFFIX);
+                final List<FileAuthentication> fileAuthenticationList =
+                        (List<FileAuthentication>) dataSet.get(FILE_AUTHENTICATION_KEY + LIST_SUFFIX);
                 if (fileAuthenticationList != null) {
                     for (FileAuthentication fileAuthentication : fileAuthenticationList) {
                         final Long id = fileAuthentication.getId();
 
-                        final Long fileConfigId = idMap
-                                .get(FILE_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + fileAuthentication
-                                                .getFileCrawlingConfigId());
+                        final Long fileConfigId = idMap.get(FILE_CRAWLING_CONFIG_KEY + ":" + fileAuthentication.getFileCrawlingConfigId());
                         if (fileConfigId == null) {
                             // skip
                             continue;
                         }
 
                         FileAuthentication entity = null;
-                        final List<FileAuthentication> list = fileAuthenticationBhv
-                                .selectList(cb -> {
-                                    cb.query().setFileCrawlingConfigId_Equal(
-                                            fileConfigId);
-                                    cb.query().setDeletedBy_IsNull();
-                                });
+                        final List<FileAuthentication> list = fileAuthenticationBhv.selectList(cb -> {
+                            cb.query().setFileCrawlingConfigId_Equal(fileConfigId);
+                            cb.query().setDeletedBy_IsNull();
+                        });
                         for (final FileAuthentication e : list) {
-                            if (StringUtil.equals(
-                                    fileAuthentication.getHostname(),
-                                    e.getHostname())
-                                    && StringUtil.equals(fileAuthentication
-                                            .getProtocolScheme(), e
-                                            .getProtocolScheme())
-                                    && equalusNumber(
-                                            fileAuthentication.getPort(),
-                                            e.getPort())) {
+                            if (StringUtil.equals(fileAuthentication.getHostname(), e.getHostname())
+                                    && StringUtil.equals(fileAuthentication.getProtocolScheme(), e.getProtocolScheme())
+                                    && equalusNumber(fileAuthentication.getPort(), e.getPort())) {
                                 entity = e;
                             }
                         }
                         fileAuthentication.setId(null);
-                        fileAuthentication
-                                .setFileCrawlingConfigId(fileConfigId);
+                        fileAuthentication.setFileCrawlingConfigId(fileConfigId);
                         if (entity == null) {
                             fileAuthenticationBhv.insert(fileAuthentication);
                         } else {
                             if (overwrite) {
                                 fileAuthentication.setVersionNo(null);
-                                Beans.copy(fileAuthentication, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(fileAuthentication, entity).excludesNull().execute();
                                 fileAuthentication = entity;
-                                fileAuthenticationBhv
-                                        .update(fileAuthentication);
+                                fileAuthenticationBhv.update(fileAuthentication);
                             } else {
-                                fileAuthenticationBhv
-                                        .insert(fileAuthentication);
+                                fileAuthenticationBhv.insert(fileAuthentication);
                             }
                         }
-                        idMap.put(
-                                FILE_AUTHENTICATION_KEY + ":" + id.toString(),
-                                fileAuthentication.getId());
+                        idMap.put(FILE_AUTHENTICATION_KEY + ":" + id.toString(), fileAuthentication.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1303,32 +1076,24 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<RequestHeader> requestHeaderList = (List<RequestHeader>) dataSet
-                        .get(REQUEST_HEADER_KEY + LIST_SUFFIX);
+                final List<RequestHeader> requestHeaderList = (List<RequestHeader>) dataSet.get(REQUEST_HEADER_KEY + LIST_SUFFIX);
                 if (requestHeaderList != null) {
                     for (RequestHeader requestHeader : requestHeaderList) {
                         final Long id = requestHeader.getId();
 
-                        final Long webConfigId = idMap
-                                .get(WEB_CRAWLING_CONFIG_KEY
-                                        + ":"
-                                        + requestHeader
-                                                .getWebCrawlingConfigId());
+                        final Long webConfigId = idMap.get(WEB_CRAWLING_CONFIG_KEY + ":" + requestHeader.getWebCrawlingConfigId());
                         if (webConfigId == null) {
                             // skip
                             continue;
                         }
 
                         RequestHeader entity = null;
-                        final List<RequestHeader> list = requestHeaderBhv
-                                .selectList(cb -> {
-                                    cb.query().setWebCrawlingConfigId_Equal(
-                                            webConfigId);
-                                    cb.query().setDeletedBy_IsNull();
-                                });
+                        final List<RequestHeader> list = requestHeaderBhv.selectList(cb -> {
+                            cb.query().setWebCrawlingConfigId_Equal(webConfigId);
+                            cb.query().setDeletedBy_IsNull();
+                        });
                         for (final RequestHeader e : list) {
-                            if (StringUtil.equals(requestHeader.getName(),
-                                    e.getName())) {
+                            if (StringUtil.equals(requestHeader.getName(), e.getName())) {
                                 entity = e;
                             }
                         }
@@ -1339,16 +1104,14 @@ public class DatabaseService {
                         } else {
                             if (overwrite) {
                                 requestHeader.setVersionNo(null);
-                                Beans.copy(requestHeader, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(requestHeader, entity).excludesNull().execute();
                                 requestHeader = entity;
                                 requestHeaderBhv.update(requestHeader);
                             } else {
                                 requestHeaderBhv.insert(requestHeader);
                             }
                         }
-                        idMap.put(REQUEST_HEADER_KEY + ":" + id.toString(),
-                                requestHeader.getId());
+                        idMap.put(REQUEST_HEADER_KEY + ":" + id.toString(), requestHeader.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1359,33 +1122,29 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<KeyMatch> keyMatchList = (List<KeyMatch>) dataSet
-                        .get(KEY_MATCH_KEY + LIST_SUFFIX);
+                final List<KeyMatch> keyMatchList = (List<KeyMatch>) dataSet.get(KEY_MATCH_KEY + LIST_SUFFIX);
                 if (keyMatchList != null) {
                     for (KeyMatch keyMatch : keyMatchList) {
                         final Long id = keyMatch.getId();
 
                         final String term = keyMatch.getTerm();
-                        final KeyMatch entity = keyMatchBhv.selectEntity(
-                                cb -> {
-                                    cb.query().setTerm_Equal(term);
-                                }).orElse(null);//TODO
+                        final KeyMatch entity = keyMatchBhv.selectEntity(cb -> {
+                            cb.query().setTerm_Equal(term);
+                        }).orElse(null);//TODO
                         keyMatch.setId(null);
                         if (entity == null) {
                             keyMatchBhv.insert(keyMatch);
                         } else {
                             if (overwrite) {
                                 keyMatch.setVersionNo(null);
-                                Beans.copy(keyMatch, entity).excludesNull()
-                                        .execute();
+                                Beans.copy(keyMatch, entity).excludesNull().execute();
                                 keyMatch = entity;
                                 keyMatchBhv.update(keyMatch);
                             } else {
                                 keyMatchBhv.insert(keyMatch);
                             }
                         }
-                        idMap.put(KEY_MATCH_KEY + ":" + id.toString(),
-                                keyMatch.getId());
+                        idMap.put(KEY_MATCH_KEY + ":" + id.toString(), keyMatch.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1396,34 +1155,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<BoostDocumentRule> boostDocumentRuleList = (List<BoostDocumentRule>) dataSet
-                        .get(BOOST_DOCUMENT_RULE_KEY + LIST_SUFFIX);
+                final List<BoostDocumentRule> boostDocumentRuleList =
+                        (List<BoostDocumentRule>) dataSet.get(BOOST_DOCUMENT_RULE_KEY + LIST_SUFFIX);
                 if (boostDocumentRuleList != null) {
                     for (BoostDocumentRule boostDocumentRule : boostDocumentRuleList) {
                         final Long id = boostDocumentRule.getId();
 
                         final String urlExpr = boostDocumentRule.getUrlExpr();
-                        final BoostDocumentRule entity = boostDocumentRuleBhv
-                                .selectEntity(cb -> {
-                                    cb.query().setUrlExpr_Equal(urlExpr);
-                                }).orElse(null);//TODO
+                        final BoostDocumentRule entity = boostDocumentRuleBhv.selectEntity(cb -> {
+                            cb.query().setUrlExpr_Equal(urlExpr);
+                        }).orElse(null);//TODO
                         boostDocumentRule.setId(null);
                         if (entity == null) {
                             boostDocumentRuleBhv.insert(boostDocumentRule);
                         } else {
                             if (overwrite) {
                                 boostDocumentRule.setVersionNo(null);
-                                Beans.copy(boostDocumentRule, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(boostDocumentRule, entity).excludesNull().execute();
                                 boostDocumentRule = entity;
                                 boostDocumentRuleBhv.update(boostDocumentRule);
                             } else {
                                 boostDocumentRuleBhv.insert(boostDocumentRule);
                             }
                         }
-                        idMap.put(
-                                BOOST_DOCUMENT_RULE_KEY + ":" + id.toString(),
-                                boostDocumentRule.getId());
+                        idMap.put(BOOST_DOCUMENT_RULE_KEY + ":" + id.toString(), boostDocumentRule.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1434,39 +1189,30 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<SuggestElevateWord> suggestElevateWordList = (List<SuggestElevateWord>) dataSet
-                        .get(SUGGEST_ELEVATE_WORD_KEY + LIST_SUFFIX);
+                final List<SuggestElevateWord> suggestElevateWordList =
+                        (List<SuggestElevateWord>) dataSet.get(SUGGEST_ELEVATE_WORD_KEY + LIST_SUFFIX);
                 if (suggestElevateWordList != null) {
                     for (SuggestElevateWord suggestElevateWord : suggestElevateWordList) {
                         final Long id = suggestElevateWord.getId();
 
-                        final String suggestWord = suggestElevateWord
-                                .getSuggestWord();
-                        final SuggestElevateWord entity = suggestElevateWordBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setSuggestWord_Equal(
-                                                    suggestWord);
-                                        }).orElse(null);//TODO
+                        final String suggestWord = suggestElevateWord.getSuggestWord();
+                        final SuggestElevateWord entity = suggestElevateWordBhv.selectEntity(cb -> {
+                            cb.query().setSuggestWord_Equal(suggestWord);
+                        }).orElse(null);//TODO
                         suggestElevateWord.setId(null);
                         if (entity == null) {
                             suggestElevateWordBhv.insert(suggestElevateWord);
                         } else {
                             if (overwrite) {
                                 suggestElevateWord.setVersionNo(null);
-                                Beans.copy(suggestElevateWord, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(suggestElevateWord, entity).excludesNull().execute();
                                 suggestElevateWord = entity;
-                                suggestElevateWordBhv
-                                        .update(suggestElevateWord);
+                                suggestElevateWordBhv.update(suggestElevateWord);
                             } else {
-                                suggestElevateWordBhv
-                                        .insert(suggestElevateWord);
+                                suggestElevateWordBhv.insert(suggestElevateWord);
                             }
                         }
-                        idMap.put(
-                                SUGGEST_ELEVATE_WORD_KEY + ":" + id.toString(),
-                                suggestElevateWord.getId());
+                        idMap.put(SUGGEST_ELEVATE_WORD_KEY + ":" + id.toString(), suggestElevateWord.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1477,36 +1223,29 @@ public class DatabaseService {
             try {
                 userTransaction.begin();
 
-                final List<SuggestBadWord> suggestNGWordList = (List<SuggestBadWord>) dataSet
-                        .get(SUGGEST_BAD_WORD_KEY + LIST_SUFFIX);
+                final List<SuggestBadWord> suggestNGWordList = (List<SuggestBadWord>) dataSet.get(SUGGEST_BAD_WORD_KEY + LIST_SUFFIX);
                 if (suggestNGWordList != null) {
                     for (SuggestBadWord suggestBadWord : suggestNGWordList) {
                         final Long id = suggestBadWord.getId();
 
-                        final String suggestWord = suggestBadWord
-                                .getSuggestWord();
-                        final SuggestBadWord entity = suggestBadWordBhv
-                                .selectEntity(
-                                        cb -> {
-                                            cb.query().setSuggestWord_Equal(
-                                                    suggestWord);
-                                        }).orElse(null);//TODO
+                        final String suggestWord = suggestBadWord.getSuggestWord();
+                        final SuggestBadWord entity = suggestBadWordBhv.selectEntity(cb -> {
+                            cb.query().setSuggestWord_Equal(suggestWord);
+                        }).orElse(null);//TODO
                         suggestBadWord.setId(null);
                         if (entity == null) {
                             suggestBadWordBhv.insert(suggestBadWord);
                         } else {
                             if (overwrite) {
                                 suggestBadWord.setVersionNo(null);
-                                Beans.copy(suggestBadWord, entity)
-                                        .excludesNull().execute();
+                                Beans.copy(suggestBadWord, entity).excludesNull().execute();
                                 suggestBadWord = entity;
                                 suggestBadWordBhv.update(suggestBadWord);
                             } else {
                                 suggestBadWordBhv.insert(suggestBadWord);
                             }
                         }
-                        idMap.put(SUGGEST_BAD_WORD_KEY + ":" + id.toString(),
-                                suggestBadWord.getId());
+                        idMap.put(SUGGEST_BAD_WORD_KEY + ":" + id.toString(), suggestBadWord.getId());
                     }
                 }
                 userTransaction.commit();
@@ -1516,10 +1255,8 @@ public class DatabaseService {
 
             // crawlerProperties
             try {
-                final Map<String, String> crawlerPropertyMap = (Map<String, String>) dataSet
-                        .get(CRAWLER_PROPERTIES_KEY);
-                for (final Map.Entry<String, String> entry : crawlerPropertyMap
-                        .entrySet()) {
+                final Map<String, String> crawlerPropertyMap = (Map<String, String>) dataSet.get(CRAWLER_PROPERTIES_KEY);
+                for (final Map.Entry<String, String> entry : crawlerPropertyMap.entrySet()) {
                     final String value = entry.getValue();
                     if (StringUtil.isNotBlank(value)) {
                         crawlerProperties.setProperty(entry.getKey(), value);
@@ -1527,8 +1264,7 @@ public class DatabaseService {
                 }
                 crawlerProperties.store();
             } catch (final Exception e) {
-                logger.warn("Failed to restore properties: "
-                        + CRAWLER_PROPERTIES_KEY, e);
+                logger.warn("Failed to restore properties: " + CRAWLER_PROPERTIES_KEY, e);
             }
 
         }

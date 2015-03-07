@@ -50,8 +50,7 @@ import org.dbflute.cbean.result.ListResultBean;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class FavoriteLogService extends BsFavoriteLogService implements
-        Serializable {
+public class FavoriteLogService extends BsFavoriteLogService implements Serializable {
     private static final Log log = LogFactory.getLog(FavoriteLogService.class);
 
     private static final long serialVersionUID = 1L;
@@ -60,8 +59,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
     protected UserInfoBhv userInfoBhv;
 
     @Override
-    protected void setupListCondition(final FavoriteLogCB cb,
-            final FavoriteLogPager favoriteLogPager) {
+    protected void setupListCondition(final FavoriteLogCB cb, final FavoriteLogPager favoriteLogPager) {
         super.setupListCondition(cb, favoriteLogPager);
         cb.setupSelect_UserInfo();
 
@@ -74,8 +72,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
     }
 
     @Override
-    protected void setupEntityCondition(final FavoriteLogCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FavoriteLogCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -107,8 +104,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
             final FavoriteLog favoriteLog = new FavoriteLog();
             favoriteLog.setUserId(userInfo.getId());
             favoriteLog.setUrl(url);
-            favoriteLog.setCreatedTime(ComponentUtil.getSystemHelper()
-                    .getCurrentTime());
+            favoriteLog.setCreatedTime(ComponentUtil.getSystemHelper().getCurrentTime());
             favoriteLogBhv.insert(favoriteLog);
             return true;
         }
@@ -116,8 +112,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
         return false;
     }
 
-    public List<String> getUrlList(final String userCode,
-            final List<String> urlList) {
+    public List<String> getUrlList(final String userCode, final List<String> urlList) {
         if (urlList.isEmpty()) {
             return urlList;
         }
@@ -127,14 +122,12 @@ public class FavoriteLogService extends BsFavoriteLogService implements
         }).orElse(null);//TODO
 
         if (userInfo != null) {
-            final ListResultBean<FavoriteLog> list = favoriteLogBhv
-                    .selectList(cb2 -> {
-                        cb2.query().setUserId_Equal(userInfo.getId());
-                        cb2.query().setUrl_InScope(urlList);
-                    });
+            final ListResultBean<FavoriteLog> list = favoriteLogBhv.selectList(cb2 -> {
+                cb2.query().setUserId_Equal(userInfo.getId());
+                cb2.query().setUrl_InScope(urlList);
+            });
             if (!list.isEmpty()) {
-                final List<String> newUrlList = new ArrayList<String>(
-                        list.size());
+                final List<String> newUrlList = new ArrayList<String>(list.size());
                 for (final FavoriteLog favoriteLog : list) {
                     newUrlList.add(favoriteLog.getUrl());
                 }
@@ -151,8 +144,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
         }, op -> op.allowNonQueryDelete());
     }
 
-    private void buildSearchCondition(final FavoriteLogPager favoriteLogPager,
-            final FavoriteLogCB cb) {
+    private void buildSearchCondition(final FavoriteLogPager favoriteLogPager, final FavoriteLogCB cb) {
 
         if (StringUtil.isNotBlank(favoriteLogPager.userCode)) {
             cb.setupSelect_UserInfo();
@@ -175,11 +167,9 @@ public class FavoriteLogService extends BsFavoriteLogService implements
                 buf.append("00");
             }
 
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("yyyy-MM-dd+HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
             try {
-                cb.query().setCreatedTime_GreaterEqual(
-                        LocalDateTime.parse(buf.toString(), formatter));
+                cb.query().setCreatedTime_GreaterEqual(LocalDateTime.parse(buf.toString(), formatter));
             } catch (final DateTimeParseException e) {
                 favoriteLogPager.startDate = null;
                 favoriteLogPager.startHour = null;
@@ -203,11 +193,9 @@ public class FavoriteLogService extends BsFavoriteLogService implements
                 buf.append("00");
             }
 
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("yyyy-MM-dd+HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
             try {
-                cb.query().setCreatedTime_LessThan(
-                        LocalDateTime.parse(buf.toString(), formatter));
+                cb.query().setCreatedTime_LessThan(LocalDateTime.parse(buf.toString(), formatter));
             } catch (final DateTimeParseException e) {
                 favoriteLogPager.endDate = null;
                 favoriteLogPager.endHour = null;
@@ -217,8 +205,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
 
     }
 
-    public void dump(final Writer writer,
-            final FavoriteLogPager favoriteLogPager) {
+    public void dump(final Writer writer, final FavoriteLogPager favoriteLogPager) {
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);
         cfg.setQuoteDisabled(false);
@@ -229,8 +216,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
             list.add("URL");
             list.add("Date");
             csvWriter.writeValues(list);
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             favoriteLogBhv.selectCursor(cb -> {
                 if (favoriteLogPager != null) {
                     buildSearchCondition(favoriteLogPager, cb);
@@ -238,9 +224,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
             }, new EntityRowHandler<FavoriteLog>() {
                 @Override
                 public void handle(final FavoriteLog entity) {
-                    final UserInfo userInfo = userInfoBhv.selectEntity(
-                            cb2 -> cb2.query().setId_Equal(entity.getId()))
-                            .orElse(null);//TODO
+                    final UserInfo userInfo = userInfoBhv.selectEntity(cb2 -> cb2.query().setId_Equal(entity.getId())).orElse(null);//TODO
                     String userCode;
                     if (userInfo == null) {
                         userCode = StringUtil.EMPTY;
@@ -259,8 +243,7 @@ public class FavoriteLogService extends BsFavoriteLogService implements
                     }
                 }
 
-                private void addToList(final List<String> list,
-                        final Object value) {
+                private void addToList(final List<String> list, final Object value) {
                     if (value == null) {
                         list.add(StringUtil.EMPTY);
                     } else if (value instanceof Timestamp) {

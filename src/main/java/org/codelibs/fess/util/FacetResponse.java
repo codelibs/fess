@@ -29,8 +29,7 @@ public class FacetResponse {
 
     protected List<Field> fieldList;
 
-    public FacetResponse(final List<FacetField> facetFields,
-            final Map<String, Integer> facetQueryMap) {
+    public FacetResponse(final List<FacetField> facetFields, final Map<String, Integer> facetQueryMap) {
         if (facetFields != null && !facetFields.isEmpty()) {
             fieldList = new ArrayList<FacetResponse.Field>();
             for (final FacetField facetField : facetFields) {
@@ -41,8 +40,7 @@ public class FacetResponse {
         }
         if (facetQueryMap != null && !facetQueryMap.isEmpty()) {
             queryCountMap = new LinkedHashMap<String, Long>();
-            for (final Map.Entry<String, Integer> entry : facetQueryMap
-                    .entrySet()) {
+            for (final Map.Entry<String, Integer> entry : facetQueryMap.entrySet()) {
                 queryCountMap.put(entry.getKey(), entry.getValue().longValue());
             }
         }

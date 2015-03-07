@@ -22,8 +22,7 @@ public class InvalidQueryException extends FessSystemException {
 
     private final String messageCode;
 
-    public InvalidQueryException(final String messageCode,
-            final String message, final Throwable cause) {
+    public InvalidQueryException(final String messageCode, final String message, final Throwable cause) {
         super(message, cause);
         this.messageCode = messageCode;
     }

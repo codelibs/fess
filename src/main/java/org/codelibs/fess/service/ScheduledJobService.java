@@ -29,8 +29,7 @@ import org.codelibs.fess.db.exentity.ScheduledJob;
 import org.codelibs.fess.job.JobScheduler;
 import org.codelibs.fess.pager.ScheduledJobPager;
 
-public class ScheduledJobService extends BsScheduledJobService implements
-        Serializable {
+public class ScheduledJobService extends BsScheduledJobService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +37,7 @@ public class ScheduledJobService extends BsScheduledJobService implements
     protected JobScheduler jobScheduler;
 
     @Override
-    protected void setupListCondition(final ScheduledJobCB cb,
-            final ScheduledJobPager scheduledJobPager) {
+    protected void setupListCondition(final ScheduledJobCB cb, final ScheduledJobPager scheduledJobPager) {
         super.setupListCondition(cb, scheduledJobPager);
 
         // setup condition
@@ -52,8 +50,7 @@ public class ScheduledJobService extends BsScheduledJobService implements
     }
 
     @Override
-    protected void setupEntityCondition(final ScheduledJobCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final ScheduledJobCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition

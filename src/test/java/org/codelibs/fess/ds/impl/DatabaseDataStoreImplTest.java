@@ -46,8 +46,7 @@ public class DatabaseDataStoreImplTest extends S2TestCase {
         assertEquals("PARAM2+", databaseDataStore.convertValue(value, paramMap));
 
         value = "\"123\"+param2+\",\"+param3+\"abc\"";
-        assertEquals("123PARAM2+,PARAM3*abc",
-                databaseDataStore.convertValue(value, paramMap));
+        assertEquals("123PARAM2+,PARAM3*abc", databaseDataStore.convertValue(value, paramMap));
 
         value = null;
         assertEquals("", databaseDataStore.convertValue(value, paramMap));

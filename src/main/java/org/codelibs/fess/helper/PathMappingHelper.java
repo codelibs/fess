@@ -35,8 +35,7 @@ public class PathMappingHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(PathMappingHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(PathMappingHelper.class);
 
     private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<String, List<PathMapping>>();
 
@@ -49,8 +48,7 @@ public class PathMappingHelper implements Serializable {
         ptList.add(CDef.ProcessType.Both);
 
         try {
-            final PathMappingBhv pathMappingBhv = SingletonS2Container
-                    .getComponent(PathMappingBhv.class);
+            final PathMappingBhv pathMappingBhv = SingletonS2Container.getComponent(PathMappingBhv.class);
             cachedPathMappingList = pathMappingBhv.selectList(cb -> {
                 cb.query().setDeletedBy_IsNull();
                 cb.query().addOrderBy_SortOrder_Asc();
@@ -61,8 +59,7 @@ public class PathMappingHelper implements Serializable {
         }
     }
 
-    public void setPathMappingList(final String sessionId,
-            final List<PathMapping> pathMappingList) {
+    public void setPathMappingList(final String sessionId, final List<PathMapping> pathMappingList) {
         if (sessionId != null) {
             if (pathMappingList != null) {
                 pathMappingMap.put(sessionId, pathMappingList);
@@ -101,8 +98,7 @@ public class PathMappingHelper implements Serializable {
         }
         String result = text;
         for (final PathMapping pathMapping : cachedPathMappingList) {
-            result = result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex()
-                    + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
+            result = result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
         }
         return result;
     }
@@ -118,8 +114,7 @@ public class PathMappingHelper implements Serializable {
         return replaceUrl(cachedPathMappingList, url);
     }
 
-    private String replaceUrl(final List<PathMapping> pathMappingList,
-            final String url) {
+    private String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
             final Matcher matcher = pathMapping.getMatcher(newUrl);

@@ -30,9 +30,7 @@ public class SynonymFileTest extends S2TestCase {
     @Override
     protected void setUp() throws Exception {
         file1 = File.createTempFile("synonym", ".txt");
-        FileUtil.write(file1.getAbsolutePath(),
-                "a1=>A1\nb1,b2 => B1\nc1 => C1, C2\nx1,X1\ny1, Y1, y2"
-                        .getBytes(Constants.UTF_8));
+        FileUtil.write(file1.getAbsolutePath(), "a1=>A1\nb1,b2 => B1\nc1 => C1, C2\nx1,X1\ny1, Y1, y2".getBytes(Constants.UTF_8));
     }
 
     @Override
@@ -105,8 +103,7 @@ public class SynonymFileTest extends S2TestCase {
         final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);
         assertEquals(5, itemList1.size());
 
-        final SynonymItem synonymItem1 = new SynonymItem(0, new String[] {
-                "z1", "z2" }, new String[] { "Z1", "Z2" });
+        final SynonymItem synonymItem1 = new SynonymItem(0, new String[] { "z1", "z2" }, new String[] { "Z1", "Z2" });
         synonymFile.insert(synonymItem1);
         final PagingList<SynonymItem> itemList2 = synonymFile.selectList(0, 20);
         assertEquals(6, itemList2.size());
@@ -115,8 +112,7 @@ public class SynonymFileTest extends S2TestCase {
         assertEquals("Z1", itemList2.get(5).getOutputs()[0]);
         assertEquals("Z2", itemList2.get(5).getOutputs()[1]);
 
-        final SynonymItem synonymItem2 = new SynonymItem(0, new String[] {
-                "z1", "z2" }, new String[] { "z1", "z2" });
+        final SynonymItem synonymItem2 = new SynonymItem(0, new String[] { "z1", "z2" }, new String[] { "z1", "z2" });
         synonymFile.insert(synonymItem2);
         final PagingList<SynonymItem> itemList3 = synonymFile.selectList(0, 20);
         assertEquals(7, itemList3.size());
@@ -177,10 +173,7 @@ public class SynonymFileTest extends S2TestCase {
         final PagingList<SynonymItem> itemList3 = synonymFile.selectList(0, 20);
         assertEquals(3, itemList3.size());
 
-        assertEquals(
-                "b1,b2=>B1" + Constants.LINE_SEPARATOR + "c1=>C1,C2"
-                        + Constants.LINE_SEPARATOR + "X1,x1"
-                        + Constants.LINE_SEPARATOR,
+        assertEquals("b1,b2=>B1" + Constants.LINE_SEPARATOR + "c1=>C1,C2" + Constants.LINE_SEPARATOR + "X1,x1" + Constants.LINE_SEPARATOR,
                 new String(FileUtil.getBytes(file1), Constants.UTF_8));
 
     }

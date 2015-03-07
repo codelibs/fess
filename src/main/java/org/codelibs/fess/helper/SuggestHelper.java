@@ -41,8 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
-    private static final Logger logger = LoggerFactory
-            .getLogger(SuggestHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
 
     @Resource
     protected SearchService searchService;
@@ -91,10 +90,9 @@ public class SuggestHelper {
     public void storeAllElevateWords() {
         suggestService.deleteAllElevateWords();
 
-        final List<SuggestElevateWord> list = suggestElevateWordBhv
-                .selectList(cb -> {
-                    cb.query().setDeletedBy_IsNull();
-                });
+        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
+            cb.query().setDeletedBy_IsNull();
+        });
         for (final SuggestElevateWord suggestElevateWord : list) {
             final String word = suggestElevateWord.getSuggestWord();
             final String reading = suggestElevateWord.getReading();
@@ -107,18 +105,15 @@ public class SuggestHelper {
         suggestService.commit();
     }
 
-    public void addElevateWord(final String word, final String reading,
-            final String labels, final String roles, final long boost) {
+    public void addElevateWord(final String word, final String reading, final String labels, final String roles, final long boost) {
         addElevateWord(word, reading, labels, roles, boost, true);
     }
 
-    public void addElevateWord(final String word, final String reading,
-            final String labels, final String roles, final long boost,
+    public void addElevateWord(final String word, final String reading, final String labels, final String roles, final long boost,
             final boolean commit) {
-        final List<SuggestBadWord> badWordList = suggestBadWordBhv
-                .selectList(badWordCB -> {
-                    badWordCB.query().setSuggestWord_Equal(word);
-                });
+        final List<SuggestBadWord> badWordList = suggestBadWordBhv.selectList(badWordCB -> {
+            badWordCB.query().setSuggestWord_Equal(word);
+        });
         if (badWordList.size() > 0) {
             return;
         }
@@ -138,8 +133,7 @@ public class SuggestHelper {
             }
         }
 
-        suggestService
-                .addElevateWord(word, reading, labelList, roleList, boost);
+        suggestService.addElevateWord(word, reading, labelList, roleList, boost);
 
         if (commit) {
             suggestService.commit();
@@ -165,9 +159,7 @@ public class SuggestHelper {
             cb.query().setDeletedBy_IsNull();
         });
 
-        final File dir = new File(System.getProperty("catalina.home").replace(
-                "¥", "/")
-                + "/" + badwordFileDir);
+        final File dir = new File(System.getProperty("catalina.home").replace("¥", "/") + "/" + badwordFileDir);
         if (!dir.exists() || !dir.isDirectory()) {
             logger.warn(dir.getAbsolutePath() + " does not exist.");
             return;

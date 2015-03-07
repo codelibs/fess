@@ -39,19 +39,16 @@ import org.codelibs.fess.pager.SuggestBadWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 
-public class SuggestBadWordService extends BsSuggestBadWordService implements
-        Serializable {
+public class SuggestBadWordService extends BsSuggestBadWordService implements Serializable {
 
     private static final String DELETE_PREFIX = "--";
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(SuggestBadWordService.class);
+    private static final Log log = LogFactory.getLog(SuggestBadWordService.class);
 
     @Override
-    protected void setupListCondition(final SuggestBadWordCB cb,
-            final SuggestBadWordPager suggestBadWordPager) {
+    protected void setupListCondition(final SuggestBadWordCB cb, final SuggestBadWordPager suggestBadWordPager) {
         super.setupListCondition(cb, suggestBadWordPager);
 
         // setup condition
@@ -63,8 +60,7 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
     }
 
     @Override
-    protected void setupEntityCondition(final SuggestBadWordCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final SuggestBadWordCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -105,12 +101,10 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
                         badWord = badWord.substring(2);
                     }
                     final String target = badWord;
-                    SuggestBadWord suggestBadWord = suggestBadWordBhv
-                            .selectEntity(cb -> {
-                                cb.query().setSuggestWord_Equal(target);
-                            }).orElse(null);//TODO
-                    final LocalDateTime now = ComponentUtil.getSystemHelper()
-                            .getCurrentTime();
+                    SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(cb -> {
+                        cb.query().setSuggestWord_Equal(target);
+                    }).orElse(null);//TODO
+                    final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
                     if (isDelete) {
                         suggestBadWord.setDeletedBy("system");
                         suggestBadWord.setDeletedTime(now);
@@ -156,14 +150,11 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        log.warn(
-                                "Failed to write a sugget bad word: " + entity,
-                                e);
+                        log.warn("Failed to write a sugget bad word: " + entity, e);
                     }
                 }
 
-                private void addToList(final List<String> list,
-                        final Object value) {
+                private void addToList(final List<String> list, final Object value) {
                     if (value == null) {
                         list.add(StringUtil.EMPTY);
                     } else {
@@ -186,8 +177,7 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements
         if (StringUtil.isBlank(item)) {
             return StringUtil.EMPTY;
         }
-        if (item.length() > 1 && item.charAt(0) == '"'
-                && item.charAt(item.length() - 1) == '"') {
+        if (item.length() > 1 && item.charAt(0) == '"' && item.charAt(item.length() - 1) == '"') {
             item = item.substring(1, item.length() - 1);
         }
         return item;

@@ -41,16 +41,13 @@ public abstract class BsLabelTypeService {
 
     public List<LabelType> getLabelTypeList(final LabelTypePager labelTypePager) {
 
-        final PagingResultBean<LabelType> labelTypeList = labelTypeBhv
-                .selectPage(cb -> {
-                    cb.paging(labelTypePager.getPageSize(),
-                            labelTypePager.getCurrentPageNumber());
-                    setupListCondition(cb, labelTypePager);
-                });
+        final PagingResultBean<LabelType> labelTypeList = labelTypeBhv.selectPage(cb -> {
+            cb.paging(labelTypePager.getPageSize(), labelTypePager.getCurrentPageNumber());
+            setupListCondition(cb, labelTypePager);
+        });
 
         // update pager
-        Beans.copy(labelTypeList, labelTypePager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(labelTypeList, labelTypePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         labelTypePager.setPageNumberList(labelTypeList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -85,8 +82,7 @@ public abstract class BsLabelTypeService {
 
     }
 
-    protected void setupListCondition(final LabelTypeCB cb,
-            final LabelTypePager labelTypePager) {
+    protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
 
         if (labelTypePager.id != null) {
             cb.query().setId_Equal(Long.parseLong(labelTypePager.id));
@@ -94,8 +90,7 @@ public abstract class BsLabelTypeService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final LabelTypeCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final LabelTypeCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final LabelType labelType) {

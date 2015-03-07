@@ -30,8 +30,7 @@ public class RoleTypeService extends BsRoleTypeService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final RoleTypeCB cb,
-            final RoleTypePager roleTypePager) {
+    protected void setupListCondition(final RoleTypeCB cb, final RoleTypePager roleTypePager) {
         super.setupListCondition(cb, roleTypePager);
 
         // setup condition
@@ -43,8 +42,7 @@ public class RoleTypeService extends BsRoleTypeService implements Serializable {
     }
 
     @Override
-    protected void setupEntityCondition(final RoleTypeCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final RoleTypeCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition

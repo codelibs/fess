@@ -20,8 +20,7 @@ import java.io.Serializable;
 
 import org.codelibs.fess.crud.form.admin.BsBoostDocumentRuleForm;
 
-public class BoostDocumentRuleForm extends BsBoostDocumentRuleForm implements
-        Serializable {
+public class BoostDocumentRuleForm extends BsBoostDocumentRuleForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

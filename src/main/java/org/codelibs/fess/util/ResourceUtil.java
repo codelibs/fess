@@ -60,8 +60,7 @@ public class ResourceUtil {
 
         String path = null;
         try {
-            final ServletContext servletContext = SingletonS2Container
-                    .getComponent(ServletContext.class);
+            final ServletContext servletContext = SingletonS2Container.getComponent(ServletContext.class);
             if (servletContext != null) {
                 path = servletContext.getRealPath("/" + baseName + name);
             }
@@ -106,8 +105,7 @@ public class ResourceUtil {
             if (replacement == null) {
                 replacement = matcher.group(1);
             }
-            matcher.appendReplacement(tunedText,
-                    replacement.replace("\\", "\\\\").replace("$", "\\$"));
+            matcher.appendReplacement(tunedText, replacement.replace("\\", "\\\\").replace("$", "\\$"));
 
         }
         matcher.appendTail(tunedText);

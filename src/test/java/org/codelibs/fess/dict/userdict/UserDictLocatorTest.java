@@ -55,20 +55,15 @@ public class UserDictLocatorTest extends S2TestCase {
         testCoreDir = new File(testDir, "core");
         testCoreDir.mkdirs();
         userDictFile1 = new File(testDir, "userdict.txt");
-        FileUtil.write(userDictFile1.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(userDictFile1.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
         userDictFile2 = new File(testDataDir, "userdict_data.txt");
-        FileUtil.write(userDictFile2.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(userDictFile2.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
         userDictFile3 = new File(testCoreDir, "userdict_core.txt");
-        FileUtil.write(userDictFile3.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(userDictFile3.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
         dummyFile1 = new File(testDir, "dummy.txt");
-        FileUtil.write(dummyFile1.getAbsolutePath(),
-                "dummy 1".getBytes(Constants.UTF_8));
+        FileUtil.write(dummyFile1.getAbsolutePath(), "dummy 1".getBytes(Constants.UTF_8));
         dummyFile2 = new File(testCoreDir, "dummy.txt");
-        FileUtil.write(dummyFile2.getAbsolutePath(),
-                "dummy 2".getBytes(Constants.UTF_8));
+        FileUtil.write(dummyFile2.getAbsolutePath(), "dummy 2".getBytes(Constants.UTF_8));
 
     }
 
@@ -82,8 +77,7 @@ public class UserDictLocatorTest extends S2TestCase {
         userDictLocator.excludedUserDictList = new ArrayList<String>();
         userDictLocator.excludedUserDictList.add("data");
         userDictLocator.addSearchPath(testDir.getAbsolutePath());
-        final List<DictionaryFile<? extends DictionaryItem>> list = userDictLocator
-                .find();
+        final List<DictionaryFile<? extends DictionaryItem>> list = userDictLocator.find();
         assertEquals(2, list.size());
         final DictionaryFile<? extends DictionaryItem> dicFile1 = list.get(0);
         final DictionaryFile<? extends DictionaryItem> dicFile2 = list.get(1);

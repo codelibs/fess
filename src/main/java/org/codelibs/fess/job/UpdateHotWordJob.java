@@ -23,12 +23,10 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateHotWordJob {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(UpdateHotWordJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpdateHotWordJob.class);
 
     public String execute() {
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
-                .getHotSearchWordHelper();
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 

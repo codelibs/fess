@@ -55,8 +55,7 @@ public class ClickLogService implements Serializable {
 
     public void importCsv(final Reader reader) {
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
-        final DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
@@ -64,22 +63,16 @@ public class ClickLogService implements Serializable {
                 try {
                     final String dateStr = list.get(3);
                     final String userSessionId = list.get(4);
-                    final SearchLog searchLog = searchLogBhv.selectEntity(
-                            cb -> {
-                                cb.query()
-                                        .setRequestedTime_Equal(
-                                                LocalDateTime.parse(dateStr,
-                                                        formatter));
-                                cb.query()
-                                        .setUserSessionId_Equal(userSessionId);
-                            }).orElse(null);//TODO
+                    final SearchLog searchLog = searchLogBhv.selectEntity(cb -> {
+                        cb.query().setRequestedTime_Equal(LocalDateTime.parse(dateStr, formatter));
+                        cb.query().setUserSessionId_Equal(userSessionId);
+                    }).orElse(null);//TODO
                     if (searchLog != null) {
                         final ClickLog entity = new ClickLog();
                         entity.setId(Long.parseLong(list.get(0)));
                         entity.setSearchId(searchLog.getId());
                         entity.setUrl(list.get(1));
-                        entity.setRequestedTime(LocalDateTime.parse(
-                                list.get(2), formatter));
+                        entity.setRequestedTime(LocalDateTime.parse(list.get(2), formatter));
                         clickLogBhv.insert(entity);
                     } else {
                         log.warn("The search log is not found: " + list);
@@ -106,8 +99,7 @@ public class ClickLogService implements Serializable {
             list.add("QueryRequestedTime");
             list.add("UserSessionId");
             csvWriter.writeValues(list);
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             clickLogBhv.selectCursor(cb -> {
                 cb.setupSelect_SearchLog();
                 cb.specify().specifySearchLog().columnUserSessionId();
@@ -130,8 +122,7 @@ public class ClickLogService implements Serializable {
                     }
                 }
 
-                private void addToList(final List<String> list,
-                        final Object value) {
+                private void addToList(final List<String> list, final Object value) {
                     if (value == null) {
                         list.add(StringUtil.EMPTY);
                     } else if (value instanceof LocalDateTime) {

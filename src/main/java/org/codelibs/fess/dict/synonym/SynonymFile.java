@@ -71,16 +71,13 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     @Override
-    public synchronized PagingList<SynonymItem> selectList(final int offset,
-            final int size) {
+    public synchronized PagingList<SynonymItem> selectList(final int offset, final int size) {
         if (synonymItemList == null) {
             reload(null);
         }
 
         if (offset >= synonymItemList.size() || offset < 0) {
-            return new PagingList<SynonymItem>(
-                    Collections.<SynonymItem> emptyList(), offset, size,
-                    synonymItemList.size());
+            return new PagingList<SynonymItem>(Collections.<SynonymItem> emptyList(), offset, size, synonymItemList.size());
         }
 
         int toIndex = offset + size;
@@ -88,8 +85,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             toIndex = synonymItemList.size();
         }
 
-        return new PagingList<SynonymItem>(synonymItemList.subList(offset,
-                toIndex), offset, size, synonymItemList.size());
+        return new PagingList<SynonymItem>(synonymItemList.subList(offset, toIndex), offset, size, synonymItemList.size());
     }
 
     @Override
@@ -97,20 +93,17 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         final SynonymItem synonymItem = item;
         BufferedWriter bw = null;
         try {
-            bw = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(file, true), Constants.UTF_8));
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), Constants.UTF_8));
             bw.newLine();
             bw.write(synonymItem.toLineString());
             bw.flush();
 
             long nextId = 1;
             if (!synonymItemList.isEmpty()) {
-                final SynonymItem lastItem = synonymItemList
-                        .get(synonymItemList.size() - 1);
+                final SynonymItem lastItem = synonymItemList.get(synonymItemList.size() - 1);
                 nextId = lastItem.getId() + 1;
             }
-            synonymItemList.add(new SynonymItem(nextId, synonymItem
-                    .getNewInputs(), synonymItem.getNewOutputs()));
+            synonymItemList.add(new SynonymItem(nextId, synonymItem.getNewInputs(), synonymItem.getNewOutputs()));
         } catch (final IOException e) {
             throw new DictionaryException("Failed to write: " + item, e);
         } finally {
@@ -151,8 +144,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         final List<SynonymItem> itemList = new ArrayList<SynonymItem>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), Constants.UTF_8));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Constants.UTF_8));
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -169,8 +161,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                 final List<String> sides = split(line, "=>");
                 if (sides.size() > 1) { // explicit mapping
                     if (sides.size() != 2) {
-                        throw new DictionaryException(
-                                "more than one explicit mapping specified on the same line");
+                        throw new DictionaryException("more than one explicit mapping specified on the same line");
                     }
                     final List<String> inputStrings = split(sides.get(0), ",");
                     inputs = new String[inputStrings.size()];
@@ -186,8 +177,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
                     if (inputs.length > 0 && outputs.length > 0) {
                         id++;
-                        final SynonymItem item = new SynonymItem(id, inputs,
-                                outputs);
+                        final SynonymItem item = new SynonymItem(id, inputs, outputs);
                         if (updater != null) {
                             final SynonymItem newItem = updater.write(item);
                             if (newItem != null) {
@@ -208,8 +198,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
                     if (inputs.length > 0) {
                         id++;
-                        final SynonymItem item = new SynonymItem(id, inputs,
-                                inputs);
+                        final SynonymItem item = new SynonymItem(id, inputs, inputs);
                         if (updater != null) {
                             final SynonymItem newItem = updater.write(item);
                             if (newItem != null) {
@@ -228,8 +217,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             }
             synonymItemList = itemList;
         } catch (final IOException e) {
-            throw new DictionaryException("Failed to parse "
-                    + file.getAbsolutePath(), e);
+            throw new DictionaryException("Failed to parse " + file.getAbsolutePath(), e);
         } finally {
             IOUtils.closeQuietly(reader);
         }
@@ -300,14 +288,12 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         protected SynonymUpdater(final File file, final SynonymItem newItem) {
             try {
                 newFile = File.createTempFile(SYNONYM, ".txt");
-                writer = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(newFile), Constants.UTF_8));
+                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
             } catch (final IOException e) {
                 if (newFile != null) {
                     newFile.delete();
                 }
-                throw new DictionaryException(
-                        "Failed to write a synonym file.", e);
+                throw new DictionaryException("Failed to write a synonym file.", e);
             }
             oldFile = file;
             item = newItem;
@@ -322,9 +308,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                                 // update
                                 writer.write(item.toLineString());
                                 writer.write(Constants.LINE_SEPARATOR);
-                                return new SynonymItem(item.getId(),
-                                        item.getNewInputs(),
-                                        item.getNewOutputs());
+                                return new SynonymItem(item.getId(), item.getNewInputs(), item.getNewOutputs());
                             } else {
                                 return null;
                             }
@@ -333,9 +317,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                             item.setNewOutputs(null);
                         }
                     } else {
-                        throw new DictionaryException(
-                                "Synonym file was updated: old=" + oldItem
-                                        + " : new=" + item);
+                        throw new DictionaryException("Synonym file was updated: old=" + oldItem + " : new=" + item);
                     }
                 } else {
                     writer.write(oldItem.toLineString());
@@ -343,8 +325,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                     return oldItem;
                 }
             } catch (final IOException e) {
-                throw new DictionaryException("Failed to write: " + oldItem
-                        + " -> " + item, e);
+                throw new DictionaryException("Failed to write: " + oldItem + " -> " + item, e);
             }
         }
 
@@ -374,9 +355,8 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                     FileUtils.copyFile(newFile, oldFile);
                     newFile.delete();
                 } catch (final IOException e) {
-                    throw new DictionaryException("Failed to replace "
-                            + oldFile.getAbsolutePath() + " with "
-                            + newFile.getAbsolutePath(), e);
+                    throw new DictionaryException("Failed to replace " + oldFile.getAbsolutePath() + " with " + newFile.getAbsolutePath(),
+                            e);
                 }
             } else {
                 newFile.delete();
@@ -399,7 +379,6 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
     @Override
     public String toString() {
-        return "SynonymFile [file=" + file + ", synonymItemList="
-                + synonymItemList + ", id=" + id + "]";
+        return "SynonymFile [file=" + file + ", synonymItemList=" + synonymItemList + ", id=" + id + "]";
     }
 }

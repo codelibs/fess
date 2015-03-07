@@ -49,8 +49,7 @@ public class WebAuthentication extends BsWebAuthentication {
     private static final long serialVersionUID = 1L;
 
     public Authentication getAuthentication() {
-        return new AuthenticationImpl(getAuthScope(), getCredentials(),
-                getAuthScheme());
+        return new AuthenticationImpl(getAuthScope(), getCredentials(), getAuthScheme());
     }
 
     private AuthScheme getAuthScheme() {
@@ -95,17 +94,14 @@ public class WebAuthentication extends BsWebAuthentication {
         }
 
         if (Constants.NTLM.equals(getProtocolScheme())) {
-            final Map<String, String> parameterMap = ParameterUtil
-                    .parse(getParameters());
+            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
             final String workstation = parameterMap.get("workstation");
             final String domain = parameterMap.get("domain");
-            return new NTCredentials(getUsername(), getPassword(),
-                    workstation == null ? StringUtil.EMPTY : workstation,
+            return new NTCredentials(getUsername(), getPassword(), workstation == null ? StringUtil.EMPTY : workstation,
                     domain == null ? StringUtil.EMPTY : domain);
         }
 
-        return new UsernamePasswordCredentials(getUsername(),
-                getPassword() == null ? StringUtil.EMPTY : getPassword());
+        return new UsernamePasswordCredentials(getUsername(), getPassword() == null ? StringUtil.EMPTY : getPassword());
     }
 
 }

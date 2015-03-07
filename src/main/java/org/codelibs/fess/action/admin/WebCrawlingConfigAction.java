@@ -44,8 +44,7 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(WebCrawlingConfigAction.class);
+    private static final Log log = LogFactory.getLog(WebCrawlingConfigAction.class);
 
     @Resource
     protected RoleTypeService roleTypeService;
@@ -66,24 +65,17 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
     @Override
     protected void loadWebCrawlingConfig() {
 
-        final CrawlingConfig webCrawlingConfig = webCrawlingConfigService
-                .getWebCrawlingConfig(createKeyMap());
+        final CrawlingConfig webCrawlingConfig = webCrawlingConfigService.getWebCrawlingConfig(createKeyMap());
         if (webCrawlingConfig == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { webCrawlingConfigForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { webCrawlingConfigForm.id });
         }
 
-        FessBeans.copy(webCrawlingConfig, webCrawlingConfigForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(webCrawlingConfig, webCrawlingConfigForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
 
         // normalize boost
-        if (webCrawlingConfigForm.boost != null
-                && webCrawlingConfigForm.boost.indexOf('.') > 0) {
-            webCrawlingConfigForm.boost = webCrawlingConfigForm.boost
-                    .substring(0, webCrawlingConfigForm.boost.indexOf('.'));
+        if (webCrawlingConfigForm.boost != null && webCrawlingConfigForm.boost.indexOf('.') > 0) {
+            webCrawlingConfigForm.boost = webCrawlingConfigForm.boost.substring(0, webCrawlingConfigForm.boost.indexOf('.'));
         }
     }
 
@@ -93,13 +85,10 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (webCrawlingConfigForm.crudMode == CommonConstants.EDIT_MODE) {
-            webCrawlingConfig = webCrawlingConfigService
-                    .getWebCrawlingConfig(createKeyMap());
+            webCrawlingConfig = webCrawlingConfigService.getWebCrawlingConfig(createKeyMap());
             if (webCrawlingConfig == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { webCrawlingConfigForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { webCrawlingConfigForm.id });
             }
         } else {
             webCrawlingConfig = new WebCrawlingConfig();
@@ -108,8 +97,7 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
         }
         webCrawlingConfig.setUpdatedBy(username);
         webCrawlingConfig.setUpdatedTime(currentTime);
-        FessBeans.copy(webCrawlingConfigForm, webCrawlingConfig)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(webCrawlingConfigForm, webCrawlingConfig).excludesCommonColumns().execute();
 
         return webCrawlingConfig;
     }
@@ -118,19 +106,15 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (webCrawlingConfigForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            webCrawlingConfigForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    webCrawlingConfigForm.crudMode });
         }
 
         try {
-            final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigService
-                    .getWebCrawlingConfig(createKeyMap());
+            final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigService.getWebCrawlingConfig(createKeyMap());
             if (webCrawlingConfig == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { webCrawlingConfigForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { webCrawlingConfigForm.id });
             }
 
             failureUrlService.deleteByConfigId(webCrawlingConfig.getConfigId());
@@ -149,12 +133,10 @@ public class WebCrawlingConfigAction extends BsWebCrawlingConfigAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 

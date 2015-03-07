@@ -36,8 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
-    private static final Logger logger = LoggerFactory
-            .getLogger(DatabaseDataStoreImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseDataStoreImpl.class);
 
     private static final String SQL_PARAM = "sql";
 
@@ -78,11 +77,8 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final DataCrawlingConfig config,
-            final IndexUpdateCallback callback,
-            final Map<String, String> paramMap,
-            final Map<String, String> scriptMap,
-            final Map<String, Object> defaultDataMap) {
+    protected void storeData(final DataCrawlingConfig config, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+            final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
 
         final long readInterval = getReadInterval(paramMap);
 
@@ -107,10 +103,8 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
             while (rs.next() && loop && alive) {
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.putAll(defaultDataMap);
-                for (final Map.Entry<String, String> entry : scriptMap
-                        .entrySet()) {
-                    final Object convertValue = convertValue(entry.getValue(),
-                            rs, paramMap);
+                for (final Map.Entry<String, String> entry : scriptMap.entrySet()) {
+                    final Object convertValue = convertValue(entry.getValue(), rs, paramMap);
                     if (convertValue != null) {
                         dataMap.put(entry.getKey(), convertValue);
                     }
@@ -156,17 +150,14 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    protected Object convertValue(final String template, final ResultSet rs,
-            final Map<String, String> paramMap) {
-        return convertValue(template, new ResultSetParamMap<String, String>(rs,
-                paramMap));
+    protected Object convertValue(final String template, final ResultSet rs, final Map<String, String> paramMap) {
+        return convertValue(template, new ResultSetParamMap<String, String>(rs, paramMap));
     }
 
     protected static class ResultSetParamMap<K, V> implements Map<K, V> {
         private final Map<K, V> paramMap = new HashMap<K, V>();
 
-        public ResultSetParamMap(final ResultSet resultSet,
-                final Map<K, V> paramMap) {
+        public ResultSetParamMap(final ResultSet resultSet, final Map<K, V> paramMap) {
             this.paramMap.putAll(paramMap);
 
             try {
@@ -178,9 +169,7 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
                         final String value = resultSet.getString(i + 1);
                         this.paramMap.put((K) label, (V) value);
                     } catch (final SQLException e) {
-                        logger.warn(
-                                "Failed to parse data in a result set. The column is "
-                                        + (i + 1) + ".", e);
+                        logger.warn("Failed to parse data in a result set. The column is " + (i + 1) + ".", e);
                     }
                 }
             } catch (final Exception e) {

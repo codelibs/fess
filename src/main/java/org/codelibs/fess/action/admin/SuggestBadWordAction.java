@@ -56,8 +56,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(SuggestBadWordAction.class);
+    private static final Log log = LogFactory.getLog(SuggestBadWordAction.class);
 
     @Resource
     protected SystemHelper systemHelper;
@@ -75,18 +74,13 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
     @Override
     protected void loadSuggestBadWord() {
 
-        final SuggestBadWord suggestBadWord = suggestBadWordService
-                .getSuggestBadWord(createKeyMap());
+        final SuggestBadWord suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
         if (suggestBadWord == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { suggestBadWordForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { suggestBadWordForm.id });
         }
 
-        FessBeans.copy(suggestBadWord, suggestBadWordForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(suggestBadWord, suggestBadWordForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -95,13 +89,10 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (suggestBadWordForm.crudMode == CommonConstants.EDIT_MODE) {
-            suggestBadWord = suggestBadWordService
-                    .getSuggestBadWord(createKeyMap());
+            suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
             if (suggestBadWord == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { suggestBadWordForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { suggestBadWordForm.id });
             }
         } else {
             suggestBadWord = new SuggestBadWord();
@@ -110,8 +101,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         }
         suggestBadWord.setUpdatedBy(username);
         suggestBadWord.setUpdatedTime(currentTime);
-        FessBeans.copy(suggestBadWordForm, suggestBadWord)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(suggestBadWordForm, suggestBadWord).excludesCommonColumns().execute();
 
         return suggestBadWord;
     }
@@ -120,19 +110,15 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (suggestBadWordForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            suggestBadWordForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    suggestBadWordForm.crudMode });
         }
 
         try {
-            final SuggestBadWord suggestBadWord = suggestBadWordService
-                    .getSuggestBadWord(createKeyMap());
+            final SuggestBadWord suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
             if (suggestBadWord == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { suggestBadWordForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { suggestBadWordForm.id });
             }
 
             //           suggestBadWordService.delete(suggestBadWord);
@@ -151,12 +137,10 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
@@ -180,8 +164,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -205,8 +188,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -222,17 +204,15 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
 
         final HttpServletResponse response = ResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\""
-                + "badword.csv" + "\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + "badword.csv" + "\"");
 
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                response.getOutputStream(), crawlerProperties.getProperty(
+        try (Writer writer =
+                new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), crawlerProperties.getProperty(
                         Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)))) {
             suggestBadWordService.exportCsv(writer);
         } catch (final Exception e) {
             log.error("Failed to export data.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_export_data");
+            throw new SSCActionMessagesException(e, "errors.failed_to_export_data");
         }
         return null;
     }
@@ -252,8 +232,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         final byte[] b = new byte[20];
         try {
             tempFile = File.createTempFile("suggestbadword-import-", ".csv");
-            is = new BufferedInputStream(
-                    suggestBadWordForm.suggestBadWordFile.getInputStream());
+            is = new BufferedInputStream(suggestBadWordForm.suggestBadWordFile.getInputStream());
             is.mark(20);
             if (is.read(b, 0, 20) <= 0) {
                 throw new FessSystemException("no import data.");
@@ -266,8 +245,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
                 log.warn("Could not delete " + tempFile.getAbsolutePath());
             }
             log.error("Failed to import data.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_import_data");
+            throw new SSCActionMessagesException(e, "errors.failed_to_import_data");
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(fos);
@@ -277,29 +255,23 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
         try {
             final String head = new String(b, Constants.UTF_8);
             if (!(head.startsWith("\"BadWord\"") || head.startsWith("BadWord"))) {
-                log.error("Unknown file: "
-                        + suggestBadWordForm.suggestBadWordFile);
-                throw new SSCActionMessagesException(
-                        "errors.unknown_import_file");
+                log.error("Unknown file: " + suggestBadWordForm.suggestBadWordFile);
+                throw new SSCActionMessagesException("errors.unknown_import_file");
             }
-            final String enc = crawlerProperties.getProperty(
-                    Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+            final String enc = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Reader reader = null;
                     try {
-                        reader = new BufferedReader(new InputStreamReader(
-                                new FileInputStream(oFile), enc));
+                        reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
                         suggestBadWordService.importCsv(reader);
                     } catch (final Exception e) {
                         log.error("Failed to import data.", e);
-                        throw new FessSystemException("Failed to import data.",
-                                e);
+                        throw new FessSystemException("Failed to import data.", e);
                     } finally {
                         if (!oFile.delete()) {
-                            log.warn("Could not delete "
-                                    + oFile.getAbsolutePath());
+                            log.warn("Could not delete " + oFile.getAbsolutePath());
                         }
                         IOUtils.closeQuietly(reader);
                         suggestHelper.deleteAllBadWord();
@@ -317,8 +289,7 @@ public class SuggestBadWordAction extends BsSuggestBadWordAction {
                 log.warn("Could not delete " + oFile.getAbsolutePath());
             }
             log.error("Failed to import data.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_import_data");
+            throw new SSCActionMessagesException(e, "errors.failed_to_import_data");
         }
         SAStrutsUtil.addSessionMessage("success.upload_suggest_bad_word");
 

@@ -38,8 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LabelTypeHelper implements Serializable {
-    private static final Logger logger = LoggerFactory
-            .getLogger(LabelTypeHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(LabelTypeHelper.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -56,8 +55,7 @@ public class LabelTypeHelper implements Serializable {
 
     @InitMethod
     public void init() {
-        final List<LabelType> labelTypeList = getLabelTypeService()
-                .getLabelTypeListWithRoles();
+        final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeListWithRoles();
         buildLabelTypeItems(labelTypeList);
     }
 
@@ -95,8 +93,7 @@ public class LabelTypeHelper implements Serializable {
             for (final LabelTypeItem item : labelTypeItemList) {
                 for (final String roleValue : roleSet) {
                     if (item.getRoleValueList().contains(roleValue)) {
-                        final Map<String, String> map = new HashMap<String, String>(
-                                2);
+                        final Map<String, String> map = new HashMap<String, String>(2);
                         map.put(Constants.ITEM_LABEL, item.getLabel());
                         map.put(Constants.ITEM_VALUE, item.getValue());
                         itemList.add(map);
@@ -113,28 +110,17 @@ public class LabelTypeHelper implements Serializable {
         if (labelTypePatternList == null) {
             synchronized (this) {
                 if (labelTypePatternList == null) {
-                    final List<LabelType> labelTypeList = getLabelTypeService()
-                            .getLabelTypeList();
+                    final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeList();
                     final List<LabelTypePattern> list = new ArrayList<LabelTypePattern>();
                     for (final LabelType labelType : labelTypeList) {
-                        final String includedPaths = labelType
-                                .getIncludedPaths();
-                        final String excludedPaths = labelType
-                                .getExcludedPaths();
-                        if (StringUtil.isNotBlank(includedPaths)
-                                || StringUtil.isNotBlank(excludedPaths)) {
+                        final String includedPaths = labelType.getIncludedPaths();
+                        final String excludedPaths = labelType.getExcludedPaths();
+                        if (StringUtil.isNotBlank(includedPaths) || StringUtil.isNotBlank(excludedPaths)) {
                             try {
-                                list.add(new LabelTypePattern(labelType
-                                        .getValue(), includedPaths,
-                                        excludedPaths));
+                                list.add(new LabelTypePattern(labelType.getValue(), includedPaths, excludedPaths));
                             } catch (final Exception e) {
-                                logger.warn(
-                                        "Failed to create a matching pattern of a label: "
-                                                + labelType.getValue()
-                                                + ", includedPaths:"
-                                                + includedPaths
-                                                + ", excludedPaths:"
-                                                + excludedPaths, e);
+                                logger.warn("Failed to create a matching pattern of a label: " + labelType.getValue() + ", includedPaths:"
+                                        + includedPaths + ", excludedPaths:" + excludedPaths, e);
                             }
                         }
                     }
@@ -196,8 +182,7 @@ public class LabelTypeHelper implements Serializable {
 
         private Pattern excludedPaths;
 
-        public LabelTypePattern(final String value, final String includedPaths,
-                final String excludedPaths) {
+        public LabelTypePattern(final String value, final String includedPaths, final String excludedPaths) {
             this.value = value;
 
             if (StringUtil.isNotBlank(includedPaths)) {
@@ -236,8 +221,7 @@ public class LabelTypeHelper implements Serializable {
         public boolean match(final String path) {
             if (includedPaths != null) {
                 if (includedPaths.matcher(path).matches()) {
-                    if (excludedPaths != null
-                            && excludedPaths.matcher(path).matches()) {
+                    if (excludedPaths != null && excludedPaths.matcher(path).matches()) {
                         return false;
                     }
                     return true;

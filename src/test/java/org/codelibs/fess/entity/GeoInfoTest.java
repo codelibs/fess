@@ -26,11 +26,8 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals(
-                "{!geofilt pt=" + Double.toString(Double.parseDouble(latitude))
-                        + "," + Double.toString(Double.parseDouble(lonitude))
-                        + " sfield=location d=" + distance + ".0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=" + Double.toString(Double.parseDouble(latitude)) + "," + Double.toString(Double.parseDouble(lonitude))
+                + " sfield=location d=" + distance + ".0}", geoInfo.toGeoQueryString());
     }
 
     public void test_90_180_10() {
@@ -40,11 +37,8 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals(
-                "{!geofilt pt=" + Double.toString(Double.parseDouble(latitude))
-                        + "," + Double.toString(Double.parseDouble(lonitude))
-                        + " sfield=location d=" + distance + ".0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=" + Double.toString(Double.parseDouble(latitude)) + "," + Double.toString(Double.parseDouble(lonitude))
+                + " sfield=location d=" + distance + ".0}", geoInfo.toGeoQueryString());
     }
 
     public void test_91_181_10() {
@@ -54,8 +48,7 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals("{!geofilt pt=90.0,-179.0 sfield=location d=10.0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=90.0,-179.0 sfield=location d=10.0}", geoInfo.toGeoQueryString());
     }
 
     public void test_91_361_10() {
@@ -65,8 +58,7 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals("{!geofilt pt=90.0,1.0 sfield=location d=100.0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=90.0,1.0 sfield=location d=100.0}", geoInfo.toGeoQueryString());
     }
 
     public void test__90__180_10() {
@@ -76,11 +68,8 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals(
-                "{!geofilt pt=" + Double.toString(Double.parseDouble(latitude))
-                        + "," + Double.toString(Double.parseDouble(lonitude))
-                        + " sfield=location d=" + distance + ".0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=" + Double.toString(Double.parseDouble(latitude)) + "," + Double.toString(Double.parseDouble(lonitude))
+                + " sfield=location d=" + distance + ".0}", geoInfo.toGeoQueryString());
     }
 
     public void test__91__181_10() {
@@ -90,8 +79,7 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals("{!geofilt pt=-90.0,179.0 sfield=location d=10.0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=-90.0,179.0 sfield=location d=10.0}", geoInfo.toGeoQueryString());
     }
 
     public void test__91__361_10() {
@@ -101,8 +89,7 @@ public class GeoInfoTest extends S2TestCase {
 
         final GeoInfo geoInfo = create(latitude, lonitude, distance);
         assertTrue(geoInfo.isAvailable());
-        assertEquals("{!geofilt pt=-90.0,-1.0 sfield=location d=100.0}",
-                geoInfo.toGeoQueryString());
+        assertEquals("{!geofilt pt=-90.0,-1.0 sfield=location d=100.0}", geoInfo.toGeoQueryString());
     }
 
     public void test_0_0_0() {
@@ -132,8 +119,7 @@ public class GeoInfoTest extends S2TestCase {
         assertFalse(geoInfo.isAvailable());
     }
 
-    private GeoInfo create(final String latitude, final String longitude,
-            final String distance) {
+    private GeoInfo create(final String latitude, final String longitude, final String distance) {
         final GeoInfo geoInfo = new GeoInfo();
         geoInfo.latitude = latitude;
         geoInfo.longitude = longitude;

@@ -29,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class H2ConfigServlet extends HttpServlet {
-    private static final Logger logger = LoggerFactory
-            .getLogger(H2ConfigServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(H2ConfigServlet.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -77,8 +76,7 @@ public class H2ConfigServlet extends HttpServlet {
             if (logger.isInfoEnabled()) {
                 logger.info("Starting H2 server...");
             }
-            server = Server.createTcpServer(
-                    argList.toArray(new String[argList.size()])).start();
+            server = Server.createTcpServer(argList.toArray(new String[argList.size()])).start();
         } catch (final Exception e) {
             throw new ServletException("Could not start Fess Config DB.", e);
         }

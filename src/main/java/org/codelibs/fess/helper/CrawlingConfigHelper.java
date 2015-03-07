@@ -54,8 +54,7 @@ public class CrawlingConfigHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(CrawlingConfigHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlingConfigHelper.class);
 
     protected final Map<String, CrawlingConfig> crawlingConfigMap = new ConcurrentHashMap<String, CrawlingConfig>();
 
@@ -99,25 +98,21 @@ public class CrawlingConfigHelper implements Serializable {
             return null;
         }
         switch (configType) {
-            case WEB:
-                final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
-                        .getComponent(WebCrawlingConfigService.class);
-                return webCrawlingConfigService.getWebCrawlingConfig(id);
-            case FILE:
-                final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container
-                        .getComponent(FileCrawlingConfigService.class);
-                return fileCrawlingConfigService.getFileCrawlingConfig(id);
-            case DATA:
-                final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container
-                        .getComponent(DataCrawlingConfigService.class);
-                return dataCrawlingConfigService.getDataCrawlingConfig(id);
-            default:
-                return null;
+        case WEB:
+            final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container.getComponent(WebCrawlingConfigService.class);
+            return webCrawlingConfigService.getWebCrawlingConfig(id);
+        case FILE:
+            final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container.getComponent(FileCrawlingConfigService.class);
+            return fileCrawlingConfigService.getFileCrawlingConfig(id);
+        case DATA:
+            final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container.getComponent(DataCrawlingConfigService.class);
+            return dataCrawlingConfigService.getDataCrawlingConfig(id);
+        default:
+            return null;
         }
     }
 
-    public synchronized String store(final String sessionId,
-            final CrawlingConfig crawlingConfig) {
+    public synchronized String store(final String sessionId, final CrawlingConfig crawlingConfig) {
         final String sessionCountId = sessionId + "-" + count;
         crawlingConfigMap.put(sessionCountId, crawlingConfig);
         count++;
@@ -148,39 +143,29 @@ public class CrawlingConfigHelper implements Serializable {
         final ConfigType configType = getConfigType(configId);
         CrawlingConfig config = null;
         if (logger.isDebugEnabled()) {
-            logger.debug("configType: " + configType + ", configId: "
-                    + configId);
+            logger.debug("configType: " + configType + ", configId: " + configId);
         }
         if (ConfigType.WEB == configType) {
-            final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container
-                    .getComponent(WebCrawlingConfigService.class);
-            config = webCrawlingConfigService
-                    .getWebCrawlingConfig(getId(configId));
+            final WebCrawlingConfigService webCrawlingConfigService = SingletonS2Container.getComponent(WebCrawlingConfigService.class);
+            config = webCrawlingConfigService.getWebCrawlingConfig(getId(configId));
         } else if (ConfigType.FILE == configType) {
-            final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container
-                    .getComponent(FileCrawlingConfigService.class);
-            config = fileCrawlingConfigService
-                    .getFileCrawlingConfig(getId(configId));
+            final FileCrawlingConfigService fileCrawlingConfigService = SingletonS2Container.getComponent(FileCrawlingConfigService.class);
+            config = fileCrawlingConfigService.getFileCrawlingConfig(getId(configId));
         } else if (ConfigType.DATA == configType) {
-            final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container
-                    .getComponent(DataCrawlingConfigService.class);
-            config = dataCrawlingConfigService
-                    .getDataCrawlingConfig(getId(configId));
+            final DataCrawlingConfigService dataCrawlingConfigService = SingletonS2Container.getComponent(DataCrawlingConfigService.class);
+            config = dataCrawlingConfigService.getDataCrawlingConfig(getId(configId));
         }
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);
         }
         final String url = (String) doc.get(fieldHelper.urlField);
-        final S2RobotClientFactory robotClientFactory = SingletonS2Container
-                .getComponent(S2RobotClientFactory.class);
+        final S2RobotClientFactory robotClientFactory = SingletonS2Container.getComponent(S2RobotClientFactory.class);
         config.initializeClientFactory(robotClientFactory);
         final S2RobotClient client = robotClientFactory.getClient(url);
         if (client == null) {
-            throw new FessSystemException("No S2RobotClient: " + configIdObj
-                    + ", url: " + url);
+            throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
         }
-        final ResponseData responseData = client.execute(RequestDataBuilder
-                .newRequestData().get().url(url).build());
+        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         final HttpServletResponse response = ResponseUtil.getResponse();
         writeFileName(response, responseData);
         writeContentType(response, responseData);
@@ -194,9 +179,7 @@ public class CrawlingConfigHelper implements Serializable {
             os.flush();
         } catch (final IOException e) {
             if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
-                throw new FessSystemException(
-                        "Failed to write a content. configId: " + configIdObj
-                                + ", url: " + url, e);
+                throw new FessSystemException("Failed to write a content. configId: " + configIdObj + ", url: " + url, e);
             }
         } finally {
             IOUtils.closeQuietly(is);
@@ -207,17 +190,14 @@ public class CrawlingConfigHelper implements Serializable {
         }
     }
 
-    protected void writeNoCache(final HttpServletResponse response,
-            final ResponseData responseData) {
+    protected void writeNoCache(final HttpServletResponse response, final ResponseData responseData) {
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
     }
 
-    protected void writeFileName(final HttpServletResponse response,
-            final ResponseData responseData) {
-        final UserAgentHelper userAgentHelper = ComponentUtil
-                .getUserAgentHelper();
+    protected void writeFileName(final HttpServletResponse response, final ResponseData responseData) {
+        final UserAgentHelper userAgentHelper = ComponentUtil.getUserAgentHelper();
         final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
         String charset = responseData.getCharSet();
         if (charset == null) {
@@ -234,47 +214,33 @@ public class CrawlingConfigHelper implements Serializable {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("userAgentType: " + userAgentType + ", charset: "
-                        + charset + ", name: " + name);
+                logger.debug("userAgentType: " + userAgentType + ", charset: " + charset + ", name: " + name);
             }
 
             switch (userAgentType) {
-                case IE:
-                    response.setHeader(
-                            "Content-Disposition",
-                            "attachment; filename=\""
-                                    + URLEncoder.encode(name, Constants.UTF_8)
-                                    + "\"");
-                    break;
-                case OPERA:
-                    response.setHeader(
-                            "Content-Disposition",
-                            "attachment; filename*=utf-8'ja'"
-                                    + URLEncoder.encode(name, Constants.UTF_8));
-                    break;
-                case SAFARI:
-                    response.setHeader("Content-Disposition",
-                            "attachment; filename=\"" + name + "\"");
-                    break;
-                case CHROME:
-                case FIREFOX:
-                case OTHER:
-                default:
-                    response.setHeader(
-                            "Content-Disposition",
-                            "attachment; filename=\"=?utf-8?B?"
-                                    + Base64Util.encode(name
-                                            .getBytes(Constants.UTF_8))
-                                    + "?=\"");
-                    break;
+            case IE:
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
+                break;
+            case OPERA:
+                response.setHeader("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
+                break;
+            case SAFARI:
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + name + "\"");
+                break;
+            case CHROME:
+            case FIREFOX:
+            case OTHER:
+            default:
+                response.setHeader("Content-Disposition",
+                        "attachment; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
+                break;
             }
         } catch (final Exception e) {
             logger.warn("Failed to write a filename: " + responseData, e);
         }
     }
 
-    protected void writeContentType(final HttpServletResponse response,
-            final ResponseData responseData) {
+    protected void writeContentType(final HttpServletResponse response, final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
         if (logger.isDebugEnabled()) {
             logger.debug("mimeType: " + mimeType);

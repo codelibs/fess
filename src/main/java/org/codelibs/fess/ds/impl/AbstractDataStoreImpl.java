@@ -37,8 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDataStoreImpl implements DataStore {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(AbstractDataStoreImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractDataStoreImpl.class);
 
     public String mimeType = "application/datastore";
 
@@ -50,17 +49,11 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     }
 
     @Override
-    public void store(final DataCrawlingConfig config,
-            final IndexUpdateCallback callback,
-            final Map<String, String> initParamMap) {
-        final Map<String, String> configParamMap = config
-                .getHandlerParameterMap();
-        final Map<String, String> configScriptMap = config
-                .getHandlerScriptMap();
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                .getCrawlingSessionHelper();
-        final LocalDateTime documentExpires = crawlingSessionHelper
-                .getDocumentExpires();
+    public void store(final DataCrawlingConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
+        final Map<String, String> configParamMap = config.getHandlerParameterMap();
+        final Map<String, String> configScriptMap = config.getHandlerScriptMap();
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final LocalDateTime documentExpires = crawlingSessionHelper.getDocumentExpires();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         initParamMap.putAll(configParamMap);
@@ -76,17 +69,14 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
         //  expires
         if (documentExpires != null) {
-            defaultDataMap.put(fieldHelper.expiresField,
-                    FessFunctions.formatDate(documentExpires));
+            defaultDataMap.put(fieldHelper.expiresField, FessFunctions.formatDate(documentExpires));
         }
         // segment
-        defaultDataMap.put(fieldHelper.segmentField,
-                initParamMap.get(Constants.SESSION_ID));
+        defaultDataMap.put(fieldHelper.segmentField, initParamMap.get(Constants.SESSION_ID));
         // created
         defaultDataMap.put(fieldHelper.createdField, "NOW");
         // boost
-        defaultDataMap
-                .put(fieldHelper.boostField, config.getBoost().toString());
+        defaultDataMap.put(fieldHelper.boostField, config.getBoost().toString());
         // label: labelType
         final List<String> labelTypeList = new ArrayList<String>();
         for (final String labelType : config.getLabelTypeValues()) {
@@ -117,8 +107,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
 
     }
 
-    protected Object convertValue(final String template,
-            final Map<String, String> paramMap) {
+    protected Object convertValue(final String template, final Map<String, String> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }
@@ -152,11 +141,9 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     protected void sleep(final long interval) {
         try {
             Thread.sleep(interval);
-        } catch (final Exception e) {
-        }
+        } catch (final Exception e) {}
     }
 
-    protected abstract void storeData(DataCrawlingConfig dataConfig,
-            IndexUpdateCallback callback, Map<String, String> paramMap,
+    protected abstract void storeData(DataCrawlingConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,
             Map<String, String> scriptMap, Map<String, Object> defaultDataMap);
 }

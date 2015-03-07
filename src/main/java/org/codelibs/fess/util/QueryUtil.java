@@ -24,8 +24,7 @@ public class QueryUtil {
     }
 
     public static String escapeValue(final String value) {
-        final String escapedValue = Constants.SOLR_FIELD_RESERVED_PATTERN
-                .matcher(value).replaceAll("\\\\$1");
+        final String escapedValue = Constants.SOLR_FIELD_RESERVED_PATTERN.matcher(value).replaceAll("\\\\$1");
         if (escapedValue.length() > 1) {
             final char c = escapedValue.charAt(0);
             if (c == '*' || c == '?') {
@@ -36,8 +35,7 @@ public class QueryUtil {
     }
 
     public static String escapeRangeValue(final String value) {
-        final String escapedValue = Constants.SOLR_RANGE_FIELD_RESERVED_PATTERN
-                .matcher(value).replaceAll("\\\\$1");
+        final String escapedValue = Constants.SOLR_RANGE_FIELD_RESERVED_PATTERN.matcher(value).replaceAll("\\\\$1");
         if (escapedValue.length() > 1) {
             final char c = escapedValue.charAt(0);
             if (c == '*' || c == '?') {

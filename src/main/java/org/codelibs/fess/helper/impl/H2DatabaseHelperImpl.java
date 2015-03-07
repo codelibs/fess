@@ -25,8 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class H2DatabaseHelperImpl implements DatabaseHelper {
-    private static final Logger logger = LoggerFactory
-            .getLogger(H2DatabaseHelperImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(H2DatabaseHelperImpl.class);
 
     public String databaseName = "robot";
 
@@ -51,8 +50,7 @@ public class H2DatabaseHelperImpl implements DatabaseHelper {
             RunScript.execute(url, user, password, sqlFilePath, null, false);
         } catch (final Exception e) {
             if (printLogOnError) {
-                logger.error("Failed to optimize H2 Database: " + databasePath
-                        + "/" + databaseName, e);
+                logger.error("Failed to optimize H2 Database: " + databasePath + "/" + databaseName, e);
             }
         }
     }

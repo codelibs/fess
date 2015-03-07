@@ -63,14 +63,12 @@ public class BsFavoriteLogAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        favoriteLogItems = favoriteLogService
-                .getFavoriteLogList(favoriteLogPager);
+        favoriteLogItems = favoriteLogService.getFavoriteLogList(favoriteLogPager);
 
         // restore from pager
-        Beans.copy(favoriteLogPager, favoriteLogForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(favoriteLogPager, favoriteLogForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -89,8 +87,7 @@ public class BsFavoriteLogAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(favoriteLogForm.pageNumber)) {
             try {
-                favoriteLogPager.setCurrentPageNumber(Integer
-                        .parseInt(favoriteLogForm.pageNumber));
+                favoriteLogPager.setCurrentPageNumber(Integer.parseInt(favoriteLogForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + favoriteLogForm.pageNumber, e);
@@ -103,10 +100,9 @@ public class BsFavoriteLogAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(favoriteLogForm.searchParams, favoriteLogPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(favoriteLogForm.searchParams, favoriteLogPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -132,9 +128,8 @@ public class BsFavoriteLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (favoriteLogForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            favoriteLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    favoriteLogForm.crudMode });
         }
 
         loadFavoriteLog();
@@ -156,9 +151,8 @@ public class BsFavoriteLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (favoriteLogForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            favoriteLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    favoriteLogForm.crudMode });
         }
 
         loadFavoriteLog();
@@ -192,9 +186,8 @@ public class BsFavoriteLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (favoriteLogForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            favoriteLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    favoriteLogForm.crudMode });
         }
 
         loadFavoriteLog();
@@ -229,8 +222,7 @@ public class BsFavoriteLogAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -251,8 +243,7 @@ public class BsFavoriteLogAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -260,20 +251,17 @@ public class BsFavoriteLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (favoriteLogForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            favoriteLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    favoriteLogForm.crudMode });
         }
 
         try {
-            final FavoriteLog favoriteLog = favoriteLogService
-                    .getFavoriteLog(createKeyMap());
+            final FavoriteLog favoriteLog = favoriteLogService.getFavoriteLog(createKeyMap());
             if (favoriteLog == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { favoriteLogForm.id });
+                new Object[] { favoriteLogForm.id });
 
             }
 
@@ -289,28 +277,24 @@ public class BsFavoriteLogAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadFavoriteLog() {
 
-        final FavoriteLog favoriteLog = favoriteLogService
-                .getFavoriteLog(createKeyMap());
+        final FavoriteLog favoriteLog = favoriteLogService.getFavoriteLog(createKeyMap());
         if (favoriteLog == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { favoriteLogForm.id });
+            new Object[] { favoriteLogForm.id });
 
         }
 
-        Beans.copy(favoriteLog, favoriteLogForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(favoriteLog, favoriteLogForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected FavoriteLog createFavoriteLog() {
@@ -319,19 +303,17 @@ public class BsFavoriteLogAction implements Serializable {
             favoriteLog = favoriteLogService.getFavoriteLog(createKeyMap());
             if (favoriteLog == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { favoriteLogForm.id });
+                new Object[] { favoriteLogForm.id });
 
             }
         } else {
             favoriteLog = new FavoriteLog();
         }
-        Beans.copy(favoriteLogForm, favoriteLog)
-                .excludes("searchParams", "mode")
+        Beans.copy(favoriteLogForm, favoriteLog).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return favoriteLog;
     }

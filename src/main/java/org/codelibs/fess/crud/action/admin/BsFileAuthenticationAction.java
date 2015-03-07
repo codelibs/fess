@@ -43,8 +43,7 @@ public class BsFileAuthenticationAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsFileAuthenticationAction.class);
+    private static final Log log = LogFactory.getLog(BsFileAuthenticationAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsFileAuthenticationAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        fileAuthenticationItems = fileAuthenticationService
-                .getFileAuthenticationList(fileAuthenticationPager);
+        fileAuthenticationItems = fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager);
 
         // restore from pager
-        Beans.copy(fileAuthenticationPager, fileAuthenticationForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(fileAuthenticationPager, fileAuthenticationForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsFileAuthenticationAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(fileAuthenticationForm.pageNumber)) {
             try {
-                fileAuthenticationPager.setCurrentPageNumber(Integer
-                        .parseInt(fileAuthenticationForm.pageNumber));
+                fileAuthenticationPager.setCurrentPageNumber(Integer.parseInt(fileAuthenticationForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: "
-                            + fileAuthenticationForm.pageNumber, e);
+                    log.debug("Invalid value: " + fileAuthenticationForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsFileAuthenticationAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(fileAuthenticationForm.searchParams, fileAuthenticationPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(fileAuthenticationForm.searchParams, fileAuthenticationPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsFileAuthenticationAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (fileAuthenticationForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            fileAuthenticationForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    fileAuthenticationForm.crudMode });
         }
 
         loadFileAuthentication();
@@ -158,9 +151,8 @@ public class BsFileAuthenticationAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (fileAuthenticationForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            fileAuthenticationForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    fileAuthenticationForm.crudMode });
         }
 
         loadFileAuthentication();
@@ -194,9 +186,8 @@ public class BsFileAuthenticationAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            fileAuthenticationForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    fileAuthenticationForm.crudMode });
         }
 
         loadFileAuthentication();
@@ -231,8 +222,7 @@ public class BsFileAuthenticationAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsFileAuthenticationAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsFileAuthenticationAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            fileAuthenticationForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    fileAuthenticationForm.crudMode });
         }
 
         try {
-            final FileAuthentication fileAuthentication = fileAuthenticationService
-                    .getFileAuthentication(createKeyMap());
+            final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
             if (fileAuthentication == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { fileAuthenticationForm.id });
+                new Object[] { fileAuthenticationForm.id });
 
             }
 
@@ -291,50 +277,43 @@ public class BsFileAuthenticationAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadFileAuthentication() {
 
-        final FileAuthentication fileAuthentication = fileAuthenticationService
-                .getFileAuthentication(createKeyMap());
+        final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
         if (fileAuthentication == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { fileAuthenticationForm.id });
+            new Object[] { fileAuthenticationForm.id });
 
         }
 
-        Beans.copy(fileAuthentication, fileAuthenticationForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(fileAuthentication, fileAuthenticationForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected FileAuthentication createFileAuthentication() {
         FileAuthentication fileAuthentication;
         if (fileAuthenticationForm.crudMode == CommonConstants.EDIT_MODE) {
-            fileAuthentication = fileAuthenticationService
-                    .getFileAuthentication(createKeyMap());
+            fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
             if (fileAuthentication == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { fileAuthenticationForm.id });
+                new Object[] { fileAuthenticationForm.id });
 
             }
         } else {
             fileAuthentication = new FileAuthentication();
         }
-        Beans.copy(fileAuthenticationForm, fileAuthentication)
-                .excludes("searchParams", "mode")
+        Beans.copy(fileAuthenticationForm, fileAuthentication).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return fileAuthentication;
     }

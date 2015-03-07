@@ -30,8 +30,7 @@ public class KeyMatchService extends BsKeyMatchService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final KeyMatchCB cb,
-            final KeyMatchPager keyMatchPager) {
+    protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
         super.setupListCondition(cb, keyMatchPager);
 
         // setup condition
@@ -43,8 +42,7 @@ public class KeyMatchService extends BsKeyMatchService implements Serializable {
     }
 
     @Override
-    protected void setupEntityCondition(final KeyMatchCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final KeyMatchCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition

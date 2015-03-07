@@ -20,8 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MoreLikeThisResponse extends
-        LinkedHashMap<String, List<Map<String, Object>>> {
+public class MoreLikeThisResponse extends LinkedHashMap<String, List<Map<String, Object>>> {
 
     private static final long serialVersionUID = 1L;
 

@@ -36,8 +36,7 @@ public class IntervalControlHelperTest extends S2TestCase {
     }
 
     public void test_0000() throws ParseException {
-        final IntervalControlHelper intervalControlHelper = createHelper(
-                "00:00", 1);
+        final IntervalControlHelper intervalControlHelper = createHelper("00:00", 1);
         intervalControlHelper.addIntervalRule("01:30", "15:15", "*", 1000);
         assertEquals(0, intervalControlHelper.getDelay());
 
@@ -54,8 +53,7 @@ public class IntervalControlHelperTest extends S2TestCase {
     }
 
     public void test_1215() throws ParseException {
-        final IntervalControlHelper intervalControlHelper = createHelper(
-                "12:15", 1);
+        final IntervalControlHelper intervalControlHelper = createHelper("12:15", 1);
         intervalControlHelper.addIntervalRule("01:30", "12:05", "*", 1000);
         assertEquals(0, intervalControlHelper.getDelay());
 
@@ -81,8 +79,7 @@ public class IntervalControlHelperTest extends S2TestCase {
     }
 
     public void test_2250() throws ParseException {
-        final IntervalControlHelper intervalControlHelper = createHelper(
-                "22:50", 1);
+        final IntervalControlHelper intervalControlHelper = createHelper("22:50", 1);
         intervalControlHelper.addIntervalRule("01:30", "15:15", "*", 1000);
         assertEquals(0, intervalControlHelper.getDelay());
 
@@ -98,8 +95,7 @@ public class IntervalControlHelperTest extends S2TestCase {
         assertEquals(4000, intervalControlHelper.getDelay());
     }
 
-    private IntervalControlHelper createHelper(final String time, final int day)
-            throws ParseException {
+    private IntervalControlHelper createHelper(final String time, final int day) throws ParseException {
         final Date date = new SimpleDateFormat("HH:mm").parse(time);
         return new IntervalControlHelper() {
             @Override

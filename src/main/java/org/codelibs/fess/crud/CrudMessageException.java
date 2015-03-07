@@ -56,15 +56,13 @@ public class CrudMessageException extends RuntimeException {
         this.args = args;
     }
 
-    public CrudMessageException(final String messageId, final String message,
-            final Throwable cause) {
+    public CrudMessageException(final String messageId, final String message, final Throwable cause) {
         super(message, cause);
         this.messageId = messageId;
         args = null;
     }
 
-    public CrudMessageException(final String messageId, final Object[] args,
-            final String message, final Throwable cause) {
+    public CrudMessageException(final String messageId, final Object[] args, final String message, final Throwable cause) {
         super(message, cause);
         this.messageId = messageId;
         this.args = args;
@@ -76,8 +74,7 @@ public class CrudMessageException extends RuntimeException {
         args = null;
     }
 
-    public CrudMessageException(final String messageId, final Object[] args,
-            final String message) {
+    public CrudMessageException(final String messageId, final Object[] args, final String message) {
         super(message);
         this.messageId = messageId;
         this.args = args;
@@ -89,8 +86,7 @@ public class CrudMessageException extends RuntimeException {
         args = null;
     }
 
-    public CrudMessageException(final String messageId, final Object[] args,
-            final Throwable cause) {
+    public CrudMessageException(final String messageId, final Object[] args, final Throwable cause) {
         super(cause);
         this.messageId = messageId;
         this.args = args;

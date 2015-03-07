@@ -26,11 +26,9 @@ public class Constants extends CoreLibConstants {
 
     public static final int MINOR_VERSION = 3;
 
-    public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION)
-            + "." + String.valueOf(MINOR_VERSION);
+    public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION) + "." + String.valueOf(MINOR_VERSION);
 
-    public static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public static final int DEFAULT_ADMIN_PAGE_SIZE = 25;
 
@@ -191,10 +189,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_PURGE_DAY = "30";
 
-    public static final String DEFAULT_PURGE_BY_BOTS = "BaiduMobaider,"
-            + "Baiduspider," + "CCBot," + "Googlebot," + "ia_archive,"
-            + "Mediapartners-Google," + "mobile goo," + "msnbot,"
-            + "Slurp,Yeti";
+    public static final String DEFAULT_PURGE_BY_BOTS = "BaiduMobaider," + "Baiduspider," + "CCBot," + "Googlebot," + "ia_archive,"
+            + "Mediapartners-Google," + "mobile goo," + "msnbot," + "Slurp,Yeti";
 
     public static final String DEFAULT_FROM_EMAIL = "Administrator <root@localhost>";
 
@@ -256,14 +252,12 @@ public class Constants extends CoreLibConstants {
 
     public static final String SAMBA = "SAMBA";
 
-    public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(",
-            ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
+    public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":",
+            "/" };
 
-    public static final Pattern SOLR_FIELD_RESERVED_PATTERN = Pattern
-            .compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",
+    public static final Pattern SOLR_FIELD_RESERVED_PATTERN = Pattern.compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",
 
-    public static final Pattern SOLR_RANGE_FIELD_RESERVED_PATTERN = Pattern
-            .compile("([!\\(\\){}\\[\\]\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))");
+    public static final Pattern SOLR_RANGE_FIELD_RESERVED_PATTERN = Pattern.compile("([!\\(\\){}\\[\\]\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))");
 
     public static final String SEARCH_LOG_ACCESS_TYPE = "searchLogAccessType";
 

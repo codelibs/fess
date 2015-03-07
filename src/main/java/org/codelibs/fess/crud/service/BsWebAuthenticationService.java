@@ -39,33 +39,27 @@ public abstract class BsWebAuthenticationService {
         super();
     }
 
-    public List<WebAuthentication> getWebAuthenticationList(
-            final WebAuthenticationPager webAuthenticationPager) {
+    public List<WebAuthentication> getWebAuthenticationList(final WebAuthenticationPager webAuthenticationPager) {
 
-        final PagingResultBean<WebAuthentication> webAuthenticationList = webAuthenticationBhv
-                .selectPage(cb -> {
-                    cb.paging(webAuthenticationPager.getPageSize(),
-                            webAuthenticationPager.getCurrentPageNumber());
-                    setupListCondition(cb, webAuthenticationPager);
-                });
+        final PagingResultBean<WebAuthentication> webAuthenticationList = webAuthenticationBhv.selectPage(cb -> {
+            cb.paging(webAuthenticationPager.getPageSize(), webAuthenticationPager.getCurrentPageNumber());
+            setupListCondition(cb, webAuthenticationPager);
+        });
 
         // update pager
-        Beans.copy(webAuthenticationList, webAuthenticationPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        webAuthenticationPager.setPageNumberList(webAuthenticationList
-                .pageRange(op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(webAuthenticationList, webAuthenticationPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        webAuthenticationPager.setPageNumberList(webAuthenticationList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return webAuthenticationList;
     }
 
     public WebAuthentication getWebAuthentication(final Map<String, String> keys) {
-        final WebAuthentication webAuthentication = webAuthenticationBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+        final WebAuthentication webAuthentication = webAuthenticationBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (webAuthentication == null) {
             // TODO exception?
             return null;
@@ -74,24 +68,21 @@ public abstract class BsWebAuthenticationService {
         return webAuthentication;
     }
 
-    public void store(final WebAuthentication webAuthentication)
-            throws CrudMessageException {
+    public void store(final WebAuthentication webAuthentication) throws CrudMessageException {
         setupStoreCondition(webAuthentication);
 
         webAuthenticationBhv.insertOrUpdate(webAuthentication);
 
     }
 
-    public void delete(final WebAuthentication webAuthentication)
-            throws CrudMessageException {
+    public void delete(final WebAuthentication webAuthentication) throws CrudMessageException {
         setupDeleteCondition(webAuthentication);
 
         webAuthenticationBhv.delete(webAuthentication);
 
     }
 
-    protected void setupListCondition(final WebAuthenticationCB cb,
-            final WebAuthenticationPager webAuthenticationPager) {
+    protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthenticationPager webAuthenticationPager) {
 
         if (webAuthenticationPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(webAuthenticationPager.id));
@@ -99,14 +90,12 @@ public abstract class BsWebAuthenticationService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final WebAuthenticationCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final WebAuthenticationCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final WebAuthentication webAuthentication) {
     }
 
-    protected void setupDeleteCondition(
-            final WebAuthentication webAuthentication) {
+    protected void setupDeleteCondition(final WebAuthentication webAuthentication) {
     }
 }

@@ -35,18 +35,15 @@ public class ViewHelperTest extends S2TestCase {
 
         text = "<a>123<b>456<c>";
         queries = new String[] { "123", "456" };
-        assertEquals("<a><em>123</em><b><em>456</em><c>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<a><em>123</em><b><em>456</em><c>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "<123><456>";
         queries = new String[] { "123", "456" };
-        assertEquals("<123><456>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<123><456>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "123<aaa 123>456<bbb 456>123";
         queries = new String[] { "123", "456" };
-        assertEquals("<em>123</em><aaa 123><em>456</em><bbb 456><em>123</em>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<em>123</em><aaa 123><em>456</em><bbb 456><em>123</em>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "abc";
         queries = new String[] { "123" };
@@ -54,38 +51,31 @@ public class ViewHelperTest extends S2TestCase {
 
         text = "123";
         queries = new String[] { "123" };
-        assertEquals("<em>123</em>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<em>123</em>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "abc123efg";
         queries = new String[] { "123" };
-        assertEquals("abc<em>123</em>efg",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("abc<em>123</em>efg", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "123";
         queries = new String[] { "123", "456" };
-        assertEquals("<em>123</em>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<em>123</em>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "123456";
         queries = new String[] { "123", "456" };
-        assertEquals("<em>123</em><em>456</em>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<em>123</em><em>456</em>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "a123b456c";
         queries = new String[] { "123", "456" };
-        assertEquals("a<em>123</em>b<em>456</em>c",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("a<em>123</em>b<em>456</em>c", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "abc";
         queries = new String[] { "abc" };
-        assertEquals("<em>abc</em>",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("<em>abc</em>", viewHelper.replaceHighlightQueries(text, queries));
 
         text = "1ABC2";
         queries = new String[] { "abc" };
-        assertEquals("1<em>abc</em>2",
-                viewHelper.replaceHighlightQueries(text, queries));
+        assertEquals("1<em>abc</em>2", viewHelper.replaceHighlightQueries(text, queries));
     }
 
     public void test_escapeHighlight() {
@@ -103,8 +93,7 @@ public class ViewHelperTest extends S2TestCase {
         assertEquals("<em>aaa</em>", viewHelper.escapeHighlight(text));
 
         text = "<em>aaa</em><b>bbb</b>";
-        assertEquals("<em>aaa</em>&lt;b&gt;bbb&lt;/b&gt;",
-                viewHelper.escapeHighlight(text));
+        assertEquals("<em>aaa</em>&lt;b&gt;bbb&lt;/b&gt;", viewHelper.escapeHighlight(text));
 
     }
 

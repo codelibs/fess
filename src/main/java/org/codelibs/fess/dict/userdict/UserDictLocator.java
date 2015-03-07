@@ -29,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UserDictLocator extends DictionaryLocator {
-    private static final Logger logger = LoggerFactory
-            .getLogger(UserDictLocator.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserDictLocator.class);
 
     public String userDictFilePrefix = "userdict";
 
@@ -43,8 +42,7 @@ public class UserDictLocator extends DictionaryLocator {
             if (logger.isInfoEnabled()) {
                 logger.info("UserDict Files from " + path);
             }
-            final File[] files = findFiles(path, userDictFilePrefix,
-                    excludedUserDictList);
+            final File[] files = findFiles(path, userDictFilePrefix, excludedUserDictList);
             for (final File file : files) {
                 if (logger.isInfoEnabled()) {
                     logger.info("UserDict File: " + file.getAbsolutePath());
@@ -52,15 +50,12 @@ public class UserDictLocator extends DictionaryLocator {
                 fileList.add(new UserDictFile(file));
             }
         }
-        Collections.sort(fileList,
-                new Comparator<DictionaryFile<? extends DictionaryItem>>() {
-                    @Override
-                    public int compare(
-                            final DictionaryFile<? extends DictionaryItem> o1,
-                            final DictionaryFile<? extends DictionaryItem> o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
+        Collections.sort(fileList, new Comparator<DictionaryFile<? extends DictionaryItem>>() {
+            @Override
+            public int compare(final DictionaryFile<? extends DictionaryItem> o1, final DictionaryFile<? extends DictionaryItem> o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return fileList;
     }
 

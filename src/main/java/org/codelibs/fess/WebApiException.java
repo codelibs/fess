@@ -26,8 +26,7 @@ public class WebApiException extends FessSystemException {
         return statusCode;
     }
 
-    public WebApiException(final int statusCode, final String message,
-            final Throwable cause) {
+    public WebApiException(final int statusCode, final String message, final Throwable cause) {
         super(message, cause);
         this.statusCode = statusCode;
     }

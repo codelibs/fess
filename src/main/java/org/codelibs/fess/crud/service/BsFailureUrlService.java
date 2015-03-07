@@ -39,19 +39,15 @@ public abstract class BsFailureUrlService {
         super();
     }
 
-    public List<FailureUrl> getFailureUrlList(
-            final FailureUrlPager failureUrlPager) {
+    public List<FailureUrl> getFailureUrlList(final FailureUrlPager failureUrlPager) {
 
-        final PagingResultBean<FailureUrl> failureUrlList = failureUrlBhv
-                .selectPage(cb -> {
-                    cb.paging(failureUrlPager.getPageSize(),
-                            failureUrlPager.getCurrentPageNumber());
-                    setupListCondition(cb, failureUrlPager);
-                });
+        final PagingResultBean<FailureUrl> failureUrlList = failureUrlBhv.selectPage(cb -> {
+            cb.paging(failureUrlPager.getPageSize(), failureUrlPager.getCurrentPageNumber());
+            setupListCondition(cb, failureUrlPager);
+        });
 
         // update pager
-        Beans.copy(failureUrlList, failureUrlPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(failureUrlList, failureUrlPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         failureUrlPager.setPageNumberList(failureUrlList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -86,8 +82,7 @@ public abstract class BsFailureUrlService {
 
     }
 
-    protected void setupListCondition(final FailureUrlCB cb,
-            final FailureUrlPager failureUrlPager) {
+    protected void setupListCondition(final FailureUrlCB cb, final FailureUrlPager failureUrlPager) {
 
         if (failureUrlPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(failureUrlPager.id));
@@ -95,8 +90,7 @@ public abstract class BsFailureUrlService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final FailureUrlCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FailureUrlCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final FailureUrl failureUrl) {

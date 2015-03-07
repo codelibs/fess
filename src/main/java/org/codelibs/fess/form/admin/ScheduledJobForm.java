@@ -23,8 +23,7 @@ import java.util.Date;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.form.admin.BsScheduledJobForm;
 
-public class ScheduledJobForm extends BsScheduledJobForm implements
-        Serializable {
+public class ScheduledJobForm extends BsScheduledJobForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +37,7 @@ public class ScheduledJobForm extends BsScheduledJobForm implements
         sortOrder = "0";
         // Temporary data
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
     }
 }

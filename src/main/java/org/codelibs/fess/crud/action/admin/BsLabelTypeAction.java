@@ -66,10 +66,9 @@ public class BsLabelTypeAction implements Serializable {
         labelTypeItems = labelTypeService.getLabelTypeList(labelTypePager);
 
         // restore from pager
-        Beans.copy(labelTypePager, labelTypeForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(labelTypePager, labelTypeForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -88,8 +87,7 @@ public class BsLabelTypeAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(labelTypeForm.pageNumber)) {
             try {
-                labelTypePager.setCurrentPageNumber(Integer
-                        .parseInt(labelTypeForm.pageNumber));
+                labelTypePager.setCurrentPageNumber(Integer.parseInt(labelTypeForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + labelTypeForm.pageNumber, e);
@@ -102,10 +100,9 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(labelTypeForm.searchParams, labelTypePager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(labelTypeForm.searchParams, labelTypePager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -131,9 +128,8 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (labelTypeForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            labelTypeForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    labelTypeForm.crudMode });
         }
 
         loadLabelType();
@@ -156,8 +152,7 @@ public class BsLabelTypeAction implements Serializable {
     public String editpage() {
         if (labelTypeForm.crudMode != CommonConstants.EDIT_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            labelTypeForm.crudMode });
+                    new Object[] { CommonConstants.EDIT_MODE, labelTypeForm.crudMode });
         }
 
         loadLabelType();
@@ -191,9 +186,8 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            labelTypeForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    labelTypeForm.crudMode });
         }
 
         loadLabelType();
@@ -228,8 +222,7 @@ public class BsLabelTypeAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -250,8 +243,7 @@ public class BsLabelTypeAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -259,20 +251,17 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            labelTypeForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    labelTypeForm.crudMode });
         }
 
         try {
-            final LabelType labelType = labelTypeService
-                    .getLabelType(createKeyMap());
+            final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
             if (labelType == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { labelTypeForm.id });
+                new Object[] { labelTypeForm.id });
 
             }
 
@@ -288,21 +277,18 @@ public class BsLabelTypeAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadLabelType() {
 
-        final LabelType labelType = labelTypeService
-                .getLabelType(createKeyMap());
+        final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
         if (labelType == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { labelTypeForm.id });
+            new Object[] { labelTypeForm.id });
 
         }
 
@@ -317,10 +303,9 @@ public class BsLabelTypeAction implements Serializable {
             labelType = labelTypeService.getLabelType(createKeyMap());
             if (labelType == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { labelTypeForm.id });
+                new Object[] { labelTypeForm.id });
 
             }
         } else {

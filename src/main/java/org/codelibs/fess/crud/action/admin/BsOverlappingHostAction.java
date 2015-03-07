@@ -43,8 +43,7 @@ public class BsOverlappingHostAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsOverlappingHostAction.class);
+    private static final Log log = LogFactory.getLog(BsOverlappingHostAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsOverlappingHostAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        overlappingHostItems = overlappingHostService
-                .getOverlappingHostList(overlappingHostPager);
+        overlappingHostItems = overlappingHostService.getOverlappingHostList(overlappingHostPager);
 
         // restore from pager
-        Beans.copy(overlappingHostPager, overlappingHostForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(overlappingHostPager, overlappingHostForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsOverlappingHostAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(overlappingHostForm.pageNumber)) {
             try {
-                overlappingHostPager.setCurrentPageNumber(Integer
-                        .parseInt(overlappingHostForm.pageNumber));
+                overlappingHostPager.setCurrentPageNumber(Integer.parseInt(overlappingHostForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: "
-                            + overlappingHostForm.pageNumber, e);
+                    log.debug("Invalid value: " + overlappingHostForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsOverlappingHostAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(overlappingHostForm.searchParams, overlappingHostPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(overlappingHostForm.searchParams, overlappingHostPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsOverlappingHostAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (overlappingHostForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            overlappingHostForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    overlappingHostForm.crudMode });
         }
 
         loadOverlappingHost();
@@ -158,9 +151,8 @@ public class BsOverlappingHostAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (overlappingHostForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            overlappingHostForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    overlappingHostForm.crudMode });
         }
 
         loadOverlappingHost();
@@ -194,9 +186,8 @@ public class BsOverlappingHostAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (overlappingHostForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            overlappingHostForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    overlappingHostForm.crudMode });
         }
 
         loadOverlappingHost();
@@ -231,8 +222,7 @@ public class BsOverlappingHostAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsOverlappingHostAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsOverlappingHostAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (overlappingHostForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            overlappingHostForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    overlappingHostForm.crudMode });
         }
 
         try {
-            final OverlappingHost overlappingHost = overlappingHostService
-                    .getOverlappingHost(createKeyMap());
+            final OverlappingHost overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
             if (overlappingHost == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { overlappingHostForm.id });
+                new Object[] { overlappingHostForm.id });
 
             }
 
@@ -291,50 +277,43 @@ public class BsOverlappingHostAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadOverlappingHost() {
 
-        final OverlappingHost overlappingHost = overlappingHostService
-                .getOverlappingHost(createKeyMap());
+        final OverlappingHost overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
         if (overlappingHost == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { overlappingHostForm.id });
+            new Object[] { overlappingHostForm.id });
 
         }
 
-        Beans.copy(overlappingHost, overlappingHostForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(overlappingHost, overlappingHostForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected OverlappingHost createOverlappingHost() {
         OverlappingHost overlappingHost;
         if (overlappingHostForm.crudMode == CommonConstants.EDIT_MODE) {
-            overlappingHost = overlappingHostService
-                    .getOverlappingHost(createKeyMap());
+            overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
             if (overlappingHost == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { overlappingHostForm.id });
+                new Object[] { overlappingHostForm.id });
 
             }
         } else {
             overlappingHost = new OverlappingHost();
         }
-        Beans.copy(overlappingHostForm, overlappingHost)
-                .excludes("searchParams", "mode")
+        Beans.copy(overlappingHostForm, overlappingHost).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return overlappingHost;
     }

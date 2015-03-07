@@ -43,8 +43,7 @@ import org.slf4j.LoggerFactory;
 public class ScreenShotManager {
     private static final String DEFAULT_SCREENSHOT_DIR = "/WEB-INF/screenshots";
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ScreenShotManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScreenShotManager.class);
 
     @Resource
     protected ServletContext application;
@@ -81,8 +80,7 @@ public class ScreenShotManager {
             }
         }
         if (!baseDir.isDirectory()) {
-            throw new FessSystemException("Not found: "
-                    + baseDir.getAbsolutePath());
+            throw new FessSystemException("Not found: " + baseDir.getAbsolutePath());
         }
 
         if (logger.isDebugEnabled()) {
@@ -119,10 +117,8 @@ public class ScreenShotManager {
             if (generator.isTarget(docMap)) {
                 final String url = (String) docMap.get(fieldHelper.urlField);
                 final String path = getImageFilename(docMap);
-                if (!screenShotTaskQueue.offer(new ScreenShotTask(url,
-                        new File(baseDir, path), generator))) {
-                    logger.warn("Failed to offer a screenshot task: " + url
-                            + " -> " + path);
+                if (!screenShotTaskQueue.offer(new ScreenShotTask(url, new File(baseDir, path), generator))) {
+                    logger.warn("Failed to offer a screenshot task: " + url + " -> " + path);
                 }
                 break;
             }
@@ -143,21 +139,17 @@ public class ScreenShotManager {
         return buf.toString();
     }
 
-    public void storeRequest(final String queryId,
-            final List<Map<String, Object>> documentItems) {
+    public void storeRequest(final String queryId, final List<Map<String, Object>> documentItems) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final Map<String, String> dataMap = new HashMap<String, String>(
-                documentItems.size());
+        final Map<String, String> dataMap = new HashMap<String, String>(documentItems.size());
         for (final Map<String, Object> docMap : documentItems) {
             final String docid = (String) docMap.get(fieldHelper.docIdField);
             final String screenShotPath = getImageFilename(docMap);
-            if (StringUtil.isNotBlank(docid)
-                    && StringUtil.isNotBlank(screenShotPath)) {
+            if (StringUtil.isNotBlank(docid) && StringUtil.isNotBlank(screenShotPath)) {
                 dataMap.put(docid, screenShotPath);
             }
         }
-        final Map<String, Map<String, String>> screenShotPathCache = getScreenShotPathCache(RequestUtil
-                .getRequest().getSession());
+        final Map<String, Map<String, String>> screenShotPathCache = getScreenShotPathCache(RequestUtil.getRequest().getSession());
         screenShotPathCache.put(queryId, dataMap);
     }
 
@@ -165,8 +157,7 @@ public class ScreenShotManager {
         final HttpSession session = RequestUtil.getRequest().getSession(false);
         if (session != null) {
             final Map<String, Map<String, String>> screenShotPathCache = getScreenShotPathCache(session);
-            final Map<String, String> dataMap = screenShotPathCache
-                    .get(queryId);
+            final Map<String, String> dataMap = screenShotPathCache.get(queryId);
             if (dataMap != null) {
                 final String path = dataMap.get(docId);
                 final File file = new File(baseDir, path);
@@ -178,16 +169,13 @@ public class ScreenShotManager {
         return null;
     }
 
-    private Map<String, Map<String, String>> getScreenShotPathCache(
-            final HttpSession session) {
+    private Map<String, Map<String, String>> getScreenShotPathCache(final HttpSession session) {
         @SuppressWarnings("unchecked")
-        Map<String, Map<String, String>> screenShotPathCache = (Map<String, Map<String, String>>) session
-                .getAttribute(Constants.SCREEN_SHOT_PATH_CACHE);
+        Map<String, Map<String, String>> screenShotPathCache =
+                (Map<String, Map<String, String>>) session.getAttribute(Constants.SCREEN_SHOT_PATH_CACHE);
         if (screenShotPathCache == null) {
-            screenShotPathCache = new LruHashMap<String, Map<String, String>>(
-                    screenShotPathCacheSize);
-            session.setAttribute(Constants.SCREEN_SHOT_PATH_CACHE,
-                    screenShotPathCache);
+            screenShotPathCache = new LruHashMap<String, Map<String, String>>(screenShotPathCacheSize);
+            session.setAttribute(Constants.SCREEN_SHOT_PATH_CACHE, screenShotPathCache);
         }
         return screenShotPathCache;
     }
@@ -203,8 +191,7 @@ public class ScreenShotManager {
 
         ScreenShotGenerator generator;
 
-        protected ScreenShotTask(final String url, final File outputFile,
-                final ScreenShotGenerator generator) {
+        protected ScreenShotTask(final String url, final File outputFile, final ScreenShotGenerator generator) {
             this.url = url;
             this.outputFile = outputFile;
             this.generator = generator;
@@ -218,8 +205,7 @@ public class ScreenShotManager {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + (outputFile == null ? 0 : outputFile.hashCode());
+            result = prime * result + (outputFile == null ? 0 : outputFile.hashCode());
             result = prime * result + (url == null ? 0 : url.hashCode());
             return result;
         }

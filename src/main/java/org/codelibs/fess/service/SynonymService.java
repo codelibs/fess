@@ -36,17 +36,14 @@ public class SynonymService {
     @Resource
     protected DictionaryManager dictionaryManager;
 
-    public List<SynonymItem> getSynonymList(final String dictId,
-            final SynonymPager synonymPager) {
+    public List<SynonymItem> getSynonymList(final String dictId, final SynonymPager synonymPager) {
         final SynonymFile synonymFile = getSynonymFile(dictId);
 
         final int pageSize = synonymPager.getPageSize();
-        final PagingList<SynonymItem> synonymList = synonymFile.selectList(
-                (synonymPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+        final PagingList<SynonymItem> synonymList = synonymFile.selectList((synonymPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
         // update pager
-        Beans.copy(synonymList, synonymPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(synonymList, synonymPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         synonymList.setPageRangeSize(5);
         synonymPager.setPageNumberList(synonymList.createPageNumberList());
 
@@ -55,16 +52,14 @@ public class SynonymService {
     }
 
     public SynonymFile getSynonymFile(final String dictId) {
-        final DictionaryFile<?> dictionaryFile = dictionaryManager
-                .getDictionaryFile(dictId);
+        final DictionaryFile<?> dictionaryFile = dictionaryManager.getDictionaryFile(dictId);
         if (dictionaryFile instanceof SynonymFile) {
             return (SynonymFile) dictionaryFile;
         }
         throw new DictionaryExpiredException();
     }
 
-    public SynonymItem getSynonym(final String dictId,
-            final Map<String, String> paramMap) {
+    public SynonymItem getSynonym(final String dictId, final Map<String, String> paramMap) {
         final SynonymFile synonymFile = getSynonymFile(dictId);
 
         final String idStr = paramMap.get("id");

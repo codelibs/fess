@@ -22,14 +22,12 @@ import org.seasar.struts.interceptor.ActionMessagesThrowsInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FessActionMessagesThrowsInterceptor extends
-        ActionMessagesThrowsInterceptor {
+public class FessActionMessagesThrowsInterceptor extends ActionMessagesThrowsInterceptor {
     private static final long serialVersionUID = 1L;
 
     private static final String SYSTEM_ERROR_JSP = "/error/system.jsp";
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(FessActionMessagesThrowsInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(FessActionMessagesThrowsInterceptor.class);
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {

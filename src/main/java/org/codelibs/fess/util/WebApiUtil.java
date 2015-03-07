@@ -37,18 +37,15 @@ public final class WebApiUtil {
     }
 
     public static void setError(final int statusCode, final String message) {
-        RequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION,
-                new WebApiException(statusCode, message));
+        RequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, message));
     }
 
     public static void setError(final int statusCode, final Exception e) {
-        RequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION,
-                new WebApiException(statusCode, e));
+        RequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, e));
     }
 
     public static void validate() {
-        final WebApiException e = (WebApiException) RequestUtil.getRequest()
-                .getAttribute(WEB_API_EXCEPTION);
+        final WebApiException e = (WebApiException) RequestUtil.getRequest().getAttribute(WEB_API_EXCEPTION);
         if (e != null) {
             throw e;
         }

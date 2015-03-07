@@ -43,8 +43,7 @@ public class BsScheduledJobAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsScheduledJobAction.class);
+    private static final Log log = LogFactory.getLog(BsScheduledJobAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsScheduledJobAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        scheduledJobItems = scheduledJobService
-                .getScheduledJobList(scheduledJobPager);
+        scheduledJobItems = scheduledJobService.getScheduledJobList(scheduledJobPager);
 
         // restore from pager
-        Beans.copy(scheduledJobPager, scheduledJobForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(scheduledJobPager, scheduledJobForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsScheduledJobAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(scheduledJobForm.pageNumber)) {
             try {
-                scheduledJobPager.setCurrentPageNumber(Integer
-                        .parseInt(scheduledJobForm.pageNumber));
+                scheduledJobPager.setCurrentPageNumber(Integer.parseInt(scheduledJobForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: " + scheduledJobForm.pageNumber,
-                            e);
+                    log.debug("Invalid value: " + scheduledJobForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsScheduledJobAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(scheduledJobForm.searchParams, scheduledJobPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(scheduledJobForm.searchParams, scheduledJobPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsScheduledJobAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (scheduledJobForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            scheduledJobForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    scheduledJobForm.crudMode });
         }
 
         loadScheduledJob();
@@ -158,9 +151,8 @@ public class BsScheduledJobAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (scheduledJobForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            scheduledJobForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    scheduledJobForm.crudMode });
         }
 
         loadScheduledJob();
@@ -194,9 +186,8 @@ public class BsScheduledJobAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (scheduledJobForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            scheduledJobForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    scheduledJobForm.crudMode });
         }
 
         loadScheduledJob();
@@ -231,8 +222,7 @@ public class BsScheduledJobAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsScheduledJobAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsScheduledJobAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (scheduledJobForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            scheduledJobForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    scheduledJobForm.crudMode });
         }
 
         try {
-            final ScheduledJob scheduledJob = scheduledJobService
-                    .getScheduledJob(createKeyMap());
+            final ScheduledJob scheduledJob = scheduledJobService.getScheduledJob(createKeyMap());
             if (scheduledJob == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { scheduledJobForm.id });
+                new Object[] { scheduledJobForm.id });
 
             }
 
@@ -291,28 +277,24 @@ public class BsScheduledJobAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadScheduledJob() {
 
-        final ScheduledJob scheduledJob = scheduledJobService
-                .getScheduledJob(createKeyMap());
+        final ScheduledJob scheduledJob = scheduledJobService.getScheduledJob(createKeyMap());
         if (scheduledJob == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { scheduledJobForm.id });
+            new Object[] { scheduledJobForm.id });
 
         }
 
-        Beans.copy(scheduledJob, scheduledJobForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(scheduledJob, scheduledJobForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected ScheduledJob createScheduledJob() {
@@ -321,19 +303,17 @@ public class BsScheduledJobAction implements Serializable {
             scheduledJob = scheduledJobService.getScheduledJob(createKeyMap());
             if (scheduledJob == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { scheduledJobForm.id });
+                new Object[] { scheduledJobForm.id });
 
             }
         } else {
             scheduledJob = new ScheduledJob();
         }
-        Beans.copy(scheduledJobForm, scheduledJob)
-                .excludes("searchParams", "mode")
+        Beans.copy(scheduledJobForm, scheduledJob).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return scheduledJob;
     }

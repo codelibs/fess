@@ -37,8 +37,7 @@ public class OverlappingHostAction extends BsOverlappingHostAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(OverlappingHostAction.class);
+    private static final Log log = LogFactory.getLog(OverlappingHostAction.class);
 
     @Resource
     protected SystemHelper systemHelper;
@@ -50,18 +49,13 @@ public class OverlappingHostAction extends BsOverlappingHostAction {
     @Override
     protected void loadOverlappingHost() {
 
-        final OverlappingHost overlappingHost = overlappingHostService
-                .getOverlappingHost(createKeyMap());
+        final OverlappingHost overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
         if (overlappingHost == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { overlappingHostForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { overlappingHostForm.id });
         }
 
-        FessBeans.copy(overlappingHost, overlappingHostForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(overlappingHost, overlappingHostForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -70,13 +64,10 @@ public class OverlappingHostAction extends BsOverlappingHostAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (overlappingHostForm.crudMode == CommonConstants.EDIT_MODE) {
-            overlappingHost = overlappingHostService
-                    .getOverlappingHost(createKeyMap());
+            overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
             if (overlappingHost == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { overlappingHostForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { overlappingHostForm.id });
             }
         } else {
             overlappingHost = new OverlappingHost();
@@ -85,8 +76,7 @@ public class OverlappingHostAction extends BsOverlappingHostAction {
         }
         overlappingHost.setUpdatedBy(username);
         overlappingHost.setUpdatedTime(currentTime);
-        FessBeans.copy(overlappingHostForm, overlappingHost)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(overlappingHostForm, overlappingHost).excludesCommonColumns().execute();
 
         return overlappingHost;
     }
@@ -95,19 +85,15 @@ public class OverlappingHostAction extends BsOverlappingHostAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (overlappingHostForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            overlappingHostForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    overlappingHostForm.crudMode });
         }
 
         try {
-            final OverlappingHost overlappingHost = overlappingHostService
-                    .getOverlappingHost(createKeyMap());
+            final OverlappingHost overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
             if (overlappingHost == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { overlappingHostForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { overlappingHostForm.id });
             }
 
             //            overlappingHostService.delete(overlappingHost);
@@ -124,12 +110,10 @@ public class OverlappingHostAction extends BsOverlappingHostAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 }

@@ -30,8 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Tomcat6ConfigServlet extends HttpServlet {
-    private static final Logger logger = LoggerFactory
-            .getLogger(Tomcat6ConfigServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(Tomcat6ConfigServlet.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -52,8 +51,7 @@ public class Tomcat6ConfigServlet extends HttpServlet {
 
     private void shutdownCommonsHttpClient() {
         try {
-            final Class<?> clazz = Class
-                    .forName("org.apache.commons.httpclient.MultiThreadedHttpConnectionManager");
+            final Class<?> clazz = Class.forName("org.apache.commons.httpclient.MultiThreadedHttpConnectionManager");
             final Method method = clazz.getMethod("shutdownAll", null);
             method.invoke(null, null);
         } catch (final ClassNotFoundException e) {
@@ -69,8 +67,7 @@ public class Tomcat6ConfigServlet extends HttpServlet {
         final ClassLoader cl = this.getClass().getClassLoader();
         try {
             cl.getResource(null);
-        } catch (final Exception e) {
-        }
+        } catch (final Exception e) {}
 
         final List<String> jvmThreadGroupList = new ArrayList<String>();
         jvmThreadGroupList.add("system");
@@ -99,8 +96,7 @@ public class Tomcat6ConfigServlet extends HttpServlet {
                     }
 
                     if (logger.isInfoEnabled()) {
-                        logger.info("Interrupting a thread ["
-                                + thread.getName() + "]...");
+                        logger.info("Interrupting a thread [" + thread.getName() + "]...");
                     }
                     thread.interrupt();
 
@@ -111,8 +107,7 @@ public class Tomcat6ConfigServlet extends HttpServlet {
                     }
 
                     if (logger.isInfoEnabled()) {
-                        logger.info("Stopping a thread [" + thread.getName()
-                                + "]...");
+                        logger.info("Stopping a thread [" + thread.getName() + "]...");
                     }
                     thread.stop();
                 }
@@ -125,13 +120,11 @@ public class Tomcat6ConfigServlet extends HttpServlet {
         try {
             threadLocalsField = Thread.class.getDeclaredField("threadLocals");
             threadLocalsField.setAccessible(true);
-            inheritableThreadLocalsField = Thread.class
-                    .getDeclaredField("inheritableThreadLocals");
+            inheritableThreadLocalsField = Thread.class.getDeclaredField("inheritableThreadLocals");
             inheritableThreadLocalsField.setAccessible(true);
             // Make the underlying array of ThreadLoad.ThreadLocalMap.Entry objects
             // accessible
-            final Class<?> tlmClass = Class
-                    .forName("java.lang.ThreadLocal$ThreadLocalMap");
+            final Class<?> tlmClass = Class.forName("java.lang.ThreadLocal$ThreadLocalMap");
             tableField = tlmClass.getDeclaredField("table");
             tableField.setAccessible(true);
         } catch (final Exception e) {
@@ -163,8 +156,7 @@ public class Tomcat6ConfigServlet extends HttpServlet {
         while (thread.isAlive() && count < 5) {
             try {
                 Thread.sleep(100);
-            } catch (final InterruptedException e) {
-            }
+            } catch (final InterruptedException e) {}
             count++;
         }
     }
@@ -195,13 +187,10 @@ public class Tomcat6ConfigServlet extends HttpServlet {
         return threads;
     }
 
-    private void clearThreadLocalMap(final ClassLoader cl, final Object map,
-            final Field internalTableField) throws NoSuchMethodException,
-            IllegalAccessException, NoSuchFieldException,
-            InvocationTargetException {
+    private void clearThreadLocalMap(final ClassLoader cl, final Object map, final Field internalTableField) throws NoSuchMethodException,
+            IllegalAccessException, NoSuchFieldException, InvocationTargetException {
         if (map != null) {
-            final Method mapRemove = map.getClass().getDeclaredMethod("remove",
-                    ThreadLocal.class);
+            final Method mapRemove = map.getClass().getDeclaredMethod("remove", ThreadLocal.class);
             mapRemove.setAccessible(true);
             final Object[] table = (Object[]) internalTableField.get(map);
             if (table != null) {
@@ -209,28 +198,23 @@ public class Tomcat6ConfigServlet extends HttpServlet {
                     if (element != null) {
                         boolean remove = false;
                         // Check the key
-                        final Field keyField = Reference.class
-                                .getDeclaredField("referent");
+                        final Field keyField = Reference.class.getDeclaredField("referent");
                         keyField.setAccessible(true);
                         final Object key = keyField.get(element);
-                        if (cl.equals(key) || key != null
-                                && cl == key.getClass().getClassLoader()) {
+                        if (cl.equals(key) || key != null && cl == key.getClass().getClassLoader()) {
                             remove = true;
                         }
                         // Check the value
-                        final Field valueField = element.getClass()
-                                .getDeclaredField("value");
+                        final Field valueField = element.getClass().getDeclaredField("value");
                         valueField.setAccessible(true);
                         final Object value = valueField.get(element);
-                        if (cl.equals(value) || value != null
-                                && cl == value.getClass().getClassLoader()) {
+                        if (cl.equals(value) || value != null && cl == value.getClass().getClassLoader()) {
                             remove = true;
                         }
                         if (remove) {
                             final Object entry = ((Reference<?>) element).get();
                             if (logger.isInfoEnabled()) {
-                                logger.info("Removing " + key.toString()
-                                        + " from a thread local...");
+                                logger.info("Removing " + key.toString() + " from a thread local...");
                             }
                             mapRemove.invoke(map, entry);
                         }

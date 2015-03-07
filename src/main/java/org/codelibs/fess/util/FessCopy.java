@@ -46,14 +46,12 @@ public class FessCopy extends Copy {
                 list.add(propertyName);
             }
         }
-        return super.excludes(list.toArray(new CharSequence[list.size()]))
-                .dateConverter(Constants.DEFAULT_DATETIME_FORMAT,
-                        "createdTime", "updatedTime", "deletedTime");
+        return super.excludes(list.toArray(new CharSequence[list.size()])).dateConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime",
+                "updatedTime", "deletedTime");
     }
 
     public Copy commonColumnDateConverter() {
-        return dateConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime",
-                "updatedTime", "deletedTime");
+        return dateConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime", "updatedTime", "deletedTime");
     }
 
 }

@@ -42,8 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CrawlJob {
-    private static final Logger logger = LoggerFactory
-            .getLogger(CrawlJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlJob.class);
 
     protected JobExecutor jobExecutor;
 
@@ -112,8 +111,7 @@ public class CrawlJob {
         return this;
     }
 
-    public void retryToDeleteTempDir(final int retryCount,
-            final long retryInterval) {
+    public void retryToDeleteTempDir(final int retryCount, final long retryInterval) {
         retryCountToDeleteTempDir = retryCount;
         retryIntervalToDeleteTempDir = retryInterval;
     }
@@ -124,8 +122,7 @@ public class CrawlJob {
         return execute();
     }
 
-    public String execute(final JobExecutor jobExecutor,
-            final String[] webConfigIds, final String[] fileConfigIds,
+    public String execute(final JobExecutor jobExecutor, final String[] webConfigIds, final String[] fileConfigIds,
             final String[] dataConfigIds, final String operation) {
         jobExecutor(jobExecutor);
         operation(Constants.COMMIT);
@@ -136,10 +133,8 @@ public class CrawlJob {
 
     }
 
-    public String execute(final JobExecutor jobExecutor,
-            final String sessionId, final String[] webConfigIds,
-            final String[] fileConfigIds, final String[] dataConfigIds,
-            final String operation) {
+    public String execute(final JobExecutor jobExecutor, final String sessionId, final String[] webConfigIds, final String[] fileConfigIds,
+            final String[] dataConfigIds, final String operation) {
         jobExecutor(jobExecutor);
         operation(Constants.COMMIT);
         webConfigIds(webConfigIds);
@@ -151,8 +146,7 @@ public class CrawlJob {
 
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder();
-        final boolean runAll = webConfigIds == null && fileConfigIds == null
-                && dataConfigIds == null;
+        final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
 
         if (sessionId == null) { // create session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -203,8 +197,7 @@ public class CrawlJob {
             jobExecutor.addShutdownListener(new ShutdownListener() {
                 @Override
                 public void onShutdown() {
-                    ComponentUtil.getJobHelper().destroyCrawlerProcess(
-                            sessionId);
+                    ComponentUtil.getJobHelper().destroyCrawlerProcess(sessionId);
                 }
             });
         }
@@ -225,8 +218,7 @@ public class CrawlJob {
     protected void executeCrawler() {
         final List<String> crawlerCmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = SingletonS2Container
-                .getComponent(ServletContext.class);
+        final ServletContext servletContext = SingletonS2Container.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
 
@@ -247,12 +239,10 @@ public class CrawlJob {
         buf.append(File.separator);
         buf.append("classes");
         // WEB-INF/lib
-        appendJarFile(cpSeparator, servletContext, buf, "/WEB-INF/lib",
-                "WEB-INF" + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, servletContext, buf, "/WEB-INF/lib", "WEB-INF" + File.separator + "lib" + File.separator);
         // WEB-INF/cmd/lib
-        appendJarFile(cpSeparator, servletContext, buf, "/WEB-INF/cmd/lib",
-                "WEB-INF" + File.separator + "cmd" + File.separator + "lib"
-                        + File.separator);
+        appendJarFile(cpSeparator, servletContext, buf, "/WEB-INF/cmd/lib", "WEB-INF" + File.separator + "cmd" + File.separator + "lib"
+                + File.separator);
         crawlerCmdList.add(buf.toString());
 
         crawlerCmdList.add("-Dfess.crawler.process=true");
@@ -273,8 +263,7 @@ public class CrawlJob {
             if (StringUtil.isNotBlank(tmpDir)) {
                 ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
                 if (ownTmpDir.mkdirs()) {
-                    crawlerCmdList.add("-Djava.io.tmpdir="
-                            + ownTmpDir.getAbsolutePath());
+                    crawlerCmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
                 } else {
                     ownTmpDir = null;
                 }
@@ -312,8 +301,7 @@ public class CrawlJob {
         final File baseDir = new File(servletContext.getRealPath("/"));
 
         if (logger.isInfoEnabled()) {
-            logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions="
-                    + crawlerCmdList);
+            logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions=" + crawlerCmdList);
         }
 
         final ProcessBuilder pb = new ProcessBuilder(crawlerCmdList);
@@ -321,8 +309,7 @@ public class CrawlJob {
         pb.redirectErrorStream(true);
 
         try {
-            final JobProcess jobProcess = jobHelper.startCrawlerProcess(
-                    sessionId, pb);
+            final JobProcess jobProcess = jobHelper.startCrawlerProcess(sessionId, pb);
 
             final InputStreamThread it = jobProcess.getInputStreamThread();
             it.start();
@@ -334,12 +321,10 @@ public class CrawlJob {
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("Crawler: Exit Code=" + exitValue
-                        + " - Crawler Process Output:\n" + it.getOutput());
+                logger.info("Crawler: Exit Code=" + exitValue + " - Crawler Process Output:\n" + it.getOutput());
             }
             if (exitValue != 0) {
-                throw new FessSystemException("Exit Code: " + exitValue
-                        + "\nOutput:\n" + it.getOutput());
+                throw new FessSystemException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
             }
         } catch (final FessSystemException e) {
             throw e;
@@ -370,12 +355,10 @@ public class CrawlJob {
                 // ignore
             }
         }
-        logger.warn("Could not delete a temp dir: "
-                + ownTmpDir.getAbsolutePath());
+        logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
     }
 
-    protected void appendJarFile(final String cpSeparator,
-            final ServletContext servletContext, final StringBuilder buf,
+    protected void appendJarFile(final String cpSeparator, final ServletContext servletContext, final StringBuilder buf,
             final String libDirPath, final String basePath) {
         final File libDir = new File(servletContext.getRealPath(libDirPath));
         final File[] jarFiles = libDir.listFiles(new FilenameFilter() {

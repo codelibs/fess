@@ -25,14 +25,12 @@ import org.codelibs.fess.db.cbean.FileAuthenticationCB;
 import org.codelibs.fess.db.exentity.FileAuthentication;
 import org.codelibs.fess.pager.FileAuthenticationPager;
 
-public class FileAuthenticationService extends BsFileAuthenticationService
-        implements Serializable {
+public class FileAuthenticationService extends BsFileAuthenticationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final FileAuthenticationCB cb,
-            final FileAuthenticationPager fileAuthenticationPager) {
+    protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthenticationPager fileAuthenticationPager) {
         super.setupListCondition(cb, fileAuthenticationPager);
 
         // setup condition
@@ -46,8 +44,7 @@ public class FileAuthenticationService extends BsFileAuthenticationService
     }
 
     @Override
-    protected void setupEntityCondition(final FileAuthenticationCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FileAuthenticationCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -56,8 +53,7 @@ public class FileAuthenticationService extends BsFileAuthenticationService
     }
 
     @Override
-    protected void setupStoreCondition(
-            final FileAuthentication fileAuthentication) {
+    protected void setupStoreCondition(final FileAuthentication fileAuthentication) {
         super.setupStoreCondition(fileAuthentication);
 
         // setup condition
@@ -65,16 +61,14 @@ public class FileAuthenticationService extends BsFileAuthenticationService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final FileAuthentication fileAuthentication) {
+    protected void setupDeleteCondition(final FileAuthentication fileAuthentication) {
         super.setupDeleteCondition(fileAuthentication);
 
         // setup condition
 
     }
 
-    public List<FileAuthentication> getFileAuthenticationList(
-            final Long fileCrawlingConfigId) {
+    public List<FileAuthentication> getFileAuthenticationList(final Long fileCrawlingConfigId) {
         return fileAuthenticationBhv.selectList(cb -> {
             cb.query().setFileCrawlingConfigId_Equal(fileCrawlingConfigId);
         });

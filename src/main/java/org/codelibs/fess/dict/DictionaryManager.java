@@ -33,8 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DictionaryManager {
-    private static final Logger logger = LoggerFactory
-            .getLogger(DictionaryManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DictionaryManager.class);
 
     protected Map<String, DictionaryFile<? extends DictionaryItem>> dicFileMap;
 
@@ -52,8 +51,7 @@ public class DictionaryManager {
     public void init() {
         // start
         final WatcherTarget watcherTarget = new WatcherTarget();
-        watcherTargetTask = TimeoutManager.getInstance().addTimeoutTarget(
-                watcherTarget, watcherTimeout, true);
+        watcherTargetTask = TimeoutManager.getInstance().addTimeoutTarget(watcherTarget, watcherTimeout, true);
     }
 
     @DestroyMethod
@@ -66,16 +64,13 @@ public class DictionaryManager {
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         final Map<String, DictionaryFile<? extends DictionaryItem>> fileMap = getDictionaryFileMap();
 
-        final Collection<DictionaryFile<? extends DictionaryItem>> values = fileMap
-                .values();
+        final Collection<DictionaryFile<? extends DictionaryItem>> values = fileMap.values();
         @SuppressWarnings("unchecked")
-        final DictionaryFile<? extends DictionaryItem>[] list = new DictionaryFile[values
-                .size()];
+        final DictionaryFile<? extends DictionaryItem>[] list = new DictionaryFile[values.size()];
         return values.toArray(list);
     }
 
-    public DictionaryFile<? extends DictionaryItem> getDictionaryFile(
-            final String id) {
+    public DictionaryFile<? extends DictionaryItem> getDictionaryFile(final String id) {
         if (StringUtil.isBlank(id)) {
             return null;
         }
@@ -93,8 +88,7 @@ public class DictionaryManager {
 
             final Map<String, DictionaryFile<? extends DictionaryItem>> newFileMap = new LinkedHashMap<>();
             for (final DictionaryLocator locator : locatorList) {
-                for (final DictionaryFile<? extends DictionaryItem> dictFile : locator
-                        .find()) {
+                for (final DictionaryFile<? extends DictionaryItem> dictFile : locator.find()) {
                     final String id = UUID.randomUUID().toString();
                     dictFile.setId(id);
                     newFileMap.put(id, dictFile);
@@ -114,8 +108,7 @@ public class DictionaryManager {
         @Override
         public void expired() {
             synchronized (DictionaryManager.this) {
-                if (lifetime <= System.currentTimeMillis()
-                        && dicFileMap != null) {
+                if (lifetime <= System.currentTimeMillis() && dicFileMap != null) {
                     dicFileMap = null;
                     if (logger.isDebugEnabled()) {
                         logger.debug("Clear dictionary cache: " + dicFileMap);

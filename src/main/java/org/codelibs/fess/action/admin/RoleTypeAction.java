@@ -68,13 +68,10 @@ public class RoleTypeAction extends BsRoleTypeAction {
         final RoleType roleType = roleTypeService.getRoleType(createKeyMap());
         if (roleType == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { roleTypeForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { roleTypeForm.id });
         }
 
-        FessBeans.copy(roleType, roleTypeForm).commonColumnDateConverter()
-                .excludes("searchParams", "mode").execute();
+        FessBeans.copy(roleType, roleTypeForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -86,9 +83,7 @@ public class RoleTypeAction extends BsRoleTypeAction {
             roleType = roleTypeService.getRoleType(createKeyMap());
             if (roleType == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { roleTypeForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { roleTypeForm.id });
             }
         } else {
             roleType = new RoleType();
@@ -98,8 +93,7 @@ public class RoleTypeAction extends BsRoleTypeAction {
         roleType.setUpdatedBy(username);
         roleType.setUpdatedTime(currentTime);
         roleTypeForm.value = roleTypeForm.value.trim();
-        FessBeans.copy(roleTypeForm, roleType).excludesCommonColumns()
-                .execute();
+        FessBeans.copy(roleTypeForm, roleType).excludesCommonColumns().execute();
 
         return roleType;
     }
@@ -109,19 +103,15 @@ public class RoleTypeAction extends BsRoleTypeAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (roleTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            roleTypeForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    roleTypeForm.crudMode });
         }
 
         try {
-            final RoleType roleType = roleTypeService
-                    .getRoleType(createKeyMap());
+            final RoleType roleType = roleTypeService.getRoleType(createKeyMap());
             if (roleType == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { roleTypeForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { roleTypeForm.id });
             }
 
             //           roleTypeService.delete(roleType);
@@ -138,12 +128,10 @@ public class RoleTypeAction extends BsRoleTypeAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 }

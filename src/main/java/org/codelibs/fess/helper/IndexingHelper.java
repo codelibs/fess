@@ -32,8 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexingHelper {
-    private static final Logger logger = LoggerFactory
-            .getLogger(IndexingHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(IndexingHelper.class);
 
     public int maxRetryCount = 5;
 
@@ -41,26 +40,22 @@ public class IndexingHelper {
 
     public long requestInterval = 500;
 
-    public void sendDocuments(final SolrGroup solrGroup,
-            final List<SolrInputDocument> docList) {
+    public void sendDocuments(final SolrGroup solrGroup, final List<SolrInputDocument> docList) {
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending " + docList.size()
-                    + " documents to a server.");
+            logger.debug("Sending " + docList.size() + " documents to a server.");
         }
         synchronized (solrGroup) {
             deleteOldDocuments(solrGroup, docList);
             solrGroup.add(docList);
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Sent " + docList.size() + " docs (Solr: "
-                    + (System.currentTimeMillis() - execTime) + "ms)");
+            logger.info("Sent " + docList.size() + " docs (Solr: " + (System.currentTimeMillis() - execTime) + "ms)");
         }
         docList.clear();
     }
 
-    private void deleteOldDocuments(final SolrGroup solrGroup,
-            final List<SolrInputDocument> docList) {
+    private void deleteOldDocuments(final SolrGroup solrGroup, final List<SolrInputDocument> docList) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         final List<String> docIdList = new ArrayList<String>();
@@ -72,31 +67,27 @@ public class IndexingHelper {
                 continue;
             }
 
-            final Object configIdValue = inputDoc
-                    .getFieldValue(fieldHelper.configIdField);
+            final Object configIdValue = inputDoc.getFieldValue(fieldHelper.configIdField);
             if (configIdValue == null) {
                 continue;
             }
 
             q.setLength(0);
             q.append(fieldHelper.urlField).append(":\"");
-            q.append(ClientUtils.escapeQueryChars((String) inputDoc
-                    .getFieldValue(fieldHelper.urlField)));
+            q.append(ClientUtils.escapeQueryChars((String) inputDoc.getFieldValue(fieldHelper.urlField)));
             q.append('"');
 
             fq.setLength(0);
             fq.append(fieldHelper.configIdField).append(':');
             fq.append(configIdValue.toString());
 
-            final SolrDocumentList docs = getSolrDocumentList(solrGroup,
-                    fq.toString(), q.toString(), new String[] {
-                            fieldHelper.idField, fieldHelper.docIdField });
+            final SolrDocumentList docs =
+                    getSolrDocumentList(solrGroup, fq.toString(), q.toString(),
+                            new String[] { fieldHelper.idField, fieldHelper.docIdField });
             for (final SolrDocument doc : docs) {
-                final Object oldIdValue = doc
-                        .getFieldValue(fieldHelper.idField);
+                final Object oldIdValue = doc.getFieldValue(fieldHelper.idField);
                 if (!idValue.equals(oldIdValue) && oldIdValue != null) {
-                    final Object oldDocIdValue = doc
-                            .getFieldValue(fieldHelper.docIdField);
+                    final Object oldDocIdValue = doc.getFieldValue(fieldHelper.docIdField);
                     if (oldDocIdValue != null) {
                         docIdList.add(oldDocIdValue.toString());
                     }
@@ -111,13 +102,11 @@ public class IndexingHelper {
         }
     }
 
-    public SolrDocumentList getSolrDocumentList(final SolrGroup solrGroup,
-            final String fq, final String q, final String[] fields) {
+    public SolrDocumentList getSolrDocumentList(final SolrGroup solrGroup, final String fq, final String q, final String[] fields) {
         return getSolrDocumentList(solrGroup, fq, q, fields, defaultRowSize);
     }
 
-    protected SolrDocumentList getSolrDocumentList(final SolrGroup solrGroup,
-            final String fq, final String q, final String[] fields,
+    protected SolrDocumentList getSolrDocumentList(final SolrGroup solrGroup, final String fq, final String q, final String[] fields,
             final int row) {
         final SolrQuery sq = new SolrQuery();
         if (fq != null) {
@@ -132,8 +121,7 @@ public class IndexingHelper {
         if (docList.getNumFound() <= row) {
             return docList;
         }
-        return getSolrDocumentList(solrGroup, fq, q, fields,
-                (int) docList.getNumFound());
+        return getSolrDocumentList(solrGroup, fq, q, fields, (int) docList.getNumFound());
     }
 
     public void deleteDocument(final SolrGroup solrGroup, final String id) {
@@ -143,39 +131,32 @@ public class IndexingHelper {
         for (int i = 0; i < maxRetryCount; i++) {
             boolean done = true;
             try {
-                for (final UpdateResponse response : solrGroup
-                        .deleteByQuery(query)) {
+                for (final UpdateResponse response : solrGroup.deleteByQuery(query)) {
                     if (response.getStatus() != 0) {
                         logger.warn("Failed to delete: " + response);
                         done = false;
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Could not delete a document from Solr."
-                        + " It might be busy. " + "Retrying.. id:" + id
-                        + ", cause: " + e.getMessage());
+                logger.warn("Could not delete a document from Solr." + " It might be busy. " + "Retrying.. id:" + id + ", cause: "
+                        + e.getMessage());
                 done = false;
             }
             if (done) {
                 if (logger.isDebugEnabled()) {
-                    logger.info("Deleted 1 doc (Solr: "
-                            + (System.currentTimeMillis() - start)
-                            + "ms) => id:" + id);
+                    logger.info("Deleted 1 doc (Solr: " + (System.currentTimeMillis() - start) + "ms) => id:" + id);
                 } else {
-                    logger.info("Deleted 1 doc (Solr: "
-                            + (System.currentTimeMillis() - start) + "ms)");
+                    logger.info("Deleted 1 doc (Solr: " + (System.currentTimeMillis() - start) + "ms)");
                 }
                 return;
             }
             try {
                 Thread.sleep(requestInterval);
-            } catch (final InterruptedException e) {
-            }
+            } catch (final InterruptedException e) {}
         }
     }
 
-    public void deleteDocumentsByDocId(final SolrGroup solrGroup,
-            final List<String> docIdList) {
+    public void deleteDocumentsByDocId(final SolrGroup solrGroup, final List<String> docIdList) {
         final long start = System.currentTimeMillis();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final StringBuilder buf = new StringBuilder(500);
@@ -189,39 +170,33 @@ public class IndexingHelper {
         for (int i = 0; i < maxRetryCount; i++) {
             boolean done = true;
             try {
-                for (final UpdateResponse response : solrGroup
-                        .deleteByQuery(query)) {
+                for (final UpdateResponse response : solrGroup.deleteByQuery(query)) {
                     if (response.getStatus() != 0) {
                         logger.warn("Failed to delete: " + response);
                         done = false;
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Could not delete a document from Solr."
-                        + " It might be busy. " + "Retrying.. id:" + docIdList
-                        + ", cause: " + e.getMessage());
+                logger.warn("Could not delete a document from Solr." + " It might be busy. " + "Retrying.. id:" + docIdList + ", cause: "
+                        + e.getMessage());
                 done = false;
             }
             if (done) {
                 if (logger.isDebugEnabled()) {
-                    logger.info("Deleted " + docIdList.size() + " docs (Solr: "
-                            + (System.currentTimeMillis() - start)
-                            + "ms) => docId:" + docIdList);
+                    logger.info("Deleted " + docIdList.size() + " docs (Solr: " + (System.currentTimeMillis() - start) + "ms) => docId:"
+                            + docIdList);
                 } else {
-                    logger.info("Deleted " + docIdList.size() + " docs (Solr: "
-                            + (System.currentTimeMillis() - start) + "ms)");
+                    logger.info("Deleted " + docIdList.size() + " docs (Solr: " + (System.currentTimeMillis() - start) + "ms)");
                 }
                 return;
             }
             try {
                 Thread.sleep(requestInterval);
-            } catch (final InterruptedException e) {
-            }
+            } catch (final InterruptedException e) {}
         }
     }
 
-    public SolrDocument getSolrDocument(final SolrGroup solrGroup,
-            final String id, final String[] fields) {
+    public SolrDocument getSolrDocument(final SolrGroup solrGroup, final String id, final String[] fields) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         final SolrQuery solrQuery = new SolrQuery();
@@ -250,8 +225,7 @@ public class IndexingHelper {
         return docList.get(0);
     }
 
-    public SolrDocumentList getSolrDocumentListByPrefixId(
-            final SolrGroup solrGroup, final String id, final String[] fields) {
+    public SolrDocumentList getSolrDocumentListByPrefixId(final SolrGroup solrGroup, final String id, final String[] fields) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SolrQuery solrQuery = new SolrQuery();
         final StringBuilder queryBuf = new StringBuilder(500);
@@ -272,11 +246,9 @@ public class IndexingHelper {
         return docList;
     }
 
-    public void deleteChildSolrDocument(final SolrGroup solrGroup,
-            final String id) {
+    public void deleteChildSolrDocument(final SolrGroup solrGroup, final String id) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final String query = "{!raw f=" + fieldHelper.parentIdField + " v=\""
-                + id + "\"}";
+        final String query = "{!raw f=" + fieldHelper.parentIdField + " v=\"" + id + "\"}";
         for (final UpdateResponse response : solrGroup.deleteByQuery(query)) {
             if (response.getStatus() != 0) {
                 logger.warn("Failed to delete: " + response);
@@ -284,28 +256,22 @@ public class IndexingHelper {
         }
     }
 
-    public SolrDocumentList getChildSolrDocumentList(final SolrGroup solrGroup,
-            final String id, final String[] fields) {
+    public SolrDocumentList getChildSolrDocumentList(final SolrGroup solrGroup, final String id, final String[] fields) {
         return getChildSolrDocumentList(solrGroup, id, fields, defaultRowSize);
     }
 
-    protected SolrDocumentList getChildSolrDocumentList(
-            final SolrGroup solrGroup, final String id, final String[] fields,
-            final int row) {
+    protected SolrDocumentList getChildSolrDocumentList(final SolrGroup solrGroup, final String id, final String[] fields, final int row) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setQuery("{!raw f=" + fieldHelper.parentIdField + " v=\""
-                + id + "\"}");
+        solrQuery.setQuery("{!raw f=" + fieldHelper.parentIdField + " v=\"" + id + "\"}");
         if (fields != null) {
             solrQuery.setFields(fields);
         }
         solrQuery.setRows(row);
-        final SolrDocumentList docList = solrGroup.query(solrQuery)
-                .getResults();
+        final SolrDocumentList docList = solrGroup.query(solrQuery).getResults();
         if (docList.getNumFound() <= row) {
             return docList;
         }
-        return getChildSolrDocumentList(solrGroup, id, fields,
-                (int) docList.getNumFound());
+        return getChildSolrDocumentList(solrGroup, id, fields, (int) docList.getNumFound());
     }
 }

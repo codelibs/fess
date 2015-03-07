@@ -42,8 +42,7 @@ public class UserInfoService extends BsUserInfoService implements Serializable {
     protected FavoriteLogBhv favoriteLogBhv;
 
     @Override
-    protected void setupListCondition(final UserInfoCB cb,
-            final UserInfoPager userInfoPager) {
+    protected void setupListCondition(final UserInfoCB cb, final UserInfoPager userInfoPager) {
         // setup condition
         cb.query().addOrderBy_UpdatedTime_Desc();
 
@@ -54,8 +53,7 @@ public class UserInfoService extends BsUserInfoService implements Serializable {
     }
 
     @Override
-    protected void setupEntityCondition(final UserInfoCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final UserInfoCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -101,93 +99,68 @@ public class UserInfoService extends BsUserInfoService implements Serializable {
 
     public void deleteBefore(final int days) {
         final UserInfoPager userInfoPager = new UserInfoPager();
-        userInfoPager.updatedTimeBefore = ComponentUtil.getSystemHelper()
-                .getCurrentTime().minusDays(days);
+        userInfoPager.updatedTimeBefore = ComponentUtil.getSystemHelper().getCurrentTime().minusDays(days);
         deleteInternal(userInfoPager);
     }
 
     protected void deleteInternal(final UserInfoPager userInfoPager) {
 
-        final boolean hasCb = StringUtil.isNotBlank(userInfoPager.code)
-                || userInfoPager.updatedTimeBefore != null;
+        final boolean hasCb = StringUtil.isNotBlank(userInfoPager.code) || userInfoPager.updatedTimeBefore != null;
 
         if (hasCb) {
             final SearchLog searchLog = new SearchLog();
             searchLog.setUserId(null);
-            searchLogBhv.queryUpdate(
-                    searchLog,
-                    cb1 -> {
-                        if (StringUtil.isNotBlank(userInfoPager.code)) {
-                            cb1.query().queryUserInfo()
-                                    .setCode_Equal(userInfoPager.code);
-                        }
-
-                        if (userInfoPager.updatedTimeBefore != null) {
-                            cb1.query()
-                                    .queryUserInfo()
-                                    .setUpdatedTime_LessEqual(
-                                            userInfoPager.updatedTimeBefore);
-                        }
-                    });
-
-            favoriteLogBhv.queryDelete(cb2 -> {
+            searchLogBhv.queryUpdate(searchLog, cb1 -> {
                 if (StringUtil.isNotBlank(userInfoPager.code)) {
-                    cb2.query().queryUserInfo()
-                            .setCode_Equal(userInfoPager.code);
+                    cb1.query().queryUserInfo().setCode_Equal(userInfoPager.code);
                 }
 
                 if (userInfoPager.updatedTimeBefore != null) {
-                    cb2.query()
-                            .queryUserInfo()
-                            .setUpdatedTime_LessEqual(
-                                    userInfoPager.updatedTimeBefore);
+                    cb1.query().queryUserInfo().setUpdatedTime_LessEqual(userInfoPager.updatedTimeBefore);
+                }
+            });
+
+            favoriteLogBhv.queryDelete(cb2 -> {
+                if (StringUtil.isNotBlank(userInfoPager.code)) {
+                    cb2.query().queryUserInfo().setCode_Equal(userInfoPager.code);
+                }
+
+                if (userInfoPager.updatedTimeBefore != null) {
+                    cb2.query().queryUserInfo().setUpdatedTime_LessEqual(userInfoPager.updatedTimeBefore);
                 }
             });
         } else {
             final SearchLog searchLog = new SearchLog();
             searchLog.setUserId(null);
-            searchLogBhv.varyingQueryUpdate(
-                    searchLog,
-                    cb1 -> {
-                        if (StringUtil.isNotBlank(userInfoPager.code)) {
-                            cb1.query().queryUserInfo()
-                                    .setCode_Equal(userInfoPager.code);
-                        }
+            searchLogBhv.varyingQueryUpdate(searchLog, cb1 -> {
+                if (StringUtil.isNotBlank(userInfoPager.code)) {
+                    cb1.query().queryUserInfo().setCode_Equal(userInfoPager.code);
+                }
 
-                        if (userInfoPager.updatedTimeBefore != null) {
-                            cb1.query()
-                                    .queryUserInfo()
-                                    .setUpdatedTime_LessEqual(
-                                            userInfoPager.updatedTimeBefore);
-                        }
-                    }, op -> op.allowNonQueryUpdate());
+                if (userInfoPager.updatedTimeBefore != null) {
+                    cb1.query().queryUserInfo().setUpdatedTime_LessEqual(userInfoPager.updatedTimeBefore);
+                }
+            }, op -> op.allowNonQueryUpdate());
 
-            favoriteLogBhv.varyingQueryDelete(
-                    cb2 -> {
-                        if (StringUtil.isNotBlank(userInfoPager.code)) {
-                            cb2.query().queryUserInfo()
-                                    .setCode_Equal(userInfoPager.code);
-                        }
+            favoriteLogBhv.varyingQueryDelete(cb2 -> {
+                if (StringUtil.isNotBlank(userInfoPager.code)) {
+                    cb2.query().queryUserInfo().setCode_Equal(userInfoPager.code);
+                }
 
-                        if (userInfoPager.updatedTimeBefore != null) {
-                            cb2.query()
-                                    .queryUserInfo()
-                                    .setUpdatedTime_LessEqual(
-                                            userInfoPager.updatedTimeBefore);
-                        }
-                    }, op -> op.allowNonQueryDelete());
+                if (userInfoPager.updatedTimeBefore != null) {
+                    cb2.query().queryUserInfo().setUpdatedTime_LessEqual(userInfoPager.updatedTimeBefore);
+                }
+            }, op -> op.allowNonQueryDelete());
         }
 
-        userInfoBhv.varyingQueryDelete(
-                cb -> {
-                    if (StringUtil.isNotBlank(userInfoPager.code)) {
-                        cb.query().setCode_Equal(userInfoPager.code);
-                    }
+        userInfoBhv.varyingQueryDelete(cb -> {
+            if (StringUtil.isNotBlank(userInfoPager.code)) {
+                cb.query().setCode_Equal(userInfoPager.code);
+            }
 
-                    if (userInfoPager.updatedTimeBefore != null) {
-                        cb.query().setUpdatedTime_LessEqual(
-                                userInfoPager.updatedTimeBefore);
-                    }
-                }, op -> op.allowNonQueryDelete());
+            if (userInfoPager.updatedTimeBefore != null) {
+                cb.query().setUpdatedTime_LessEqual(userInfoPager.updatedTimeBefore);
+            }
+        }, op -> op.allowNonQueryDelete());
     }
 }

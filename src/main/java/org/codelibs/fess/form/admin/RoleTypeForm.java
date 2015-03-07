@@ -33,8 +33,7 @@ public class RoleTypeForm extends BsRoleTypeForm implements Serializable {
         sortOrder = "0";
         // Temporary data
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
     }
 }

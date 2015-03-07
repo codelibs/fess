@@ -44,8 +44,7 @@ import org.seasar.framework.container.SingletonS2Container;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class FileCrawlingConfig extends BsFileCrawlingConfig implements
-        CrawlingConfig {
+public class FileCrawlingConfig extends BsFileCrawlingConfig implements CrawlingConfig {
 
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;
@@ -126,8 +125,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
             initDocPathPattern();
         }
 
-        if (includedDocPathPatterns.length == 0
-                && excludedDocPathPatterns.length == 0) {
+        if (includedDocPathPatterns.length == 0 && excludedDocPathPatterns.length == 0) {
             return Constants.TRUE;
         }
 
@@ -156,12 +154,10 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
                 final String[] paths = getIncludedDocPaths().split("[\r\n]");
                 for (final String u : paths) {
                     if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        pathPatterList.add(Pattern.compile(systemHelper
-                                .encodeUrlFilter(u.trim())));
+                        pathPatterList.add(Pattern.compile(systemHelper.encodeUrlFilter(u.trim())));
                     }
                 }
-                includedDocPathPatterns = pathPatterList
-                        .toArray(new Pattern[pathPatterList.size()]);
+                includedDocPathPatterns = pathPatterList.toArray(new Pattern[pathPatterList.size()]);
             } else {
                 includedDocPathPatterns = new Pattern[0];
             }
@@ -173,12 +169,10 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
                 final String[] paths = getExcludedDocPaths().split("[\r\n]");
                 for (final String u : paths) {
                     if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
-                        pathPatterList.add(Pattern.compile(systemHelper
-                                .encodeUrlFilter(u.trim())));
+                        pathPatterList.add(Pattern.compile(systemHelper.encodeUrlFilter(u.trim())));
                     }
                 }
-                excludedDocPathPatterns = pathPatterList
-                        .toArray(new Pattern[pathPatterList.size()]);
+                excludedDocPathPatterns = pathPatterList.toArray(new Pattern[pathPatterList.size()]);
             } else if (includedDocPathPatterns.length > 0) {
                 excludedDocPathPatterns = new Pattern[] { Pattern.compile(".*") };
             } else {
@@ -198,8 +192,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
         if (value != null) {
             try {
                 _boost = new BigDecimal(value);
-            } catch (final Exception e) {
-            }
+            } catch (final Exception e) {}
         }
     }
 
@@ -210,8 +203,7 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
 
     @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
-        final FileAuthenticationService fileAuthenticationService = SingletonS2Container
-                .getComponent(FileAuthenticationService.class);
+        final FileAuthenticationService fileAuthenticationService = SingletonS2Container.getComponent(FileAuthenticationService.class);
 
         //  Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -223,14 +215,12 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
         }
 
         // auth params
-        final List<FileAuthentication> fileAuthList = fileAuthenticationService
-                .getFileAuthenticationList(getId());
+        final List<FileAuthentication> fileAuthList = fileAuthenticationService.getFileAuthenticationList(getId());
         final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
         for (final FileAuthentication fileAuth : fileAuthList) {
             if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
                 final SmbAuthentication smbAuth = new SmbAuthentication();
-                final Map<String, String> map = ParameterUtil.parse(fileAuth
-                        .getParameters());
+                final Map<String, String> map = ParameterUtil.parse(fileAuth.getParameters());
                 final String domain = map.get("domain");
                 smbAuth.setDomain(domain == null ? StringUtil.EMPTY : domain);
                 smbAuth.setServer(fileAuth.getHostname());
@@ -240,16 +230,14 @@ public class FileCrawlingConfig extends BsFileCrawlingConfig implements
                 smbAuthList.add(smbAuth);
             }
         }
-        paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
-                smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+        paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
 
     }
 
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
         if (configParameterMap == null) {
-            configParameterMap = ParameterUtil
-                    .createConfigParameterMap(getConfigParameter());
+            configParameterMap = ParameterUtil.createConfigParameterMap(getConfigParameter());
         }
 
         final Map<String, String> configMap = configParameterMap.get(name);

@@ -43,8 +43,7 @@ import org.seasar.framework.container.SingletonS2Container;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class WebCrawlingConfig extends BsWebCrawlingConfig implements
-        CrawlingConfig {
+public class WebCrawlingConfig extends BsWebCrawlingConfig implements CrawlingConfig {
 
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;
@@ -131,8 +130,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
             initDocUrlPattern();
         }
 
-        if (includedDocUrlPatterns.length == 0
-                && excludedDocUrlPatterns.length == 0) {
+        if (includedDocUrlPatterns.length == 0 && excludedDocUrlPatterns.length == 0) {
             return Constants.TRUE;
         }
 
@@ -162,8 +160,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
                         urlPatterList.add(Pattern.compile(u.trim()));
                     }
                 }
-                includedDocUrlPatterns = urlPatterList
-                        .toArray(new Pattern[urlPatterList.size()]);
+                includedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
             } else {
                 includedDocUrlPatterns = new Pattern[0];
             }
@@ -178,8 +175,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
                         urlPatterList.add(Pattern.compile(u.trim()));
                     }
                 }
-                excludedDocUrlPatterns = urlPatterList
-                        .toArray(new Pattern[urlPatterList.size()]);
+                excludedDocUrlPatterns = urlPatterList.toArray(new Pattern[urlPatterList.size()]);
             } else if (includedDocUrlPatterns.length > 0) {
                 excludedDocUrlPatterns = new Pattern[] { Pattern.compile(".*") };
             } else {
@@ -199,8 +195,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
         if (value != null) {
             try {
                 _boost = new BigDecimal(value);
-            } catch (final Exception e) {
-            }
+            } catch (final Exception e) {}
         }
     }
 
@@ -211,10 +206,8 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
 
     @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
-        final WebAuthenticationService webAuthenticationService = SingletonS2Container
-                .getComponent(WebAuthenticationService.class);
-        final RequestHeaderService requestHeaderService = SingletonS2Container
-                .getComponent(RequestHeaderService.class);
+        final WebAuthenticationService webAuthenticationService = SingletonS2Container.getComponent(WebAuthenticationService.class);
+        final RequestHeaderService requestHeaderService = SingletonS2Container.getComponent(RequestHeaderService.class);
 
         // HttpClient Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -230,34 +223,27 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements
             paramMap.put(HcHttpClient.USER_AGENT_PROPERTY, userAgent);
         }
 
-        final List<WebAuthentication> webAuthList = webAuthenticationService
-                .getWebAuthenticationList(getId());
+        final List<WebAuthentication> webAuthList = webAuthenticationService.getWebAuthenticationList(getId());
         final List<Authentication> basicAuthList = new ArrayList<Authentication>();
         for (final WebAuthentication webAuth : webAuthList) {
             basicAuthList.add(webAuth.getAuthentication());
         }
-        paramMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY,
-                basicAuthList.toArray(new Authentication[basicAuthList.size()]));
+        paramMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY, basicAuthList.toArray(new Authentication[basicAuthList.size()]));
 
         // request header
-        final List<RequestHeader> requestHeaderList = requestHeaderService
-                .getRequestHeaderList(getId());
+        final List<RequestHeader> requestHeaderList = requestHeaderService.getRequestHeaderList(getId());
         final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
         for (final RequestHeader requestHeader : requestHeaderList) {
             rhList.add(requestHeader.getS2RobotRequestHeader());
         }
-        paramMap.put(
-                HcHttpClient.REQUERT_HEADERS_PROPERTY,
-                rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList
-                        .size()]));
+        paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList.size()]));
 
     }
 
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
         if (configParameterMap == null) {
-            configParameterMap = ParameterUtil
-                    .createConfigParameterMap(getConfigParameter());
+            configParameterMap = ParameterUtil.createConfigParameterMap(getConfigParameter());
         }
 
         final Map<String, String> configMap = configParameterMap.get(name);

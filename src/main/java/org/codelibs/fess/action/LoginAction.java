@@ -48,8 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginAction implements Serializable {
-    private static final Logger logger = LoggerFactory
-            .getLogger(LoginAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoginAction.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -78,34 +77,28 @@ public class LoginAction implements Serializable {
 
         if ("logout".equals(loginForm.type)) {
             if (logger.isInfoEnabled()) {
-                logger.info("Invalidated session. The username is "
-                        + request.getRemoteUser());
+                logger.info("Invalidated session. The username is " + request.getRemoteUser());
             }
             session.invalidate();
         }
 
         String returnPath;
         if (StringUtil.isNotBlank(loginForm.returnPath)) {
-            final CachedCipher cipher = ComponentUtil
-                    .getCipher(Constants.AUTH_CIPHER);
+            final CachedCipher cipher = ComponentUtil.getCipher(Constants.AUTH_CIPHER);
             if (cipher == null) {
-                throw new FessSystemException(
-                        "A cipher for authentication is null. Please check a filter setting.");
+                throw new FessSystemException("A cipher for authentication is null. Please check a filter setting.");
             }
             final String value = cipher.decryptoText(loginForm.returnPath);
             final int idx = value.indexOf('|');
             if (idx >= 0) {
                 returnPath = value.substring(idx + 1);
-                RequestUtil.getRequest().getSession()
-                        .setAttribute(Constants.RETURN_PATH, returnPath);
+                RequestUtil.getRequest().getSession().setAttribute(Constants.RETURN_PATH, returnPath);
             } else {
                 // invalid returnPath
-                RequestUtil.getRequest().getSession()
-                        .removeAttribute(Constants.RETURN_PATH);
+                RequestUtil.getRequest().getSession().removeAttribute(Constants.RETURN_PATH);
             }
         } else {
-            RequestUtil.getRequest().getSession()
-                    .removeAttribute(Constants.RETURN_PATH);
+            RequestUtil.getRequest().getSession().removeAttribute(Constants.RETURN_PATH);
         }
 
         return "login?redirect=true";
@@ -137,8 +130,7 @@ public class LoginAction implements Serializable {
         session.setAttribute(SSCConstants.USER_INFO, loginInfo);
 
         String returnPath;
-        final Set<String> authenticatedRoleList = systemHelper
-                .getAuthenticatedRoleSet();
+        final Set<String> authenticatedRoleList = systemHelper.getAuthenticatedRoleSet();
         final Set<String> roleSet = new HashSet<>();
         for (final String role : authenticatedRoleList) {
             if (request.isUserInRole(role)) {
@@ -162,8 +154,7 @@ public class LoginAction implements Serializable {
                 ActivityUtil.login(request.getRemoteUser(), request);
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Login Failure: " + request.getRemoteUser()
-                            + " does not have authenticated roles.");
+                    logger.warn("Login Failure: " + request.getRemoteUser() + " does not have authenticated roles.");
                 }
                 // logout
                 session.invalidate();
@@ -181,8 +172,7 @@ public class LoginAction implements Serializable {
         try {
             response.sendRedirect(response.encodeURL(returnPath));
         } catch (final IOException e) {
-            throw new FessSystemException(
-                    "Failed to redirect to " + returnPath, e);
+            throw new FessSystemException("Failed to redirect to " + returnPath, e);
         }
     }
 

@@ -28,33 +28,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DictionaryLocator {
-    private static final Logger logger = LoggerFactory
-            .getLogger(DictionaryLocator.class);
+    private static final Logger logger = LoggerFactory.getLogger(DictionaryLocator.class);
 
     protected List<String> searchPathList = new ArrayList<String>();
 
     public abstract List<DictionaryFile<? extends DictionaryItem>> find();
 
-    protected File[] findFiles(final String path, final String filenamePrefix,
-            final List<String> excludedSet) {
+    protected File[] findFiles(final String path, final String filenamePrefix, final List<String> excludedSet) {
 
         final File directory = new File(path);
         if (logger.isDebugEnabled()) {
             logger.debug("Load files from " + directory.getAbsolutePath());
         }
-        final Collection<File> files = FileUtils.listFiles(directory,
-                new AbstractFileFilter() {
-                    @Override
-                    public boolean accept(final File dir, final String name) {
-                        return name.startsWith(filenamePrefix);
-                    }
-                }, new AbstractFileFilter() {
-                    @Override
-                    public boolean accept(final File dir, final String name) {
-                        return excludedSet == null
-                                || !excludedSet.contains(name);
-                    }
-                });
+        final Collection<File> files = FileUtils.listFiles(directory, new AbstractFileFilter() {
+            @Override
+            public boolean accept(final File dir, final String name) {
+                return name.startsWith(filenamePrefix);
+            }
+        }, new AbstractFileFilter() {
+            @Override
+            public boolean accept(final File dir, final String name) {
+                return excludedSet == null || !excludedSet.contains(name);
+            }
+        });
 
         if (logger.isDebugEnabled()) {
             logger.debug("Dictionary files: " + files);

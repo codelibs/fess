@@ -22,8 +22,7 @@ import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 
 public interface DataStore {
 
-    void store(DataCrawlingConfig config, IndexUpdateCallback callback,
-            Map<String, String> initParamMap);
+    void store(DataCrawlingConfig config, IndexUpdateCallback callback, Map<String, String> initParamMap);
 
     void stop();
 

@@ -60,8 +60,7 @@ public class ClickLog extends BsClickLog {
     }
 
     public String getRequestedTimeForList() {
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         if (getRequestedTime() != null) {
             return sdf.format(getRequestedTime());
         }
@@ -86,10 +85,8 @@ public class ClickLog extends BsClickLog {
 
     @Override
     public String toString() {
-        return "ClickLog [queryRequestedTime=" + queryRequestedTime
-                + ", userSessionId=" + userSessionId + ", docId=" + docId
-                + ", clickCount=" + clickCount + ", _id=" + _id
-                + ", _searchId=" + _searchId + ", _url=" + _url
-                + ", _requestedTime=" + _requestedTime + "]";
+        return "ClickLog [queryRequestedTime=" + queryRequestedTime + ", userSessionId=" + userSessionId + ", docId=" + docId
+                + ", clickCount=" + clickCount + ", _id=" + _id + ", _searchId=" + _searchId + ", _url=" + _url + ", _requestedTime="
+                + _requestedTime + "]";
     }
 }

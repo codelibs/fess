@@ -43,8 +43,7 @@ public class BsSuggestBadWordAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsSuggestBadWordAction.class);
+    private static final Log log = LogFactory.getLog(BsSuggestBadWordAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsSuggestBadWordAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        suggestBadWordItems = suggestBadWordService
-                .getSuggestBadWordList(suggestBadWordPager);
+        suggestBadWordItems = suggestBadWordService.getSuggestBadWordList(suggestBadWordPager);
 
         // restore from pager
-        Beans.copy(suggestBadWordPager, suggestBadWordForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(suggestBadWordPager, suggestBadWordForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,13 +87,10 @@ public class BsSuggestBadWordAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(suggestBadWordForm.pageNumber)) {
             try {
-                suggestBadWordPager.setCurrentPageNumber(Integer
-                        .parseInt(suggestBadWordForm.pageNumber));
+                suggestBadWordPager.setCurrentPageNumber(Integer.parseInt(suggestBadWordForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug(
-                            "Invalid value: " + suggestBadWordForm.pageNumber,
-                            e);
+                    log.debug("Invalid value: " + suggestBadWordForm.pageNumber, e);
                 }
             }
         }
@@ -106,10 +100,9 @@ public class BsSuggestBadWordAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(suggestBadWordForm.searchParams, suggestBadWordPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(suggestBadWordForm.searchParams, suggestBadWordPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -135,9 +128,8 @@ public class BsSuggestBadWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (suggestBadWordForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            suggestBadWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    suggestBadWordForm.crudMode });
         }
 
         loadSuggestBadWord();
@@ -159,9 +151,8 @@ public class BsSuggestBadWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (suggestBadWordForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            suggestBadWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    suggestBadWordForm.crudMode });
         }
 
         loadSuggestBadWord();
@@ -195,9 +186,8 @@ public class BsSuggestBadWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (suggestBadWordForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            suggestBadWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    suggestBadWordForm.crudMode });
         }
 
         loadSuggestBadWord();
@@ -232,8 +222,7 @@ public class BsSuggestBadWordAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -254,8 +243,7 @@ public class BsSuggestBadWordAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -263,20 +251,17 @@ public class BsSuggestBadWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (suggestBadWordForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            suggestBadWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    suggestBadWordForm.crudMode });
         }
 
         try {
-            final SuggestBadWord suggestBadWord = suggestBadWordService
-                    .getSuggestBadWord(createKeyMap());
+            final SuggestBadWord suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
             if (suggestBadWord == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { suggestBadWordForm.id });
+                new Object[] { suggestBadWordForm.id });
 
             }
 
@@ -292,50 +277,43 @@ public class BsSuggestBadWordAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadSuggestBadWord() {
 
-        final SuggestBadWord suggestBadWord = suggestBadWordService
-                .getSuggestBadWord(createKeyMap());
+        final SuggestBadWord suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
         if (suggestBadWord == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { suggestBadWordForm.id });
+            new Object[] { suggestBadWordForm.id });
 
         }
 
-        Beans.copy(suggestBadWord, suggestBadWordForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(suggestBadWord, suggestBadWordForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected SuggestBadWord createSuggestBadWord() {
         SuggestBadWord suggestBadWord;
         if (suggestBadWordForm.crudMode == CommonConstants.EDIT_MODE) {
-            suggestBadWord = suggestBadWordService
-                    .getSuggestBadWord(createKeyMap());
+            suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
             if (suggestBadWord == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { suggestBadWordForm.id });
+                new Object[] { suggestBadWordForm.id });
 
             }
         } else {
             suggestBadWord = new SuggestBadWord();
         }
-        Beans.copy(suggestBadWordForm, suggestBadWord)
-                .excludes("searchParams", "mode")
+        Beans.copy(suggestBadWordForm, suggestBadWord).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return suggestBadWord;
     }

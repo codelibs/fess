@@ -39,33 +39,27 @@ public abstract class BsRequestHeaderService {
         super();
     }
 
-    public List<RequestHeader> getRequestHeaderList(
-            final RequestHeaderPager requestHeaderPager) {
+    public List<RequestHeader> getRequestHeaderList(final RequestHeaderPager requestHeaderPager) {
 
-        final PagingResultBean<RequestHeader> requestHeaderList = requestHeaderBhv
-                .selectPage(cb -> {
-                    cb.paging(requestHeaderPager.getPageSize(),
-                            requestHeaderPager.getCurrentPageNumber());
-                    setupListCondition(cb, requestHeaderPager);
-                });
+        final PagingResultBean<RequestHeader> requestHeaderList = requestHeaderBhv.selectPage(cb -> {
+            cb.paging(requestHeaderPager.getPageSize(), requestHeaderPager.getCurrentPageNumber());
+            setupListCondition(cb, requestHeaderPager);
+        });
 
         // update pager
-        Beans.copy(requestHeaderList, requestHeaderPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        requestHeaderPager.setPageNumberList(requestHeaderList.pageRange(
-                op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(requestHeaderList, requestHeaderPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        requestHeaderPager.setPageNumberList(requestHeaderList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return requestHeaderList;
     }
 
     public RequestHeader getRequestHeader(final Map<String, String> keys) {
-        final RequestHeader requestHeader = requestHeaderBhv.selectEntity(
-                cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+        final RequestHeader requestHeader = requestHeaderBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (requestHeader == null) {
             // TODO exception?
             return null;
@@ -74,24 +68,21 @@ public abstract class BsRequestHeaderService {
         return requestHeader;
     }
 
-    public void store(final RequestHeader requestHeader)
-            throws CrudMessageException {
+    public void store(final RequestHeader requestHeader) throws CrudMessageException {
         setupStoreCondition(requestHeader);
 
         requestHeaderBhv.insertOrUpdate(requestHeader);
 
     }
 
-    public void delete(final RequestHeader requestHeader)
-            throws CrudMessageException {
+    public void delete(final RequestHeader requestHeader) throws CrudMessageException {
         setupDeleteCondition(requestHeader);
 
         requestHeaderBhv.delete(requestHeader);
 
     }
 
-    protected void setupListCondition(final RequestHeaderCB cb,
-            final RequestHeaderPager requestHeaderPager) {
+    protected void setupListCondition(final RequestHeaderCB cb, final RequestHeaderPager requestHeaderPager) {
 
         if (requestHeaderPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(requestHeaderPager.id));
@@ -99,8 +90,7 @@ public abstract class BsRequestHeaderService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final RequestHeaderCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final RequestHeaderCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final RequestHeader requestHeader) {

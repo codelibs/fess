@@ -33,8 +33,7 @@ import org.codelibs.fess.db.exentity.FileConfigToRoleTypeMapping;
 import org.codelibs.fess.db.exentity.FileCrawlingConfig;
 import org.codelibs.fess.pager.FileCrawlingConfigPager;
 
-public class FileCrawlingConfigService extends BsFileCrawlingConfigService
-        implements Serializable {
+public class FileCrawlingConfigService extends BsFileCrawlingConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,8 +47,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
         return getAllFileCrawlingConfigList(true, true, true, null);
     }
 
-    public List<FileCrawlingConfig> getFileCrawlingConfigListByIds(
-            final List<Long> idList) {
+    public List<FileCrawlingConfig> getFileCrawlingConfigListByIds(final List<Long> idList) {
         if (idList == null) {
             return getAllFileCrawlingConfigList();
         } else {
@@ -57,19 +55,17 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
         }
     }
 
-    public List<FileCrawlingConfig> getAllFileCrawlingConfigList(
-            final boolean withLabelType, final boolean withRoleType,
+    public List<FileCrawlingConfig> getAllFileCrawlingConfigList(final boolean withLabelType, final boolean withRoleType,
             final boolean available, final List<Long> idList) {
-        final List<FileCrawlingConfig> list = fileCrawlingConfigBhv
-                .selectList(cb -> {
-                    cb.query().setDeletedBy_IsNull();
-                    if (available) {
-                        cb.query().setAvailable_Equal(Constants.T);
-                    }
-                    if (idList != null) {
-                        cb.query().setId_InScope(idList);
-                    }
-                });
+        final List<FileCrawlingConfig> list = fileCrawlingConfigBhv.selectList(cb -> {
+            cb.query().setDeletedBy_IsNull();
+            if (available) {
+                cb.query().setAvailable_Equal(Constants.T);
+            }
+            if (idList != null) {
+                cb.query().setId_InScope(idList);
+            }
+        });
         if (withRoleType) {
             fileCrawlingConfigBhv.loadFileConfigToRoleTypeMapping(list, cb -> {
                 cb.setupSelect_RoleType();
@@ -78,58 +74,45 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
             });
         }
         if (withLabelType) {
-            fileCrawlingConfigBhv.loadFileConfigToLabelTypeMapping(list,
-                    cb -> {
-                        cb.setupSelect_LabelType();
-                        cb.query().queryLabelType().setDeletedBy_IsNull();
-                        cb.query().queryLabelType().addOrderBy_SortOrder_Asc();
-                    });
+            fileCrawlingConfigBhv.loadFileConfigToLabelTypeMapping(list, cb -> {
+                cb.setupSelect_LabelType();
+                cb.query().queryLabelType().setDeletedBy_IsNull();
+                cb.query().queryLabelType().addOrderBy_SortOrder_Asc();
+            });
         }
         return list;
     }
 
     @Override
-    public FileCrawlingConfig getFileCrawlingConfig(
-            final Map<String, String> keys) {
-        final FileCrawlingConfig fileCrawlingConfig = super
-                .getFileCrawlingConfig(keys);
+    public FileCrawlingConfig getFileCrawlingConfig(final Map<String, String> keys) {
+        final FileCrawlingConfig fileCrawlingConfig = super.getFileCrawlingConfig(keys);
 
         if (fileCrawlingConfig != null) {
 
-            final List<FileConfigToRoleTypeMapping> fctrtmList = fileConfigToRoleTypeMappingBhv
-                    .selectList(fctrtmCb -> {
-                        fctrtmCb.query().setFileConfigId_Equal(
-                                fileCrawlingConfig.getId());
-                        fctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
-                        fctrtmCb.query().queryFileCrawlingConfig()
-                                .setDeletedBy_IsNull();
-                    });
+            final List<FileConfigToRoleTypeMapping> fctrtmList = fileConfigToRoleTypeMappingBhv.selectList(fctrtmCb -> {
+                fctrtmCb.query().setFileConfigId_Equal(fileCrawlingConfig.getId());
+                fctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
+                fctrtmCb.query().queryFileCrawlingConfig().setDeletedBy_IsNull();
+            });
             if (!fctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(
-                        fctrtmList.size());
+                final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
                 for (final FileConfigToRoleTypeMapping mapping : fctrtmList) {
                     roleTypeIds.add(Long.toString(mapping.getRoleTypeId()));
                 }
-                fileCrawlingConfig.setRoleTypeIds(roleTypeIds
-                        .toArray(new String[roleTypeIds.size()]));
+                fileCrawlingConfig.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }
 
-            final List<FileConfigToLabelTypeMapping> fctltmList = fileConfigToLabelTypeMappingBhv
-                    .selectList(fctltmCb -> {
-                        fctltmCb.query().setFileConfigId_Equal(
-                                fileCrawlingConfig.getId());
-                        fctltmCb.query().queryLabelType().setDeletedBy_IsNull();
-                        fctltmCb.query().queryFileCrawlingConfig()
-                                .setDeletedBy_IsNull();
-                    });
+            final List<FileConfigToLabelTypeMapping> fctltmList = fileConfigToLabelTypeMappingBhv.selectList(fctltmCb -> {
+                fctltmCb.query().setFileConfigId_Equal(fileCrawlingConfig.getId());
+                fctltmCb.query().queryLabelType().setDeletedBy_IsNull();
+                fctltmCb.query().queryFileCrawlingConfig().setDeletedBy_IsNull();
+            });
             if (!fctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(
-                        fctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
                 for (final FileConfigToLabelTypeMapping mapping : fctltmList) {
                     labelTypeIds.add(Long.toString(mapping.getLabelTypeId()));
                 }
-                fileCrawlingConfig.setLabelTypeIds(labelTypeIds
-                        .toArray(new String[labelTypeIds.size()]));
+                fileCrawlingConfig.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
             }
 
         }
@@ -169,11 +152,9 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
         } else {
             // Update
             if (labelTypeIds != null) {
-                final List<FileConfigToLabelTypeMapping> fctltmList = fileConfigToLabelTypeMappingBhv
-                        .selectList(fctltmCb -> {
-                            fctltmCb.query()
-                                    .setFileConfigId_Equal(fileConfigId);
-                        });
+                final List<FileConfigToLabelTypeMapping> fctltmList = fileConfigToLabelTypeMappingBhv.selectList(fctltmCb -> {
+                    fctltmCb.query().setFileConfigId_Equal(fileConfigId);
+                });
                 final List<FileConfigToLabelTypeMapping> newList = new ArrayList<FileConfigToLabelTypeMapping>();
                 final List<FileConfigToLabelTypeMapping> matchedList = new ArrayList<FileConfigToLabelTypeMapping>();
                 for (final String id : labelTypeIds) {
@@ -199,11 +180,9 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
                 fileConfigToLabelTypeMappingBhv.batchDelete(fctltmList);
             }
             if (roleTypeIds != null) {
-                final List<FileConfigToRoleTypeMapping> fctrtmList = fileConfigToRoleTypeMappingBhv
-                        .selectList(fctrtmCb -> {
-                            fctrtmCb.query()
-                                    .setFileConfigId_Equal(fileConfigId);
-                        });
+                final List<FileConfigToRoleTypeMapping> fctrtmList = fileConfigToRoleTypeMappingBhv.selectList(fctrtmCb -> {
+                    fctrtmCb.query().setFileConfigId_Equal(fileConfigId);
+                });
                 final List<FileConfigToRoleTypeMapping> newList = new ArrayList<FileConfigToRoleTypeMapping>();
                 final List<FileConfigToRoleTypeMapping> matchedList = new ArrayList<FileConfigToRoleTypeMapping>();
                 for (final String id : roleTypeIds) {
@@ -232,8 +211,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
     }
 
     @Override
-    protected void setupListCondition(final FileCrawlingConfigCB cb,
-            final FileCrawlingConfigPager fileCrawlingConfigPager) {
+    protected void setupListCondition(final FileCrawlingConfigCB cb, final FileCrawlingConfigPager fileCrawlingConfigPager) {
         super.setupListCondition(cb, fileCrawlingConfigPager);
 
         // setup condition
@@ -245,8 +223,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
     }
 
     @Override
-    protected void setupEntityCondition(final FileCrawlingConfigCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FileCrawlingConfigCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -255,8 +232,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
     }
 
     @Override
-    protected void setupStoreCondition(
-            final FileCrawlingConfig fileCrawlingConfig) {
+    protected void setupStoreCondition(final FileCrawlingConfig fileCrawlingConfig) {
         super.setupStoreCondition(fileCrawlingConfig);
 
         // setup condition
@@ -264,8 +240,7 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final FileCrawlingConfig fileCrawlingConfig) {
+    protected void setupDeleteCondition(final FileCrawlingConfig fileCrawlingConfig) {
         super.setupDeleteCondition(fileCrawlingConfig);
 
         // setup condition

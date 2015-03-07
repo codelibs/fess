@@ -26,6 +26,5 @@ import org.codelibs.fess.db.bsbhv.BsWebConfigToRoleTypeMappingBhv;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class WebConfigToRoleTypeMappingBhv extends
-        BsWebConfigToRoleTypeMappingBhv {
+public class WebConfigToRoleTypeMappingBhv extends BsWebConfigToRoleTypeMappingBhv {
 }

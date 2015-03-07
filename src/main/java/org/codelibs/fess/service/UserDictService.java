@@ -36,18 +36,15 @@ public class UserDictService {
     @Resource
     protected DictionaryManager dictionaryManager;
 
-    public List<UserDictItem> getUserDictList(final String dictId,
-            final UserDictPager userDictPager) {
+    public List<UserDictItem> getUserDictList(final String dictId, final UserDictPager userDictPager) {
         final UserDictFile userDictFile = getUserDictFile(dictId);
 
         final int pageSize = userDictPager.getPageSize();
-        final PagingList<UserDictItem> userDictList = userDictFile
-                .selectList((userDictPager.getCurrentPageNumber() - 1)
-                        * pageSize, pageSize);
+        final PagingList<UserDictItem> userDictList =
+                userDictFile.selectList((userDictPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
         // update pager
-        Beans.copy(userDictList, userDictPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(userDictList, userDictPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         userDictList.setPageRangeSize(5);
         userDictPager.setPageNumberList(userDictList.createPageNumberList());
 
@@ -56,16 +53,14 @@ public class UserDictService {
     }
 
     public UserDictFile getUserDictFile(final String dictId) {
-        final DictionaryFile<?> dictionaryFile = dictionaryManager
-                .getDictionaryFile(dictId);
+        final DictionaryFile<?> dictionaryFile = dictionaryManager.getDictionaryFile(dictId);
         if (dictionaryFile instanceof UserDictFile) {
             return (UserDictFile) dictionaryFile;
         }
         throw new DictionaryExpiredException();
     }
 
-    public UserDictItem getUserDict(final String dictId,
-            final Map<String, String> paramMap) {
+    public UserDictItem getUserDict(final String dictId, final Map<String, String> paramMap) {
         final UserDictFile userDictFile = getUserDictFile(dictId);
 
         final String idStr = paramMap.get("id");

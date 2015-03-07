@@ -67,10 +67,9 @@ public class BsUserInfoAction implements Serializable {
         userInfoItems = userInfoService.getUserInfoList(userInfoPager);
 
         // restore from pager
-        Beans.copy(userInfoPager, userInfoForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(userInfoPager, userInfoForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -89,8 +88,7 @@ public class BsUserInfoAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(userInfoForm.pageNumber)) {
             try {
-                userInfoPager.setCurrentPageNumber(Integer
-                        .parseInt(userInfoForm.pageNumber));
+                userInfoPager.setCurrentPageNumber(Integer.parseInt(userInfoForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + userInfoForm.pageNumber, e);
@@ -103,10 +101,9 @@ public class BsUserInfoAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(userInfoForm.searchParams, userInfoPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(userInfoForm.searchParams, userInfoPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -132,9 +129,8 @@ public class BsUserInfoAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (userInfoForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            userInfoForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    userInfoForm.crudMode });
         }
 
         loadUserInfo();
@@ -156,9 +152,7 @@ public class BsUserInfoAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (userInfoForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            userInfoForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, userInfoForm.crudMode });
         }
 
         loadUserInfo();
@@ -193,8 +187,7 @@ public class BsUserInfoAction implements Serializable {
     public String deletepage() {
         if (userInfoForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            userInfoForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, userInfoForm.crudMode });
         }
 
         loadUserInfo();
@@ -229,8 +222,7 @@ public class BsUserInfoAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -251,8 +243,7 @@ public class BsUserInfoAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -261,19 +252,16 @@ public class BsUserInfoAction implements Serializable {
     public String delete() {
         if (userInfoForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            userInfoForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, userInfoForm.crudMode });
         }
 
         try {
-            final UserInfo userInfo = userInfoService
-                    .getUserInfo(createKeyMap());
+            final UserInfo userInfo = userInfoService.getUserInfo(createKeyMap());
             if (userInfo == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { userInfoForm.id });
+                new Object[] { userInfoForm.id });
 
             }
 
@@ -289,8 +277,7 @@ public class BsUserInfoAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
@@ -299,18 +286,15 @@ public class BsUserInfoAction implements Serializable {
         final UserInfo userInfo = userInfoService.getUserInfo(createKeyMap());
         if (userInfo == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { userInfoForm.id });
+            new Object[] { userInfoForm.id });
 
         }
 
-        Beans.copy(userInfo, userInfoForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(userInfo, userInfoForm).excludes("searchParams", "mode")
 
-                .timestampConverter(Constants.DEFAULT_DATETIME_FORMAT,
-                        "createdTime", "updatedTime").execute();
+        .timestampConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime", "updatedTime").execute();
     }
 
     protected UserInfo createUserInfo() {
@@ -319,20 +303,17 @@ public class BsUserInfoAction implements Serializable {
             userInfo = userInfoService.getUserInfo(createKeyMap());
             if (userInfo == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { userInfoForm.id });
+                new Object[] { userInfoForm.id });
 
             }
         } else {
             userInfo = new UserInfo();
         }
-        Beans.copy(userInfoForm, userInfo)
-                .excludes("searchParams", "mode")
+        Beans.copy(userInfoForm, userInfo).excludes("searchParams", "mode")
 
-                .timestampConverter(Constants.DEFAULT_DATETIME_FORMAT,
-                        "createdTime", "updatedTime").execute();
+        .timestampConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime", "updatedTime").execute();
 
         return userInfo;
     }

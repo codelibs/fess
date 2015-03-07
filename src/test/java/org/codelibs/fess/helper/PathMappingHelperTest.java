@@ -57,8 +57,7 @@ public class PathMappingHelperTest extends S2TestCase {
         pathMappingHelper.setPathMappingList(sessionId, pathMappingList);
 
         final String url = "file:///home/taro/";
-        assertEquals("http://localhost/taro/",
-                pathMappingHelper.replaceUrl(sessionId, url));
+        assertEquals("http://localhost/taro/", pathMappingHelper.replaceUrl(sessionId, url));
     }
 
     public void test_replaceUrls() {
@@ -71,20 +70,16 @@ public class PathMappingHelperTest extends S2TestCase {
         pathMappingHelper.cachedPathMappingList = pathMappingList;
 
         String text = "\"file:///home/\"";
-        assertEquals("\"http://localhost/\"",
-                pathMappingHelper.replaceUrls(text));
+        assertEquals("\"http://localhost/\"", pathMappingHelper.replaceUrls(text));
 
         text = "\"file:///home/taro/\"";
-        assertEquals("\"http://localhost/taro/\"",
-                pathMappingHelper.replaceUrls(text));
+        assertEquals("\"http://localhost/taro/\"", pathMappingHelper.replaceUrls(text));
 
         text = "\"aaafile:///home/taro/\"";
-        assertEquals("\"aaahttp://localhost/taro/\"",
-                pathMappingHelper.replaceUrls(text));
+        assertEquals("\"aaahttp://localhost/taro/\"", pathMappingHelper.replaceUrls(text));
 
         text = "aaa\"file:///home/taro/\"bbb";
-        assertEquals("aaa\"http://localhost/taro/\"bbb",
-                pathMappingHelper.replaceUrls(text));
+        assertEquals("aaa\"http://localhost/taro/\"bbb", pathMappingHelper.replaceUrls(text));
 
     }
 }

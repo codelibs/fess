@@ -45,8 +45,7 @@ public class MailHelper implements Serializable {
         props.put(key, value);
     }
 
-    public void send(final String[] toAddresses, final String subject,
-            final String text) {
+    public void send(final String[] toAddresses, final String subject, final String text) {
         if (toAddresses == null || toAddresses.length == 0) {
             throw new FessSystemException("TO address is empty.");
         }
@@ -73,8 +72,7 @@ public class MailHelper implements Serializable {
 
             Transport.send(msg);
         } catch (final MessagingException e) {
-            throw new FessSystemException("Failed to send "
-                    + Arrays.toString(toAddresses), e);
+            throw new FessSystemException("Failed to send " + Arrays.toString(toAddresses), e);
         }
     }
 

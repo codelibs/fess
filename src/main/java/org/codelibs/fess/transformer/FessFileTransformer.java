@@ -25,21 +25,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FessFileTransformer extends AbstractFessFileTransformer {
-    private static final Logger logger = LoggerFactory
-            .getLogger(FessFileTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(FessFileTransformer.class);
 
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
-        final ExtractorFactory extractorFactory = ComponentUtil
-                .getExtractorFactory();
+        final ExtractorFactory extractorFactory = ComponentUtil.getExtractorFactory();
         if (extractorFactory == null) {
             throw new FessSystemException("Could not find extractorFactory.");
         }
-        final Extractor extractor = extractorFactory.getExtractor(responseData
-                .getMimeType());
+        final Extractor extractor = extractorFactory.getExtractor(responseData.getMimeType());
         if (logger.isDebugEnabled()) {
-            logger.debug("url=" + responseData.getUrl() + ", extractor="
-                    + extractor);
+            logger.debug("url=" + responseData.getUrl() + ", extractor=" + extractor);
         }
         return extractor;
     }

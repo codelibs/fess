@@ -32,8 +32,7 @@ public class JobLogService extends BsJobLogService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final JobLogCB cb,
-            final JobLogPager jobLogPager) {
+    protected void setupListCondition(final JobLogCB cb, final JobLogPager jobLogPager) {
         super.setupListCondition(cb, jobLogPager);
 
         // setup condition
@@ -45,8 +44,7 @@ public class JobLogService extends BsJobLogService implements Serializable {
     }
 
     @Override
-    protected void setupEntityCondition(final JobLogCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final JobLogCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -70,8 +68,7 @@ public class JobLogService extends BsJobLogService implements Serializable {
     }
 
     public void deleteBefore(final int days) {
-        final LocalDateTime targetTime = ComponentUtil.getSystemHelper()
-                .getCurrentTime().minusDays(days);
+        final LocalDateTime targetTime = ComponentUtil.getSystemHelper().getCurrentTime().minusDays(days);
         jobLogBhv.varyingQueryDelete(cb -> {
             cb.query().setEndTime_LessThan(targetTime);
         }, op -> op.allowNonQueryDelete());

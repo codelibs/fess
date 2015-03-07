@@ -24,8 +24,7 @@ import org.seasar.framework.container.SingletonS2Container;
 public class FessTikaTransformer extends AbstractFessFileTransformer {
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
-        final Extractor extractor = SingletonS2Container
-                .getComponent("tikaExtractor");
+        final Extractor extractor = SingletonS2Container.getComponent("tikaExtractor");
         if (extractor == null) {
             throw new FessSystemException("Could not find tikaExtractor.");
         }

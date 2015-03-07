@@ -127,8 +127,7 @@ public final class ComponentUtil {
         return SingletonS2Container.getComponent(QUERY_RESPONSE_LIST);
     }
 
-    public static DynamicProperties getSolrGroupProperties(
-            final String groupName) {
+    public static DynamicProperties getSolrGroupProperties(final String groupName) {
         return SingletonS2Container.getComponent(groupName + PROPERTIES_SUFFIX);
     }
 

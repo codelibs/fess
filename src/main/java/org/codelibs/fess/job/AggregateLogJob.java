@@ -23,12 +23,10 @@ import org.slf4j.LoggerFactory;
 
 public class AggregateLogJob {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(AggregateLogJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(AggregateLogJob.class);
 
     public String execute() {
-        final SearchLogHelper searchLogHelper = ComponentUtil
-                .getSearchLogHelper();
+        final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 

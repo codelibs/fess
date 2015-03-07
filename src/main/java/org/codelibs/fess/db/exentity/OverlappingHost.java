@@ -32,10 +32,8 @@ public class OverlappingHost extends BsOverlappingHost {
     private static final long serialVersionUID = 1L;
 
     public String convert(final String url) {
-        final String targetStr = getOverlappingName()
-                .replaceAll("\\.", "\\\\.");
-        return url.replaceFirst("://" + targetStr + "$",
-                "://" + getRegularName()).replaceFirst(
-                "://" + targetStr + "([:/])", "://" + getRegularName() + "$1");
+        final String targetStr = getOverlappingName().replaceAll("\\.", "\\\\.");
+        return url.replaceFirst("://" + targetStr + "$", "://" + getRegularName()).replaceFirst("://" + targetStr + "([:/])",
+                "://" + getRegularName() + "$1");
     }
 }

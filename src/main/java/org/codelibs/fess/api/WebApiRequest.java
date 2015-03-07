@@ -22,16 +22,14 @@ import javax.servlet.http.HttpServletRequestWrapper;
 public class WebApiRequest extends HttpServletRequestWrapper {
     protected String servletPath;
 
-    public WebApiRequest(final HttpServletRequest request,
-            final String servletPath) {
+    public WebApiRequest(final HttpServletRequest request, final String servletPath) {
         super(request);
         this.servletPath = servletPath;
     }
 
     @Override
     public String getServletPath() {
-        if (getQueryString() != null
-                && getQueryString().indexOf("SAStruts.method") != -1) {
+        if (getQueryString() != null && getQueryString().indexOf("SAStruts.method") != -1) {
             return super.getServletPath();
         } else {
             return servletPath;

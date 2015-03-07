@@ -27,8 +27,7 @@ public class GroovyExecutor extends JobExecutor {
     @Override
     public Object execute(final String script) {
         final Binding binding = new Binding();
-        binding.setVariable("container",
-                SingletonS2ContainerFactory.getContainer());
+        binding.setVariable("container", SingletonS2ContainerFactory.getContainer());
         binding.setVariable("executor", this);
 
         final GroovyShell shell = new GroovyShell(binding);

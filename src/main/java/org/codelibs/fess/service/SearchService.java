@@ -64,8 +64,7 @@ public class SearchService implements Serializable {
     protected RoleQueryHelper roleQueryHelper;
 
     public PingResponse ping() {
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.QUERY);
+        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.QUERY);
         return new PingResponse(solrGroup.ping());
     }
 
@@ -73,18 +72,15 @@ public class SearchService implements Serializable {
         return getDocument(query, queryHelper.getResponseFields(), null);
     }
 
-    public Map<String, Object> getDocument(final String query,
-            final String[] responseFields, final String[] docValuesFields) {
-        final List<Map<String, Object>> docList = getDocumentList(query, 0, 1,
-                null, null, null, responseFields, docValuesFields);
+    public Map<String, Object> getDocument(final String query, final String[] responseFields, final String[] docValuesFields) {
+        final List<Map<String, Object>> docList = getDocumentList(query, 0, 1, null, null, null, responseFields, docValuesFields);
         if (!docList.isEmpty()) {
             return docList.get(0);
         }
         return null;
     }
 
-    public List<Map<String, Object>> getDocumentListByDocIds(
-            final String[] docIds, final String[] responseFields,
+    public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] responseFields,
             final String[] docValuesFields, final int pageSize) {
         if (docIds == null || docIds.length == 0) {
             return Collections.emptyList();
@@ -97,32 +93,24 @@ public class SearchService implements Serializable {
             }
             buf.append(fieldHelper.docIdField + ":").append(docIds[i]);
         }
-        return getDocumentList(buf.toString(), 0, pageSize, null, null, null,
-                responseFields, docValuesFields);
+        return getDocumentList(buf.toString(), 0, pageSize, null, null, null, responseFields, docValuesFields);
     }
 
-    public List<Map<String, Object>> getDocumentList(final String query,
-            final int start, final int rows, final FacetInfo facetInfo,
-            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
-            final String[] responseFields, final String[] docValuesFields) {
-        return getDocumentList(query, start, rows, facetInfo, geoInfo, mltInfo,
-                responseFields, docValuesFields, true);
+    public List<Map<String, Object>> getDocumentList(final String query, final int start, final int rows, final FacetInfo facetInfo,
+            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo, final String[] responseFields, final String[] docValuesFields) {
+        return getDocumentList(query, start, rows, facetInfo, geoInfo, mltInfo, responseFields, docValuesFields, true);
     }
 
-    public List<Map<String, Object>> getDocumentList(final String query,
-            final int start, final int rows, final FacetInfo facetInfo,
-            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo,
-            final String[] responseFields, final String[] docValuesFields,
+    public List<Map<String, Object>> getDocumentList(final String query, final int start, final int rows, final FacetInfo facetInfo,
+            final GeoInfo geoInfo, final MoreLikeThisInfo mltInfo, final String[] responseFields, final String[] docValuesFields,
             final boolean forUser) {
         if (start > queryHelper.getMaxSearchResultOffset()) {
-            throw new ResultOffsetExceededException(
-                    "The number of result size is exceeded.");
+            throw new ResultOffsetExceededException("The number of result size is exceeded.");
         }
 
         final long startTime = System.currentTimeMillis();
 
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.QUERY);
+        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.QUERY);
 
         QueryResponse queryResponse = null;
         final SolrQuery solrQuery = new SolrQuery();
@@ -137,8 +125,7 @@ public class SearchService implements Serializable {
             solrQuery.setRows(rows);
             solrQuery.set("mm", searchQuery.getMinimumShouldMatch());
             solrQuery.set("defType", searchQuery.getDefType());
-            for (final Map.Entry<String, String[]> entry : queryHelper
-                    .getQueryParamMap().entrySet()) {
+            for (final Map.Entry<String, String[]> entry : queryHelper.getQueryParamMap().entrySet()) {
                 solrQuery.set(entry.getKey(), entry.getValue());
             }
             // filter query
@@ -149,30 +136,21 @@ public class SearchService implements Serializable {
             final SortField[] sortFields = searchQuery.getSortFields();
             if (sortFields.length != 0) {
                 for (final SortField sortField : sortFields) {
-                    solrQuery
-                            .addSort(
-                                    sortField.getField(),
-                                    Constants.DESC.equals(sortField.getOrder()) ? SolrQuery.ORDER.desc
-                                            : SolrQuery.ORDER.asc);
+                    solrQuery.addSort(sortField.getField(), Constants.DESC.equals(sortField.getOrder()) ? SolrQuery.ORDER.desc
+                            : SolrQuery.ORDER.asc);
                 }
             } else if (queryHelper.hasDefaultSortFields()) {
-                for (final SortField sortField : queryHelper
-                        .getDefaultSortFields()) {
-                    solrQuery
-                            .addSort(
-                                    sortField.getField(),
-                                    Constants.DESC.equals(sortField.getOrder()) ? SolrQuery.ORDER.desc
-                                            : SolrQuery.ORDER.asc);
+                for (final SortField sortField : queryHelper.getDefaultSortFields()) {
+                    solrQuery.addSort(sortField.getField(), Constants.DESC.equals(sortField.getOrder()) ? SolrQuery.ORDER.desc
+                            : SolrQuery.ORDER.asc);
                 }
             }
             // highlighting
-            if (queryHelper.getHighlightingFields() != null
-                    && queryHelper.getHighlightingFields().length != 0) {
+            if (queryHelper.getHighlightingFields() != null && queryHelper.getHighlightingFields().length != 0) {
                 for (final String hf : queryHelper.getHighlightingFields()) {
                     solrQuery.addHighlightField(hf);
                 }
-                solrQuery.setHighlightSnippets(queryHelper
-                        .getHighlightSnippetSize());
+                solrQuery.setHighlightSnippets(queryHelper.getHighlightSnippetSize());
             }
             // shards
             if (queryHelper.getShards() != null) {
@@ -181,8 +159,7 @@ public class SearchService implements Serializable {
             // geo
             if (geoInfo != null && geoInfo.isAvailable()) {
                 solrQuery.addFilterQuery(geoInfo.toGeoQueryString());
-                final String additionalGeoQuery = queryHelper
-                        .getAdditionalGeoQuery();
+                final String additionalGeoQuery = queryHelper.getAdditionalGeoQuery();
                 if (StringUtil.isNotBlank(additionalGeoQuery)) {
                     solrQuery.addFilterQuery(additionalGeoQuery);
                 }
@@ -195,20 +172,17 @@ public class SearchService implements Serializable {
                         if (queryHelper.isFacetField(f)) {
                             solrQuery.addFacetField(f);
                         } else {
-                            throw new FessSolrQueryException("EFESS0002",
-                                    new Object[] { f });
+                            throw new FessSolrQueryException("EFESS0002", new Object[] { f });
                         }
                     }
                 }
                 if (facetInfo.query != null) {
                     for (final String fq : facetInfo.query) {
-                        final String facetQuery = queryHelper
-                                .buildFacetQuery(fq);
+                        final String facetQuery = queryHelper.buildFacetQuery(fq);
                         if (StringUtil.isNotBlank(facetQuery)) {
                             solrQuery.addFacetQuery(facetQuery);
                         } else {
-                            throw new FessSolrQueryException("EFESS0003",
-                                    new Object[] { fq, facetQuery });
+                            throw new FessSolrQueryException("EFESS0003", new Object[] { fq, facetQuery });
                         }
                     }
                 }
@@ -216,30 +190,25 @@ public class SearchService implements Serializable {
                     solrQuery.setFacetLimit(Integer.parseInt(facetInfo.limit));
                 }
                 if (facetInfo.minCount != null) {
-                    solrQuery.setFacetMinCount(Integer
-                            .parseInt(facetInfo.minCount));
+                    solrQuery.setFacetMinCount(Integer.parseInt(facetInfo.minCount));
                 }
                 if (facetInfo.missing != null) {
-                    solrQuery.setFacetMissing(Boolean
-                            .parseBoolean(facetInfo.missing));
+                    solrQuery.setFacetMissing(Boolean.parseBoolean(facetInfo.missing));
                 }
                 if (facetInfo.prefix != null) {
                     solrQuery.setFacetPrefix(facetInfo.prefix);
                 }
-                if (facetInfo.sort != null
-                        && queryHelper.isFacetSortValue(facetInfo.sort)) {
+                if (facetInfo.sort != null && queryHelper.isFacetSortValue(facetInfo.sort)) {
                     solrQuery.setFacetSort(facetInfo.sort);
                 }
             }
             // mlt
             if (mltInfo != null) {
-                final String mltField = queryHelper
-                        .getMoreLikeThisField(mltInfo.field);
+                final String mltField = queryHelper.getMoreLikeThisField(mltInfo.field);
                 if (mltField != null) {
                     solrQuery.set("mlt", true);
                     if (mltInfo.count != null) {
-                        solrQuery.set("mlt.count",
-                                Integer.parseInt(mltInfo.count));
+                        solrQuery.set("mlt.count", Integer.parseInt(mltInfo.count));
                     }
                     solrQuery.set("mlt.fl", mltField);
                 }
@@ -248,8 +217,7 @@ public class SearchService implements Serializable {
             if (queryHelper.getTimeAllowed() >= 0) {
                 solrQuery.setTimeAllowed(queryHelper.getTimeAllowed());
             }
-            final Set<Entry<String, String[]>> paramSet = queryHelper
-                    .getRequestParameterSet();
+            final Set<Entry<String, String[]>> paramSet = queryHelper.getRequestParameterSet();
             if (!paramSet.isEmpty()) {
                 for (final Map.Entry<String, String[]> entry : paramSet) {
                     solrQuery.set(entry.getKey(), entry.getValue());
@@ -266,8 +234,7 @@ public class SearchService implements Serializable {
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
-        final QueryResponseList queryResponseList = ComponentUtil
-                .getQueryResponseList();
+        final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
         queryResponseList.init(queryResponse, rows);
         queryResponseList.setSearchQuery(q);
         queryResponseList.setSolrQuery(solrQuery.toString());
@@ -275,14 +242,12 @@ public class SearchService implements Serializable {
         return queryResponseList;
     }
 
-    public FieldAnalysisResponse getFieldAnalysisResponse(
-            final String[] fieldNames, final String fieldValue) {
+    public FieldAnalysisResponse getFieldAnalysisResponse(final String[] fieldNames, final String fieldValue) {
         final FieldAnalysisRequest request = new FieldAnalysisRequest();
 
         for (final String fieldName : fieldNames) {
             if (!queryHelper.isAnalysisFieldName(fieldName)) {
-                throw new FessSolrQueryException("EFESS0001",
-                        new Object[] { fieldName });
+                throw new FessSolrQueryException("EFESS0001", new Object[] { fieldName });
             }
             request.addFieldName(fieldName);
         }
@@ -290,15 +255,13 @@ public class SearchService implements Serializable {
 
         final long startTime = System.currentTimeMillis();
 
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.REQUEST);
+        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.REQUEST);
 
         final NamedList<Object> response = solrGroup.request(request);
 
         final long execTime = System.currentTimeMillis() - startTime;
 
-        final FieldAnalysisResponse fieldAnalysisResponse = new FieldAnalysisResponse(
-                response);
+        final FieldAnalysisResponse fieldAnalysisResponse = new FieldAnalysisResponse(response);
         fieldAnalysisResponse.setExecTime(execTime);
         return fieldAnalysisResponse;
     }

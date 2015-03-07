@@ -84,20 +84,17 @@ public abstract class SearchLogHelper {
     }
 
     public int getClickCount(final String url) {
-        final ClickLogBhv clickLogBhv = SingletonS2Container
-                .getComponent(ClickLogBhv.class);
+        final ClickLogBhv clickLogBhv = SingletonS2Container.getComponent(ClickLogBhv.class);
         return clickLogBhv.selectCount(cb -> {
             cb.query().setUrl_Equal(url);
         });
     }
 
     public long getFavoriteCount(final String url) {
-        final FavoriteLogBhv favoriteLogBhv = SingletonS2Container
-                .getComponent(FavoriteLogBhv.class);
+        final FavoriteLogBhv favoriteLogBhv = SingletonS2Container.getComponent(FavoriteLogBhv.class);
         final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
         pmb.setUrl(url);
-        final ListResultBean<FavoriteUrlCount> list = favoriteLogBhv
-                .outsideSql().selectList(pmb);
+        final ListResultBean<FavoriteUrlCount> list = favoriteLogBhv.outsideSql().selectList(pmb);
 
         long count = 0;
         if (!list.isEmpty()) {

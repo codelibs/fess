@@ -25,14 +25,12 @@ import org.codelibs.fess.db.cbean.BoostDocumentRuleCB;
 import org.codelibs.fess.db.exentity.BoostDocumentRule;
 import org.codelibs.fess.pager.BoostDocumentRulePager;
 
-public class BoostDocumentRuleService extends BsBoostDocumentRuleService
-        implements Serializable {
+public class BoostDocumentRuleService extends BsBoostDocumentRuleService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final BoostDocumentRuleCB cb,
-            final BoostDocumentRulePager boostDocumentRulePager) {
+    protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocumentRulePager boostDocumentRulePager) {
         super.setupListCondition(cb, boostDocumentRulePager);
 
         // setup condition
@@ -44,8 +42,7 @@ public class BoostDocumentRuleService extends BsBoostDocumentRuleService
     }
 
     @Override
-    protected void setupEntityCondition(final BoostDocumentRuleCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final BoostDocumentRuleCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -61,8 +58,7 @@ public class BoostDocumentRuleService extends BsBoostDocumentRuleService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final BoostDocumentRule boostDocumentRule) {
+    protected void setupDeleteCondition(final BoostDocumentRule boostDocumentRule) {
         super.setupDeleteCondition(boostDocumentRule);
 
         // setup condition

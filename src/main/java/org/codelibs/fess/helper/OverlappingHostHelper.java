@@ -36,14 +36,11 @@ public class OverlappingHostHelper implements Serializable {
         if (overlappingHostList == null) {
             overlappingHostList = new ArrayList<OverlappingHost>();
         }
-        final OverlappingHostService overlappingHostService = SingletonS2Container
-                .getComponent(OverlappingHostService.class);
-        overlappingHostList.addAll(overlappingHostService
-                .getOverlappingHostList());
+        final OverlappingHostService overlappingHostService = SingletonS2Container.getComponent(OverlappingHostService.class);
+        overlappingHostList.addAll(overlappingHostService.getOverlappingHostList());
     }
 
-    public void setOverlappingHostList(
-            final List<OverlappingHost> overlappingHostList) {
+    public void setOverlappingHostList(final List<OverlappingHost> overlappingHostList) {
         this.overlappingHostList = overlappingHostList;
     }
 

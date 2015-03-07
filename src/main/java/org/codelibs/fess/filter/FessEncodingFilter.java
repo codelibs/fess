@@ -73,9 +73,8 @@ public class FessEncodingFilter extends EncodingFilter {
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final String servletPath = req.getServletPath();
         for (final Map.Entry<String, String> entry : encodingMap.entrySet()) {
@@ -84,8 +83,7 @@ public class FessEncodingFilter extends EncodingFilter {
                 req.setCharacterEncoding(entry.getValue());
                 final StringBuilder locationBuf = new StringBuilder(1000);
                 final String contextPath = servletContext.getContextPath();
-                if (StringUtil.isNotBlank(contextPath)
-                        && !"/".equals(contextPath)) {
+                if (StringUtil.isNotBlank(contextPath) && !"/".equals(contextPath)) {
                     locationBuf.append(contextPath);
                 }
                 locationBuf.append('/');
@@ -93,10 +91,8 @@ public class FessEncodingFilter extends EncodingFilter {
                 boolean append = false;
                 final Map<String, String[]> parameterMap = new HashMap<>();
                 parameterMap.putAll(req.getParameterMap());
-                parameterMap.putAll(getParameterMapFromQueryString(req,
-                        entry.getValue()));
-                for (final Map.Entry<String, String[]> paramEntry : parameterMap
-                        .entrySet()) {
+                parameterMap.putAll(getParameterMapFromQueryString(req, entry.getValue()));
+                for (final Map.Entry<String, String[]> paramEntry : parameterMap.entrySet()) {
                     final String[] values = paramEntry.getValue();
                     if (values == null) {
                         continue;
@@ -124,9 +120,7 @@ public class FessEncodingFilter extends EncodingFilter {
         super.doFilter(request, response, chain);
     }
 
-    protected Map<String, String[]> getParameterMapFromQueryString(
-            final HttpServletRequest request, final String enc)
-            throws IOException {
+    protected Map<String, String[]> getParameterMapFromQueryString(final HttpServletRequest request, final String enc) throws IOException {
         final String queryString = request.getQueryString();
         if (StringUtil.isNotBlank(queryString)) {
             return parseQueryString(queryString, enc);
@@ -135,16 +129,14 @@ public class FessEncodingFilter extends EncodingFilter {
         }
     }
 
-    protected Map<String, String[]> parseQueryString(final String queryString,
-            final String enc) throws IOException {
+    protected Map<String, String[]> parseQueryString(final String queryString, final String enc) throws IOException {
         final Map<String, List<String>> paramListMap = new HashMap<>();
         final String[] pairs = queryString.split("&");
         try {
             for (final String pair : pairs) {
                 final int pos = pair.indexOf('=');
                 if (pos >= 0) {
-                    final String key = urlCodec.decode(pair.substring(0, pos),
-                            enc);
+                    final String key = urlCodec.decode(pair.substring(0, pos), enc);
                     List<String> list = paramListMap.get(key);
                     if (list == null) {
                         list = new ArrayList<>();
@@ -169,10 +161,8 @@ public class FessEncodingFilter extends EncodingFilter {
             throw new IOException(e);
         }
 
-        final Map<String, String[]> paramMap = new HashMap<>(
-                paramListMap.size());
-        for (final Map.Entry<String, List<String>> entry : paramListMap
-                .entrySet()) {
+        final Map<String, String[]> paramMap = new HashMap<>(paramListMap.size());
+        for (final Map.Entry<String, List<String>> entry : paramListMap.entrySet()) {
             final List<String> list = entry.getValue();
             paramMap.put(entry.getKey(), list.toArray(new String[list.size()]));
         }

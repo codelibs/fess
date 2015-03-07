@@ -66,10 +66,9 @@ public class BsKeyMatchAction implements Serializable {
         keyMatchItems = keyMatchService.getKeyMatchList(keyMatchPager);
 
         // restore from pager
-        Beans.copy(keyMatchPager, keyMatchForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(keyMatchPager, keyMatchForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -88,8 +87,7 @@ public class BsKeyMatchAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(keyMatchForm.pageNumber)) {
             try {
-                keyMatchPager.setCurrentPageNumber(Integer
-                        .parseInt(keyMatchForm.pageNumber));
+                keyMatchPager.setCurrentPageNumber(Integer.parseInt(keyMatchForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + keyMatchForm.pageNumber, e);
@@ -102,10 +100,9 @@ public class BsKeyMatchAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(keyMatchForm.searchParams, keyMatchPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(keyMatchForm.searchParams, keyMatchPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -131,9 +128,8 @@ public class BsKeyMatchAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (keyMatchForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            keyMatchForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    keyMatchForm.crudMode });
         }
 
         loadKeyMatch();
@@ -155,9 +151,7 @@ public class BsKeyMatchAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (keyMatchForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            keyMatchForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, keyMatchForm.crudMode });
         }
 
         loadKeyMatch();
@@ -192,8 +186,7 @@ public class BsKeyMatchAction implements Serializable {
     public String deletepage() {
         if (keyMatchForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            keyMatchForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, keyMatchForm.crudMode });
         }
 
         loadKeyMatch();
@@ -228,8 +221,7 @@ public class BsKeyMatchAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -250,8 +242,7 @@ public class BsKeyMatchAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -260,19 +251,16 @@ public class BsKeyMatchAction implements Serializable {
     public String delete() {
         if (keyMatchForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            keyMatchForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, keyMatchForm.crudMode });
         }
 
         try {
-            final KeyMatch keyMatch = keyMatchService
-                    .getKeyMatch(createKeyMap());
+            final KeyMatch keyMatch = keyMatchService.getKeyMatch(createKeyMap());
             if (keyMatch == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { keyMatchForm.id });
+                new Object[] { keyMatchForm.id });
 
             }
 
@@ -288,8 +276,7 @@ public class BsKeyMatchAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
@@ -298,10 +285,9 @@ public class BsKeyMatchAction implements Serializable {
         final KeyMatch keyMatch = keyMatchService.getKeyMatch(createKeyMap());
         if (keyMatch == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { keyMatchForm.id });
+            new Object[] { keyMatchForm.id });
 
         }
 
@@ -316,10 +302,9 @@ public class BsKeyMatchAction implements Serializable {
             keyMatch = keyMatchService.getKeyMatch(createKeyMap());
             if (keyMatch == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { keyMatchForm.id });
+                new Object[] { keyMatchForm.id });
 
             }
         } else {

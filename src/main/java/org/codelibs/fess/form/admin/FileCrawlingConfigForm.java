@@ -23,8 +23,7 @@ import java.util.Date;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.form.admin.BsFileCrawlingConfigForm;
 
-public class FileCrawlingConfigForm extends BsFileCrawlingConfigForm implements
-        Serializable {
+public class FileCrawlingConfigForm extends BsFileCrawlingConfigForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,8 +39,7 @@ public class FileCrawlingConfigForm extends BsFileCrawlingConfigForm implements
         intervalTime = Integer.toString(Constants.DEFAULT_INTERVAL_TIME_FOR_FS);
         // Temporary data
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
     }
 }

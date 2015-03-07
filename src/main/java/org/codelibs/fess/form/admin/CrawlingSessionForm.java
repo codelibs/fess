@@ -20,8 +20,7 @@ import java.io.Serializable;
 
 import org.codelibs.fess.crud.form.admin.BsCrawlingSessionForm;
 
-public class CrawlingSessionForm extends BsCrawlingSessionForm implements
-        Serializable {
+public class CrawlingSessionForm extends BsCrawlingSessionForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

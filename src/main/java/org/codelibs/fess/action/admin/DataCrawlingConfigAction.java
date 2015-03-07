@@ -48,8 +48,7 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(DataCrawlingConfigAction.class);
+    private static final Log log = LogFactory.getLog(DataCrawlingConfigAction.class);
 
     @Resource
     protected RoleTypeService roleTypeService;
@@ -73,24 +72,17 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
     @Override
     protected void loadDataCrawlingConfig() {
 
-        final DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigService
-                .getDataCrawlingConfig(createKeyMap());
+        final DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigService.getDataCrawlingConfig(createKeyMap());
         if (dataCrawlingConfig == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { dataCrawlingConfigForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { dataCrawlingConfigForm.id });
         }
 
-        FessBeans.copy(dataCrawlingConfig, dataCrawlingConfigForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(dataCrawlingConfig, dataCrawlingConfigForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
 
         // normalize boost
-        if (dataCrawlingConfigForm.boost != null
-                && dataCrawlingConfigForm.boost.indexOf('.') > 0) {
-            dataCrawlingConfigForm.boost = dataCrawlingConfigForm.boost
-                    .substring(0, dataCrawlingConfigForm.boost.indexOf('.'));
+        if (dataCrawlingConfigForm.boost != null && dataCrawlingConfigForm.boost.indexOf('.') > 0) {
+            dataCrawlingConfigForm.boost = dataCrawlingConfigForm.boost.substring(0, dataCrawlingConfigForm.boost.indexOf('.'));
         }
     }
 
@@ -100,13 +92,10 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (dataCrawlingConfigForm.crudMode == CommonConstants.EDIT_MODE) {
-            dataCrawlingConfig = dataCrawlingConfigService
-                    .getDataCrawlingConfig(createKeyMap());
+            dataCrawlingConfig = dataCrawlingConfigService.getDataCrawlingConfig(createKeyMap());
             if (dataCrawlingConfig == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { dataCrawlingConfigForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { dataCrawlingConfigForm.id });
             }
         } else {
             dataCrawlingConfig = new DataCrawlingConfig();
@@ -115,8 +104,7 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
         }
         dataCrawlingConfig.setUpdatedBy(username);
         dataCrawlingConfig.setUpdatedTime(currentTime);
-        FessBeans.copy(dataCrawlingConfigForm, dataCrawlingConfig)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(dataCrawlingConfigForm, dataCrawlingConfig).excludesCommonColumns().execute();
 
         return dataCrawlingConfig;
     }
@@ -125,23 +113,18 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (dataCrawlingConfigForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            dataCrawlingConfigForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    dataCrawlingConfigForm.crudMode });
         }
 
         try {
-            final DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigService
-                    .getDataCrawlingConfig(createKeyMap());
+            final DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigService.getDataCrawlingConfig(createKeyMap());
             if (dataCrawlingConfig == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { dataCrawlingConfigForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { dataCrawlingConfigForm.id });
             }
 
-            failureUrlService
-                    .deleteByConfigId(dataCrawlingConfig.getConfigId());
+            failureUrlService.deleteByConfigId(dataCrawlingConfig.getConfigId());
 
             //dataCrawlingConfigService.delete(dataCrawlingConfig);
             final String username = systemHelper.getUsername();
@@ -157,12 +140,10 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
@@ -175,8 +156,7 @@ public class DataCrawlingConfigAction extends BsDataCrawlingConfigAction {
     }
 
     public List<Map<String, String>> getHandlerNameItems() {
-        final List<String> dataStoreNameList = dataStoreFactory
-                .getDataStoreNameList();
+        final List<String> dataStoreNameList = dataStoreFactory.getDataStoreNameList();
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
         for (final String name : dataStoreNameList) {
             final Map<String, String> map = new HashMap<String, String>();

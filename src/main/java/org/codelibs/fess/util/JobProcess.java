@@ -25,8 +25,7 @@ public class JobProcess {
 
     public JobProcess(final Process process) {
         this.process = process;
-        inputStreamThread = new InputStreamThread(process.getInputStream(),
-                Constants.UTF_8);
+        inputStreamThread = new InputStreamThread(process.getInputStream(), Constants.UTF_8);
     }
 
     public Process getProcess() {

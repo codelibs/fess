@@ -24,21 +24,18 @@ import java.util.Map;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 
-public class FieldAnalysisResponse extends
-        LinkedHashMap<String, Map<String, List<Map<String, Object>>>> {
+public class FieldAnalysisResponse extends LinkedHashMap<String, Map<String, List<Map<String, Object>>>> {
 
     private static final long serialVersionUID = 1L;
 
     protected long execTime;
 
     public FieldAnalysisResponse(final NamedList<Object> response) {
-        final NamedList<?> fnList = getNamedList(
-                getNamedList(response, "analysis"), "field_names");
+        final NamedList<?> fnList = getNamedList(getNamedList(response, "analysis"), "field_names");
         if (fnList != null) {
             for (int i = 0; i < fnList.size(); i++) {
                 final String fieldName = fnList.getName(i);
-                final NamedList<?> analysisList = getNamedList(
-                        fnList.getVal(i), "index");
+                final NamedList<?> analysisList = getNamedList(fnList.getVal(i), "index");
                 final Map<String, List<Map<String, Object>>> analysisMap = new LinkedHashMap<String, List<Map<String, Object>>>();
                 put(fieldName, analysisMap);
 
@@ -56,17 +53,14 @@ public class FieldAnalysisResponse extends
         }
     }
 
-    private List<Map<String, Object>> getDataMap(
-            final List<Object> analysisDataList) {
+    private List<Map<String, Object>> getDataMap(final List<Object> analysisDataList) {
         final List<Map<String, Object>> dataMapList = new ArrayList<Map<String, Object>>();
         for (final Object dataList : analysisDataList) {
             if (dataList instanceof SimpleOrderedMap<?>) {
                 final Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
                 for (int k = 0; k < ((SimpleOrderedMap<?>) dataList).size(); k++) {
-                    final String dataName = ((SimpleOrderedMap<?>) dataList)
-                            .getName(k);
-                    final Object dataObj = ((SimpleOrderedMap<?>) dataList)
-                            .getVal(k);
+                    final String dataName = ((SimpleOrderedMap<?>) dataList).getName(k);
+                    final Object dataObj = ((SimpleOrderedMap<?>) dataList).getVal(k);
                     dataMap.put(dataName, dataObj);
                 }
                 dataMapList.add(dataMap);

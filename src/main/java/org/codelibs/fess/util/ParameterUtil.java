@@ -48,15 +48,12 @@ public class ParameterUtil {
                 if (StringUtil.isNotBlank(line)) {
                     final int pos = line.indexOf('=');
                     if (pos == 0) {
-                        throw new FessSystemException(
-                                "Invalid parameter. The key is null.");
+                        throw new FessSystemException("Invalid parameter. The key is null.");
                     } else if (pos > 0) {
                         if (pos < line.length()) {
-                            paramMap.put(line.substring(0, pos).trim(), line
-                                    .substring(pos + 1).trim());
+                            paramMap.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
                         } else {
-                            paramMap.put(line.substring(0, pos).trim(),
-                                    StringUtil.EMPTY);
+                            paramMap.put(line.substring(0, pos).trim(), StringUtil.EMPTY);
                         }
                     } else {
                         paramMap.put(line.trim(), StringUtil.EMPTY);
@@ -67,16 +64,14 @@ public class ParameterUtil {
         return paramMap;
     }
 
-    public static void loadConfigParams(final Map<String, Object> paramMap,
-            final String configParam) {
+    public static void loadConfigParams(final Map<String, Object> paramMap, final String configParam) {
         final Map<String, String> map = ParameterUtil.parse(configParam);
         if (!map.isEmpty()) {
             paramMap.putAll(map);
         }
     }
 
-    public static Map<ConfigName, Map<String, String>> createConfigParameterMap(
-            final String configParameters) {
+    public static Map<ConfigName, Map<String, String>> createConfigParameterMap(final String configParameters) {
         final Map<ConfigName, Map<String, String>> map = new HashMap<>();
         final Map<String, String> clientConfigMap = new HashMap<>();
         final Map<String, String> xpathConfigMap = new HashMap<>();
@@ -90,27 +85,20 @@ public class ParameterUtil {
         map.put(ConfigName.VALUE, valueConfigMap);
         map.put(ConfigName.SCRIPT, scriptConfigMap);
         map.put(ConfigName.FIELD, fieldConfigMap);
-        for (final Map.Entry<String, String> entry : ParameterUtil.parse(
-                configParameters).entrySet()) {
+        for (final Map.Entry<String, String> entry : ParameterUtil.parse(configParameters).entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith(CLIENT_PREFIX)) {
-                clientConfigMap.put(key.substring(CLIENT_PREFIX.length()),
-                        entry.getValue());
+                clientConfigMap.put(key.substring(CLIENT_PREFIX.length()), entry.getValue());
             } else if (key.startsWith(XPATH_PREFIX)) {
-                xpathConfigMap.put(key.substring(XPATH_PREFIX.length()),
-                        entry.getValue());
+                xpathConfigMap.put(key.substring(XPATH_PREFIX.length()), entry.getValue());
             } else if (key.startsWith(META_PREFIX)) {
-                metaConfigMap.put(key.substring(META_PREFIX.length()),
-                        entry.getValue());
+                metaConfigMap.put(key.substring(META_PREFIX.length()), entry.getValue());
             } else if (key.startsWith(VALUE_PREFIX)) {
-                valueConfigMap.put(key.substring(VALUE_PREFIX.length()),
-                        entry.getValue());
+                valueConfigMap.put(key.substring(VALUE_PREFIX.length()), entry.getValue());
             } else if (key.startsWith(SCRIPT_PREFIX)) {
-                scriptConfigMap.put(key.substring(SCRIPT_PREFIX.length()),
-                        entry.getValue());
+                scriptConfigMap.put(key.substring(SCRIPT_PREFIX.length()), entry.getValue());
             } else if (key.startsWith(FIELD_PREFIX)) {
-                fieldConfigMap.put(key.substring(FIELD_PREFIX.length()),
-                        entry.getValue());
+                fieldConfigMap.put(key.substring(FIELD_PREFIX.length()), entry.getValue());
             }
         }
 

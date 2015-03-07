@@ -39,19 +39,15 @@ public abstract class BsScheduledJobService {
         super();
     }
 
-    public List<ScheduledJob> getScheduledJobList(
-            final ScheduledJobPager scheduledJobPager) {
+    public List<ScheduledJob> getScheduledJobList(final ScheduledJobPager scheduledJobPager) {
 
-        final PagingResultBean<ScheduledJob> scheduledJobList = scheduledJobBhv
-                .selectPage(cb -> {
-                    cb.paging(scheduledJobPager.getPageSize(),
-                            scheduledJobPager.getCurrentPageNumber());
-                    setupListCondition(cb, scheduledJobPager);
-                });
+        final PagingResultBean<ScheduledJob> scheduledJobList = scheduledJobBhv.selectPage(cb -> {
+            cb.paging(scheduledJobPager.getPageSize(), scheduledJobPager.getCurrentPageNumber());
+            setupListCondition(cb, scheduledJobPager);
+        });
 
         // update pager
-        Beans.copy(scheduledJobList, scheduledJobPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(scheduledJobList, scheduledJobPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         scheduledJobPager.setPageNumberList(scheduledJobList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -72,24 +68,21 @@ public abstract class BsScheduledJobService {
         return scheduledJob;
     }
 
-    public void store(final ScheduledJob scheduledJob)
-            throws CrudMessageException {
+    public void store(final ScheduledJob scheduledJob) throws CrudMessageException {
         setupStoreCondition(scheduledJob);
 
         scheduledJobBhv.insertOrUpdate(scheduledJob);
 
     }
 
-    public void delete(final ScheduledJob scheduledJob)
-            throws CrudMessageException {
+    public void delete(final ScheduledJob scheduledJob) throws CrudMessageException {
         setupDeleteCondition(scheduledJob);
 
         scheduledJobBhv.delete(scheduledJob);
 
     }
 
-    protected void setupListCondition(final ScheduledJobCB cb,
-            final ScheduledJobPager scheduledJobPager) {
+    protected void setupListCondition(final ScheduledJobCB cb, final ScheduledJobPager scheduledJobPager) {
 
         if (scheduledJobPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(scheduledJobPager.id));
@@ -97,8 +90,7 @@ public abstract class BsScheduledJobService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final ScheduledJobCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final ScheduledJobCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final ScheduledJob scheduledJob) {

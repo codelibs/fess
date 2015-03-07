@@ -207,21 +207,16 @@ public class Crawler implements Serializable {
 
         int exitCode;
         try {
-            final ServletContext servletContext = new MockServletContextImpl(
-                    "/fess");
-            final HttpServletRequest request = new MockHttpServletRequestImpl(
-                    servletContext, "/crawler");
-            final HttpServletResponse response = new MockHttpServletResponseImpl(
-                    request);
+            final ServletContext servletContext = new MockServletContextImpl("/fess");
+            final HttpServletRequest request = new MockHttpServletRequestImpl(servletContext, "/crawler");
+            final HttpServletResponse response = new MockHttpServletResponseImpl(request);
             final SingletonS2ContainerInitializer initializer = new SingletonS2ContainerInitializer();
             initializer.setConfigPath("app.dicon");
             initializer.setApplication(servletContext);
             initializer.initialize();
 
-            final S2Container container = SingletonS2ContainerFactory
-                    .getContainer();
-            final ExternalContext externalContext = container
-                    .getExternalContext();
+            final S2Container container = SingletonS2ContainerFactory.getContainer();
+            final ExternalContext externalContext = container.getExternalContext();
             externalContext.setRequest(request);
             externalContext.setResponse(response);
 
@@ -250,8 +245,7 @@ public class Crawler implements Serializable {
     }
 
     private static int process(final Options options) {
-        final Crawler crawler = SingletonS2Container
-                .getComponent(Crawler.class);
+        final Crawler crawler = SingletonS2Container.getComponent(Crawler.class);
 
         final DatabaseHelper databaseHelper = ComponentUtil.getDatabaseHelper();
         databaseHelper.optimize();
@@ -262,20 +256,16 @@ public class Crawler implements Serializable {
             options.sessionId = sdf.format(new Date());
         }
 
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                .getCrawlingSessionHelper();
-        final DynamicProperties crawlerProperties = ComponentUtil
-                .getCrawlerProperties();
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
 
         if (StringUtil.isNotBlank(options.propertiesPath)) {
             crawlerProperties.reload(options.propertiesPath);
         } else {
             try {
-                final File propFile = File.createTempFile("crawler_",
-                        ".properties");
+                final File propFile = File.createTempFile("crawler_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
-                    logger.debug("Deleted a temp file: "
-                            + propFile.getAbsolutePath());
+                    logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
                 crawlerProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit(); // NOSONAR
@@ -290,16 +280,13 @@ public class Crawler implements Serializable {
             if (StringUtil.isNotBlank(options.expires)) {
                 dayForCleanupStr = options.expires;
             } else {
-                dayForCleanupStr = crawlerProperties.getProperty(
-                        Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
+                dayForCleanupStr = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
             }
             int dayForCleanup = -1;
             try {
                 dayForCleanup = Integer.parseInt(dayForCleanupStr);
-            } catch (final NumberFormatException e) {
-            }
-            crawlingSessionHelper.updateParams(options.sessionId, options.name,
-                    dayForCleanup);
+            } catch (final NumberFormatException e) {}
+            crawlingSessionHelper.updateParams(options.sessionId, options.name, dayForCleanup);
         } catch (final Exception e) {
             logger.warn("Failed to store crawling information.", e);
         }
@@ -314,8 +301,7 @@ public class Crawler implements Serializable {
             }
             databaseHelper.optimize();
 
-            final Map<String, String> infoMap = crawlingSessionHelper
-                    .getInfoMap(options.sessionId);
+            final Map<String, String> infoMap = crawlingSessionHelper.getInfoMap(options.sessionId);
 
             final StringBuilder buf = new StringBuilder(500);
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
@@ -339,33 +325,28 @@ public class Crawler implements Serializable {
     }
 
     public void sendMail(final Map<String, String> infoMap) {
-        final String toStrs = (String) crawlerProperties
-                .get(Constants.NOTIFICATION_TO_PROPERTY);
+        final String toStrs = (String) crawlerProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
         if (StringUtil.isNotBlank(toStrs)) {
             final String[] toAddresses = toStrs.split(",");
             final Map<String, Object> dataMap = new HashMap<String, Object>();
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
-                dataMap.put(StringUtil.decapitalize(entry.getKey()),
-                        entry.getValue());
+                dataMap.put(StringUtil.decapitalize(entry.getKey()), entry.getValue());
             }
 
             if (Constants.T.equals(infoMap.get(Constants.CRAWLER_STATUS))) {
                 dataMap.put("success", true);
             }
             try {
-                dataMap.put("hostname", InetAddress.getLocalHost()
-                        .getHostAddress());
+                dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
             } catch (final UnknownHostException e) {
                 // ignore
             }
 
-            final FileTemplateLoader loader = new FileTemplateLoader(new File(
-                    ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
+            final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
             final Handlebars handlebars = new Handlebars(loader);
 
             try {
-                final Template template = handlebars
-                        .compile(MAIL_TEMPLATE_NAME);
+                final Template template = handlebars.compile(MAIL_TEMPLATE_NAME);
                 final Context hbsContext = Context.newContext(dataMap);
                 final String body = template.apply(hbsContext);
 
@@ -381,54 +362,45 @@ public class Crawler implements Serializable {
             logger.info("Starting Crawler..");
         }
 
-        final PathMappingHelper pathMappingHelper = ComponentUtil
-                .getPathMappingHelper();
+        final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
 
         final long totalTime = System.currentTimeMillis();
 
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                .getCrawlingSessionHelper();
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         boolean completed = false;
         int exitCode = Constants.EXIT_OK;
         try {
-            writeTimeToSessionInfo(crawlingSessionHelper,
-                    Constants.CRAWLER_START_TIME);
+            writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_START_TIME);
 
-            final SolrGroup updateSolrGroup = solrGroupManager
-                    .getSolrGroup(QueryType.ADD);
+            final SolrGroup updateSolrGroup = solrGroupManager.getSolrGroup(QueryType.ADD);
             if (!updateSolrGroup.isActive(QueryType.ADD)) {
-                throw new FessSystemException("SolrGroup "
-                        + updateSolrGroup.getGroupName() + " is not available.");
+                throw new FessSystemException("SolrGroup " + updateSolrGroup.getGroupName() + " is not available.");
             }
 
             // setup path mapping
             final List<CDef.ProcessType> ptList = new ArrayList<CDef.ProcessType>();
             ptList.add(CDef.ProcessType.Crawling);
             ptList.add(CDef.ProcessType.Both);
-            pathMappingHelper.setPathMappingList(options.sessionId,
-                    pathMappingService.getPathMappingList(ptList));
+            pathMappingHelper.setPathMappingList(options.sessionId, pathMappingService.getPathMappingList(ptList));
 
             // overlapping host
             try {
-                final OverlappingHostHelper overlappingHostHelper = ComponentUtil
-                        .getOverlappingHostHelper();
+                final OverlappingHostHelper overlappingHostHelper = ComponentUtil.getOverlappingHostHelper();
                 overlappingHostHelper.init();
             } catch (final Exception e) {
                 logger.warn("Could not initialize overlappingHostHelper.", e);
             }
 
             // delete expired sessions
-            crawlingSessionService.deleteSessionIdsBefore(options.sessionId,
-                    options.name, ComponentUtil.getSystemHelper()
-                            .getCurrentTime());
+            crawlingSessionService
+                    .deleteSessionIdsBefore(options.sessionId, options.name, ComponentUtil.getSystemHelper().getCurrentTime());
 
             final List<Long> webConfigIdList = options.getWebConfigIdList();
             final List<Long> fileConfigIdList = options.getFileConfigIdList();
             final List<Long> dataConfigIdList = options.getDataConfigIdList();
-            final boolean runAll = webConfigIdList == null
-                    && fileConfigIdList == null && dataConfigIdList == null;
+            final boolean runAll = webConfigIdList == null && fileConfigIdList == null && dataConfigIdList == null;
 
             Thread webFsCrawlerThread = null;
             Thread dataCrawlerThread = null;
@@ -438,13 +410,9 @@ public class Crawler implements Serializable {
                     @Override
                     public void run() {
                         // crawl web
-                        writeTimeToSessionInfo(crawlingSessionHelper,
-                                Constants.WEB_FS_CRAWLER_START_TIME);
-                        webFsIndexHelper.crawl(options.sessionId,
-                                webConfigIdList, fileConfigIdList,
-                                updateSolrGroup);
-                        writeTimeToSessionInfo(crawlingSessionHelper,
-                                Constants.WEB_FS_CRAWLER_END_TIME);
+                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_START_TIME);
+                        webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList, updateSolrGroup);
+                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_END_TIME);
                     }
                 }, WEB_FS_CRAWLING_PROCESS);
                 webFsCrawlerThread.start();
@@ -455,12 +423,9 @@ public class Crawler implements Serializable {
                     @Override
                     public void run() {
                         // crawl data system
-                        writeTimeToSessionInfo(crawlingSessionHelper,
-                                Constants.DATA_CRAWLER_START_TIME);
-                        dataIndexHelper.crawl(options.sessionId,
-                                dataConfigIdList, updateSolrGroup);
-                        writeTimeToSessionInfo(crawlingSessionHelper,
-                                Constants.DATA_CRAWLER_END_TIME);
+                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_START_TIME);
+                        dataIndexHelper.crawl(options.sessionId, dataConfigIdList, updateSolrGroup);
+                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_END_TIME);
                     }
                 }, DATA_CRAWLING_PROCESS);
                 dataCrawlerThread.start();
@@ -471,13 +436,11 @@ public class Crawler implements Serializable {
 
             // clean up
             try {
-                updateSolrGroup.deleteByQuery(fieldHelper.expiresField
-                        + ":[* TO " + FessFunctions.formatDate(new Date())
+                updateSolrGroup.deleteByQuery(fieldHelper.expiresField + ":[* TO " + FessFunctions.formatDate(new Date())
                         + "] NOT segment:" + options.sessionId);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Could not delete expired sessions in "
-                            + updateSolrGroup.getGroupName(), e);
+                    logger.warn("Could not delete expired sessions in " + updateSolrGroup.getGroupName(), e);
                 }
                 exitCode = Constants.EXIT_FAIL;
             }
@@ -492,8 +455,7 @@ public class Crawler implements Serializable {
                 }
             }
 
-            final String serverRotationStr = crawlerProperties.getProperty(
-                    Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
+            final String serverRotationStr = crawlerProperties.getProperty(Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
             if (Constants.TRUE.equalsIgnoreCase(serverRotationStr)) {
                 // apply
                 solrGroupManager.applyNewSolrGroup();
@@ -510,28 +472,21 @@ public class Crawler implements Serializable {
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
-            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_STATUS,
-                    completed ? Constants.T : Constants.F);
-            writeTimeToSessionInfo(crawlingSessionHelper,
-                    Constants.CRAWLER_END_TIME);
-            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME,
-                    Long.toString(System.currentTimeMillis() - totalTime));
+            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_STATUS, completed ? Constants.T : Constants.F);
+            writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_END_TIME);
+            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
 
         }
     }
 
-    protected void optimize(final CrawlingSessionHelper crawlingSessionHelper,
-            final SolrGroup solrGroup) {
-        writeTimeToSessionInfo(crawlingSessionHelper,
-                Constants.OPTIMIZE_START_TIME);
+    protected void optimize(final CrawlingSessionHelper crawlingSessionHelper, final SolrGroup solrGroup) {
+        writeTimeToSessionInfo(crawlingSessionHelper, Constants.OPTIMIZE_START_TIME);
         long startTime = System.currentTimeMillis();
         solrGroup.optimize();
         startTime = System.currentTimeMillis() - startTime;
-        writeTimeToSessionInfo(crawlingSessionHelper,
-                Constants.OPTIMIZE_END_TIME);
+        writeTimeToSessionInfo(crawlingSessionHelper, Constants.OPTIMIZE_END_TIME);
         if (crawlingSessionHelper != null) {
-            crawlingSessionHelper.putToInfoMap(Constants.OPTIMIZE_EXEC_TIME,
-                    Long.toString(startTime));
+            crawlingSessionHelper.putToInfoMap(Constants.OPTIMIZE_EXEC_TIME, Long.toString(startTime));
         }
 
         // update status
@@ -547,17 +502,14 @@ public class Crawler implements Serializable {
         }
     }
 
-    protected void commit(final CrawlingSessionHelper crawlingSessionHelper,
-            final SolrGroup solrGroup) {
-        writeTimeToSessionInfo(crawlingSessionHelper,
-                Constants.COMMIT_START_TIME);
+    protected void commit(final CrawlingSessionHelper crawlingSessionHelper, final SolrGroup solrGroup) {
+        writeTimeToSessionInfo(crawlingSessionHelper, Constants.COMMIT_START_TIME);
         long startTime = System.currentTimeMillis();
         solrGroup.commit(true, true, false, true);
         startTime = System.currentTimeMillis() - startTime;
         writeTimeToSessionInfo(crawlingSessionHelper, Constants.COMMIT_END_TIME);
         if (crawlingSessionHelper != null) {
-            crawlingSessionHelper.putToInfoMap(Constants.COMMIT_EXEC_TIME,
-                    Long.toString(startTime));
+            crawlingSessionHelper.putToInfoMap(Constants.COMMIT_EXEC_TIME, Long.toString(startTime));
         }
 
         // update status
@@ -573,13 +525,10 @@ public class Crawler implements Serializable {
         }
     }
 
-    private void writeTimeToSessionInfo(
-            final CrawlingSessionHelper crawlingSessionHelper, final String key) {
+    private void writeTimeToSessionInfo(final CrawlingSessionHelper crawlingSessionHelper, final String key) {
         if (crawlingSessionHelper != null) {
-            final SimpleDateFormat dateFormat = new SimpleDateFormat(
-                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            crawlingSessionHelper.putToInfoMap(key,
-                    dateFormat.format(new Date()));
+            final SimpleDateFormat dateFormat = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            crawlingSessionHelper.putToInfoMap(key, dateFormat.format(new Date()));
         }
     }
 
@@ -588,8 +537,7 @@ public class Crawler implements Serializable {
             try {
                 crawlerThread.join();
             } catch (final Exception e) {
-                logger.info("Interrupted a crawling process: "
-                        + crawlerThread.getName());
+                logger.info("Interrupted a crawling process: " + crawlerThread.getName());
             }
         }
     }

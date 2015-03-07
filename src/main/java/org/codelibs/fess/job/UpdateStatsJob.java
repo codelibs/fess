@@ -24,12 +24,10 @@ import org.slf4j.LoggerFactory;
 
 public class UpdateStatsJob {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(UpdateStatsJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpdateStatsJob.class);
 
     public String execute() {
-        final SearchFieldLogService searchFieldLogService = SingletonS2Container
-                .getComponent(SearchFieldLogService.class);
+        final SearchFieldLogService searchFieldLogService = SingletonS2Container.getComponent(SearchFieldLogService.class);
 
         final StringBuilder resultBuf = new StringBuilder();
 

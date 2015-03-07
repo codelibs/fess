@@ -39,19 +39,15 @@ public abstract class BsPathMappingService {
         super();
     }
 
-    public List<PathMapping> getPathMappingList(
-            final PathMappingPager pathMappingPager) {
+    public List<PathMapping> getPathMappingList(final PathMappingPager pathMappingPager) {
 
-        final PagingResultBean<PathMapping> pathMappingList = pathMappingBhv
-                .selectPage(cb -> {
-                    cb.paging(pathMappingPager.getPageSize(),
-                            pathMappingPager.getCurrentPageNumber());
-                    setupListCondition(cb, pathMappingPager);
-                });
+        final PagingResultBean<PathMapping> pathMappingList = pathMappingBhv.selectPage(cb -> {
+            cb.paging(pathMappingPager.getPageSize(), pathMappingPager.getCurrentPageNumber());
+            setupListCondition(cb, pathMappingPager);
+        });
 
         // update pager
-        Beans.copy(pathMappingList, pathMappingPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(pathMappingList, pathMappingPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         pathMappingPager.setPageNumberList(pathMappingList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -72,24 +68,21 @@ public abstract class BsPathMappingService {
         return pathMapping;
     }
 
-    public void store(final PathMapping pathMapping)
-            throws CrudMessageException {
+    public void store(final PathMapping pathMapping) throws CrudMessageException {
         setupStoreCondition(pathMapping);
 
         pathMappingBhv.insertOrUpdate(pathMapping);
 
     }
 
-    public void delete(final PathMapping pathMapping)
-            throws CrudMessageException {
+    public void delete(final PathMapping pathMapping) throws CrudMessageException {
         setupDeleteCondition(pathMapping);
 
         pathMappingBhv.delete(pathMapping);
 
     }
 
-    protected void setupListCondition(final PathMappingCB cb,
-            final PathMappingPager pathMappingPager) {
+    protected void setupListCondition(final PathMappingCB cb, final PathMappingPager pathMappingPager) {
 
         if (pathMappingPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(pathMappingPager.id));
@@ -97,8 +90,7 @@ public abstract class BsPathMappingService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final PathMappingCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final PathMappingCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final PathMapping pathMapping) {

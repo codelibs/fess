@@ -40,17 +40,14 @@ import org.codelibs.fess.pager.SuggestElevateWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 
-public class SuggestElevateWordService extends BsSuggestElevateWordService
-        implements Serializable {
+public class SuggestElevateWordService extends BsSuggestElevateWordService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(SuggestElevateWordService.class);
+    private static final Log log = LogFactory.getLog(SuggestElevateWordService.class);
 
     @Override
-    protected void setupListCondition(final SuggestElevateWordCB cb,
-            final SuggestElevateWordPager suggestElevateWordPager) {
+    protected void setupListCondition(final SuggestElevateWordCB cb, final SuggestElevateWordPager suggestElevateWordPager) {
         super.setupListCondition(cb, suggestElevateWordPager);
 
         // setup condition
@@ -62,8 +59,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
     }
 
     @Override
-    protected void setupEntityCondition(final SuggestElevateWordCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final SuggestElevateWordCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -71,8 +67,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
     }
 
     @Override
-    protected void setupStoreCondition(
-            final SuggestElevateWord suggestElevateWord) {
+    protected void setupStoreCondition(final SuggestElevateWord suggestElevateWord) {
         super.setupStoreCondition(suggestElevateWord);
 
         // setup condition
@@ -80,8 +75,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final SuggestElevateWord suggestElevateWord) {
+    protected void setupDeleteCondition(final SuggestElevateWord suggestElevateWord) {
         super.setupDeleteCondition(suggestElevateWord);
 
         // setup condition
@@ -102,42 +96,35 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
                 try {
                     final String role = getValue(list, 2);
                     final String label = getValue(list, 3);
-                    SuggestElevateWord suggestElevateWord = suggestElevateWordBhv
-                            .selectEntity(cb -> {
-                                cb.query().setSuggestWord_Equal(suggestWord);
-                                if (StringUtil.isNotBlank(role)) {
-                                    cb.query().setTargetRole_Equal(role);
-                                }
-                                if (StringUtil.isNotBlank(label)) {
-                                    cb.query().setTargetLabel_Equal(label);
-                                }
-                            }).orElse(null);//TODO
+                    SuggestElevateWord suggestElevateWord = suggestElevateWordBhv.selectEntity(cb -> {
+                        cb.query().setSuggestWord_Equal(suggestWord);
+                        if (StringUtil.isNotBlank(role)) {
+                            cb.query().setTargetRole_Equal(role);
+                        }
+                        if (StringUtil.isNotBlank(label)) {
+                            cb.query().setTargetLabel_Equal(label);
+                        }
+                    }).orElse(null);//TODO
                     final String reading = getValue(list, 1);
                     final String boost = getValue(list, 4);
-                    final LocalDateTime now = ComponentUtil.getSystemHelper()
-                            .getCurrentTime();
+                    final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
                     if (suggestElevateWord == null) {
                         suggestElevateWord = new SuggestElevateWord();
                         suggestElevateWord.setSuggestWord(suggestWord);
                         suggestElevateWord.setReading(reading);
                         suggestElevateWord.setTargetRole(role);
                         suggestElevateWord.setTargetLabel(label);
-                        suggestElevateWord
-                                .setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE
-                                        : new BigDecimal(boost));
+                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE : new BigDecimal(boost));
                         suggestElevateWord.setCreatedBy("system");
                         suggestElevateWord.setCreatedTime(now);
                         suggestElevateWordBhv.insert(suggestElevateWord);
-                    } else if (StringUtil.isBlank(reading)
-                            && StringUtil.isBlank(boost)) {
+                    } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
                         suggestElevateWord.setDeletedBy("system");
                         suggestElevateWord.setDeletedTime(now);
                         suggestElevateWordBhv.update(suggestElevateWord);
                     } else {
                         suggestElevateWord.setReading(reading);
-                        suggestElevateWord
-                                .setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE
-                                        : new BigDecimal(boost));
+                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE : new BigDecimal(boost));
                         suggestElevateWord.setUpdatedBy("system");
                         suggestElevateWord.setUpdatedTime(now);
                         suggestElevateWordBhv.update(suggestElevateWord);
@@ -180,13 +167,11 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        log.warn("Failed to write a sugget elevate word: "
-                                + entity, e);
+                        log.warn("Failed to write a sugget elevate word: " + entity, e);
                     }
                 }
 
-                private void addToList(final List<String> list,
-                        final Object value) {
+                private void addToList(final List<String> list, final Object value) {
                     if (value == null) {
                         list.add(StringUtil.EMPTY);
                     } else {
@@ -209,8 +194,7 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService
         if (StringUtil.isBlank(item)) {
             return StringUtil.EMPTY;
         }
-        if (item.length() > 1 && item.charAt(0) == '"'
-                && item.charAt(item.length() - 1) == '"') {
+        if (item.length() > 1 && item.charAt(0) == '"' && item.charAt(item.length() - 1) == '"') {
             item = item.substring(1, item.length() - 1);
         }
         return item;

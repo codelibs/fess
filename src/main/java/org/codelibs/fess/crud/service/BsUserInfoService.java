@@ -41,16 +41,13 @@ public abstract class BsUserInfoService {
 
     public List<UserInfo> getUserInfoList(final UserInfoPager userInfoPager) {
 
-        final PagingResultBean<UserInfo> userInfoList = userInfoBhv
-                .selectPage(cb -> {
-                    cb.paging(userInfoPager.getPageSize(),
-                            userInfoPager.getCurrentPageNumber());
-                    setupListCondition(cb, userInfoPager);
-                });
+        final PagingResultBean<UserInfo> userInfoList = userInfoBhv.selectPage(cb -> {
+            cb.paging(userInfoPager.getPageSize(), userInfoPager.getCurrentPageNumber());
+            setupListCondition(cb, userInfoPager);
+        });
 
         // update pager
-        Beans.copy(userInfoList, userInfoPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(userInfoList, userInfoPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         userInfoPager.setPageNumberList(userInfoList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -85,8 +82,7 @@ public abstract class BsUserInfoService {
 
     }
 
-    protected void setupListCondition(final UserInfoCB cb,
-            final UserInfoPager userInfoPager) {
+    protected void setupListCondition(final UserInfoCB cb, final UserInfoPager userInfoPager) {
 
         if (userInfoPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(userInfoPager.id));
@@ -94,8 +90,7 @@ public abstract class BsUserInfoService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final UserInfoCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final UserInfoCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final UserInfo userInfo) {

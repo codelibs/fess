@@ -36,8 +36,7 @@ public class SearchLog extends BsSearchLog {
     private static final long serialVersionUID = 1L;
 
     public String getRequestedTimeForList() {
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         if (getRequestedTime() != null) {
             return sdf.format(getRequestedTime());
         }

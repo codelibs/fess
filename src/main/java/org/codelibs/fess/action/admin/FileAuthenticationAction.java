@@ -47,8 +47,7 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(FileAuthenticationAction.class);
+    private static final Log log = LogFactory.getLog(FileAuthenticationAction.class);
 
     @Resource
     protected FileCrawlingConfigService fileCrawlingConfigService;
@@ -63,18 +62,13 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
     @Override
     protected void loadFileAuthentication() {
 
-        final FileAuthentication fileAuthentication = fileAuthenticationService
-                .getFileAuthentication(createKeyMap());
+        final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
         if (fileAuthentication == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { fileAuthenticationForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileAuthenticationForm.id });
         }
 
-        FessBeans.copy(fileAuthentication, fileAuthenticationForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(fileAuthentication, fileAuthenticationForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
         if ("-1".equals(fileAuthenticationForm.port)) {
             fileAuthenticationForm.port = StringUtil.EMPTY;
         }
@@ -86,13 +80,10 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (fileAuthenticationForm.crudMode == CommonConstants.EDIT_MODE) {
-            fileAuthentication = fileAuthenticationService
-                    .getFileAuthentication(createKeyMap());
+            fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
             if (fileAuthentication == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { fileAuthenticationForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileAuthenticationForm.id });
             }
         } else {
             fileAuthentication = new FileAuthentication();
@@ -104,8 +95,7 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
         if (StringUtil.isBlank(fileAuthenticationForm.port)) {
             fileAuthenticationForm.port = "-1";
         }
-        FessBeans.copy(fileAuthenticationForm, fileAuthentication)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(fileAuthenticationForm, fileAuthentication).excludesCommonColumns().execute();
 
         return fileAuthentication;
     }
@@ -114,19 +104,15 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            fileAuthenticationForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    fileAuthenticationForm.crudMode });
         }
 
         try {
-            final FileAuthentication fileAuthentication = fileAuthenticationService
-                    .getFileAuthentication(createKeyMap());
+            final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
             if (fileAuthentication == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { fileAuthenticationForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileAuthenticationForm.id });
             }
 
             //           fileAuthenticationService.delete(fileAuthentication);
@@ -143,41 +129,36 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
     public boolean isDisplayCreateLink() {
-        return !fileCrawlingConfigService.getAllFileCrawlingConfigList(false,
-                false, false, null).isEmpty();
+        return !fileCrawlingConfigService.getAllFileCrawlingConfigList(false, false, false, null).isEmpty();
     }
 
     public List<Map<String, String>> getFileCrawlingConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        final List<FileCrawlingConfig> fileCrawlingConfigList = fileCrawlingConfigService
-                .getAllFileCrawlingConfigList(false, false, false, null);
+        final List<FileCrawlingConfig> fileCrawlingConfigList =
+                fileCrawlingConfigService.getAllFileCrawlingConfigList(false, false, false, null);
         for (final FileCrawlingConfig fileCrawlingConfig : fileCrawlingConfigList) {
-            items.add(createItem(fileCrawlingConfig.getName(),
-                    fileCrawlingConfig.getId().toString()));
+            items.add(createItem(fileCrawlingConfig.getName(), fileCrawlingConfig.getId().toString()));
         }
         return items;
     }
 
     public List<Map<String, String>> getProtocolSchemeItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(),
-                "labels.file_authentication_scheme_samba"), Constants.SAMBA));
+        items.add(createItem(
+                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.file_authentication_scheme_samba"),
+                Constants.SAMBA));
         return items;
     }
 
-    protected Map<String, String> createItem(final String label,
-            final String value) {
+    protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<String, String>(2);
         map.put("label", label);
         map.put("value", value);

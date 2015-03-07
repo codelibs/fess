@@ -37,8 +37,7 @@ public class DictionaryManagerTest extends S2TestCase {
         testDir.delete();
         testDir.mkdirs();
         synonymFile1 = new File(testDir, "synonym.txt");
-        FileUtil.write(synonymFile1.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(synonymFile1.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
     }
 
     @Override
@@ -56,16 +55,14 @@ public class DictionaryManagerTest extends S2TestCase {
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
         dictionaryManager.addLocator(synonymLocator);
         dictionaryManager.init();
-        final DictionaryFile<? extends DictionaryItem>[] synonymFiles = dictionaryManager
-                .getDictionaryFiles();
+        final DictionaryFile<? extends DictionaryItem>[] synonymFiles = dictionaryManager.getDictionaryFiles();
         assertEquals(1, synonymFiles.length);
 
         assertNotNull(dictionaryManager.dicFileMap);
         Thread.sleep(2000);
         assertNull(dictionaryManager.dicFileMap);
 
-        final DictionaryFile<? extends DictionaryItem>[] synonymFiles2 = dictionaryManager
-                .getDictionaryFiles();
+        final DictionaryFile<? extends DictionaryItem>[] synonymFiles2 = dictionaryManager.getDictionaryFiles();
         assertEquals(1, synonymFiles2.length);
 
         assertNotNull(dictionaryManager.dicFileMap);

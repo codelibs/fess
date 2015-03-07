@@ -31,8 +31,7 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 
 public class KeyMatchHelper {
-    protected volatile Map<String, String[]> keyMatchQueryMap = Collections
-            .emptyMap();
+    protected volatile Map<String, String[]> keyMatchQueryMap = Collections.emptyMap();
 
     protected ThreadLocal<List<String>> searchWordList = new ThreadLocal<>();
 
@@ -54,24 +53,20 @@ public class KeyMatchHelper {
 
     protected void reload(final long interval) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final KeyMatchService keyMatchService = SingletonS2Container
-                .getComponent(KeyMatchService.class);
+        final KeyMatchService keyMatchService = SingletonS2Container.getComponent(KeyMatchService.class);
         final List<KeyMatch> list = keyMatchService.getAvailableKeyMatchList();
-        final Map<String, String[]> keyMatchQueryMap = new HashMap<String, String[]>(
-                list.size());
+        final Map<String, String[]> keyMatchQueryMap = new HashMap<String, String[]>(list.size());
         for (final KeyMatch keyMatch : list) {
             final List<Map<String, Object>> documentList = getDocumentList(keyMatch);
             final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentList) {
                 final String docId = (String) map.get(fieldHelper.docIdField);
                 if (StringUtil.isNotBlank(docId)) {
-                    docIdList.add(fieldHelper.docIdField + ":" + docId + "^"
-                            + keyMatch.getBoost());
+                    docIdList.add(fieldHelper.docIdField + ":" + docId + "^" + keyMatch.getBoost());
                 }
             }
             if (!docIdList.isEmpty()) {
-                keyMatchQueryMap.put(keyMatch.getTerm(),
-                        docIdList.toArray(new String[docIdList.size()]));
+                keyMatchQueryMap.put(keyMatch.getTerm(), docIdList.toArray(new String[docIdList.size()]));
             }
 
             if (reloadInterval > 0) {
@@ -88,9 +83,8 @@ public class KeyMatchHelper {
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final SearchService searchService = ComponentUtil.getSearchService();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final List<Map<String, Object>> documentList = searchService
-                .getDocumentList(keyMatch.getQuery(), 0, keyMatch.getMaxSize(),
-                        null, null, null,
+        final List<Map<String, Object>> documentList =
+                searchService.getDocumentList(keyMatch.getQuery(), 0, keyMatch.getMaxSize(), null, null, null,
                         new String[] { fieldHelper.docIdField }, null, false);
         return documentList;
     }

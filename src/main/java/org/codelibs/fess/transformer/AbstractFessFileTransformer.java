@@ -67,8 +67,7 @@ import org.seasar.framework.util.SerializeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractFessFileTransformer extends
-        AbstractFessXpathTransformer {
+public abstract class AbstractFessFileTransformer extends AbstractFessXpathTransformer {
     private static final Logger logger = LoggerFactory // NOPMD
             .getLogger(AbstractFessFileTransformer.class);
 
@@ -90,8 +89,7 @@ public abstract class AbstractFessFileTransformer extends
 
     public boolean enableCache = false;
 
-    public Map<String, String> parentEncodingMap = Collections
-            .synchronizedMap(new LruHashMap<String, String>(1000));
+    public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
     protected Map<String, String> metaContentMapping;
 
@@ -106,8 +104,7 @@ public abstract class AbstractFessFileTransformer extends
         final Extractor extractor = getExtractor(responseData);
         final InputStream in = responseData.getResponseBody();
         final Map<String, String> params = new HashMap<String, String>();
-        params.put(TikaMetadataKeys.RESOURCE_NAME_KEY,
-                getResourceName(responseData));
+        params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
         final String mimeType = responseData.getMimeType();
         params.put(HttpHeaders.CONTENT_TYPE, mimeType);
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
@@ -136,8 +133,7 @@ public abstract class AbstractFessFileTransformer extends
                     if (StringUtil.isNotBlank(joinValue)) {
                         contentMetaBuf.append(joinValue);
                         if (metaContentMapping != null) {
-                            final String solrField = metaContentMapping
-                                    .get(key);
+                            final String solrField = metaContentMapping.get(key);
                             if (StringUtil.isNotBlank(solrField)) {
                                 if (solrField.endsWith("_m")) {
                                     dataMap.put(solrField, values);
@@ -150,8 +146,7 @@ public abstract class AbstractFessFileTransformer extends
                 }
             }
         } catch (final Exception e) {
-            final RobotCrawlAccessException rcae = new RobotCrawlAccessException(
-                    "Could not get a text from " + responseData.getUrl(), e);
+            final RobotCrawlAccessException rcae = new RobotCrawlAccessException("Could not get a text from " + responseData.getUrl(), e);
             rcae.setLogLevel(RobotCrawlAccessException.WARN);
             throw rcae;
         } finally {
@@ -165,32 +160,22 @@ public abstract class AbstractFessFileTransformer extends
         final ResultData resultData = new ResultData();
         resultData.setTransformerName(getName());
 
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                .getCrawlingSessionHelper();
-        final String sessionId = crawlingSessionHelper
-                .getCanonicalSessionId(responseData.getSessionId());
-        final LocalDateTime documentExpires = crawlingSessionHelper
-                .getDocumentExpires();
-        final PathMappingHelper pathMappingHelper = ComponentUtil
-                .getPathMappingHelper();
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
+        final LocalDateTime documentExpires = crawlingSessionHelper.getDocumentExpires();
+        final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-        final DynamicProperties crawlerProperties = ComponentUtil
-                .getCrawlerProperties();
-        final boolean useAclAsRole = crawlerProperties.getProperty(
-                Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
-                Constants.TRUE);
-        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
-                .getCrawlingConfigHelper();
-        final CrawlingConfig crawlingConfig = crawlingConfigHelper
-                .get(responseData.getSessionId());
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
+        final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
 
-        final Map<String, String> fieldConfigMap = crawlingConfig
-                .getConfigParameterMap(ConfigName.FIELD);
+        final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
 
         String urlEncoding;
         final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
@@ -207,8 +192,7 @@ public abstract class AbstractFessFileTransformer extends
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, fieldHelper.expiresField,
-                    FessFunctions.formatDate(documentExpires));
+            putResultDataBody(dataMap, fieldHelper.expiresField, FessFunctions.formatDate(documentExpires));
         }
         // segment
         putResultDataBody(dataMap, fieldHelper.segmentField, sessionId);
@@ -227,33 +211,24 @@ public abstract class AbstractFessFileTransformer extends
         if (StringUtil.isNotBlank(body)) {
             putResultDataBody(dataMap, fieldHelper.contentField, body);
         } else {
-            putResultDataBody(dataMap, fieldHelper.contentField,
-                    StringUtil.EMPTY);
+            putResultDataBody(dataMap, fieldHelper.contentField, StringUtil.EMPTY);
         }
-        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap
-                .get(fieldHelper.cacheField)) || enableCache) {
-            final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+",
-                    " ");
+        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fieldHelper.cacheField)) || enableCache) {
+            final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
             // text cache
             putResultDataBody(dataMap, fieldHelper.cacheField, cache);
-            putResultDataBody(dataMap, fieldHelper.hasCacheField,
-                    Constants.TRUE);
+            putResultDataBody(dataMap, fieldHelper.hasCacheField, Constants.TRUE);
         }
         // digest
-        putResultDataBody(
-                dataMap,
-                fieldHelper.digestField,
-                Constants.DIGEST_PREFIX
-                        + abbreviate(normalizeContent(content), maxDigestLength));
+        putResultDataBody(dataMap, fieldHelper.digestField, Constants.DIGEST_PREFIX
+                + abbreviate(normalizeContent(content), maxDigestLength));
         // title
         if (!dataMap.containsKey(fieldHelper.titleField)) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
-                    putResultDataBody(dataMap, fieldHelper.titleField,
-                            abbreviate(body, maxTitleLength));
+                    putResultDataBody(dataMap, fieldHelper.titleField, abbreviate(body, maxTitleLength));
                 } else {
-                    putResultDataBody(dataMap, fieldHelper.titleField,
-                            noTitleLabel);
+                    putResultDataBody(dataMap, fieldHelper.titleField, noTitleLabel);
                 }
             } else {
                 final String u = decodeUrlAsName(url, url.startsWith("file:"));
@@ -261,16 +236,14 @@ public abstract class AbstractFessFileTransformer extends
                 if (pos == -1) {
                     putResultDataBody(dataMap, fieldHelper.titleField, u);
                 } else {
-                    putResultDataBody(dataMap, fieldHelper.titleField,
-                            u.substring(pos + 1));
+                    putResultDataBody(dataMap, fieldHelper.titleField, u.substring(pos + 1));
                 }
             }
         }
         // host
         putResultDataBody(dataMap, fieldHelper.hostField, getHost(url));
         // site
-        putResultDataBody(dataMap, fieldHelper.siteField,
-                getSite(url, urlEncoding));
+        putResultDataBody(dataMap, fieldHelper.siteField, getSite(url, urlEncoding));
         // url
         putResultDataBody(dataMap, fieldHelper.urlField, url);
         // created
@@ -281,29 +254,24 @@ public abstract class AbstractFessFileTransformer extends
         putResultDataBody(dataMap, fieldHelper.mimetypeField, mimeType);
         if (fileTypeHelper != null) {
             // filetype
-            putResultDataBody(dataMap, fieldHelper.filetypeField,
-                    fileTypeHelper.get(mimeType));
+            putResultDataBody(dataMap, fieldHelper.filetypeField, fileTypeHelper.get(mimeType));
         }
         // contentLength
-        putResultDataBody(dataMap, fieldHelper.contentLengthField,
-                Long.toString(responseData.getContentLength()));
+        putResultDataBody(dataMap, fieldHelper.contentLengthField, Long.toString(responseData.getContentLength()));
         //  lastModified
         if (responseData.getLastModified() != null) {
-            putResultDataBody(dataMap, fieldHelper.lastModifiedField,
-                    FessFunctions.formatDate(responseData.getLastModified()));
+            putResultDataBody(dataMap, fieldHelper.lastModifiedField, FessFunctions.formatDate(responseData.getLastModified()));
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
-        putResultDataBody(dataMap, fieldHelper.boostField,
-                crawlingConfig.getDocumentBoost());
+        putResultDataBody(dataMap, fieldHelper.boostField, crawlingConfig.getDocumentBoost());
         // label: labelType
         final Set<String> labelTypeSet = new HashSet<String>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
             labelTypeSet.add(labelType);
         }
-        final LabelTypeHelper labelTypeHelper = ComponentUtil
-                .getLabelTypeHelper();
+        final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
         putResultDataBody(dataMap, fieldHelper.labelField, labelTypeSet);
         // role: roleType
@@ -312,16 +280,14 @@ public abstract class AbstractFessFileTransformer extends
             roleTypeList.add(roleType);
         }
         if (useAclAsRole && responseData.getUrl().startsWith("smb://")) {
-            final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(
-                    SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
+            final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
             if (aces != null) {
                 for (final ACE item : aces) {
                     final SID sid = item.getSID();
                     roleTypeList.add(sambaHelper.getAccountId(sid));
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smbUrl:" + responseData.getUrl()
-                            + " roleType:" + roleTypeList.toString());
+                    logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
                 }
             }
         }
@@ -329,44 +295,36 @@ public abstract class AbstractFessFileTransformer extends
         // TODO date
         // TODO lang
         // id
-        putResultDataBody(dataMap, fieldHelper.idField,
-                crawlingSessionHelper.generateId(dataMap));
+        putResultDataBody(dataMap, fieldHelper.idField, crawlingSessionHelper.generateId(dataMap));
         // parentId
         String parentUrl = responseData.getParentUrl();
         if (StringUtil.isNotBlank(parentUrl)) {
             parentUrl = pathMappingHelper.replaceUrl(sessionId, parentUrl);
             putResultDataBody(dataMap, fieldHelper.urlField, parentUrl);
-            putResultDataBody(dataMap, fieldHelper.parentIdField,
-                    crawlingSessionHelper.generateId(dataMap));
+            putResultDataBody(dataMap, fieldHelper.parentIdField, crawlingSessionHelper.generateId(dataMap));
             putResultDataBody(dataMap, fieldHelper.urlField, url); // set again
         }
 
         // from config
-        final Map<String, String> scriptConfigMap = crawlingConfig
-                .getConfigParameterMap(ConfigName.SCRIPT);
-        final Map<String, String> metaConfigMap = crawlingConfig
-                .getConfigParameterMap(ConfigName.META);
+        final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);
+        final Map<String, String> metaConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.META);
         for (final Map.Entry<String, String> entry : metaConfigMap.entrySet()) {
             final String key = entry.getKey();
             final String[] values = entry.getValue().split(",");
             for (final String value : values) {
-                putResultDataWithTemplate(dataMap, key, metaDataMap.get(value),
-                        scriptConfigMap.get(key));
+                putResultDataWithTemplate(dataMap, key, metaDataMap.get(value), scriptConfigMap.get(key));
             }
         }
-        final Map<String, String> valueConfigMap = crawlingConfig
-                .getConfigParameterMap(ConfigName.VALUE);
+        final Map<String, String> valueConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.VALUE);
         for (final Map.Entry<String, String> entry : valueConfigMap.entrySet()) {
             final String key = entry.getKey();
-            putResultDataWithTemplate(dataMap, key, entry.getValue(),
-                    scriptConfigMap.get(key));
+            putResultDataWithTemplate(dataMap, key, entry.getValue(), scriptConfigMap.get(key));
         }
 
         try {
             resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
         } catch (final Exception e) {
-            throw new RobotCrawlAccessException("Could not serialize object: "
-                    + url, e);
+            throw new RobotCrawlAccessException("Could not serialize object: " + url, e);
         }
         resultData.setEncoding(charsetName);
 
@@ -376,8 +334,7 @@ public abstract class AbstractFessFileTransformer extends
     protected String abbreviate(final String str, final int maxWidth) {
         String newStr = StringUtils.abbreviate(str, maxWidth);
         try {
-            if (newStr.getBytes(Constants.UTF_8).length > maxWidth
-                    + abbreviationMarginLength) {
+            if (newStr.getBytes(Constants.UTF_8).length > maxWidth + abbreviationMarginLength) {
                 newStr = StringUtils.abbreviate(str, maxWidth / 2);
             }
         } catch (final UnsupportedEncodingException e) {
@@ -418,8 +375,7 @@ public abstract class AbstractFessFileTransformer extends
                 final String parentUrl = urlQueue.getParentUrl();
                 if (StringUtil.isNotEmpty(parentUrl)) {
                     final String sessionId = urlQueue.getSessionId();
-                    final String pageEnc = getParentEncoding(parentUrl,
-                            sessionId);
+                    final String pageEnc = getParentEncoding(parentUrl, sessionId);
                     if (pageEnc != null) {
                         enc = pageEnc;
                     } else if (urlQueue.getEncoding() != null) {
@@ -439,8 +395,7 @@ public abstract class AbstractFessFileTransformer extends
         }
     }
 
-    protected String getParentEncoding(final String parentUrl,
-            final String sessionId) {
+    protected String getParentEncoding(final String parentUrl, final String sessionId) {
         final String key = sessionId + ":" + parentUrl;
         String enc = parentEncodingMap.get(key);
         if (enc != null) {
@@ -451,8 +406,7 @@ public abstract class AbstractFessFileTransformer extends
         cb.query().queryAccessResult().setSessionId_Equal(sessionId);
         cb.query().queryAccessResult().setUrl_Equal(parentUrl);
         cb.specify().columnEncoding();
-        final AccessResultData accessResultData = SingletonS2Container
-                .getComponent(AccessResultDataBhv.class).selectEntity(cb);
+        final AccessResultData accessResultData = SingletonS2Container.getComponent(AccessResultDataBhv.class).selectEntity(cb);
         if (accessResultData != null && accessResultData.getEncoding() != null) {
             enc = accessResultData.getEncoding();
             parentEncodingMap.put(key, enc);
@@ -492,14 +446,12 @@ public abstract class AbstractFessFileTransformer extends
 
         if (url.startsWith("file:////")) {
             final String value = decodeUrlAsName(url.substring(9), true);
-            return StringUtils.abbreviate("\\\\" + value.replace('/', '\\'),
-                    maxSiteLength);
+            return StringUtils.abbreviate("\\\\" + value.replace('/', '\\'), maxSiteLength);
         } else if (url.startsWith("file:")) {
             final String value = decodeUrlAsName(url.substring(5), true);
             if (value.length() > 2 && value.charAt(2) == ':') {
                 // Windows
-                return StringUtils.abbreviate(
-                        value.substring(1).replace('/', '\\'), maxSiteLength);
+                return StringUtils.abbreviate(value.substring(1).replace('/', '\\'), maxSiteLength);
             } else {
                 // Unix
                 return StringUtils.abbreviate(value, maxSiteLength);
@@ -516,15 +468,13 @@ public abstract class AbstractFessFileTransformer extends
             try {
                 return SerializeUtil.fromBinaryToObject(data);
             } catch (final Exception e) {
-                throw new RobotSystemException(
-                        "Could not create an instanced from bytes.", e);
+                throw new RobotSystemException("Could not create an instanced from bytes.", e);
             }
         }
         return new HashMap<String, Object>();
     }
 
-    public void addMetaContentMapping(final String metaname,
-            final String solrField) {
+    public void addMetaContentMapping(final String metaname, final String solrField) {
         if (metaContentMapping == null) {
             metaContentMapping = new HashMap<String, String>();
         }

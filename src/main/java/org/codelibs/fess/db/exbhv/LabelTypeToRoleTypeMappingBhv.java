@@ -26,6 +26,5 @@ import org.codelibs.fess.db.bsbhv.BsLabelTypeToRoleTypeMappingBhv;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class LabelTypeToRoleTypeMappingBhv extends
-        BsLabelTypeToRoleTypeMappingBhv {
+public class LabelTypeToRoleTypeMappingBhv extends BsLabelTypeToRoleTypeMappingBhv {
 }

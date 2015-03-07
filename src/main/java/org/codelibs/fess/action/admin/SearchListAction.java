@@ -50,8 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SearchListAction implements Serializable {
-    private static final Logger logger = LoggerFactory
-            .getLogger(SearchListAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(SearchListAction.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -161,10 +160,9 @@ public class SearchListAction implements Serializable {
         final int offset = Integer.parseInt(searchListForm.start);
         final int size = Integer.parseInt(searchListForm.num);
         try {
-            documentItems = searchService.getDocumentList(query, offset, size,
-                    null, null, null, queryHelper.getResponseFields(),
-                    new String[] { fieldHelper.clickCountField,
-                            fieldHelper.favoriteCountField }, false);
+            documentItems =
+                    searchService.getDocumentList(query, offset, size, null, null, null, queryHelper.getResponseFields(), new String[] {
+                            fieldHelper.clickCountField, fieldHelper.favoriteCountField }, false);
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -174,25 +172,19 @@ public class SearchListAction implements Serializable {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throw new SSCActionMessagesException(e,
-                    "errors.result_size_exceeded");
+            throw new SSCActionMessagesException(e, "errors.result_size_exceeded");
         }
         final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
-        final NumberFormat nf = NumberFormat.getInstance(RequestUtil
-                .getRequest().getLocale());
+        final NumberFormat nf = NumberFormat.getInstance(RequestUtil.getRequest().getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);
         try {
-            execTime = nf
-                    .format((double) queryResponseList.getExecTime() / 1000);
-        } catch (final Exception e) {
-        }
+            execTime = nf.format((double) queryResponseList.getExecTime() / 1000);
+        } catch (final Exception e) {}
 
         Beans.copy(documentItems, this)
-                .includes("pageSize", "currentPageNumber", "allRecordCount",
-                        "allPageCount", "existNextPage", "existPrevPage",
-                        "currentStartRecordNumber", "currentEndRecordNumber",
-                        "pageNumberList").execute();
+                .includes("pageSize", "currentPageNumber", "allRecordCount", "allPageCount", "existNextPage", "existPrevPage",
+                        "currentStartRecordNumber", "currentEndRecordNumber", "pageNumberList").execute();
 
         return query;
     }
@@ -261,14 +253,11 @@ public class SearchListAction implements Serializable {
 
     private String deleteByQuery(final String docId) {
         if (jobHelper.isCrawlProcessRunning()) {
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_start_solr_process_because_of_running");
+            throw new SSCActionMessagesException("errors.failed_to_start_solr_process_because_of_running");
         }
-        final SolrGroup solrGroup = solrGroupManager
-                .getSolrGroup(QueryType.DELETE);
+        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.DELETE);
         if (solrGroup == null) {
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_delete_solr_index");
+            throw new SSCActionMessagesException("errors.failed_to_delete_solr_index");
         } else {
             final Thread thread = new Thread(new Runnable() {
                 @Override
@@ -276,23 +265,17 @@ public class SearchListAction implements Serializable {
                     if (!jobHelper.isCrawlProcessRunning()) {
                         final long time = System.currentTimeMillis();
                         try {
-                            solrGroup.deleteByQuery(fieldHelper.docIdField
-                                    + ":" + docId);
+                            solrGroup.deleteByQuery(fieldHelper.docIdField + ":" + docId);
                             solrGroup.commit(true, true, false, true);
                             if (logger.isInfoEnabled()) {
-                                logger.info("[EXEC TIME] index cleanup time: "
-                                        + (System.currentTimeMillis() - time)
-                                        + "ms");
+                                logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - time) + "ms");
                             }
                         } catch (final Exception e) {
-                            logger.error("Failed to delete index (query="
-                                    + fieldHelper.docIdField + ":" + docId
-                                    + ").", e);
+                            logger.error("Failed to delete index (query=" + fieldHelper.docIdField + ":" + docId + ").", e);
                         }
                     } else {
                         if (logger.isInfoEnabled()) {
-                            logger.info("could not start index cleanup process"
-                                    + " because of running solr process.");
+                            logger.info("could not start index cleanup process" + " because of running solr process.");
                         }
                     }
                 }
@@ -300,8 +283,7 @@ public class SearchListAction implements Serializable {
             thread.start();
             SAStrutsUtil.addSessionMessage("success.delete_solr_index");
         }
-        return "search?query=" + S2Functions.u(searchListForm.query)
-                + "&redirect=true";
+        return "search?query=" + S2Functions.u(searchListForm.query) + "&redirect=true";
     }
 
     public boolean isSolrProcessRunning() {

@@ -57,8 +57,7 @@ import org.dbflute.cbean.result.ListResultBean;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class SearchLogService extends BsSearchLogService implements
-        Serializable {
+public class SearchLogService extends BsSearchLogService implements Serializable {
     private static final Log log = LogFactory.getLog(SearchLogService.class);
 
     private static final long serialVersionUID = 1L;
@@ -70,8 +69,7 @@ public class SearchLogService extends BsSearchLogService implements
     protected SearchFieldLogBhv searchFieldLogBhv;
 
     @Override
-    protected void setupListCondition(final SearchLogCB cb,
-            final SearchLogPager searchLogPager) {
+    protected void setupListCondition(final SearchLogCB cb, final SearchLogPager searchLogPager) {
         super.setupListCondition(cb, searchLogPager);
         cb.setupSelect_UserInfo();
 
@@ -127,8 +125,7 @@ public class SearchLogService extends BsSearchLogService implements
     }
 
     @Override
-    protected void setupEntityCondition(final SearchLogCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final SearchLogCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -161,159 +158,138 @@ public class SearchLogService extends BsSearchLogService implements
     }
 
     public void deleteAll(final SearchLogPager searchLogPager) {
-        clickLogBhv.varyingQueryDelete(
-                cb2 -> {
-                    if (StringUtil.isNotBlank(searchLogPager.searchWord)) {
-                        cb2.query()
-                                .querySearchLog()
-                                .setSearchWord_LikeSearch(
-                                        searchLogPager.searchWord,
-                                        op -> op.likeContain());
-                    }
+        clickLogBhv.varyingQueryDelete(cb2 -> {
+            if (StringUtil.isNotBlank(searchLogPager.searchWord)) {
+                cb2.query().querySearchLog().setSearchWord_LikeSearch(searchLogPager.searchWord, op -> op.likeContain());
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.startDate)) {
-                        final StringBuilder buf = new StringBuilder(20);
-                        buf.append(searchLogPager.startDate);
-                        buf.append('+');
-                        if (StringUtil.isNotBlank(searchLogPager.startHour)) {
-                            buf.append(searchLogPager.startHour);
-                        } else {
-                            buf.append("00");
-                        }
-                        buf.append(':');
-                        if (StringUtil.isNotBlank(searchLogPager.startMin)) {
-                            buf.append(searchLogPager.startMin);
-                        } else {
-                            buf.append("00");
-                        }
+            if (StringUtil.isNotBlank(searchLogPager.startDate)) {
+                final StringBuilder buf = new StringBuilder(20);
+                buf.append(searchLogPager.startDate);
+                buf.append('+');
+                if (StringUtil.isNotBlank(searchLogPager.startHour)) {
+                    buf.append(searchLogPager.startHour);
+                } else {
+                    buf.append("00");
+                }
+                buf.append(':');
+                if (StringUtil.isNotBlank(searchLogPager.startMin)) {
+                    buf.append(searchLogPager.startMin);
+                } else {
+                    buf.append("00");
+                }
 
-                        final DateTimeFormatter formatter = DateTimeFormatter
-                                .ofPattern("yyyy-MM-dd+HH:mm");
-                        try {
-                            final LocalDateTime startDate = LocalDateTime
-                                    .parse(buf.toString(), formatter);
-                            cb2.query().querySearchLog()
-                                    .setRequestedTime_GreaterEqual(startDate);
-                        } catch (final DateTimeParseException e) {
-                            searchLogPager.startDate = null;
-                            searchLogPager.startHour = null;
-                            searchLogPager.startMin = null;
-                        }
-                    }
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
+                try {
+                    final LocalDateTime startDate = LocalDateTime.parse(buf.toString(), formatter);
+                    cb2.query().querySearchLog().setRequestedTime_GreaterEqual(startDate);
+                } catch (final DateTimeParseException e) {
+                    searchLogPager.startDate = null;
+                    searchLogPager.startHour = null;
+                    searchLogPager.startMin = null;
+                }
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.endDate)) {
-                        final StringBuilder buf = new StringBuilder(20);
-                        buf.append(searchLogPager.endDate);
-                        buf.append('+');
-                        if (StringUtil.isNotBlank(searchLogPager.endHour)) {
-                            buf.append(searchLogPager.endHour);
-                        } else {
-                            buf.append("00");
-                        }
-                        buf.append(':');
-                        if (StringUtil.isNotBlank(searchLogPager.endMin)) {
-                            buf.append(searchLogPager.endMin);
-                        } else {
-                            buf.append("00");
-                        }
+            if (StringUtil.isNotBlank(searchLogPager.endDate)) {
+                final StringBuilder buf = new StringBuilder(20);
+                buf.append(searchLogPager.endDate);
+                buf.append('+');
+                if (StringUtil.isNotBlank(searchLogPager.endHour)) {
+                    buf.append(searchLogPager.endHour);
+                } else {
+                    buf.append("00");
+                }
+                buf.append(':');
+                if (StringUtil.isNotBlank(searchLogPager.endMin)) {
+                    buf.append(searchLogPager.endMin);
+                } else {
+                    buf.append("00");
+                }
 
-                        final DateTimeFormatter formatter = DateTimeFormatter
-                                .ofPattern("yyyy-MM-dd+HH:mm");
-                        try {
-                            final LocalDateTime endDate = LocalDateTime.parse(
-                                    buf.toString(), formatter);
-                            cb2.query().querySearchLog()
-                                    .setRequestedTime_LessThan(endDate);
-                        } catch (final DateTimeParseException e) {
-                            searchLogPager.endDate = null;
-                            searchLogPager.endHour = null;
-                            searchLogPager.endMin = null;
-                        }
-                    }
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
+                try {
+                    final LocalDateTime endDate = LocalDateTime.parse(buf.toString(), formatter);
+                    cb2.query().querySearchLog().setRequestedTime_LessThan(endDate);
+                } catch (final DateTimeParseException e) {
+                    searchLogPager.endDate = null;
+                    searchLogPager.endHour = null;
+                    searchLogPager.endMin = null;
+                }
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.startPage)) {
-                        cb2.query().querySearchLog().setQueryOffset_Equal(0);
-                    }
-                }, op -> op.allowNonQueryDelete());
-        searchFieldLogBhv.varyingQueryDelete(cb2 -> {
+            if (StringUtil.isNotBlank(searchLogPager.startPage)) {
+                cb2.query().querySearchLog().setQueryOffset_Equal(0);
+            }
         }, op -> op.allowNonQueryDelete());
-        searchLogBhv.varyingQueryDelete(
-                cb1 -> {
-                    if (StringUtil.isNotBlank(searchLogPager.searchWord)) {
-                        cb1.query().setSearchWord_LikeSearch(
-                                searchLogPager.searchWord,
-                                op -> op.likeContain());
-                    }
+        searchFieldLogBhv.varyingQueryDelete(cb2 -> {}, op -> op.allowNonQueryDelete());
+        searchLogBhv.varyingQueryDelete(cb1 -> {
+            if (StringUtil.isNotBlank(searchLogPager.searchWord)) {
+                cb1.query().setSearchWord_LikeSearch(searchLogPager.searchWord, op -> op.likeContain());
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.userCode)) {
-                        cb1.setupSelect_UserInfo();
-                        cb1.query().queryUserInfo()
-                                .setCode_Equal(searchLogPager.userCode);
-                    }
+            if (StringUtil.isNotBlank(searchLogPager.userCode)) {
+                cb1.setupSelect_UserInfo();
+                cb1.query().queryUserInfo().setCode_Equal(searchLogPager.userCode);
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.startDate)) {
-                        final StringBuilder buf = new StringBuilder(20);
-                        buf.append(searchLogPager.startDate);
-                        buf.append('+');
-                        if (StringUtil.isNotBlank(searchLogPager.startHour)) {
-                            buf.append(searchLogPager.startHour);
-                        } else {
-                            buf.append("00");
-                        }
-                        buf.append(':');
-                        if (StringUtil.isNotBlank(searchLogPager.startMin)) {
-                            buf.append(searchLogPager.startMin);
-                        } else {
-                            buf.append("00");
-                        }
+            if (StringUtil.isNotBlank(searchLogPager.startDate)) {
+                final StringBuilder buf = new StringBuilder(20);
+                buf.append(searchLogPager.startDate);
+                buf.append('+');
+                if (StringUtil.isNotBlank(searchLogPager.startHour)) {
+                    buf.append(searchLogPager.startHour);
+                } else {
+                    buf.append("00");
+                }
+                buf.append(':');
+                if (StringUtil.isNotBlank(searchLogPager.startMin)) {
+                    buf.append(searchLogPager.startMin);
+                } else {
+                    buf.append("00");
+                }
 
-                        final DateTimeFormatter formatter = DateTimeFormatter
-                                .ofPattern("yyyy-MM-dd+HH:mm");
-                        try {
-                            final LocalDateTime startDate = LocalDateTime
-                                    .parse(buf.toString(), formatter);
-                            cb1.query()
-                                    .setRequestedTime_GreaterEqual(startDate);
-                        } catch (final DateTimeParseException e) {
-                            searchLogPager.startDate = null;
-                            searchLogPager.startHour = null;
-                            searchLogPager.startMin = null;
-                        }
-                    }
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
+                try {
+                    final LocalDateTime startDate = LocalDateTime.parse(buf.toString(), formatter);
+                    cb1.query().setRequestedTime_GreaterEqual(startDate);
+                } catch (final DateTimeParseException e) {
+                    searchLogPager.startDate = null;
+                    searchLogPager.startHour = null;
+                    searchLogPager.startMin = null;
+                }
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.endDate)) {
-                        final StringBuilder buf = new StringBuilder(20);
-                        buf.append(searchLogPager.endDate);
-                        buf.append('+');
-                        if (StringUtil.isNotBlank(searchLogPager.endHour)) {
-                            buf.append(searchLogPager.endHour);
-                        } else {
-                            buf.append("00");
-                        }
-                        buf.append(':');
-                        if (StringUtil.isNotBlank(searchLogPager.endMin)) {
-                            buf.append(searchLogPager.endMin);
-                        } else {
-                            buf.append("00");
-                        }
+            if (StringUtil.isNotBlank(searchLogPager.endDate)) {
+                final StringBuilder buf = new StringBuilder(20);
+                buf.append(searchLogPager.endDate);
+                buf.append('+');
+                if (StringUtil.isNotBlank(searchLogPager.endHour)) {
+                    buf.append(searchLogPager.endHour);
+                } else {
+                    buf.append("00");
+                }
+                buf.append(':');
+                if (StringUtil.isNotBlank(searchLogPager.endMin)) {
+                    buf.append(searchLogPager.endMin);
+                } else {
+                    buf.append("00");
+                }
 
-                        final DateTimeFormatter formatter = DateTimeFormatter
-                                .ofPattern("yyyy-MM-dd+HH:mm");
-                        try {
-                            final LocalDateTime endDate = LocalDateTime.parse(
-                                    buf.toString(), formatter);
-                            cb1.query().setRequestedTime_LessThan(endDate);
-                        } catch (final DateTimeParseException e) {
-                            searchLogPager.endDate = null;
-                            searchLogPager.endHour = null;
-                            searchLogPager.endMin = null;
-                        }
-                    }
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
+                try {
+                    final LocalDateTime endDate = LocalDateTime.parse(buf.toString(), formatter);
+                    cb1.query().setRequestedTime_LessThan(endDate);
+                } catch (final DateTimeParseException e) {
+                    searchLogPager.endDate = null;
+                    searchLogPager.endHour = null;
+                    searchLogPager.endMin = null;
+                }
+            }
 
-                    if (StringUtil.isNotBlank(searchLogPager.startPage)) {
-                        cb1.query().setQueryOffset_Equal(0);
-                    }
-                }, op -> op.allowNonQueryDelete());
+            if (StringUtil.isNotBlank(searchLogPager.startPage)) {
+                cb1.query().setQueryOffset_Equal(0);
+            }
+        }, op -> op.allowNonQueryDelete());
     }
 
     public void exportCsv(final Writer writer) {
@@ -322,8 +298,7 @@ public class SearchLogService extends BsSearchLogService implements
 
     public void importCsv(final Reader reader) {
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
-        final DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
@@ -333,8 +308,7 @@ public class SearchLogService extends BsSearchLogService implements
                     entity.setSearchWord(list.get(0));
                     entity.setSearchQuery(list.get(1));
                     entity.setSolrQuery(list.get(2));
-                    entity.setRequestedTime(LocalDateTime.parse(list.get(3),
-                            formatter));
+                    entity.setRequestedTime(LocalDateTime.parse(list.get(3), formatter));
                     entity.setResponseTime(Integer.parseInt(list.get(4)));
                     entity.setHitCount(Long.parseLong(list.get(5)));
                     entity.setQueryOffset(Integer.parseInt(list.get(6)));
@@ -343,8 +317,7 @@ public class SearchLogService extends BsSearchLogService implements
                     entity.setReferer(list.get(9));
                     entity.setClientIp(list.get(10));
                     entity.setUserSessionId(list.get(11));
-                    entity.setAccessTypeAsAccessType(AccessType.valueOf(list
-                            .get(12)));
+                    entity.setAccessTypeAsAccessType(AccessType.valueOf(list.get(12)));
                     if (list.size() >= 14) {
                         final String jsonStr = list.get(13);
                         @SuppressWarnings("rawtypes")
@@ -352,8 +325,7 @@ public class SearchLogService extends BsSearchLogService implements
                         for (final Object obj : objList) {
                             @SuppressWarnings("rawtypes")
                             final Map objMap = (Map) obj;
-                            entity.addSearchFieldLogValue(
-                                    (String) objMap.get(Constants.ITEM_NAME),
+                            entity.addSearchFieldLogValue((String) objMap.get(Constants.ITEM_NAME),
                                     (String) objMap.get(Constants.ITEM_VALUE));
                         }
                     }
@@ -389,8 +361,7 @@ public class SearchLogService extends BsSearchLogService implements
             list.add("AccessType");
             list.add("Fields");
             csvWriter.writeValues(list);
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             searchLogBhv.selectCursor(cb -> {
                 if (searchLogPager != null) {
                     buildSearchCondition(searchLogPager, cb);
@@ -398,30 +369,23 @@ public class SearchLogService extends BsSearchLogService implements
             }, new EntityRowHandler<SearchLog>() {
                 @Override
                 public void handle(final SearchLog entity) {
-                    final ListResultBean<SearchFieldLog> fieldLogList = ComponentUtil
-                            .getComponent(SearchFieldLogBhv.class).selectList(
-                                    cb2 -> {
-                                        cb2.query().setSearchId_Equal(
-                                                entity.getId());
-                                    });
+                    final ListResultBean<SearchFieldLog> fieldLogList =
+                            ComponentUtil.getComponent(SearchFieldLogBhv.class).selectList(cb2 -> {
+                                cb2.query().setSearchId_Equal(entity.getId());
+                            });
                     String query = StringUtil.EMPTY;
                     String solrQuery = StringUtil.EMPTY;
-                    final List<Map<String, String>> jsonObjList = new ArrayList<Map<String, String>>(
-                            fieldLogList.size());
+                    final List<Map<String, String>> jsonObjList = new ArrayList<Map<String, String>>(fieldLogList.size());
                     for (final SearchFieldLog fieldLog : fieldLogList) {
                         final String name = fieldLog.getName();
-                        if (Constants.SEARCH_FIELD_LOG_SEARCH_QUERY
-                                .equals(name)) {
+                        if (Constants.SEARCH_FIELD_LOG_SEARCH_QUERY.equals(name)) {
                             query = fieldLog.getValue();
-                        } else if (Constants.SEARCH_FIELD_LOG_SOLR_QUERY
-                                .equals(name)) {
+                        } else if (Constants.SEARCH_FIELD_LOG_SOLR_QUERY.equals(name)) {
                             solrQuery = fieldLog.getValue();
                         } else {
-                            final Map<String, String> objMap = new HashMap<String, String>(
-                                    2);
+                            final Map<String, String> objMap = new HashMap<String, String>(2);
                             objMap.put(Constants.ITEM_NAME, fieldLog.getName());
-                            objMap.put(Constants.ITEM_VALUE,
-                                    fieldLog.getValue());
+                            objMap.put(Constants.ITEM_VALUE, fieldLog.getValue());
                             jsonObjList.add(objMap);
                         }
                     }
@@ -448,8 +412,7 @@ public class SearchLogService extends BsSearchLogService implements
                     }
                 }
 
-                private void addToList(final List<String> list,
-                        final Object value) {
+                private void addToList(final List<String> list, final Object value) {
                     if (value == null) {
                         list.add(StringUtil.EMPTY);
                     } else if (value instanceof Timestamp) {
@@ -465,21 +428,15 @@ public class SearchLogService extends BsSearchLogService implements
         }
     }
 
-    private void buildSearchCondition(final SearchLogPager searchLogPager,
-            final SearchLogCB cb) {
+    private void buildSearchCondition(final SearchLogPager searchLogPager, final SearchLogCB cb) {
         buildSearchCondition(searchLogPager, cb, null);
     }
 
-    private void buildSearchCondition(final SearchLogPager searchLogPager,
-            final SearchLogCB cb1, final ClickLogCB cb2) {
+    private void buildSearchCondition(final SearchLogPager searchLogPager, final SearchLogCB cb1, final ClickLogCB cb2) {
         if (StringUtil.isNotBlank(searchLogPager.searchWord)) {
-            cb1.query().setSearchWord_LikeSearch(searchLogPager.searchWord,
-                    op -> op.likeContain());
+            cb1.query().setSearchWord_LikeSearch(searchLogPager.searchWord, op -> op.likeContain());
             if (cb2 != null) {
-                cb2.query()
-                        .querySearchLog()
-                        .setSearchWord_LikeSearch(searchLogPager.searchWord,
-                                op -> op.likeContain());
+                cb2.query().querySearchLog().setSearchWord_LikeSearch(searchLogPager.searchWord, op -> op.likeContain());
             }
         }
 
@@ -504,15 +461,12 @@ public class SearchLogService extends BsSearchLogService implements
                 buf.append("00");
             }
 
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("yyyy-MM-dd+HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
             try {
-                final LocalDateTime startDate = LocalDateTime.parse(
-                        buf.toString(), formatter);
+                final LocalDateTime startDate = LocalDateTime.parse(buf.toString(), formatter);
                 cb1.query().setRequestedTime_GreaterEqual(startDate);
                 if (cb2 != null) {
-                    cb2.query().querySearchLog()
-                            .setRequestedTime_GreaterEqual(startDate);
+                    cb2.query().querySearchLog().setRequestedTime_GreaterEqual(startDate);
                 }
             } catch (final DateTimeParseException e) {
                 searchLogPager.startDate = null;
@@ -537,15 +491,12 @@ public class SearchLogService extends BsSearchLogService implements
                 buf.append("00");
             }
 
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("yyyy-MM-dd+HH:mm");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");
             try {
-                final LocalDateTime endDate = LocalDateTime.parse(
-                        buf.toString(), formatter);
+                final LocalDateTime endDate = LocalDateTime.parse(buf.toString(), formatter);
                 cb1.query().setRequestedTime_LessThan(endDate);
                 if (cb2 != null) {
-                    cb2.query().querySearchLog()
-                            .setRequestedTime_LessThan(endDate);
+                    cb2.query().querySearchLog().setRequestedTime_LessThan(endDate);
                 }
             } catch (final DateTimeParseException e) {
                 searchLogPager.endDate = null;
@@ -576,42 +527,28 @@ public class SearchLogService extends BsSearchLogService implements
     }
 
     public void deleteBotsLog(final String[] bots) {
-        final LocalDateTime now = ComponentUtil.getSystemHelper()
-                .getCurrentTime();
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
         for (final String value : bots) {
             final String userAgent = value.trim();
-            clickLogBhv.varyingQueryDelete(
-                    cb2 -> {
-                        cb2.query().querySearchLog()
-                                .setRequestedTime_LessThan(now);
-                        cb2.query()
-                                .querySearchLog()
-                                .setUserAgent_LikeSearch(userAgent,
-                                        op -> op.likeContain());
-                    }, op -> op.allowNonQueryDelete());
-            searchFieldLogBhv.varyingQueryDelete(
-                    cb3 -> {
-                        cb3.query().querySearchLog()
-                                .setRequestedTime_LessThan(now);
-                        cb3.query()
-                                .querySearchLog()
-                                .setUserAgent_LikeSearch(userAgent,
-                                        op -> op.likeContain());
-                    }, op -> op.allowNonQueryDelete());
-            searchLogBhv.varyingQueryDelete(
-                    cb1 -> {
-                        cb1.query().setRequestedTime_LessThan(now);
-                        cb1.query().setUserAgent_LikeSearch(userAgent,
-                                op -> op.likeContain());
-                    }, op -> op.allowNonQueryDelete());
+            clickLogBhv.varyingQueryDelete(cb2 -> {
+                cb2.query().querySearchLog().setRequestedTime_LessThan(now);
+                cb2.query().querySearchLog().setUserAgent_LikeSearch(userAgent, op -> op.likeContain());
+            }, op -> op.allowNonQueryDelete());
+            searchFieldLogBhv.varyingQueryDelete(cb3 -> {
+                cb3.query().querySearchLog().setRequestedTime_LessThan(now);
+                cb3.query().querySearchLog().setUserAgent_LikeSearch(userAgent, op -> op.likeContain());
+            }, op -> op.allowNonQueryDelete());
+            searchLogBhv.varyingQueryDelete(cb1 -> {
+                cb1.query().setRequestedTime_LessThan(now);
+                cb1.query().setUserAgent_LikeSearch(userAgent, op -> op.likeContain());
+            }, op -> op.allowNonQueryDelete());
         }
     }
 
     @Override
     public void store(final SearchLog searchLog) {
         super.store(searchLog);
-        final List<SearchFieldLog> searchFieldLogList = searchLog
-                .getSearchFieldLogList();
+        final List<SearchFieldLog> searchFieldLogList = searchLog.getSearchFieldLogList();
         if (!searchFieldLogList.isEmpty()) {
             final List<SearchFieldLog> fieldLogList = new ArrayList<SearchFieldLog>();
             for (final SearchFieldLog fieldLog : searchFieldLogList) {
@@ -626,8 +563,7 @@ public class SearchLogService extends BsSearchLogService implements
         for (final SearchLog searchLog : searchLogList) {
             searchLogBhv.insert(searchLog);
             final List<SearchFieldLog> fieldLogList = new ArrayList<SearchFieldLog>();
-            for (final SearchFieldLog fieldLog : searchLog
-                    .getSearchFieldLogList()) {
+            for (final SearchFieldLog fieldLog : searchLog.getSearchFieldLogList()) {
                 fieldLog.setSearchId(searchLog.getId());
                 fieldLogList.add(fieldLog);
             }

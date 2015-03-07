@@ -24,8 +24,7 @@ import org.dbflute.saflute.web.action.processor.ActionRequestProcessor;
 public class FessRequestProcessor extends ActionRequestProcessor {
     @Override
     @SuppressWarnings("unchecked")
-    protected void setMapProperty(final Map map, final String name,
-            final Object value) {
+    protected void setMapProperty(final Map map, final String name, final Object value) {
         if (value instanceof String[]) {
             if (map.get(SearchParamMap.CLASS_NAME) != null) {
                 map.put(name, value);

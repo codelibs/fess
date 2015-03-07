@@ -55,15 +55,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XmlApiManager extends BaseApiManager implements WebApiManager {
-    private static final Logger logger = LoggerFactory
-            .getLogger(XmlApiManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(XmlApiManager.class);
 
     protected String xmlPathPrefix = "/xml";
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (Constants.FALSE.equals(ComponentUtil.getCrawlerProperties()
-                .getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(ComponentUtil.getCrawlerProperties().getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE))) {
             return false;
         }
 
@@ -72,38 +70,36 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     }
 
     @Override
-    public void process(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         final String formatType = request.getParameter("type");
         switch (getFormatType(formatType)) {
-            case SEARCH:
-                processSearchRequest(request, response, chain);
-                break;
-            case LABEL:
-                processLabelRequest(request, response, chain);
-                break;
-            case SUGGEST:
-                processSuggestRequest(request, response, chain);
-                break;
-            case SPELLCHECK:
-                processSpellCheckRequest(request, response, chain);
-                break;
-            case ANALYSIS:
-                processAnalysisRequest(request, response, chain);
-                break;
-            case PING:
-                processPingRequest(request, response, chain);
-                break;
-            default:
-                writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
-                break;
+        case SEARCH:
+            processSearchRequest(request, response, chain);
+            break;
+        case LABEL:
+            processLabelRequest(request, response, chain);
+            break;
+        case SUGGEST:
+            processSuggestRequest(request, response, chain);
+            break;
+        case SPELLCHECK:
+            processSpellCheckRequest(request, response, chain);
+            break;
+        case ANALYSIS:
+            processAnalysisRequest(request, response, chain);
+            break;
+        case PING:
+            processPingRequest(request, response, chain);
+            break;
+        default:
+            writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
+            break;
         }
 
     }
 
-    protected void processPingRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getSearchService();
         int status;
         final StringBuilder buf = new StringBuilder(1000);
@@ -138,35 +134,27 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         writeXmlResponse(status, buf.toString(), errMsg);
     }
 
-    protected void processSearchRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(1000);
         String query = null;
-        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
-                CDef.AccessType.Xml);
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, CDef.AccessType.Xml);
         final String queryId = request.getParameter("queryId");
         try {
-            chain.doFilter(new WebApiRequest(request, SEARCH_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, SEARCH_API), new WebApiResponse(response));
             WebApiUtil.validate();
             query = WebApiUtil.getObject("searchQuery");
             final String execTime = WebApiUtil.getObject("execTime");
             final String queryTime = WebApiUtil.getObject("queryTime");
             final String searchTime = WebApiUtil.getObject("searchTime");
             final String pageSize = WebApiUtil.getObject("pageSize");
-            final String currentPageNumber = WebApiUtil
-                    .getObject("currentPageNumber");
-            final String allRecordCount = WebApiUtil
-                    .getObject("allRecordCount");
+            final String currentPageNumber = WebApiUtil.getObject("currentPageNumber");
+            final String allRecordCount = WebApiUtil.getObject("allRecordCount");
             final String allPageCount = WebApiUtil.getObject("allPageCount");
-            final List<Map<String, Object>> documentItems = WebApiUtil
-                    .getObject("documentItems");
-            final FacetResponse facetResponse = WebApiUtil
-                    .getObject("facetResponse");
-            final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil
-                    .getObject("moreLikeThisResponse");
+            final List<Map<String, Object>> documentItems = WebApiUtil.getObject("documentItems");
+            final FacetResponse facetResponse = WebApiUtil.getObject("facetResponse");
+            final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil.getObject("moreLikeThisResponse");
 
             buf.append("<query>");
             buf.append(escapeXml(query));
@@ -200,13 +188,9 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<result>");
             for (final Map<String, Object> document : documentItems) {
                 buf.append("<doc>");
-                for (final Map.Entry<String, Object> entry : document
-                        .entrySet()) {
+                for (final Map.Entry<String, Object> entry : document.entrySet()) {
                     final String name = entry.getKey();
-                    if (StringUtil.isNotBlank(name)
-                            && entry.getValue() != null
-                            && ComponentUtil.getQueryHelper()
-                                    .isApiResponseField(name)) {
+                    if (StringUtil.isNotBlank(name) && entry.getValue() != null && ComponentUtil.getQueryHelper().isApiResponseField(name)) {
                         final String tagName = convertTagName(name);
                         buf.append('<');
                         buf.append(tagName);
@@ -228,8 +212,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         buf.append("<field name=\"");
                         buf.append(escapeXml(field.getName()));
                         buf.append("\">");
-                        for (final Map.Entry<String, Long> entry : field
-                                .getValueCountMap().entrySet()) {
+                        for (final Map.Entry<String, Long> entry : field.getValueCountMap().entrySet()) {
                             buf.append("<value count=\"");
                             buf.append(escapeXml(entry.getValue()));
                             buf.append("\">");
@@ -242,8 +225,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                 // facet query
                 if (facetResponse.getQueryCountMap() != null) {
                     buf.append("<query>");
-                    for (final Map.Entry<String, Long> entry : facetResponse
-                            .getQueryCountMap().entrySet()) {
+                    for (final Map.Entry<String, Long> entry : facetResponse.getQueryCountMap().entrySet()) {
                         buf.append("<value count=\"");
                         buf.append(escapeXml(entry.getValue()));
                         buf.append("\">");
@@ -256,25 +238,19 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             }
             if (moreLikeThisResponse != null && !moreLikeThisResponse.isEmpty()) {
                 buf.append("<more-like-this>");
-                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse
-                        .entrySet()) {
+                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse.entrySet()) {
                     buf.append("<result id=\"");
                     buf.append(escapeXml(mltEntry.getKey()));
                     buf.append("\">");
-                    for (final Map<String, Object> document : mltEntry
-                            .getValue()) {
+                    for (final Map<String, Object> document : mltEntry.getValue()) {
                         buf.append("<doc>");
-                        for (final Map.Entry<String, Object> entry : document
-                                .entrySet()) {
-                            if (StringUtil.isNotBlank(entry.getKey())
-                                    && entry.getValue() != null) {
-                                final String tagName = convertTagName(entry
-                                        .getKey());
+                        for (final Map.Entry<String, Object> entry : document.entrySet()) {
+                            if (StringUtil.isNotBlank(entry.getKey()) && entry.getValue() != null) {
+                                final String tagName = convertTagName(entry.getKey());
                                 buf.append('<');
                                 buf.append(tagName);
                                 buf.append('>');
-                                buf.append(escapeXml(entry.getValue()
-                                        .toString()));
+                                buf.append(escapeXml(entry.getValue().toString()));
                                 buf.append("</");
                                 buf.append(tagName);
                                 buf.append('>');
@@ -301,19 +277,16 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     }
 
     private String convertTagName(final String name) {
-        final String tagName = StringUtil.decamelize(name).replaceAll("_", "-")
-                .toLowerCase();
+        final String tagName = StringUtil.decamelize(name).replaceAll("_", "-").toLowerCase();
         return tagName;
     }
 
-    protected void processLabelRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<Map<String, String>> labelTypeItems = ComponentUtil
-                    .getLabelTypeHelper().getLabelTypeItemList();
+            final List<Map<String, String>> labelTypeItems = ComponentUtil.getLabelTypeHelper().getLabelTypeItemList();
             buf.append("<record-count>");
             buf.append(labelTypeItems.size());
             buf.append("</record-count>");
@@ -341,22 +314,17 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         writeXmlResponse(status, buf.toString(), errMsg);
     }
 
-    protected void processSuggestRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, SUGGEST_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final Integer suggestRecordCount = WebApiUtil
-                    .getObject("suggestRecordCount");
-            final List<SuggestResponse> suggestResultList = WebApiUtil
-                    .getObject("suggestResultList");
-            final List<String> suggestFieldName = WebApiUtil
-                    .getObject("suggestFieldName");
+            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
+            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
+            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
 
             buf.append("<record-count>");
             buf.append(suggestRecordCount);
@@ -366,13 +334,10 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
 
                 for (int i = 0; i < suggestResultList.size(); i++) {
 
-                    final SuggestResponse suggestResponse = suggestResultList
-                            .get(i);
+                    final SuggestResponse suggestResponse = suggestResultList.get(i);
 
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
+                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
+                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
                         final String fn = suggestFieldName.get(i);
                         buf.append("<suggest>");
                         buf.append("<token>");
@@ -382,16 +347,13 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         buf.append(escapeXml(fn));
                         buf.append("</fn>");
                         buf.append("<start-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getStartOffset())));
+                        buf.append(escapeXml(Integer.toString(srList.getStartOffset())));
                         buf.append("</start-offset>");
                         buf.append("<end-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getEndOffset())));
+                        buf.append(escapeXml(Integer.toString(srList.getEndOffset())));
                         buf.append("</end-offset>");
                         buf.append("<num-found>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getNumFound())));
+                        buf.append(escapeXml(Integer.toString(srList.getNumFound())));
                         buf.append("</num-found>");
                         buf.append("<result>");
                         for (final String value : srList) {
@@ -421,22 +383,17 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         writeXmlResponse(status, buf.toString(), errMsg);
     }
 
-    protected void processSpellCheckRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processSpellCheckRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final Integer spellCheckRecordCount = WebApiUtil
-                    .getObject("spellCheckRecordCount");
-            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil
-                    .getObject("spellCheckResultList");
-            final List<String> spellCheckFieldName = WebApiUtil
-                    .getObject("spellCheckFieldName");
+            final Integer spellCheckRecordCount = WebApiUtil.getObject("spellCheckRecordCount");
+            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil.getObject("spellCheckResultList");
+            final List<String> spellCheckFieldName = WebApiUtil.getObject("spellCheckFieldName");
 
             buf.append("<record-count>");
             buf.append(spellCheckRecordCount);
@@ -446,13 +403,10 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
 
                 for (int i = 0; i < spellCheckResultList.size(); i++) {
 
-                    final SuggestResponse suggestResponse = spellCheckResultList
-                            .get(i);
+                    final SuggestResponse suggestResponse = spellCheckResultList.get(i);
 
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
+                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
+                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
                         final String fn = spellCheckFieldName.get(i);
                         buf.append("<suggest>");
                         buf.append("<token>");
@@ -462,16 +416,13 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
                         buf.append(escapeXml(fn));
                         buf.append("</fn>");
                         buf.append("<start-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getStartOffset())));
+                        buf.append(escapeXml(Integer.toString(srList.getStartOffset())));
                         buf.append("</start-offset>");
                         buf.append("<end-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getEndOffset())));
+                        buf.append(escapeXml(Integer.toString(srList.getEndOffset())));
                         buf.append("</end-offset>");
                         buf.append("<num-found>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getNumFound())));
+                        buf.append(escapeXml(Integer.toString(srList.getNumFound())));
                         buf.append("</num-found>");
                         buf.append("<result>");
                         for (final String value : srList) {
@@ -501,46 +452,33 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         writeXmlResponse(status, buf.toString(), errMsg);
     }
 
-    protected String processAnalysisRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected String processAnalysisRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, ANALYSIS_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, ANALYSIS_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final FieldAnalysisResponse fieldAnalysis = WebApiUtil
-                    .getObject("fieldAnalysis");
+            final FieldAnalysisResponse fieldAnalysis = WebApiUtil.getObject("fieldAnalysis");
 
             buf.append("<record-count>");
             buf.append(fieldAnalysis.size());
             buf.append("</record-count>");
             if (fieldAnalysis.size() > 0) {
                 buf.append("<result>");
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis
-                        .entrySet()) {
+                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis.entrySet()) {
 
-                    buf.append("<field name=\"")
-                            .append(escapeXml(fEntry.getKey())).append("\">");
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
-                            .getValue().entrySet()) {
-                        buf.append("<analysis name=\"")
-                                .append(escapeXml(aEntry.getKey()))
-                                .append("\">");
-                        for (final Map<String, Object> dataMap : aEntry
-                                .getValue()) {
+                    buf.append("<field name=\"").append(escapeXml(fEntry.getKey())).append("\">");
+                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry.getValue().entrySet()) {
+                        buf.append("<analysis name=\"").append(escapeXml(aEntry.getKey())).append("\">");
+                        for (final Map<String, Object> dataMap : aEntry.getValue()) {
                             buf.append("<token>");
-                            for (final Map.Entry<String, Object> dEntry : dataMap
-                                    .entrySet()) {
+                            for (final Map.Entry<String, Object> dEntry : dataMap.entrySet()) {
                                 final String key = dEntry.getKey();
                                 final Object value = dEntry.getValue();
                                 if (StringUtil.isNotBlank(key) && value != null) {
-                                    buf.append("<value name=\"")
-                                            .append(escapeXml(key))
-                                            .append("\">")
-                                            .append(escapeXml(value))
+                                    buf.append("<value name=\"").append(escapeXml(key)).append("\">").append(escapeXml(value))
                                             .append("</value>");
                                 }
                             }
@@ -569,8 +507,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         return null;
     }
 
-    protected void writeXmlResponse(final int status, final String body,
-            final String errMsg) {
+    protected void writeXmlResponse(final int status, final String body, final String errMsg) {
         final StringBuilder buf = new StringBuilder(1000);
         buf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         buf.append("<response>");
@@ -604,14 +541,12 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<data>");
             for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
 
-                buf.append("<name>").append(escapeXml(entry.getKey()))
-                        .append("</name><value>")
-                        .append(escapeXml(entry.getValue())).append("</value>");
+                buf.append("<name>").append(escapeXml(entry.getKey())).append("</name><value>").append(escapeXml(entry.getValue()))
+                        .append("</value>");
             }
             buf.append("</data>");
         } else if (obj instanceof Date) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             buf.append(StringEscapeUtils.escapeXml(sdf.format(obj)));
         } else if (obj != null) {
             buf.append(StringEscapeUtils.escapeXml(obj.toString()));

@@ -27,13 +27,11 @@ import org.codelibs.fess.db.cbean.PathMappingCB;
 import org.codelibs.fess.db.exentity.PathMapping;
 import org.codelibs.fess.pager.PathMappingPager;
 
-public class PathMappingService extends BsPathMappingService implements
-        Serializable {
+public class PathMappingService extends BsPathMappingService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public List<PathMapping> getPathMappingList(
-            final Collection<CDef.ProcessType> cdefList) {
+    public List<PathMapping> getPathMappingList(final Collection<CDef.ProcessType> cdefList) {
 
         return pathMappingBhv.selectList(cb -> {
             cb.query().setDeletedBy_IsNull();
@@ -43,8 +41,7 @@ public class PathMappingService extends BsPathMappingService implements
     }
 
     @Override
-    protected void setupListCondition(final PathMappingCB cb,
-            final PathMappingPager pathMappingPager) {
+    protected void setupListCondition(final PathMappingCB cb, final PathMappingPager pathMappingPager) {
         super.setupListCondition(cb, pathMappingPager);
 
         // setup condition
@@ -56,8 +53,7 @@ public class PathMappingService extends BsPathMappingService implements
     }
 
     @Override
-    protected void setupEntityCondition(final PathMappingCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final PathMappingCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition

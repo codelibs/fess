@@ -61,18 +61,13 @@ public class PathMappingAction extends BsPathMappingAction {
     @Override
     protected void loadPathMapping() {
 
-        final PathMapping pathMapping = pathMappingService
-                .getPathMapping(createKeyMap());
+        final PathMapping pathMapping = pathMappingService.getPathMapping(createKeyMap());
         if (pathMapping == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { pathMappingForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { pathMappingForm.id });
         }
 
-        FessBeans.copy(pathMapping, pathMappingForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(pathMapping, pathMappingForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -84,9 +79,7 @@ public class PathMappingAction extends BsPathMappingAction {
             pathMapping = pathMappingService.getPathMapping(createKeyMap());
             if (pathMapping == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { pathMappingForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { pathMappingForm.id });
             }
         } else {
             pathMapping = new PathMapping();
@@ -95,8 +88,7 @@ public class PathMappingAction extends BsPathMappingAction {
         }
         pathMapping.setUpdatedBy(username);
         pathMapping.setUpdatedTime(currentTime);
-        FessBeans.copy(pathMappingForm, pathMapping).excludesCommonColumns()
-                .execute();
+        FessBeans.copy(pathMappingForm, pathMapping).excludesCommonColumns().execute();
 
         return pathMapping;
     }
@@ -105,19 +97,15 @@ public class PathMappingAction extends BsPathMappingAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (pathMappingForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            pathMappingForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    pathMappingForm.crudMode });
         }
 
         try {
-            final PathMapping pathMapping = pathMappingService
-                    .getPathMapping(createKeyMap());
+            final PathMapping pathMapping = pathMappingService.getPathMapping(createKeyMap());
             if (pathMapping == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { pathMappingForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { pathMappingForm.id });
             }
 
             //            pathMappingService.delete(pathMapping);
@@ -134,12 +122,10 @@ public class PathMappingAction extends BsPathMappingAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 

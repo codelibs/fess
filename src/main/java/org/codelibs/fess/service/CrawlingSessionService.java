@@ -48,26 +48,22 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
 
-public class CrawlingSessionService extends BsCrawlingSessionService implements
-        Serializable {
+public class CrawlingSessionService extends BsCrawlingSessionService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(CrawlingSessionService.class);
+    private static final Log log = LogFactory.getLog(CrawlingSessionService.class);
 
     @Resource
     protected CrawlingSessionInfoBhv crawlingSessionInfoBhv;
 
     @Override
-    protected void setupListCondition(final CrawlingSessionCB cb,
-            final CrawlingSessionPager crawlingSessionPager) {
+    protected void setupListCondition(final CrawlingSessionCB cb, final CrawlingSessionPager crawlingSessionPager) {
         super.setupListCondition(cb, crawlingSessionPager);
         if (StringUtil.isNotBlank(crawlingSessionPager.sessionId)) {
-            cb.query().setSessionId_LikeSearch(crawlingSessionPager.sessionId,
-                    op -> {
-                        op.likeContain();
-                    });
+            cb.query().setSessionId_LikeSearch(crawlingSessionPager.sessionId, op -> {
+                op.likeContain();
+            });
         }
         cb.query().addOrderBy_CreatedTime_Desc();
     }
@@ -77,8 +73,7 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         if (crawlingSession == null) {
             throw new FessSystemException("Crawling Session is null.");
         }
-        final LocalDateTime now = ComponentUtil.getSystemHelper()
-                .getCurrentTime();
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
         if (crawlingSession.getCreatedTime() == null) {
             crawlingSession.setCreatedTime(now);
         }
@@ -93,32 +88,28 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         });
     }
 
-    public void deleteSessionIdsBefore(final String activeSessionId,
-            final String name, final LocalDateTime date) {
-        final List<CrawlingSession> crawlingSessionList = crawlingSessionBhv
-                .selectList(cb -> {
-                    cb.query().setExpiredTime_LessEqual(date);
-                    if (StringUtil.isNotBlank(name)) {
-                        cb.query().setName_Equal(name);
-                    }
-                    if (activeSessionId != null) {
-                        cb.query().setSessionId_NotEqual(activeSessionId);
-                    }
-                    cb.specify().columnId();
-                });
+    public void deleteSessionIdsBefore(final String activeSessionId, final String name, final LocalDateTime date) {
+        final List<CrawlingSession> crawlingSessionList = crawlingSessionBhv.selectList(cb -> {
+            cb.query().setExpiredTime_LessEqual(date);
+            if (StringUtil.isNotBlank(name)) {
+                cb.query().setName_Equal(name);
+            }
+            if (activeSessionId != null) {
+                cb.query().setSessionId_NotEqual(activeSessionId);
+            }
+            cb.specify().columnId();
+        });
         if (!crawlingSessionList.isEmpty()) {
             final List<Long> crawlingSessionIdList = new ArrayList<Long>();
             for (final CrawlingSession cs : crawlingSessionList) {
                 crawlingSessionIdList.add(cs.getId());
             }
 
-            crawlingSessionInfoBhv.varyingQueryDelete(
-                    cb2 -> {
-                        cb2.query().setCrawlingSessionId_InScope(
-                                crawlingSessionIdList);
-                    }, op -> {
-                        op.allowNonQueryDelete();
-                    });
+            crawlingSessionInfoBhv.varyingQueryDelete(cb2 -> {
+                cb2.query().setCrawlingSessionId_InScope(crawlingSessionIdList);
+            }, op -> {
+                op.allowNonQueryDelete();
+            });
 
             crawlingSessionBhv.batchDelete(crawlingSessionList);
         }
@@ -130,14 +121,12 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         }).orElse(null);//TODO
     }
 
-    public void storeInfo(
-            final List<CrawlingSessionInfo> crawlingSessionInfoList) {
+    public void storeInfo(final List<CrawlingSessionInfo> crawlingSessionInfoList) {
         if (crawlingSessionInfoList == null) {
             throw new FessSystemException("Crawling Session Info is null.");
         }
 
-        final LocalDateTime now = ComponentUtil.getSystemHelper()
-                .getCurrentTime();
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
         for (final CrawlingSessionInfo crawlingSessionInfo : crawlingSessionInfoList) {
             if (crawlingSessionInfo.getCreatedTime() == null) {
                 crawlingSessionInfo.setCreatedTime(now);
@@ -153,8 +142,7 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
         });
     }
 
-    public List<CrawlingSessionInfo> getLastCrawlingSessionInfoList(
-            final String sessionId) {
+    public List<CrawlingSessionInfo> getLastCrawlingSessionInfoList(final String sessionId) {
         final CrawlingSession crawlingSession = getLast(sessionId);
         if (crawlingSession == null) {
             return Collections.emptyList();
@@ -166,15 +154,13 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
     }
 
     public void deleteOldSessions(final Set<String> activeSessionId) {
-        crawlingSessionInfoBhv.varyingQueryDelete(
-                cb1 -> {
-                    if (!activeSessionId.isEmpty()) {
-                        cb1.query().queryCrawlingSession()
-                                .setSessionId_NotInScope(activeSessionId);
-                    }
-                }, op -> {
-                    op.allowNonQueryDelete();
-                });
+        crawlingSessionInfoBhv.varyingQueryDelete(cb1 -> {
+            if (!activeSessionId.isEmpty()) {
+                cb1.query().queryCrawlingSession().setSessionId_NotInScope(activeSessionId);
+            }
+        }, op -> {
+            op.allowNonQueryDelete();
+        });
         crawlingSessionBhv.varyingQueryDelete(cb2 -> {
             if (!activeSessionId.isEmpty()) {
                 cb2.query().setSessionId_NotInScope(activeSessionId);
@@ -186,24 +172,21 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
 
     public void importCsv(final Reader reader) {
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
-        final DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
             while ((list = csvReader.readValues()) != null) {
                 try {
                     final String sessionId = list.get(0);
-                    CrawlingSession crawlingSession = crawlingSessionBhv
-                            .selectEntity(cb -> {
-                                cb.query().setSessionId_Equal(sessionId);
-                                cb.specify().columnSessionId();
-                            }).orElse(null);//TODO
+                    CrawlingSession crawlingSession = crawlingSessionBhv.selectEntity(cb -> {
+                        cb.query().setSessionId_Equal(sessionId);
+                        cb.specify().columnSessionId();
+                    }).orElse(null);//TODO
                     if (crawlingSession == null) {
                         crawlingSession = new CrawlingSession();
                         crawlingSession.setSessionId(list.get(0));
-                        crawlingSession.setCreatedTime(LocalDateTime.parse(
-                                list.get(1), formatter));
+                        crawlingSession.setCreatedTime(LocalDateTime.parse(list.get(1), formatter));
                         crawlingSessionBhv.insert(crawlingSession);
                     }
 
@@ -211,8 +194,7 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
                     entity.setCrawlingSessionId(crawlingSession.getId());
                     entity.setKey(list.get(2));
                     entity.setValue(list.get(3));
-                    entity.setCreatedTime(LocalDateTime.parse(list.get(4),
-                            formatter));
+                    entity.setCreatedTime(LocalDateTime.parse(list.get(4), formatter));
                     crawlingSessionInfoBhv.insert(entity);
                 } catch (final Exception e) {
                     log.warn("Failed to read a click log: " + list, e);
@@ -237,8 +219,7 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
             list.add("Value");
             list.add("CreatedTime");
             csvWriter.writeValues(list);
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             crawlingSessionInfoBhv.selectCursor(cb -> {
                 cb.setupSelect_CrawlingSession();
             }, new EntityRowHandler<CrawlingSessionInfo>() {
@@ -260,13 +241,11 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        log.warn("Failed to write a crawling session info: "
-                                + entity, e);
+                        log.warn("Failed to write a crawling session info: " + entity, e);
                     }
                 }
 
-                private void addToList(final List<String> list,
-                        final Object value) {
+                private void addToList(final List<String> list, final Object value) {
                     if (value == null) {
                         list.add(StringUtil.EMPTY);
                     } else if (value instanceof LocalDateTime) {
@@ -297,12 +276,11 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
     }
 
     public CrawlingSession getLast(final String sessionId) {
-        final ListResultBean<CrawlingSession> list = crawlingSessionBhv
-                .selectList(cb -> {
-                    cb.query().setSessionId_Equal(sessionId);
-                    cb.query().addOrderBy_CreatedTime_Desc();
-                    cb.fetchFirst(1);
-                });
+        final ListResultBean<CrawlingSession> list = crawlingSessionBhv.selectList(cb -> {
+            cb.query().setSessionId_Equal(sessionId);
+            cb.query().addOrderBy_CreatedTime_Desc();
+            cb.fetchFirst(1);
+        });
         if (list.isEmpty()) {
             return null;
         }

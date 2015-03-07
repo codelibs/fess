@@ -54,17 +54,13 @@ public class LabelTypeAction extends BsLabelTypeAction {
     @Override
     protected void loadLabelType() {
 
-        final LabelType labelType = labelTypeService
-                .getLabelType(createKeyMap());
+        final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
         if (labelType == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { labelTypeForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { labelTypeForm.id });
         }
 
-        FessBeans.copy(labelType, labelTypeForm).commonColumnDateConverter()
-                .excludes("searchParams", "mode").execute();
+        FessBeans.copy(labelType, labelTypeForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -76,9 +72,7 @@ public class LabelTypeAction extends BsLabelTypeAction {
             labelType = labelTypeService.getLabelType(createKeyMap());
             if (labelType == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { labelTypeForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { labelTypeForm.id });
             }
         } else {
             labelType = new LabelType();
@@ -87,8 +81,7 @@ public class LabelTypeAction extends BsLabelTypeAction {
         }
         labelType.setUpdatedBy(username);
         labelType.setUpdatedTime(currentTime);
-        FessBeans.copy(labelTypeForm, labelType).excludesCommonColumns()
-                .execute();
+        FessBeans.copy(labelTypeForm, labelType).excludesCommonColumns().execute();
 
         return labelType;
     }
@@ -97,19 +90,15 @@ public class LabelTypeAction extends BsLabelTypeAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            labelTypeForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    labelTypeForm.crudMode });
         }
 
         try {
-            final LabelType labelType = labelTypeService
-                    .getLabelType(createKeyMap());
+            final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
             if (labelType == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { labelTypeForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { labelTypeForm.id });
             }
 
             //           labelTypeService.delete(labelType);
@@ -126,12 +115,10 @@ public class LabelTypeAction extends BsLabelTypeAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 

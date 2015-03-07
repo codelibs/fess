@@ -39,33 +39,27 @@ public abstract class BsWebCrawlingConfigService {
         super();
     }
 
-    public List<WebCrawlingConfig> getWebCrawlingConfigList(
-            final WebCrawlingConfigPager webCrawlingConfigPager) {
+    public List<WebCrawlingConfig> getWebCrawlingConfigList(final WebCrawlingConfigPager webCrawlingConfigPager) {
 
-        final PagingResultBean<WebCrawlingConfig> webCrawlingConfigList = webCrawlingConfigBhv
-                .selectPage(cb -> {
-                    cb.paging(webCrawlingConfigPager.getPageSize(),
-                            webCrawlingConfigPager.getCurrentPageNumber());
-                    setupListCondition(cb, webCrawlingConfigPager);
-                });
+        final PagingResultBean<WebCrawlingConfig> webCrawlingConfigList = webCrawlingConfigBhv.selectPage(cb -> {
+            cb.paging(webCrawlingConfigPager.getPageSize(), webCrawlingConfigPager.getCurrentPageNumber());
+            setupListCondition(cb, webCrawlingConfigPager);
+        });
 
         // update pager
-        Beans.copy(webCrawlingConfigList, webCrawlingConfigPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        webCrawlingConfigPager.setPageNumberList(webCrawlingConfigList
-                .pageRange(op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(webCrawlingConfigList, webCrawlingConfigPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        webCrawlingConfigPager.setPageNumberList(webCrawlingConfigList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return webCrawlingConfigList;
     }
 
     public WebCrawlingConfig getWebCrawlingConfig(final Map<String, String> keys) {
-        final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+        final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (webCrawlingConfig == null) {
             // TODO exception?
             return null;
@@ -74,24 +68,21 @@ public abstract class BsWebCrawlingConfigService {
         return webCrawlingConfig;
     }
 
-    public void store(final WebCrawlingConfig webCrawlingConfig)
-            throws CrudMessageException {
+    public void store(final WebCrawlingConfig webCrawlingConfig) throws CrudMessageException {
         setupStoreCondition(webCrawlingConfig);
 
         webCrawlingConfigBhv.insertOrUpdate(webCrawlingConfig);
 
     }
 
-    public void delete(final WebCrawlingConfig webCrawlingConfig)
-            throws CrudMessageException {
+    public void delete(final WebCrawlingConfig webCrawlingConfig) throws CrudMessageException {
         setupDeleteCondition(webCrawlingConfig);
 
         webCrawlingConfigBhv.delete(webCrawlingConfig);
 
     }
 
-    protected void setupListCondition(final WebCrawlingConfigCB cb,
-            final WebCrawlingConfigPager webCrawlingConfigPager) {
+    protected void setupListCondition(final WebCrawlingConfigCB cb, final WebCrawlingConfigPager webCrawlingConfigPager) {
 
         if (webCrawlingConfigPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(webCrawlingConfigPager.id));
@@ -99,14 +90,12 @@ public abstract class BsWebCrawlingConfigService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final WebCrawlingConfigCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final WebCrawlingConfigCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final WebCrawlingConfig webCrawlingConfig) {
     }
 
-    protected void setupDeleteCondition(
-            final WebCrawlingConfig webCrawlingConfig) {
+    protected void setupDeleteCondition(final WebCrawlingConfig webCrawlingConfig) {
     }
 }

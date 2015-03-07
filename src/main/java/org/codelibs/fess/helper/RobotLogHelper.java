@@ -36,39 +36,37 @@ public class RobotLogHelper extends LogHelperImpl {
     public void log(final LogType key, final Object... objs) {
         try {
             switch (key) {
-                case CRAWLING_ACCESS_EXCEPTION: {
-                    final S2RobotContext robotContext = (S2RobotContext) objs[0];
-                    final UrlQueue urlQueue = (UrlQueue) objs[1];
-                    Throwable e = (Throwable) objs[2];
-                    if (e instanceof RobotMultipleCrawlAccessException) {
-                        final Throwable[] causes = ((RobotMultipleCrawlAccessException) e)
-                                .getCauses();
-                        if (causes.length > 0) {
-                            e = causes[causes.length - 1];
-                        }
+            case CRAWLING_ACCESS_EXCEPTION: {
+                final S2RobotContext robotContext = (S2RobotContext) objs[0];
+                final UrlQueue urlQueue = (UrlQueue) objs[1];
+                Throwable e = (Throwable) objs[2];
+                if (e instanceof RobotMultipleCrawlAccessException) {
+                    final Throwable[] causes = ((RobotMultipleCrawlAccessException) e).getCauses();
+                    if (causes.length > 0) {
+                        e = causes[causes.length - 1];
                     }
-
-                    String errorName;
-                    final Throwable cause = e.getCause();
-                    if (cause != null) {
-                        errorName = cause.getClass().getCanonicalName();
-                    } else {
-                        errorName = e.getClass().getCanonicalName();
-                    }
-                    storeFailureUrl(robotContext, urlQueue, errorName, e);
-                    break;
                 }
-                case CRAWLING_EXCETPION: {
-                    final S2RobotContext robotContext = (S2RobotContext) objs[0];
-                    final UrlQueue urlQueue = (UrlQueue) objs[1];
-                    final Throwable e = (Throwable) objs[2];
 
-                    storeFailureUrl(robotContext, urlQueue, e.getClass()
-                            .getCanonicalName(), e);
-                    break;
+                String errorName;
+                final Throwable cause = e.getCause();
+                if (cause != null) {
+                    errorName = cause.getClass().getCanonicalName();
+                } else {
+                    errorName = e.getClass().getCanonicalName();
                 }
-                default:
-                    break;
+                storeFailureUrl(robotContext, urlQueue, errorName, e);
+                break;
+            }
+            case CRAWLING_EXCETPION: {
+                final S2RobotContext robotContext = (S2RobotContext) objs[0];
+                final UrlQueue urlQueue = (UrlQueue) objs[1];
+                final Throwable e = (Throwable) objs[2];
+
+                storeFailureUrl(robotContext, urlQueue, e.getClass().getCanonicalName(), e);
+                break;
+            }
+            default:
+                break;
             }
         } catch (final Exception e) {
             logger.warn("Failed to store a failure url.", e);
@@ -77,15 +75,12 @@ public class RobotLogHelper extends LogHelperImpl {
         super.log(key, objs);
     }
 
-    private void storeFailureUrl(final S2RobotContext robotContext,
-            final UrlQueue urlQueue, final String errorName, final Throwable e) {
+    private void storeFailureUrl(final S2RobotContext robotContext, final UrlQueue urlQueue, final String errorName, final Throwable e) {
 
-        final CrawlingConfig crawlingConfig = getCrawlingConfig(robotContext
-                .getSessionId());
+        final CrawlingConfig crawlingConfig = getCrawlingConfig(robotContext.getSessionId());
         final String url = urlQueue.getUrl();
 
-        final FailureUrlService failureUrlService = SingletonS2Container
-                .getComponent(FailureUrlService.class);
+        final FailureUrlService failureUrlService = SingletonS2Container.getComponent(FailureUrlService.class);
         failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 

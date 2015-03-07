@@ -56,42 +56,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FessS2RobotThread extends S2RobotThread {
-    private static final Logger logger = LoggerFactory
-            .getLogger(FessS2RobotThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(FessS2RobotThread.class);
 
     @Override
-    protected boolean isContentUpdated(final S2RobotClient client,
-            final UrlQueue urlQueue) {
-        final DynamicProperties crawlerProperties = ComponentUtil
-                .getCrawlerProperties();
-        if (crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY,
-                Constants.TRUE).equals(Constants.TRUE)) {
+    protected boolean isContentUpdated(final S2RobotClient client, final UrlQueue urlQueue) {
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
+        if (crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
 
             log(logHelper, LogType.CHECK_LAST_MODIFIED, robotContext, urlQueue);
             final long startTime = System.currentTimeMillis();
 
-            final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
-                    .getCrawlingConfigHelper();
-            final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                    .getCrawlingSessionHelper();
+            final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+            final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-            final IndexingHelper indexingHelper = ComponentUtil
-                    .getIndexingHelper();
-            final SolrGroupManager solrGroupManager = ComponentUtil
-                    .getSolrGroupManager();
-            final boolean useAclAsRole = crawlerProperties.getProperty(
-                    Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(
-                    Constants.TRUE);
+            final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
+            final SolrGroupManager solrGroupManager = ComponentUtil.getSolrGroupManager();
+            final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
 
-            final SolrGroup solrGroup = solrGroupManager
-                    .getSolrGroup(QueryType.ADD);
+            final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.ADD);
 
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;
             try {
-                final CrawlingConfig crawlingConfig = crawlingConfigHelper
-                        .get(robotContext.getSessionId());
+                final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(robotContext.getSessionId());
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put(fieldHelper.urlField, url);
                 final List<String> roleTypeList = new ArrayList<String>();
@@ -100,78 +88,60 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
                 if (useAclAsRole && url.startsWith("smb://")) {
                     //  head method
-                    responseData = client.execute(RequestDataBuilder
-                            .newRequestData().head().url(url).build());
+                    responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                     if (responseData == null) {
                         return true;
                     }
 
-                    final ACE[] aces = (ACE[]) responseData.getMetaDataMap()
-                            .get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
+                    final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
                     if (aces != null) {
                         for (final ACE item : aces) {
                             final SID sid = item.getSID();
                             roleTypeList.add(sambaHelper.getAccountId(sid));
                         }
                         if (logger.isDebugEnabled()) {
-                            logger.debug("smbUrl:" + responseData.getUrl()
-                                    + " roleType:" + roleTypeList.toString());
+                            logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
                         }
                     }
                 }
                 dataMap.put(fieldHelper.roleField, roleTypeList);
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
-                final SolrDocument solrDocument = indexingHelper
-                        .getSolrDocument(solrGroup, id, new String[] {
-                                fieldHelper.idField,
-                                fieldHelper.lastModifiedField,
-                                fieldHelper.anchorField,
-                                fieldHelper.segmentField,
-                                fieldHelper.expiresField,
-                                fieldHelper.clickCountField,
+                final SolrDocument solrDocument =
+                        indexingHelper.getSolrDocument(solrGroup, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
+                                fieldHelper.anchorField, fieldHelper.segmentField, fieldHelper.expiresField, fieldHelper.clickCountField,
                                 fieldHelper.favoriteCountField });
                 if (solrDocument == null) {
-                    storeChildUrlsToQueue(urlQueue,
-                            getChildUrlSet(solrGroup, id));
+                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(solrGroup, id));
                     return true;
                 }
 
-                final Date expires = (Date) solrDocument
-                        .get(fieldHelper.expiresField);
-                if (expires != null
-                        && expires.getTime() < System.currentTimeMillis()) {
-                    final Object idValue = solrDocument
-                            .getFieldValue(fieldHelper.idField);
+                final Date expires = (Date) solrDocument.get(fieldHelper.expiresField);
+                if (expires != null && expires.getTime() < System.currentTimeMillis()) {
+                    final Object idValue = solrDocument.getFieldValue(fieldHelper.idField);
                     if (idValue != null) {
-                        indexingHelper.deleteDocument(solrGroup,
-                                idValue.toString());
+                        indexingHelper.deleteDocument(solrGroup, idValue.toString());
                     }
                     return true;
                 }
 
-                final Date lastModified = (Date) solrDocument
-                        .get(fieldHelper.lastModifiedField);
+                final Date lastModified = (Date) solrDocument.get(fieldHelper.lastModifiedField);
                 if (lastModified == null) {
                     return true;
                 }
 
-                final Integer clickCount = (Integer) solrDocument
-                        .get(fieldHelper.clickCountField);
+                final Integer clickCount = (Integer) solrDocument.get(fieldHelper.clickCountField);
                 if (clickCount != null) {
-                    final SearchLogHelper searchLogHelper = ComponentUtil
-                            .getSearchLogHelper();
+                    final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
                     final int count = searchLogHelper.getClickCount(url);
                     if (count != clickCount.intValue()) {
                         return true;
                     }
                 }
 
-                final Integer favoriteCount = (Integer) solrDocument
-                        .get(fieldHelper.favoriteCountField);
+                final Integer favoriteCount = (Integer) solrDocument.get(fieldHelper.favoriteCountField);
                 if (favoriteCount != null) {
-                    final SearchLogHelper searchLogHelper = ComponentUtil
-                            .getSearchLogHelper();
+                    final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
                     final long count = searchLogHelper.getFavoriteCount(url);
                     if (count != favoriteCount.longValue()) {
                         return true;
@@ -180,8 +150,7 @@ public class FessS2RobotThread extends S2RobotThread {
 
                 if (responseData == null) {
                     //  head method
-                    responseData = client.execute(RequestDataBuilder
-                            .newRequestData().head().url(url).build());
+                    responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                     if (responseData == null) {
                         return true;
                     }
@@ -189,29 +158,22 @@ public class FessS2RobotThread extends S2RobotThread {
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
-                    storeChildUrlsToQueue(urlQueue,
-                            getAnchorSet(solrDocument
-                                    .get(fieldHelper.anchorField)));
+                    storeChildUrlsToQueue(urlQueue, getAnchorSet(solrDocument.get(fieldHelper.anchorField)));
                     indexingHelper.deleteDocument(solrGroup, id);
                     return false;
                 } else if (responseData.getLastModified() == null) {
                     return true;
-                } else if (responseData.getLastModified().getTime() <= lastModified
-                        .getTime() && httpStatusCode == 200) {
+                } else if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == 200) {
 
                     log(logHelper, LogType.NOT_MODIFIED, robotContext, urlQueue);
 
-                    responseData.setExecutionTime(System.currentTimeMillis()
-                            - startTime);
+                    responseData.setExecutionTime(System.currentTimeMillis() - startTime);
                     responseData.setParentUrl(urlQueue.getParentUrl());
                     responseData.setSessionId(robotContext.getSessionId());
-                    responseData
-                            .setHttpStatusCode(org.codelibs.robot.Constants.NOT_MODIFIED_STATUS);
+                    responseData.setHttpStatusCode(org.codelibs.robot.Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
-                    storeChildUrlsToQueue(urlQueue,
-                            getAnchorSet(solrDocument
-                                    .get(fieldHelper.anchorField)));
+                    storeChildUrlsToQueue(urlQueue, getAnchorSet(solrDocument.get(fieldHelper.anchorField)));
 
                     return false;
                 }
@@ -224,14 +186,11 @@ public class FessS2RobotThread extends S2RobotThread {
         return true;
     }
 
-    protected void storeChildUrlsToQueue(final UrlQueue urlQueue,
-            final Set<RequestData> childUrlSet) {
+    protected void storeChildUrlsToQueue(final UrlQueue urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
             synchronized (robotContext.getAccessCountLock()) {
                 //  add an url
-                storeChildUrls(childUrlSet, urlQueue.getUrl(),
-                        urlQueue.getDepth() != null ? urlQueue.getDepth() + 1
-                                : 1);
+                storeChildUrls(childUrlSet, urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
             }
         }
     }
@@ -254,19 +213,15 @@ public class FessS2RobotThread extends S2RobotThread {
 
         final Set<RequestData> childUrlSet = new LinkedHashSet<>();
         for (final String anchor : anchorList) {
-            childUrlSet.add(RequestDataBuilder.newRequestData().get()
-                    .url(anchor).build());
+            childUrlSet.add(RequestDataBuilder.newRequestData().get().url(anchor).build());
         }
         return childUrlSet;
     }
 
-    protected Set<RequestData> getChildUrlSet(final SolrGroup solrGroup,
-            final String id) {
+    protected Set<RequestData> getChildUrlSet(final SolrGroup solrGroup, final String id) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-        final SolrDocumentList docList = indexingHelper
-                .getChildSolrDocumentList(solrGroup, id,
-                        new String[] { fieldHelper.urlField });
+        final SolrDocumentList docList = indexingHelper.getChildSolrDocumentList(solrGroup, id, new String[] { fieldHelper.urlField });
         if (docList.isEmpty()) {
             return null;
         }
@@ -277,8 +232,7 @@ public class FessS2RobotThread extends S2RobotThread {
         for (final SolrDocument doc : docList) {
             final Object obj = doc.get(fieldHelper.urlField);
             if (obj != null) {
-                urlSet.add(RequestDataBuilder.newRequestData().get()
-                        .url(obj.toString()).build());
+                urlSet.add(RequestDataBuilder.newRequestData().get().url(obj.toString()).build());
             }
         }
         return urlSet;

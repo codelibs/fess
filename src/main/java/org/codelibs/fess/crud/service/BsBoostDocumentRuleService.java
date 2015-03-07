@@ -39,33 +39,27 @@ public abstract class BsBoostDocumentRuleService {
         super();
     }
 
-    public List<BoostDocumentRule> getBoostDocumentRuleList(
-            final BoostDocumentRulePager boostDocumentRulePager) {
+    public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocumentRulePager boostDocumentRulePager) {
 
-        final PagingResultBean<BoostDocumentRule> boostDocumentRuleList = boostDocumentRuleBhv
-                .selectPage(cb -> {
-                    cb.paging(boostDocumentRulePager.getPageSize(),
-                            boostDocumentRulePager.getCurrentPageNumber());
-                    setupListCondition(cb, boostDocumentRulePager);
-                });
+        final PagingResultBean<BoostDocumentRule> boostDocumentRuleList = boostDocumentRuleBhv.selectPage(cb -> {
+            cb.paging(boostDocumentRulePager.getPageSize(), boostDocumentRulePager.getCurrentPageNumber());
+            setupListCondition(cb, boostDocumentRulePager);
+        });
 
         // update pager
-        Beans.copy(boostDocumentRuleList, boostDocumentRulePager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        boostDocumentRulePager.setPageNumberList(boostDocumentRuleList
-                .pageRange(op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(boostDocumentRuleList, boostDocumentRulePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return boostDocumentRuleList;
     }
 
     public BoostDocumentRule getBoostDocumentRule(final Map<String, String> keys) {
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+        final BoostDocumentRule boostDocumentRule = boostDocumentRuleBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (boostDocumentRule == null) {
             // TODO exception?
             return null;
@@ -74,24 +68,21 @@ public abstract class BsBoostDocumentRuleService {
         return boostDocumentRule;
     }
 
-    public void store(final BoostDocumentRule boostDocumentRule)
-            throws CrudMessageException {
+    public void store(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
         setupStoreCondition(boostDocumentRule);
 
         boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule);
 
     }
 
-    public void delete(final BoostDocumentRule boostDocumentRule)
-            throws CrudMessageException {
+    public void delete(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
         setupDeleteCondition(boostDocumentRule);
 
         boostDocumentRuleBhv.delete(boostDocumentRule);
 
     }
 
-    protected void setupListCondition(final BoostDocumentRuleCB cb,
-            final BoostDocumentRulePager boostDocumentRulePager) {
+    protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocumentRulePager boostDocumentRulePager) {
 
         if (boostDocumentRulePager.id != null) {
             cb.query().setId_Equal(Long.parseLong(boostDocumentRulePager.id));
@@ -99,14 +90,12 @@ public abstract class BsBoostDocumentRuleService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final BoostDocumentRuleCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final BoostDocumentRuleCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final BoostDocumentRule boostDocumentRule) {
     }
 
-    protected void setupDeleteCondition(
-            final BoostDocumentRule boostDocumentRule) {
+    protected void setupDeleteCondition(final BoostDocumentRule boostDocumentRule) {
     }
 }

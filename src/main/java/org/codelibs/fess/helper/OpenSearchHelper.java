@@ -53,8 +53,7 @@ public class OpenSearchHelper {
     @InitMethod
     public void init() {
         if (StringUtil.isNotBlank(osddPath)) {
-            final String path = ServletContextUtil.getServletContext()
-                    .getRealPath(osddPath);
+            final String path = ServletContextUtil.getServletContext().getRealPath(osddPath);
             osddFile = new File(path);
             if (!osddFile.isFile()) {
                 osddFile = null;
@@ -80,8 +79,7 @@ public class OpenSearchHelper {
             os = response.getOutputStream();
             os.write(FileUtil.getBytes(osddFile));
         } catch (final IOException e) {
-            throw new FessSystemException(
-                    "Failed to write OpenSearch response.", e);
+            throw new FessSystemException("Failed to write OpenSearch response.", e);
         } finally {
             IOUtils.closeQuietly(os);
         }

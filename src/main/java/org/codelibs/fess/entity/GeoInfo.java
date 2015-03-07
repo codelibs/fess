@@ -39,8 +39,7 @@ public class GeoInfo {
         if (!isInit) {
             isInit = true;
 
-            if (StringUtil.isBlank(latitude) || StringUtil.isBlank(longitude)
-                    || StringUtil.isBlank(distance)) {
+            if (StringUtil.isBlank(latitude) || StringUtil.isBlank(longitude) || StringUtil.isBlank(distance)) {
                 latitude = null;
                 longitude = null;
                 distance = null;
@@ -88,20 +87,16 @@ public class GeoInfo {
 
     public boolean isAvailable() {
         init();
-        return StringUtil.isNotBlank(latitude)
-                && StringUtil.isNotBlank(longitude)
-                && StringUtil.isNotBlank(distance);
+        return StringUtil.isNotBlank(latitude) && StringUtil.isNotBlank(longitude) && StringUtil.isNotBlank(distance);
     }
 
     public String toGeoQueryString() {
         init();
-        return "{!geofilt pt=" + latitude + "," + longitude
-                + " sfield=location d=" + distance + "}";
+        return "{!geofilt pt=" + latitude + "," + longitude + " sfield=location d=" + distance + "}";
     }
 
     @Override
     public String toString() {
-        return "GeoInfo [latitude=" + latitude + ", longitude=" + longitude
-                + ", distance=" + distance + ", isInit=" + isInit + "]";
+        return "GeoInfo [latitude=" + latitude + ", longitude=" + longitude + ", distance=" + distance + ", isInit=" + isInit + "]";
     }
 }

@@ -47,13 +47,11 @@ public class LoginInfoFilter implements Filter {
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         final HttpServletRequest hRequest = (HttpServletRequest) request;
         final HttpSession session = hRequest.getSession();
-        LoginInfo loginInfo = (LoginInfo) session
-                .getAttribute(SSCConstants.USER_INFO);
+        LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
         if (loginInfo == null) {
             loginInfo = new LoginInfo();
             session.setAttribute(SSCConstants.USER_INFO, loginInfo);
@@ -70,11 +68,9 @@ public class LoginInfoFilter implements Filter {
         chain.doFilter(request, response);
     }
 
-    private void updateRoleList(final HttpServletRequest hRequest,
-            final LoginInfo loginInfo) {
+    private void updateRoleList(final HttpServletRequest hRequest, final LoginInfo loginInfo) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final Set<String> authenticatedRoleList = systemHelper
-                .getAuthenticatedRoleSet();
+        final Set<String> authenticatedRoleList = systemHelper.getAuthenticatedRoleSet();
         final Set<String> roleSet = new HashSet<>();
         for (final String role : authenticatedRoleList) {
             if (hRequest.isUserInRole(role)) {

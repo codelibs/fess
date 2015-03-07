@@ -60,18 +60,13 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
     @Override
     protected void loadRequestHeader() {
 
-        final RequestHeader requestHeader = requestHeaderService
-                .getRequestHeader(createKeyMap());
+        final RequestHeader requestHeader = requestHeaderService.getRequestHeader(createKeyMap());
         if (requestHeader == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { requestHeaderForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { requestHeaderForm.id });
         }
 
-        FessBeans.copy(requestHeader, requestHeaderForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(requestHeader, requestHeaderForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -80,13 +75,10 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (requestHeaderForm.crudMode == CommonConstants.EDIT_MODE) {
-            requestHeader = requestHeaderService
-                    .getRequestHeader(createKeyMap());
+            requestHeader = requestHeaderService.getRequestHeader(createKeyMap());
             if (requestHeader == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { requestHeaderForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { requestHeaderForm.id });
             }
         } else {
             requestHeader = new RequestHeader();
@@ -95,8 +87,7 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
         }
         requestHeader.setUpdatedBy(username);
         requestHeader.setUpdatedTime(currentTime);
-        FessBeans.copy(requestHeaderForm, requestHeader)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(requestHeaderForm, requestHeader).excludesCommonColumns().execute();
 
         return requestHeader;
     }
@@ -105,19 +96,15 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (requestHeaderForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            requestHeaderForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    requestHeaderForm.crudMode });
         }
 
         try {
-            final RequestHeader requestHeader = requestHeaderService
-                    .getRequestHeader(createKeyMap());
+            final RequestHeader requestHeader = requestHeaderService.getRequestHeader(createKeyMap());
             if (requestHeader == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { requestHeaderForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { requestHeaderForm.id });
             }
 
             //           requestHeaderService.delete(requestHeader);
@@ -134,39 +121,33 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
     public List<Map<String, String>> getWebCrawlingConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        final List<WebCrawlingConfig> webCrawlingConfigList = webCrawlingConfigService
-                .getAllWebCrawlingConfigList(false, false, false, null);
+        final List<WebCrawlingConfig> webCrawlingConfigList =
+                webCrawlingConfigService.getAllWebCrawlingConfigList(false, false, false, null);
         for (final WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-            items.add(createItem(webCrawlingConfig.getName(), webCrawlingConfig
-                    .getId().toString()));
+            items.add(createItem(webCrawlingConfig.getName(), webCrawlingConfig.getId().toString()));
         }
         return items;
     }
 
     public List<Map<String, String>> getProtocolSchemeItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(),
-                "labels.web_authentication_scheme_basic"), "BASIC"));
-        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(),
-                "labels.web_authentication_scheme_digest"), "DIGEST"));
+        items.add(createItem(
+                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_basic"), "BASIC"));
+        items.add(createItem(
+                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_digest"), "DIGEST"));
         return items;
     }
 
-    protected Map<String, String> createItem(final String label,
-            final String value) {
+    protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<String, String>(2);
         map.put("label", label);
         map.put("value", value);
@@ -174,7 +155,6 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
     }
 
     public boolean isDisplayCreateLink() {
-        return !webCrawlingConfigService.getAllWebCrawlingConfigList(false,
-                false, false, null).isEmpty();
+        return !webCrawlingConfigService.getAllWebCrawlingConfigList(false, false, false, null).isEmpty();
     }
 }

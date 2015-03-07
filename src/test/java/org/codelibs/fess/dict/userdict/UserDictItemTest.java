@@ -21,8 +21,7 @@ import org.seasar.extension.unit.S2TestCase;
 public class UserDictItemTest extends S2TestCase {
 
     public void test_new1() {
-        final UserDictItem userDictItem = new UserDictItem(1, "t1", "s1", "r1",
-                "p1");
+        final UserDictItem userDictItem = new UserDictItem(1, "t1", "s1", "r1", "p1");
         assertEquals(1, userDictItem.getId());
         assertEquals("t1", userDictItem.getToken());
         assertEquals("s1", userDictItem.getSegmentation());
@@ -48,33 +47,22 @@ public class UserDictItemTest extends S2TestCase {
     }
 
     public void test_equals1() {
-        final UserDictItem userDictItem1 = new UserDictItem(1, "t1", "s1",
-                "r1", "p1");
+        final UserDictItem userDictItem1 = new UserDictItem(1, "t1", "s1", "r1", "p1");
 
         assertTrue(userDictItem1.equals(userDictItem1));
-        assertTrue(userDictItem1.equals(new UserDictItem(1, "t1", "s1", "r1",
-                "p1")));
-        assertTrue(userDictItem1.equals(new UserDictItem(2, "t1", "s1", "r1",
-                "p1")));
-        assertFalse(userDictItem1.equals(new UserDictItem(1, "T1", "s1", "r1",
-                "p1")));
-        assertFalse(userDictItem1.equals(new UserDictItem(1, "t1", "S1", "r1",
-                "p1")));
-        assertFalse(userDictItem1.equals(new UserDictItem(1, "t1", "s1", "R1",
-                "p1")));
-        assertFalse(userDictItem1.equals(new UserDictItem(1, "t1", "s1", "r1",
-                "P1")));
+        assertTrue(userDictItem1.equals(new UserDictItem(1, "t1", "s1", "r1", "p1")));
+        assertTrue(userDictItem1.equals(new UserDictItem(2, "t1", "s1", "r1", "p1")));
+        assertFalse(userDictItem1.equals(new UserDictItem(1, "T1", "s1", "r1", "p1")));
+        assertFalse(userDictItem1.equals(new UserDictItem(1, "t1", "S1", "r1", "p1")));
+        assertFalse(userDictItem1.equals(new UserDictItem(1, "t1", "s1", "R1", "p1")));
+        assertFalse(userDictItem1.equals(new UserDictItem(1, "t1", "s1", "r1", "P1")));
     }
 
     public void test_toLineString() {
-        assertEquals("t1,s1,r1,p1",
-                new UserDictItem(1, "t1", "s1", "r1", "p1").toLineString());
-        assertEquals("t\"\"1,s\"\"1,r\"\"1,p\"\"1", new UserDictItem(1, "t\"1",
-                "s\"1", "r\"1", "p\"1").toLineString());
-        assertEquals("\"t,1\",\"s,1\",\"r,1\",\"p,1\"", new UserDictItem(1,
-                "t,1", "s,1", "r,1", "p,1").toLineString());
+        assertEquals("t1,s1,r1,p1", new UserDictItem(1, "t1", "s1", "r1", "p1").toLineString());
+        assertEquals("t\"\"1,s\"\"1,r\"\"1,p\"\"1", new UserDictItem(1, "t\"1", "s\"1", "r\"1", "p\"1").toLineString());
+        assertEquals("\"t,1\",\"s,1\",\"r,1\",\"p,1\"", new UserDictItem(1, "t,1", "s,1", "r,1", "p,1").toLineString());
         assertEquals("\"t\"\",1\",\"s\"\",1\",\"r\"\",1\",\"p\"\",1\"",
-                new UserDictItem(1, "t\",1", "s\",1", "r\",1", "p\",1")
-                        .toLineString());
+                new UserDictItem(1, "t\",1", "s\",1", "r\",1", "p\",1").toLineString());
     }
 }

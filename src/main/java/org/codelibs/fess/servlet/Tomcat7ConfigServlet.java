@@ -24,8 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Tomcat7ConfigServlet extends HttpServlet {
-    private static final Logger logger = LoggerFactory
-            .getLogger(Tomcat7ConfigServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(Tomcat7ConfigServlet.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -39,8 +38,7 @@ public class Tomcat7ConfigServlet extends HttpServlet {
 
     private void shutdownCommonsHttpClient() {
         try {
-            final Class<?> clazz = Class
-                    .forName("org.apache.commons.httpclient.MultiThreadedHttpConnectionManager");
+            final Class<?> clazz = Class.forName("org.apache.commons.httpclient.MultiThreadedHttpConnectionManager");
             final Method method = clazz.getMethod("shutdownAll", null);
             method.invoke(null, null);
         } catch (final ClassNotFoundException e) {

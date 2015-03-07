@@ -22,8 +22,7 @@ import org.apache.struts.upload.FormFile;
 import org.codelibs.fess.crud.form.admin.BsSuggestElevateWordForm;
 import org.seasar.struts.annotation.Required;
 
-public class SuggestElevateWordForm extends BsSuggestElevateWordForm implements
-        Serializable {
+public class SuggestElevateWordForm extends BsSuggestElevateWordForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

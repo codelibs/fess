@@ -30,8 +30,7 @@ public class SynonymItem extends DictionaryItem {
 
     private String[] newOutputs;
 
-    public SynonymItem(final long id, final String[] inputs,
-            final String[] outputs) {
+    public SynonymItem(final long id, final String[] inputs, final String[] outputs) {
         this.id = id;
         this.inputs = inputs;
         this.outputs = outputs;
@@ -128,10 +127,8 @@ public class SynonymItem extends DictionaryItem {
 
     @Override
     public String toString() {
-        return "SynonymItem [id=" + id + ", inputs=" + Arrays.toString(inputs)
-                + ", outputs=" + Arrays.toString(outputs) + ", newInputs="
-                + Arrays.toString(newInputs) + ", newOutputs="
-                + Arrays.toString(newOutputs) + "]";
+        return "SynonymItem [id=" + id + ", inputs=" + Arrays.toString(inputs) + ", outputs=" + Arrays.toString(outputs) + ", newInputs="
+                + Arrays.toString(newInputs) + ", newOutputs=" + Arrays.toString(newOutputs) + "]";
     }
 
     public String toLineString() {
@@ -139,15 +136,13 @@ public class SynonymItem extends DictionaryItem {
             if (Arrays.equals(newInputs, newOutputs)) {
                 return StringUtils.join(newInputs, ",");
             } else {
-                return StringUtils.join(newInputs, ",") + "=>"
-                        + StringUtils.join(newOutputs, ",");
+                return StringUtils.join(newInputs, ",") + "=>" + StringUtils.join(newOutputs, ",");
             }
         } else {
             if (Arrays.equals(inputs, outputs)) {
                 return StringUtils.join(inputs, ",");
             } else {
-                return StringUtils.join(inputs, ",") + "=>"
-                        + StringUtils.join(outputs, ",");
+                return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");
             }
         }
     }

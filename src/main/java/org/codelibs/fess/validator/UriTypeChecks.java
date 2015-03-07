@@ -30,10 +30,8 @@ public class UriTypeChecks extends S2FieldChecks {
 
     private static final long serialVersionUID = 1L;
 
-    public static boolean validateUriType(final Object bean,
-            final ValidatorAction validatorAction, final Field field,
-            final ActionMessages errors, final Validator validator,
-            final HttpServletRequest request) {
+    public static boolean validateUriType(final Object bean, final ValidatorAction validatorAction, final Field field,
+            final ActionMessages errors, final Validator validator, final HttpServletRequest request) {
         final String value = getValueAsString(bean, field);
         if (StringUtil.isNotBlank(value)) {
             final String protocols = field.getVarValue("protocols");

@@ -39,34 +39,27 @@ public abstract class BsFileCrawlingConfigService {
         super();
     }
 
-    public List<FileCrawlingConfig> getFileCrawlingConfigList(
-            final FileCrawlingConfigPager fileCrawlingConfigPager) {
+    public List<FileCrawlingConfig> getFileCrawlingConfigList(final FileCrawlingConfigPager fileCrawlingConfigPager) {
 
-        final PagingResultBean<FileCrawlingConfig> fileCrawlingConfigList = fileCrawlingConfigBhv
-                .selectPage(cb -> {
-                    cb.paging(fileCrawlingConfigPager.getPageSize(),
-                            fileCrawlingConfigPager.getCurrentPageNumber());
-                    setupListCondition(cb, fileCrawlingConfigPager);
-                });
+        final PagingResultBean<FileCrawlingConfig> fileCrawlingConfigList = fileCrawlingConfigBhv.selectPage(cb -> {
+            cb.paging(fileCrawlingConfigPager.getPageSize(), fileCrawlingConfigPager.getCurrentPageNumber());
+            setupListCondition(cb, fileCrawlingConfigPager);
+        });
 
         // update pager
-        Beans.copy(fileCrawlingConfigList, fileCrawlingConfigPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        fileCrawlingConfigPager.setPageNumberList(fileCrawlingConfigList
-                .pageRange(op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(fileCrawlingConfigList, fileCrawlingConfigPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        fileCrawlingConfigPager.setPageNumberList(fileCrawlingConfigList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return fileCrawlingConfigList;
     }
 
-    public FileCrawlingConfig getFileCrawlingConfig(
-            final Map<String, String> keys) {
-        final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+    public FileCrawlingConfig getFileCrawlingConfig(final Map<String, String> keys) {
+        final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (fileCrawlingConfig == null) {
             // TODO exception?
             return null;
@@ -75,24 +68,21 @@ public abstract class BsFileCrawlingConfigService {
         return fileCrawlingConfig;
     }
 
-    public void store(final FileCrawlingConfig fileCrawlingConfig)
-            throws CrudMessageException {
+    public void store(final FileCrawlingConfig fileCrawlingConfig) throws CrudMessageException {
         setupStoreCondition(fileCrawlingConfig);
 
         fileCrawlingConfigBhv.insertOrUpdate(fileCrawlingConfig);
 
     }
 
-    public void delete(final FileCrawlingConfig fileCrawlingConfig)
-            throws CrudMessageException {
+    public void delete(final FileCrawlingConfig fileCrawlingConfig) throws CrudMessageException {
         setupDeleteCondition(fileCrawlingConfig);
 
         fileCrawlingConfigBhv.delete(fileCrawlingConfig);
 
     }
 
-    protected void setupListCondition(final FileCrawlingConfigCB cb,
-            final FileCrawlingConfigPager fileCrawlingConfigPager) {
+    protected void setupListCondition(final FileCrawlingConfigCB cb, final FileCrawlingConfigPager fileCrawlingConfigPager) {
 
         if (fileCrawlingConfigPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(fileCrawlingConfigPager.id));
@@ -100,15 +90,12 @@ public abstract class BsFileCrawlingConfigService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final FileCrawlingConfigCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FileCrawlingConfigCB cb, final Map<String, String> keys) {
     }
 
-    protected void setupStoreCondition(
-            final FileCrawlingConfig fileCrawlingConfig) {
+    protected void setupStoreCondition(final FileCrawlingConfig fileCrawlingConfig) {
     }
 
-    protected void setupDeleteCondition(
-            final FileCrawlingConfig fileCrawlingConfig) {
+    protected void setupDeleteCondition(final FileCrawlingConfig fileCrawlingConfig) {
     }
 }

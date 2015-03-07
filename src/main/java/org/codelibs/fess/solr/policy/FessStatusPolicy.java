@@ -41,8 +41,7 @@ import com.github.jknack.handlebars.io.FileTemplateLoader;
 public class FessStatusPolicy extends StatusPolicyImpl {
     private static final String MAIL_TEMPLATE_NAME = "solr_status";
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(FessStatusPolicy.class);
+    private static final Logger logger = LoggerFactory.getLogger(FessStatusPolicy.class);
 
     public String activateSubject = "[FESS] Solr status changed";
 
@@ -50,10 +49,8 @@ public class FessStatusPolicy extends StatusPolicyImpl {
 
     @Override
     public void activate(final QueryType queryType, final String serverName) {
-        final String statusValue = solrGroupProperties
-                .getProperty(getStatusKey(serverName));
-        final String indexValue = solrGroupProperties
-                .getProperty(getIndexKey(serverName));
+        final String statusValue = solrGroupProperties.getProperty(getStatusKey(serverName));
+        final String indexValue = solrGroupProperties.getProperty(getIndexKey(serverName));
 
         final Map<String, Object> dataMap = new HashMap<String, Object>();
 
@@ -64,30 +61,28 @@ public class FessStatusPolicy extends StatusPolicyImpl {
         }
 
         switch (queryType) {
-            case COMMIT:
-            case OPTIMIZE:
-            case ROLLBACK:
-                if (StringUtil.isNotBlank(indexValue)
-                        && UNFINISHED.equals(indexValue)) {
-                    // index: UNFINISHED -> COMPLETED
-                    dataMap.put("indexBefore", UNFINISHED.toUpperCase());
-                    dataMap.put("indexAfter", COMPLETED.toUpperCase());
-                }
-                break;
-            case ADD:
-            case DELETE:
-                if (StringUtil.isNotBlank(indexValue)
-                        && UNFINISHED.equals(indexValue)) {
-                    // index: UNFINISHED -> READY
-                    dataMap.put("indexBefore", UNFINISHED.toUpperCase());
-                    dataMap.put("indexAfter", READY.toUpperCase());
-                }
-                break;
-            case PING:
-            case QUERY:
-            case REQUEST:
-            default:
-                break;
+        case COMMIT:
+        case OPTIMIZE:
+        case ROLLBACK:
+            if (StringUtil.isNotBlank(indexValue) && UNFINISHED.equals(indexValue)) {
+                // index: UNFINISHED -> COMPLETED
+                dataMap.put("indexBefore", UNFINISHED.toUpperCase());
+                dataMap.put("indexAfter", COMPLETED.toUpperCase());
+            }
+            break;
+        case ADD:
+        case DELETE:
+            if (StringUtil.isNotBlank(indexValue) && UNFINISHED.equals(indexValue)) {
+                // index: UNFINISHED -> READY
+                dataMap.put("indexBefore", UNFINISHED.toUpperCase());
+                dataMap.put("indexAfter", READY.toUpperCase());
+            }
+            break;
+        case PING:
+        case QUERY:
+        case REQUEST:
+        default:
+            break;
         }
 
         if (!dataMap.isEmpty()) {
@@ -104,10 +99,8 @@ public class FessStatusPolicy extends StatusPolicyImpl {
 
     @Override
     public void deactivate(final QueryType queryType, final String serverName) {
-        final String statusValue = solrGroupProperties
-                .getProperty(getStatusKey(serverName));
-        final String indexValue = solrGroupProperties
-                .getProperty(getIndexKey(serverName));
+        final String statusValue = solrGroupProperties.getProperty(getStatusKey(serverName));
+        final String indexValue = solrGroupProperties.getProperty(getIndexKey(serverName));
 
         final Map<String, Object> dataMap = new HashMap<String, Object>();
 
@@ -118,24 +111,22 @@ public class FessStatusPolicy extends StatusPolicyImpl {
         }
 
         switch (queryType) {
-            case COMMIT:
-            case OPTIMIZE:
-            case ROLLBACK:
-            case ADD:
-            case DELETE:
-                if (StringUtil.isNotBlank(indexValue)
-                        && !UNFINISHED.equals(indexValue)) {
-                    // index: READY/COMPLETED -> UNFINISHED
-                    dataMap.put("indexBefore", indexValue == null ? "UNKNOWN"
-                            : indexValue.toUpperCase());
-                    dataMap.put("indexAfter", UNFINISHED.toUpperCase());
-                }
-                break;
-            case PING:
-            case QUERY:
-            case REQUEST:
-            default:
-                break;
+        case COMMIT:
+        case OPTIMIZE:
+        case ROLLBACK:
+        case ADD:
+        case DELETE:
+            if (StringUtil.isNotBlank(indexValue) && !UNFINISHED.equals(indexValue)) {
+                // index: READY/COMPLETED -> UNFINISHED
+                dataMap.put("indexBefore", indexValue == null ? "UNKNOWN" : indexValue.toUpperCase());
+                dataMap.put("indexAfter", UNFINISHED.toUpperCase());
+            }
+            break;
+        case PING:
+        case QUERY:
+        case REQUEST:
+        default:
+            break;
         }
 
         if (!dataMap.isEmpty()) {
@@ -151,8 +142,7 @@ public class FessStatusPolicy extends StatusPolicyImpl {
     }
 
     protected void send(final String subject, final Map<String, Object> dataMap) {
-        final DynamicProperties crawlerProperties = ComponentUtil
-                .getCrawlerProperties();
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
         if (crawlerProperties == null) {
             logger.info("crawlerProperties is not found.");
             return;
@@ -164,25 +154,21 @@ public class FessStatusPolicy extends StatusPolicyImpl {
             return;
         }
 
-        final String toStrs = (String) crawlerProperties
-                .get(Constants.NOTIFICATION_TO_PROPERTY);
+        final String toStrs = (String) crawlerProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
         if (StringUtil.isNotBlank(toStrs)) {
             final String[] toAddresses = toStrs.split(",");
 
             try {
-                dataMap.put("hostname", InetAddress.getLocalHost()
-                        .getHostAddress());
+                dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
             } catch (final UnknownHostException e) {
                 // ignore
             }
 
-            final FileTemplateLoader loader = new FileTemplateLoader(new File(
-                    ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
+            final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
             final Handlebars handlebars = new Handlebars(loader);
 
             try {
-                final Template template = handlebars
-                        .compile(MAIL_TEMPLATE_NAME);
+                final Template template = handlebars.compile(MAIL_TEMPLATE_NAME);
                 final Context hbsContext = Context.newContext(dataMap);
                 final String body = template.apply(hbsContext);
 

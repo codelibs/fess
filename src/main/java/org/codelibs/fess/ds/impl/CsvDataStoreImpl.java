@@ -46,8 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CsvDataStoreImpl extends AbstractDataStoreImpl {
-    private static final Logger logger = LoggerFactory
-            .getLogger(CsvDataStoreImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CsvDataStoreImpl.class);
 
     protected static final String ESCAPE_CHARACTER_PARAM = "escapeCharacter";
 
@@ -114,8 +113,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             final String[] values = value.split(",");
             for (final String path : values) {
                 final File file = new File(path);
-                if (file.isFile()
-                        && isCsvFile(file.getParentFile(), file.getName())) {
+                if (file.isFile() && isCsvFile(file.getParentFile(), file.getName())) {
                     fileList.add(file);
                 } else {
                     logger.warn(path + " is not found.");
@@ -159,11 +157,8 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final DataCrawlingConfig dataConfig,
-            final IndexUpdateCallback callback,
-            final Map<String, String> paramMap,
-            final Map<String, String> scriptMap,
-            final Map<String, Object> defaultDataMap) {
+    protected void storeData(final DataCrawlingConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+            final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
 
         final long readInterval = getReadInterval(paramMap);
 
@@ -178,25 +173,18 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
         final CsvConfig csvConfig = buildCsvConfig(paramMap);
 
         for (final File csvFile : csvFileList) {
-            processCsv(dataConfig, callback, paramMap, scriptMap,
-                    defaultDataMap, csvConfig, csvFile, readInterval,
-                    csvFileEncoding, hasHeaderLine);
+            processCsv(dataConfig, callback, paramMap, scriptMap, defaultDataMap, csvConfig, csvFile, readInterval, csvFileEncoding,
+                    hasHeaderLine);
         }
     }
 
-    protected void processCsv(final DataCrawlingConfig dataConfig,
-            final IndexUpdateCallback callback,
-            final Map<String, String> paramMap,
-            final Map<String, String> scriptMap,
-            final Map<String, Object> defaultDataMap,
-            final CsvConfig csvConfig, final File csvFile,
-            final long readInterval, final String csvFileEncoding,
-            final boolean hasHeaderLine) {
+    protected void processCsv(final DataCrawlingConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+            final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap, final CsvConfig csvConfig, final File csvFile,
+            final long readInterval, final String csvFileEncoding, final boolean hasHeaderLine) {
         logger.info("Loading " + csvFile.getAbsolutePath());
         CsvReader csvReader = null;
         try {
-            csvReader = new CsvReader(new BufferedReader(new InputStreamReader(
-                    new FileInputStream(csvFile), csvFileEncoding)), csvConfig);
+            csvReader = new CsvReader(new BufferedReader(new InputStreamReader(new FileInputStream(csvFile), csvFileEncoding)), csvConfig);
             List<String> headerList = null;
             if (hasHeaderLine) {
                 headerList = csvReader.readValues();
@@ -227,24 +215,20 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    for (final Map.Entry<String, String> entry : resultMap
-                            .entrySet()) {
+                    for (final Map.Entry<String, String> entry : resultMap.entrySet()) {
                         logger.debug(entry.getKey() + "=" + entry.getValue());
                     }
                 }
 
-                for (final Map.Entry<String, String> entry : scriptMap
-                        .entrySet()) {
-                    final Object convertValue = convertValue(entry.getValue(),
-                            resultMap);
+                for (final Map.Entry<String, String> entry : scriptMap.entrySet()) {
+                    final Object convertValue = convertValue(entry.getValue(), resultMap);
                     if (convertValue != null) {
                         dataMap.put(entry.getKey(), convertValue);
                     }
                 }
 
                 if (logger.isDebugEnabled()) {
-                    for (final Map.Entry<String, Object> entry : dataMap
-                            .entrySet()) {
+                    for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
                         logger.debug(entry.getKey() + "=" + entry.getValue());
                     }
                 }
@@ -254,8 +238,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 } catch (final RobotCrawlAccessException e) {
                     Throwable target = e;
                     if (target instanceof RobotMultipleCrawlAccessException) {
-                        final Throwable[] causes = ((RobotMultipleCrawlAccessException) target)
-                                .getCauses();
+                        final Throwable[] causes = ((RobotMultipleCrawlAccessException) target).getCauses();
                         if (causes.length > 0) {
                             target = causes[causes.length - 1];
                         }
@@ -273,22 +256,17 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     if (target instanceof DataStoreCrawlingException) {
                         url = ((DataStoreCrawlingException) target).getUrl();
                     } else {
-                        url = csvFile.getAbsolutePath() + ":"
-                                + csvReader.getLineNumber();
+                        url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
 
                     }
-                    final FailureUrlService failureUrlService = SingletonS2Container
-                            .getComponent(FailureUrlService.class);
+                    final FailureUrlService failureUrlService = SingletonS2Container.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, errorName, url, target);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
                 } catch (final Exception e) {
-                    final String url = csvFile.getAbsolutePath() + ":"
-                            + csvReader.getLineNumber();
-                    final FailureUrlService failureUrlService = SingletonS2Container
-                            .getComponent(FailureUrlService.class);
-                    failureUrlService.store(dataConfig, e.getClass()
-                            .getCanonicalName(), url, e);
+                    final String url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
+                    final FailureUrlService failureUrlService = SingletonS2Container.getComponent(FailureUrlService.class);
+                    failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
                 }
@@ -298,8 +276,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 }
             }
         } catch (final Exception e) {
-            throw new DataStoreException(
-                    "Failed to crawl data when reading csv file.", e);
+            throw new DataStoreException("Failed to crawl data when reading csv file.", e);
         } finally {
             IOUtils.closeQuietly(csvReader);
         }
@@ -314,8 +291,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 try {
                     csvConfig.setSeparator(value.charAt(0));
                 } catch (final Exception e) {
-                    logger.warn("Failed to load " + SEPARATOR_CHARACTER_PARAM,
-                            e);
+                    logger.warn("Failed to load " + SEPARATOR_CHARACTER_PARAM, e);
                 }
             }
         }
@@ -387,26 +363,21 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             if (StringUtil.isNotBlank(value)) {
                 try {
                     // 項目値前のホワイトスペースを除去します。
-                    csvConfig.setIgnoreLeadingWhitespaces(Boolean
-                            .parseBoolean(value));
+                    csvConfig.setIgnoreLeadingWhitespaces(Boolean.parseBoolean(value));
                 } catch (final Exception e) {
-                    logger.warn("Failed to load "
-                            + IGNORE_LEADING_WHITESPACES_PARAM, e);
+                    logger.warn("Failed to load " + IGNORE_LEADING_WHITESPACES_PARAM, e);
                 }
             }
         }
 
         if (paramMap.containsKey(IGNORE_TRAILING_WHITESPACES_PARAM)) {
-            final String value = paramMap
-                    .get(IGNORE_TRAILING_WHITESPACES_PARAM);
+            final String value = paramMap.get(IGNORE_TRAILING_WHITESPACES_PARAM);
             if (StringUtil.isNotBlank(value)) {
                 try {
                     // 項目値後のホワイトスペースを除去します。
-                    csvConfig.setIgnoreTrailingWhitespaces(Boolean
-                            .parseBoolean(value));
+                    csvConfig.setIgnoreTrailingWhitespaces(Boolean.parseBoolean(value));
                 } catch (final Exception e) {
-                    logger.warn("Failed to load "
-                            + IGNORE_TRAILING_WHITESPACES_PARAM, e);
+                    logger.warn("Failed to load " + IGNORE_TRAILING_WHITESPACES_PARAM, e);
                 }
             }
         }

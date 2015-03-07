@@ -166,67 +166,50 @@ public class QueryHelper implements Serializable {
     @InitMethod
     public void init() {
         if (responseFields == null) {
-            responseFields = new String[] { SCORE_FIELD, fieldHelper.idField,
-                    fieldHelper.docIdField, fieldHelper.boostField,
-                    fieldHelper.contentLengthField, fieldHelper.hostField,
-                    fieldHelper.siteField, fieldHelper.lastModifiedField,
-                    fieldHelper.mimetypeField, fieldHelper.filetypeField,
-                    fieldHelper.createdField, fieldHelper.titleField,
-                    fieldHelper.digestField, fieldHelper.urlField,
-                    fieldHelper.clickCountField,
-                    fieldHelper.favoriteCountField, fieldHelper.configIdField,
-                    fieldHelper.langField, fieldHelper.hasCacheField };
+            responseFields =
+                    new String[] { SCORE_FIELD, fieldHelper.idField, fieldHelper.docIdField, fieldHelper.boostField,
+                            fieldHelper.contentLengthField, fieldHelper.hostField, fieldHelper.siteField, fieldHelper.lastModifiedField,
+                            fieldHelper.mimetypeField, fieldHelper.filetypeField, fieldHelper.createdField, fieldHelper.titleField,
+                            fieldHelper.digestField, fieldHelper.urlField, fieldHelper.clickCountField, fieldHelper.favoriteCountField,
+                            fieldHelper.configIdField, fieldHelper.langField, fieldHelper.hasCacheField };
         }
         if (cacheResponseFields == null) {
-            cacheResponseFields = new String[] { SCORE_FIELD,
-                    fieldHelper.idField, fieldHelper.docIdField,
-                    fieldHelper.boostField, fieldHelper.contentLengthField,
-                    fieldHelper.hostField, fieldHelper.siteField,
-                    fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
-                    fieldHelper.filetypeField, fieldHelper.createdField,
-                    fieldHelper.titleField, fieldHelper.digestField,
-                    fieldHelper.urlField, fieldHelper.clickCountField,
-                    fieldHelper.favoriteCountField, fieldHelper.configIdField,
-                    fieldHelper.langField, fieldHelper.cacheField };
+            cacheResponseFields =
+                    new String[] { SCORE_FIELD, fieldHelper.idField, fieldHelper.docIdField, fieldHelper.boostField,
+                            fieldHelper.contentLengthField, fieldHelper.hostField, fieldHelper.siteField, fieldHelper.lastModifiedField,
+                            fieldHelper.mimetypeField, fieldHelper.filetypeField, fieldHelper.createdField, fieldHelper.titleField,
+                            fieldHelper.digestField, fieldHelper.urlField, fieldHelper.clickCountField, fieldHelper.favoriteCountField,
+                            fieldHelper.configIdField, fieldHelper.langField, fieldHelper.cacheField };
         }
         if (responseDocValuesFields == null) {
-            responseDocValuesFields = new String[] {
-                    fieldHelper.clickCountField, fieldHelper.favoriteCountField };
+            responseDocValuesFields = new String[] { fieldHelper.clickCountField, fieldHelper.favoriteCountField };
         }
         if (highlightingFields == null) {
             highlightingFields = new String[] { fieldHelper.contentField };
         }
         if (searchFields == null) {
-            searchFields = new String[] { INURL_FIELD, fieldHelper.urlField,
-                    fieldHelper.docIdField, fieldHelper.hostField,
-                    fieldHelper.titleField, fieldHelper.contentField,
-                    fieldHelper.contentLengthField,
-                    fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
-                    fieldHelper.filetypeField, fieldHelper.labelField,
-                    fieldHelper.segmentField, fieldHelper.clickCountField,
-                    fieldHelper.favoriteCountField, fieldHelper.langField };
+            searchFields =
+                    new String[] { INURL_FIELD, fieldHelper.urlField, fieldHelper.docIdField, fieldHelper.hostField,
+                            fieldHelper.titleField, fieldHelper.contentField, fieldHelper.contentLengthField,
+                            fieldHelper.lastModifiedField, fieldHelper.mimetypeField, fieldHelper.filetypeField, fieldHelper.labelField,
+                            fieldHelper.segmentField, fieldHelper.clickCountField, fieldHelper.favoriteCountField, fieldHelper.langField };
         }
         if (facetFields == null) {
-            facetFields = new String[] { fieldHelper.urlField,
-                    fieldHelper.hostField, fieldHelper.titleField,
-                    fieldHelper.contentField, fieldHelper.contentLengthField,
-                    fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
-                    fieldHelper.filetypeField, fieldHelper.labelField,
-                    fieldHelper.segmentField };
+            facetFields =
+                    new String[] { fieldHelper.urlField, fieldHelper.hostField, fieldHelper.titleField, fieldHelper.contentField,
+                            fieldHelper.contentLengthField, fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
+                            fieldHelper.filetypeField, fieldHelper.labelField, fieldHelper.segmentField };
         }
         if (supportedSortFields == null) {
-            supportedSortFields = new String[] { fieldHelper.createdField,
-                    fieldHelper.contentLengthField,
-                    fieldHelper.lastModifiedField, fieldHelper.clickCountField,
-                    fieldHelper.favoriteCountField };
+            supportedSortFields =
+                    new String[] { fieldHelper.createdField, fieldHelper.contentLengthField, fieldHelper.lastModifiedField,
+                            fieldHelper.clickCountField, fieldHelper.favoriteCountField };
         }
         if (supportedMltFields == null) {
-            supportedMltFields = new String[] { fieldHelper.contentField,
-                    "content_ja" };
+            supportedMltFields = new String[] { fieldHelper.contentField, "content_ja" };
         }
         if (supportedAnalysisFields == null) {
-            supportedAnalysisFields = new String[] { fieldHelper.contentField,
-                    "content_ja" };
+            supportedAnalysisFields = new String[] { fieldHelper.contentField, "content_ja" };
         }
     }
 
@@ -237,8 +220,7 @@ public class QueryHelper implements Serializable {
      */
     public SearchQuery build(final String query, final boolean envCondition) {
         String q;
-        if (envCondition && additionalQuery != null
-                && StringUtil.isNotBlank(query)) {
+        if (envCondition && additionalQuery != null && StringUtil.isNotBlank(query)) {
             q = query + " " + additionalQuery;
         } else {
             q = query;
@@ -254,12 +236,10 @@ public class QueryHelper implements Serializable {
         }
 
         if (keyMatchHelper != null) {
-            final List<String> docIdQueryList = keyMatchHelper
-                    .getDocIdQueryList();
+            final List<String> docIdQueryList = keyMatchHelper.getDocIdQueryList();
             if (docIdQueryList != null && searchQuery.queryExists()) {
                 final String originalQuery = searchQuery.getQuery();
-                final StringBuilder queryBuf = new StringBuilder(
-                        originalQuery.length() + 100);
+                final StringBuilder queryBuf = new StringBuilder(originalQuery.length() + 100);
                 queryBuf.append(originalQuery);
                 for (final String docIdQuery : docIdQueryList) {
                     queryBuf.append(_OR_);
@@ -275,8 +255,7 @@ public class QueryHelper implements Serializable {
                 // add query
                 final String sq = searchQuery.getQuery();
                 final StringBuilder queryBuf = new StringBuilder(255);
-                final boolean hasQueries = sq.contains(_AND_)
-                        || sq.contains(_OR_);
+                final boolean hasQueries = sq.contains(_AND_) || sq.contains(_OR_);
                 if (hasQueries) {
                     queryBuf.append('(');
                 }
@@ -324,8 +303,7 @@ public class QueryHelper implements Serializable {
         final Map<String, List<String>> fieldLogMap = new HashMap<String, List<String>>();
         final SearchQuery searchQuery = new SearchQuery();
 
-        final String q = buildQuery(query, sortFieldMap, highLightQueryList,
-                fieldLogMap);
+        final String q = buildQuery(query, sortFieldMap, highLightQueryList, fieldLogMap);
         String solrQuery;
         if (q == null || "()".equals(q)) {
             solrQuery = StringUtil.EMPTY;
@@ -343,9 +321,7 @@ public class QueryHelper implements Serializable {
         // set queries to request for HighLight
         final HttpServletRequest request = RequestUtil.getRequest();
         if (request != null) {
-            request.setAttribute(Constants.HIGHLIGHT_QUERIES,
-                    highLightQueryList.toArray(new String[highLightQueryList
-                            .size()]));
+            request.setAttribute(Constants.HIGHLIGHT_QUERIES, highLightQueryList.toArray(new String[highLightQueryList.size()]));
             request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
         }
         return searchQuery;
@@ -380,12 +356,9 @@ public class QueryHelper implements Serializable {
 
     }
 
-    protected String buildQuery(final String query,
-            final Map<String, String> sortFieldMap,
-            final List<String> highLightQueryList,
+    protected String buildQuery(final String query, final Map<String, String> sortFieldMap, final List<String> highLightQueryList,
             final Map<String, List<String>> fieldLogMap) {
-        final List<QueryPart> queryPartList = splitQuery(query, sortFieldMap,
-                highLightQueryList, fieldLogMap);
+        final List<QueryPart> queryPartList = splitQuery(query, sortFieldMap, highLightQueryList, fieldLogMap);
         if (queryPartList == null || queryPartList.isEmpty()) {
             return null;
         }
@@ -411,8 +384,7 @@ public class QueryHelper implements Serializable {
             // check prefix
             for (final String field : searchFields) {
                 String prefix = field + ":";
-                if (value.startsWith(prefix)
-                        && value.length() != prefix.length()) {
+                if (value.startsWith(prefix) && value.length() != prefix.length()) {
                     if (queryBuf.length() > 0 && !notOperatorFlag) {
                         queryBuf.append(operator);
                     }
@@ -429,8 +401,7 @@ public class QueryHelper implements Serializable {
                         if (isInUrl) {
                             buf.append('*');
                         }
-                        appendQueryValue(buf, targetWord, isInUrl ? false
-                                : useBigram);
+                        appendQueryValue(buf, targetWord, isInUrl ? false : useBigram);
                         if (isInUrl) {
                             buf.append('*');
                         }
@@ -442,8 +413,7 @@ public class QueryHelper implements Serializable {
                         if (isInUrl) {
                             queryBuf.append('*');
                         }
-                        appendQueryValue(queryBuf, targetWord, isInUrl ? false
-                                : useBigram);
+                        appendQueryValue(queryBuf, targetWord, isInUrl ? false : useBigram);
                         if (isInUrl) {
                             queryBuf.append('*');
                         }
@@ -465,19 +435,15 @@ public class QueryHelper implements Serializable {
             }
 
             // sort
-            if (value.startsWith(sortPrefix)
-                    && value.length() != sortPrefix.length()) {
-                final String[] sortFieldPairs = value.substring(
-                        sortPrefix.length()).split(",");
+            if (value.startsWith(sortPrefix) && value.length() != sortPrefix.length()) {
+                final String[] sortFieldPairs = value.substring(sortPrefix.length()).split(",");
                 for (final String sortFieldPairStr : sortFieldPairs) {
-                    final String[] sortFieldPair = sortFieldPairStr
-                            .split("\\.");
+                    final String[] sortFieldPair = sortFieldPairStr.split("\\.");
                     if (isSupportedSortField(sortFieldPair[0])) {
                         if (sortFieldPair.length == 1) {
                             sortFieldMap.put(sortFieldPair[0], Constants.ASC);
                         } else {
-                            sortFieldMap
-                                    .put(sortFieldPair[0], sortFieldPair[1]);
+                            sortFieldMap.put(sortFieldPair[0], sortFieldPair[1]);
                         }
                     }
                 }
@@ -502,8 +468,7 @@ public class QueryHelper implements Serializable {
                     highLightQueryList.add(value);
 
                     if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, fieldHelper.contentField,
-                                NOT_ + value);
+                        addFieldLogValue(fieldLogMap, fieldHelper.contentField, NOT_ + value);
                     }
                 } else {
                     // content
@@ -517,8 +482,7 @@ public class QueryHelper implements Serializable {
                     highLightQueryList.add(value);
 
                     if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, fieldHelper.contentField,
-                                value);
+                        addFieldLogValue(fieldLogMap, fieldHelper.contentField, value);
                     }
 
                     if (keyMatchHelper != null) {
@@ -557,8 +521,7 @@ public class QueryHelper implements Serializable {
         return searchQueryBuf.toString();
     }
 
-    private void addFieldLogValue(final Map<String, List<String>> fieldLogMap,
-            final String field, final String targetWord) {
+    private void addFieldLogValue(final Map<String, List<String>> fieldLogMap, final String field, final String targetWord) {
         List<String> logList = fieldLogMap.get(field);
         if (logList == null) {
             logList = new ArrayList<String>();
@@ -567,8 +530,7 @@ public class QueryHelper implements Serializable {
         logList.add(targetWord);
     }
 
-    protected void appendQueryValue(final StringBuilder buf,
-            final String query, final boolean useBigram) {
+    protected void appendQueryValue(final StringBuilder buf, final String query, final boolean useBigram) {
         // check reserved
         boolean reserved = false;
         for (final String element : Constants.RESERVED) {
@@ -585,8 +547,7 @@ public class QueryHelper implements Serializable {
         }
 
         String value = query;
-        if (useBigram && value.length() == 1
-                && !StringUtils.isAsciiPrintable(value)) {
+        if (useBigram && value.length() == 1 && !StringUtils.isAsciiPrintable(value)) {
             // if using bigram, add ?
             value = value + '?';
         }
@@ -655,8 +616,7 @@ public class QueryHelper implements Serializable {
             if (proximityValue == null) {
                 buf.append(QueryUtil.escapeValue(value));
             } else {
-                buf.append('"').append(QueryUtil.escapeValue(value))
-                        .append('"');
+                buf.append('"').append(QueryUtil.escapeValue(value)).append('"');
             }
         }
 
@@ -669,17 +629,13 @@ public class QueryHelper implements Serializable {
         }
     }
 
-    protected void appendRangeQueryValue(final StringBuilder buf,
-            final String value, final char prefix, final char suffix) {
-        final String[] split = value.substring(1, value.length() - 1).split(
-                _TO_);
+    protected void appendRangeQueryValue(final StringBuilder buf, final String value, final char prefix, final char suffix) {
+        final String[] split = value.substring(1, value.length() - 1).split(_TO_);
         if (split.length == 2 && split[0].length() > 0 && split[1].length() > 0) {
             final String value1 = split[0].trim();
             final String value2 = split[1].trim();
             if ("*".equals(value1) && "*".equals(value2)) {
-                throw new InvalidQueryException(
-                        "errors.invalid_query_str_range", "Invalid range: "
-                                + value);
+                throw new InvalidQueryException("errors.invalid_query_str_range", "Invalid range: " + value);
             }
             buf.append(prefix);
             buf.append(QueryUtil.escapeRangeValue(value1));
@@ -687,8 +643,7 @@ public class QueryHelper implements Serializable {
             buf.append(QueryUtil.escapeRangeValue(value2));
             buf.append(suffix);
         } else {
-            throw new InvalidQueryException("errors.invalid_query_str_range",
-                    "Invalid range: " + value);
+            throw new InvalidQueryException("errors.invalid_query_str_range", "Invalid range: " + value);
         }
     }
 
@@ -701,9 +656,7 @@ public class QueryHelper implements Serializable {
         return false;
     }
 
-    protected List<QueryPart> splitQuery(final String query,
-            final Map<String, String> sortFieldMap,
-            final List<String> highLightQueryList,
+    protected List<QueryPart> splitQuery(final String query, final Map<String, String> sortFieldMap, final List<String> highLightQueryList,
             final Map<String, List<String>> fieldLogMap) {
         final List<QueryPart> valueList = new ArrayList<QueryPart>();
         StringBuilder buf = new StringBuilder();
@@ -714,77 +667,72 @@ public class QueryHelper implements Serializable {
         char oldChar = 0;
         for (int i = 0; i < query.length(); i++) {
             final char c = query.charAt(i);
-            if (oldChar == '\\'
-                    && (c == '"' || c == '(' || c == '{' || c == '[')) {
+            if (oldChar == '\\' && (c == '"' || c == '(' || c == '{' || c == '[')) {
                 buf.append(c);
             } else {
                 if (oldChar == '\\') {
                     buf.append('\\');
                 }
                 switch (c) {
-                    case '(':
+                case '(':
+                    buf.append(c);
+                    if (!quoted && squareBracket == 0 && curlyBracket == 0) {
+                        parenthesis++;
+                    }
+                    break;
+                case ')':
+                    buf.append(c);
+                    if (!quoted && squareBracket == 0 && curlyBracket == 0) {
+                        parenthesis--;
+                    }
+                    break;
+                case '[':
+                    buf.append(c);
+                    if (!quoted && parenthesis == 0 && curlyBracket == 0) {
+                        squareBracket++;
+                    }
+                    break;
+                case ']':
+                    buf.append(c);
+                    if (!quoted && parenthesis == 0 && curlyBracket == 0) {
+                        squareBracket--;
+                    }
+                    break;
+                case '{':
+                    buf.append(c);
+                    if (!quoted && parenthesis == 0 && squareBracket == 0) {
+                        curlyBracket++;
+                    }
+                    break;
+                case '}':
+                    buf.append(c);
+                    if (!quoted && parenthesis == 0 && squareBracket == 0) {
+                        curlyBracket--;
+                    }
+                    break;
+                case '"':
+                    if (parenthesis == 0 && curlyBracket == 0 && squareBracket == 0) {
+                        quoted ^= true;
+                    } else {
                         buf.append(c);
-                        if (!quoted && squareBracket == 0 && curlyBracket == 0) {
-                            parenthesis++;
-                        }
-                        break;
-                    case ')':
+                    }
+                    break;
+                case '\\':
+                    break;
+                case ' ':
+                case '\u3000':
+                    if (quoted || curlyBracket > 0 || squareBracket > 0 || parenthesis > 0) {
                         buf.append(c);
-                        if (!quoted && squareBracket == 0 && curlyBracket == 0) {
-                            parenthesis--;
+                    } else {
+                        if (buf.length() > 0) {
+                            addQueryPart(buf.toString(), valueList, sortFieldMap, highLightQueryList, fieldLogMap);
                         }
-                        break;
-                    case '[':
-                        buf.append(c);
-                        if (!quoted && parenthesis == 0 && curlyBracket == 0) {
-                            squareBracket++;
-                        }
-                        break;
-                    case ']':
-                        buf.append(c);
-                        if (!quoted && parenthesis == 0 && curlyBracket == 0) {
-                            squareBracket--;
-                        }
-                        break;
-                    case '{':
-                        buf.append(c);
-                        if (!quoted && parenthesis == 0 && squareBracket == 0) {
-                            curlyBracket++;
-                        }
-                        break;
-                    case '}':
-                        buf.append(c);
-                        if (!quoted && parenthesis == 0 && squareBracket == 0) {
-                            curlyBracket--;
-                        }
-                        break;
-                    case '"':
-                        if (parenthesis == 0 && curlyBracket == 0
-                                && squareBracket == 0) {
-                            quoted ^= true;
-                        } else {
-                            buf.append(c);
-                        }
-                        break;
-                    case '\\':
-                        break;
-                    case ' ':
-                    case '\u3000':
-                        if (quoted || curlyBracket > 0 || squareBracket > 0
-                                || parenthesis > 0) {
-                            buf.append(c);
-                        } else {
-                            if (buf.length() > 0) {
-                                addQueryPart(buf.toString(), valueList,
-                                        sortFieldMap, highLightQueryList,
-                                        fieldLogMap);
-                            }
-                            buf = new StringBuilder();
-                        }
-                        break;
-                    default:
-                        buf.append(c);
-                        break;
+                        buf = new StringBuilder();
+                    }
+                    break;
+                default:
+                    buf.append(c);
+                    break;
                 }
             }
             oldChar = c;
@@ -793,39 +741,28 @@ public class QueryHelper implements Serializable {
             buf.append('\\');
         }
         if (quoted) {
-            throw new InvalidQueryException("errors.invalid_query_quoted",
-                    "Invalid quoted: " + query);
+            throw new InvalidQueryException("errors.invalid_query_quoted", "Invalid quoted: " + query);
         } else if (curlyBracket > 0) {
-            throw new InvalidQueryException(
-                    "errors.invalid_query_curly_bracket",
-                    "Invalid curly bracket: " + query);
+            throw new InvalidQueryException("errors.invalid_query_curly_bracket", "Invalid curly bracket: " + query);
         } else if (squareBracket > 0) {
-            throw new InvalidQueryException(
-                    "errors.invalid_query_square_bracket",
-                    "Invalid square bracket: " + query);
+            throw new InvalidQueryException("errors.invalid_query_square_bracket", "Invalid square bracket: " + query);
         } else if (parenthesis > 0) {
-            throw new InvalidQueryException("errors.invalid_query_parenthesis",
-                    "Invalid parenthesis: " + query);
+            throw new InvalidQueryException("errors.invalid_query_parenthesis", "Invalid parenthesis: " + query);
         }
         if (buf.length() > 0) {
-            addQueryPart(buf.toString(), valueList, sortFieldMap,
-                    highLightQueryList, fieldLogMap);
+            addQueryPart(buf.toString(), valueList, sortFieldMap, highLightQueryList, fieldLogMap);
         }
         return valueList;
     }
 
-    private void addQueryPart(final String str,
-            final List<QueryPart> valueList,
-            final Map<String, String> sortFieldMap,
-            final List<String> highLightQueryList,
-            final Map<String, List<String>> fieldLogMap) {
+    private void addQueryPart(final String str, final List<QueryPart> valueList, final Map<String, String> sortFieldMap,
+            final List<String> highLightQueryList, final Map<String, List<String>> fieldLogMap) {
         if (str.startsWith("[") || str.startsWith("{")) {
             valueList.add(new QueryPart(str.trim()));
         } else if (str.startsWith("(") && str.endsWith(")") && str.length() > 2) {
             final String q = str.substring(1, str.length() - 1);
             if (sortFieldMap != null && highLightQueryList != null) {
-                final String innerQuery = buildQuery(q, sortFieldMap,
-                        highLightQueryList, fieldLogMap);
+                final String innerQuery = buildQuery(q, sortFieldMap, highLightQueryList, fieldLogMap);
                 if (StringUtil.isNotBlank(innerQuery)) {
                     valueList.add(new QueryPart("(" + innerQuery + ")", true));
                 }
@@ -866,8 +803,7 @@ public class QueryHelper implements Serializable {
     }
 
     protected String buildFacetQueryInternal(final String query) {
-        final List<QueryPart> queryPartList = splitQuery(query, null, null,
-                null);
+        final List<QueryPart> queryPartList = splitQuery(query, null, null, null);
         if (queryPartList.isEmpty()) {
             return StringUtil.EMPTY;
         }
@@ -893,8 +829,7 @@ public class QueryHelper implements Serializable {
             // check prefix
             for (final String field : facetFields) {
                 final String prefix = field + ":";
-                if (value.startsWith(prefix)
-                        && value.length() != prefix.length()) {
+                if (value.startsWith(prefix) && value.length() != prefix.length()) {
                     if (queryBuf.length() > 0) {
                         queryBuf.append(operator);
                     }
@@ -917,8 +852,7 @@ public class QueryHelper implements Serializable {
             }
 
             // sort
-            if (value.startsWith(sortPrefix)
-                    && value.length() != sortPrefix.length()) {
+            if (value.startsWith(sortPrefix) && value.length() != sortPrefix.length()) {
                 // skip
                 continue;
             }
@@ -980,8 +914,7 @@ public class QueryHelper implements Serializable {
         return searchQueryBuf.toString();
     }
 
-    protected void buildContentQueryWithLang(final StringBuilder buf,
-            final String value, final String queryLanguage) {
+    protected void buildContentQueryWithLang(final StringBuilder buf, final String value, final String queryLanguage) {
         buf.append('(');
         buf.append(fieldHelper.titleField).append(':');
         appendQueryValue(buf, value, useBigram);
@@ -1002,8 +935,7 @@ public class QueryHelper implements Serializable {
     }
 
     protected String getQueryLanguage() {
-        final String[] supportedLanguages = systemHelper
-                .getSupportedLanguages();
+        final String[] supportedLanguages = systemHelper.getSupportedLanguages();
         if (supportedLanguages.length == 0) {
             return null;
         }
@@ -1075,9 +1007,7 @@ public class QueryHelper implements Serializable {
                 if (StringUtil.isNotBlank(cq)) {
                     buf.append(' ');
                     char split = 0;
-                    final List<QueryPart> partList = splitQuery(
-                            cq.indexOf('"') >= 0 ? cq : "\"" + cq + "\"", null,
-                            null, null);
+                    final List<QueryPart> partList = splitQuery(cq.indexOf('"') >= 0 ? cq : "\"" + cq + "\"", null, null, null);
                     for (final QueryPart part : partList) {
                         if (split == 0) {
                             split = ' ';
@@ -1098,10 +1028,8 @@ public class QueryHelper implements Serializable {
             for (final String oq : oqs) {
                 if (StringUtil.isNotBlank(oq)) {
                     buf.append(' ');
-                    final List<QueryPart> partList = splitQuery(oq, null, null,
-                            null);
-                    final boolean append = partList.size() > 1
-                            && optionMap.size() > 1;
+                    final List<QueryPart> partList = splitQuery(oq, null, null, null);
+                    final boolean append = partList.size() > 1 && optionMap.size() > 1;
                     if (append) {
                         buf.append('(');
                     }
@@ -1135,8 +1063,7 @@ public class QueryHelper implements Serializable {
                 if (StringUtil.isNotBlank(nq)) {
                     buf.append(' ');
                     String split = StringUtil.EMPTY;
-                    final List<QueryPart> partList = splitQuery(nq, null, null,
-                            null);
+                    final List<QueryPart> partList = splitQuery(nq, null, null, null);
                     for (final QueryPart part : partList) {
                         buf.append(split);
                         if (split.length() == 0) {
@@ -1200,8 +1127,7 @@ public class QueryHelper implements Serializable {
         return responseDocValuesFields;
     }
 
-    public void setResponseDocValuesFields(
-            final String[] responseDocValuesFields) {
+    public void setResponseDocValuesFields(final String[] responseDocValuesFields) {
         this.responseDocValuesFields = responseDocValuesFields;
     }
 
@@ -1394,9 +1320,7 @@ public class QueryHelper implements Serializable {
     public void addDefaultSortField(final String fieldName, final String order) {
         final SortField sortField = new SortField();
         sortField.setField(fieldName);
-        sortField
-                .setOrder(Constants.ASC.equalsIgnoreCase(order) ? Constants.ASC
-                        : Constants.DESC);
+        sortField.setOrder(Constants.ASC.equalsIgnoreCase(order) ? Constants.ASC : Constants.DESC);
         defaultSortFieldList.add(sortField);
     }
 
@@ -1405,8 +1329,7 @@ public class QueryHelper implements Serializable {
     }
 
     public SortField[] getDefaultSortFields() {
-        return defaultSortFieldList.toArray(new SortField[defaultSortFieldList
-                .size()]);
+        return defaultSortFieldList.toArray(new SortField[defaultSortFieldList.size()]);
     }
 
     public void setHighlightingPrefix(final String highlightingPrefix) {
@@ -1485,8 +1408,7 @@ public class QueryHelper implements Serializable {
         return defaultMoreLikeThisInfo;
     }
 
-    public void setDefaultMoreLikeThisInfo(
-            final MoreLikeThisInfo defaultMoreLikeThisInfo) {
+    public void setDefaultMoreLikeThisInfo(final MoreLikeThisInfo defaultMoreLikeThisInfo) {
         this.defaultMoreLikeThisInfo = defaultMoreLikeThisInfo;
     }
 
@@ -1513,16 +1435,13 @@ public class QueryHelper implements Serializable {
 
         final HttpServletRequest request = RequestUtil.getRequest();
         final Map<String, String[]> queryParamMap = new HashMap<String, String[]>();
-        for (final Map.Entry<String, String[]> entry : additionalQueryParamMap
-                .entrySet()) {
+        for (final Map.Entry<String, String[]> entry : additionalQueryParamMap.entrySet()) {
             final String[] values = entry.getValue();
             final String[] newValues = new String[values.length];
             for (int i = 0; i < values.length; i++) {
                 final String value = values[i];
-                if (value.length() > 1 && value.charAt(0) == '$'
-                        && request != null) {
-                    final String param = request.getParameter(value
-                            .substring(1));
+                if (value.length() > 1 && value.charAt(0) == '$' && request != null) {
+                    final String param = request.getParameter(value.substring(1));
                     if (StringUtil.isNotBlank(param)) {
                         newValues[i] = param;
                     } else {
@@ -1554,8 +1473,7 @@ public class QueryHelper implements Serializable {
     protected String getDefaultOperator() {
         final HttpServletRequest request = RequestUtil.getRequest();
         if (request != null) {
-            final String defaultOperator = (String) request
-                    .getAttribute(Constants.DEFAULT_OPERATOR);
+            final String defaultOperator = (String) request.getAttribute(Constants.DEFAULT_OPERATOR);
             if (AND.equalsIgnoreCase(defaultOperator)) {
                 return _AND_;
             } else if (OR.equalsIgnoreCase(defaultOperator)) {
@@ -1565,10 +1483,8 @@ public class QueryHelper implements Serializable {
         return DEFAULT_OPERATOR;
     }
 
-    protected void appendFieldBoostValue(final StringBuilder buf,
-            final String field, final String value) {
-        if (fieldBoostMap.containsKey(field) && value.indexOf('^') == -1
-                && value.indexOf('~') == -1) {
+    protected void appendFieldBoostValue(final StringBuilder buf, final String field, final String value) {
+        if (fieldBoostMap.containsKey(field) && value.indexOf('^') == -1 && value.indexOf('~') == -1) {
             buf.append('^').append(fieldBoostMap.get(field));
         }
     }

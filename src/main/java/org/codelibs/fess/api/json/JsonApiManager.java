@@ -58,15 +58,13 @@ import org.slf4j.LoggerFactory;
 
 public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(JsonApiManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
 
     protected String jsonPathPrefix = "/json";
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (Constants.FALSE.equals(ComponentUtil.getCrawlerProperties()
-                .getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(ComponentUtil.getCrawlerProperties().getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE))) {
             return false;
         }
 
@@ -75,46 +73,44 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     @Override
-    public void process(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         final String formatType = request.getParameter("type");
         switch (getFormatType(formatType)) {
-            case SEARCH:
-                processSearchRequest(request, response, chain);
-                break;
-            case LABEL:
-                processLabelRequest(request, response, chain);
-                break;
-            case SUGGEST:
-                processSuggestRequest(request, response, chain);
-                break;
-            case SPELLCHECK:
-                processSpellCheckRequest(request, response, chain);
-                break;
-            case ANALYSIS:
-                processAnalysisRequest(request, response, chain);
-                break;
-            case HOTSEARCHWORD:
-                processHotSearchWordRequest(request, response, chain);
-                break;
-            case FAVORITE:
-                processFavoriteRequest(request, response, chain);
-                break;
-            case FAVORITES:
-                processFavoritesRequest(request, response, chain);
-                break;
-            case PING:
-                processPingRequest(request, response, chain);
-                break;
-            default:
-                writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
-                break;
+        case SEARCH:
+            processSearchRequest(request, response, chain);
+            break;
+        case LABEL:
+            processLabelRequest(request, response, chain);
+            break;
+        case SUGGEST:
+            processSuggestRequest(request, response, chain);
+            break;
+        case SPELLCHECK:
+            processSpellCheckRequest(request, response, chain);
+            break;
+        case ANALYSIS:
+            processAnalysisRequest(request, response, chain);
+            break;
+        case HOTSEARCHWORD:
+            processHotSearchWordRequest(request, response, chain);
+            break;
+        case FAVORITE:
+            processFavoriteRequest(request, response, chain);
+            break;
+        case FAVORITES:
+            processFavoritesRequest(request, response, chain);
+            break;
+        case PING:
+            processPingRequest(request, response, chain);
+            break;
+        default:
+            writeJsonResponse(99, StringUtil.EMPTY, "Not found.");
+            break;
         }
     }
 
-    protected void processPingRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getSearchService();
         int status;
         final StringBuilder buf = new StringBuilder(1000);
@@ -155,35 +151,27 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         writeJsonResponse(status, buf.toString(), errMsg);
     }
 
-    protected void processSearchRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         String query = null;
         final StringBuilder buf = new StringBuilder(1000);
-        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
-                CDef.AccessType.Json);
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, CDef.AccessType.Json);
         final String queryId = request.getParameter("queryId");
         try {
-            chain.doFilter(new WebApiRequest(request, SEARCH_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, SEARCH_API), new WebApiResponse(response));
             WebApiUtil.validate();
             query = WebApiUtil.getObject("searchQuery");
             final String execTime = WebApiUtil.getObject("execTime");
             final String queryTime = WebApiUtil.getObject("queryTime");
             final String searchTime = WebApiUtil.getObject("searchTime");
             final String pageSize = WebApiUtil.getObject("pageSize");
-            final String currentPageNumber = WebApiUtil
-                    .getObject("currentPageNumber");
-            final String allRecordCount = WebApiUtil
-                    .getObject("allRecordCount");
+            final String currentPageNumber = WebApiUtil.getObject("currentPageNumber");
+            final String allRecordCount = WebApiUtil.getObject("allRecordCount");
             final String allPageCount = WebApiUtil.getObject("allPageCount");
-            final List<Map<String, Object>> documentItems = WebApiUtil
-                    .getObject("documentItems");
-            final FacetResponse facetResponse = WebApiUtil
-                    .getObject("facetResponse");
-            final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil
-                    .getObject("moreLikeThisResponse");
+            final List<Map<String, Object>> documentItems = WebApiUtil.getObject("documentItems");
+            final FacetResponse facetResponse = WebApiUtil.getObject("facetResponse");
+            final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil.getObject("moreLikeThisResponse");
 
             buf.append("\"query\":");
             buf.append(escapeJson(query));
@@ -222,13 +210,10 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     }
                     buf.append('{');
                     boolean first2 = true;
-                    for (final Map.Entry<String, Object> entry : document
-                            .entrySet()) {
+                    for (final Map.Entry<String, Object> entry : document.entrySet()) {
                         final String name = entry.getKey();
-                        if (StringUtil.isNotBlank(name)
-                                && entry.getValue() != null
-                                && ComponentUtil.getQueryHelper()
-                                        .isApiResponseField(name)) {
+                        if (StringUtil.isNotBlank(name) && entry.getValue() != null
+                                && ComponentUtil.getQueryHelper().isApiResponseField(name)) {
                             if (!first2) {
                                 buf.append(',');
                             } else {
@@ -259,8 +244,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                         buf.append(escapeJson(field.getName()));
                         buf.append(",\"result\":[");
                         boolean first2 = true;
-                        for (final Map.Entry<String, Long> entry : field
-                                .getValueCountMap().entrySet()) {
+                        for (final Map.Entry<String, Long> entry : field.getValueCountMap().entrySet()) {
                             if (!first2) {
                                 buf.append(',');
                             } else {
@@ -282,8 +266,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     buf.append(',');
                     buf.append("\"facetQuery\":[");
                     boolean first1 = true;
-                    for (final Map.Entry<String, Long> entry : facetResponse
-                            .getQueryCountMap().entrySet()) {
+                    for (final Map.Entry<String, Long> entry : facetResponse.getQueryCountMap().entrySet()) {
                         if (!first1) {
                             buf.append(',');
                         } else {
@@ -302,8 +285,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 buf.append(',');
                 buf.append("\"moreLikeThis\":[");
                 boolean first = true;
-                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse
-                        .entrySet()) {
+                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse.entrySet()) {
                     if (!first) {
                         buf.append(',');
                     } else {
@@ -313,8 +295,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                     buf.append(escapeJson(mltEntry.getKey()));
                     buf.append(",\"result\":[");
                     boolean first1 = true;
-                    for (final Map<String, Object> document : mltEntry
-                            .getValue()) {
+                    for (final Map<String, Object> document : mltEntry.getValue()) {
                         if (!first1) {
                             buf.append(',');
                         } else {
@@ -322,10 +303,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                         }
                         buf.append('{');
                         boolean first2 = true;
-                        for (final Map.Entry<String, Object> entry : document
-                                .entrySet()) {
-                            if (StringUtil.isNotBlank(entry.getKey())
-                                    && entry.getValue() != null) {
+                        for (final Map.Entry<String, Object> entry : document.entrySet()) {
+                            if (StringUtil.isNotBlank(entry.getKey()) && entry.getValue() != null) {
                                 if (!first2) {
                                     buf.append(',');
                                 } else {
@@ -357,14 +336,12 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processLabelRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<Map<String, String>> labelTypeItems = ComponentUtil
-                    .getLabelTypeHelper().getLabelTypeItemList();
+            final List<Map<String, String>> labelTypeItems = ComponentUtil.getLabelTypeHelper().getLabelTypeItemList();
             buf.append("\"recordCount\":");
             buf.append(labelTypeItems.size());
             if (!labelTypeItems.isEmpty()) {
@@ -397,22 +374,17 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processSuggestRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, SUGGEST_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final Integer suggestRecordCount = WebApiUtil
-                    .getObject("suggestRecordCount");
-            final List<SuggestResponse> suggestResultList = WebApiUtil
-                    .getObject("suggestResultList");
-            final List<String> suggestFieldName = WebApiUtil
-                    .getObject("suggestFieldName");
+            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
+            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
+            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
 
             buf.append("\"recordCount\":");
             buf.append(suggestRecordCount);
@@ -423,11 +395,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 boolean first1 = true;
                 for (int i = 0; i < suggestResultList.size(); i++) {
 
-                    final SuggestResponse suggestResponse = suggestResultList
-                            .get(i);
+                    final SuggestResponse suggestResponse = suggestResultList.get(i);
 
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
+                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
                         final String fn = suggestFieldName.get(i);
                         if (!first1) {
                             buf.append(',');
@@ -435,8 +405,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                             first1 = false;
                         }
 
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
+                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
 
                         buf.append("{\"token\":");
                         buf.append(escapeJson(entry.getKey()));
@@ -481,22 +450,17 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processSpellCheckRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processSpellCheckRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final Integer spellCheckRecordCount = WebApiUtil
-                    .getObject("spellCheckRecordCount");
-            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil
-                    .getObject("spellCheckResultList");
-            final List<String> spellCheckFieldName = WebApiUtil
-                    .getObject("spellCheckFieldName");
+            final Integer spellCheckRecordCount = WebApiUtil.getObject("spellCheckRecordCount");
+            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil.getObject("spellCheckResultList");
+            final List<String> spellCheckFieldName = WebApiUtil.getObject("spellCheckFieldName");
 
             buf.append("\"recordCount\":");
             buf.append(spellCheckRecordCount);
@@ -507,11 +471,9 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 boolean first1 = true;
                 for (int i = 0; i < spellCheckResultList.size(); i++) {
 
-                    final SuggestResponse suggestResponse = spellCheckResultList
-                            .get(i);
+                    final SuggestResponse suggestResponse = spellCheckResultList.get(i);
 
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
+                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
                         final String fn = spellCheckFieldName.get(i);
                         if (!first1) {
                             buf.append(',');
@@ -519,8 +481,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                             first1 = false;
                         }
 
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
+                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
 
                         buf.append("{\"token\":");
                         buf.append(escapeJson(entry.getKey()));
@@ -565,18 +526,15 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processAnalysisRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processAnalysisRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, ANALYSIS_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, ANALYSIS_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final FieldAnalysisResponse fieldAnalysis = WebApiUtil
-                    .getObject("fieldAnalysis");
+            final FieldAnalysisResponse fieldAnalysis = WebApiUtil.getObject("fieldAnalysis");
 
             buf.append("\"recordCount\":");
             buf.append(fieldAnalysis.size());
@@ -585,30 +543,23 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 buf.append(',');
                 buf.append("\"result\":[");
                 boolean first1 = true;
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis
-                        .entrySet()) {
+                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis.entrySet()) {
                     if (first1) {
                         first1 = false;
                     } else {
                         buf.append(',');
                     }
-                    buf.append("{\"field\":")
-                            .append(escapeJson(fEntry.getKey()))
-                            .append(",\"analysis\":[");
+                    buf.append("{\"field\":").append(escapeJson(fEntry.getKey())).append(",\"analysis\":[");
                     boolean first2 = true;
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
-                            .getValue().entrySet()) {
+                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry.getValue().entrySet()) {
                         if (first2) {
                             first2 = false;
                         } else {
                             buf.append(',');
                         }
-                        buf.append("{\"name\":")
-                                .append(escapeJson(aEntry.getKey()))
-                                .append(",\"data\":[");
+                        buf.append("{\"name\":").append(escapeJson(aEntry.getKey())).append(",\"data\":[");
                         boolean first3 = true;
-                        for (final Map<String, Object> dataMap : aEntry
-                                .getValue()) {
+                        for (final Map<String, Object> dataMap : aEntry.getValue()) {
                             if (first3) {
                                 first3 = false;
                             } else {
@@ -616,8 +567,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                             }
                             buf.append('{');
                             boolean first4 = true;
-                            for (final Map.Entry<String, Object> dEntry : dataMap
-                                    .entrySet()) {
+                            for (final Map.Entry<String, Object> dEntry : dataMap.entrySet()) {
                                 final String key = dEntry.getKey();
                                 final Object value = dEntry.getValue();
                                 if (StringUtil.isNotBlank(key) && value != null) {
@@ -626,8 +576,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                                     } else {
                                         buf.append(',');
                                     }
-                                    buf.append(escapeJson(key)).append(':')
-                                            .append(escapeJson(value));
+                                    buf.append(escapeJson(key)).append(':').append(escapeJson(value));
                                 }
                             }
                             buf.append('}');
@@ -654,19 +603,15 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processHotSearchWordRequest(
-            final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processHotSearchWordRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, HOT_SEARCH_WORD_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, HOT_SEARCH_WORD_API), new WebApiResponse(response));
             WebApiUtil.validate();
-            final List<String> hotSearchWordList = WebApiUtil
-                    .getObject("hotSearchWordList");
+            final List<String> hotSearchWordList = WebApiUtil.getObject("hotSearchWordList");
 
             buf.append("\"result\":[");
             boolean first1 = true;
@@ -695,14 +640,12 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processFavoriteRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processFavoriteRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
         String body = null;
         String errMsg = null;
         try {
-            chain.doFilter(new WebApiRequest(request, FAVORITE_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, FAVORITE_API), new WebApiResponse(response));
             WebApiUtil.validate();
 
             body = "\"result\":\"ok\"";
@@ -722,15 +665,13 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         writeJsonResponse(status, body, errMsg);
     }
 
-    protected void processFavoritesRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
+    protected void processFavoritesRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         int status = 0;
         String body = null;
         String errMsg = null;
 
         try {
-            chain.doFilter(new WebApiRequest(request, FAVORITES_API),
-                    new WebApiResponse(response));
+            chain.doFilter(new WebApiRequest(request, FAVORITES_API), new WebApiResponse(response));
             WebApiUtil.validate();
             final List<String> docIdList = WebApiUtil.getObject("docIdList");
 
@@ -763,10 +704,8 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void writeJsonResponse(final int status, final String body,
-            final String errMsg) {
-        final String callback = RequestUtil.getRequest().getParameter(
-                "callback");
+    protected void writeJsonResponse(final int status, final String body, final String errMsg) {
+        final String callback = RequestUtil.getRequest().getParameter("callback");
         final boolean isJsonp = StringUtil.isNotBlank(callback);
 
         final StringBuilder buf = new StringBuilder(1000);
@@ -792,15 +731,12 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         if (isJsonp) {
             buf.append(')');
         }
-        ResponseUtil.write(buf.toString(), "text/javascript+json",
-                Constants.UTF_8);
+        ResponseUtil.write(buf.toString(), "text/javascript+json", Constants.UTF_8);
 
     }
 
     protected String escapeCallbackName(final String callbackName) {
-        return "/**/"
-                + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]",
-                        StringUtil.EMPTY);
+        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
     }
 
     protected String escapeJson(final Object obj) {
@@ -830,23 +766,16 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 } else {
                     buf.append(',');
                 }
-                buf.append(escapeJson(entry.getKey())).append(':')
-                        .append(escapeJson(entry.getValue()));
+                buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
             }
             buf.append('}');
-        } else if (obj instanceof Integer || obj instanceof Long
-                || obj instanceof Float || obj instanceof Double
-                || obj instanceof Short) {
+        } else if (obj instanceof Integer || obj instanceof Long || obj instanceof Float || obj instanceof Double || obj instanceof Short) {
             buf.append(obj);
         } else if (obj instanceof Date) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            buf.append('\"')
-                    .append(StringEscapeUtils.escapeXml(sdf.format(obj)))
-                    .append('\"');
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            buf.append('\"').append(StringEscapeUtils.escapeXml(sdf.format(obj))).append('\"');
         } else {
-            buf.append('\"').append(escapeJsonString(obj.toString()))
-                    .append('\"');
+            buf.append('\"').append(escapeJsonString(obj.toString())).append('\"');
         }
         return buf.toString();
     }
@@ -871,50 +800,50 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
                 out.write(hex(ch));
             } else if (ch < 32) {
                 switch (ch) {
-                    case '\b':
-                        out.write('\\');
-                        out.write('b');
-                        break;
-                    case '\n':
-                        out.write('\\');
-                        out.write('n');
-                        break;
-                    case '\t':
-                        out.write('\\');
-                        out.write('t');
-                        break;
-                    case '\f':
-                        out.write('\\');
-                        out.write('f');
-                        break;
-                    case '\r':
-                        out.write('\\');
-                        out.write('r');
-                        break;
-                    default:
-                        if (ch > 0xf) {
-                            out.write("\\u00");
-                            out.write(hex(ch));
-                        } else {
-                            out.write("\\u000");
-                            out.write(hex(ch));
-                        }
-                        break;
+                case '\b':
+                    out.write('\\');
+                    out.write('b');
+                    break;
+                case '\n':
+                    out.write('\\');
+                    out.write('n');
+                    break;
+                case '\t':
+                    out.write('\\');
+                    out.write('t');
+                    break;
+                case '\f':
+                    out.write('\\');
+                    out.write('f');
+                    break;
+                case '\r':
+                    out.write('\\');
+                    out.write('r');
+                    break;
+                default:
+                    if (ch > 0xf) {
+                        out.write("\\u00");
+                        out.write(hex(ch));
+                    } else {
+                        out.write("\\u000");
+                        out.write(hex(ch));
+                    }
+                    break;
                 }
             } else {
                 switch (ch) {
-                    case '"':
-                        out.write("\\u0022");
-                        break;
-                    case '\\':
-                        out.write("\\u005C");
-                        break;
-                    case '/':
-                        out.write("\\u002F");
-                        break;
-                    default:
-                        out.write(ch);
-                        break;
+                case '"':
+                    out.write("\\u0022");
+                    break;
+                case '\\':
+                    out.write("\\u005C");
+                    break;
+                case '/':
+                    out.write("\\u002F");
+                    break;
+                default:
+                    out.write(ch);
+                    break;
                 }
             }
         }

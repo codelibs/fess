@@ -103,8 +103,7 @@ public class StatsService implements Serializable {
         return false;
     }
 
-    protected List<Map<String, Object>> getSearchWordStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getSearchWordStatsList(final StatsPager statsPager) {
 
         final SearchWordRankingPmb pmb = new SearchWordRankingPmb();
 
@@ -114,12 +113,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectSearchWordRanking;
-        final PagingResultBean<SearchWordRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<SearchWordRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -134,8 +131,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getSearchQueryStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getSearchQueryStatsList(final StatsPager statsPager) {
 
         final SearchQueryRankingPmb pmb = new SearchQueryRankingPmb();
 
@@ -145,12 +141,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectSearchQueryRanking;
-        final PagingResultBean<SearchQueryRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<SearchQueryRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -165,8 +159,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getSolrQueryStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getSolrQueryStatsList(final StatsPager statsPager) {
 
         final SolrQueryRankingPmb pmb = new SolrQueryRankingPmb();
 
@@ -176,12 +169,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectSolrQueryRanking;
-        final PagingResultBean<SolrQueryRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<SolrQueryRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -196,8 +187,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getUserAgentStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getUserAgentStatsList(final StatsPager statsPager) {
 
         final UserAgentRankingPmb pmb = new UserAgentRankingPmb();
 
@@ -207,12 +197,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectUserAgentRanking;
-        final PagingResultBean<UserAgentRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<UserAgentRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -227,8 +215,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getRefererStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getRefererStatsList(final StatsPager statsPager) {
 
         final RefererRankingPmb pmb = new RefererRankingPmb();
 
@@ -238,12 +225,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectRefererRanking;
-        final PagingResultBean<RefererRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<RefererRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -258,8 +243,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getClientIpStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getClientIpStatsList(final StatsPager statsPager) {
 
         final ClientIpRankingPmb pmb = new ClientIpRankingPmb();
 
@@ -269,12 +253,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectClientIpRanking;
-        final PagingResultBean<ClientIpRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<ClientIpRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -289,8 +271,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getClickUrlStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getClickUrlStatsList(final StatsPager statsPager) {
 
         final ClickUrlRankingPmb pmb = new ClickUrlRankingPmb();
 
@@ -300,12 +281,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsClickLogBhv.PATH_selectClickUrlRanking;
-        final PagingResultBean<ClickUrlRanking> statsList = clicklogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<ClickUrlRanking> statsList = clicklogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -320,8 +299,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getFavoriteUrlStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getFavoriteUrlStatsList(final StatsPager statsPager) {
 
         final FavoriteUrlRankingPmb pmb = new FavoriteUrlRankingPmb();
 
@@ -331,12 +309,10 @@ public class StatsService implements Serializable {
         pmb.setToCreatedTime(statsPager.getToRequestedTime());
 
         final String path = BsFavoriteLogBhv.PATH_selectFavoriteUrlRanking;
-        final PagingResultBean<FavoriteUrlRanking> statsList = favoriteLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<FavoriteUrlRanking> statsList = favoriteLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -351,8 +327,7 @@ public class StatsService implements Serializable {
         return mapList;
     }
 
-    protected List<Map<String, Object>> getGroupedFieldStatsList(
-            final StatsPager statsPager) {
+    protected List<Map<String, Object>> getGroupedFieldStatsList(final StatsPager statsPager) {
 
         final SearchFieldRankingPmb pmb = new SearchFieldRankingPmb();
 
@@ -363,12 +338,10 @@ public class StatsService implements Serializable {
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
         final String path = BsSearchLogBhv.PATH_selectSearchFieldRanking;
-        final PagingResultBean<SearchFieldRanking> statsList = searchLogBhv
-                .outsideSql().selectPage(pmb);
+        final PagingResultBean<SearchFieldRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
-        Beans.copy(statsList, statsPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsList, statsPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         statsPager.setPageNumberList(statsList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

@@ -32,7 +32,6 @@ public class RequestHeader extends BsRequestHeader {
     private static final long serialVersionUID = 1L;
 
     public org.codelibs.robot.client.http.RequestHeader getS2RobotRequestHeader() {
-        return new org.codelibs.robot.client.http.RequestHeader(getName(),
-                getValue());
+        return new org.codelibs.robot.client.http.RequestHeader(getName(), getValue());
     }
 }

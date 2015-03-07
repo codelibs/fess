@@ -61,8 +61,7 @@ public class SearchLogAction extends BsSearchLogAction {
         if (!searchParams.containsKey("startPage")) {
             searchParams.put("startPage", StringUtil.EMPTY);
         }
-        Beans.copy(searchParams, searchLogPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(searchParams, searchLogPager).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         return displayList(false);
     }
@@ -78,21 +77,17 @@ public class SearchLogAction extends BsSearchLogAction {
     public String download() {
         BufferedWriter writer = null;
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        final String fileName = "FessSearchLog_" + sdf.format(new Date())
-                + ".csv";
+        final String fileName = "FessSearchLog_" + sdf.format(new Date()) + ".csv";
         final HttpServletResponse response = ResponseUtil.getResponse();
         response.setContentType("text/csv");
-        response.setHeader("Content-disposition", "attachment; filename=\""
-                + fileName + "\"");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
         try {
-            writer = new BufferedWriter(new OutputStreamWriter(
-                    response.getOutputStream(), getCsvEncoding()));
+            writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), getCsvEncoding()));
             searchLogService.dump(writer, searchLogPager);
             writer.flush();
         } catch (final Exception e) {
             log.error("Could not create FessSearchLog.csv.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.could_not_create_search_log_csv");
+            throw new SSCActionMessagesException(e, "errors.could_not_create_search_log_csv");
         } finally {
             IOUtils.closeQuietly(writer);
         }
@@ -111,7 +106,6 @@ public class SearchLogAction extends BsSearchLogAction {
     }
 
     public boolean isHasClickLog() {
-        return searchLogForm.clickLogList != null
-                && !searchLogForm.clickLogList.isEmpty();
+        return searchLogForm.clickLogList != null && !searchLogForm.clickLogList.isEmpty();
     }
 }

@@ -42,8 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CrawlingSessionHelper implements Serializable {
-    private static final Logger logger = LoggerFactory
-            .getLogger(CrawlingSessionHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlingSessionHelper.class);
 
     public static final String FACET_COUNT_KEY = "count";
 
@@ -66,8 +65,7 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public synchronized void store(final String sessionId, final boolean create) {
-        CrawlingSession crawlingSession = create ? null
-                : getCrawlingSessionService().getLast(sessionId);
+        CrawlingSession crawlingSession = create ? null : getCrawlingSessionService().getLast(sessionId);
         if (crawlingSession == null) {
             crawlingSession = new CrawlingSession(sessionId);
             try {
@@ -81,8 +79,7 @@ public class CrawlingSessionHelper implements Serializable {
             final List<CrawlingSessionInfo> crawlingSessionInfoList = new ArrayList<CrawlingSessionInfo>();
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
                 final CrawlingSessionInfo crawlingSessionInfo = new CrawlingSessionInfo();
-                crawlingSessionInfo.setCrawlingSessionId(crawlingSession
-                        .getId());
+                crawlingSessionInfo.setCrawlingSessionId(crawlingSession.getId());
                 crawlingSessionInfo.setKey(entry.getKey());
                 crawlingSessionInfo.setValue(entry.getValue());
                 crawlingSessionInfoList.add(crawlingSessionInfo);
@@ -95,16 +92,13 @@ public class CrawlingSessionHelper implements Serializable {
 
     public synchronized void putToInfoMap(final String key, final String value) {
         if (infoMap == null) {
-            infoMap = Collections
-                    .synchronizedMap(new LinkedHashMap<String, String>());
+            infoMap = Collections.synchronizedMap(new LinkedHashMap<String, String>());
         }
         infoMap.put(key, value);
     }
 
-    public void updateParams(final String sessionId, final String name,
-            final int dayForCleanup) {
-        final CrawlingSession crawlingSession = getCrawlingSessionService()
-                .getLast(sessionId);
+    public void updateParams(final String sessionId, final String name, final int dayForCleanup) {
+        final CrawlingSession crawlingSession = getCrawlingSessionService().getLast(sessionId);
         if (crawlingSession == null) {
             logger.warn("No crawling session: " + sessionId);
             return;
@@ -132,18 +126,15 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     protected LocalDateTime getExpiredTime(final int days) {
-        final LocalDateTime now = ComponentUtil.getSystemHelper()
-                .getCurrentTime();
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
         return now.plusDays(days);
     }
 
     public Map<String, String> getInfoMap(final String sessionId) {
-        final List<CrawlingSessionInfo> crawlingSessionInfoList = getCrawlingSessionService()
-                .getLastCrawlingSessionInfoList(sessionId);
+        final List<CrawlingSessionInfo> crawlingSessionInfoList = getCrawlingSessionService().getLastCrawlingSessionInfoList(sessionId);
         final Map<String, String> map = new HashMap<String, String>();
         for (final CrawlingSessionInfo crawlingSessionInfo : crawlingSessionInfoList) {
-            map.put(crawlingSessionInfo.getKey(),
-                    crawlingSessionInfo.getValue());
+            map.put(crawlingSessionInfo.getKey(), crawlingSessionInfo.getValue());
         }
         return map;
     }
@@ -152,13 +143,11 @@ public class CrawlingSessionHelper implements Serializable {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final String url = (String) dataMap.get(fieldHelper.urlField);
         @SuppressWarnings("unchecked")
-        final List<String> roleTypeList = (List<String>) dataMap
-                .get(fieldHelper.roleField);
+        final List<String> roleTypeList = (List<String>) dataMap.get(fieldHelper.roleField);
         return generateId(url, roleTypeList);
     }
 
-    public List<Map<String, String>> getSessionIdList(
-            final SolrGroup serverGroup) {
+    public List<Map<String, String>> getSessionIdList(final SolrGroup serverGroup) {
         final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
@@ -174,8 +163,7 @@ public class CrawlingSessionHelper implements Serializable {
             final List<FacetField.Count> facetEntries = facet.getValues();
             if (facetEntries != null) {
                 for (final FacetField.Count fcount : facetEntries) {
-                    final Map<String, String> map = new HashMap<String, String>(
-                            2);
+                    final Map<String, String> map = new HashMap<String, String>(2);
                     map.put(fieldHelper.segmentField, fcount.getName());
                     map.put(FACET_COUNT_KEY, Long.toString(fcount.getCount()));
                     sessionIdList.add(map);

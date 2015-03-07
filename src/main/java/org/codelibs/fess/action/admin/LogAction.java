@@ -50,8 +50,7 @@ public class LogAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(LogAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogAction.class);
 
     @ActionForm
     @Resource
@@ -71,47 +70,39 @@ public class LogAction implements Serializable {
 
     @Execute(validator = true, input = "index", urlPattern = "download/{logFileName}")
     public String download() {
-        final String logFilePath = ComponentUtil.getSystemHelper()
-                .getLogFilePath();
+        final String logFilePath = ComponentUtil.getSystemHelper().getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             final File file = new File(logFilePath);
             final File parentDir = file.getParentFile();
             String fileName;
             try {
-                fileName = new String(Base64.decodeBase64(logForm.logFileName
-                        .getBytes(Constants.UTF_8)), Constants.UTF_8);
+                fileName = new String(Base64.decodeBase64(logForm.logFileName.getBytes(Constants.UTF_8)), Constants.UTF_8);
             } catch (final UnsupportedEncodingException e1) {
-                fileName = new String(Base64.decodeBase64(logForm.logFileName
-                        .getBytes(Charset.defaultCharset())),
-                        Charset.defaultCharset());
+                fileName =
+                        new String(Base64.decodeBase64(logForm.logFileName.getBytes(Charset.defaultCharset())), Charset.defaultCharset());
             }
             final File logFile = new File(parentDir, fileName);
             if (logFile.isFile()) {
                 try {
-                    ResponseUtil.download(fileName,
-                            new FileInputStream(logFile));
+                    ResponseUtil.download(fileName, new FileInputStream(logFile));
                     return null;
                 } catch (final FileNotFoundException e) {
-                    logger.warn("Could not find " + logFile.getAbsolutePath(),
-                            e);
+                    logger.warn("Could not find " + logFile.getAbsolutePath(), e);
                 }
             }
         }
-        throw new SSCActionMessagesException("errors.could_not_find_log_file",
-                new Object[] { logForm.logFileName });
+        throw new SSCActionMessagesException("errors.could_not_find_log_file", new Object[] { logForm.logFileName });
     }
 
     public List<Map<String, Object>> getLogFileItems() {
         final List<Map<String, Object>> logFileItems = new ArrayList<Map<String, Object>>();
-        final String logFilePath = ComponentUtil.getSystemHelper()
-                .getLogFilePath();
+        final String logFilePath = ComponentUtil.getSystemHelper().getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             try {
                 final File file = new File(logFilePath);
                 final File parentDir = file.getParentFile();
                 if (!parentDir.exists()) {
-                    logger.warn("Log directory does not exist: "
-                            + parentDir.getAbsolutePath());
+                    logger.warn("Log directory does not exist: " + parentDir.getAbsolutePath());
                     return logFileItems;
                 }
                 final File[] files = parentDir.listFiles(new FilenameFilter() {
@@ -150,14 +141,10 @@ public class LogAction implements Serializable {
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("name", file.getName());
         try {
-            map.put("logFileName",
-                    new String(Base64.encodeBase64(file.getName().getBytes(
-                            Constants.UTF_8)), "UTF-8"));
+            map.put("logFileName", new String(Base64.encodeBase64(file.getName().getBytes(Constants.UTF_8)), "UTF-8"));
         } catch (final UnsupportedEncodingException e) {
             map.put("logFileName",
-                    new String(Base64.encodeBase64(file.getName().getBytes(
-                            Charset.defaultCharset())), Charset
-                            .defaultCharset()));
+                    new String(Base64.encodeBase64(file.getName().getBytes(Charset.defaultCharset())), Charset.defaultCharset()));
         }
         map.put("lastModified", new Date(file.lastModified()));
         return map;

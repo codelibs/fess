@@ -74,12 +74,10 @@ public class SynonymAction {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        synonymItemItems = synonymService.getSynonymList(synonymForm.dictId,
-                synonymPager);
+        synonymItemItems = synonymService.getSynonymList(synonymForm.dictId, synonymPager);
 
         // restore from pager
-        Beans.copy(synonymPager, synonymForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(synonymPager, synonymForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         if (redirect) {
             return "index?dictId=" + synonymForm.dictId + "&redirect=true";
@@ -98,8 +96,7 @@ public class SynonymAction {
         // page navi
         if (StringUtil.isNotBlank(synonymForm.pageNumber)) {
             try {
-                synonymPager.setCurrentPageNumber(Integer
-                        .parseInt(synonymForm.pageNumber));
+                synonymPager.setCurrentPageNumber(Integer.parseInt(synonymForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + synonymForm.pageNumber, e);
@@ -112,8 +109,7 @@ public class SynonymAction {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(synonymForm.searchParams, synonymPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(synonymForm.searchParams, synonymPager).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         return displayList(false);
     }
@@ -140,8 +136,7 @@ public class SynonymAction {
     public String confirmpage() {
         if (synonymForm.crudMode != CommonConstants.CONFIRM_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            synonymForm.crudMode });
+                    new Object[] { CommonConstants.CONFIRM_MODE, synonymForm.crudMode });
         }
 
         loadSynonym();
@@ -163,9 +158,7 @@ public class SynonymAction {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{dictId}/{crudMode}/{id}")
     public String editpage() {
         if (synonymForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            synonymForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, synonymForm.crudMode });
         }
 
         loadSynonym();
@@ -200,8 +193,7 @@ public class SynonymAction {
     public String deletepage() {
         if (synonymForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            synonymForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, synonymForm.crudMode });
         }
 
         loadSynonym();
@@ -235,12 +227,10 @@ public class SynonymAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_create_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -260,12 +250,10 @@ public class SynonymAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_update_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -274,19 +262,16 @@ public class SynonymAction {
     public String delete() {
         if (synonymForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            synonymForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, synonymForm.crudMode });
         }
 
         try {
-            final SynonymItem synonymItem = synonymService.getSynonym(
-                    synonymForm.dictId, createKeyMap());
+            final SynonymItem synonymItem = synonymService.getSynonym(synonymForm.dictId, createKeyMap());
             if (synonymItem == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { synonymForm.id });
+                new Object[] { synonymForm.id });
 
             }
 
@@ -301,23 +286,19 @@ public class SynonymAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "downloadpage")
     public String downloadpage() {
-        final SynonymFile synonymFile = synonymService
-                .getSynonymFile(synonymForm.dictId);
+        final SynonymFile synonymFile = synonymService.getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.synonym_file_is_not_found");
+            throw new SSCActionMessagesException("errors.synonym_file_is_not_found");
         }
         filename = synonymFile.getSimpleName();
         return "download.jsp";
@@ -326,17 +307,14 @@ public class SynonymAction {
     @Token(save = true, validate = true)
     @Execute(validator = false, input = "downloadpage")
     public String download() {
-        final SynonymFile synonymFile = synonymService
-                .getSynonymFile(synonymForm.dictId);
+        final SynonymFile synonymFile = synonymService.getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.synonym_file_is_not_found");
+            throw new SSCActionMessagesException("errors.synonym_file_is_not_found");
         }
         try (InputStream in = synonymFile.getInputStream()) {
             ResponseUtil.download(synonymFile.getSimpleName(), in);
         } catch (final IOException e) {
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_download_synonym_file");
+            throw new SSCActionMessagesException("errors.failed_to_download_synonym_file");
         }
 
         return null;
@@ -345,11 +323,9 @@ public class SynonymAction {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "uploadpage")
     public String uploadpage() {
-        final SynonymFile synonymFile = synonymService
-                .getSynonymFile(synonymForm.dictId);
+        final SynonymFile synonymFile = synonymService.getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.synonym_file_is_not_found");
+            throw new SSCActionMessagesException("errors.synonym_file_is_not_found");
         }
         filename = synonymFile.getName();
         return "upload.jsp";
@@ -358,17 +334,14 @@ public class SynonymAction {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "uploadpage")
     public String upload() {
-        final SynonymFile synonymFile = synonymService
-                .getSynonymFile(synonymForm.dictId);
+        final SynonymFile synonymFile = synonymService.getSynonymFile(synonymForm.dictId);
         if (synonymFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.synonym_file_is_not_found");
+            throw new SSCActionMessagesException("errors.synonym_file_is_not_found");
         }
         try (InputStream in = synonymForm.synonymFile.getInputStream()) {
             synonymFile.update(in);
         } catch (final IOException e) {
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_upload_synonym_file");
+            throw new SSCActionMessagesException("errors.failed_to_upload_synonym_file");
         }
 
         SAStrutsUtil.addSessionMessage("success.upload_synonym_file");
@@ -378,13 +351,10 @@ public class SynonymAction {
 
     protected void loadSynonym() {
 
-        final SynonymItem synonymItem = synonymService.getSynonym(
-                synonymForm.dictId, createKeyMap());
+        final SynonymItem synonymItem = synonymService.getSynonym(synonymForm.dictId, createKeyMap());
         if (synonymItem == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { synonymForm.id });
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { synonymForm.id });
 
         }
 
@@ -396,19 +366,16 @@ public class SynonymAction {
     protected SynonymItem createSynonym() {
         SynonymItem synonymItem;
         if (synonymForm.crudMode == CommonConstants.EDIT_MODE) {
-            synonymItem = synonymService.getSynonym(synonymForm.dictId,
-                    createKeyMap());
+            synonymItem = synonymService.getSynonym(synonymForm.dictId, createKeyMap());
             if (synonymItem == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { synonymForm.id });
+                new Object[] { synonymForm.id });
 
             }
         } else {
-            synonymItem = new SynonymItem(0, StringUtil.EMPTY_STRINGS,
-                    StringUtil.EMPTY_STRINGS);
+            synonymItem = new SynonymItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
 
         final String[] newInputs = splitLine(synonymForm.inputs);

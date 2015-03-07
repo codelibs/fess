@@ -44,16 +44,14 @@ public class CrawlingSessionAction extends BsCrawlingSessionAction {
 
     public List<CrawlingSessionInfo> getCrawlingSessionInfoItems() {
         if (crawlingSessionForm.id != null) {
-            return crawlingSessionService.getCrawlingSessionInfoList(Long
-                    .parseLong(crawlingSessionForm.id));
+            return crawlingSessionService.getCrawlingSessionInfoList(Long.parseLong(crawlingSessionForm.id));
         }
         return Collections.emptyList();
     }
 
     @Execute(validator = false, input = "error.jsp")
     public String deleteall() {
-        crawlingSessionService.deleteOldSessions(jobHelper
-                .getRunningSessionIdSet());
+        crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
         SAStrutsUtil.addSessionMessage("success.crawling_session_delete_all");
         return displayList(true);
     }

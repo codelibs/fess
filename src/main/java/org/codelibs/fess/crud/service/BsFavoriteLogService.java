@@ -39,19 +39,15 @@ public abstract class BsFavoriteLogService {
         super();
     }
 
-    public List<FavoriteLog> getFavoriteLogList(
-            final FavoriteLogPager favoriteLogPager) {
+    public List<FavoriteLog> getFavoriteLogList(final FavoriteLogPager favoriteLogPager) {
 
-        final PagingResultBean<FavoriteLog> favoriteLogList = favoriteLogBhv
-                .selectPage(cb -> {
-                    cb.paging(favoriteLogPager.getPageSize(),
-                            favoriteLogPager.getCurrentPageNumber());
-                    setupListCondition(cb, favoriteLogPager);
-                });
+        final PagingResultBean<FavoriteLog> favoriteLogList = favoriteLogBhv.selectPage(cb -> {
+            cb.paging(favoriteLogPager.getPageSize(), favoriteLogPager.getCurrentPageNumber());
+            setupListCondition(cb, favoriteLogPager);
+        });
 
         // update pager
-        Beans.copy(favoriteLogList, favoriteLogPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(favoriteLogList, favoriteLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         favoriteLogPager.setPageNumberList(favoriteLogList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -72,24 +68,21 @@ public abstract class BsFavoriteLogService {
         return favoriteLog;
     }
 
-    public void store(final FavoriteLog favoriteLog)
-            throws CrudMessageException {
+    public void store(final FavoriteLog favoriteLog) throws CrudMessageException {
         setupStoreCondition(favoriteLog);
 
         favoriteLogBhv.insertOrUpdate(favoriteLog);
 
     }
 
-    public void delete(final FavoriteLog favoriteLog)
-            throws CrudMessageException {
+    public void delete(final FavoriteLog favoriteLog) throws CrudMessageException {
         setupDeleteCondition(favoriteLog);
 
         favoriteLogBhv.delete(favoriteLog);
 
     }
 
-    protected void setupListCondition(final FavoriteLogCB cb,
-            final FavoriteLogPager favoriteLogPager) {
+    protected void setupListCondition(final FavoriteLogCB cb, final FavoriteLogPager favoriteLogPager) {
 
         if (favoriteLogPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(favoriteLogPager.id));
@@ -97,8 +90,7 @@ public abstract class BsFavoriteLogService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final FavoriteLogCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FavoriteLogCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final FavoriteLog favoriteLog) {

@@ -42,8 +42,7 @@ import org.seasar.struts.exception.ActionMessagesException;
 public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(FileCrawlingConfigAction.class);
+    private static final Log log = LogFactory.getLog(FileCrawlingConfigAction.class);
 
     @Resource
     protected RoleTypeService roleTypeService;
@@ -64,24 +63,17 @@ public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
     @Override
     protected void loadFileCrawlingConfig() {
 
-        final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigService
-                .getFileCrawlingConfig(createKeyMap());
+        final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigService.getFileCrawlingConfig(createKeyMap());
         if (fileCrawlingConfig == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { fileCrawlingConfigForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileCrawlingConfigForm.id });
         }
 
-        FessBeans.copy(fileCrawlingConfig, fileCrawlingConfigForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(fileCrawlingConfig, fileCrawlingConfigForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
 
         // normalize boost
-        if (fileCrawlingConfigForm.boost != null
-                && fileCrawlingConfigForm.boost.indexOf('.') > 0) {
-            fileCrawlingConfigForm.boost = fileCrawlingConfigForm.boost
-                    .substring(0, fileCrawlingConfigForm.boost.indexOf('.'));
+        if (fileCrawlingConfigForm.boost != null && fileCrawlingConfigForm.boost.indexOf('.') > 0) {
+            fileCrawlingConfigForm.boost = fileCrawlingConfigForm.boost.substring(0, fileCrawlingConfigForm.boost.indexOf('.'));
         }
     }
 
@@ -91,13 +83,10 @@ public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (fileCrawlingConfigForm.crudMode == CommonConstants.EDIT_MODE) {
-            fileCrawlingConfig = fileCrawlingConfigService
-                    .getFileCrawlingConfig(createKeyMap());
+            fileCrawlingConfig = fileCrawlingConfigService.getFileCrawlingConfig(createKeyMap());
             if (fileCrawlingConfig == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { fileCrawlingConfigForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileCrawlingConfigForm.id });
             }
         } else {
             fileCrawlingConfig = new FileCrawlingConfig();
@@ -106,8 +95,7 @@ public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
         }
         fileCrawlingConfig.setUpdatedBy(username);
         fileCrawlingConfig.setUpdatedTime(currentTime);
-        FessBeans.copy(fileCrawlingConfigForm, fileCrawlingConfig)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(fileCrawlingConfigForm, fileCrawlingConfig).excludesCommonColumns().execute();
 
         return fileCrawlingConfig;
     }
@@ -116,23 +104,18 @@ public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (fileCrawlingConfigForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            fileCrawlingConfigForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    fileCrawlingConfigForm.crudMode });
         }
 
         try {
-            final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigService
-                    .getFileCrawlingConfig(createKeyMap());
+            final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigService.getFileCrawlingConfig(createKeyMap());
             if (fileCrawlingConfig == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { fileCrawlingConfigForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileCrawlingConfigForm.id });
             }
 
-            failureUrlService
-                    .deleteByConfigId(fileCrawlingConfig.getConfigId());
+            failureUrlService.deleteByConfigId(fileCrawlingConfig.getConfigId());
 
             //fileCrawlingConfigService.delete(fileCrawlingConfig);
             final String username = systemHelper.getUsername();
@@ -148,12 +131,10 @@ public class FileCrawlingConfigAction extends BsFileCrawlingConfigAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 

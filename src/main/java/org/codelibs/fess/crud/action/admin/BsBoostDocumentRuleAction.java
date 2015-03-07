@@ -43,8 +43,7 @@ public class BsBoostDocumentRuleAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsBoostDocumentRuleAction.class);
+    private static final Log log = LogFactory.getLog(BsBoostDocumentRuleAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsBoostDocumentRuleAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        boostDocumentRuleItems = boostDocumentRuleService
-                .getBoostDocumentRuleList(boostDocumentRulePager);
+        boostDocumentRuleItems = boostDocumentRuleService.getBoostDocumentRuleList(boostDocumentRulePager);
 
         // restore from pager
-        Beans.copy(boostDocumentRulePager, boostDocumentRuleForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(boostDocumentRulePager, boostDocumentRuleForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsBoostDocumentRuleAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(boostDocumentRuleForm.pageNumber)) {
             try {
-                boostDocumentRulePager.setCurrentPageNumber(Integer
-                        .parseInt(boostDocumentRuleForm.pageNumber));
+                boostDocumentRulePager.setCurrentPageNumber(Integer.parseInt(boostDocumentRuleForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: "
-                            + boostDocumentRuleForm.pageNumber, e);
+                    log.debug("Invalid value: " + boostDocumentRuleForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsBoostDocumentRuleAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(boostDocumentRuleForm.searchParams, boostDocumentRulePager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(boostDocumentRuleForm.searchParams, boostDocumentRulePager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsBoostDocumentRuleAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (boostDocumentRuleForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            boostDocumentRuleForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    boostDocumentRuleForm.crudMode });
         }
 
         loadBoostDocumentRule();
@@ -158,9 +151,8 @@ public class BsBoostDocumentRuleAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (boostDocumentRuleForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            boostDocumentRuleForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    boostDocumentRuleForm.crudMode });
         }
 
         loadBoostDocumentRule();
@@ -194,9 +186,8 @@ public class BsBoostDocumentRuleAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (boostDocumentRuleForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            boostDocumentRuleForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    boostDocumentRuleForm.crudMode });
         }
 
         loadBoostDocumentRule();
@@ -231,8 +222,7 @@ public class BsBoostDocumentRuleAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsBoostDocumentRuleAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsBoostDocumentRuleAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (boostDocumentRuleForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            boostDocumentRuleForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    boostDocumentRuleForm.crudMode });
         }
 
         try {
-            final BoostDocumentRule boostDocumentRule = boostDocumentRuleService
-                    .getBoostDocumentRule(createKeyMap());
+            final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
             if (boostDocumentRule == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { boostDocumentRuleForm.id });
+                new Object[] { boostDocumentRuleForm.id });
 
             }
 
@@ -291,50 +277,43 @@ public class BsBoostDocumentRuleAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadBoostDocumentRule() {
 
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService
-                .getBoostDocumentRule(createKeyMap());
+        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
         if (boostDocumentRule == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { boostDocumentRuleForm.id });
+            new Object[] { boostDocumentRuleForm.id });
 
         }
 
-        Beans.copy(boostDocumentRule, boostDocumentRuleForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(boostDocumentRule, boostDocumentRuleForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected BoostDocumentRule createBoostDocumentRule() {
         BoostDocumentRule boostDocumentRule;
         if (boostDocumentRuleForm.crudMode == CommonConstants.EDIT_MODE) {
-            boostDocumentRule = boostDocumentRuleService
-                    .getBoostDocumentRule(createKeyMap());
+            boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
             if (boostDocumentRule == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { boostDocumentRuleForm.id });
+                new Object[] { boostDocumentRuleForm.id });
 
             }
         } else {
             boostDocumentRule = new BoostDocumentRule();
         }
-        Beans.copy(boostDocumentRuleForm, boostDocumentRule)
-                .excludes("searchParams", "mode")
+        Beans.copy(boostDocumentRuleForm, boostDocumentRule).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return boostDocumentRule;
     }

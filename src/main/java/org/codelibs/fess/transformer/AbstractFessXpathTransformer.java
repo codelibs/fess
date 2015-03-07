@@ -31,8 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFessXpathTransformer extends XpathTransformer {
-    private static final Logger logger = LoggerFactory
-            .getLogger(AbstractFessXpathTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractFessXpathTransformer.class);
 
     public int maxSiteLength = 50;
 
@@ -89,8 +88,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
             String enc;
             if (siteEncoding != null) {
                 if (replaceSiteEncodingWhenEnglish) {
-                    if ("ISO-8859-1".equalsIgnoreCase(encoding)
-                            || "US-ASCII".equalsIgnoreCase(encoding)) {
+                    if ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding)) {
                         enc = siteEncoding;
                     } else {
                         enc = encoding;
@@ -104,8 +102,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
             try {
                 url = URLDecoder.decode(url, enc);
-            } catch (final Exception e) {
-            }
+            } catch (final Exception e) {}
         }
 
         return StringUtils.abbreviate(url, maxSiteLength);
@@ -118,8 +115,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         return content.replaceAll("\\s+", " ");
     }
 
-    protected void putResultDataBody(final Map<String, Object> dataMap,
-            final String key, final Object value) {
+    protected void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         if (fieldHelper.urlField.equals(key)) {
             dataMap.put(key, value);
@@ -130,15 +126,13 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
                     final Object[] oldValues = (Object[]) oldValue;
                     if (value.getClass().isArray()) {
                         final Object[] newValues = (Object[]) value;
-                        final Object[] values = Arrays.copyOf(oldValues,
-                                oldValues.length + newValues.length);
+                        final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
                         for (int i = 0; i < newValues.length; i++) {
                             values[values.length - 1 + i] = newValues[i];
                         }
                         dataMap.put(key, values);
                     } else {
-                        final Object[] values = Arrays.copyOf(oldValues,
-                                oldValues.length + 1);
+                        final Object[] values = Arrays.copyOf(oldValues, oldValues.length + 1);
                         values[values.length - 1] = value;
                         dataMap.put(key, values);
                     }
@@ -153,12 +147,10 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         }
     }
 
-    protected void putResultDataWithTemplate(final Map<String, Object> dataMap,
-            final String key, final Object value, final String template) {
+    protected void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template) {
         Object target = value;
         if (template != null) {
-            final Map<String, Object> paramMap = new HashMap<>(
-                    dataMap.size() + 1);
+            final Map<String, Object> paramMap = new HashMap<>(dataMap.size() + 1);
             paramMap.putAll(dataMap);
             paramMap.put("value", target);
             target = evaluateValue(template, paramMap);
@@ -168,8 +160,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
                 if (key.endsWith("_m")) {
                     putResultDataBody(dataMap, key, target);
                 } else {
-                    putResultDataBody(dataMap, key,
-                            Arrays.toString((Object[]) target));
+                    putResultDataBody(dataMap, key, Arrays.toString((Object[]) target));
                 }
             } else {
                 if (key.endsWith("_m")) {
@@ -181,8 +172,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         }
     }
 
-    protected String evaluateValue(final String template,
-            final Map<String, Object> paramMap) {
+    protected String evaluateValue(final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }

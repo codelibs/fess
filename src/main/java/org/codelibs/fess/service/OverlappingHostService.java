@@ -25,8 +25,7 @@ import org.codelibs.fess.db.cbean.OverlappingHostCB;
 import org.codelibs.fess.db.exentity.OverlappingHost;
 import org.codelibs.fess.pager.OverlappingHostPager;
 
-public class OverlappingHostService extends BsOverlappingHostService implements
-        Serializable {
+public class OverlappingHostService extends BsOverlappingHostService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,8 +40,7 @@ public class OverlappingHostService extends BsOverlappingHostService implements
     }
 
     @Override
-    protected void setupListCondition(final OverlappingHostCB cb,
-            final OverlappingHostPager overlappingHostPager) {
+    protected void setupListCondition(final OverlappingHostCB cb, final OverlappingHostPager overlappingHostPager) {
         super.setupListCondition(cb, overlappingHostPager);
 
         // setup condition
@@ -54,8 +52,7 @@ public class OverlappingHostService extends BsOverlappingHostService implements
     }
 
     @Override
-    protected void setupEntityCondition(final OverlappingHostCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final OverlappingHostCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition

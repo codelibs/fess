@@ -29,27 +29,20 @@ import org.slf4j.LoggerFactory;
 
 public class PurgeLogJob {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(PurgeLogJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(PurgeLogJob.class);
 
     public String execute() {
-        final CrawlingSessionService crawlingSessionService = SingletonS2Container
-                .getComponent(CrawlingSessionService.class);
-        final SearchLogService searchLogService = SingletonS2Container
-                .getComponent(SearchLogService.class);
-        final JobLogService jobLogService = SingletonS2Container
-                .getComponent(JobLogService.class);
-        final UserInfoService userInfoService = SingletonS2Container
-                .getComponent(UserInfoService.class);
-        final DynamicProperties crawlerProperties = ComponentUtil
-                .getCrawlerProperties();
+        final CrawlingSessionService crawlingSessionService = SingletonS2Container.getComponent(CrawlingSessionService.class);
+        final SearchLogService searchLogService = SingletonS2Container.getComponent(SearchLogService.class);
+        final JobLogService jobLogService = SingletonS2Container.getComponent(JobLogService.class);
+        final UserInfoService userInfoService = SingletonS2Container.getComponent(UserInfoService.class);
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
 
         final StringBuilder resultBuf = new StringBuilder();
 
         // purge crawling sessions
         try {
-            crawlingSessionService.deleteBefore(ComponentUtil.getSystemHelper()
-                    .getCurrentTime());
+            crawlingSessionService.deleteBefore(ComponentUtil.getSystemHelper().getCurrentTime());
         } catch (final Exception e) {
             logger.error("Failed to purge crawling sessions.", e);
             resultBuf.append(e.getMessage()).append("\n");
@@ -57,9 +50,7 @@ public class PurgeLogJob {
 
         // purge search logs
         try {
-            final String value = crawlerProperties.getProperty(
-                    Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
-                    Constants.DEFAULT_PURGE_DAY);
+            final String value = crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
             searchLogService.deleteBefore(days);
         } catch (final Exception e) {
@@ -69,9 +60,7 @@ public class PurgeLogJob {
 
         // purge job logs
         try {
-            final String value = crawlerProperties.getProperty(
-                    Constants.PURGE_JOB_LOG_DAY_PROPERTY,
-                    Constants.DEFAULT_PURGE_DAY);
+            final String value = crawlerProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
             jobLogService.deleteBefore(days);
         } catch (final Exception e) {
@@ -81,9 +70,7 @@ public class PurgeLogJob {
 
         // purge user info
         try {
-            final String value = crawlerProperties.getProperty(
-                    Constants.PURGE_USER_INFO_DAY_PROPERTY,
-                    Constants.DEFAULT_PURGE_DAY);
+            final String value = crawlerProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
             userInfoService.deleteBefore(days);
         } catch (final Exception e) {

@@ -26,6 +26,5 @@ import org.codelibs.fess.db.bsbhv.BsWebConfigToLabelTypeMappingBhv;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class WebConfigToLabelTypeMappingBhv extends
-        BsWebConfigToLabelTypeMappingBhv {
+public class WebConfigToLabelTypeMappingBhv extends BsWebConfigToLabelTypeMappingBhv {
 }

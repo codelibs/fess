@@ -32,8 +32,7 @@ public class SAStrutsUtil {
         addMessage(RequestUtil.getRequest(), key);
     }
 
-    public static void addMessage(final HttpServletRequest request,
-            final String key) {
+    public static void addMessage(final HttpServletRequest request, final String key) {
         final ActionMessages msgs = new ActionMessages();
         msgs.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(key));
         ActionMessagesUtil.saveMessages(request, msgs);
@@ -43,8 +42,7 @@ public class SAStrutsUtil {
         addMessage(RequestUtil.getRequest(), key, values);
     }
 
-    public static void addMessage(final HttpServletRequest request,
-            final String key, final Object... values) {
+    public static void addMessage(final HttpServletRequest request, final String key, final Object... values) {
         final ActionMessages msgs = new ActionMessages();
         msgs.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(key, values));
         ActionMessagesUtil.saveMessages(request, msgs);
@@ -54,20 +52,17 @@ public class SAStrutsUtil {
         addSessionMessage(RequestUtil.getRequest(), key);
     }
 
-    public static void addSessionMessage(final HttpServletRequest request,
-            final String key) {
+    public static void addSessionMessage(final HttpServletRequest request, final String key) {
         final ActionMessages msgs = new ActionMessages();
         msgs.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(key));
         ActionMessagesUtil.saveMessages(request.getSession(), msgs);
     }
 
-    public static void addSessionMessage(final String key,
-            final Object... values) {
+    public static void addSessionMessage(final String key, final Object... values) {
         addSessionMessage(RequestUtil.getRequest(), key, values);
     }
 
-    public static void addSessionMessage(final HttpServletRequest request,
-            final String key, final Object... values) {
+    public static void addSessionMessage(final HttpServletRequest request, final String key, final Object... values) {
         final ActionMessages msgs = new ActionMessages();
         msgs.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(key, values));
         ActionMessagesUtil.saveMessages(request.getSession(), msgs);

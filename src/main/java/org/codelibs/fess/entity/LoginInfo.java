@@ -34,8 +34,7 @@ public class LoginInfo extends UserInfo {
     }
 
     public boolean isAdministrator() {
-        for (final String role : ComponentUtil.getSystemHelper()
-                .getAdminRoleSet()) {
+        for (final String role : ComponentUtil.getSystemHelper().getAdminRoleSet()) {
             if (isUserInRole(role)) {
                 return true;
             }

@@ -59,8 +59,7 @@ public class RoleQueryHelperImplTest extends S2TestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedParameterValue = true;
-        getRequest().setParameter("fess2",
-                cipher.encryptoText("xxx\nrole1,role2,role3"));
+        getRequest().setParameter("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
         roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -120,8 +119,7 @@ public class RoleQueryHelperImplTest extends S2TestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedHeaderValue = true;
-        getRequest().addHeader("fess2",
-                cipher.encryptoText("xxx\nrole1,role2,role3"));
+        getRequest().addHeader("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
         roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
@@ -187,8 +185,7 @@ public class RoleQueryHelperImplTest extends S2TestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
-        cookie = new Cookie("fess2",
-                cipher.encryptoText("xxx\nrole1,role2,role3"));
+        cookie = new Cookie("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
         getRequest().addCookie(cookie);
         roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
         assertEquals(3, roleSet.size());

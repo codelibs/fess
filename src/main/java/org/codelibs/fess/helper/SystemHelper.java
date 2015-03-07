@@ -65,18 +65,14 @@ public class SystemHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(SystemHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
 
     private final Set<String> adminRoleSet = new HashSet<>();
 
-    private String[] crawlerJavaOptions = new String[] {
-            "-Djava.awt.headless=true", "-server", "-Xmx512m",
-            "-XX:MaxPermSize=128m", "-XX:-UseGCOverheadLimit",
-            "-XX:+UseConcMarkSweepGC", "-XX:CMSInitiatingOccupancyFraction=75",
-            "-XX:+CMSIncrementalMode", "-XX:+CMSIncrementalPacing",
-            "-XX:CMSIncrementalDutyCycleMin=0", "-XX:+UseParNewGC",
-            "-XX:+UseStringCache", "-XX:+UseTLAB", "-XX:+DisableExplicitGC" };
+    private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx512m", "-XX:MaxPermSize=128m",
+            "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC", "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+CMSIncrementalMode",
+            "-XX:+CMSIncrementalPacing", "-XX:CMSIncrementalDutyCycleMin=0", "-XX:+UseParNewGC", "-XX:+UseStringCache", "-XX:+UseTLAB",
+            "-XX:+DisableExplicitGC" };
 
     private String logFilePath = System.getProperty("fess.log.file");
 
@@ -88,9 +84,7 @@ public class SystemHelper implements Serializable {
 
     private boolean useOwnTmpDir = true;
 
-    private String baseHelpLink = "http://fess.codelibs.org/{lang}/"
-            + Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION
-            + "/admin/";
+    private String baseHelpLink = "http://fess.codelibs.org/{lang}/" + Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION + "/admin/";
 
     private String[] supportedHelpLangs = new String[] { "ja" };
 
@@ -100,8 +94,7 @@ public class SystemHelper implements Serializable {
 
     private String[] supportedUploadedCssExtentions = new String[] { "css" };
 
-    private String[] supportedUploadedMediaExtentions = new String[] { "jpg",
-            "jpeg", "gif", "png", "swf" };
+    private String[] supportedUploadedMediaExtentions = new String[] { "jpg", "jpeg", "gif", "png", "swf" };
 
     private String jarDir = "/jar/";
 
@@ -117,10 +110,8 @@ public class SystemHelper implements Serializable {
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
-    protected String[] supportedLanguages = new String[] { "ar", "bg", "ca",
-            "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
-            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
-            "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" };
+    protected String[] supportedLanguages = new String[] { "ar", "bg", "ca", "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga",
+            "gl", "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt", "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" };
 
     protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
 
@@ -129,82 +120,67 @@ public class SystemHelper implements Serializable {
         final File[] files = ResourceUtil.getJarFiles(launcherFileNamePrefix);
         if (files.length > 0) {
             final String fileName = files[0].getName();
-            final String jarPath = ServletContextUtil.getServletContext()
-                    .getRealPath(jarDir);
-            final File[] jarFiles = new File(jarPath)
-                    .listFiles(new FilenameFilter() {
-                        @Override
-                        public boolean accept(final File dir, final String name) {
-                            return name.startsWith(launcherFileNamePrefix);
-                        }
-                    });
+            final String jarPath = ServletContextUtil.getServletContext().getRealPath(jarDir);
+            final File[] jarFiles = new File(jarPath).listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(final File dir, final String name) {
+                    return name.startsWith(launcherFileNamePrefix);
+                }
+            });
             if (jarFiles != null) {
                 for (final File jarFile : jarFiles) {
                     if (jarFile.exists() && !jarFile.delete()) {
-                        logger.warn("Could not delete "
-                                + jarFile.getAbsolutePath());
+                        logger.warn("Could not delete " + jarFile.getAbsolutePath());
                     }
                 }
             }
             final File launcherJarFile = new File(jarPath, fileName);
             final File parentLauncherJarFile = launcherJarFile.getParentFile();
-            if (!parentLauncherJarFile.exists()
-                    && !parentLauncherJarFile.mkdirs()) {
-                logger.warn("Could not create "
-                        + parentLauncherJarFile.getAbsolutePath());
+            if (!parentLauncherJarFile.exists() && !parentLauncherJarFile.mkdirs()) {
+                logger.warn("Could not create " + parentLauncherJarFile.getAbsolutePath());
             }
             FileUtil.copy(files[0], launcherJarFile);
             launcherJarPath = jarDir + fileName;
             launcherJnlpPath = launcherJarPath.replace(".jar", ".jnlp");
-            final File launcherJnlpFile = new File(launcherJarFile
-                    .getAbsolutePath().replace(".jar", ".jnlp"));
-            final File jnlpTemplateFile = new File(
-                    ResourceUtil.getOrigPath("jnlp/fess-launcher.jnlp"));
+            final File launcherJnlpFile = new File(launcherJarFile.getAbsolutePath().replace(".jar", ".jnlp"));
+            final File jnlpTemplateFile = new File(ResourceUtil.getOrigPath("jnlp/fess-launcher.jnlp"));
             if (!jnlpTemplateFile.isFile()) {
-                throw new FessSystemException(
-                        jnlpTemplateFile.getAbsolutePath() + " is not found.");
+                throw new FessSystemException(jnlpTemplateFile.getAbsolutePath() + " is not found.");
             }
             try {
-                String content = new String(
-                        FileUtil.getBytes(jnlpTemplateFile), Constants.UTF_8);
+                String content = new String(FileUtil.getBytes(jnlpTemplateFile), Constants.UTF_8);
                 content = content.replace("${launcherJarFile}", fileName);
-                FileUtil.write(launcherJnlpFile.getAbsolutePath(),
-                        content.getBytes(Constants.UTF_8));
+                FileUtil.write(launcherJnlpFile.getAbsolutePath(), content.getBytes(Constants.UTF_8));
             } catch (final UnsupportedEncodingException e) {
-                throw new FessSystemException("Could not write "
-                        + jnlpTemplateFile.getAbsolutePath(), e);
+                throw new FessSystemException("Could not write " + jnlpTemplateFile.getAbsolutePath(), e);
             }
         }
 
-        langItemsCache = CacheBuilder.newBuilder().maximumSize(20)
-                .expireAfterAccess(1, TimeUnit.HOURS)
-                .build(new CacheLoader<String, List<Map<String, String>>>() {
-                    @Override
-                    public List<Map<String, String>> load(final String key)
-                            throws Exception {
-                        final ULocale uLocale = new ULocale(key);
-                        final Locale displayLocale = uLocale.toLocale();
-                        final List<Map<String, String>> langItems = new ArrayList<>(
-                                supportedLanguages.length);
-                        final String msg = MessageResourcesUtil.getMessage(
-                                displayLocale, "labels.allLanguages");
-                        final Map<String, String> defaultMap = new HashMap<>(2);
-                        defaultMap.put(Constants.ITEM_LABEL, msg);
-                        defaultMap.put(Constants.ITEM_VALUE, "all");
-                        langItems.add(defaultMap);
+        langItemsCache =
+                CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
+                        .build(new CacheLoader<String, List<Map<String, String>>>() {
+                            @Override
+                            public List<Map<String, String>> load(final String key) throws Exception {
+                                final ULocale uLocale = new ULocale(key);
+                                final Locale displayLocale = uLocale.toLocale();
+                                final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
+                                final String msg = MessageResourcesUtil.getMessage(displayLocale, "labels.allLanguages");
+                                final Map<String, String> defaultMap = new HashMap<>(2);
+                                defaultMap.put(Constants.ITEM_LABEL, msg);
+                                defaultMap.put(Constants.ITEM_VALUE, "all");
+                                langItems.add(defaultMap);
 
-                        for (final String lang : supportedLanguages) {
-                            final Locale locale = LocaleUtils.toLocale(lang);
-                            final String label = locale
-                                    .getDisplayName(displayLocale);
-                            final Map<String, String> map = new HashMap<>(2);
-                            map.put(Constants.ITEM_LABEL, label);
-                            map.put(Constants.ITEM_VALUE, lang);
-                            langItems.add(map);
-                        }
-                        return langItems;
-                    }
-                });
+                                for (final String lang : supportedLanguages) {
+                                    final Locale locale = LocaleUtils.toLocale(lang);
+                                    final String label = locale.getDisplayName(displayLocale);
+                                    final Map<String, String> map = new HashMap<>(2);
+                                    map.put(Constants.ITEM_LABEL, label);
+                                    map.put(Constants.ITEM_VALUE, lang);
+                                    langItems.add(map);
+                                }
+                                return langItems;
+                            }
+                        });
     }
 
     public String getUsername() {
@@ -236,12 +212,10 @@ public class SystemHelper implements Serializable {
             final StringBuilder buf = new StringBuilder();
             for (int i = 0; i < path.length(); i++) {
                 final char c = path.charAt(i);
-                if (CharUtil.isUrlChar(c) || c == '^' || c == '{' || c == '}'
-                        || c == '|' || c == '\\') {
+                if (CharUtil.isUrlChar(c) || c == '^' || c == '{' || c == '}' || c == '|' || c == '\\') {
                     buf.append(c);
                 } else {
-                    buf.append(URLEncoder.encode(String.valueOf(c),
-                            filterPathEncoding));
+                    buf.append(URLEncoder.encode(String.valueOf(c), filterPathEncoding));
                 }
             }
             return buf.toString();
@@ -281,12 +255,10 @@ public class SystemHelper implements Serializable {
     }
 
     public Set<String> getAuthenticatedRoleSet() {
-        final RoleTypeService roleTypeService = SingletonS2Container
-                .getComponent(RoleTypeService.class);
+        final RoleTypeService roleTypeService = SingletonS2Container.getComponent(RoleTypeService.class);
         final List<RoleType> roleTypeList = roleTypeService.getRoleTypeList();
 
-        final Set<String> roleList = new HashSet<>(roleTypeList.size()
-                + adminRoleSet.size());
+        final Set<String> roleList = new HashSet<>(roleTypeList.size() + adminRoleSet.size());
         for (final RoleType roleType : roleTypeList) {
             roleList.add(roleType.getValue());
         }
@@ -381,8 +353,7 @@ public class SystemHelper implements Serializable {
         return supportedUploadedJSExtentions;
     }
 
-    public void setSupportedUploadedJSExtentions(
-            final String[] supportedUploadedJSExtentions) {
+    public void setSupportedUploadedJSExtentions(final String[] supportedUploadedJSExtentions) {
         this.supportedUploadedJSExtentions = supportedUploadedJSExtentions;
     }
 
@@ -390,8 +361,7 @@ public class SystemHelper implements Serializable {
         return supportedUploadedCssExtentions;
     }
 
-    public void setSupportedUploadedCssExtentions(
-            final String[] supportedUploadedCssExtentions) {
+    public void setSupportedUploadedCssExtentions(final String[] supportedUploadedCssExtentions) {
         this.supportedUploadedCssExtentions = supportedUploadedCssExtentions;
     }
 
@@ -399,8 +369,7 @@ public class SystemHelper implements Serializable {
         return supportedUploadedMediaExtentions;
     }
 
-    public void setSupportedUploadedMediaExtentions(
-            final String[] supportedUploadedMediaExtentions) {
+    public void setSupportedUploadedMediaExtentions(final String[] supportedUploadedMediaExtentions) {
         this.supportedUploadedMediaExtentions = supportedUploadedMediaExtentions;
     }
 
@@ -436,8 +405,7 @@ public class SystemHelper implements Serializable {
         this.maxTextLength = maxTextLength;
     }
 
-    public void updateStatus(final SolrGroup solrGroup,
-            final QueryType queryType) {
+    public void updateStatus(final SolrGroup solrGroup, final QueryType queryType) {
         final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
         for (final String serverName : solrGroup.getServerNames()) {
             statusPolicy.activate(queryType, serverName);
@@ -466,12 +434,10 @@ public class SystemHelper implements Serializable {
             return null;
         }
 
-        final String localeName = value.trim().toLowerCase(Locale.ENGLISH)
-                .replace("-", "_");
+        final String localeName = value.trim().toLowerCase(Locale.ENGLISH).replace("-", "_");
 
         for (final String supportedLang : supportedLanguages) {
-            if (localeName
-                    .startsWith(supportedLang.toLowerCase(Locale.ENGLISH))) {
+            if (localeName.startsWith(supportedLang.toLowerCase(Locale.ENGLISH))) {
                 return supportedLang;
             }
         }
@@ -483,10 +449,8 @@ public class SystemHelper implements Serializable {
             final String localeStr = locale.toString();
             return langItemsCache.get(localeStr);
         } catch (final ExecutionException e) {
-            final List<Map<String, String>> langItems = new ArrayList<>(
-                    supportedLanguages.length);
-            final String msg = MessageResourcesUtil.getMessage(locale,
-                    "labels.allLanguages");
+            final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
+            final String msg = MessageResourcesUtil.getMessage(locale, "labels.allLanguages");
             final Map<String, String> defaultMap = new HashMap<>(2);
             defaultMap.put(Constants.ITEM_LABEL, msg);
             defaultMap.put(Constants.ITEM_VALUE, "all");

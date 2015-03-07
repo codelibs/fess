@@ -55,20 +55,15 @@ public class SynonymLocatorTest extends S2TestCase {
         testCoreDir = new File(testDir, "core");
         testCoreDir.mkdirs();
         synonymFile1 = new File(testDir, "synonym.txt");
-        FileUtil.write(synonymFile1.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(synonymFile1.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
         synonymFile2 = new File(testDataDir, "synonym_data.txt");
-        FileUtil.write(synonymFile2.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(synonymFile2.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
         synonymFile3 = new File(testCoreDir, "synonym_core.txt");
-        FileUtil.write(synonymFile3.getAbsolutePath(),
-                "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
+        FileUtil.write(synonymFile3.getAbsolutePath(), "abc=>123\nxyz,890".getBytes(Constants.UTF_8));
         dummyFile1 = new File(testDir, "dummy.txt");
-        FileUtil.write(dummyFile1.getAbsolutePath(),
-                "dummy 1".getBytes(Constants.UTF_8));
+        FileUtil.write(dummyFile1.getAbsolutePath(), "dummy 1".getBytes(Constants.UTF_8));
         dummyFile2 = new File(testCoreDir, "dummy.txt");
-        FileUtil.write(dummyFile2.getAbsolutePath(),
-                "dummy 2".getBytes(Constants.UTF_8));
+        FileUtil.write(dummyFile2.getAbsolutePath(), "dummy 2".getBytes(Constants.UTF_8));
 
     }
 
@@ -82,8 +77,7 @@ public class SynonymLocatorTest extends S2TestCase {
         synonymLocator.excludedSynonymList = new ArrayList<String>();
         synonymLocator.excludedSynonymList.add("data");
         synonymLocator.addSearchPath(testDir.getAbsolutePath());
-        final List<DictionaryFile<? extends DictionaryItem>> list = synonymLocator
-                .find();
+        final List<DictionaryFile<? extends DictionaryItem>> list = synonymLocator.find();
         assertEquals(2, list.size());
         final DictionaryFile<? extends DictionaryItem> dicFile1 = list.get(0);
         final DictionaryFile<? extends DictionaryItem> dicFile2 = list.get(1);

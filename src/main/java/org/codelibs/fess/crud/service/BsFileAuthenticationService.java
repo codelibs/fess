@@ -39,34 +39,27 @@ public abstract class BsFileAuthenticationService {
         super();
     }
 
-    public List<FileAuthentication> getFileAuthenticationList(
-            final FileAuthenticationPager fileAuthenticationPager) {
+    public List<FileAuthentication> getFileAuthenticationList(final FileAuthenticationPager fileAuthenticationPager) {
 
-        final PagingResultBean<FileAuthentication> fileAuthenticationList = fileAuthenticationBhv
-                .selectPage(cb -> {
-                    cb.paging(fileAuthenticationPager.getPageSize(),
-                            fileAuthenticationPager.getCurrentPageNumber());
-                    setupListCondition(cb, fileAuthenticationPager);
-                });
+        final PagingResultBean<FileAuthentication> fileAuthenticationList = fileAuthenticationBhv.selectPage(cb -> {
+            cb.paging(fileAuthenticationPager.getPageSize(), fileAuthenticationPager.getCurrentPageNumber());
+            setupListCondition(cb, fileAuthenticationPager);
+        });
 
         // update pager
-        Beans.copy(fileAuthenticationList, fileAuthenticationPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        fileAuthenticationPager.setPageNumberList(fileAuthenticationList
-                .pageRange(op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(fileAuthenticationList, fileAuthenticationPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        fileAuthenticationPager.setPageNumberList(fileAuthenticationList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return fileAuthenticationList;
     }
 
-    public FileAuthentication getFileAuthentication(
-            final Map<String, String> keys) {
-        final FileAuthentication fileAuthentication = fileAuthenticationBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+    public FileAuthentication getFileAuthentication(final Map<String, String> keys) {
+        final FileAuthentication fileAuthentication = fileAuthenticationBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (fileAuthentication == null) {
             // TODO exception?
             return null;
@@ -75,24 +68,21 @@ public abstract class BsFileAuthenticationService {
         return fileAuthentication;
     }
 
-    public void store(final FileAuthentication fileAuthentication)
-            throws CrudMessageException {
+    public void store(final FileAuthentication fileAuthentication) throws CrudMessageException {
         setupStoreCondition(fileAuthentication);
 
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication);
 
     }
 
-    public void delete(final FileAuthentication fileAuthentication)
-            throws CrudMessageException {
+    public void delete(final FileAuthentication fileAuthentication) throws CrudMessageException {
         setupDeleteCondition(fileAuthentication);
 
         fileAuthenticationBhv.delete(fileAuthentication);
 
     }
 
-    protected void setupListCondition(final FileAuthenticationCB cb,
-            final FileAuthenticationPager fileAuthenticationPager) {
+    protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthenticationPager fileAuthenticationPager) {
 
         if (fileAuthenticationPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(fileAuthenticationPager.id));
@@ -100,15 +90,12 @@ public abstract class BsFileAuthenticationService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final FileAuthenticationCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FileAuthenticationCB cb, final Map<String, String> keys) {
     }
 
-    protected void setupStoreCondition(
-            final FileAuthentication fileAuthentication) {
+    protected void setupStoreCondition(final FileAuthentication fileAuthentication) {
     }
 
-    protected void setupDeleteCondition(
-            final FileAuthentication fileAuthentication) {
+    protected void setupDeleteCondition(final FileAuthentication fileAuthentication) {
     }
 }

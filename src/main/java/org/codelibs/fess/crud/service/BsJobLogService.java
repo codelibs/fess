@@ -41,16 +41,13 @@ public abstract class BsJobLogService {
 
     public List<JobLog> getJobLogList(final JobLogPager jobLogPager) {
 
-        final PagingResultBean<JobLog> jobLogList = jobLogBhv
-                .selectPage(cb -> {
-                    cb.paging(jobLogPager.getPageSize(),
-                            jobLogPager.getCurrentPageNumber());
-                    setupListCondition(cb, jobLogPager);
-                });
+        final PagingResultBean<JobLog> jobLogList = jobLogBhv.selectPage(cb -> {
+            cb.paging(jobLogPager.getPageSize(), jobLogPager.getCurrentPageNumber());
+            setupListCondition(cb, jobLogPager);
+        });
 
         // update pager
-        Beans.copy(jobLogList, jobLogPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(jobLogList, jobLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         jobLogPager.setPageNumberList(jobLogList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -85,8 +82,7 @@ public abstract class BsJobLogService {
 
     }
 
-    protected void setupListCondition(final JobLogCB cb,
-            final JobLogPager jobLogPager) {
+    protected void setupListCondition(final JobLogCB cb, final JobLogPager jobLogPager) {
 
         if (jobLogPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(jobLogPager.id));
@@ -94,8 +90,7 @@ public abstract class BsJobLogService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final JobLogCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final JobLogCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final JobLog jobLog) {

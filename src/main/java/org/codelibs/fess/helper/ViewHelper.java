@@ -64,8 +64,7 @@ public class ViewHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ViewHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
 
     @Resource
     protected PathMappingHelper pathMappingHelper;
@@ -146,8 +145,7 @@ public class ViewHelper implements Serializable {
 
     public String getContentDescription(final Map<String, Object> document) {
         final HttpServletRequest request = RequestUtil.getRequest();
-        final String[] queries = request == null ? StringUtil.EMPTY_STRINGS
-                : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final String[] queries = request == null ? StringUtil.EMPTY_STRINGS : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
         final int size = descriptionLength;
 
         for (final String field : highlightingFields) {
@@ -156,8 +154,7 @@ public class ViewHelper implements Serializable {
                 if (useSolrHighlight) {
                     return escapeHighlight(text);
                 } else {
-                    return highlight(S2Functions.h(StringUtils.abbreviate(
-                            removeSolrHighlightTag(text), size)), queries);
+                    return highlight(S2Functions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
                 }
             }
         }
@@ -166,27 +163,23 @@ public class ViewHelper implements Serializable {
     }
 
     protected String escapeHighlight(final String text) {
-        return S2Functions.h(text)
-                .replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
+        return S2Functions.h(text).replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
                 .replaceAll(escapedSolrHighlightPost, solrHighlightTagPost);
     }
 
     protected String removeSolrHighlightTag(final String str) {
-        return str.replaceAll(solrHighlightTagPre, StringUtil.EMPTY)
-                .replaceAll(solrHighlightTagPost, StringUtil.EMPTY);
+        return str.replaceAll(solrHighlightTagPre, StringUtil.EMPTY).replaceAll(solrHighlightTagPost, StringUtil.EMPTY);
     }
 
     protected String highlight(final String content, final String[] queries) {
-        if (StringUtil.isBlank(content) || queries == null
-                || queries.length == 0) {
+        if (StringUtil.isBlank(content) || queries == null || queries.length == 0) {
             return content;
         }
         String newContent = content;
         for (final String query : queries) {
-            newContent = Pattern
-                    .compile(Pattern.quote(query), Pattern.CASE_INSENSITIVE)
-                    .matcher(newContent)
-                    .replaceAll(highlightTagPre + query + highlightTagPost);
+            newContent =
+                    Pattern.compile(Pattern.quote(query), Pattern.CASE_INSENSITIVE).matcher(newContent)
+                            .replaceAll(highlightTagPre + query + highlightTagPost);
         }
         return newContent;
     }
@@ -216,8 +209,7 @@ public class ViewHelper implements Serializable {
                     buf.append(c);
                 } else {
                     try {
-                        buf.append(URLEncoder.encode(String.valueOf(c),
-                                urlLinkEncoding));
+                        buf.append(URLEncoder.encode(String.valueOf(c), urlLinkEncoding));
                     } catch (final UnsupportedEncodingException e) {
                         // NOP
                     }
@@ -231,70 +223,48 @@ public class ViewHelper implements Serializable {
 
             final UserAgentType ua = userAgentHelper.getUserAgentType();
             switch (ua) {
-                case IE:
-                    if (isLocalFile) {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.winlocal.ie",
-                                        "file://"));
-                    } else {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.ie", "file://"));
-                    }
-                    break;
-                case FIREFOX:
-                    if (isLocalFile) {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.winlocal.firefox",
-                                        "file://"));
-                    } else {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.firefox",
-                                        "file://///"));
-                    }
-                    break;
-                case CHROME:
-                    if (isLocalFile) {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.winlocal.chrome",
-                                        "file://"));
-                    } else {
-                        url = url
-                                .replaceFirst("file:/+", crawlerProperties
-                                        .getProperty("file.protocol.chrome",
-                                                "file://"));
-                    }
-                    break;
-                case SAFARI:
-                    if (isLocalFile) {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.winlocal.safari",
-                                        "file://"));
-                    } else {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.safari",
-                                        "file:////"));
-                    }
-                    break;
-                case OPERA:
-                    if (isLocalFile) {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.winlocal.opera",
-                                        "file://"));
-                    } else {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.opera", "file://"));
-                    }
-                    break;
-                default:
-                    if (isLocalFile) {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.winlocal.other",
-                                        "file://"));
-                    } else {
-                        url = url.replaceFirst("file:/+", crawlerProperties
-                                .getProperty("file.protocol.other", "file://"));
-                    }
-                    break;
+            case IE:
+                if (isLocalFile) {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.ie", "file://"));
+                } else {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.ie", "file://"));
+                }
+                break;
+            case FIREFOX:
+                if (isLocalFile) {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
+                } else {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.firefox", "file://///"));
+                }
+                break;
+            case CHROME:
+                if (isLocalFile) {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
+                } else {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.chrome", "file://"));
+                }
+                break;
+            case SAFARI:
+                if (isLocalFile) {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.safari", "file://"));
+                } else {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.safari", "file:////"));
+                }
+                break;
+            case OPERA:
+                if (isLocalFile) {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.opera", "file://"));
+                } else {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.opera", "file://"));
+                }
+                break;
+            default:
+                if (isLocalFile) {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.other", "file://"));
+                } else {
+                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.other", "file://"));
+                }
+                break;
             }
 
             if (encodeUrlLink) {
@@ -302,12 +272,9 @@ public class ViewHelper implements Serializable {
             } else {
                 url = url.replace("+", "%2B");
                 try {
-                    return URLDecoder.decode(
-                            appendQueryParameter(document, url),
-                            urlLinkEncoding);
+                    return URLDecoder.decode(appendQueryParameter(document, url), urlLinkEncoding);
                 } catch (final Exception e) {
-                    throw new FessSystemException("Unsupported encoding: "
-                            + urlLinkEncoding, e);
+                    throw new FessSystemException("Unsupported encoding: " + urlLinkEncoding, e);
                 }
             }
         }
@@ -315,13 +282,10 @@ public class ViewHelper implements Serializable {
         return appendQueryParameter(document, url);
     }
 
-    protected String appendQueryParameter(final Map<String, Object> document,
-            final String url) {
-        if (Constants.TRUE.equals(crawlerProperties
-                .get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
+    protected String appendQueryParameter(final Map<String, Object> document, final String url) {
+        if (Constants.TRUE.equals(crawlerProperties.get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-            final String mimetype = getString(document,
-                    fieldHelper.mimetypeField);
+            final String mimetype = getString(document, fieldHelper.mimetypeField);
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
                     return appendPDFSearchWord(url);
@@ -335,8 +299,7 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendPDFSearchWord(final String url) {
-        final String[] queries = (String[]) RequestUtil.getRequest()
-                .getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final String[] queries = (String[]) RequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (queries != null) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             buf.append(url).append("#search=%22");
@@ -390,8 +353,7 @@ public class ViewHelper implements Serializable {
         return "index.jsp";
     }
 
-    private String getLocalizedPagePath(final String page, final String lang,
-            final String country) {
+    private String getLocalizedPagePath(final String page, final String lang, final String country) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("/WEB-INF/view/").append(page);
         if (StringUtil.isNotBlank(lang)) {
@@ -405,17 +367,14 @@ public class ViewHelper implements Serializable {
     }
 
     private boolean existsPage(final String path) {
-        final String realPath = ServletContextUtil.getServletContext()
-                .getRealPath(path);
+        final String realPath = ServletContextUtil.getServletContext().getRealPath(path);
         final File file = new File(realPath);
         return file.isFile();
     }
 
-    public String createCacheContent(final Map<String, Object> doc,
-            final String[] queries) {
+    public String createCacheContent(final Map<String, Object> doc, final String[] queries) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final FileTemplateLoader loader = new FileTemplateLoader(new File(
-                ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
+        final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
         final Handlebars handlebars = new Handlebars(loader);
 
         Locale locale = RequestUtil.getRequest().getLocale();
@@ -424,20 +383,16 @@ public class ViewHelper implements Serializable {
         }
         String url = (String) doc.get("urlLink");
         if (url == null) {
-            url = MessageResourcesUtil.getMessage(locale,
-                    "labels.search_unknown");
+            url = MessageResourcesUtil.getMessage(locale, "labels.search_unknown");
         }
         Object created = doc.get(fieldHelper.createdField);
         if (created instanceof Date) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(
-                    CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             created = sdf.format((Date) created);
         } else {
-            created = MessageResourcesUtil.getMessage(locale,
-                    "labels.search_unknown");
+            created = MessageResourcesUtil.getMessage(locale, "labels.search_unknown");
         }
-        doc.put("cacheMsg", MessageResourcesUtil.getMessage(locale,
-                "labels.search_cache_msg", url, created));
+        doc.put("cacheMsg", MessageResourcesUtil.getMessage(locale, "labels.search_cache_msg", url, created));
 
         doc.put("queries", queries);
 
@@ -465,8 +420,7 @@ public class ViewHelper implements Serializable {
         return null;
     }
 
-    protected String replaceHighlightQueries(final String cache,
-            final String[] queries) {
+    protected String replaceHighlightQueries(final String cache, final String[] queries) {
         final StringBuffer buf = new StringBuffer(cache.length() + 100);
         final StringBuffer segBuf = new StringBuffer(1000);
         final Pattern p = Pattern.compile("<[^>]+>");
@@ -482,9 +436,7 @@ public class ViewHelper implements Serializable {
             m.appendReplacement(segBuf, StringUtil.EMPTY);
             String segment = segBuf.toString();
             for (int i = 0; i < queries.length; i++) {
-                segment = Pattern
-                        .compile(regexQueries[i], Pattern.CASE_INSENSITIVE)
-                        .matcher(segment).replaceAll(hlQueries[i]);
+                segment = Pattern.compile(regexQueries[i], Pattern.CASE_INSENSITIVE).matcher(segment).replaceAll(hlQueries[i]);
             }
             buf.append(segment);
             buf.append(m.group(0));
@@ -493,9 +445,7 @@ public class ViewHelper implements Serializable {
         m.appendTail(segBuf);
         String segment = segBuf.toString();
         for (int i = 0; i < queries.length; i++) {
-            segment = Pattern
-                    .compile(regexQueries[i], Pattern.CASE_INSENSITIVE)
-                    .matcher(segment).replaceAll(hlQueries[i]);
+            segment = Pattern.compile(regexQueries[i], Pattern.CASE_INSENSITIVE).matcher(segment).replaceAll(hlQueries[i]);
         }
         buf.append(segment);
         return buf.toString();
@@ -504,9 +454,7 @@ public class ViewHelper implements Serializable {
     public Object getSitePath(final Map<String, Object> docMap) {
         final Object urlLink = docMap.get("urlLink");
         if (urlLink != null) {
-            return StringUtils.abbreviate(
-                    urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""),
-                    sitePathLength);
+            return StringUtils.abbreviate(urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""), sitePathLength);
         }
         return null;
     }

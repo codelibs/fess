@@ -32,8 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JobHelper {
-    private static final Logger logger = LoggerFactory
-            .getLogger(JobHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(JobHelper.class);
 
     private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
@@ -46,14 +45,12 @@ public class JobHelper {
         }
     }
 
-    public JobProcess startCrawlerProcess(final String sessionId,
-            final ProcessBuilder processBuilder) {
+    public JobProcess startCrawlerProcess(final String sessionId, final ProcessBuilder processBuilder) {
         destroyCrawlerProcess(sessionId);
         JobProcess jobProcess;
         try {
             jobProcess = new JobProcess(processBuilder.start());
-            destroyCrawlerProcess(runningProcessMap.putIfAbsent(sessionId,
-                    jobProcess));
+            destroyCrawlerProcess(runningProcessMap.putIfAbsent(sessionId, jobProcess));
             return jobProcess;
         } catch (final IOException e) {
             throw new FessSystemException("Crawler Process terminated.", e);
@@ -75,8 +72,7 @@ public class JobHelper {
             try {
                 ist.interrupt();
             } catch (final Exception e) {
-                logger.warn("Could not interrupt a thread of an input stream.",
-                        e);
+                logger.warn("Could not interrupt a thread of an input stream.", e);
             }
 
             final CountDownLatch latch = new CountDownLatch(1);
@@ -87,20 +83,17 @@ public class JobHelper {
                     try {
                         IOUtils.closeQuietly(process.getInputStream());
                     } catch (final Exception e) {
-                        logger.warn("Could not close a process input stream.",
-                                e);
+                        logger.warn("Could not close a process input stream.", e);
                     }
                     try {
                         IOUtils.closeQuietly(process.getErrorStream());
                     } catch (final Exception e) {
-                        logger.warn("Could not close a process error stream.",
-                                e);
+                        logger.warn("Could not close a process error stream.", e);
                     }
                     try {
                         IOUtils.closeQuietly(process.getOutputStream());
                     } catch (final Exception e) {
-                        logger.warn("Could not close a process output stream.",
-                                e);
+                        logger.warn("Could not close a process output stream.", e);
                     }
                     latch.countDown();
                 }
@@ -123,8 +116,7 @@ public class JobHelper {
         return runningProcessMap.keySet();
     }
 
-    public JobExecutor startJobExecutoer(final Long id,
-            final JobExecutor jobExecutor) {
+    public JobExecutor startJobExecutoer(final Long id, final JobExecutor jobExecutor) {
         return runningJobExecutorMap.putIfAbsent(id, jobExecutor);
     }
 

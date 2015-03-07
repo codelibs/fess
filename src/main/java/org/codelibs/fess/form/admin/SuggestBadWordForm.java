@@ -22,8 +22,7 @@ import org.apache.struts.upload.FormFile;
 import org.codelibs.fess.crud.form.admin.BsSuggestBadWordForm;
 import org.seasar.struts.annotation.Required;
 
-public class SuggestBadWordForm extends BsSuggestBadWordForm implements
-        Serializable {
+public class SuggestBadWordForm extends BsSuggestBadWordForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

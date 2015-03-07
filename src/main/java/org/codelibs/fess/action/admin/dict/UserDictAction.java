@@ -72,12 +72,10 @@ public class UserDictAction {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        userDictItemItems = userDictService.getUserDictList(
-                userDictForm.dictId, userDictPager);
+        userDictItemItems = userDictService.getUserDictList(userDictForm.dictId, userDictPager);
 
         // restore from pager
-        Beans.copy(userDictPager, userDictForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(userDictPager, userDictForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         if (redirect) {
             return "index?dictId=" + userDictForm.dictId + "&redirect=true";
@@ -96,8 +94,7 @@ public class UserDictAction {
         // page navi
         if (StringUtil.isNotBlank(userDictForm.pageNumber)) {
             try {
-                userDictPager.setCurrentPageNumber(Integer
-                        .parseInt(userDictForm.pageNumber));
+                userDictPager.setCurrentPageNumber(Integer.parseInt(userDictForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + userDictForm.pageNumber, e);
@@ -110,8 +107,7 @@ public class UserDictAction {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(userDictForm.searchParams, userDictPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(userDictForm.searchParams, userDictPager).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         return displayList(false);
     }
@@ -137,9 +133,8 @@ public class UserDictAction {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{dictId}/{crudMode}/{id}")
     public String confirmpage() {
         if (userDictForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            userDictForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    userDictForm.crudMode });
         }
 
         loadUserDict();
@@ -161,9 +156,7 @@ public class UserDictAction {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{dictId}/{crudMode}/{id}")
     public String editpage() {
         if (userDictForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            userDictForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, userDictForm.crudMode });
         }
 
         loadUserDict();
@@ -198,8 +191,7 @@ public class UserDictAction {
     public String deletepage() {
         if (userDictForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            userDictForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, userDictForm.crudMode });
         }
 
         loadUserDict();
@@ -233,12 +225,10 @@ public class UserDictAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_create_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -258,12 +248,10 @@ public class UserDictAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_update_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -272,19 +260,16 @@ public class UserDictAction {
     public String delete() {
         if (userDictForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            userDictForm.crudMode });
+                    new Object[] { CommonConstants.DELETE_MODE, userDictForm.crudMode });
         }
 
         try {
-            final UserDictItem userDictItem = userDictService.getUserDict(
-                    userDictForm.dictId, createKeyMap());
+            final UserDictItem userDictItem = userDictService.getUserDict(userDictForm.dictId, createKeyMap());
             if (userDictItem == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { userDictForm.id });
+                new Object[] { userDictForm.id });
 
             }
 
@@ -299,23 +284,19 @@ public class UserDictAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "downloadpage")
     public String downloadpage() {
-        final UserDictFile userdictFile = userDictService
-                .getUserDictFile(userDictForm.dictId);
+        final UserDictFile userdictFile = userDictService.getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.userdict_file_is_not_found");
+            throw new SSCActionMessagesException("errors.userdict_file_is_not_found");
         }
         filename = userdictFile.getSimpleName();
         return "download.jsp";
@@ -324,17 +305,14 @@ public class UserDictAction {
     @Token(save = true, validate = true)
     @Execute(validator = false, input = "downloadpage")
     public String download() {
-        final UserDictFile userdictFile = userDictService
-                .getUserDictFile(userDictForm.dictId);
+        final UserDictFile userdictFile = userDictService.getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.userdict_file_is_not_found");
+            throw new SSCActionMessagesException("errors.userdict_file_is_not_found");
         }
         try (InputStream in = userdictFile.getInputStream()) {
             ResponseUtil.download(userdictFile.getSimpleName(), in);
         } catch (final IOException e) {
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_download_userdict_file");
+            throw new SSCActionMessagesException("errors.failed_to_download_userdict_file");
         }
 
         return null;
@@ -343,11 +321,9 @@ public class UserDictAction {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "uploadpage")
     public String uploadpage() {
-        final UserDictFile userdictFile = userDictService
-                .getUserDictFile(userDictForm.dictId);
+        final UserDictFile userdictFile = userDictService.getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.userdict_file_is_not_found");
+            throw new SSCActionMessagesException("errors.userdict_file_is_not_found");
         }
         filename = userdictFile.getName();
         return "upload.jsp";
@@ -356,17 +332,14 @@ public class UserDictAction {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "uploadpage")
     public String upload() {
-        final UserDictFile userdictFile = userDictService
-                .getUserDictFile(userDictForm.dictId);
+        final UserDictFile userdictFile = userDictService.getUserDictFile(userDictForm.dictId);
         if (userdictFile == null) {
-            throw new SSCActionMessagesException(
-                    "errors.userdict_file_is_not_found");
+            throw new SSCActionMessagesException("errors.userdict_file_is_not_found");
         }
         try (InputStream in = userDictForm.userDictFile.getInputStream()) {
             userdictFile.update(in);
         } catch (final IOException e) {
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_upload_userdict_file");
+            throw new SSCActionMessagesException("errors.failed_to_upload_userdict_file");
         }
 
         SAStrutsUtil.addSessionMessage("success.upload_userdict_file");
@@ -376,13 +349,10 @@ public class UserDictAction {
 
     protected void loadUserDict() {
 
-        final UserDictItem userDictItem = userDictService.getUserDict(
-                userDictForm.dictId, createKeyMap());
+        final UserDictItem userDictItem = userDictService.getUserDict(userDictForm.dictId, createKeyMap());
         if (userDictItem == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { userDictForm.id });
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { userDictForm.id });
 
         }
 
@@ -396,19 +366,16 @@ public class UserDictAction {
     protected UserDictItem createUserDict() {
         UserDictItem userDictItem;
         if (userDictForm.crudMode == CommonConstants.EDIT_MODE) {
-            userDictItem = userDictService.getUserDict(userDictForm.dictId,
-                    createKeyMap());
+            userDictItem = userDictService.getUserDict(userDictForm.dictId, createKeyMap());
             if (userDictItem == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { userDictForm.id });
+                new Object[] { userDictForm.id });
 
             }
         } else {
-            userDictItem = new UserDictItem(0, StringUtil.EMPTY,
-                    StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
+            userDictItem = new UserDictItem(0, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
         }
 
         userDictItem.setNewToken(userDictForm.token);

@@ -27,7 +27,6 @@ public interface WebApiManager {
 
     boolean matches(HttpServletRequest request);
 
-    void process(HttpServletRequest request, HttpServletResponse response,
-            FilterChain chain) throws IOException, ServletException;
+    void process(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException;
 
 }

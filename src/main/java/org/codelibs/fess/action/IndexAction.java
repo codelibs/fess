@@ -113,8 +113,7 @@ import org.slf4j.LoggerFactory;
 
 public class IndexAction {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(IndexAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(IndexAction.class);
 
     private static final String REDIRECT_TO_INDEX = "index?redirect=true";
 
@@ -130,8 +129,7 @@ public class IndexAction {
 
     protected static final int DEFAULT_SPELLCHECK_PAGE_SIZE = 5;
 
-    protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern
-            .compile("^([a-zA-Z0-9_]+):.*");
+    protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern.compile("^([a-zA-Z0-9_]+):.*");
 
     @ActionForm
     @Resource
@@ -238,10 +236,8 @@ public class IndexAction {
 
     @InitMethod
     public void init() {
-        searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
-        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
+        searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
     }
 
     public String getPagingQuery() {
@@ -250,11 +246,8 @@ public class IndexAction {
             if (indexForm.additional != null) {
                 final Set<String> fieldSet = new HashSet<String>();
                 for (final String additional : indexForm.additional) {
-                    if (StringUtil.isNotBlank(additional)
-                            && additional.length() < 1000
-                            && !hasFieldInQuery(fieldSet, additional)) {
-                        buf.append("&additional=").append(
-                                S2Functions.u(additional));
+                    if (StringUtil.isNotBlank(additional) && additional.length() < 1000 && !hasFieldInQuery(fieldSet, additional)) {
+                        buf.append("&additional=").append(S2Functions.u(additional));
                     }
                 }
             }
@@ -272,8 +265,7 @@ public class IndexAction {
                             langSet.clear();
                             break;
                         }
-                        final String normalizeLang = systemHelper
-                                .normalizeLang(lang);
+                        final String normalizeLang = systemHelper.normalizeLang(lang);
                         if (normalizeLang != null) {
                             langSet.add(normalizeLang);
                         }
@@ -286,15 +278,12 @@ public class IndexAction {
                 }
             }
             if (!indexForm.fields.isEmpty()) {
-                for (final Map.Entry<String, String[]> entry : indexForm.fields
-                        .entrySet()) {
+                for (final Map.Entry<String, String[]> entry : indexForm.fields.entrySet()) {
                     final String[] values = entry.getValue();
                     if (values != null) {
                         for (final String v : values) {
                             if (StringUtil.isNotBlank(v)) {
-                                buf.append("&fields.")
-                                        .append(S2Functions.u(entry.getKey()))
-                                        .append('=').append(S2Functions.u(v));
+                                buf.append("&fields.").append(S2Functions.u(entry.getKey())).append('=').append(S2Functions.u(v));
                             }
                         }
                     }
@@ -317,12 +306,10 @@ public class IndexAction {
     }
 
     protected void searchAvailable() {
-        final String supportedSearch = crawlerProperties.getProperty(
-                Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                Constants.SUPPORTED_SEARCH_WEB);
+        final String supportedSearch =
+                crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
         if (Constants.SUPPORTED_SEARCH_NONE.equals(supportedSearch)) {
-            throw new UnsupportedSearchException("A search is not supported: "
-                    + RequestUtil.getRequest().getRequestURL());
+            throw new UnsupportedSearchException("A search is not supported: " + RequestUtil.getRequest().getRequestURL());
         }
     }
 
@@ -331,8 +318,7 @@ public class IndexAction {
 
         if (StringUtil.isBlank(indexForm.query)) {
             try {
-                final String optionQuery = queryHelper
-                        .buildOptionQuery(indexForm.options);
+                final String optionQuery = queryHelper.buildOptionQuery(indexForm.options);
                 indexForm.query = optionQuery;
             } catch (final InvalidQueryException e) {
                 if (logger.isDebugEnabled()) {
@@ -359,24 +345,18 @@ public class IndexAction {
     public String cache() {
         Map<String, Object> doc = null;
         try {
-            doc = searchService.getDocument(fieldHelper.docIdField + ":"
-                    + indexForm.docId, queryHelper.getCacheResponseFields(),
-                    null);
+            doc = searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getCacheResponseFields(), null);
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
         if (doc == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                    .getRequest().getLocale(), "errors.docid_not_found",
-                    indexForm.docId);
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
             return "error.jsp";
         }
 
         final String content = viewHelper.createCacheContent(doc, indexForm.hq);
         if (content == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                    .getRequest().getLocale(), "errors.docid_not_found",
-                    indexForm.docId);
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
             return "error.jsp";
         }
         ResponseUtil.write(content, "text/html", Constants.UTF_8);
@@ -388,39 +368,33 @@ public class IndexAction {
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
-            doc = searchService.getDocument(fieldHelper.docIdField + ":"
-                    + indexForm.docId, queryHelper.getResponseFields(),
-                    new String[] { fieldHelper.clickCountField });
+            doc =
+                    searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getResponseFields(),
+                            new String[] { fieldHelper.clickCountField });
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
         if (doc == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                    .getRequest().getLocale(), "errors.docid_not_found",
-                    indexForm.docId);
+            errorMessage = MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
             return "error.jsp";
         }
         final Object urlObj = doc.get(fieldHelper.urlField);
         if (urlObj == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                    .getRequest().getLocale(), "errors.document_not_found",
-                    indexForm.docId);
+            errorMessage =
+                    MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.document_not_found", indexForm.docId);
             return "error.jsp";
         }
         final String url = urlObj.toString();
 
-        if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
+        if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
             final String userSessionId = userInfoHelper.getUserCode();
             if (userSessionId != null) {
-                final SearchLogHelper searchLogHelper = ComponentUtil
-                        .getSearchLogHelper();
+                final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
                 final ClickLog clickLog = new ClickLog();
                 clickLog.setUrl(url);
                 LocalDateTime now = systemHelper.getCurrentTime();
                 clickLog.setRequestedTime(now);
-                clickLog.setQueryRequestedTime(LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(Long.parseLong(indexForm.rt)),
+                clickLog.setQueryRequestedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(indexForm.rt)),
                         ZoneId.systemDefault()));
                 clickLog.setUserSessionId(userSessionId);
                 clickLog.setDocId(indexForm.docId);
@@ -436,16 +410,14 @@ public class IndexAction {
 
         String hash;
         if (StringUtil.isNotBlank(indexForm.hash)) {
-            final String value = URLUtil
-                    .decode(indexForm.hash, Constants.UTF_8);
+            final String value = URLUtil.decode(indexForm.hash, Constants.UTF_8);
             final StringBuilder buf = new StringBuilder(value.length() + 100);
             for (final char c : value.toCharArray()) {
                 if (CharUtil.isUrlChar(c) || c == ' ') {
                     buf.append(c);
                 } else {
                     try {
-                        buf.append(URLEncoder.encode(String.valueOf(c),
-                                Constants.UTF_8));
+                        buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
                     } catch (final UnsupportedEncodingException e) {
                         // NOP
                     }
@@ -457,49 +429,40 @@ public class IndexAction {
         }
 
         if (isFileSystemPath(url)) {
-            if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                    Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
-                final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil
-                        .getCrawlingConfigHelper();
+            if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
+                final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
                 try {
                     crawlingConfigHelper.writeContent(doc);
                     return null;
                 } catch (final Exception e) {
                     logger.error("Failed to load: " + doc, e);
-                    errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                            .getRequest().getLocale(),
-                            "errors.not_load_from_server", url);
+                    errorMessage =
+                            MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.not_load_from_server", url);
                     return "error.jsp";
                 }
-            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                    Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
+            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
                 final String path = url.replaceFirst("file:/+", "//");
                 final File file = new File(path);
                 if (!file.exists()) {
-                    errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                            .getRequest().getLocale(),
-                            "errors.not_found_on_file_system", url);
+                    errorMessage =
+                            MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.not_found_on_file_system", url);
                     return "error.jsp";
                 }
                 final Desktop desktop = Desktop.getDesktop();
                 try {
                     desktop.open(file);
                 } catch (final Exception e) {
-                    errorMessage = MessageResourcesUtil.getMessage(RequestUtil
-                            .getRequest().getLocale(),
-                            "errors.could_not_open_on_system", url);
+                    errorMessage =
+                            MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.could_not_open_on_system", url);
                     logger.warn("Could not open " + path, e);
                     return "error.jsp";
                 }
 
-                ResponseUtil.getResponse().setStatus(
-                        HttpServletResponse.SC_NO_CONTENT);
+                ResponseUtil.getResponse().setStatus(HttpServletResponse.SC_NO_CONTENT);
                 return null;
-            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                    Constants.SEARCH_FILE_LAUNCHER_PROPERTY, Constants.TRUE))) {
+            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_FILE_LAUNCHER_PROPERTY, Constants.TRUE))) {
                 ResponseUtil.getResponse().sendRedirect(
-                        RequestUtil.getRequest().getContextPath()
-                                + "/applet/launcher?uri=" + S2Functions.u(url));
+                        RequestUtil.getRequest().getContextPath() + "/applet/launcher?uri=" + S2Functions.u(url));
             } else {
                 ResponseUtil.getResponse().sendRedirect(url + hash);
             }
@@ -542,19 +505,15 @@ public class IndexAction {
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
-            final Map<String, Object> doc = searchService
-                    .getDocument(fieldHelper.docIdField + ":" + indexForm.docId);
-            final String url = doc == null ? null : (String) doc
-                    .get(fieldHelper.urlField);
-            if (StringUtil.isBlank(indexForm.queryId)
-                    || StringUtil.isBlank(url) || screenShotManager == null) {
+            final Map<String, Object> doc = searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId);
+            final String url = doc == null ? null : (String) doc.get(fieldHelper.urlField);
+            if (StringUtil.isBlank(indexForm.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
                 // 404
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
 
-            final File screenShotFile = screenShotManager.getScreenShotFile(
-                    indexForm.queryId, indexForm.docId);
+            final File screenShotFile = screenShotManager.getScreenShotFile(indexForm.queryId, indexForm.docId);
             if (screenShotFile == null) {
                 // 404
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -600,8 +559,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String suggestApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
             return null;
         }
@@ -649,9 +607,8 @@ public class IndexAction {
                 roleSet = new HashSet<>();
             }
 
-            final SuggestResponse suggestResponse = suggestService
-                    .getSuggestResponse(indexForm.query, suggestFieldName,
-                            labelList, new ArrayList<String>(roleSet), num);
+            final SuggestResponse suggestResponse =
+                    suggestService.getSuggestResponse(indexForm.query, suggestFieldName, labelList, new ArrayList<String>(roleSet), num);
 
             if (!suggestResponse.isEmpty()) {
                 suggestResultList.add(suggestResponse);
@@ -666,8 +623,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String spellCheckApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_SPELLCHECK_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_SPELLCHECK_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
             return null;
         }
@@ -715,10 +671,9 @@ public class IndexAction {
                 roleSet = new HashSet<>();
             }
 
-            final SpellCheckResponse spellCheckResponse = suggestService
-                    .getSpellCheckResponse(indexForm.query,
-                            spellCheckFieldName, labelList,
-                            new ArrayList<String>(roleSet), num);
+            final SpellCheckResponse spellCheckResponse =
+                    suggestService.getSpellCheckResponse(indexForm.query, spellCheckFieldName, labelList, new ArrayList<String>(roleSet),
+                            num);
 
             if (!spellCheckResponse.isEmpty()) {
                 spellCheckResultList.add(spellCheckResponse);
@@ -733,8 +688,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String analysisApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
             return null;
         }
@@ -751,8 +705,7 @@ public class IndexAction {
 
         try {
             final String[] fieldNames = indexForm.fn;
-            final FieldAnalysisResponse fieldAnalysis = searchService
-                    .getFieldAnalysisResponse(fieldNames, indexForm.query);
+            final FieldAnalysisResponse fieldAnalysis = searchService.getFieldAnalysisResponse(fieldNames, indexForm.query);
             WebApiUtil.setObject("fieldAnalysis", fieldAnalysis);
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
@@ -762,8 +715,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String hotSearchWordApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
             return null;
         }
@@ -773,24 +725,19 @@ public class IndexAction {
             range = Range.ENTIRE;
         } else if ("day".equals(indexForm.range) || "1".equals(indexForm.range)) {
             range = Range.ONE_DAY;
-        } else if ("week".equals(indexForm.range)
-                || "7".equals(indexForm.range)) {
+        } else if ("week".equals(indexForm.range) || "7".equals(indexForm.range)) {
             range = Range.ONE_DAY;
-        } else if ("month".equals(indexForm.range)
-                || "30".equals(indexForm.range)) {
+        } else if ("month".equals(indexForm.range) || "30".equals(indexForm.range)) {
             range = Range.ONE_DAY;
-        } else if ("year".equals(indexForm.range)
-                || "365".equals(indexForm.range)) {
+        } else if ("year".equals(indexForm.range) || "365".equals(indexForm.range)) {
             range = Range.ONE_DAY;
         } else {
             range = Range.ENTIRE;
         }
 
         try {
-            final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
-                    .getHotSearchWordHelper();
-            final List<String> hotSearchWordList = hotSearchWordHelper
-                    .getHotSearchWordList(range);
+            final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
+            final List<String> hotSearchWordList = hotSearchWordHelper.getHotSearchWordList(range);
             WebApiUtil.setObject("hotSearchWordList", hotSearchWordList);
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
@@ -801,20 +748,17 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String favoriteApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
             return null;
         }
 
         try {
-            final Map<String, Object> doc = indexForm.docId == null ? null
-                    : searchService.getDocument(fieldHelper.docIdField + ":"
-                            + indexForm.docId, queryHelper.getResponseFields(),
-                            new String[] { fieldHelper.favoriteCountField });
+            final Map<String, Object> doc =
+                    indexForm.docId == null ? null : searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId,
+                            queryHelper.getResponseFields(), new String[] { fieldHelper.favoriteCountField });
             final String userCode = userInfoHelper.getUserCode();
-            final String favoriteUrl = doc == null ? null : (String) doc
-                    .get(fieldHelper.urlField);
+            final String favoriteUrl = doc == null ? null : (String) doc.get(fieldHelper.urlField);
 
             if (StringUtil.isBlank(userCode)) {
                 WebApiUtil.setError(2, "No user session.");
@@ -824,8 +768,7 @@ public class IndexAction {
                 return null;
             }
 
-            final String[] docIds = userInfoHelper.getResultDocIds(URLDecoder
-                    .decode(indexForm.queryId, Constants.UTF_8));
+            final String[] docIds = userInfoHelper.getResultDocIds(URLDecoder.decode(indexForm.queryId, Constants.UTF_8));
             if (docIds == null) {
                 WebApiUtil.setError(6, "No searched urls.");
                 return null;
@@ -848,16 +791,12 @@ public class IndexAction {
                 return null;
             }
 
-            final DocumentHelper documentHelper = ComponentUtil
-                    .getDocumentHelper();
+            final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
             final Object count = doc.get(fieldHelper.favoriteCountField);
             if (count instanceof Long) {
-                documentHelper.update(indexForm.docId,
-                        fieldHelper.favoriteCountField,
-                        ((Long) count).longValue() + 1);
+                documentHelper.update(indexForm.docId, fieldHelper.favoriteCountField, ((Long) count).longValue() + 1);
             } else {
-                WebApiUtil
-                        .setError(7, "Failed to update count: " + favoriteUrl);
+                WebApiUtil.setError(7, "Failed to update count: " + favoriteUrl);
                 return null;
             }
         } catch (final Exception e) {
@@ -869,8 +808,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String favoritesApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
             return null;
         }
@@ -886,13 +824,10 @@ public class IndexAction {
                 return null;
             }
 
-            final String[] docIds = userInfoHelper
-                    .getResultDocIds(indexForm.queryId);
-            final List<Map<String, Object>> docList = searchService
-                    .getDocumentListByDocIds(docIds,
-                            queryHelper.getResponseFields(),
-                            new String[] { fieldHelper.favoriteCountField },
-                            getMaxPageSize());
+            final String[] docIds = userInfoHelper.getResultDocIds(indexForm.queryId);
+            final List<Map<String, Object>> docList =
+                    searchService.getDocumentListByDocIds(docIds, queryHelper.getResponseFields(),
+                            new String[] { fieldHelper.favoriteCountField }, getMaxPageSize());
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final Object urlObj = doc.get(fieldHelper.urlField);
@@ -947,16 +882,13 @@ public class IndexAction {
         if (indexForm.additional != null) {
             final Set<String> fieldSet = new HashSet<String>();
             for (final String additional : indexForm.additional) {
-                if (StringUtil.isNotBlank(additional)
-                        && additional.length() < 1000
-                        && !hasFieldInQuery(fieldSet, additional)) {
+                if (StringUtil.isNotBlank(additional) && additional.length() < 1000 && !hasFieldInQuery(fieldSet, additional)) {
                     queryBuf.append(' ').append(additional);
                 }
             }
         }
         if (!indexForm.fields.isEmpty()) {
-            for (final Map.Entry<String, String[]> entry : indexForm.fields
-                    .entrySet()) {
+            for (final Map.Entry<String, String[]> entry : indexForm.fields.entrySet()) {
                 final List<String> valueList = new ArrayList<String>();
                 final String[] values = entry.getValue();
                 if (values != null) {
@@ -965,17 +897,14 @@ public class IndexAction {
                     }
                 }
                 if (valueList.size() == 1) {
-                    queryBuf.append(' ').append(entry.getKey()).append(":\"")
-                            .append(valueList.get(0)).append('\"');
+                    queryBuf.append(' ').append(entry.getKey()).append(":\"").append(valueList.get(0)).append('\"');
                 } else if (valueList.size() > 1) {
                     queryBuf.append(" (");
                     for (int i = 0; i < valueList.size(); i++) {
                         if (i != 0) {
                             queryBuf.append(" OR");
                         }
-                        queryBuf.append(' ').append(entry.getKey())
-                                .append(":\"").append(valueList.get(i))
-                                .append('\"');
+                        queryBuf.append(' ').append(entry.getKey()).append(":\"").append(valueList.get(i)).append('\"');
                     }
                     queryBuf.append(')');
                 }
@@ -992,8 +921,7 @@ public class IndexAction {
                     if (Constants.ALL_LANGUAGES.equalsIgnoreCase(lang)) {
                         langSet.add(Constants.ALL_LANGUAGES);
                     } else {
-                        final String normalizeLang = systemHelper
-                                .normalizeLang(lang);
+                        final String normalizeLang = systemHelper.normalizeLang(lang);
                         if (normalizeLang != null) {
                             langSet.add(normalizeLang);
                         }
@@ -1007,16 +935,13 @@ public class IndexAction {
                 langSet.remove(Constants.ALL_LANGUAGES);
             }
             appendLangQuery(queryBuf, langSet);
-        } else if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY,
-                Constants.FALSE))) {
+        } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, Constants.FALSE))) {
             final Set<String> langSet = new HashSet<>();
             final Enumeration<Locale> locales = request.getLocales();
             if (locales != null) {
                 while (locales.hasMoreElements()) {
                     final Locale locale = locales.nextElement();
-                    final String normalizeLang = systemHelper
-                            .normalizeLang(locale.toString());
+                    final String normalizeLang = systemHelper.normalizeLang(locale.toString());
                     if (normalizeLang != null) {
                         langSet.add(normalizeLang);
                     }
@@ -1047,16 +972,14 @@ public class IndexAction {
         final int pageStart = Integer.parseInt(indexForm.start);
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
-            documentItems = searchService.getDocumentList(query, pageStart,
-                    pageNum, indexForm.facet, indexForm.geo, indexForm.mlt,
-                    queryHelper.getResponseFields(),
-                    queryHelper.getResponseDocValuesFields());
+            documentItems =
+                    searchService.getDocumentList(query, pageStart, pageNum, indexForm.facet, indexForm.geo, indexForm.mlt,
+                            queryHelper.getResponseFields(), queryHelper.getResponseDocValuesFields());
         } catch (final SolrLibQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throw new SSCActionMessagesException(e,
-                    "errors.invalid_query_unknown");
+            throw new SSCActionMessagesException(e, "errors.invalid_query_unknown");
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -1066,20 +989,17 @@ public class IndexAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throw new SSCActionMessagesException(e,
-                    "errors.result_size_exceeded");
+            throw new SSCActionMessagesException(e, "errors.result_size_exceeded");
         }
         // search
         final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
         facetResponse = queryResponseList.getFacetResponse();
         moreLikeThisResponse = queryResponseList.getMoreLikeThisResponse();
-        final NumberFormat nf = NumberFormat.getInstance(RequestUtil
-                .getRequest().getLocale());
+        final NumberFormat nf = NumberFormat.getInstance(RequestUtil.getRequest().getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);
         try {
-            execTime = nf
-                    .format((double) queryResponseList.getExecTime() / 1000);
+            execTime = nf.format((double) queryResponseList.getExecTime() / 1000);
         } catch (final Exception e) {
             // ignore
         }
@@ -1089,11 +1009,9 @@ public class IndexAction {
 
         // favorite
         if (favoriteSupport || screenShotManager != null) {
-            indexForm.queryId = userInfoHelper.generateQueryId(query,
-                    documentItems);
+            indexForm.queryId = userInfoHelper.generateQueryId(query, documentItems);
             if (screenShotManager != null) {
-                screenShotManager
-                        .storeRequest(indexForm.queryId, documentItems);
+                screenShotManager.storeRequest(indexForm.queryId, documentItems);
                 screenShotSupport = true;
             }
         }
@@ -1102,13 +1020,11 @@ public class IndexAction {
         if (searchLogSupport) {
             final LocalDateTime now = systemHelper.getCurrentTime();
 
-            final SearchLogHelper searchLogHelper = ComponentUtil
-                    .getSearchLogHelper();
+            final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
             final SearchLog searchLog = new SearchLog();
 
             String userCode = null;
-            if (Constants.TRUE.equals(crawlerProperties.getProperty(
-                    Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
+            if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
                 userCode = userInfoHelper.getUserCode();
                 if (StringUtil.isNotBlank(userCode)) {
                     final UserInfo userInfo = new UserInfo();
@@ -1120,58 +1036,48 @@ public class IndexAction {
             }
 
             searchLog.setHitCount(queryResponseList.getAllRecordCount());
-            searchLog.setResponseTime(Integer.valueOf((int) queryResponseList
-                    .getExecTime()));
+            searchLog.setResponseTime(Integer.valueOf((int) queryResponseList.getExecTime()));
             searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
-            searchLog.setSearchQuery(StringUtils.abbreviate(
-                    queryResponseList.getSearchQuery(), 1000));
-            searchLog.setSolrQuery(StringUtils.abbreviate(
-                    queryResponseList.getSolrQuery(), 1000));
+            searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
+            searchLog.setSolrQuery(StringUtils.abbreviate(queryResponseList.getSolrQuery(), 1000));
             searchLog.setRequestedTime(now);
             searchLog.setQueryOffset(pageStart);
             searchLog.setQueryPageSize(pageNum);
 
-            searchLog.setClientIp(StringUtils.abbreviate(
-                    request.getRemoteAddr(), 50));
-            searchLog.setReferer(StringUtils.abbreviate(
-                    request.getHeader("referer"), 1000));
-            searchLog.setUserAgent(StringUtils.abbreviate(
-                    request.getHeader("user-agent"), 255));
+            searchLog.setClientIp(StringUtils.abbreviate(request.getRemoteAddr(), 50));
+            searchLog.setReferer(StringUtils.abbreviate(request.getHeader("referer"), 1000));
+            searchLog.setUserAgent(StringUtils.abbreviate(request.getHeader("user-agent"), 255));
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
             }
-            final Object accessType = request
-                    .getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
+            final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
             if (accessType instanceof CDef.AccessType) {
                 switch ((CDef.AccessType) accessType) {
-                    case Json:
-                        searchLog.setAccessType_Json();
-                        searchLog.setAccessType_Others();
-                        searchLog.setAccessType_Xml();
-                        break;
-                    case Xml:
-                        searchLog.setAccessType_Xml();
-                        break;
-                    case Others:
-                        searchLog.setAccessType_Others();
-                        break;
-                    default:
-                        searchLog.setAccessType_Web();
-                        break;
+                case Json:
+                    searchLog.setAccessType_Json();
+                    searchLog.setAccessType_Others();
+                    searchLog.setAccessType_Xml();
+                    break;
+                case Xml:
+                    searchLog.setAccessType_Xml();
+                    break;
+                case Others:
+                    searchLog.setAccessType_Others();
+                    break;
+                default:
+                    searchLog.setAccessType_Web();
+                    break;
                 }
             } else {
                 searchLog.setAccessType_Web();
             }
 
             @SuppressWarnings("unchecked")
-            final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request
-                    .getAttribute(Constants.FIELD_LOGS);
+            final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
             if (fieldLogMap != null) {
-                for (final Map.Entry<String, List<String>> logEntry : fieldLogMap
-                        .entrySet()) {
+                for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
                     for (final String value : logEntry.getValue()) {
-                        searchLog.addSearchFieldLogValue(logEntry.getKey(),
-                                StringUtils.abbreviate(value, 1000));
+                        searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, 1000));
                     }
                 }
             }
@@ -1179,8 +1085,7 @@ public class IndexAction {
             searchLogHelper.addSearchLog(searchLog);
         }
 
-        final String[] highlightQueries = (String[]) request
-                .getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final String[] highlightQueries = (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (highlightQueries != null) {
             final StringBuilder buf = new StringBuilder(100);
             for (final String q : highlightQueries) {
@@ -1190,20 +1095,16 @@ public class IndexAction {
         }
 
         Beans.copy(documentItems, this)
-                .includes("pageSize", "currentPageNumber", "allRecordCount",
-                        "allPageCount", "existNextPage", "existPrevPage",
-                        "currentStartRecordNumber", "currentEndRecordNumber",
-                        "pageNumberList", "partialResults", "queryTime",
-                        "searchTime").execute();
+                .includes("pageSize", "currentPageNumber", "allRecordCount", "allPageCount", "existNextPage", "existPrevPage",
+                        "currentStartRecordNumber", "currentEndRecordNumber", "pageNumberList", "partialResults", "queryTime", "searchTime")
+                .execute();
 
         return query;
     }
 
-    private void appendLangQuery(final StringBuilder queryBuf,
-            final Set<String> langSet) {
+    private void appendLangQuery(final StringBuilder queryBuf, final Set<String> langSet) {
         if (langSet.size() == 1) {
-            queryBuf.append(' ').append(fieldHelper.langField).append(':')
-                    .append(langSet.iterator().next());
+            queryBuf.append(' ').append(fieldHelper.langField).append(':').append(langSet.iterator().next());
         } else if (langSet.size() > 1) {
             boolean first = true;
             for (final String lang : langSet) {
@@ -1282,8 +1183,7 @@ public class IndexAction {
     public String getDisplayQuery() {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(indexForm.query);
-        if (!indexForm.fields.isEmpty()
-                && indexForm.fields.containsKey(LABEL_FIELD)) {
+        if (!indexForm.fields.isEmpty() && indexForm.fields.containsKey(LABEL_FIELD)) {
             final String[] values = indexForm.fields.get(LABEL_FIELD);
             final List<String> labelList = new ArrayList<String>();
             if (values != null) {
@@ -1308,23 +1208,19 @@ public class IndexAction {
         // label
         labelTypeItems = labelTypeHelper.getLabelTypeItemList();
 
-        if (!labelTypeItems.isEmpty()
-                && !indexForm.fields.containsKey(LABEL_FIELD)) {
-            final String defaultLabelValue = crawlerProperties.getProperty(
-                    Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+        if (!labelTypeItems.isEmpty() && !indexForm.fields.containsKey(LABEL_FIELD)) {
+            final String defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
             if (StringUtil.isNotBlank(defaultLabelValue)) {
                 final String[] values = defaultLabelValue.split("\n");
                 if (values != null && values.length > 0) {
-                    final List<String> list = new ArrayList<String>(
-                            values.length);
+                    final List<String> list = new ArrayList<String>(values.length);
                     for (final String value : values) {
                         if (StringUtil.isNotBlank(value)) {
                             list.add(value);
                         }
                     }
                     if (!list.isEmpty()) {
-                        indexForm.fields.put(LABEL_FIELD,
-                                list.toArray(new String[list.size()]));
+                        indexForm.fields.put(LABEL_FIELD, list.toArray(new String[list.size()]));
                     }
                 }
             }
@@ -1333,8 +1229,7 @@ public class IndexAction {
         final Map<String, String> labelMap = new LinkedHashMap<String, String>();
         if (!labelTypeItems.isEmpty()) {
             for (final Map<String, String> map : labelTypeItems) {
-                labelMap.put(map.get(Constants.ITEM_VALUE),
-                        map.get(Constants.ITEM_LABEL));
+                labelMap.put(map.get(Constants.ITEM_VALUE), map.get(Constants.ITEM_LABEL));
             }
         }
         request.setAttribute(Constants.LABEL_VALUE_MAP, labelMap);
@@ -1342,8 +1237,7 @@ public class IndexAction {
         if (viewHelper.isUseSession()) {
             final HttpSession session = request.getSession(false);
             if (session != null) {
-                final Object resultsPerPage = session
-                        .getAttribute(Constants.RESULTS_PER_PAGE);
+                final Object resultsPerPage = session.getAttribute(Constants.RESULTS_PER_PAGE);
                 if (resultsPerPage != null) {
                     indexForm.num = resultsPerPage.toString();
                 }
@@ -1368,16 +1262,12 @@ public class IndexAction {
     }
 
     protected void buildInitParams() {
-        buildInitParamMap(viewHelper.getInitFacetParamMap(),
-                Constants.FACET_QUERY, Constants.FACET_FORM);
-        buildInitParamMap(viewHelper.getInitMltParamMap(), Constants.MLT_QUERY,
-                Constants.MLT_FORM);
-        buildInitParamMap(viewHelper.getInitGeoParamMap(), Constants.GEO_QUERY,
-                Constants.GEO_FORM);
+        buildInitParamMap(viewHelper.getInitFacetParamMap(), Constants.FACET_QUERY, Constants.FACET_FORM);
+        buildInitParamMap(viewHelper.getInitMltParamMap(), Constants.MLT_QUERY, Constants.MLT_FORM);
+        buildInitParamMap(viewHelper.getInitGeoParamMap(), Constants.GEO_QUERY, Constants.GEO_FORM);
     }
 
-    protected void buildInitParamMap(final Map<String, String> paramMap,
-            final String queryKey, final String formKey) {
+    protected void buildInitParamMap(final Map<String, String> paramMap, final String queryKey, final String formKey) {
         if (!paramMap.isEmpty()) {
             final StringBuilder queryBuf = new StringBuilder(100);
             final StringBuilder formBuf = new StringBuilder(100);
@@ -1416,8 +1306,7 @@ public class IndexAction {
     }
 
     protected int getMaxPageSize() {
-        Object maxPageSize = crawlerProperties
-                .get(Constants.SEARCH_RESULT_MAX_PAGE_SIZE);
+        Object maxPageSize = crawlerProperties.get(Constants.SEARCH_RESULT_MAX_PAGE_SIZE);
         if (maxPageSize == null) {
             return MAX_PAGE_SIZE;
         }
@@ -1436,8 +1325,7 @@ public class IndexAction {
         return viewHelper.getPagePath("common/help");
     }
 
-    protected boolean hasFieldInQuery(final Set<String> fieldSet,
-            final String query) {
+    protected boolean hasFieldInQuery(final Set<String> fieldSet, final String query) {
         final Matcher matcher = FIELD_EXTRACTION_PATTERN.matcher(query);
         if (matcher.matches()) {
             final String field = matcher.replaceFirst("$1");

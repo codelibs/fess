@@ -23,8 +23,7 @@ import java.util.Date;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.form.admin.BsRequestHeaderForm;
 
-public class RequestHeaderForm extends BsRequestHeaderForm implements
-        Serializable {
+public class RequestHeaderForm extends BsRequestHeaderForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,8 +31,7 @@ public class RequestHeaderForm extends BsRequestHeaderForm implements
     public void initialize() {
         super.initialize();
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
     }
 }

@@ -34,8 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandGenerator extends BaseScreenShotGenerator {
-    private static final Logger logger = LoggerFactory
-            .getLogger(CommandGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandGenerator.class);
 
     @Binding(bindingType = BindingType.MUST)
     public List<String> commandList;
@@ -51,8 +50,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
         if (baseDir == null) {
             baseDir = new File(application.getRealPath("/"));
         }
-        destoryTimer = new Timer("CommandGeneratorDestoryTimer-"
-                + System.currentTimeMillis(), true);
+        destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
     }
 
     @DestroyMethod
@@ -69,8 +67,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
 
         if (outputFile.exists()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("The screenshot file exists: "
-                        + outputFile.getAbsolutePath());
+                logger.debug("The screenshot file exists: " + outputFile.getAbsolutePath());
             }
             return;
         }
@@ -87,8 +84,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
         final String outputPath = outputFile.getAbsolutePath();
         final List<String> cmdList = new ArrayList<String>();
         for (final String value : commandList) {
-            cmdList.add(value.replace("${url}", url).replace("${outputFile}",
-                    outputPath));
+            cmdList.add(value.replace("${url}", url).replace("${outputFile}", outputPath));
         }
 
         ProcessBuilder pb = null;
@@ -113,8 +109,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
                 String line;
                 BufferedReader br = null;
                 try {
-                    br = new BufferedReader(new InputStreamReader(
-                            p.getInputStream(), Charset.defaultCharset()));
+                    br = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()));
                     while ((line = br.readLine()) != null) {
                         if (logger.isDebugEnabled()) {
                             logger.debug(line);
@@ -154,8 +149,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
 
         private final List<String> commandList;
 
-        protected ProcessDestroyer(final Process p,
-                final List<String> commandList) {
+        protected ProcessDestroyer(final Process p, final List<String> commandList) {
             this.p = p;
             this.commandList = commandList;
         }

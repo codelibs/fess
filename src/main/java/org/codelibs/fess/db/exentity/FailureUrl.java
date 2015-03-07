@@ -37,8 +37,7 @@ public class FailureUrl extends BsFailureUrl {
     private static final long serialVersionUID = 1L;
 
     public String getLastAccessTimeForList() {
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         if (getLastAccessTime() != null) {
             return sdf.format(getLastAccessTime());
         }
@@ -46,8 +45,7 @@ public class FailureUrl extends BsFailureUrl {
     }
 
     public String getWebConfigName() {
-        final CrawlingConfig crawlingConfig = ComponentUtil
-                .getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
+        final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
@@ -55,8 +53,7 @@ public class FailureUrl extends BsFailureUrl {
     }
 
     public String getFileConfigName() {
-        final CrawlingConfig crawlingConfig = ComponentUtil
-                .getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
+        final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }
@@ -64,8 +61,7 @@ public class FailureUrl extends BsFailureUrl {
     }
 
     public String getDataConfigName() {
-        final CrawlingConfig crawlingConfig = ComponentUtil
-                .getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
+        final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().getCrawlingConfig(getConfigId());
         if (crawlingConfig != null) {
             return crawlingConfig.getName();
         }

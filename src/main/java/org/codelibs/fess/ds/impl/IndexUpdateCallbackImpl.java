@@ -36,8 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
-    private static final Logger logger = LoggerFactory
-            .getLogger(IndexUpdateCallbackImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(IndexUpdateCallbackImpl.class);
 
     protected SolrGroup solrGroup;
 
@@ -80,18 +79,14 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                .getCrawlingSessionHelper();
-        dataMap.put(fieldHelper.idField,
-                crawlingSessionHelper.generateId(dataMap));
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        dataMap.put(fieldHelper.idField, crawlingSessionHelper.generateId(dataMap));
 
         final SolrInputDocument doc = createSolrDocument(dataMap);
 
         docList.add(doc);
         if (logger.isDebugEnabled()) {
-            logger.debug("Added the document. "
-                    + "The number of a document cache is " + docList.size()
-                    + ".");
+            logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
         }
 
         if (docList.size() >= maxDocumentCacheSize) {
@@ -106,28 +101,24 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             commitDocuments();
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("The number of an added document is "
-                    + documentSize.get() + ".");
+            logger.debug("The number of an added document is " + documentSize.get() + ".");
         }
 
         executeTime += System.currentTimeMillis() - startTime;
         return true;
     }
 
-    protected SolrInputDocument createSolrDocument(
-            final Map<String, Object> dataMap) {
+    protected SolrInputDocument createSolrDocument(final Map<String, Object> dataMap) {
         final String url = dataMap.get(fieldHelper.urlField).toString();
 
         final SolrInputDocument doc = new SolrInputDocument();
         for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
             if (fieldHelper.boostField.equals(entry.getKey())) {
                 // boost
-                final float documentBoost = Float.valueOf(entry.getValue()
-                        .toString());
+                final float documentBoost = Float.valueOf(entry.getValue().toString());
                 doc.setDocumentBoost(documentBoost);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Set a document boost (" + documentBoost
-                            + ").");
+                    logger.debug("Set a document boost (" + documentBoost + ").");
                 }
             }
             doc.addField(entry.getKey(), entry.getValue());
@@ -143,8 +134,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         if (!dataMap.containsKey(fieldHelper.docIdField)) {
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-            doc.addField(fieldHelper.docIdField,
-                    systemHelper.generateDocId(dataMap));
+            doc.addField(fieldHelper.docIdField, systemHelper.generateDocId(dataMap));
         }
 
         return doc;
@@ -153,8 +143,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     @Override
     public void commit() {
         if (!docList.isEmpty()) {
-            final IndexingHelper indexingHelper = ComponentUtil
-                    .getIndexingHelper();
+            final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             indexingHelper.sendDocuments(solrGroup, docList);
         }
         commitDocuments();
@@ -169,15 +158,12 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             solrGroup.commit(true, true, false, true);
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Committed documents. The execution time is "
-                    + (System.currentTimeMillis() - execTime) + "ms.");
+            logger.info("Committed documents. The execution time is " + (System.currentTimeMillis() - execTime) + "ms.");
         }
     }
 
-    protected void addClickCountField(final SolrInputDocument doc,
-            final String url, final String clickCountField) {
-        final SearchLogHelper searchLogHelper = ComponentUtil
-                .getSearchLogHelper();
+    protected void addClickCountField(final SolrInputDocument doc, final String url, final String clickCountField) {
+        final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final int count = searchLogHelper.getClickCount(url);
         doc.addField(clickCountField, count);
         if (logger.isDebugEnabled()) {
@@ -185,10 +171,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
-    protected void addFavoriteCountField(final SolrInputDocument doc,
-            final String url, final String favoriteCountField) {
-        final SearchLogHelper searchLogHelper = ComponentUtil
-                .getSearchLogHelper();
+    protected void addFavoriteCountField(final SolrInputDocument doc, final String url, final String favoriteCountField) {
+        final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final long count = searchLogHelper.getFavoriteCount(url);
         doc.addField(favoriteCountField, count);
         if (logger.isDebugEnabled()) {

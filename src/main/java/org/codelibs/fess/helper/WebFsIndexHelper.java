@@ -51,8 +51,7 @@ public class WebFsIndexHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(WebFsIndexHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebFsIndexHelper.class);
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -83,14 +82,11 @@ public class WebFsIndexHelper implements Serializable {
 
     public int crawlerPriority = Thread.NORM_PRIORITY;
 
-    private final List<S2Robot> s2RobotList = Collections
-            .synchronizedList(new ArrayList<S2Robot>());
+    private final List<S2Robot> s2RobotList = Collections.synchronizedList(new ArrayList<S2Robot>());
 
     public void crawl(final String sessionId, final SolrGroup solrGroup) {
-        final List<WebCrawlingConfig> webConfigList = webCrawlingConfigService
-                .getAllWebCrawlingConfigList();
-        final List<FileCrawlingConfig> fileConfigList = fileCrawlingConfigService
-                .getAllFileCrawlingConfigList();
+        final List<WebCrawlingConfig> webConfigList = webCrawlingConfigService.getAllWebCrawlingConfigList();
+        final List<FileCrawlingConfig> fileConfigList = fileCrawlingConfigService.getAllFileCrawlingConfigList();
 
         if (webConfigList.isEmpty() && fileConfigList.isEmpty()) {
             // nothing
@@ -103,21 +99,17 @@ public class WebFsIndexHelper implements Serializable {
         crawl(sessionId, solrGroup, webConfigList, fileConfigList);
     }
 
-    public void crawl(final String sessionId, final List<Long> webConfigIdList,
-            final List<Long> fileConfigIdList, final SolrGroup solrGroup) {
-        final boolean runAll = webConfigIdList == null
-                && fileConfigIdList == null;
+    public void crawl(final String sessionId, final List<Long> webConfigIdList, final List<Long> fileConfigIdList, final SolrGroup solrGroup) {
+        final boolean runAll = webConfigIdList == null && fileConfigIdList == null;
         final List<WebCrawlingConfig> webConfigList;
         if (runAll || webConfigIdList != null) {
-            webConfigList = webCrawlingConfigService
-                    .getWebCrawlingConfigListByIds(webConfigIdList);
+            webConfigList = webCrawlingConfigService.getWebCrawlingConfigListByIds(webConfigIdList);
         } else {
             webConfigList = Collections.emptyList();
         }
         final List<FileCrawlingConfig> fileConfigList;
         if (runAll || fileConfigIdList != null) {
-            fileConfigList = fileCrawlingConfigService
-                    .getFileCrawlingConfigListByIds(fileConfigIdList);
+            fileConfigList = fileCrawlingConfigService.getFileCrawlingConfigListByIds(fileConfigIdList);
         } else {
             fileConfigList = Collections.emptyList();
         }
@@ -133,12 +125,10 @@ public class WebFsIndexHelper implements Serializable {
         crawl(sessionId, solrGroup, webConfigList, fileConfigList);
     }
 
-    protected void crawl(final String sessionId, final SolrGroup solrGroup,
-            final List<WebCrawlingConfig> webConfigList,
+    protected void crawl(final String sessionId, final SolrGroup solrGroup, final List<WebCrawlingConfig> webConfigList,
             final List<FileCrawlingConfig> fileConfigList) {
         int multiprocessCrawlingCount = 5;
-        String value = crawlerProperties.getProperty(
-                Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
             multiprocessCrawlingCount = Integer.parseInt(value);
         } catch (final NumberFormatException e) {
@@ -146,9 +136,7 @@ public class WebFsIndexHelper implements Serializable {
         }
 
         long commitPerCount = Constants.DEFAULT_COMMIT_PER_COUNT;
-        value = crawlerProperties.getProperty(
-                Constants.COMMIT_PER_COUNT_PROPERTY,
-                Long.toString(Constants.DEFAULT_COMMIT_PER_COUNT));
+        value = crawlerProperties.getProperty(Constants.COMMIT_PER_COUNT_PROPERTY, Long.toString(Constants.DEFAULT_COMMIT_PER_COUNT));
         try {
             commitPerCount = Long.parseLong(value);
         } catch (final NumberFormatException e) {
@@ -164,12 +152,10 @@ public class WebFsIndexHelper implements Serializable {
         final List<String> s2RobotStatusList = new ArrayList<String>();
         // Web
         for (final WebCrawlingConfig webCrawlingConfig : webConfigList) {
-            final String sid = crawlingConfigHelper.store(sessionId,
-                    webCrawlingConfig);
+            final String sid = crawlingConfigHelper.store(sessionId, webCrawlingConfig);
 
             // create s2robot
-            final S2Robot s2Robot = SingletonS2Container
-                    .getComponent(S2Robot.class);
+            final S2Robot s2Robot = SingletonS2Container.getComponent(S2Robot.class);
             s2Robot.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -180,35 +166,32 @@ public class WebFsIndexHelper implements Serializable {
             }
 
             // interval time
-            final int intervalTime = webCrawlingConfig.getIntervalTime() != null ? webCrawlingConfig
-                    .getIntervalTime()
-                    : Constants.DEFAULT_INTERVAL_TIME_FOR_WEB;
-            ((FessIntervalController) s2Robot.getIntervalController())
-                    .setDelayMillisForWaitingNewUrl(intervalTime);
+            final int intervalTime =
+                    webCrawlingConfig.getIntervalTime() != null ? webCrawlingConfig.getIntervalTime()
+                            : Constants.DEFAULT_INTERVAL_TIME_FOR_WEB;
+            ((FessIntervalController) s2Robot.getIntervalController()).setDelayMillisForWaitingNewUrl(intervalTime);
 
-            final String includedUrlsStr = webCrawlingConfig.getIncludedUrls() != null ? webCrawlingConfig
-                    .getIncludedUrls() : StringUtil.EMPTY;
-            final String excludedUrlsStr = webCrawlingConfig.getExcludedUrls() != null ? webCrawlingConfig
-                    .getExcludedUrls() : StringUtil.EMPTY;
+            final String includedUrlsStr =
+                    webCrawlingConfig.getIncludedUrls() != null ? webCrawlingConfig.getIncludedUrls() : StringUtil.EMPTY;
+            final String excludedUrlsStr =
+                    webCrawlingConfig.getExcludedUrls() != null ? webCrawlingConfig.getExcludedUrls() : StringUtil.EMPTY;
 
             // num of threads
             final S2RobotContext robotContext = s2Robot.getRobotContext();
-            final int numOfThread = webCrawlingConfig.getNumOfThread() != null ? webCrawlingConfig
-                    .getNumOfThread() : Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB;
+            final int numOfThread =
+                    webCrawlingConfig.getNumOfThread() != null ? webCrawlingConfig.getNumOfThread()
+                            : Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB;
             robotContext.setNumOfThread(numOfThread);
 
             // depth
-            final int depth = webCrawlingConfig.getDepth() != null ? webCrawlingConfig
-                    .getDepth() : -1;
+            final int depth = webCrawlingConfig.getDepth() != null ? webCrawlingConfig.getDepth() : -1;
             robotContext.setMaxDepth(depth);
 
             // max count
-            final long maxCount = webCrawlingConfig.getMaxAccessCount() != null ? webCrawlingConfig
-                    .getMaxAccessCount() : maxAccessCount;
+            final long maxCount = webCrawlingConfig.getMaxAccessCount() != null ? webCrawlingConfig.getMaxAccessCount() : maxAccessCount;
             robotContext.setMaxAccessCount(maxCount);
 
-            webCrawlingConfig.initializeClientFactory(s2Robot
-                    .getClientFactory());
+            webCrawlingConfig.initializeClientFactory(s2Robot.getClientFactory());
 
             // set urls
             final String[] urls = urlsStr.split("[\r\n]");
@@ -253,16 +236,14 @@ public class WebFsIndexHelper implements Serializable {
             }
 
             // failure url
-            final List<String> excludedUrlList = failureUrlService
-                    .getExcludedUrlList(webCrawlingConfig.getConfigId());
+            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webCrawlingConfig.getConfigId());
             if (excludedUrlList != null) {
                 for (final String u : excludedUrlList) {
                     if (StringUtil.isNotBlank(u)) {
                         final String urlValue = u.trim();
                         s2Robot.addExcludeFilter(urlValue);
                         if (logger.isInfoEnabled()) {
-                            logger.info("Excluded URL from failures: "
-                                    + urlValue);
+                            logger.info("Excluded URL from failures: " + urlValue);
                         }
                     }
                 }
@@ -281,12 +262,10 @@ public class WebFsIndexHelper implements Serializable {
 
         // File
         for (final FileCrawlingConfig fileCrawlingConfig : fileConfigList) {
-            final String sid = crawlingConfigHelper.store(sessionId,
-                    fileCrawlingConfig);
+            final String sid = crawlingConfigHelper.store(sessionId, fileCrawlingConfig);
 
             // create s2robot
-            final S2Robot s2Robot = SingletonS2Container
-                    .getComponent(S2Robot.class);
+            final S2Robot s2Robot = SingletonS2Container.getComponent(S2Robot.class);
             s2Robot.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -296,36 +275,32 @@ public class WebFsIndexHelper implements Serializable {
                 break;
             }
 
-            final int intervalTime = fileCrawlingConfig.getIntervalTime() != null ? fileCrawlingConfig
-                    .getIntervalTime() : Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
-            ((FessIntervalController) s2Robot.getIntervalController())
-                    .setDelayMillisForWaitingNewUrl(intervalTime);
+            final int intervalTime =
+                    fileCrawlingConfig.getIntervalTime() != null ? fileCrawlingConfig.getIntervalTime()
+                            : Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
+            ((FessIntervalController) s2Robot.getIntervalController()).setDelayMillisForWaitingNewUrl(intervalTime);
 
-            final String includedPathsStr = fileCrawlingConfig
-                    .getIncludedPaths() != null ? fileCrawlingConfig
-                    .getIncludedPaths() : StringUtil.EMPTY;
-            final String excludedPathsStr = fileCrawlingConfig
-                    .getExcludedPaths() != null ? fileCrawlingConfig
-                    .getExcludedPaths() : StringUtil.EMPTY;
+            final String includedPathsStr =
+                    fileCrawlingConfig.getIncludedPaths() != null ? fileCrawlingConfig.getIncludedPaths() : StringUtil.EMPTY;
+            final String excludedPathsStr =
+                    fileCrawlingConfig.getExcludedPaths() != null ? fileCrawlingConfig.getExcludedPaths() : StringUtil.EMPTY;
 
             // num of threads
             final S2RobotContext robotContext = s2Robot.getRobotContext();
-            final int numOfThread = fileCrawlingConfig.getNumOfThread() != null ? fileCrawlingConfig
-                    .getNumOfThread() : Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
+            final int numOfThread =
+                    fileCrawlingConfig.getNumOfThread() != null ? fileCrawlingConfig.getNumOfThread()
+                            : Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
             robotContext.setNumOfThread(numOfThread);
 
             // depth
-            final int depth = fileCrawlingConfig.getDepth() != null ? fileCrawlingConfig
-                    .getDepth() : -1;
+            final int depth = fileCrawlingConfig.getDepth() != null ? fileCrawlingConfig.getDepth() : -1;
             robotContext.setMaxDepth(depth);
 
             // max count
-            final long maxCount = fileCrawlingConfig.getMaxAccessCount() != null ? fileCrawlingConfig
-                    .getMaxAccessCount() : maxAccessCount;
+            final long maxCount = fileCrawlingConfig.getMaxAccessCount() != null ? fileCrawlingConfig.getMaxAccessCount() : maxAccessCount;
             robotContext.setMaxAccessCount(maxCount);
 
-            fileCrawlingConfig.initializeClientFactory(s2Robot
-                    .getClientFactory());
+            fileCrawlingConfig.initializeClientFactory(s2Robot.getClientFactory());
 
             // set paths
             final String[] paths = pathsStr.split("[\r\n]");
@@ -397,16 +372,14 @@ public class WebFsIndexHelper implements Serializable {
             }
 
             // failure url
-            final List<String> excludedUrlList = failureUrlService
-                    .getExcludedUrlList(fileCrawlingConfig.getConfigId());
+            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(fileCrawlingConfig.getConfigId());
             if (excludedUrlList != null) {
                 for (final String u : excludedUrlList) {
                     if (StringUtil.isNotBlank(u)) {
                         final String urlValue = u.trim();
                         s2Robot.addExcludeFilter(urlValue);
                         if (logger.isInfoEnabled()) {
-                            logger.info("Excluded Path from failures: "
-                                    + urlValue);
+                            logger.info("Excluded Path from failures: " + urlValue);
                         }
                     }
                 }
@@ -432,11 +405,8 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setDaemon(true);
         indexUpdater.setCommitPerCount(commitPerCount);
         indexUpdater.setS2RobotList(s2RobotList);
-        for (final BoostDocumentRule rule : boostDocumentRuleService
-                .getAvailableBoostDocumentRuleList()) {
-            indexUpdater
-                    .addBoostDocumentRule(new org.codelibs.fess.solr.BoostDocumentRule(
-                            rule));
+        for (final BoostDocumentRule rule : boostDocumentRuleService.getAvailableBoostDocumentRuleList()) {
+            indexUpdater.addBoostDocumentRule(new org.codelibs.fess.solr.BoostDocumentRule(rule));
         }
         indexUpdater.start();
 
@@ -467,12 +437,10 @@ public class WebFsIndexHelper implements Serializable {
 
             // check status
             for (int i = 0; i < startedCrawlerNum; i++) {
-                if (!s2RobotList.get(i).getRobotContext().isRunning()
-                        && s2RobotStatusList.get(i).equals(Constants.RUNNING)) {
+                if (!s2RobotList.get(i).getRobotContext().isRunning() && s2RobotStatusList.get(i).equals(Constants.RUNNING)) {
                     s2RobotList.get(i).awaitTermination();
                     s2RobotStatusList.set(i, Constants.DONE);
-                    final String sid = s2RobotList.get(i).getRobotContext()
-                            .getSessionId();
+                    final String sid = s2RobotList.get(i).getRobotContext().getSessionId();
                     indexUpdater.addFinishedSessionId(sid);
                     activeCrawlerNum--;
                 }
@@ -489,11 +457,9 @@ public class WebFsIndexHelper implements Serializable {
             finishedAll = true;
             for (int i = 0; i < s2RobotList.size(); i++) {
                 s2RobotList.get(i).awaitTermination(crawlingExecutionInterval);
-                if (!s2RobotList.get(i).getRobotContext().isRunning()
-                        && !s2RobotStatusList.get(i).equals(Constants.DONE)) {
+                if (!s2RobotList.get(i).getRobotContext().isRunning() && !s2RobotStatusList.get(i).equals(Constants.DONE)) {
                     s2RobotStatusList.set(i, Constants.DONE);
-                    final String sid = s2RobotList.get(i).getRobotContext()
-                            .getSessionId();
+                    final String sid = s2RobotList.get(i).getRobotContext().getSessionId();
                     indexUpdater.addFinishedSessionId(sid);
                 }
                 if (!s2RobotStatusList.get(i).equals(Constants.DONE)) {
@@ -505,12 +471,10 @@ public class WebFsIndexHelper implements Serializable {
         s2RobotStatusList.clear();
 
         // put cralwing info
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil
-                .getCrawlingSessionHelper();
+        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
 
         final long execTime = System.currentTimeMillis() - startTime;
-        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME,
-                Long.toString(execTime));
+        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
             logger.info("[EXEC TIME] crawling time: " + execTime + "ms");
         }
@@ -522,10 +486,8 @@ public class WebFsIndexHelper implements Serializable {
             logger.warn("Interrupted index update.", e);
         }
 
-        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_INDEX_EXEC_TIME,
-                Long.toString(indexUpdater.getExecuteTime()));
-        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_INDEX_SIZE,
-                Long.toString(indexUpdater.getDocumentSize()));
+        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_INDEX_EXEC_TIME, Long.toString(indexUpdater.getExecuteTime()));
+        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_INDEX_SIZE, Long.toString(indexUpdater.getDocumentSize()));
 
         for (final String sid : sessionIdList) {
             // remove config
@@ -533,18 +495,15 @@ public class WebFsIndexHelper implements Serializable {
         }
 
         // clear url filter
-        final UrlFilterService urlFilterService = SingletonS2Container
-                .getComponent(UrlFilterService.class);
+        final UrlFilterService urlFilterService = SingletonS2Container.getComponent(UrlFilterService.class);
         urlFilterService.deleteAll();
 
         // clear queue
-        final UrlQueueService urlQueueService = SingletonS2Container
-                .getComponent(UrlQueueService.class);
+        final UrlQueueService urlQueueService = SingletonS2Container.getComponent(UrlQueueService.class);
         urlQueueService.deleteAll();
 
         // clear
-        final DataService dataService = SingletonS2Container
-                .getComponent(DataService.class);
+        final DataService dataService = SingletonS2Container.getComponent(DataService.class);
         dataService.deleteAll();
 
     }

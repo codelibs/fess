@@ -41,16 +41,13 @@ public abstract class BsSearchLogService {
 
     public List<SearchLog> getSearchLogList(final SearchLogPager searchLogPager) {
 
-        final PagingResultBean<SearchLog> searchLogList = searchLogBhv
-                .selectPage(cb -> {
-                    cb.paging(searchLogPager.getPageSize(),
-                            searchLogPager.getCurrentPageNumber());
-                    setupListCondition(cb, searchLogPager);
-                });
+        final PagingResultBean<SearchLog> searchLogList = searchLogBhv.selectPage(cb -> {
+            cb.paging(searchLogPager.getPageSize(), searchLogPager.getCurrentPageNumber());
+            setupListCondition(cb, searchLogPager);
+        });
 
         // update pager
-        Beans.copy(searchLogList, searchLogPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(searchLogList, searchLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         searchLogPager.setPageNumberList(searchLogList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -85,8 +82,7 @@ public abstract class BsSearchLogService {
 
     }
 
-    protected void setupListCondition(final SearchLogCB cb,
-            final SearchLogPager searchLogPager) {
+    protected void setupListCondition(final SearchLogCB cb, final SearchLogPager searchLogPager) {
 
         if (searchLogPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(searchLogPager.id));
@@ -94,8 +90,7 @@ public abstract class BsSearchLogService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final SearchLogCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final SearchLogCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final SearchLog searchLog) {

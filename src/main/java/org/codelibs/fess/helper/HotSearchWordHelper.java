@@ -44,21 +44,15 @@ public class HotSearchWordHelper {
 
     @InitMethod
     public void init() {
-        final LocalDateTime now = ComponentUtil.getSystemHelper()
-                .getCurrentTime();
-        cacheMap.put(Range.ONE_DAY,
-                getHotSearchWordListByFromDate(now.minusDays(1)));
-        cacheMap.put(Range.ONE_WEEK,
-                getHotSearchWordListByFromDate(now.minusWeeks(1)));
-        cacheMap.put(Range.ONE_MONTH,
-                getHotSearchWordListByFromDate(now.minusMonths(1)));
-        cacheMap.put(Range.ONE_YEAR,
-                getHotSearchWordListByFromDate(now.minusYears(1)));
+        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
+        cacheMap.put(Range.ONE_DAY, getHotSearchWordListByFromDate(now.minusDays(1)));
+        cacheMap.put(Range.ONE_WEEK, getHotSearchWordListByFromDate(now.minusWeeks(1)));
+        cacheMap.put(Range.ONE_MONTH, getHotSearchWordListByFromDate(now.minusMonths(1)));
+        cacheMap.put(Range.ONE_YEAR, getHotSearchWordListByFromDate(now.minusYears(1)));
         cacheMap.put(Range.ENTIRE, getHotSearchWordListByFromDate(null));
     }
 
-    protected List<String> getHotSearchWordListByFromDate(
-            final LocalDateTime fromDate) {
+    protected List<String> getHotSearchWordListByFromDate(final LocalDateTime fromDate) {
         final HotSearchWordPmb pmb = new HotSearchWordPmb();
 
         if (fromDate != null) {

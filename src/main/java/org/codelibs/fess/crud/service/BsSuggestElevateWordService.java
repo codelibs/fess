@@ -39,34 +39,27 @@ public abstract class BsSuggestElevateWordService {
         super();
     }
 
-    public List<SuggestElevateWord> getSuggestElevateWordList(
-            final SuggestElevateWordPager suggestElevateWordPager) {
+    public List<SuggestElevateWord> getSuggestElevateWordList(final SuggestElevateWordPager suggestElevateWordPager) {
 
-        final PagingResultBean<SuggestElevateWord> suggestElevateWordList = suggestElevateWordBhv
-                .selectPage(cb -> {
-                    cb.paging(suggestElevateWordPager.getPageSize(),
-                            suggestElevateWordPager.getCurrentPageNumber());
-                    setupListCondition(cb, suggestElevateWordPager);
-                });
+        final PagingResultBean<SuggestElevateWord> suggestElevateWordList = suggestElevateWordBhv.selectPage(cb -> {
+            cb.paging(suggestElevateWordPager.getPageSize(), suggestElevateWordPager.getCurrentPageNumber());
+            setupListCondition(cb, suggestElevateWordPager);
+        });
 
         // update pager
-        Beans.copy(suggestElevateWordList, suggestElevateWordPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        suggestElevateWordPager.setPageNumberList(suggestElevateWordList
-                .pageRange(op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(suggestElevateWordList, suggestElevateWordPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        suggestElevateWordPager.setPageNumberList(suggestElevateWordList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return suggestElevateWordList;
     }
 
-    public SuggestElevateWord getSuggestElevateWord(
-            final Map<String, String> keys) {
-        final SuggestElevateWord suggestElevateWord = suggestElevateWordBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+    public SuggestElevateWord getSuggestElevateWord(final Map<String, String> keys) {
+        final SuggestElevateWord suggestElevateWord = suggestElevateWordBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (suggestElevateWord == null) {
             // TODO exception?
             return null;
@@ -75,24 +68,21 @@ public abstract class BsSuggestElevateWordService {
         return suggestElevateWord;
     }
 
-    public void store(final SuggestElevateWord suggestElevateWord)
-            throws CrudMessageException {
+    public void store(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
         setupStoreCondition(suggestElevateWord);
 
         suggestElevateWordBhv.insertOrUpdate(suggestElevateWord);
 
     }
 
-    public void delete(final SuggestElevateWord suggestElevateWord)
-            throws CrudMessageException {
+    public void delete(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
         setupDeleteCondition(suggestElevateWord);
 
         suggestElevateWordBhv.delete(suggestElevateWord);
 
     }
 
-    protected void setupListCondition(final SuggestElevateWordCB cb,
-            final SuggestElevateWordPager suggestElevateWordPager) {
+    protected void setupListCondition(final SuggestElevateWordCB cb, final SuggestElevateWordPager suggestElevateWordPager) {
 
         if (suggestElevateWordPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(suggestElevateWordPager.id));
@@ -100,15 +90,12 @@ public abstract class BsSuggestElevateWordService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final SuggestElevateWordCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final SuggestElevateWordCB cb, final Map<String, String> keys) {
     }
 
-    protected void setupStoreCondition(
-            final SuggestElevateWord suggestElevateWord) {
+    protected void setupStoreCondition(final SuggestElevateWord suggestElevateWord) {
     }
 
-    protected void setupDeleteCondition(
-            final SuggestElevateWord suggestElevateWord) {
+    protected void setupDeleteCondition(final SuggestElevateWord suggestElevateWord) {
     }
 }

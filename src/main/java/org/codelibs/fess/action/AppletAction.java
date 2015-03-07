@@ -35,8 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class AppletAction {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(AppletAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppletAction.class);
 
     @ActionForm
     @Resource
@@ -61,8 +60,7 @@ public class AppletAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_redirect", appletForm.uri);
+            throw new SSCActionMessagesException(e, "errors.failed_to_redirect", appletForm.uri);
         }
         return null;
     }
@@ -71,13 +69,11 @@ public class AppletAction {
     public String launcher() {
         launcherJarFile = systemHelper.getLauncherJarPath();
         if (StringUtil.isBlank(launcherJarFile)) {
-            throw new SSCActionMessagesException(
-                    "errors.no_launcher_applet_jar");
+            throw new SSCActionMessagesException("errors.no_launcher_applet_jar");
         }
         launcherJnlpFile = systemHelper.getLauncherJnlpPath();
         if (StringUtil.isBlank(launcherJnlpFile)) {
-            throw new SSCActionMessagesException(
-                    "errors.no_launcher_applet_jar");
+            throw new SSCActionMessagesException("errors.no_launcher_applet_jar");
         }
 
         String encoding = appletForm.encoding;

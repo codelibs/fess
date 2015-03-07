@@ -33,8 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AdRoleHelper {
-    private static final Logger logger = LoggerFactory
-            .getLogger(AdRoleHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdRoleHelper.class);
 
     public String domain;
 
@@ -61,8 +60,7 @@ public class AdRoleHelper {
             name = name.replace(".", ",dc=");
 
             //search
-            final NamingEnumeration<SearchResult> rslt = ctx.search(name,
-                    filter, controls);
+            final NamingEnumeration<SearchResult> rslt = ctx.search(name, filter, controls);
             while (rslt.hasMoreElements()) {
                 final SearchResult srcrslt = rslt.next();
                 final Attributes attrs = srcrslt.getAttributes();

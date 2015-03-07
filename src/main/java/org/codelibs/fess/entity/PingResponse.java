@@ -34,8 +34,7 @@ public class PingResponse {
             if (status != 0) {
                 status = 1;
             }
-            targetList.add(new Target(status, response.getRequestUrl(),
-                    response.getElapsedTime(), response.getQTime()));
+            targetList.add(new Target(status, response.getRequestUrl(), response.getElapsedTime(), response.getQTime()));
         }
         targets = targetList.toArray(new Target[targetList.size()]);
     }
@@ -50,8 +49,7 @@ public class PingResponse {
 
         private final int queryTime;
 
-        public Target(final int status, final String url,
-                final long elapsedTime, final int qTime) {
+        public Target(final int status, final String url, final long elapsedTime, final int qTime) {
             this.status = status;
             this.url = url;
             searchTime = elapsedTime;

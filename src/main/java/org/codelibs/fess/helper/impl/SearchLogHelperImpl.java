@@ -52,12 +52,10 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         final long current = System.currentTimeMillis();
         final Long time = userInfoCache.get(userCode);
         if (time == null || current - time.longValue() > userCheckInterval) {
-            final UserInfoService userInfoService = SingletonS2Container
-                    .getComponent(UserInfoService.class);
+            final UserInfoService userInfoService = SingletonS2Container.getComponent(UserInfoService.class);
             UserInfo userInfo = userInfoService.getUserInfo(userCode);
             if (userInfo == null) {
-                final LocalDateTime now = ComponentUtil.getSystemHelper()
-                        .getCurrentTime();
+                final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
                 userInfo = new UserInfo();
                 userInfo.setCode(userCode);
                 userInfo.setCreatedTime(now);
@@ -71,8 +69,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
     @Override
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
         final List<SearchLog> searchLogList = new ArrayList<SearchLog>();
-        final String value = crawlerProperties.getProperty(
-                Constants.PURGE_BY_BOTS_PROPERTY, StringUtil.EMPTY);
+        final String value = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, StringUtil.EMPTY);
         String[] botNames;
         if (StringUtil.isBlank(value)) {
             botNames = StringUtil.EMPTY_STRINGS;
@@ -80,24 +77,20 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             botNames = value.split(",");
         }
 
-        final boolean suggestAvailable = Constants.TRUE
-                .equals(crawlerProperties.getProperty(
-                        Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE));
-        final String dayForCleanupStr = crawlerProperties.getProperty(
-                Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
+        final boolean suggestAvailable =
+                Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE));
+        final String dayForCleanupStr = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
         int dayForCleanup = -1;
         try {
             dayForCleanup = Integer.parseInt(dayForCleanupStr);
-        } catch (final NumberFormatException e) {
-        }
+        } catch (final NumberFormatException e) {}
 
         boolean addedSuggest = false;
         final Map<String, UserInfo> userInfoMap = new HashMap<String, UserInfo>();
         for (final SearchLog searchLog : queue) {
             boolean add = true;
             for (final String botName : botNames) {
-                if (searchLog.getUserAgent() != null
-                        && searchLog.getUserAgent().indexOf(botName) >= 0) {
+                if (searchLog.getUserAgent() != null && searchLog.getUserAgent().indexOf(botName) >= 0) {
                     add = false;
                     break;
                 }
@@ -115,12 +108,10 @@ public class SearchLogHelperImpl extends SearchLogHelper {
                 searchLogList.add(searchLog);
 
                 if (suggestAvailable && searchLog.getHitCount() > 0) {
-                    final List<SearchFieldLog> searchFieldLogList = searchLog
-                            .getSearchFieldLogList();
+                    final List<SearchFieldLog> searchFieldLogList = searchLog.getSearchFieldLogList();
                     for (final SearchFieldLog searchFieldLog : searchFieldLogList) {
                         if ("solrQuery".equals(searchFieldLog.getName())) {
-                            suggestService.addSolrParams(
-                                    searchFieldLog.getValue(), dayForCleanup);
+                            suggestService.addSolrParams(searchFieldLog.getValue(), dayForCleanup);
                             addedSuggest = true;
                         }
                     }
@@ -132,19 +123,16 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         }
 
         if (!userInfoMap.isEmpty()) {
-            final List<UserInfo> insertList = new ArrayList<UserInfo>(
-                    userInfoMap.values());
+            final List<UserInfo> insertList = new ArrayList<UserInfo>(userInfoMap.values());
             final List<UserInfo> updateList = new ArrayList<UserInfo>();
-            final UserInfoBhv userInfoBhv = SingletonS2Container
-                    .getComponent(UserInfoBhv.class);
+            final UserInfoBhv userInfoBhv = SingletonS2Container.getComponent(UserInfoBhv.class);
             final List<UserInfo> list = userInfoBhv.selectList(cb -> {
                 cb.query().setCode_InScope(userInfoMap.keySet());
             });
             for (final UserInfo userInfo : list) {
                 final String code = userInfo.getCode();
                 final UserInfo entity = userInfoMap.get(code);
-                FessBeans.copy(userInfo, entity).includes("id", "createdTime")
-                        .execute();
+                FessBeans.copy(userInfo, entity).includes("id", "createdTime").execute();
                 updateList.add(entity);
                 insertList.remove(entity);
             }
@@ -160,8 +148,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         }
 
         if (!searchLogList.isEmpty()) {
-            final SearchLogService searchLogService = SingletonS2Container
-                    .getComponent(SearchLogService.class);
+            final SearchLogService searchLogService = SingletonS2Container.getComponent(SearchLogService.class);
             searchLogService.store(searchLogList);
         }
     }
@@ -172,15 +159,11 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         final List<ClickLog> clickLogList = new ArrayList<ClickLog>();
         for (final ClickLog clickLog : queue) {
             try {
-                final SearchLogBhv searchLogBhv = SingletonS2Container
-                        .getComponent(SearchLogBhv.class);
-                final SearchLog entity = searchLogBhv.selectEntity(
-                        cb -> {
-                            cb.query().setRequestedTime_Equal(
-                                    clickLog.getQueryRequestedTime());
-                            cb.query().setUserSessionId_Equal(
-                                    clickLog.getUserSessionId());
-                        }).orElse(null);//TODO
+                final SearchLogBhv searchLogBhv = SingletonS2Container.getComponent(SearchLogBhv.class);
+                final SearchLog entity = searchLogBhv.selectEntity(cb -> {
+                    cb.query().setRequestedTime_Equal(clickLog.getQueryRequestedTime());
+                    cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
+                }).orElse(null);//TODO
                 if (entity != null) {
                     clickLog.setSearchId(entity.getId());
                     clickLogList.add(clickLog);
@@ -203,8 +186,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         }
         if (!clickLogList.isEmpty()) {
             try {
-                final ClickLogBhv clickLogBhv = SingletonS2Container
-                        .getComponent(ClickLogBhv.class);
+                final ClickLogBhv clickLogBhv = SingletonS2Container.getComponent(ClickLogBhv.class);
                 clickLogBhv.batchInsert(clickLogList);
             } catch (final Exception e) {
                 logger.warn("Failed to insert: " + clickLogList, e);
@@ -215,11 +197,9 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final Map.Entry<String, Long> entry : clickCountMap.entrySet()) {
             try {
-                documentHelper.update(entry.getKey(),
-                        fieldHelper.clickCountField, entry.getValue() + 1);
+                documentHelper.update(entry.getKey(), fieldHelper.clickCountField, entry.getValue() + 1);
             } catch (final Exception e) {
-                logger.warn("Failed to update a clickCount(" + entry.getValue()
-                        + ") for " + entry.getKey(), e);
+                logger.warn("Failed to update a clickCount(" + entry.getValue() + ") for " + entry.getKey(), e);
             }
         }
     }

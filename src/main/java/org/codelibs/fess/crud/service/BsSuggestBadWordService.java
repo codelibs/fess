@@ -39,33 +39,27 @@ public abstract class BsSuggestBadWordService {
         super();
     }
 
-    public List<SuggestBadWord> getSuggestBadWordList(
-            final SuggestBadWordPager suggestBadWordPager) {
+    public List<SuggestBadWord> getSuggestBadWordList(final SuggestBadWordPager suggestBadWordPager) {
 
-        final PagingResultBean<SuggestBadWord> suggestBadWordList = suggestBadWordBhv
-                .selectPage(cb -> {
-                    cb.paging(suggestBadWordPager.getPageSize(),
-                            suggestBadWordPager.getCurrentPageNumber());
-                    setupListCondition(cb, suggestBadWordPager);
-                });
+        final PagingResultBean<SuggestBadWord> suggestBadWordList = suggestBadWordBhv.selectPage(cb -> {
+            cb.paging(suggestBadWordPager.getPageSize(), suggestBadWordPager.getCurrentPageNumber());
+            setupListCondition(cb, suggestBadWordPager);
+        });
 
         // update pager
-        Beans.copy(suggestBadWordList, suggestBadWordPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        suggestBadWordPager.setPageNumberList(suggestBadWordList.pageRange(
-                op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(suggestBadWordList, suggestBadWordPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        suggestBadWordPager.setPageNumberList(suggestBadWordList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return suggestBadWordList;
     }
 
     public SuggestBadWord getSuggestBadWord(final Map<String, String> keys) {
-        final SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(
-                cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+        final SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (suggestBadWord == null) {
             // TODO exception?
             return null;
@@ -74,24 +68,21 @@ public abstract class BsSuggestBadWordService {
         return suggestBadWord;
     }
 
-    public void store(final SuggestBadWord suggestBadWord)
-            throws CrudMessageException {
+    public void store(final SuggestBadWord suggestBadWord) throws CrudMessageException {
         setupStoreCondition(suggestBadWord);
 
         suggestBadWordBhv.insertOrUpdate(suggestBadWord);
 
     }
 
-    public void delete(final SuggestBadWord suggestBadWord)
-            throws CrudMessageException {
+    public void delete(final SuggestBadWord suggestBadWord) throws CrudMessageException {
         setupDeleteCondition(suggestBadWord);
 
         suggestBadWordBhv.delete(suggestBadWord);
 
     }
 
-    protected void setupListCondition(final SuggestBadWordCB cb,
-            final SuggestBadWordPager suggestBadWordPager) {
+    protected void setupListCondition(final SuggestBadWordCB cb, final SuggestBadWordPager suggestBadWordPager) {
 
         if (suggestBadWordPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(suggestBadWordPager.id));
@@ -99,8 +90,7 @@ public abstract class BsSuggestBadWordService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final SuggestBadWordCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final SuggestBadWordCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final SuggestBadWord suggestBadWord) {

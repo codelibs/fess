@@ -26,6 +26,5 @@ import org.codelibs.fess.db.bsbhv.BsDataConfigToRoleTypeMappingBhv;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class DataConfigToRoleTypeMappingBhv extends
-        BsDataConfigToRoleTypeMappingBhv {
+public class DataConfigToRoleTypeMappingBhv extends BsDataConfigToRoleTypeMappingBhv {
 }

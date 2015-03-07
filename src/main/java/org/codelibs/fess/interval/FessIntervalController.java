@@ -26,8 +26,7 @@ public class FessIntervalController extends DefaultIntervalController {
         return delayMillisAfterProcessing;
     }
 
-    public void setDelayMillisAfterProcessing(
-            final long delayMillisAfterProcessing) {
+    public void setDelayMillisAfterProcessing(final long delayMillisAfterProcessing) {
         this.delayMillisAfterProcessing = delayMillisAfterProcessing;
     }
 
@@ -35,8 +34,7 @@ public class FessIntervalController extends DefaultIntervalController {
         return delayMillisAtNoUrlInQueue;
     }
 
-    public void setDelayMillisAtNoUrlInQueue(
-            final long delayMillisAtNoUrlInQueue) {
+    public void setDelayMillisAtNoUrlInQueue(final long delayMillisAtNoUrlInQueue) {
         this.delayMillisAtNoUrlInQueue = delayMillisAtNoUrlInQueue;
     }
 
@@ -44,8 +42,7 @@ public class FessIntervalController extends DefaultIntervalController {
         return delayMillisBeforeProcessing;
     }
 
-    public void setDelayMillisBeforeProcessing(
-            final long delayMillisBeforeProcessing) {
+    public void setDelayMillisBeforeProcessing(final long delayMillisBeforeProcessing) {
         this.delayMillisBeforeProcessing = delayMillisBeforeProcessing;
     }
 
@@ -53,20 +50,17 @@ public class FessIntervalController extends DefaultIntervalController {
         return delayMillisForWaitingNewUrl;
     }
 
-    public void setDelayMillisForWaitingNewUrl(
-            final long delayMillisForWaitingNewUrl) {
+    public void setDelayMillisForWaitingNewUrl(final long delayMillisForWaitingNewUrl) {
         this.delayMillisForWaitingNewUrl = delayMillisForWaitingNewUrl;
     }
 
     @Override
     protected void delayForWaitingNewUrl() {
         try {
-            final IntervalControlHelper intervalControlHelper = ComponentUtil
-                    .getIntervalControlHelper();
+            final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();
             intervalControlHelper.delayByRules();
-        } catch (final Exception e) {
-        }
+        } catch (final Exception e) {}
 
         super.delayForWaitingNewUrl();
     }

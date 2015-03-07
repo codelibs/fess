@@ -50,8 +50,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(RoleQueryHelperImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoleQueryHelperImpl.class);
 
     public CachedCipher cipher;
 
@@ -109,8 +108,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         if (request != null) {
             final HttpSession session = request.getSession(false);
             if (session != null) {
-                final LoginInfo loginInfo = (LoginInfo) session
-                        .getAttribute(SSCConstants.USER_INFO);
+                final LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
                 if (loginInfo != null) {
                     roleList.addAll(loginInfo.getRoleSet());
                 }
@@ -175,8 +173,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         return Collections.emptySet();
     }
 
-    protected Set<String> buildByCookieNameMapping(
-            final HttpServletRequest request) {
+    protected Set<String> buildByCookieNameMapping(final HttpServletRequest request) {
 
         final Set<String> roleNameSet = new HashSet<>();
         final Cookie[] cookies = request.getCookies();
@@ -189,16 +186,14 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         return roleNameSet;
     }
 
-    protected void addRoleFromCookieMapping(final Set<String> roleNameList,
-            final Cookie cookie) {
+    protected void addRoleFromCookieMapping(final Set<String> roleNameList, final Cookie cookie) {
         final String roleName = cookieNameMap.get(cookie.getName());
         if (StringUtil.isNotBlank(roleName)) {
             roleNameList.add(roleName);
         }
     }
 
-    protected Set<String> decodedRoleList(final String value,
-            final boolean encrypted) {
+    protected Set<String> decodedRoleList(final String value, final boolean encrypted) {
         String rolesStr = value;
         if (encrypted && cipher != null) {
             rolesStr = cipher.decryptoText(rolesStr);
@@ -226,8 +221,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         return roleSet;
     }
 
-    public void addCookieNameMapping(final String cookieName,
-            final String roleName) {
+    public void addCookieNameMapping(final String cookieName, final String roleName) {
         if (cookieNameMap == null) {
             cookieNameMap = new HashMap<String, String>();
         }

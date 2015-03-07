@@ -37,8 +37,7 @@ public class BoostDocumentRuleAction extends BsBoostDocumentRuleAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BoostDocumentRuleAction.class);
+    private static final Log log = LogFactory.getLog(BoostDocumentRuleAction.class);
 
     @Resource
     protected SystemHelper systemHelper;
@@ -50,18 +49,13 @@ public class BoostDocumentRuleAction extends BsBoostDocumentRuleAction {
     @Override
     protected void loadBoostDocumentRule() {
 
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService
-                .getBoostDocumentRule(createKeyMap());
+        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
         if (boostDocumentRule == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { boostDocumentRuleForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { boostDocumentRuleForm.id });
         }
 
-        FessBeans.copy(boostDocumentRule, boostDocumentRuleForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(boostDocumentRule, boostDocumentRuleForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -70,13 +64,10 @@ public class BoostDocumentRuleAction extends BsBoostDocumentRuleAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (boostDocumentRuleForm.crudMode == CommonConstants.EDIT_MODE) {
-            boostDocumentRule = boostDocumentRuleService
-                    .getBoostDocumentRule(createKeyMap());
+            boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
             if (boostDocumentRule == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { boostDocumentRuleForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { boostDocumentRuleForm.id });
             }
         } else {
             boostDocumentRule = new BoostDocumentRule();
@@ -85,8 +76,7 @@ public class BoostDocumentRuleAction extends BsBoostDocumentRuleAction {
         }
         boostDocumentRule.setUpdatedBy(username);
         boostDocumentRule.setUpdatedTime(currentTime);
-        FessBeans.copy(boostDocumentRuleForm, boostDocumentRule)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(boostDocumentRuleForm, boostDocumentRule).excludesCommonColumns().execute();
 
         return boostDocumentRule;
     }
@@ -95,19 +85,15 @@ public class BoostDocumentRuleAction extends BsBoostDocumentRuleAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (boostDocumentRuleForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            boostDocumentRuleForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    boostDocumentRuleForm.crudMode });
         }
 
         try {
-            final BoostDocumentRule boostDocumentRule = boostDocumentRuleService
-                    .getBoostDocumentRule(createKeyMap());
+            final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
             if (boostDocumentRule == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { boostDocumentRuleForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { boostDocumentRuleForm.id });
             }
 
             //           boostDocumentRuleService.delete(boostDocumentRule);
@@ -124,12 +110,10 @@ public class BoostDocumentRuleAction extends BsBoostDocumentRuleAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 }

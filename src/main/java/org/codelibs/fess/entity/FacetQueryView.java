@@ -42,8 +42,7 @@ public class FacetQueryView {
 
     @Override
     public String toString() {
-        return "FacetQueryView [title=" + title + ", queryMap=" + queryMap
-                + "]";
+        return "FacetQueryView [title=" + title + ", queryMap=" + queryMap + "]";
     }
 
 }

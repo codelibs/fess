@@ -28,8 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class InputStreamThread extends Thread {
-    private static final Logger logger = LoggerFactory
-            .getLogger(InputStreamThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(InputStreamThread.class);
 
     private BufferedReader br;
 

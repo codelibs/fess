@@ -33,8 +33,7 @@ import org.codelibs.fess.db.exentity.DataConfigToRoleTypeMapping;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.pager.DataCrawlingConfigPager;
 
-public class DataCrawlingConfigService extends BsDataCrawlingConfigService
-        implements Serializable {
+public class DataCrawlingConfigService extends BsDataCrawlingConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,8 +47,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
         return getAllDataCrawlingConfigList(true, true, true, null);
     }
 
-    public List<DataCrawlingConfig> getDataCrawlingConfigListByIds(
-            final List<Long> idList) {
+    public List<DataCrawlingConfig> getDataCrawlingConfigListByIds(final List<Long> idList) {
         if (idList == null) {
             return getAllDataCrawlingConfigList();
         } else {
@@ -57,19 +55,17 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
         }
     }
 
-    public List<DataCrawlingConfig> getAllDataCrawlingConfigList(
-            final boolean withLabelType, final boolean withRoleType,
+    public List<DataCrawlingConfig> getAllDataCrawlingConfigList(final boolean withLabelType, final boolean withRoleType,
             final boolean available, final List<Long> idList) {
-        final List<DataCrawlingConfig> list = dataCrawlingConfigBhv
-                .selectList(cb -> {
-                    cb.query().setDeletedBy_IsNull();
-                    if (available) {
-                        cb.query().setAvailable_Equal(Constants.T);
-                    }
-                    if (idList != null) {
-                        cb.query().setId_InScope(idList);
-                    }
-                });
+        final List<DataCrawlingConfig> list = dataCrawlingConfigBhv.selectList(cb -> {
+            cb.query().setDeletedBy_IsNull();
+            if (available) {
+                cb.query().setAvailable_Equal(Constants.T);
+            }
+            if (idList != null) {
+                cb.query().setId_InScope(idList);
+            }
+        });
         if (withRoleType) {
             dataCrawlingConfigBhv.loadDataConfigToRoleTypeMapping(list, cb -> {
                 cb.setupSelect_RoleType();
@@ -78,58 +74,45 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
             });
         }
         if (withLabelType) {
-            dataCrawlingConfigBhv.loadDataConfigToLabelTypeMapping(list,
-                    cb -> {
-                        cb.setupSelect_LabelType();
-                        cb.query().queryLabelType().setDeletedBy_IsNull();
-                        cb.query().queryLabelType().addOrderBy_SortOrder_Asc();
-                    });
+            dataCrawlingConfigBhv.loadDataConfigToLabelTypeMapping(list, cb -> {
+                cb.setupSelect_LabelType();
+                cb.query().queryLabelType().setDeletedBy_IsNull();
+                cb.query().queryLabelType().addOrderBy_SortOrder_Asc();
+            });
         }
         return list;
     }
 
     @Override
-    public DataCrawlingConfig getDataCrawlingConfig(
-            final Map<String, String> keys) {
-        final DataCrawlingConfig dataCrawlingConfig = super
-                .getDataCrawlingConfig(keys);
+    public DataCrawlingConfig getDataCrawlingConfig(final Map<String, String> keys) {
+        final DataCrawlingConfig dataCrawlingConfig = super.getDataCrawlingConfig(keys);
 
         if (dataCrawlingConfig != null) {
 
-            final List<DataConfigToRoleTypeMapping> fctrtmList = dataConfigToRoleTypeMappingBhv
-                    .selectList(fctrtmCb -> {
-                        fctrtmCb.query().setDataConfigId_Equal(
-                                dataCrawlingConfig.getId());
-                        fctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
-                        fctrtmCb.query().queryDataCrawlingConfig()
-                                .setDeletedBy_IsNull();
-                    });
+            final List<DataConfigToRoleTypeMapping> fctrtmList = dataConfigToRoleTypeMappingBhv.selectList(fctrtmCb -> {
+                fctrtmCb.query().setDataConfigId_Equal(dataCrawlingConfig.getId());
+                fctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
+                fctrtmCb.query().queryDataCrawlingConfig().setDeletedBy_IsNull();
+            });
             if (!fctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(
-                        fctrtmList.size());
+                final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
                 for (final DataConfigToRoleTypeMapping mapping : fctrtmList) {
                     roleTypeIds.add(Long.toString(mapping.getRoleTypeId()));
                 }
-                dataCrawlingConfig.setRoleTypeIds(roleTypeIds
-                        .toArray(new String[roleTypeIds.size()]));
+                dataCrawlingConfig.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }
 
-            final List<DataConfigToLabelTypeMapping> fctltmList = dataConfigToLabelTypeMappingBhv
-                    .selectList(fctltmCb -> {
-                        fctltmCb.query().setDataConfigId_Equal(
-                                dataCrawlingConfig.getId());
-                        fctltmCb.query().queryLabelType().setDeletedBy_IsNull();
-                        fctltmCb.query().queryDataCrawlingConfig()
-                                .setDeletedBy_IsNull();
-                    });
+            final List<DataConfigToLabelTypeMapping> fctltmList = dataConfigToLabelTypeMappingBhv.selectList(fctltmCb -> {
+                fctltmCb.query().setDataConfigId_Equal(dataCrawlingConfig.getId());
+                fctltmCb.query().queryLabelType().setDeletedBy_IsNull();
+                fctltmCb.query().queryDataCrawlingConfig().setDeletedBy_IsNull();
+            });
             if (!fctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(
-                        fctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
                 for (final DataConfigToLabelTypeMapping mapping : fctltmList) {
                     labelTypeIds.add(Long.toString(mapping.getLabelTypeId()));
                 }
-                dataCrawlingConfig.setLabelTypeIds(labelTypeIds
-                        .toArray(new String[labelTypeIds.size()]));
+                dataCrawlingConfig.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
             }
 
         }
@@ -169,11 +152,9 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
         } else {
             // Update
             if (labelTypeIds != null) {
-                final List<DataConfigToLabelTypeMapping> fctltmList = dataConfigToLabelTypeMappingBhv
-                        .selectList(fctltmCb -> {
-                            fctltmCb.query()
-                                    .setDataConfigId_Equal(dataConfigId);
-                        });
+                final List<DataConfigToLabelTypeMapping> fctltmList = dataConfigToLabelTypeMappingBhv.selectList(fctltmCb -> {
+                    fctltmCb.query().setDataConfigId_Equal(dataConfigId);
+                });
                 final List<DataConfigToLabelTypeMapping> newList = new ArrayList<DataConfigToLabelTypeMapping>();
                 final List<DataConfigToLabelTypeMapping> matchedList = new ArrayList<DataConfigToLabelTypeMapping>();
                 for (final String id : labelTypeIds) {
@@ -199,11 +180,9 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
                 dataConfigToLabelTypeMappingBhv.batchDelete(fctltmList);
             }
             if (roleTypeIds != null) {
-                final List<DataConfigToRoleTypeMapping> fctrtmList = dataConfigToRoleTypeMappingBhv
-                        .selectList(fctrtmCb -> {
-                            fctrtmCb.query()
-                                    .setDataConfigId_Equal(dataConfigId);
-                        });
+                final List<DataConfigToRoleTypeMapping> fctrtmList = dataConfigToRoleTypeMappingBhv.selectList(fctrtmCb -> {
+                    fctrtmCb.query().setDataConfigId_Equal(dataConfigId);
+                });
                 final List<DataConfigToRoleTypeMapping> newList = new ArrayList<DataConfigToRoleTypeMapping>();
                 final List<DataConfigToRoleTypeMapping> matchedList = new ArrayList<DataConfigToRoleTypeMapping>();
                 for (final String id : roleTypeIds) {
@@ -232,8 +211,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
     }
 
     @Override
-    protected void setupListCondition(final DataCrawlingConfigCB cb,
-            final DataCrawlingConfigPager dataCrawlingConfigPager) {
+    protected void setupListCondition(final DataCrawlingConfigCB cb, final DataCrawlingConfigPager dataCrawlingConfigPager) {
         super.setupListCondition(cb, dataCrawlingConfigPager);
 
         // setup condition
@@ -245,8 +223,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
     }
 
     @Override
-    protected void setupEntityCondition(final DataCrawlingConfigCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final DataCrawlingConfigCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -255,8 +232,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
     }
 
     @Override
-    protected void setupStoreCondition(
-            final DataCrawlingConfig dataCrawlingConfig) {
+    protected void setupStoreCondition(final DataCrawlingConfig dataCrawlingConfig) {
         super.setupStoreCondition(dataCrawlingConfig);
 
         // setup condition
@@ -264,8 +240,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final DataCrawlingConfig dataCrawlingConfig) {
+    protected void setupDeleteCondition(final DataCrawlingConfig dataCrawlingConfig) {
         super.setupDeleteCondition(dataCrawlingConfig);
 
         // setup condition

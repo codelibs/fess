@@ -44,8 +44,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     private static final String DOC_VALUES = "docValues";
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(QueryResponseList.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryResponseList.class);
 
     private final List<Map<String, Object>> parent;
 
@@ -104,10 +103,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
             queryTime = queryResponse.getQTime();
             searchTime = queryResponse.getElapsedTime();
 
-            final Object partialResultsValue = queryResponse
-                    .getResponseHeader().get(PARTIAL_RESULTS);
-            if (partialResultsValue != null
-                    && ((Boolean) partialResultsValue).booleanValue()) {
+            final Object partialResultsValue = queryResponse.getResponseHeader().get(PARTIAL_RESULTS);
+            if (partialResultsValue != null && ((Boolean) partialResultsValue).booleanValue()) {
                 partialResults = true;
             }
 
@@ -122,33 +119,26 @@ public class QueryResponseList implements List<Map<String, Object>> {
                 try {
                     final Object idValue = docMap.get(fieldHelper.idField);
                     if (queryResponse.getHighlighting().get(idValue) != null) {
-                        for (final String hf : queryHelper
-                                .getHighlightingFields()) {
-                            final List<String> highlightSnippets = queryResponse
-                                    .getHighlighting().get(idValue).get(hf);
+                        for (final String hf : queryHelper.getHighlightingFields()) {
+                            final List<String> highlightSnippets = queryResponse.getHighlighting().get(idValue).get(hf);
                             String value = null;
-                            if (highlightSnippets != null
-                                    && !highlightSnippets.isEmpty()) {
-                                value = StringUtils.join(highlightSnippets,
-                                        "...");
+                            if (highlightSnippets != null && !highlightSnippets.isEmpty()) {
+                                value = StringUtils.join(highlightSnippets, "...");
                                 docMap.put(hlPrefix + hf, value);
                             }
                         }
                     }
                 } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Could not create a highlighting value: "
-                                + docMap, e);
+                        logger.debug("Could not create a highlighting value: " + docMap, e);
                     }
                 }
 
                 // ContentTitle
                 final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 if (viewHelper != null) {
-                    docMap.put("contentTitle",
-                            viewHelper.getContentTitle(docMap));
-                    docMap.put("contentDescription",
-                            viewHelper.getContentDescription(docMap));
+                    docMap.put("contentTitle", viewHelper.getContentTitle(docMap));
+                    docMap.put("contentDescription", viewHelper.getContentDescription(docMap));
                     docMap.put("urlLink", viewHelper.getUrlLink(docMap));
                     docMap.put("sitePath", viewHelper.getSitePath(docMap));
                 }
@@ -158,27 +148,22 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
             // facet
             final List<FacetField> facetFields = queryResponse.getFacetFields();
-            final Map<String, Integer> facetQueryMap = queryResponse
-                    .getFacetQuery();
+            final Map<String, Integer> facetQueryMap = queryResponse.getFacetQuery();
             if (facetFields != null || facetQueryMap != null) {
                 facetResponse = new FacetResponse(facetFields, facetQueryMap);
             }
 
             // mlt
-            final Object moreLikeThisMap = queryResponse.getResponse().get(
-                    MORE_LIKE_THIS);
+            final Object moreLikeThisMap = queryResponse.getResponse().get(MORE_LIKE_THIS);
             if (moreLikeThisMap instanceof SimpleOrderedMap) {
                 moreLikeThisResponse = new MoreLikeThisResponse();
                 final int size = ((SimpleOrderedMap<?>) moreLikeThisMap).size();
                 for (int i = 0; i < size; i++) {
-                    final String id = ((SimpleOrderedMap<?>) moreLikeThisMap)
-                            .getName(i);
-                    final Object docList = ((SimpleOrderedMap<?>) moreLikeThisMap)
-                            .getVal(i);
-                    if (StringUtil.isNotBlank(id)
-                            && docList instanceof SolrDocumentList) {
-                        final List<Map<String, Object>> docMapList = new ArrayList<Map<String, Object>>(
-                                ((SolrDocumentList) docList).size());
+                    final String id = ((SimpleOrderedMap<?>) moreLikeThisMap).getName(i);
+                    final Object docList = ((SimpleOrderedMap<?>) moreLikeThisMap).getVal(i);
+                    if (StringUtil.isNotBlank(id) && docList instanceof SolrDocumentList) {
+                        final List<Map<String, Object>> docMapList =
+                                new ArrayList<Map<String, Object>>(((SolrDocumentList) docList).size());
                         for (final SolrDocument solrDoc : (SolrDocumentList) docList) {
                             final Map<String, Object> docMap = new HashMap<String, Object>();
                             docMap.putAll(solrDoc);
@@ -190,8 +175,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
 
             // docValues
-            final Object docValuesObj = queryResponse.getResponse().get(
-                    DOC_VALUES);
+            final Object docValuesObj = queryResponse.getResponse().get(DOC_VALUES);
             if (docValuesObj instanceof SimpleOrderedMap) {
                 @SuppressWarnings("unchecked")
                 final SimpleOrderedMap<List<Long>> docValuesMap = (SimpleOrderedMap<List<Long>>) docValuesObj;
@@ -207,19 +191,16 @@ public class QueryResponseList implements List<Map<String, Object>> {
         calculatePageInfo(start, pageSize, numFound);
     }
 
-    protected void calculatePageInfo(final long start, final int size,
-            final long numFound) {
+    protected void calculatePageInfo(final long start, final int size, final long numFound) {
         pageSize = size;
         allRecordCount = numFound;
         allPageCount = (int) ((allRecordCount - 1) / pageSize) + 1;
         existPrevPage = start > 0;
         existNextPage = start < (long) (allPageCount - 1) * (long) pageSize;
         currentPageNumber = (int) (start / pageSize) + 1;
-        currentStartRecordNumber = numFound != 0 ? (currentPageNumber - 1)
-                * pageSize + 1 : 0;
+        currentStartRecordNumber = numFound != 0 ? (currentPageNumber - 1) * pageSize + 1 : 0;
         currentEndRecordNumber = currentPageNumber * pageSize;
-        currentEndRecordNumber = allRecordCount < currentEndRecordNumber ? allRecordCount
-                : currentEndRecordNumber;
+        currentEndRecordNumber = allRecordCount < currentEndRecordNumber ? allRecordCount : currentEndRecordNumber;
 
         final int pageRangeSize = 5;
         int startPageRangeSize = currentPageNumber - pageRangeSize;
@@ -253,8 +234,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
     }
 
     @Override
-    public boolean addAll(final int index,
-            final Collection<? extends Map<String, Object>> c) {
+    public boolean addAll(final int index, final Collection<? extends Map<String, Object>> c) {
         return parent.addAll(index, c);
     }
 
@@ -339,8 +319,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
     }
 
     @Override
-    public Map<String, Object> set(final int index,
-            final Map<String, Object> element) {
+    public Map<String, Object> set(final int index, final Map<String, Object> element) {
         return parent.set(index, element);
     }
 
@@ -350,8 +329,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
     }
 
     @Override
-    public List<Map<String, Object>> subList(final int fromIndex,
-            final int toIndex) {
+    public List<Map<String, Object>> subList(final int fromIndex, final int toIndex) {
         return parent.subList(fromIndex, toIndex);
     }
 
@@ -447,19 +425,12 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     @Override
     public String toString() {
-        return "parent=" + parent + ", pageSize=" + pageSize
-                + ", currentPageNumber=" + currentPageNumber
-                + ", allRecordCount=" + allRecordCount + ", allPageCount="
-                + allPageCount + ", existNextPage=" + existNextPage
-                + ", existPrevPage=" + existPrevPage
-                + ", currentStartRecordNumber=" + currentStartRecordNumber
-                + ", currentEndRecordNumber=" + currentEndRecordNumber
-                + ", pageNumberList=" + pageNumberList + ", searchQuery="
-                + searchQuery + ", solrQuery=" + solrQuery + ", execTime="
-                + execTime + ", facetResponse=" + facetResponse
-                + ", moreLikeThisResponse=" + moreLikeThisResponse
-                + ", partialResults=" + partialResults + ", queryTime="
-                + queryTime + ", searchTime=" + searchTime;
+        return "parent=" + parent + ", pageSize=" + pageSize + ", currentPageNumber=" + currentPageNumber + ", allRecordCount="
+                + allRecordCount + ", allPageCount=" + allPageCount + ", existNextPage=" + existNextPage + ", existPrevPage="
+                + existPrevPage + ", currentStartRecordNumber=" + currentStartRecordNumber + ", currentEndRecordNumber="
+                + currentEndRecordNumber + ", pageNumberList=" + pageNumberList + ", searchQuery=" + searchQuery + ", solrQuery="
+                + solrQuery + ", execTime=" + execTime + ", facetResponse=" + facetResponse + ", moreLikeThisResponse="
+                + moreLikeThisResponse + ", partialResults=" + partialResults + ", queryTime=" + queryTime + ", searchTime=" + searchTime;
     }
 
 }

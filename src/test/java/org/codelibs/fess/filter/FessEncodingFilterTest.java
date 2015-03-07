@@ -76,8 +76,7 @@ public class FessEncodingFilterTest extends S2TestCase {
         final FessEncodingFilter filter = new FessEncodingFilter();
         Map<String, String[]> paramMap;
 
-        paramMap = filter.parseQueryString("a=%E3%83%86%E3%82%B9%E3%83%88",
-                "UTF-8");
+        paramMap = filter.parseQueryString("a=%E3%83%86%E3%82%B9%E3%83%88", "UTF-8");
         assertEquals(1, paramMap.size());
         assertEquals("テスト", paramMap.get("a")[0]);
 

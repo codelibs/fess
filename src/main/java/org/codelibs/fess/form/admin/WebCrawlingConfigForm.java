@@ -25,8 +25,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.form.admin.BsWebCrawlingConfigForm;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements
-        Serializable {
+public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,12 +42,10 @@ public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements
             userAgent = "Fess Robot/1.0";
         }
         numOfThread = Integer.toString(Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB);
-        intervalTime = Integer
-                .toString(Constants.DEFAULT_INTERVAL_TIME_FOR_WEB);
+        intervalTime = Integer.toString(Constants.DEFAULT_INTERVAL_TIME_FOR_WEB);
         // Temporary data
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
 
     }

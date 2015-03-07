@@ -69,13 +69,11 @@ public class SystemInfoAction implements Serializable {
             envItems.add(createItem(entry.getKey(), entry.getValue()));
         }
 
-        for (final Map.Entry<Object, Object> entry : System.getProperties()
-                .entrySet()) {
+        for (final Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
             propItems.add(createItem(entry.getKey(), entry.getValue()));
         }
 
-        for (final Map.Entry<Object, Object> entry : crawlerProperties
-                .entrySet()) {
+        for (final Map.Entry<Object, Object> entry : crawlerProperties.entrySet()) {
             fessPropItems.add(createItem(entry.getKey(), entry.getValue()));
         }
 
@@ -92,11 +90,9 @@ public class SystemInfoAction implements Serializable {
         bugReportItems.add(createPropItem("user.country"));
         bugReportItems.add(createPropItem("user.language"));
         bugReportItems.add(createPropItem("user.timezone"));
-        for (final Map.Entry<Object, Object> entry : crawlerProperties
-                .entrySet()) {
+        for (final Map.Entry<Object, Object> entry : crawlerProperties.entrySet()) {
             if (isBugReportTarget(entry.getKey())) {
-                bugReportItems
-                        .add(createItem(entry.getKey(), entry.getValue()));
+                bugReportItems.add(createItem(entry.getKey(), entry.getValue()));
             }
         }
 
@@ -114,13 +110,10 @@ public class SystemInfoAction implements Serializable {
         return createItem(key, System.getProperty(key));
     }
 
-    private Map<String, String> createItem(final Object label,
-            final Object value) {
+    private Map<String, String> createItem(final Object label, final Object value) {
         final Map<String, String> map = new HashMap<String, String>(2);
-        map.put(Constants.ITEM_LABEL, label != null ? label.toString()
-                : StringUtil.EMPTY);
-        map.put(Constants.ITEM_VALUE, value != null ? value.toString()
-                : StringUtil.EMPTY);
+        map.put(Constants.ITEM_LABEL, label != null ? label.toString() : StringUtil.EMPTY);
+        map.put(Constants.ITEM_VALUE, value != null ? value.toString() : StringUtil.EMPTY);
         return map;
     }
 }

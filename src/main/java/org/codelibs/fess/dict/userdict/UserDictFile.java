@@ -72,16 +72,13 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
     }
 
     @Override
-    public synchronized PagingList<UserDictItem> selectList(final int offset,
-            final int size) {
+    public synchronized PagingList<UserDictItem> selectList(final int offset, final int size) {
         if (userDictItemList == null) {
             reload(null);
         }
 
         if (offset >= userDictItemList.size() || offset < 0) {
-            return new PagingList<UserDictItem>(
-                    Collections.<UserDictItem> emptyList(), offset, size,
-                    userDictItemList.size());
+            return new PagingList<UserDictItem>(Collections.<UserDictItem> emptyList(), offset, size, userDictItemList.size());
         }
 
         int toIndex = offset + size;
@@ -89,8 +86,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
             toIndex = userDictItemList.size();
         }
 
-        return new PagingList<UserDictItem>(userDictItemList.subList(offset,
-                toIndex), offset, size, userDictItemList.size());
+        return new PagingList<UserDictItem>(userDictItemList.subList(offset, toIndex), offset, size, userDictItemList.size());
     }
 
     @Override
@@ -98,21 +94,18 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         final UserDictItem userDictItem = item;
         BufferedWriter bw = null;
         try {
-            bw = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(file, true), Constants.UTF_8));
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), Constants.UTF_8));
             bw.newLine();
             bw.write(userDictItem.toLineString());
             bw.flush();
 
             long nextId = 1;
             if (!userDictItemList.isEmpty()) {
-                final UserDictItem lastItem = userDictItemList
-                        .get(userDictItemList.size() - 1);
+                final UserDictItem lastItem = userDictItemList.get(userDictItemList.size() - 1);
                 nextId = lastItem.getId() + 1;
             }
-            userDictItemList.add(new UserDictItem(nextId, userDictItem
-                    .getNewToken(), userDictItem.getNewSegmentation(),
-                    userDictItem.getNewReading(), userDictItem.getNewPos()));
+            userDictItemList.add(new UserDictItem(nextId, userDictItem.getNewToken(), userDictItem.getNewSegmentation(), userDictItem
+                    .getNewReading(), userDictItem.getNewPos()));
         } catch (final IOException e) {
             throw new DictionaryException("Failed to write: " + item, e);
         } finally {
@@ -152,8 +145,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         final List<UserDictItem> itemList = new ArrayList<UserDictItem>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), Constants.UTF_8));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Constants.UTF_8));
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -174,21 +166,20 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                 String reading = null;
                 String pos = null;
                 switch (values.length) {
-                    case 4:
-                        pos = values[3];
-                    case 3:
-                        reading = values[2];
-                    case 2:
-                        segmentation = values[1];
-                    case 1:
-                        token = values[0];
-                    default:
-                        break;
+                case 4:
+                    pos = values[3];
+                case 3:
+                    reading = values[2];
+                case 2:
+                    segmentation = values[1];
+                case 1:
+                    token = values[0];
+                default:
+                    break;
                 }
 
                 id++;
-                final UserDictItem item = new UserDictItem(id, token,
-                        segmentation, reading, pos);
+                final UserDictItem item = new UserDictItem(id, token, segmentation, reading, pos);
                 if (updater != null) {
                     final UserDictItem newItem = updater.write(item);
                     if (newItem != null) {
@@ -205,8 +196,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
             }
             userDictItemList = itemList;
         } catch (final IOException e) {
-            throw new DictionaryException("Failed to parse "
-                    + file.getAbsolutePath(), e);
+            throw new DictionaryException("Failed to parse " + file.getAbsolutePath(), e);
         } finally {
             IOUtils.closeQuietly(reader);
         }
@@ -227,14 +217,12 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         protected UserDictUpdater(final File file, final UserDictItem newItem) {
             try {
                 newFile = File.createTempFile(USERDICT, ".txt");
-                writer = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(newFile), Constants.UTF_8));
+                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
             } catch (final IOException e) {
                 if (newFile != null) {
                     newFile.delete();
                 }
-                throw new DictionaryException(
-                        "Failed to write a userDict file.", e);
+                throw new DictionaryException("Failed to write a userDict file.", e);
             }
             oldFile = file;
             item = newItem;
@@ -249,10 +237,8 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                                 // update
                                 writer.write(item.toLineString());
                                 writer.write(Constants.LINE_SEPARATOR);
-                                return new UserDictItem(item.getId(),
-                                        item.getNewToken(),
-                                        item.getNewSegmentation(),
-                                        item.getNewReading(), item.getNewPos());
+                                return new UserDictItem(item.getId(), item.getNewToken(), item.getNewSegmentation(), item.getNewReading(),
+                                        item.getNewPos());
                             } else {
                                 return null;
                             }
@@ -260,9 +246,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                             item.setNewToken(null);
                         }
                     } else {
-                        throw new DictionaryException(
-                                "UserDict file was updated: old=" + oldItem
-                                        + " : new=" + item);
+                        throw new DictionaryException("UserDict file was updated: old=" + oldItem + " : new=" + item);
                     }
                 } else {
                     writer.write(oldItem.toLineString());
@@ -270,8 +254,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                     return oldItem;
                 }
             } catch (final IOException e) {
-                throw new DictionaryException("Failed to write: " + oldItem
-                        + " -> " + item, e);
+                throw new DictionaryException("Failed to write: " + oldItem + " -> " + item, e);
             }
         }
 
@@ -301,9 +284,8 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                     FileUtils.copyFile(newFile, oldFile);
                     newFile.delete();
                 } catch (final IOException e) {
-                    throw new DictionaryException("Failed to replace "
-                            + oldFile.getAbsolutePath() + " with "
-                            + newFile.getAbsolutePath(), e);
+                    throw new DictionaryException("Failed to replace " + oldFile.getAbsolutePath() + " with " + newFile.getAbsolutePath(),
+                            e);
                 }
             } else {
                 newFile.delete();
@@ -326,7 +308,6 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
 
     @Override
     public String toString() {
-        return "UserDictFile [file=" + file + ", userDictItemList="
-                + userDictItemList + ", id=" + id + "]";
+        return "UserDictFile [file=" + file + ", userDictItemList=" + userDictItemList + ", id=" + id + "]";
     }
 }

@@ -32,15 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TriggeredJob implements Job {
-    private static final Logger logger = LoggerFactory
-            .getLogger(TriggeredJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(TriggeredJob.class);
 
     @Override
-    public void execute(final JobExecutionContext context)
-            throws JobExecutionException {
+    public void execute(final JobExecutionContext context) throws JobExecutionException {
         final JobDataMap data = context.getMergedJobDataMap();
-        final ScheduledJob scheduledJob = (ScheduledJob) data
-                .get(Constants.SCHEDULED_JOB);
+        final ScheduledJob scheduledJob = (ScheduledJob) data.get(Constants.SCHEDULED_JOB);
 
         execute(scheduledJob);
     }
@@ -53,8 +50,7 @@ public class TriggeredJob implements Job {
         final String script = scheduledJob.getScriptData();
         final Long id = scheduledJob.getId();
         final String jobId = Constants.JOB_ID_PREFIX + id;
-        final JobExecutor jobExecutor = ComponentUtil
-                .getJobExecutor(scriptType);
+        final JobExecutor jobExecutor = ComponentUtil.getJobExecutor(scriptType);
         if (jobExecutor == null) {
             throw new ScheduledJobException("No jobExecutor: " + scriptType);
         }
@@ -72,10 +68,8 @@ public class TriggeredJob implements Job {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Starting Job " + jobId + ". scriptType: "
-                        + scriptType + ", script: " + script);
-            } else if (scheduledJob.isLoggingEnabled()
-                    && logger.isInfoEnabled()) {
+                logger.debug("Starting Job " + jobId + ". scriptType: " + scriptType + ", script: " + script);
+            } else if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
                 logger.info("Starting Job " + jobId + ".");
             }
 
@@ -86,8 +80,7 @@ public class TriggeredJob implements Job {
                 }
             } else {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                    logger.info("Finished Job " + jobId
-                            + ". The return value is:\n" + ret);
+                    logger.info("Finished Job " + jobId + ". The return value is:\n" + ret);
                 }
                 jobLog.setScriptResult(ret.toString());
             }
@@ -95,8 +88,7 @@ public class TriggeredJob implements Job {
         } catch (final Throwable t) { // NOPMD
             logger.error("Failed to execute " + jobId + ": " + script, t);
             jobLog.setJobStatus(Constants.FAIL);
-            jobLog.setScriptResult(systemHelper.abbreviateLongText(t
-                    .getLocalizedMessage()));
+            jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {
             jobHelper.finishJobExecutoer(id);
             jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTime());
@@ -110,8 +102,7 @@ public class TriggeredJob implements Job {
     }
 
     private void storeJobLog(final JobLog jobLog) {
-        final JobLogService jobLogService = SingletonS2Container
-                .getComponent(JobLogService.class);
+        final JobLogService jobLogService = SingletonS2Container.getComponent(JobLogService.class);
         jobLogService.store(jobLog);
     }
 

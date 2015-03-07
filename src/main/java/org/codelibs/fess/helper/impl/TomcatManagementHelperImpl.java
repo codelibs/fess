@@ -39,15 +39,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TomcatManagementHelperImpl implements WebManagementHelper {
-    private static final Logger logger = LoggerFactory
-            .getLogger(TomcatManagementHelperImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(TomcatManagementHelperImpl.class);
 
     protected Map<String, SolrInstance> solrInstanceMap = new LinkedHashMap<String, SolrInstance>();
 
     public void addSolrInstance(final SolrInstance solrInstance) {
         if (!solrInstance.isValid()) {
-            throw new FessTomcatManagerException("SolrInstance is invalid: "
-                    + solrInstance);
+            throw new FessTomcatManagerException("SolrInstance is invalid: " + solrInstance);
         }
         solrInstanceMap.put(solrInstance.name, solrInstance);
     }
@@ -80,8 +78,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
             try {
                 return solrInstance.status();
             } catch (final Exception e) {
-                logger.error("System error on a solr instance (" + name + ").",
-                        e);
+                logger.error("System error on a solr instance (" + name + ").", e);
                 return "error";
             }
         }
@@ -97,8 +94,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
         if (solrInstance != null) {
             solrInstance.start();
         } else {
-            throw new FessTomcatManagerException("Solr instance (" + name
-                    + ") is not found.");
+            throw new FessTomcatManagerException("Solr instance (" + name + ") is not found.");
         }
     }
 
@@ -111,8 +107,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
         if (solrInstance != null) {
             solrInstance.stop();
         } else {
-            throw new FessTomcatManagerException("Solr instance (" + name
-                    + ") is not found.");
+            throw new FessTomcatManagerException("Solr instance (" + name + ") is not found.");
         }
     }
 
@@ -125,8 +120,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
         if (solrInstance != null) {
             solrInstance.reload();
         } else {
-            throw new FessTomcatManagerException("Solr instance (" + name
-                    + ") is not found.");
+            throw new FessTomcatManagerException("Solr instance (" + name + ") is not found.");
         }
     }
 
@@ -153,9 +147,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
             buf.append(contextPath);
             final String responseBody = getResponseBody(buf.toString());
             if (!responseBody.trim().startsWith("OK")) {
-                throw new FessTomcatManagerException(
-                        "Failed to start a solr instance. The reponse is \n"
-                                + responseBody);
+                throw new FessTomcatManagerException("Failed to start a solr instance. The reponse is \n" + responseBody);
             }
         }
 
@@ -169,9 +161,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
             buf.append(contextPath);
             final String responseBody = getResponseBody(buf.toString());
             if (!responseBody.trim().startsWith("OK")) {
-                throw new FessTomcatManagerException(
-                        "Failed to start a solr instance. The reponse is \n"
-                                + responseBody);
+                throw new FessTomcatManagerException("Failed to start a solr instance. The reponse is \n" + responseBody);
             }
         }
 
@@ -185,9 +175,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
             buf.append(contextPath);
             final String responseBody = getResponseBody(buf.toString());
             if (!responseBody.trim().startsWith("OK")) {
-                throw new FessTomcatManagerException(
-                        "Failed to start a solr instance. The reponse is \n"
-                                + responseBody);
+                throw new FessTomcatManagerException("Failed to start a solr instance. The reponse is \n" + responseBody);
             }
         }
 
@@ -200,9 +188,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
             buf.append("list");
             final String responseBody = getResponseBody(buf.toString());
             if (!responseBody.trim().startsWith("OK")) {
-                throw new FessTomcatManagerException(
-                        "Failed to start a solr instance. The reponse is \n"
-                                + responseBody);
+                throw new FessTomcatManagerException("Failed to start a solr instance. The reponse is \n" + responseBody);
             }
 
             final String[] lines = responseBody.split("\n");
@@ -222,14 +208,12 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
             final DefaultHttpClient client = new DefaultHttpClient();
 
             if (username != null && password != null) {
-                final Credentials defaultcreds = new UsernamePasswordCredentials(
-                        username, password);
+                final Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
                 if (schema == null) {
                     schema = Constants.BASIC;
                 }
-                client.getCredentialsProvider().setCredentials(
-                        new AuthScope(AuthScope.ANY_HOST, -1,
-                                AuthScope.ANY_REALM, schema), defaultcreds);
+                client.getCredentialsProvider().setCredentials(new AuthScope(AuthScope.ANY_HOST, -1, AuthScope.ANY_REALM, schema),
+                        defaultcreds);
             }
 
             // Create a method instance.
@@ -241,32 +225,27 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
                 final int statusCode = response.getStatusLine().getStatusCode();
 
                 if (statusCode != HttpStatus.SC_OK) {
-                    throw new FessTomcatManagerException("Could not access "
-                            + url + ". HTTP Status is " + statusCode + ".");
+                    throw new FessTomcatManagerException("Could not access " + url + ". HTTP Status is " + statusCode + ".");
                 }
 
                 final HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     // Read the response body.
-                    final String value = new String(
-                            InputStreamUtil.getBytes(entity.getContent()),
-                            Constants.UTF_8);
+                    final String value = new String(InputStreamUtil.getBytes(entity.getContent()), Constants.UTF_8);
                     // Release the connection.
                     entity.consumeContent();
                     return value;
                 }
                 throw new FessTomcatManagerException("No response from " + url);
             } catch (final IOException e) {
-                throw new FessTomcatManagerException("Fatal transport error: "
-                        + url, e);
+                throw new FessTomcatManagerException("Fatal transport error: " + url, e);
             } finally {
                 client.getConnectionManager().shutdown();
             }
         }
 
         public boolean isValid() {
-            if (StringUtil.isBlank(name) || StringUtil.isBlank(managerUrl)
-                    || StringUtil.isBlank(contextPath)) {
+            if (StringUtil.isBlank(name) || StringUtil.isBlank(managerUrl) || StringUtil.isBlank(contextPath)) {
                 return false;
             }
             return true;
@@ -289,8 +268,7 @@ public class TomcatManagementHelperImpl implements WebManagementHelper {
 
         private static final long serialVersionUID = 1L;
 
-        public FessTomcatManagerException(final String message,
-                final Throwable cause) {
+        public FessTomcatManagerException(final String message, final Throwable cause) {
             super(message, cause);
         }
 

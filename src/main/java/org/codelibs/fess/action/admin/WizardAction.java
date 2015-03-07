@@ -52,8 +52,7 @@ import org.slf4j.LoggerFactory;
 public class WizardAction implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(WizardAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(WizardAction.class);
 
     @ActionForm
     @Resource
@@ -95,25 +94,20 @@ public class WizardAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "crawlingConfigForm")
     public String crawlingConfig() {
-        final String name = crawlingConfigInternal(
-                wizardForm.crawlingConfigName, wizardForm.crawlingConfigPath);
-        SAStrutsUtil.addSessionMessage(
-                "success.create_crawling_config_at_wizard", name);
+        final String name = crawlingConfigInternal(wizardForm.crawlingConfigName, wizardForm.crawlingConfigPath);
+        SAStrutsUtil.addSessionMessage("success.create_crawling_config_at_wizard", name);
         return "crawlingConfigForm?redirect=true";
     }
 
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "crawlingConfigForm")
     public String crawlingConfigNext() {
-        final String name = crawlingConfigInternal(
-                wizardForm.crawlingConfigName, wizardForm.crawlingConfigPath);
-        SAStrutsUtil.addSessionMessage(
-                "success.create_crawling_config_at_wizard", name);
+        final String name = crawlingConfigInternal(wizardForm.crawlingConfigName, wizardForm.crawlingConfigPath);
+        SAStrutsUtil.addSessionMessage("success.create_crawling_config_at_wizard", name);
         return "startCrawlingForm?redirect=true";
     }
 
-    protected String crawlingConfigInternal(final String crawlingConfigName,
-            final String crawlingConfigPath) {
+    protected String crawlingConfigInternal(final String crawlingConfigName, final String crawlingConfigPath) {
 
         String configName = crawlingConfigName;
         String configPath = crawlingConfigPath.trim();
@@ -133,10 +127,8 @@ public class WizardAction implements Serializable {
                 buf.append(c);
             } else {
                 try {
-                    buf.append(URLEncoder.encode(String.valueOf(c),
-                            Constants.UTF_8));
-                } catch (final UnsupportedEncodingException e) {
-                }
+                    buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                } catch (final UnsupportedEncodingException e) {}
             }
         }
         configPath = convertCrawlingPath(buf.toString());
@@ -155,33 +147,21 @@ public class WizardAction implements Serializable {
                 if (StringUtil.isNotBlank(wizardForm.depth)) {
                     wConfig.setDepth(Integer.parseInt(wizardForm.depth));
                 }
-                wConfig.setExcludedDocUrls(getDefaultString(
-                        "default.config.web.excludedDocUrls", StringUtil.EMPTY));
-                wConfig.setExcludedUrls(getDefaultString(
-                        "default.config.web.excludedUrls", StringUtil.EMPTY));
-                wConfig.setIncludedDocUrls(getDefaultString(
-                        "default.config.web.includedDocUrls", StringUtil.EMPTY));
-                wConfig.setIncludedUrls(getDefaultString(
-                        "default.config.web.includedUrls", StringUtil.EMPTY));
-                wConfig.setIntervalTime(getDefaultInteger(
-                        "default.config.web.intervalTime",
-                        Constants.DEFAULT_INTERVAL_TIME_FOR_WEB));
+                wConfig.setExcludedDocUrls(getDefaultString("default.config.web.excludedDocUrls", StringUtil.EMPTY));
+                wConfig.setExcludedUrls(getDefaultString("default.config.web.excludedUrls", StringUtil.EMPTY));
+                wConfig.setIncludedDocUrls(getDefaultString("default.config.web.includedDocUrls", StringUtil.EMPTY));
+                wConfig.setIncludedUrls(getDefaultString("default.config.web.includedUrls", StringUtil.EMPTY));
+                wConfig.setIntervalTime(getDefaultInteger("default.config.web.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_WEB));
                 if (StringUtil.isNotBlank(wizardForm.maxAccessCount)) {
-                    wConfig.setMaxAccessCount(Long
-                            .parseLong(wizardForm.maxAccessCount));
+                    wConfig.setMaxAccessCount(Long.parseLong(wizardForm.maxAccessCount));
                 }
                 wConfig.setName(configName);
-                wConfig.setNumOfThread(getDefaultInteger(
-                        "default.config.web.numOfThread",
-                        Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB));
-                wConfig.setSortOrder(getDefaultInteger(
-                        "default.config.web.sortOrder", 1));
+                wConfig.setNumOfThread(getDefaultInteger("default.config.web.numOfThread", Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB));
+                wConfig.setSortOrder(getDefaultInteger("default.config.web.sortOrder", 1));
                 wConfig.setUpdatedBy(username);
                 wConfig.setUpdatedTime(now);
                 wConfig.setUrls(configPath);
-                wConfig.setUserAgent(getDefaultString(
-                        "default.config.web.userAgent",
-                        ComponentUtil.getUserAgentName()));
+                wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", ComponentUtil.getUserAgentName()));
 
                 webCrawlingConfigService.store(wConfig);
 
@@ -195,29 +175,17 @@ public class WizardAction implements Serializable {
                 if (StringUtil.isNotBlank(wizardForm.depth)) {
                     fConfig.setDepth(Integer.parseInt(wizardForm.depth));
                 }
-                fConfig.setExcludedDocPaths(getDefaultString(
-                        "default.config.file.excludedDocPaths",
-                        StringUtil.EMPTY));
-                fConfig.setExcludedPaths(getDefaultString(
-                        "default.config.file.excludedPaths", StringUtil.EMPTY));
-                fConfig.setIncludedDocPaths(getDefaultString(
-                        "default.config.file.includedDocPaths",
-                        StringUtil.EMPTY));
-                fConfig.setIncludedPaths(getDefaultString(
-                        "default.config.file.includedPaths", StringUtil.EMPTY));
-                fConfig.setIntervalTime(getDefaultInteger(
-                        "default.config.file.intervalTime",
-                        Constants.DEFAULT_INTERVAL_TIME_FOR_FS));
+                fConfig.setExcludedDocPaths(getDefaultString("default.config.file.excludedDocPaths", StringUtil.EMPTY));
+                fConfig.setExcludedPaths(getDefaultString("default.config.file.excludedPaths", StringUtil.EMPTY));
+                fConfig.setIncludedDocPaths(getDefaultString("default.config.file.includedDocPaths", StringUtil.EMPTY));
+                fConfig.setIncludedPaths(getDefaultString("default.config.file.includedPaths", StringUtil.EMPTY));
+                fConfig.setIntervalTime(getDefaultInteger("default.config.file.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_FS));
                 if (StringUtil.isNotBlank(wizardForm.maxAccessCount)) {
-                    fConfig.setMaxAccessCount(Long
-                            .parseLong(wizardForm.maxAccessCount));
+                    fConfig.setMaxAccessCount(Long.parseLong(wizardForm.maxAccessCount));
                 }
                 fConfig.setName(configName);
-                fConfig.setNumOfThread(getDefaultInteger(
-                        "default.config.file.numOfThread",
-                        Constants.DEFAULT_NUM_OF_THREAD_FOR_FS));
-                fConfig.setSortOrder(getDefaultInteger(
-                        "default.config.file.sortOrder", 1));
+                fConfig.setNumOfThread(getDefaultInteger("default.config.file.numOfThread", Constants.DEFAULT_NUM_OF_THREAD_FOR_FS));
+                fConfig.setSortOrder(getDefaultInteger("default.config.file.sortOrder", 1));
                 fConfig.setUpdatedBy(username);
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
@@ -226,22 +194,17 @@ public class WizardAction implements Serializable {
             }
             return configName;
         } catch (final Exception e) {
-            logger.error("Failed to create crawling config: "
-                    + wizardForm.crawlingConfigPath, e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_create_crawling_config_at_wizard",
-                    wizardForm.crawlingConfigPath);
+            logger.error("Failed to create crawling config: " + wizardForm.crawlingConfigPath, e);
+            throw new SSCActionMessagesException(e, "errors.failed_to_create_crawling_config_at_wizard", wizardForm.crawlingConfigPath);
         }
     }
 
-    protected Integer getDefaultInteger(final String key,
-            final Integer defaultValue) {
+    protected Integer getDefaultInteger(final String key, final Integer defaultValue) {
         final String value = crawlerProperties.getProperty(key);
         if (value != null) {
             try {
                 return Integer.parseInt(value);
-            } catch (final NumberFormatException e) {
-            }
+            } catch (final NumberFormatException e) {}
         }
         return defaultValue;
     }
@@ -251,14 +214,12 @@ public class WizardAction implements Serializable {
         if (value != null) {
             try {
                 return Long.parseLong(value);
-            } catch (final NumberFormatException e) {
-            }
+            } catch (final NumberFormatException e) {}
         }
         return defaultValue;
     }
 
-    protected String getDefaultString(final String key,
-            final String defaultValue) {
+    protected String getDefaultString(final String key, final String defaultValue) {
         final String value = crawlerProperties.getProperty(key);
         if (value != null) {
             return value;
@@ -275,8 +236,7 @@ public class WizardAction implements Serializable {
     }
 
     protected String convertCrawlingPath(final String path) {
-        if (path.startsWith("http:") || path.startsWith("https:")
-                || path.startsWith("smb:")) {
+        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:")) {
             return path;
         }
 
@@ -304,8 +264,7 @@ public class WizardAction implements Serializable {
     @Execute(validator = false)
     public String startCrawling() {
         if (!jobHelper.isCrawlProcessRunning()) {
-            final List<ScheduledJob> scheduledJobList = scheduledJobService
-                    .getCrawloerJobList();
+            final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawloerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
                 new Thread(new Runnable() {
                     @Override
@@ -316,8 +275,7 @@ public class WizardAction implements Serializable {
             }
             SAStrutsUtil.addSessionMessage("success.start_crawl_process");
         } else {
-            SAStrutsUtil
-                    .addSessionMessage("success.failed_to_start_crawl_process");
+            SAStrutsUtil.addSessionMessage("success.failed_to_start_crawl_process");
         }
         return "../system/index?redirect=true";
     }

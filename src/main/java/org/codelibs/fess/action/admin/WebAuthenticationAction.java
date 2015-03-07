@@ -48,8 +48,7 @@ public class WebAuthenticationAction extends BsWebAuthenticationAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(WebAuthenticationAction.class);
+    private static final Log log = LogFactory.getLog(WebAuthenticationAction.class);
 
     @Resource
     protected WebCrawlingConfigService webCrawlingConfigService;
@@ -64,18 +63,13 @@ public class WebAuthenticationAction extends BsWebAuthenticationAction {
     @Override
     protected void loadWebAuthentication() {
 
-        final WebAuthentication webAuthentication = webAuthenticationService
-                .getWebAuthentication(createKeyMap());
+        final WebAuthentication webAuthentication = webAuthenticationService.getWebAuthentication(createKeyMap());
         if (webAuthentication == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { webAuthenticationForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { webAuthenticationForm.id });
         }
 
-        FessBeans.copy(webAuthentication, webAuthenticationForm)
-                .commonColumnDateConverter().excludes("searchParams", "mode")
-                .execute();
+        FessBeans.copy(webAuthentication, webAuthenticationForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
         if ("-1".equals(webAuthenticationForm.port)) {
             webAuthenticationForm.port = StringUtil.EMPTY;
         }
@@ -87,13 +81,10 @@ public class WebAuthenticationAction extends BsWebAuthenticationAction {
         final String username = systemHelper.getUsername();
         final LocalDateTime currentTime = systemHelper.getCurrentTime();
         if (webAuthenticationForm.crudMode == CommonConstants.EDIT_MODE) {
-            webAuthentication = webAuthenticationService
-                    .getWebAuthentication(createKeyMap());
+            webAuthentication = webAuthenticationService.getWebAuthentication(createKeyMap());
             if (webAuthentication == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { webAuthenticationForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { webAuthenticationForm.id });
             }
         } else {
             webAuthentication = new WebAuthentication();
@@ -105,8 +96,7 @@ public class WebAuthenticationAction extends BsWebAuthenticationAction {
         if (StringUtil.isBlank(webAuthenticationForm.port)) {
             webAuthenticationForm.port = "-1";
         }
-        FessBeans.copy(webAuthenticationForm, webAuthentication)
-                .excludesCommonColumns().execute();
+        FessBeans.copy(webAuthenticationForm, webAuthentication).excludesCommonColumns().execute();
 
         return webAuthentication;
     }
@@ -116,19 +106,15 @@ public class WebAuthenticationAction extends BsWebAuthenticationAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (webAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            webAuthenticationForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    webAuthenticationForm.crudMode });
         }
 
         try {
-            final WebAuthentication webAuthentication = webAuthenticationService
-                    .getWebAuthentication(createKeyMap());
+            final WebAuthentication webAuthentication = webAuthenticationService.getWebAuthentication(createKeyMap());
             if (webAuthentication == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { webAuthenticationForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { webAuthenticationForm.id });
             }
 
             //           webAuthenticationService.delete(webAuthentication);
@@ -145,47 +131,42 @@ public class WebAuthenticationAction extends BsWebAuthenticationAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
     public boolean isDisplayCreateLink() {
-        return !webCrawlingConfigService.getAllWebCrawlingConfigList(false,
-                false, false, null).isEmpty();
+        return !webCrawlingConfigService.getAllWebCrawlingConfigList(false, false, false, null).isEmpty();
     }
 
     public List<Map<String, String>> getWebCrawlingConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        final List<WebCrawlingConfig> webCrawlingConfigList = webCrawlingConfigService
-                .getAllWebCrawlingConfigList(false, false, false, null);
+        final List<WebCrawlingConfig> webCrawlingConfigList =
+                webCrawlingConfigService.getAllWebCrawlingConfigList(false, false, false, null);
         for (final WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-            items.add(createItem(webCrawlingConfig.getName(), webCrawlingConfig
-                    .getId().toString()));
+            items.add(createItem(webCrawlingConfig.getName(), webCrawlingConfig.getId().toString()));
         }
         return items;
     }
 
     public List<Map<String, String>> getProtocolSchemeItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(),
-                "labels.web_authentication_scheme_basic"), Constants.BASIC));
-        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(),
-                "labels.web_authentication_scheme_digest"), Constants.DIGEST));
-        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(),
-                "labels.web_authentication_scheme_ntlm"), Constants.NTLM));
+        items.add(createItem(
+                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_basic"),
+                Constants.BASIC));
+        items.add(createItem(
+                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_digest"),
+                Constants.DIGEST));
+        items.add(createItem(
+                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_ntlm"),
+                Constants.NTLM));
         return items;
     }
 
-    protected Map<String, String> createItem(final String label,
-            final String value) {
+    protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<String, String>(2);
         map.put("label", label);
         map.put("value", value);

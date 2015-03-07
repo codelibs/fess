@@ -66,10 +66,9 @@ public class BsFailureUrlAction implements Serializable {
         failureUrlItems = failureUrlService.getFailureUrlList(failureUrlPager);
 
         // restore from pager
-        Beans.copy(failureUrlPager, failureUrlForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(failureUrlPager, failureUrlForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -88,8 +87,7 @@ public class BsFailureUrlAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(failureUrlForm.pageNumber)) {
             try {
-                failureUrlPager.setCurrentPageNumber(Integer
-                        .parseInt(failureUrlForm.pageNumber));
+                failureUrlPager.setCurrentPageNumber(Integer.parseInt(failureUrlForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + failureUrlForm.pageNumber, e);
@@ -102,10 +100,9 @@ public class BsFailureUrlAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(failureUrlForm.searchParams, failureUrlPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(failureUrlForm.searchParams, failureUrlPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -131,9 +128,8 @@ public class BsFailureUrlAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (failureUrlForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            failureUrlForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    failureUrlForm.crudMode });
         }
 
         loadFailureUrl();
@@ -156,8 +152,7 @@ public class BsFailureUrlAction implements Serializable {
     public String editpage() {
         if (failureUrlForm.crudMode != CommonConstants.EDIT_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            failureUrlForm.crudMode });
+                    new Object[] { CommonConstants.EDIT_MODE, failureUrlForm.crudMode });
         }
 
         loadFailureUrl();
@@ -191,9 +186,8 @@ public class BsFailureUrlAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (failureUrlForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            failureUrlForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    failureUrlForm.crudMode });
         }
 
         loadFailureUrl();
@@ -228,8 +222,7 @@ public class BsFailureUrlAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -250,8 +243,7 @@ public class BsFailureUrlAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -259,20 +251,17 @@ public class BsFailureUrlAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (failureUrlForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            failureUrlForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    failureUrlForm.crudMode });
         }
 
         try {
-            final FailureUrl failureUrl = failureUrlService
-                    .getFailureUrl(createKeyMap());
+            final FailureUrl failureUrl = failureUrlService.getFailureUrl(createKeyMap());
             if (failureUrl == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { failureUrlForm.id });
+                new Object[] { failureUrlForm.id });
 
             }
 
@@ -288,21 +277,18 @@ public class BsFailureUrlAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadFailureUrl() {
 
-        final FailureUrl failureUrl = failureUrlService
-                .getFailureUrl(createKeyMap());
+        final FailureUrl failureUrl = failureUrlService.getFailureUrl(createKeyMap());
         if (failureUrl == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { failureUrlForm.id });
+            new Object[] { failureUrlForm.id });
 
         }
 
@@ -317,10 +303,9 @@ public class BsFailureUrlAction implements Serializable {
             failureUrl = failureUrlService.getFailureUrl(createKeyMap());
             if (failureUrl == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { failureUrlForm.id });
+                new Object[] { failureUrlForm.id });
 
             }
         } else {

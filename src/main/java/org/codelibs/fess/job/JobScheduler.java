@@ -44,8 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JobScheduler {
-    private static final Logger logger = LoggerFactory
-            .getLogger(JobScheduler.class);
+    private static final Logger logger = LoggerFactory.getLogger(JobScheduler.class);
 
     private static final String TRIGGER_ID_PREFIX = "trigger";
 
@@ -92,8 +91,7 @@ public class JobScheduler {
         }
 
         if (!Constants.T.equals(scheduledJob.getAvailable())) {
-            logger.info("Inactive Job " + scheduledJob.getId() + ":"
-                    + scheduledJob.getName());
+            logger.info("Inactive Job " + scheduledJob.getId() + ":" + scheduledJob.getName());
             try {
                 unregister(scheduledJob);
             } catch (final Exception e) {
@@ -104,8 +102,7 @@ public class JobScheduler {
 
         final String target = scheduledJob.getTarget();
         if (!isTarget(target)) {
-            logger.info("Ignore Job " + scheduledJob.getId() + ":"
-                    + scheduledJob.getName() + " because of not target: "
+            logger.info("Ignore Job " + scheduledJob.getId() + ":" + scheduledJob.getName() + " because of not target: "
                     + scheduledJob.getTarget());
             return;
         }
@@ -122,22 +119,18 @@ public class JobScheduler {
         final JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(Constants.SCHEDULED_JOB, scheduledJob);
         jobDataMap.put(Constants.JOB_EXECUTOR_TYPE, scriptType);
-        final JobDetail jobDetail = newJob(jobClass).withIdentity(jobId)
-                .usingJobData(jobDataMap).build();
+        final JobDetail jobDetail = newJob(jobClass).withIdentity(jobId).usingJobData(jobDataMap).build();
 
-        final Trigger trigger = newTrigger().withIdentity(triggerId)
-                .withSchedule(cronSchedule(scheduledJob.getCronExpression()))
-                .startNow().build();
+        final Trigger trigger =
+                newTrigger().withIdentity(triggerId).withSchedule(cronSchedule(scheduledJob.getCronExpression())).startNow().build();
 
         try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (final SchedulerException e) {
-            throw new ScheduledJobException("Failed to add Job: "
-                    + scheduledJob, e);
+            throw new ScheduledJobException("Failed to add Job: " + scheduledJob, e);
         }
 
-        logger.info("Starting Job " + scheduledJob.getId() + ":"
-                + scheduledJob.getName());
+        logger.info("Starting Job " + scheduledJob.getId() + ":" + scheduledJob.getName());
 
     }
 
@@ -146,8 +139,7 @@ public class JobScheduler {
         try {
             scheduler.deleteJob(jobKey(jobId));
         } catch (final SchedulerException e) {
-            throw new ScheduledJobException("Failed to delete Job: "
-                    + scheduledJob, e);
+            throw new ScheduledJobException("Failed to delete Job: " + scheduledJob, e);
         }
     }
 
@@ -159,8 +151,7 @@ public class JobScheduler {
         final String[] targets = target.split(",");
         for (String name : targets) {
             name = name.trim();
-            if (Constants.DEFAULT_JOB_TARGET.equals(name)
-                    || targetList.contains(name)) {
+            if (Constants.DEFAULT_JOB_TARGET.equals(name) || targetList.contains(name)) {
                 return true;
             }
         }

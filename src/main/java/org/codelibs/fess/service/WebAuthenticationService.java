@@ -25,14 +25,12 @@ import org.codelibs.fess.db.cbean.WebAuthenticationCB;
 import org.codelibs.fess.db.exentity.WebAuthentication;
 import org.codelibs.fess.pager.WebAuthenticationPager;
 
-public class WebAuthenticationService extends BsWebAuthenticationService
-        implements Serializable {
+public class WebAuthenticationService extends BsWebAuthenticationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void setupListCondition(final WebAuthenticationCB cb,
-            final WebAuthenticationPager webAuthenticationPager) {
+    protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthenticationPager webAuthenticationPager) {
         super.setupListCondition(cb, webAuthenticationPager);
 
         // setup condition
@@ -46,8 +44,7 @@ public class WebAuthenticationService extends BsWebAuthenticationService
     }
 
     @Override
-    protected void setupEntityCondition(final WebAuthenticationCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final WebAuthenticationCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -64,16 +61,14 @@ public class WebAuthenticationService extends BsWebAuthenticationService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final WebAuthentication webAuthentication) {
+    protected void setupDeleteCondition(final WebAuthentication webAuthentication) {
         super.setupDeleteCondition(webAuthentication);
 
         // setup condition
 
     }
 
-    public List<WebAuthentication> getWebAuthenticationList(
-            final Long webCrawlingConfigId) {
+    public List<WebAuthentication> getWebAuthenticationList(final Long webCrawlingConfigId) {
         return webAuthenticationBhv.selectList(cb -> {
             cb.query().setWebCrawlingConfigId_Equal(webCrawlingConfigId);
         });

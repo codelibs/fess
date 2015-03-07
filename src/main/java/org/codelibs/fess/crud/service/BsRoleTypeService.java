@@ -41,16 +41,13 @@ public abstract class BsRoleTypeService {
 
     public List<RoleType> getRoleTypeList(final RoleTypePager roleTypePager) {
 
-        final PagingResultBean<RoleType> roleTypeList = roleTypeBhv
-                .selectPage(cb -> {
-                    cb.paging(roleTypePager.getPageSize(),
-                            roleTypePager.getCurrentPageNumber());
-                    setupListCondition(cb, roleTypePager);
-                });
+        final PagingResultBean<RoleType> roleTypeList = roleTypeBhv.selectPage(cb -> {
+            cb.paging(roleTypePager.getPageSize(), roleTypePager.getCurrentPageNumber());
+            setupListCondition(cb, roleTypePager);
+        });
 
         // update pager
-        Beans.copy(roleTypeList, roleTypePager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(roleTypeList, roleTypePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
         roleTypePager.setPageNumberList(roleTypeList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -85,8 +82,7 @@ public abstract class BsRoleTypeService {
 
     }
 
-    protected void setupListCondition(final RoleTypeCB cb,
-            final RoleTypePager roleTypePager) {
+    protected void setupListCondition(final RoleTypeCB cb, final RoleTypePager roleTypePager) {
 
         if (roleTypePager.id != null) {
             cb.query().setId_Equal(Long.parseLong(roleTypePager.id));
@@ -94,8 +90,7 @@ public abstract class BsRoleTypeService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final RoleTypeCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final RoleTypeCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final RoleType roleType) {

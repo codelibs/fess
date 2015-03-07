@@ -39,33 +39,27 @@ public abstract class BsCrawlingSessionService {
         super();
     }
 
-    public List<CrawlingSession> getCrawlingSessionList(
-            final CrawlingSessionPager crawlingSessionPager) {
+    public List<CrawlingSession> getCrawlingSessionList(final CrawlingSessionPager crawlingSessionPager) {
 
-        final PagingResultBean<CrawlingSession> crawlingSessionList = crawlingSessionBhv
-                .selectPage(cb -> {
-                    cb.paging(crawlingSessionPager.getPageSize(),
-                            crawlingSessionPager.getCurrentPageNumber());
-                    setupListCondition(cb, crawlingSessionPager);
-                });
+        final PagingResultBean<CrawlingSession> crawlingSessionList = crawlingSessionBhv.selectPage(cb -> {
+            cb.paging(crawlingSessionPager.getPageSize(), crawlingSessionPager.getCurrentPageNumber());
+            setupListCondition(cb, crawlingSessionPager);
+        });
 
         // update pager
-        Beans.copy(crawlingSessionList, crawlingSessionPager)
-                .includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
-        crawlingSessionPager.setPageNumberList(crawlingSessionList.pageRange(
-                op -> {
-                    op.rangeSize(5);
-                }).createPageNumberList());
+        Beans.copy(crawlingSessionList, crawlingSessionPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        crawlingSessionPager.setPageNumberList(crawlingSessionList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
 
         return crawlingSessionList;
     }
 
     public CrawlingSession getCrawlingSession(final Map<String, String> keys) {
-        final CrawlingSession crawlingSession = crawlingSessionBhv
-                .selectEntity(cb -> {
-                    cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-                    setupEntityCondition(cb, keys);
-                }).orElse(null);//TODO
+        final CrawlingSession crawlingSession = crawlingSessionBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (crawlingSession == null) {
             // TODO exception?
             return null;
@@ -74,24 +68,21 @@ public abstract class BsCrawlingSessionService {
         return crawlingSession;
     }
 
-    public void store(final CrawlingSession crawlingSession)
-            throws CrudMessageException {
+    public void store(final CrawlingSession crawlingSession) throws CrudMessageException {
         setupStoreCondition(crawlingSession);
 
         crawlingSessionBhv.insertOrUpdate(crawlingSession);
 
     }
 
-    public void delete(final CrawlingSession crawlingSession)
-            throws CrudMessageException {
+    public void delete(final CrawlingSession crawlingSession) throws CrudMessageException {
         setupDeleteCondition(crawlingSession);
 
         crawlingSessionBhv.delete(crawlingSession);
 
     }
 
-    protected void setupListCondition(final CrawlingSessionCB cb,
-            final CrawlingSessionPager crawlingSessionPager) {
+    protected void setupListCondition(final CrawlingSessionCB cb, final CrawlingSessionPager crawlingSessionPager) {
 
         if (crawlingSessionPager.id != null) {
             cb.query().setId_Equal(Long.parseLong(crawlingSessionPager.id));
@@ -99,8 +90,7 @@ public abstract class BsCrawlingSessionService {
         // TODO Long, Integer, String supported only.
     }
 
-    protected void setupEntityCondition(final CrawlingSessionCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final CrawlingSessionCB cb, final Map<String, String> keys) {
     }
 
     protected void setupStoreCondition(final CrawlingSession crawlingSession) {

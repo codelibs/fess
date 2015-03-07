@@ -40,8 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CrawlAction implements Serializable {
-    private static final Logger logger = LoggerFactory
-            .getLogger(CrawlAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlAction.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -60,61 +59,33 @@ public class CrawlAction implements Serializable {
     }
 
     protected String showIndex(final boolean redirect) {
-        crawlForm.diffCrawling = crawlerProperties.getProperty(
-                Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
-        crawlForm.useAclAsRole = crawlerProperties.getProperty(
-                Constants.USE_ACL_AS_ROLE, Constants.FALSE);
-        crawlForm.serverRotation = crawlerProperties.getProperty(
-                Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
-        crawlForm.dayForCleanup = crawlerProperties.getProperty(
-                Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
-        crawlForm.crawlingThreadCount = crawlerProperties.getProperty(
-                Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
-        crawlForm.searchLog = crawlerProperties.getProperty(
-                Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
-        crawlForm.userInfo = crawlerProperties.getProperty(
-                Constants.USER_INFO_PROPERTY, Constants.TRUE);
-        crawlForm.userFavorite = crawlerProperties.getProperty(
-                Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
-        crawlForm.webApiXml = crawlerProperties.getProperty(
-                Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
-        crawlForm.webApiJson = crawlerProperties.getProperty(
-                Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
-        crawlForm.defaultLabelValue = crawlerProperties.getProperty(
-                Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
-        crawlForm.appendQueryParameter = crawlerProperties.getProperty(
-                Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
-        crawlForm.supportedSearch = crawlerProperties.getProperty(
-                Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                Constants.SUPPORTED_SEARCH_WEB);
-        crawlForm.ignoreFailureType = crawlerProperties.getProperty(
-                Constants.IGNORE_FAILURE_TYPE_PROPERTY,
-                Constants.DEFAULT_IGNORE_FAILURE_TYPE);
-        crawlForm.failureCountThreshold = crawlerProperties.getProperty(
-                Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
-                Constants.DEFAULT_FAILURE_COUNT);
-        crawlForm.hotSearchWord = crawlerProperties.getProperty(
-                Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE);
-        crawlForm.csvFileEncoding = crawlerProperties.getProperty(
-                Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-        crawlForm.purgeSearchLogDay = crawlerProperties.getProperty(
-                Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
-                Constants.DEFAULT_PURGE_DAY);
-        crawlForm.purgeJobLogDay = crawlerProperties.getProperty(
-                Constants.PURGE_JOB_LOG_DAY_PROPERTY,
-                Constants.DEFAULT_PURGE_DAY);
-        crawlForm.purgeUserInfoDay = crawlerProperties.getProperty(
-                Constants.PURGE_USER_INFO_DAY_PROPERTY,
-                Constants.DEFAULT_PURGE_DAY);
-        crawlForm.purgeByBots = crawlerProperties.getProperty(
-                Constants.PURGE_BY_BOTS_PROPERTY,
-                Constants.DEFAULT_PURGE_BY_BOTS);
-        crawlForm.notificationTo = crawlerProperties.getProperty(
-                Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
-        crawlForm.suggestSearchLog = crawlerProperties.getProperty(
-                Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
-        crawlForm.purgeSuggestSearchLogDay = crawlerProperties.getProperty(
-                Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
+        crawlForm.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
+        crawlForm.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
+        crawlForm.serverRotation = crawlerProperties.getProperty(Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
+        crawlForm.dayForCleanup = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
+        crawlForm.crawlingThreadCount = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        crawlForm.searchLog = crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
+        crawlForm.userInfo = crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
+        crawlForm.userFavorite = crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
+        crawlForm.webApiXml = crawlerProperties.getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
+        crawlForm.webApiJson = crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
+        crawlForm.defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+        crawlForm.appendQueryParameter = crawlerProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
+        crawlForm.supportedSearch =
+                crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
+        crawlForm.ignoreFailureType =
+                crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
+        crawlForm.failureCountThreshold =
+                crawlerProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
+        crawlForm.hotSearchWord = crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE);
+        crawlForm.csvFileEncoding = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+        crawlForm.purgeSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
+        crawlForm.purgeJobLogDay = crawlerProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
+        crawlForm.purgeUserInfoDay = crawlerProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
+        crawlForm.purgeByBots = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
+        crawlForm.notificationTo = crawlerProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
+        crawlForm.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
+        crawlForm.purgeSuggestSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
         if (redirect) {
             return "index?redirect=true";
         } else {
@@ -131,120 +102,52 @@ public class CrawlAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index.jsp")
     public String update() {
-        crawlerProperties
-                .setProperty(
-                        Constants.DIFF_CRAWLING_PROPERTY,
-                        crawlForm.diffCrawling != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.diffCrawling) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.USE_ACL_AS_ROLE,
-                        crawlForm.useAclAsRole != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.useAclAsRole) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.SERVER_ROTATION_PROPERTY,
-                        crawlForm.serverRotation != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.serverRotation) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY,
-                crawlForm.dayForCleanup);
-        crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY,
-                crawlForm.crawlingThreadCount);
-        crawlerProperties
-                .setProperty(
-                        Constants.SEARCH_LOG_PROPERTY,
-                        crawlForm.searchLog != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.searchLog) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.USER_INFO_PROPERTY,
-                        crawlForm.userInfo != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.userInfo) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.USER_FAVORITE_PROPERTY,
-                        crawlForm.userFavorite != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.userFavorite) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.WEB_API_XML_PROPERTY,
-                        crawlForm.webApiXml != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.webApiXml) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties
-                .setProperty(
-                        Constants.WEB_API_JSON_PROPERTY,
-                        crawlForm.webApiJson != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.webApiJson) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY,
-                crawlForm.defaultLabelValue);
-        crawlerProperties
-                .setProperty(
-                        Constants.APPEND_QUERY_PARAMETER_PROPERTY,
-                        crawlForm.appendQueryParameter != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.appendQueryParameter) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties.setProperty(
-                Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY,
-                crawlForm.supportedSearch);
-        crawlerProperties.setProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY,
-                crawlForm.ignoreFailureType);
-        crawlerProperties.setProperty(
-                Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
-                crawlForm.failureCountThreshold);
-        crawlerProperties
-                .setProperty(
-                        Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
-                        crawlForm.hotSearchWord != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.hotSearchWord) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.CSV_FILE_ENCODING_PROPERTY,
-                crawlForm.csvFileEncoding);
-        crawlerProperties.setProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY,
-                crawlForm.purgeSearchLogDay);
-        crawlerProperties.setProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY,
-                crawlForm.purgeJobLogDay);
-        crawlerProperties.setProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY,
-                crawlForm.purgeUserInfoDay);
-        crawlerProperties.setProperty(Constants.PURGE_BY_BOTS_PROPERTY,
-                crawlForm.purgeByBots);
-        crawlerProperties.setProperty(Constants.NOTIFICATION_TO_PROPERTY,
-                crawlForm.notificationTo);
-        crawlerProperties
-                .setProperty(
-                        Constants.SUGGEST_SEARCH_LOG_PROPERTY,
-                        crawlForm.suggestSearchLog != null
-                                && Constants.ON
-                                        .equalsIgnoreCase(crawlForm.suggestSearchLog) ? Constants.TRUE
-                                : Constants.FALSE);
-        crawlerProperties.setProperty(
-                Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
-                crawlForm.purgeSuggestSearchLogDay);
+        crawlerProperties.setProperty(Constants.DIFF_CRAWLING_PROPERTY,
+                crawlForm.diffCrawling != null && Constants.ON.equalsIgnoreCase(crawlForm.diffCrawling) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.USE_ACL_AS_ROLE,
+                crawlForm.useAclAsRole != null && Constants.ON.equalsIgnoreCase(crawlForm.useAclAsRole) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.SERVER_ROTATION_PROPERTY,
+                crawlForm.serverRotation != null && Constants.ON.equalsIgnoreCase(crawlForm.serverRotation) ? Constants.TRUE
+                        : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, crawlForm.dayForCleanup);
+        crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, crawlForm.crawlingThreadCount);
+        crawlerProperties.setProperty(Constants.SEARCH_LOG_PROPERTY,
+                crawlForm.searchLog != null && Constants.ON.equalsIgnoreCase(crawlForm.searchLog) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.USER_INFO_PROPERTY,
+                crawlForm.userInfo != null && Constants.ON.equalsIgnoreCase(crawlForm.userInfo) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.USER_FAVORITE_PROPERTY,
+                crawlForm.userFavorite != null && Constants.ON.equalsIgnoreCase(crawlForm.userFavorite) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.WEB_API_XML_PROPERTY,
+                crawlForm.webApiXml != null && Constants.ON.equalsIgnoreCase(crawlForm.webApiXml) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.WEB_API_JSON_PROPERTY,
+                crawlForm.webApiJson != null && Constants.ON.equalsIgnoreCase(crawlForm.webApiJson) ? Constants.TRUE : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, crawlForm.defaultLabelValue);
+        crawlerProperties.setProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY,
+                crawlForm.appendQueryParameter != null && Constants.ON.equalsIgnoreCase(crawlForm.appendQueryParameter) ? Constants.TRUE
+                        : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, crawlForm.supportedSearch);
+        crawlerProperties.setProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, crawlForm.ignoreFailureType);
+        crawlerProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, crawlForm.failureCountThreshold);
+        crawlerProperties.setProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
+                crawlForm.hotSearchWord != null && Constants.ON.equalsIgnoreCase(crawlForm.hotSearchWord) ? Constants.TRUE
+                        : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.CSV_FILE_ENCODING_PROPERTY, crawlForm.csvFileEncoding);
+        crawlerProperties.setProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, crawlForm.purgeSearchLogDay);
+        crawlerProperties.setProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, crawlForm.purgeJobLogDay);
+        crawlerProperties.setProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, crawlForm.purgeUserInfoDay);
+        crawlerProperties.setProperty(Constants.PURGE_BY_BOTS_PROPERTY, crawlForm.purgeByBots);
+        crawlerProperties.setProperty(Constants.NOTIFICATION_TO_PROPERTY, crawlForm.notificationTo);
+        crawlerProperties.setProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
+                crawlForm.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(crawlForm.suggestSearchLog) ? Constants.TRUE
+                        : Constants.FALSE);
+        crawlerProperties.setProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, crawlForm.purgeSuggestSearchLogDay);
         try {
             crawlerProperties.store();
             SAStrutsUtil.addSessionMessage("success.update_crawler_params");
             return showIndex(true);
         } catch (final Exception e) {
             logger.error("Failed to update crawler parameters.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_update_crawler_params", e);
+            throw new SSCActionMessagesException(e, "errors.failed_to_update_crawler_params", e);
         }
     }
 
@@ -262,17 +165,14 @@ public class CrawlAction implements Serializable {
 
     public List<Map<String, String>> getSupportedSearchItems() {
         final List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(), "labels.supported_search_web"),
+        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.supported_search_web"),
                 Constants.SUPPORTED_SEARCH_WEB));
-        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
-                .getRequest().getLocale(), "labels.supported_search_none"),
+        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.supported_search_none"),
                 Constants.SUPPORTED_SEARCH_NONE));
         return list;
     }
 
-    private Map<String, String> createItem(final String label,
-            final String value) {
+    private Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<String, String>();
         map.put(Constants.ITEM_LABEL, label);
         map.put(Constants.ITEM_VALUE, value);

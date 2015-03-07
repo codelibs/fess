@@ -53,8 +53,7 @@ public class FessFunctions {
 
     public static Boolean labelExists(final String value) {
         @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil
-                .getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
             return labelValueMap.get(value) != null;
         }
@@ -63,8 +62,7 @@ public class FessFunctions {
 
     public static String label(final String value) {
         @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil
-                .getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
             final String name = labelValueMap.get(value);
             if (name != null) {
@@ -94,10 +92,8 @@ public class FessFunctions {
             range = Range.ENTIRE;
         }
 
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
-                .getHotSearchWordHelper();
-        final List<String> wordList = hotSearchWordHelper
-                .getHotSearchWordList(range);
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
+        final List<String> wordList = hotSearchWordHelper.getHotSearchWordList(range);
         if (wordList.size() > size) {
             return wordList.subList(0, size);
         }
@@ -124,18 +120,14 @@ public class FessFunctions {
             range = Range.ENTIRE;
         }
 
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil
-                .getHotSearchWordHelper();
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
         return hotSearchWordHelper.getHotSearchWordList(range).size();
     }
 
     private static boolean isSupportHotSearchWord() {
-        final DynamicProperties crawlerProperties = ComponentUtil
-                .getCrawlerProperties();
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
         return crawlerProperties != null
-                && Constants.TRUE.equals(crawlerProperties.getProperty(
-                        Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
-                        Constants.TRUE));
+                && Constants.TRUE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE));
     }
 
     public static Date date(final Long value) {
@@ -161,8 +153,7 @@ public class FessFunctions {
     }
 
     public static String formatDate(final LocalDateTime date) {
-        return date.format(DateTimeFormatter.ofPattern(
-                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT));
+        return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT));
     }
 
     public static String facetQuery() {

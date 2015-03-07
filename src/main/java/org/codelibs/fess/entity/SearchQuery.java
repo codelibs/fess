@@ -51,8 +51,7 @@ public class SearchQuery {
     }
 
     public void addSortField(final String field, final String order) {
-        if (StringUtil.isNotBlank(field)
-                && (Constants.ASC.equals(order) || Constants.DESC.equals(order))) {
+        if (StringUtil.isNotBlank(field) && (Constants.ASC.equals(order) || Constants.DESC.equals(order))) {
             final SortField sortField = new SortField();
             sortField.setField(field);
             sortField.setOrder(order);
@@ -126,8 +125,7 @@ public class SearchQuery {
 
     @Override
     public String toString() {
-        return "SearchQuery [query=" + query + ", filterQueryList="
-                + filterQueryList + ", sortFieldList=" + sortFieldList
+        return "SearchQuery [query=" + query + ", filterQueryList=" + filterQueryList + ", sortFieldList=" + sortFieldList
                 + ", minimumShouldMatch=" + minimumShouldMatch + "]";
     }
 }

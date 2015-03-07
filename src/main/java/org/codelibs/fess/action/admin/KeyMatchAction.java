@@ -54,13 +54,10 @@ public class KeyMatchAction extends BsKeyMatchAction {
         final KeyMatch keyMatch = keyMatchService.getKeyMatch(createKeyMap());
         if (keyMatch == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { keyMatchForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { keyMatchForm.id });
         }
 
-        FessBeans.copy(keyMatch, keyMatchForm).commonColumnDateConverter()
-                .excludes("searchParams", "mode").execute();
+        FessBeans.copy(keyMatch, keyMatchForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
     @Override
@@ -72,9 +69,7 @@ public class KeyMatchAction extends BsKeyMatchAction {
             keyMatch = keyMatchService.getKeyMatch(createKeyMap());
             if (keyMatch == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { keyMatchForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { keyMatchForm.id });
             }
         } else {
             keyMatch = new KeyMatch();
@@ -83,8 +78,7 @@ public class KeyMatchAction extends BsKeyMatchAction {
         }
         keyMatch.setUpdatedBy(username);
         keyMatch.setUpdatedTime(currentTime);
-        FessBeans.copy(keyMatchForm, keyMatch).excludesCommonColumns()
-                .execute();
+        FessBeans.copy(keyMatchForm, keyMatch).excludesCommonColumns().execute();
 
         return keyMatch;
     }
@@ -111,19 +105,15 @@ public class KeyMatchAction extends BsKeyMatchAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (keyMatchForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            keyMatchForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    keyMatchForm.crudMode });
         }
 
         try {
-            final KeyMatch keyMatch = keyMatchService
-                    .getKeyMatch(createKeyMap());
+            final KeyMatch keyMatch = keyMatchService.getKeyMatch(createKeyMap());
             if (keyMatch == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { keyMatchForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { keyMatchForm.id });
             }
 
             //           keyMatchService.delete(keyMatch);
@@ -142,12 +132,10 @@ public class KeyMatchAction extends BsKeyMatchAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 

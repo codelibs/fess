@@ -23,8 +23,7 @@ import java.util.Date;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.form.admin.BsFileAuthenticationForm;
 
-public class FileAuthenticationForm extends BsFileAuthenticationForm implements
-        Serializable {
+public class FileAuthenticationForm extends BsFileAuthenticationForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,8 +31,7 @@ public class FileAuthenticationForm extends BsFileAuthenticationForm implements
     public void initialize() {
         super.initialize();
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
     }
 }

@@ -36,16 +36,14 @@ public class CrawlingSessionHelperTest extends S2TestCase {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://hoge.com/");
 
-        assertEquals("http://hoge.com/",
-                crawlingSessionHelper.generateId(dataMap));
+        assertEquals("http://hoge.com/", crawlingSessionHelper.generateId(dataMap));
 
         final List<String> browserTypeList = new ArrayList<String>();
         dataMap.put("type", browserTypeList);
         final List<String> roleTypeList = new ArrayList<String>();
         dataMap.put("role", roleTypeList);
 
-        assertEquals("http://hoge.com/",
-                crawlingSessionHelper.generateId(dataMap));
+        assertEquals("http://hoge.com/", crawlingSessionHelper.generateId(dataMap));
     }
 
     public void test_generateId_roleType() {
@@ -55,19 +53,16 @@ public class CrawlingSessionHelperTest extends S2TestCase {
         roleTypeList.add("admin");
         dataMap.put("role", roleTypeList);
 
-        assertEquals("http://hoge.com/;role=admin",
-                crawlingSessionHelper.generateId(dataMap));
+        assertEquals("http://hoge.com/;role=admin", crawlingSessionHelper.generateId(dataMap));
 
         roleTypeList.add("guest");
 
-        assertEquals("http://hoge.com/;role=admin,guest",
-                crawlingSessionHelper.generateId(dataMap));
+        assertEquals("http://hoge.com/;role=admin,guest", crawlingSessionHelper.generateId(dataMap));
 
         final List<String> browserTypeList = new ArrayList<String>();
         dataMap.put("type", browserTypeList);
 
-        assertEquals("http://hoge.com/;role=admin,guest",
-                crawlingSessionHelper.generateId(dataMap));
+        assertEquals("http://hoge.com/;role=admin,guest", crawlingSessionHelper.generateId(dataMap));
     }
 
 }

@@ -33,8 +33,7 @@ public class IntervalControlHelper {
         while (!crawlerRunning) {
             try {
                 Thread.sleep(crawlerWaitMillis);
-            } catch (final InterruptedException e) {
-            }
+            } catch (final InterruptedException e) {}
         }
     }
 
@@ -43,8 +42,7 @@ public class IntervalControlHelper {
         if (delay > 0) {
             try {
                 Thread.sleep(delay);
-            } catch (final InterruptedException e) {
-            }
+            } catch (final InterruptedException e) {}
         }
     }
 
@@ -70,8 +68,7 @@ public class IntervalControlHelper {
         return cal;
     }
 
-    public void addIntervalRule(final String from, final String to,
-            final String days, final long delay) {
+    public void addIntervalRule(final String from, final String to, final String days, final long delay) {
         ruleList.add(new IntervalRule(from, to, days, delay));
     }
 
@@ -98,8 +95,7 @@ public class IntervalControlHelper {
 
         protected boolean reverse;
 
-        public IntervalRule(final String from, final String to,
-                final String days, final long delay) {
+        public IntervalRule(final String from, final String to, final String days, final long delay) {
             final int[] fints = parseTime(from);
             fromHours = fints[0];
             fromMinutes = fints[1];
@@ -111,8 +107,7 @@ public class IntervalControlHelper {
             for (final String value : values) {
                 try {
                     list.add(Integer.parseInt(value.trim()));
-                } catch (final NumberFormatException e) {
-                }
+                } catch (final NumberFormatException e) {}
             }
             this.days = new int[list.size()];
             for (int i = 0; i < list.size(); i++) {
@@ -126,20 +121,16 @@ public class IntervalControlHelper {
             return delay;
         }
 
-        public boolean isTarget(final int hours, final int minutes,
-                final int day) {
+        public boolean isTarget(final int hours, final int minutes, final int day) {
             if (reverse) {
-                if (compareTime(hours, minutes, toHours, toMinutes) >= 0
-                        && isInDays(day + 1)) {
+                if (compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1)) {
                     return true;
-                } else if (compareTime(fromHours, fromMinutes, hours, minutes) >= 0
-                        && isInDays(day)) {
+                } else if (compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day)) {
                     return true;
                 }
                 return false;
             } else {
-                return compareTime(fromHours, fromMinutes, hours, minutes) >= 0
-                        && compareTime(hours, minutes, toHours, toMinutes) >= 0
+                return compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && compareTime(hours, minutes, toHours, toMinutes) >= 0
                         && isInDays(day);
             }
         }
@@ -162,8 +153,7 @@ public class IntervalControlHelper {
             return false;
         }
 
-        protected int compareTime(final int h1, final int m1, final int h2,
-                final int m2) {
+        protected int compareTime(final int h1, final int m1, final int h2, final int m2) {
             if (h1 < h2) {
                 return 1;
             } else if (h1 == h2) {

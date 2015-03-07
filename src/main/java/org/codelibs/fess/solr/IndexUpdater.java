@@ -56,8 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexUpdater extends Thread {
-    private static final Logger logger = LoggerFactory
-            .getLogger(IndexUpdater.class);
+    private static final Logger logger = LoggerFactory.getLogger(IndexUpdater.class);
 
     protected List<String> sessionIdList;
 
@@ -172,8 +171,7 @@ public class IndexUpdater extends Thread {
         executeTime = 0;
         documentSize = 0;
 
-        final IntervalControlHelper intervalControlHelper = ComponentUtil
-                .getIntervalControlHelper();
+        final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
             final AccessResultCB cb = new AccessResultCB();
             cb.setupSelect_AccessResultDataAsOne();
@@ -188,7 +186,8 @@ public class IndexUpdater extends Thread {
 
             final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
             final List<org.codelibs.robot.entity.AccessResult> accessResultList = new ArrayList<org.codelibs.robot.entity.AccessResult>();
-            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList = new ArrayList<org.codelibs.robot.db.exentity.AccessResultData>();
+            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList =
+                    new ArrayList<org.codelibs.robot.db.exentity.AccessResultData>();
 
             long updateTime = System.currentTimeMillis();
             int solrErrorCount = 0;
@@ -230,11 +229,9 @@ public class IndexUpdater extends Thread {
                         emptyListCount = 0; // reset
                     }
                     while (!arList.isEmpty()) {
-                        processAccessResults(docList, accessResultList,
-                                accessResultDataList, arList);
+                        processAccessResults(docList, accessResultList, accessResultDataList, arList);
 
-                        cleanupAccessResults(accessResultList,
-                                accessResultDataList);
+                        cleanupAccessResults(accessResultList, accessResultDataList);
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("Getting documents in IndexUpdater queue.");
@@ -247,9 +244,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     synchronized (finishedSessionIdList) {
-                        if (sessionIdListSize != 0
-                                && sessionIdListSize == finishedSessionIdList
-                                        .size()) {
+                        if (sessionIdListSize != 0 && sessionIdListSize == finishedSessionIdList.size()) {
                             cleanupFinishedSessionData();
                         }
                     }
@@ -267,16 +262,13 @@ public class IndexUpdater extends Thread {
                         throw e;
                     }
                     solrErrorCount++;
-                    logger.warn(
-                            "Failed to access a solr group. Retry to access.. "
-                                    + solrErrorCount, e);
+                    logger.warn("Failed to access a solr group. Retry to access.. " + solrErrorCount, e);
                 } catch (final Exception e) {
                     if (errorCount > maxErrorCount) {
                         throw e;
                     }
                     errorCount++;
-                    logger.warn("Failed to access data. Retry to access.. "
-                            + errorCount, e);
+                    logger.warn("Failed to access data. Retry to access.. " + errorCount, e);
                 } finally {
                     if (systemHelper.isForceStop()) {
                         finishCrawling = true;
@@ -288,9 +280,7 @@ public class IndexUpdater extends Thread {
 
                 if (emptyListCount >= maxEmptyListCount) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("Terminating indexUpdater. "
-                                + "emptyListCount is over " + maxEmptyListCount
-                                + ".");
+                        logger.info("Terminating indexUpdater. " + "emptyListCount is over " + maxEmptyListCount + ".");
                     }
                     // terminate crawling
                     finishCrawling = true;
@@ -319,8 +309,7 @@ public class IndexUpdater extends Thread {
     }
 
     private void printThreadDump() {
-        for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread
-                .getAllStackTraces().entrySet()) {
+        for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
             logger.info("Thread: " + entry.getKey());
             final StackTraceElement[] trace = entry.getValue();
             for (final StackTraceElement element : trace) {
@@ -329,11 +318,9 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void processAccessResults(
-            final List<SolrInputDocument> docList,
+    private void processAccessResults(final List<SolrInputDocument> docList,
             final List<org.codelibs.robot.entity.AccessResult> accessResultList,
-            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList,
-            final PagingResultBean<AccessResult> arList) {
+            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList, final PagingResultBean<AccessResult> arList) {
         for (final AccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing " + accessResult.getUrl());
@@ -344,41 +331,33 @@ public class IndexUpdater extends Thread {
             if (accessResult.getHttpStatusCode() != 200) {
                 // invalid page
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Skipped. The response code is "
-                            + accessResult.getHttpStatusCode() + ".");
+                    logger.debug("Skipped. The response code is " + accessResult.getHttpStatusCode() + ".");
                 }
                 continue;
             }
 
-            final AccessResultData accessResultData = accessResult
-                    .getAccessResultData();
+            final AccessResultData accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
-                accessResultDataList
-                        .add((org.codelibs.robot.db.exentity.AccessResultData) accessResultData);
+                accessResultDataList.add((org.codelibs.robot.db.exentity.AccessResultData) accessResultData);
                 try {
-                    final Transformer transformer = SingletonS2Container
-                            .getComponent(accessResultData.getTransformerName());
+                    final Transformer transformer = SingletonS2Container.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
-                        logger.warn("No transformer: "
-                                + accessResultData.getTransformerName());
+                        logger.warn("No transformer: " + accessResultData.getTransformerName());
                         continue;
                     }
                     @SuppressWarnings("unchecked")
-                    final Map<String, Object> map = (Map<String, Object>) transformer
-                            .getData(accessResultData);
+                    final Map<String, Object> map = (Map<String, Object>) transformer.getData(accessResultData);
                     if (map.isEmpty()) {
                         // no transformer
                         logger.warn("No data: " + accessResult.getUrl());
                         continue;
                     }
 
-                    if (Constants.FALSE.equals(map
-                            .get(Constants.INDEXING_TARGET))) {
+                    if (Constants.FALSE.equals(map.get(Constants.INDEXING_TARGET))) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Skipped. "
-                                    + "This document is not a index target. ");
+                            logger.debug("Skipped. " + "This document is not a index target. ");
                         }
                         continue;
                     } else {
@@ -389,9 +368,7 @@ public class IndexUpdater extends Thread {
 
                     docList.add(doc);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document. "
-                                + "The number of a document cache is "
-                                + docList.size() + ".");
+                        logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
                     }
 
                     if (docList.size() >= maxDocumentCacheSize) {
@@ -399,22 +376,19 @@ public class IndexUpdater extends Thread {
                     }
                     documentSize++;
                     // commit
-                    if (commitPerCount > 0
-                            && documentSize % commitPerCount == 0) {
+                    if (commitPerCount > 0 && documentSize % commitPerCount == 0) {
                         if (!docList.isEmpty()) {
                             indexingHelper.sendDocuments(solrGroup, docList);
                         }
                         commitDocuments();
                     }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("The number of an added document is "
-                                + documentSize + ".");
+                        logger.debug("The number of an added document is " + documentSize + ".");
                     }
                 } catch (final SolrLibException e) {
                     throw e;
                 } catch (final Exception e) {
-                    logger.warn(
-                            "Could not add a doc: " + accessResult.getUrl(), e);
+                    logger.warn("Could not add a doc: " + accessResult.getUrl(), e);
                 }
             } else {
                 if (logger.isDebugEnabled()) {
@@ -467,15 +441,13 @@ public class IndexUpdater extends Thread {
         }
 
         if (!map.containsKey(fieldHelper.docIdField)) {
-            doc.addField(fieldHelper.docIdField,
-                    systemHelper.generateDocId(map));
+            doc.addField(fieldHelper.docIdField, systemHelper.generateDocId(map));
         }
 
         return doc;
     }
 
-    protected void addBoostValue(final Map<String, Object> map,
-            final float documentBoost, final SolrInputDocument doc) {
+    protected void addBoostValue(final Map<String, Object> map, final float documentBoost, final SolrInputDocument doc) {
         doc.addField(fieldHelper.boostField, documentBoost);
         doc.setDocumentBoost(documentBoost);
         if (logger.isDebugEnabled()) {
@@ -483,8 +455,7 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    protected void addClickCountField(final Map<String, Object> map,
-            final SolrInputDocument doc) {
+    protected void addClickCountField(final Map<String, Object> map, final SolrInputDocument doc) {
         final String url = (String) map.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
             final int count = clickLogBhv.selectCount(cb -> {
@@ -498,14 +469,12 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    protected void addFavoriteCountField(final Map<String, Object> map,
-            final SolrInputDocument doc) {
+    protected void addFavoriteCountField(final Map<String, Object> map, final SolrInputDocument doc) {
         final String url = (String) map.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
             final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
             pmb.setUrl(url);
-            final List<FavoriteUrlCount> list = favoriteLogBhv.outsideSql()
-                    .selectList(pmb);
+            final List<FavoriteUrlCount> list = favoriteLogBhv.outsideSql().selectList(pmb);
 
             long count = 0;
             if (!list.isEmpty()) {
@@ -520,8 +489,7 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void cleanupAccessResults(
-            final List<org.codelibs.robot.entity.AccessResult> accessResultList,
+    private void cleanupAccessResults(final List<org.codelibs.robot.entity.AccessResult> accessResultList,
             final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList) {
         if (!accessResultList.isEmpty()) {
             final long execTime = System.currentTimeMillis();
@@ -529,9 +497,8 @@ public class IndexUpdater extends Thread {
             dataService.update(accessResultList);
             accessResultList.clear();
             if (logger.isDebugEnabled()) {
-                logger.debug("Updated " + size
-                        + " access results. The execution time is "
-                        + (System.currentTimeMillis() - execTime) + "ms.");
+                logger.debug("Updated " + size + " access results. The execution time is " + (System.currentTimeMillis() - execTime)
+                        + "ms.");
             }
         }
 
@@ -542,39 +509,32 @@ public class IndexUpdater extends Thread {
             accessResultDataBhv.batchDelete(accessResultDataList);
             accessResultDataList.clear();
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + size
-                        + " access result data. The execution time is "
-                        + (System.currentTimeMillis() - execTime) + "ms.");
+                logger.debug("Deleted " + size + " access result data. The execution time is " + (System.currentTimeMillis() - execTime)
+                        + "ms.");
             }
         }
     }
 
-    private PagingResultBean<AccessResult> getAccessResultList(
-            final AccessResultCB cb) {
+    private PagingResultBean<AccessResult> getAccessResultList(final AccessResultCB cb) {
         final long execTime = System.currentTimeMillis();
-        final PagingResultBean<AccessResult> arList = accessResultBhv
-                .selectPage(cb);
+        final PagingResultBean<AccessResult> arList = accessResultBhv.selectPage(cb);
         if (!arList.isEmpty()) {
-            for (final AccessResult ar : arList.toArray(new AccessResult[arList
-                    .size()])) {
+            for (final AccessResult ar : arList.toArray(new AccessResult[arList.size()])) {
                 if (ar.getCreateTime().getTime() > execTime - commitMarginTime) {
                     arList.remove(ar);
                 }
             }
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Processing " + arList.size() + "/"
-                    + arList.getAllRecordCount() + " docs (DB: "
+            logger.info("Processing " + arList.size() + "/" + arList.getAllRecordCount() + " docs (DB: "
                     + (System.currentTimeMillis() - execTime) + "ms)");
         }
         if (arList.getAllRecordCount() > unprocessedDocumentSize) {
             if (logger.isInfoEnabled()) {
-                logger.info("Stopped all crawler threads. " + " You have "
-                        + arList.getAllRecordCount() + " (>"
-                        + unprocessedDocumentSize + ") " + " unprocessed docs.");
+                logger.info("Stopped all crawler threads. " + " You have " + arList.getAllRecordCount() + " (>" + unprocessedDocumentSize
+                        + ") " + " unprocessed docs.");
             }
-            final IntervalControlHelper intervalControlHelper = ComponentUtil
-                    .getIntervalControlHelper();
+            final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.setCrawlerRunning(false);
         }
         return arList;
@@ -590,17 +550,14 @@ public class IndexUpdater extends Thread {
             }
             deleteBySessionId(sessionId);
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + sessionId
-                        + " documents. The execution time is "
-                        + (System.currentTimeMillis() - execTime2) + "ms.");
+                logger.debug("Deleted " + sessionId + " documents. The execution time is " + (System.currentTimeMillis() - execTime2)
+                        + "ms.");
             }
         }
         finishedSessionIdList.clear();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Deleted completed document data. "
-                    + "The execution time is "
-                    + (System.currentTimeMillis() - execTime) + "ms.");
+            logger.info("Deleted completed document data. " + "The execution time is " + (System.currentTimeMillis() - execTime) + "ms.");
         }
     }
 
@@ -613,8 +570,7 @@ public class IndexUpdater extends Thread {
             solrGroup.commit(true, true, false, true);
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Committed documents. The execution time is "
-                    + (System.currentTimeMillis() - execTime) + "ms.");
+            logger.info("Committed documents. The execution time is " + (System.currentTimeMillis() - execTime) + "ms.");
         }
     }
 
@@ -664,8 +620,7 @@ public class IndexUpdater extends Thread {
     }
 
     @Binding(bindingType = BindingType.MAY)
-    public static void setDefaultUncaughtExceptionHandler(
-            final UncaughtExceptionHandler eh) {
+    public static void setDefaultUncaughtExceptionHandler(final UncaughtExceptionHandler eh) {
         Thread.setDefaultUncaughtExceptionHandler(eh);
     }
 

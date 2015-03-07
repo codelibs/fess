@@ -41,8 +41,7 @@ public abstract class BaseScreenShotGenerator implements ScreenShotGenerator {
     public boolean isTarget(final Map<String, Object> docMap) {
         for (final Map.Entry<String, String> entry : conditionMap.entrySet()) {
             final Object value = docMap.get(entry.getKey());
-            if (value instanceof String
-                    && !((String) value).matches(entry.getValue())) {
+            if (value instanceof String && !((String) value).matches(entry.getValue())) {
                 return false;
             }
         }

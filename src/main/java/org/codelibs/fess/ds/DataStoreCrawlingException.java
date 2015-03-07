@@ -24,8 +24,7 @@ public class DataStoreCrawlingException extends RobotCrawlAccessException {
 
     private final String url;
 
-    public DataStoreCrawlingException(final String url, final String message,
-            final Exception e) {
+    public DataStoreCrawlingException(final String url, final String message, final Exception e) {
         super(message, e);
         this.url = url;
     }

@@ -43,8 +43,7 @@ public class BsSuggestElevateWordAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsSuggestElevateWordAction.class);
+    private static final Log log = LogFactory.getLog(BsSuggestElevateWordAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsSuggestElevateWordAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        suggestElevateWordItems = suggestElevateWordService
-                .getSuggestElevateWordList(suggestElevateWordPager);
+        suggestElevateWordItems = suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager);
 
         // restore from pager
-        Beans.copy(suggestElevateWordPager, suggestElevateWordForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(suggestElevateWordPager, suggestElevateWordForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsSuggestElevateWordAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(suggestElevateWordForm.pageNumber)) {
             try {
-                suggestElevateWordPager.setCurrentPageNumber(Integer
-                        .parseInt(suggestElevateWordForm.pageNumber));
+                suggestElevateWordPager.setCurrentPageNumber(Integer.parseInt(suggestElevateWordForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: "
-                            + suggestElevateWordForm.pageNumber, e);
+                    log.debug("Invalid value: " + suggestElevateWordForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsSuggestElevateWordAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(suggestElevateWordForm.searchParams, suggestElevateWordPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(suggestElevateWordForm.searchParams, suggestElevateWordPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsSuggestElevateWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (suggestElevateWordForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            suggestElevateWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    suggestElevateWordForm.crudMode });
         }
 
         loadSuggestElevateWord();
@@ -158,9 +151,8 @@ public class BsSuggestElevateWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (suggestElevateWordForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            suggestElevateWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    suggestElevateWordForm.crudMode });
         }
 
         loadSuggestElevateWord();
@@ -194,9 +186,8 @@ public class BsSuggestElevateWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (suggestElevateWordForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            suggestElevateWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    suggestElevateWordForm.crudMode });
         }
 
         loadSuggestElevateWord();
@@ -231,8 +222,7 @@ public class BsSuggestElevateWordAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsSuggestElevateWordAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsSuggestElevateWordAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (suggestElevateWordForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            suggestElevateWordForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    suggestElevateWordForm.crudMode });
         }
 
         try {
-            final SuggestElevateWord suggestElevateWord = suggestElevateWordService
-                    .getSuggestElevateWord(createKeyMap());
+            final SuggestElevateWord suggestElevateWord = suggestElevateWordService.getSuggestElevateWord(createKeyMap());
             if (suggestElevateWord == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { suggestElevateWordForm.id });
+                new Object[] { suggestElevateWordForm.id });
 
             }
 
@@ -291,50 +277,43 @@ public class BsSuggestElevateWordAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadSuggestElevateWord() {
 
-        final SuggestElevateWord suggestElevateWord = suggestElevateWordService
-                .getSuggestElevateWord(createKeyMap());
+        final SuggestElevateWord suggestElevateWord = suggestElevateWordService.getSuggestElevateWord(createKeyMap());
         if (suggestElevateWord == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { suggestElevateWordForm.id });
+            new Object[] { suggestElevateWordForm.id });
 
         }
 
-        Beans.copy(suggestElevateWord, suggestElevateWordForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(suggestElevateWord, suggestElevateWordForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected SuggestElevateWord createSuggestElevateWord() {
         SuggestElevateWord suggestElevateWord;
         if (suggestElevateWordForm.crudMode == CommonConstants.EDIT_MODE) {
-            suggestElevateWord = suggestElevateWordService
-                    .getSuggestElevateWord(createKeyMap());
+            suggestElevateWord = suggestElevateWordService.getSuggestElevateWord(createKeyMap());
             if (suggestElevateWord == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { suggestElevateWordForm.id });
+                new Object[] { suggestElevateWordForm.id });
 
             }
         } else {
             suggestElevateWord = new SuggestElevateWord();
         }
-        Beans.copy(suggestElevateWordForm, suggestElevateWord)
-                .excludes("searchParams", "mode")
+        Beans.copy(suggestElevateWordForm, suggestElevateWord).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return suggestElevateWord;
     }

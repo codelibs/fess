@@ -41,8 +41,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.seasar.framework.container.SingletonS2Container;
 
-public class FailureUrlService extends BsFailureUrlService implements
-        Serializable {
+public class FailureUrlService extends BsFailureUrlService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,8 +49,7 @@ public class FailureUrlService extends BsFailureUrlService implements
     protected DynamicProperties crawlerProperties;
 
     @Override
-    protected void setupListCondition(final FailureUrlCB cb,
-            final FailureUrlPager failureUrlPager) {
+    protected void setupListCondition(final FailureUrlCB cb, final FailureUrlPager failureUrlPager) {
         super.setupListCondition(cb, failureUrlPager);
 
         // setup condition
@@ -61,8 +59,7 @@ public class FailureUrlService extends BsFailureUrlService implements
     }
 
     @Override
-    protected void setupEntityCondition(final FailureUrlCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final FailureUrlCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -93,37 +90,30 @@ public class FailureUrlService extends BsFailureUrlService implements
         });
     }
 
-    private void buildSearchCondition(final FailureUrlPager failureUrlPager,
-            final FailureUrlCB cb) {
+    private void buildSearchCondition(final FailureUrlPager failureUrlPager, final FailureUrlCB cb) {
         // search
         if (StringUtil.isNotBlank(failureUrlPager.url)) {
-            cb.query().setUrl_LikeSearch(failureUrlPager.url,
-                    op -> op.likeContain());
+            cb.query().setUrl_LikeSearch(failureUrlPager.url, op -> op.likeContain());
         }
 
         if (StringUtil.isNotBlank(failureUrlPager.errorCountMax)) {
-            cb.query().setErrorCount_LessEqual(
-                    Integer.parseInt(failureUrlPager.errorCountMax));
+            cb.query().setErrorCount_LessEqual(Integer.parseInt(failureUrlPager.errorCountMax));
         }
         if (StringUtil.isNotBlank(failureUrlPager.errorCountMin)) {
-            cb.query().setErrorCount_GreaterEqual(
-                    Integer.parseInt(failureUrlPager.errorCountMin));
+            cb.query().setErrorCount_GreaterEqual(Integer.parseInt(failureUrlPager.errorCountMin));
         }
 
         if (StringUtil.isNotBlank(failureUrlPager.errorName)) {
-            cb.query().setErrorName_LikeSearch(failureUrlPager.errorName,
-                    op -> op.likeContain());
+            cb.query().setErrorName_LikeSearch(failureUrlPager.errorName, op -> op.likeContain());
         }
 
     }
 
     public List<String> getExcludedUrlList(final String configId) {
-        final String failureCountStr = crawlerProperties.getProperty(
-                Constants.FAILURE_COUNT_THRESHOLD_PROPERTY,
-                Constants.DEFAULT_FAILURE_COUNT);
-        final String ignoreFailureType = crawlerProperties.getProperty(
-                Constants.IGNORE_FAILURE_TYPE_PROPERTY,
-                Constants.DEFAULT_IGNORE_FAILURE_TYPE);
+        final String failureCountStr =
+                crawlerProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
+        final String ignoreFailureType =
+                crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
         int failureCount;
         try {
             failureCount = Integer.parseInt(failureCountStr);
@@ -136,11 +126,10 @@ public class FailureUrlService extends BsFailureUrlService implements
         }
 
         final int count = failureCount;
-        final ListResultBean<FailureUrl> list = failureUrlBhv
-                .selectList(cb -> {
-                    cb.query().setConfigId_Equal(configId);
-                    cb.query().setErrorCount_GreaterEqual(count);
-                });
+        final ListResultBean<FailureUrl> list = failureUrlBhv.selectList(cb -> {
+            cb.query().setConfigId_Equal(configId);
+            cb.query().setErrorCount_GreaterEqual(count);
+        });
         if (list.isEmpty()) {
             return null;
         }
@@ -168,10 +157,8 @@ public class FailureUrlService extends BsFailureUrlService implements
         }, op -> op.allowNonQueryDelete());
     }
 
-    public void store(final CrawlingConfig crawlingConfig,
-            final String errorName, final String url, final Throwable e) {
-        final FailureUrlBhv failureUrlBhv = SingletonS2Container
-                .getComponent(FailureUrlBhv.class);
+    public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
+        final FailureUrlBhv failureUrlBhv = SingletonS2Container.getComponent(FailureUrlBhv.class);
         FailureUrl failureUrl = failureUrlBhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {
@@ -193,8 +180,7 @@ public class FailureUrlService extends BsFailureUrlService implements
 
         failureUrl.setErrorName(errorName);
         failureUrl.setErrorLog(StringUtils.abbreviate(getStackTrace(e), 4000));
-        failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper()
-                .getCurrentTime());
+        failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTime());
         failureUrl.setThreadName(Thread.currentThread().getName());
 
         failureUrlBhv.insertOrUpdate(failureUrl);

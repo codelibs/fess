@@ -65,15 +65,10 @@ public class ScheduledJobAction extends BsScheduledJobAction {
 
         final ScheduledJob scheduledJob = getScheduledJob();
 
-        FessBeans.copy(scheduledJob, scheduledJobForm)
-                .commonColumnDateConverter()
-                .excludes("searchParams", "mode", "jobLogging").execute();
-        scheduledJobForm.jobLogging = scheduledJob.isLoggingEnabled() ? Constants.ON
-                : null;
-        scheduledJobForm.crawler = scheduledJob.isCrawlerJob() ? Constants.ON
-                : null;
-        scheduledJobForm.available = scheduledJob.isEnabled() ? Constants.ON
-                : null;
+        FessBeans.copy(scheduledJob, scheduledJobForm).commonColumnDateConverter().excludes("searchParams", "mode", "jobLogging").execute();
+        scheduledJobForm.jobLogging = scheduledJob.isLoggingEnabled() ? Constants.ON : null;
+        scheduledJobForm.crawler = scheduledJob.isCrawlerJob() ? Constants.ON : null;
+        scheduledJobForm.available = scheduledJob.isEnabled() ? Constants.ON : null;
         running = scheduledJob.isRunning();
     }
 
@@ -86,9 +81,7 @@ public class ScheduledJobAction extends BsScheduledJobAction {
             scheduledJob = scheduledJobService.getScheduledJob(createKeyMap());
             if (scheduledJob == null) {
                 // throw an exception
-                throw new SSCActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
-                        new Object[] { scheduledJobForm.id });
+                throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { scheduledJobForm.id });
             }
         } else {
             scheduledJob = new ScheduledJob();
@@ -97,17 +90,10 @@ public class ScheduledJobAction extends BsScheduledJobAction {
         }
         scheduledJob.setUpdatedBy(username);
         scheduledJob.setUpdatedTime(currentTime);
-        FessBeans.copy(scheduledJobForm, scheduledJob).excludesCommonColumns()
-                .execute();
-        scheduledJob.setJobLogging(Constants.ON
-                .equals(scheduledJobForm.jobLogging) ? Constants.T
-                : Constants.F);
-        scheduledJob
-                .setCrawler(Constants.ON.equals(scheduledJobForm.crawler) ? Constants.T
-                        : Constants.F);
-        scheduledJob
-                .setAvailable(Constants.ON.equals(scheduledJobForm.available) ? Constants.T
-                        : Constants.F);
+        FessBeans.copy(scheduledJobForm, scheduledJob).excludesCommonColumns().execute();
+        scheduledJob.setJobLogging(Constants.ON.equals(scheduledJobForm.jobLogging) ? Constants.T : Constants.F);
+        scheduledJob.setCrawler(Constants.ON.equals(scheduledJobForm.crawler) ? Constants.T : Constants.F);
+        scheduledJob.setAvailable(Constants.ON.equals(scheduledJobForm.available) ? Constants.T : Constants.F);
 
         return scheduledJob;
     }
@@ -116,9 +102,8 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (scheduledJobForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new SSCActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            scheduledJobForm.crudMode });
+            throw new SSCActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    scheduledJobForm.crudMode });
         }
 
         try {
@@ -137,12 +122,10 @@ public class ScheduledJobAction extends BsScheduledJobAction {
             throw e;
         } catch (final CrudMessageException e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e, e.getMessageId(),
-                    e.getArgs());
+            throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
 
@@ -151,13 +134,11 @@ public class ScheduledJobAction extends BsScheduledJobAction {
         final ScheduledJob scheduledJob = getScheduledJob();
         try {
             scheduledJob.start();
-            SAStrutsUtil.addSessionMessage("success.job_started",
-                    scheduledJob.getName());
+            SAStrutsUtil.addSessionMessage("success.job_started", scheduledJob.getName());
             return displayList(true);
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_start_job", scheduledJob.getName());
+            throw new SSCActionMessagesException(e, "errors.failed_to_start_job", scheduledJob.getName());
         }
 
     }
@@ -166,16 +147,13 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     public String stop() {
         final ScheduledJob scheduledJob = getScheduledJob();
         try {
-            final JobExecutor jobExecutoer = jobHelper
-                    .getJobExecutoer(scheduledJob.getId());
+            final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
             jobExecutoer.shutdown();
-            SAStrutsUtil.addSessionMessage("success.job_stopped",
-                    scheduledJob.getName());
+            SAStrutsUtil.addSessionMessage("success.job_stopped", scheduledJob.getName());
             return displayList(true);
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_stop_job", scheduledJob.getName());
+            throw new SSCActionMessagesException(e, "errors.failed_to_stop_job", scheduledJob.getName());
         }
     }
 
@@ -184,13 +162,10 @@ public class ScheduledJobAction extends BsScheduledJobAction {
     }
 
     protected ScheduledJob getScheduledJob() {
-        final ScheduledJob scheduledJob = scheduledJobService
-                .getScheduledJob(createKeyMap());
+        final ScheduledJob scheduledJob = scheduledJobService.getScheduledJob(createKeyMap());
         if (scheduledJob == null) {
             // throw an exception
-            throw new SSCActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
-                    new Object[] { scheduledJobForm.id });
+            throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { scheduledJobForm.id });
         }
         return scheduledJob;
     }

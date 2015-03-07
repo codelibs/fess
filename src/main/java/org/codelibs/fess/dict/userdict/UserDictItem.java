@@ -35,8 +35,7 @@ public class UserDictItem extends DictionaryItem {
 
     private String newPos;
 
-    public UserDictItem(final long id, final String token,
-            final String segmentation, final String reading, final String pos) {
+    public UserDictItem(final long id, final String token, final String segmentation, final String reading, final String pos) {
         this.id = id;
         this.token = token;
         this.segmentation = segmentation;
@@ -114,8 +113,7 @@ public class UserDictItem extends DictionaryItem {
         int result = 1;
         result = prime * result + (pos == null ? 0 : pos.hashCode());
         result = prime * result + (reading == null ? 0 : reading.hashCode());
-        result = prime * result
-                + (segmentation == null ? 0 : segmentation.hashCode());
+        result = prime * result + (segmentation == null ? 0 : segmentation.hashCode());
         result = prime * result + (token == null ? 0 : token.hashCode());
         return result;
     }
@@ -165,11 +163,8 @@ public class UserDictItem extends DictionaryItem {
 
     @Override
     public String toString() {
-        return "UserDictItem [token=" + token + ", segmentation="
-                + segmentation + ", reading=" + reading + ", pos=" + pos
-                + ", newToken=" + newToken + ", newSegmentation="
-                + newSegmentation + ", newReading=" + newReading + ", newPos="
-                + newPos + "]";
+        return "UserDictItem [token=" + token + ", segmentation=" + segmentation + ", reading=" + reading + ", pos=" + pos + ", newToken="
+                + newToken + ", newSegmentation=" + newSegmentation + ", newReading=" + newReading + ", newPos=" + newPos + "]";
     }
 
     public String toLineString() {

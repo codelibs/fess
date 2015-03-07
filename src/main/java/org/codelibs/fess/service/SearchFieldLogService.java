@@ -44,8 +44,7 @@ public class SearchFieldLogService implements Serializable {
 
     public void updateFieldLabels() {
         final GroupedFieldNamePmb pmb = new GroupedFieldNamePmb();
-        final ListResultBean<GroupedFieldName> list = searchFieldLogBhv
-                .outsideSql().selectList(pmb);
+        final ListResultBean<GroupedFieldName> list = searchFieldLogBhv.outsideSql().selectList(pmb);
         final List<String> groupedFieldNameList = new ArrayList<String>();
         for (final GroupedFieldName e : list) {
             final String name = e.getName();
@@ -53,8 +52,7 @@ public class SearchFieldLogService implements Serializable {
                 groupedFieldNameList.add(name);
             }
         }
-        groupedFieldNames = groupedFieldNameList
-                .toArray(new String[groupedFieldNameList.size()]);
+        groupedFieldNames = groupedFieldNameList.toArray(new String[groupedFieldNameList.size()]);
     }
 
     public String[] getGroupedFieldNames() {

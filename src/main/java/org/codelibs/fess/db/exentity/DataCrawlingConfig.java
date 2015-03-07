@@ -54,14 +54,12 @@ import org.slf4j.LoggerFactory;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class DataCrawlingConfig extends BsDataCrawlingConfig implements
-        CrawlingConfig {
+public class DataCrawlingConfig extends BsDataCrawlingConfig implements CrawlingConfig {
 
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(DataCrawlingConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataCrawlingConfig.class);
 
     private static final String S2ROBOT_WEB_HEADER_PREFIX = "s2robot.web.header.";
 
@@ -156,8 +154,7 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
         if (value != null) {
             try {
                 _boost = new BigDecimal(value);
-            } catch (final Exception e) {
-            }
+            } catch (final Exception e) {}
         }
     }
 
@@ -187,8 +184,7 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
     }
 
     @Override
-    public void initializeClientFactory(
-            final S2RobotClientFactory robotClientFactory) {
+    public void initializeClientFactory(final S2RobotClientFactory robotClientFactory) {
         final Map<String, String> paramMap = getHandlerParameterMap();
 
         final Map<String, Object> factoryParamMap = new HashMap<String, Object>();
@@ -198,9 +194,7 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
         for (final Map.Entry<String, String> entry : paramMap.entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith(S2ROBOT_PARAM_PREFIX)) {
-                factoryParamMap.put(
-                        key.substring(S2ROBOT_PARAM_PREFIX.length()),
-                        entry.getValue());
+                factoryParamMap.put(key.substring(S2ROBOT_PARAM_PREFIX.length()), entry.getValue());
             }
         }
 
@@ -216,18 +210,12 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
             final String[] webAuthNames = webAuthStr.split(",");
             final List<Authentication> basicAuthList = new ArrayList<Authentication>();
             for (final String webAuthName : webAuthNames) {
-                final String scheme = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                        + webAuthName + ".scheme");
-                final String hostname = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                        + webAuthName + ".host");
-                final String port = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                        + webAuthName + ".port");
-                final String realm = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                        + webAuthName + ".realm");
-                final String username = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                        + webAuthName + ".username");
-                final String password = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                        + webAuthName + ".password");
+                final String scheme = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".scheme");
+                final String hostname = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".host");
+                final String port = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".port");
+                final String realm = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".realm");
+                final String username = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".username");
+                final String password = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".password");
 
                 if (StringUtil.isEmpty(username)) {
                     logger.warn("username is empty. webAuth:" + webAuthName);
@@ -262,8 +250,7 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
                     }
 
                     String s = scheme;
-                    if (StringUtil.isBlank(scheme)
-                            || Constants.NTLM.equals(scheme)) {
+                    if (StringUtil.isBlank(scheme) || Constants.NTLM.equals(scheme)) {
                         s = AuthScope.ANY_SCHEME;
                     }
                     authScope = new AuthScope(hostname, p, r, s);
@@ -271,47 +258,34 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
 
                 Credentials credentials;
                 if (Constants.NTLM.equals(scheme)) {
-                    final String workstation = paramMap.get(S2ROBOT_WEB_AUTH
-                            + "." + webAuthName + ".workstation");
-                    final String domain = paramMap.get(S2ROBOT_WEB_AUTH + "."
-                            + webAuthName + ".domain");
-                    credentials = new NTCredentials(username,
-                            password == null ? StringUtil.EMPTY : password,
-                            workstation == null ? StringUtil.EMPTY
-                                    : workstation,
-                            domain == null ? StringUtil.EMPTY : domain);
+                    final String workstation = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".workstation");
+                    final String domain = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".domain");
+                    credentials =
+                            new NTCredentials(username, password == null ? StringUtil.EMPTY : password,
+                                    workstation == null ? StringUtil.EMPTY : workstation, domain == null ? StringUtil.EMPTY : domain);
                 } else {
-                    credentials = new UsernamePasswordCredentials(username,
-                            password == null ? StringUtil.EMPTY : password);
+                    credentials = new UsernamePasswordCredentials(username, password == null ? StringUtil.EMPTY : password);
                 }
 
-                basicAuthList.add(new AuthenticationImpl(authScope,
-                        credentials, authScheme));
+                basicAuthList.add(new AuthenticationImpl(authScope, credentials, authScheme));
             }
             factoryParamMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY,
-                    basicAuthList.toArray(new Authentication[basicAuthList
-                            .size()]));
+                    basicAuthList.toArray(new Authentication[basicAuthList.size()]));
         }
 
         // request header
         final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
         int count = 1;
-        String headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count
-                + ".name");
+        String headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".name");
         while (StringUtil.isNotBlank(headerName)) {
-            final String headerValue = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX
-                    + count + ".value");
-            rhList.add(new org.codelibs.robot.client.http.RequestHeader(
-                    headerName, headerValue));
+            final String headerValue = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".value");
+            rhList.add(new org.codelibs.robot.client.http.RequestHeader(headerName, headerValue));
             count++;
-            headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count
-                    + ".name");
+            headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".name");
         }
         if (!rhList.isEmpty()) {
-            factoryParamMap
-                    .put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
-                            rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList
-                                    .size()]));
+            factoryParamMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
+                    rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList.size()]));
         }
 
         // file auth
@@ -320,29 +294,21 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
             final String[] fileAuthNames = fileAuthStr.split(",");
             final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
             for (final String fileAuthName : fileAuthNames) {
-                final String scheme = paramMap.get(S2ROBOT_FILE_AUTH + "."
-                        + fileAuthName + ".scheme");
+                final String scheme = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".scheme");
                 if (Constants.SAMBA.equals(scheme)) {
-                    final String domain = paramMap.get(S2ROBOT_FILE_AUTH + "."
-                            + fileAuthName + ".domain");
-                    final String hostname = paramMap.get(S2ROBOT_FILE_AUTH
-                            + "." + fileAuthName + ".host");
-                    final String port = paramMap.get(S2ROBOT_FILE_AUTH + "."
-                            + fileAuthName + ".port");
-                    final String username = paramMap.get(S2ROBOT_FILE_AUTH
-                            + "." + fileAuthName + ".username");
-                    final String password = paramMap.get(S2ROBOT_FILE_AUTH
-                            + "." + fileAuthName + ".password");
+                    final String domain = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".domain");
+                    final String hostname = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".host");
+                    final String port = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".port");
+                    final String username = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".username");
+                    final String password = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".password");
 
                     if (StringUtil.isEmpty(username)) {
-                        logger.warn("username is empty. fileAuth:"
-                                + fileAuthName);
+                        logger.warn("username is empty. fileAuth:" + fileAuthName);
                         continue;
                     }
 
                     final SmbAuthentication smbAuth = new SmbAuthentication();
-                    smbAuth.setDomain(domain == null ? StringUtil.EMPTY
-                            : domain);
+                    smbAuth.setDomain(domain == null ? StringUtil.EMPTY : domain);
                     smbAuth.setServer(hostname);
                     if (StringUtil.isNotBlank(port)) {
                         try {
@@ -352,15 +318,12 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
                         }
                     }
                     smbAuth.setUsername(username);
-                    smbAuth.setPassword(password == null ? StringUtil.EMPTY
-                            : password);
+                    smbAuth.setPassword(password == null ? StringUtil.EMPTY : password);
                     smbAuthList.add(smbAuth);
                 }
             }
             if (!smbAuthList.isEmpty()) {
-                factoryParamMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
-                        smbAuthList.toArray(new SmbAuthentication[smbAuthList
-                                .size()]));
+                factoryParamMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
             }
         }
 

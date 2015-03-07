@@ -30,7 +30,6 @@ public class MoreLikeThisInfo {
 
     @Override
     public String toString() {
-        return "MoreLikeThisInfo [field=" + Arrays.toString(field) + ", count="
-                + count + "]";
+        return "MoreLikeThisInfo [field=" + Arrays.toString(field) + ", count=" + count + "]";
     }
 }

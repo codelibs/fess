@@ -33,8 +33,7 @@ import org.codelibs.fess.db.exentity.WebConfigToRoleTypeMapping;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
 import org.codelibs.fess.pager.WebCrawlingConfigPager;
 
-public class WebCrawlingConfigService extends BsWebCrawlingConfigService
-        implements Serializable {
+public class WebCrawlingConfigService extends BsWebCrawlingConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,8 +47,7 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
         return getAllWebCrawlingConfigList(true, true, true, null);
     }
 
-    public List<WebCrawlingConfig> getWebCrawlingConfigListByIds(
-            final List<Long> idList) {
+    public List<WebCrawlingConfig> getWebCrawlingConfigListByIds(final List<Long> idList) {
         if (idList == null) {
             return getAllWebCrawlingConfigList();
         } else {
@@ -57,19 +55,17 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
         }
     }
 
-    public List<WebCrawlingConfig> getAllWebCrawlingConfigList(
-            final boolean withLabelType, final boolean withRoleType,
+    public List<WebCrawlingConfig> getAllWebCrawlingConfigList(final boolean withLabelType, final boolean withRoleType,
             final boolean available, final List<Long> idList) {
-        final List<WebCrawlingConfig> list = webCrawlingConfigBhv
-                .selectList(cb -> {
-                    cb.query().setDeletedBy_IsNull();
-                    if (available) {
-                        cb.query().setAvailable_Equal(Constants.T);
-                    }
-                    if (idList != null) {
-                        cb.query().setId_InScope(idList);
-                    }
-                });
+        final List<WebCrawlingConfig> list = webCrawlingConfigBhv.selectList(cb -> {
+            cb.query().setDeletedBy_IsNull();
+            if (available) {
+                cb.query().setAvailable_Equal(Constants.T);
+            }
+            if (idList != null) {
+                cb.query().setId_InScope(idList);
+            }
+        });
         if (withLabelType) {
             webCrawlingConfigBhv.loadWebConfigToLabelTypeMapping(list, cb -> {
                 cb.setupSelect_LabelType();
@@ -89,44 +85,33 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
 
     @Override
     public WebCrawlingConfig getWebCrawlingConfig(final Map<String, String> keys) {
-        final WebCrawlingConfig webCrawlingConfig = super
-                .getWebCrawlingConfig(keys);
+        final WebCrawlingConfig webCrawlingConfig = super.getWebCrawlingConfig(keys);
 
         if (webCrawlingConfig != null) {
-            final List<WebConfigToLabelTypeMapping> wctltmList = webConfigToLabelTypeMappingBhv
-                    .selectList(wctltmCb -> {
-                        wctltmCb.query().setWebConfigId_Equal(
-                                webCrawlingConfig.getId());
-                        wctltmCb.query().queryLabelType().setDeletedBy_IsNull();
-                        wctltmCb.query().queryWebCrawlingConfig()
-                                .setDeletedBy_IsNull();
-                    });
+            final List<WebConfigToLabelTypeMapping> wctltmList = webConfigToLabelTypeMappingBhv.selectList(wctltmCb -> {
+                wctltmCb.query().setWebConfigId_Equal(webCrawlingConfig.getId());
+                wctltmCb.query().queryLabelType().setDeletedBy_IsNull();
+                wctltmCb.query().queryWebCrawlingConfig().setDeletedBy_IsNull();
+            });
             if (!wctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(
-                        wctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
                 for (final WebConfigToLabelTypeMapping mapping : wctltmList) {
                     labelTypeIds.add(Long.toString(mapping.getLabelTypeId()));
                 }
-                webCrawlingConfig.setLabelTypeIds(labelTypeIds
-                        .toArray(new String[labelTypeIds.size()]));
+                webCrawlingConfig.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
             }
 
-            final List<WebConfigToRoleTypeMapping> wctrtmList = webConfigToRoleTypeMappingBhv
-                    .selectList(wctrtmCb -> {
-                        wctrtmCb.query().setWebConfigId_Equal(
-                                webCrawlingConfig.getId());
-                        wctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
-                        wctrtmCb.query().queryWebCrawlingConfig()
-                                .setDeletedBy_IsNull();
-                    });
+            final List<WebConfigToRoleTypeMapping> wctrtmList = webConfigToRoleTypeMappingBhv.selectList(wctrtmCb -> {
+                wctrtmCb.query().setWebConfigId_Equal(webCrawlingConfig.getId());
+                wctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
+                wctrtmCb.query().queryWebCrawlingConfig().setDeletedBy_IsNull();
+            });
             if (!wctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(
-                        wctrtmList.size());
+                final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
                 for (final WebConfigToRoleTypeMapping mapping : wctrtmList) {
                     roleTypeIds.add(Long.toString(mapping.getRoleTypeId()));
                 }
-                webCrawlingConfig.setRoleTypeIds(roleTypeIds
-                        .toArray(new String[roleTypeIds.size()]));
+                webCrawlingConfig.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }
         }
 
@@ -165,10 +150,9 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
         } else {
             // Update
             if (labelTypeIds != null) {
-                final List<WebConfigToLabelTypeMapping> list = webConfigToLabelTypeMappingBhv
-                        .selectList(wctltmCb -> {
-                            wctltmCb.query().setWebConfigId_Equal(webConfigId);
-                        });
+                final List<WebConfigToLabelTypeMapping> list = webConfigToLabelTypeMappingBhv.selectList(wctltmCb -> {
+                    wctltmCb.query().setWebConfigId_Equal(webConfigId);
+                });
                 final List<WebConfigToLabelTypeMapping> newList = new ArrayList<WebConfigToLabelTypeMapping>();
                 final List<WebConfigToLabelTypeMapping> matchedList = new ArrayList<WebConfigToLabelTypeMapping>();
                 for (final String id : labelTypeIds) {
@@ -194,10 +178,9 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
                 webConfigToLabelTypeMappingBhv.batchDelete(list);
             }
             if (roleTypeIds != null) {
-                final List<WebConfigToRoleTypeMapping> list = webConfigToRoleTypeMappingBhv
-                        .selectList(wctrtmCb -> {
-                            wctrtmCb.query().setWebConfigId_Equal(webConfigId);
-                        });
+                final List<WebConfigToRoleTypeMapping> list = webConfigToRoleTypeMappingBhv.selectList(wctrtmCb -> {
+                    wctrtmCb.query().setWebConfigId_Equal(webConfigId);
+                });
                 final List<WebConfigToRoleTypeMapping> newList = new ArrayList<WebConfigToRoleTypeMapping>();
                 final List<WebConfigToRoleTypeMapping> matchedList = new ArrayList<WebConfigToRoleTypeMapping>();
                 for (final String id : roleTypeIds) {
@@ -226,8 +209,7 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
     }
 
     @Override
-    protected void setupListCondition(final WebCrawlingConfigCB cb,
-            final WebCrawlingConfigPager webCrawlingConfigPager) {
+    protected void setupListCondition(final WebCrawlingConfigCB cb, final WebCrawlingConfigPager webCrawlingConfigPager) {
         super.setupListCondition(cb, webCrawlingConfigPager);
 
         // setup condition
@@ -240,8 +222,7 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
     }
 
     @Override
-    protected void setupEntityCondition(final WebCrawlingConfigCB cb,
-            final Map<String, String> keys) {
+    protected void setupEntityCondition(final WebCrawlingConfigCB cb, final Map<String, String> keys) {
         super.setupEntityCondition(cb, keys);
 
         // setup condition
@@ -258,8 +239,7 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService
     }
 
     @Override
-    protected void setupDeleteCondition(
-            final WebCrawlingConfig webCrawlingConfig) {
+    protected void setupDeleteCondition(final WebCrawlingConfig webCrawlingConfig) {
         super.setupDeleteCondition(webCrawlingConfig);
 
         // setup condition

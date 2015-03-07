@@ -102,8 +102,7 @@ public class FessXpathTransformerTest extends S2TestCase {
 
     private Document getDocument(final String data) throws Exception {
         final DOMParser parser = new DOMParser();
-        final ByteArrayInputStream is = new ByteArrayInputStream(
-                data.getBytes("UTF-8"));
+        final ByteArrayInputStream is = new ByteArrayInputStream(data.getBytes("UTF-8"));
         parser.parse(new InputSource(is));
         return parser.getDocument();
     }
@@ -186,27 +185,22 @@ public class FessXpathTransformerTest extends S2TestCase {
         assertEquals(0, urlList.size());
 
         urlList.clear();
-        urlList.add(RequestDataBuilder.newRequestData().get()
-                .url("http://www.example.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get().url("http://www.example.com").build());
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(1, urlList.size());
         assertEquals("http://www.example.com", urlList.get(0).getUrl());
 
         urlList.clear();
-        urlList.add(RequestDataBuilder.newRequestData().get()
-                .url("http://www.example.com").build());
-        urlList.add(RequestDataBuilder.newRequestData().get()
-                .url("http://www.test.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get().url("http://www.example.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get().url("http://www.test.com").build());
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(2, urlList.size());
         assertEquals("http://www.example.com", urlList.get(0).getUrl());
         assertEquals("http://www.test.com", urlList.get(1).getUrl());
 
         urlList.clear();
-        urlList.add(RequestDataBuilder.newRequestData().get()
-                .url("feed://www.example.com").build());
-        urlList.add(RequestDataBuilder.newRequestData().get()
-                .url("http://www.test.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get().url("feed://www.example.com").build());
+        urlList.add(RequestDataBuilder.newRequestData().get().url("http://www.test.com").build());
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
         assertEquals(2, urlList.size());
         assertEquals("http://www.example.com", urlList.get(0).getUrl());
@@ -227,30 +221,16 @@ public class FessXpathTransformerTest extends S2TestCase {
         assertEquals("", fessXpathTransformer.removeCommentTag(""));
         assertEquals(" ", fessXpathTransformer.removeCommentTag("<!-- - -->"));
         assertEquals("abc", fessXpathTransformer.removeCommentTag("abc"));
-        assertEquals("abc ",
-                fessXpathTransformer.removeCommentTag("abc<!-- hoge -->"));
-        assertEquals("abc 123",
-                fessXpathTransformer.removeCommentTag("abc<!-- ho\nge -->123"));
-        assertEquals("abc 123",
-                fessXpathTransformer.removeCommentTag("abc<!--\n hoge -->123"));
-        assertEquals("abc 123",
-                fessXpathTransformer.removeCommentTag("abc<!-- hoge -->123"));
-        assertEquals("abc 123 ",
-                fessXpathTransformer
-                        .removeCommentTag("abc<!-- hoge1 -->123<!-- hoge2 -->"));
-        assertEquals(
-                "abc 123 xyz",
-                fessXpathTransformer
-                        .removeCommentTag("abc<!-- hoge1 -->123<!-- hoge2 -->xyz"));
-        assertEquals("abc ",
-                fessXpathTransformer.removeCommentTag("abc<!---->"));
-        assertEquals("abc -->",
-                fessXpathTransformer.removeCommentTag("abc<!-- hoge-->-->"));
-        assertEquals("abc<!-- hoge",
-                fessXpathTransformer.removeCommentTag("abc<!-- hoge"));
-        assertEquals("abc  -->123",
-                fessXpathTransformer
-                        .removeCommentTag("abc<!-- <!-- hoge --> -->123"));
+        assertEquals("abc ", fessXpathTransformer.removeCommentTag("abc<!-- hoge -->"));
+        assertEquals("abc 123", fessXpathTransformer.removeCommentTag("abc<!-- ho\nge -->123"));
+        assertEquals("abc 123", fessXpathTransformer.removeCommentTag("abc<!--\n hoge -->123"));
+        assertEquals("abc 123", fessXpathTransformer.removeCommentTag("abc<!-- hoge -->123"));
+        assertEquals("abc 123 ", fessXpathTransformer.removeCommentTag("abc<!-- hoge1 -->123<!-- hoge2 -->"));
+        assertEquals("abc 123 xyz", fessXpathTransformer.removeCommentTag("abc<!-- hoge1 -->123<!-- hoge2 -->xyz"));
+        assertEquals("abc ", fessXpathTransformer.removeCommentTag("abc<!---->"));
+        assertEquals("abc -->", fessXpathTransformer.removeCommentTag("abc<!-- hoge-->-->"));
+        assertEquals("abc<!-- hoge", fessXpathTransformer.removeCommentTag("abc<!-- hoge"));
+        assertEquals("abc  -->123", fessXpathTransformer.removeCommentTag("abc<!-- <!-- hoge --> -->123"));
     }
 
     public void test_canonicalXpath() throws Exception {
@@ -286,8 +266,7 @@ public class FessXpathTransformerTest extends S2TestCase {
         } catch (final ChildUrlsException e) {
             final Set<RequestData> childUrlList = e.getChildUrlList();
             assertEquals(1, childUrlList.size());
-            assertEquals("http://example.com/hoge", childUrlList.iterator()
-                    .next().getUrl());
+            assertEquals("http://example.com/hoge", childUrlList.iterator().next().getUrl());
         }
 
         data = "<html><link rel=\"canonical\" href=\"http://example.com/hoge\"><body>aaa</body></html>";
@@ -298,8 +277,7 @@ public class FessXpathTransformerTest extends S2TestCase {
         } catch (final ChildUrlsException e) {
             final Set<RequestData> childUrlList = e.getChildUrlList();
             assertEquals(1, childUrlList.size());
-            assertEquals("http://example.com/hoge", childUrlList.iterator()
-                    .next().getUrl());
+            assertEquals("http://example.com/hoge", childUrlList.iterator().next().getUrl());
         }
     }
 
@@ -308,16 +286,13 @@ public class FessXpathTransformerTest extends S2TestCase {
 
         final String data = "<html><head><meta name=\"keywords\" content=\"bbb\"></head><body>aaa</body></html>";
         final Document document = getDocument(data);
-        String value = transformer
-                .getSingleNodeValue(document, "//BODY", false);
+        String value = transformer.getSingleNodeValue(document, "//BODY", false);
         assertEquals("aaa", value);
 
-        value = transformer.getSingleNodeValue(document,
-                "//META[@name='keywords']/@content", false);
+        value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content", false);
         assertEquals("bbb", value);
 
-        value = transformer.getSingleNodeValue(document,
-                "//META[@name='keywords']/@content|//BODY", false);
+        value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content|//BODY", false);
         assertEquals("bbb aaa", value);
     }
 }

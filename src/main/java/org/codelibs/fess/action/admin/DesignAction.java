@@ -49,8 +49,7 @@ import org.slf4j.LoggerFactory;
 public class DesignAction implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(DesignAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(DesignAction.class);
 
     @ActionForm
     @Resource
@@ -116,54 +115,41 @@ public class DesignAction implements Serializable {
                     fileName = fileName.substring(pos + 1);
                 }
             } catch (final Exception e) {
-                throw new SSCActionMessagesException(e,
-                        "errors.design_file_name_is_invalid");
+                throw new SSCActionMessagesException(e, "errors.design_file_name_is_invalid");
             }
         }
         if (StringUtil.isBlank(fileName)) {
-            throw new SSCActionMessagesException(
-                    "errors.design_file_name_is_not_found");
+            throw new SSCActionMessagesException("errors.design_file_name_is_not_found");
         }
 
         String baseDir = null;
         // normalize filename
-        if (checkFileType(fileName,
-                systemHelper.getSupportedUploadedMediaExtentions())
-                && checkFileType(uploadedFileName,
-                        systemHelper.getSupportedUploadedMediaExtentions())) {
+        if (checkFileType(fileName, systemHelper.getSupportedUploadedMediaExtentions())
+                && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedMediaExtentions())) {
             baseDir = "/images/";
-        } else if (checkFileType(fileName,
-                systemHelper.getSupportedUploadedCssExtentions())
-                && checkFileType(uploadedFileName,
-                        systemHelper.getSupportedUploadedCssExtentions())) {
+        } else if (checkFileType(fileName, systemHelper.getSupportedUploadedCssExtentions())
+                && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedCssExtentions())) {
             baseDir = "/css/";
-        } else if (checkFileType(fileName,
-                systemHelper.getSupportedUploadedJSExtentions())
-                && checkFileType(uploadedFileName,
-                        systemHelper.getSupportedUploadedJSExtentions())) {
+        } else if (checkFileType(fileName, systemHelper.getSupportedUploadedJSExtentions())
+                && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedJSExtentions())) {
             baseDir = "/js/";
         } else {
-            throw new SSCActionMessagesException(
-                    "errors.design_file_is_unsupported_type");
+            throw new SSCActionMessagesException("errors.design_file_is_unsupported_type");
         }
 
-        final File uploadFile = new File(ServletContextUtil.getServletContext()
-                .getRealPath(baseDir + fileName));
+        final File uploadFile = new File(ServletContextUtil.getServletContext().getRealPath(baseDir + fileName));
         final File parentFile = uploadFile.getParentFile();
         if (!parentFile.exists() && !parentFile.mkdirs()) {
             logger.warn("Could not create " + parentFile.getAbsolutePath());
         }
 
         try {
-            FileUtil.write(uploadFile.getAbsolutePath(),
-                    designForm.designFile.getFileData());
-            SAStrutsUtil.addSessionMessage("success.upload_design_file",
-                    fileName);
+            FileUtil.write(uploadFile.getAbsolutePath(), designForm.designFile.getFileData());
+            SAStrutsUtil.addSessionMessage("success.upload_design_file", fileName);
             return "index?redirect=true";
         } catch (final Exception e) {
             logger.error("Failed to write an image file.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_write_design_image_file");
+            throw new SSCActionMessagesException(e, "errors.failed_to_write_design_image_file");
         }
 
     }
@@ -176,8 +162,7 @@ public class DesignAction implements Serializable {
         final File jspFile = getJspFile(jspType);
 
         try {
-            designForm.content = new String(FileUtil.getBytes(jspFile),
-                    Constants.UTF_8);
+            designForm.content = new String(FileUtil.getBytes(jspFile), Constants.UTF_8);
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Invalid encoding", e);
         }
@@ -193,8 +178,7 @@ public class DesignAction implements Serializable {
         final File jspFile = getJspFile(jspType);
 
         try {
-            designForm.content = new String(FileUtil.getBytes(jspFile),
-                    Constants.UTF_8);
+            designForm.content = new String(FileUtil.getBytes(jspFile), Constants.UTF_8);
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Invalid encoding", e);
         }
@@ -214,15 +198,12 @@ public class DesignAction implements Serializable {
         }
 
         try {
-            FileUtil.write(jspFile.getAbsolutePath(),
-                    designForm.content.getBytes(Constants.UTF_8));
-            SAStrutsUtil.addSessionMessage("success.update_design_jsp_file",
-                    systemHelper.getDesignJspFileName(designForm.fileName));
+            FileUtil.write(jspFile.getAbsolutePath(), designForm.content.getBytes(Constants.UTF_8));
+            SAStrutsUtil.addSessionMessage("success.update_design_jsp_file", systemHelper.getDesignJspFileName(designForm.fileName));
             return "index?redirect=true";
         } catch (final Exception e) {
             logger.error("Failed to update " + designForm.fileName, e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_update_jsp_file");
+            throw new SSCActionMessagesException(e, "errors.failed_to_update_jsp_file");
         }
     }
 
@@ -232,8 +213,7 @@ public class DesignAction implements Serializable {
 
         final File file = getTargetFile();
         if (file == null) {
-            throw new SSCActionMessagesException(
-                    "errors.target_file_does_not_exist", designForm.fileName);
+            throw new SSCActionMessagesException("errors.target_file_does_not_exist", designForm.fileName);
         }
 
         BufferedInputStream bis = null;
@@ -242,8 +222,7 @@ public class DesignAction implements Serializable {
             ResponseUtil.download(file.getName(), bis);
         } catch (final Exception e) {
             logger.error("Failed to download " + file.getAbsolutePath(), e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_download_file", designForm.fileName);
+            throw new SSCActionMessagesException(e, "errors.failed_to_download_file", designForm.fileName);
         } finally {
             IOUtils.closeQuietly(bis);
         }
@@ -257,49 +236,39 @@ public class DesignAction implements Serializable {
 
         final File file = getTargetFile();
         if (file == null) {
-            throw new SSCActionMessagesException(
-                    "errors.target_file_does_not_exist", designForm.fileName);
+            throw new SSCActionMessagesException("errors.target_file_does_not_exist", designForm.fileName);
         }
 
         if (file.delete()) {
-            SAStrutsUtil.addSessionMessage("success.delete_file",
-                    designForm.fileName);
+            SAStrutsUtil.addSessionMessage("success.delete_file", designForm.fileName);
             return "index?redirect=true";
         } else {
             logger.error("Failed to delete " + file.getAbsolutePath());
-            throw new SSCActionMessagesException(
-                    "errors.failed_to_delete_file", designForm.fileName);
+            throw new SSCActionMessagesException("errors.failed_to_delete_file", designForm.fileName);
         }
     }
 
     private File getJspFile(final String jspType) {
-        final String jspFileName = systemHelper
-                .getDesignJspFileName(designForm.fileName);
+        final String jspFileName = systemHelper.getDesignJspFileName(designForm.fileName);
         if (jspFileName == null) {
-            throw new SSCActionMessagesException(
-                    "errors.invalid_design_jsp_file_name");
+            throw new SSCActionMessagesException("errors.invalid_design_jsp_file_name");
         }
-        final File jspFile = new File(ServletContextUtil.getServletContext()
-                .getRealPath("/WEB-INF/" + jspType + "/" + jspFileName));
+        final File jspFile = new File(ServletContextUtil.getServletContext().getRealPath("/WEB-INF/" + jspType + "/" + jspFileName));
         if (jspFile == null || !jspFile.exists()) {
-            throw new SSCActionMessagesException(
-                    "errors.design_jsp_file_does_not_exist");
+            throw new SSCActionMessagesException("errors.design_jsp_file_does_not_exist");
         }
         return jspFile;
     }
 
     private void checkEditorStatus() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(
-                Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE))) {
             editable = false;
-            throw new SSCActionMessagesException(
-                    "errors.design_editor_disabled");
+            throw new SSCActionMessagesException("errors.design_editor_disabled");
         }
     }
 
     private void loadFileNameItems() {
-        final File baseDir = new File(ServletContextUtil.getServletContext()
-                .getRealPath("/"));
+        final File baseDir = new File(ServletContextUtil.getServletContext().getRealPath("/"));
         fileNameItems = new ArrayList<String>();
         final List<File> fileList = getAccessibleFileList(baseDir);
         final int length = baseDir.getAbsolutePath().length();
@@ -310,20 +279,15 @@ public class DesignAction implements Serializable {
 
     private List<File> getAccessibleFileList(final File baseDir) {
         final List<File> fileList = new ArrayList<File>();
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "images"),
-                systemHelper.getSupportedUploadedMediaExtentions(), true));
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "css"),
-                systemHelper.getSupportedUploadedCssExtentions(), true));
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "js"),
-                systemHelper.getSupportedUploadedJSExtentions(), true));
+        fileList.addAll(FileUtils.listFiles(new File(baseDir, "images"), systemHelper.getSupportedUploadedMediaExtentions(), true));
+        fileList.addAll(FileUtils.listFiles(new File(baseDir, "css"), systemHelper.getSupportedUploadedCssExtentions(), true));
+        fileList.addAll(FileUtils.listFiles(new File(baseDir, "js"), systemHelper.getSupportedUploadedJSExtentions(), true));
         return fileList;
     }
 
     private File getTargetFile() {
-        final File baseDir = new File(ServletContextUtil.getServletContext()
-                .getRealPath("/"));
-        final File targetFile = new File(ServletContextUtil.getServletContext()
-                .getRealPath(designForm.fileName));
+        final File baseDir = new File(ServletContextUtil.getServletContext().getRealPath("/"));
+        final File targetFile = new File(ServletContextUtil.getServletContext().getRealPath(designForm.fileName));
         final List<File> fileList = getAccessibleFileList(baseDir);
         boolean exist = false;
         for (final File file : fileList) {

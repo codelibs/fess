@@ -80,18 +80,15 @@ public class StatsPager implements Serializable {
             if (StringUtil.isBlank(startHour)) {
                 startHour = null;
                 startMin = null;
-                final DateTimeFormatter formatter = DateTimeFormatter
-                        .ofPattern(DATE_TIME_FORMAT);
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
                 return LocalDateTime.parse(startDate + " 00:00", formatter);
 
             } else {
                 if (StringUtil.isBlank(startMin)) {
                     startMin = "0";
                 }
-                final DateTimeFormatter formatter = DateTimeFormatter
-                        .ofPattern(DATE_TIME_FORMAT);
-                return LocalDateTime.parse(startDate + " " + startHour + ":"
-                        + startMin, formatter);
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+                return LocalDateTime.parse(startDate + " " + startHour + ":" + startMin, formatter);
             }
         } catch (final DateTimeParseException e) {
             resetStartDate();
@@ -114,18 +111,15 @@ public class StatsPager implements Serializable {
             if (StringUtil.isBlank(endHour)) {
                 endHour = null;
                 endMin = null;
-                final DateTimeFormatter formatter = DateTimeFormatter
-                        .ofPattern(DATE_TIME_FORMAT);
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
                 return LocalDateTime.parse(endDate + " 00:00", formatter);
 
             } else {
                 if (StringUtil.isBlank(endMin)) {
                     endMin = "0";
                 }
-                final DateTimeFormatter formatter = DateTimeFormatter
-                        .ofPattern(DATE_TIME_FORMAT);
-                return LocalDateTime.parse(endDate + " " + endHour + ":"
-                        + endMin, formatter);
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+                return LocalDateTime.parse(endDate + " " + endHour + ":" + endMin, formatter);
             }
         } catch (final DateTimeParseException e) {
             resetEndDate();

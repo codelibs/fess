@@ -66,10 +66,9 @@ public class BsJobLogAction implements Serializable {
         jobLogItems = jobLogService.getJobLogList(jobLogPager);
 
         // restore from pager
-        Beans.copy(jobLogPager, jobLogForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(jobLogPager, jobLogForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -88,8 +87,7 @@ public class BsJobLogAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(jobLogForm.pageNumber)) {
             try {
-                jobLogPager.setCurrentPageNumber(Integer
-                        .parseInt(jobLogForm.pageNumber));
+                jobLogPager.setCurrentPageNumber(Integer.parseInt(jobLogForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + jobLogForm.pageNumber, e);
@@ -102,10 +100,9 @@ public class BsJobLogAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(jobLogForm.searchParams, jobLogPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(jobLogForm.searchParams, jobLogPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -132,8 +129,7 @@ public class BsJobLogAction implements Serializable {
     public String confirmpage() {
         if (jobLogForm.crudMode != CommonConstants.CONFIRM_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            jobLogForm.crudMode });
+                    new Object[] { CommonConstants.CONFIRM_MODE, jobLogForm.crudMode });
         }
 
         loadJobLog();
@@ -155,9 +151,7 @@ public class BsJobLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (jobLogForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            jobLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, jobLogForm.crudMode });
         }
 
         loadJobLog();
@@ -191,9 +185,7 @@ public class BsJobLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (jobLogForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            jobLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE, jobLogForm.crudMode });
         }
 
         loadJobLog();
@@ -228,8 +220,7 @@ public class BsJobLogAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -250,8 +241,7 @@ public class BsJobLogAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -259,19 +249,16 @@ public class BsJobLogAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (jobLogForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            jobLogForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE, jobLogForm.crudMode });
         }
 
         try {
             final JobLog jobLog = jobLogService.getJobLog(createKeyMap());
             if (jobLog == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { jobLogForm.id });
+                new Object[] { jobLogForm.id });
 
             }
 
@@ -287,8 +274,7 @@ public class BsJobLogAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
@@ -297,10 +283,9 @@ public class BsJobLogAction implements Serializable {
         final JobLog jobLog = jobLogService.getJobLog(createKeyMap());
         if (jobLog == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { jobLogForm.id });
+            new Object[] { jobLogForm.id });
 
         }
 
@@ -315,10 +300,9 @@ public class BsJobLogAction implements Serializable {
             jobLog = jobLogService.getJobLog(createKeyMap());
             if (jobLog == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { jobLogForm.id });
+                new Object[] { jobLogForm.id });
 
             }
         } else {

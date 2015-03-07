@@ -54,8 +54,7 @@ import org.slf4j.LoggerFactory;
 public class SystemAction implements Serializable {
     private static final String STARTING_CRAWL_PROCESS = "startingCrawlProcess";
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(SystemAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(SystemAction.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -88,8 +87,7 @@ public class SystemAction implements Serializable {
     protected String showIndex(final boolean redirect) {
         final Map<String, DynamicProperties> groupPropMap = new HashMap<String, DynamicProperties>();
         for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            final DynamicProperties props = ComponentUtil
-                    .getSolrGroupProperties(groupName);
+            final DynamicProperties props = ComponentUtil.getSolrGroupProperties(groupName);
             if (props != null) {
                 groupPropMap.put(groupName, props);
             }
@@ -106,16 +104,12 @@ public class SystemAction implements Serializable {
                 map.put("serverName", names[1]);
                 final DynamicProperties props = groupPropMap.get(names[0]);
                 if (props != null) {
-                    String status = props
-                            .getProperty(StatusPolicyImpl.STATUS_PREFIX
-                                    + names[1]);
+                    String status = props.getProperty(StatusPolicyImpl.STATUS_PREFIX + names[1]);
                     if (StringUtil.isBlank(status)) {
                         status = StatusPolicyImpl.ACTIVE;
                     }
                     map.put("status", status);
-                    String index = props
-                            .getProperty(StatusPolicyImpl.INDEX_PREFIX
-                                    + names[1]);
+                    String index = props.getProperty(StatusPolicyImpl.INDEX_PREFIX + names[1]);
                     if (StringUtil.isBlank(index)) {
                         index = StatusPolicyImpl.READY;
                     }
@@ -128,24 +122,18 @@ public class SystemAction implements Serializable {
             }
         }
         // select group status
-        systemForm.currentServerForSelect = solrProperties
-                .getProperty(SolrLibConstants.SELECT_GROUP);
-        final SolrGroup selectSolrGroup = solrGroupManager
-                .getSolrGroup(systemForm.currentServerForSelect);
-        if (selectSolrGroup != null
-                && selectSolrGroup.isActive(QueryType.QUERY)) {
+        systemForm.currentServerForSelect = solrProperties.getProperty(SolrLibConstants.SELECT_GROUP);
+        final SolrGroup selectSolrGroup = solrGroupManager.getSolrGroup(systemForm.currentServerForSelect);
+        if (selectSolrGroup != null && selectSolrGroup.isActive(QueryType.QUERY)) {
             systemForm.currentServerStatusForSelect = Constants.ACTIVE;
         } else {
             systemForm.currentServerStatusForSelect = Constants.INACTIVE;
         }
 
         // update group status
-        systemForm.currentServerForUpdate = solrProperties
-                .getProperty(SolrLibConstants.SELECT_GROUP);
-        final SolrGroup updateSolrGroup = solrGroupManager
-                .getSolrGroup(systemForm.currentServerForUpdate);
-        if (updateSolrGroup != null
-                && updateSolrGroup.isActive(QueryType.QUERY)) {
+        systemForm.currentServerForUpdate = solrProperties.getProperty(SolrLibConstants.SELECT_GROUP);
+        final SolrGroup updateSolrGroup = solrGroupManager.getSolrGroup(systemForm.currentServerForUpdate);
+        if (updateSolrGroup != null && updateSolrGroup.isActive(QueryType.QUERY)) {
             systemForm.currentServerStatusForUpdate = Constants.ACTIVE;
         } else {
             systemForm.currentServerStatusForUpdate = Constants.INACTIVE;
@@ -170,8 +158,7 @@ public class SystemAction implements Serializable {
         // load solr group properties
         final Map<String, DynamicProperties> groupPropMap = new HashMap<String, DynamicProperties>();
         for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            final DynamicProperties props = ComponentUtil
-                    .getSolrGroupProperties(groupName);
+            final DynamicProperties props = ComponentUtil.getSolrGroupProperties(groupName);
             if (props != null) {
                 groupPropMap.put(groupName, props);
             }
@@ -180,12 +167,10 @@ public class SystemAction implements Serializable {
         try {
             // server status
             for (final Map<String, String> statusMap : systemForm.serverStatusList) {
-                for (final Map.Entry<String, String> entry : statusMap
-                        .entrySet()) {
+                for (final Map.Entry<String, String> entry : statusMap.entrySet()) {
                     final String[] names = entry.getKey().split("/");
                     if (names.length == 3) {
-                        final DynamicProperties props = groupPropMap
-                                .get(names[0]);
+                        final DynamicProperties props = groupPropMap.get(names[0]);
                         if (props != null) {
                             final String value = entry.getValue();
                             String key;
@@ -194,16 +179,13 @@ public class SystemAction implements Serializable {
                             } else if ("index".equals(names[2])) {
                                 key = StatusPolicyImpl.INDEX_PREFIX + names[1];
                             } else {
-                                logger.error("Invalid parameter: "
-                                        + entry.getKey());
-                                throw new SSCActionMessagesException(
-                                        "errors.failed_to_update_solr_params");
+                                logger.error("Invalid parameter: " + entry.getKey());
+                                throw new SSCActionMessagesException("errors.failed_to_update_solr_params");
                             }
                             props.setProperty(key, value);
                             props.store();
                         } else {
-                            logger.warn("Solr group properties is not found: "
-                                    + names[0]);
+                            logger.warn("Solr group properties is not found: " + names[0]);
                         }
                     }
                 }
@@ -212,8 +194,7 @@ public class SystemAction implements Serializable {
             SAStrutsUtil.addSessionMessage("success.update_solr_params");
         } catch (final Exception e) {
             logger.error("Failed to update solr parameters.", e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_update_solr_params", e);
+            throw new SSCActionMessagesException(e, "errors.failed_to_update_solr_params", e);
         }
 
         return showIndex(true);
@@ -223,26 +204,21 @@ public class SystemAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String start() {
-        final String groupName = solrProperties
-                .getProperty(SolrLibConstants.UPDATE_GROUP);
+        final String groupName = solrProperties.getProperty(SolrLibConstants.UPDATE_GROUP);
         final SolrGroup solrGroup = solrGroupManager.getSolrGroup(groupName);
         if (solrGroup != null) {
             if (!jobHelper.isCrawlProcessRunning()) {
-                final List<ScheduledJob> scheduledJobList = scheduledJobService
-                        .getCrawloerJobList();
+                final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawloerJobList();
                 for (final ScheduledJob scheduledJob : scheduledJobList) {
                     scheduledJob.start();
                 }
                 SAStrutsUtil.addSessionMessage("success.start_crawl_process");
-                RequestUtil.getRequest().getSession()
-                        .setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
+                RequestUtil.getRequest().getSession().setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
             } else {
-                SAStrutsUtil
-                        .addSessionMessage("success.failed_to_start_crawl_process");
+                SAStrutsUtil.addSessionMessage("success.failed_to_start_crawl_process");
             }
         } else {
-            SAStrutsUtil
-                    .addSessionMessage("success.failed_to_start_crawl_process");
+            SAStrutsUtil.addSessionMessage("success.failed_to_start_crawl_process");
         }
         return showIndex(true);
     }
@@ -254,8 +230,7 @@ public class SystemAction implements Serializable {
             if (StringUtil.isNotBlank(systemForm.sessionId)) {
                 jobHelper.destroyCrawlerProcess(systemForm.sessionId);
             } else {
-                for (final String sessionId : jobHelper
-                        .getRunningSessionIdSet()) {
+                for (final String sessionId : jobHelper.getRunningSessionIdSet()) {
                     jobHelper.destroyCrawlerProcess(sessionId);
                 }
             }
@@ -273,10 +248,8 @@ public class SystemAction implements Serializable {
             webManagementHelper.start(systemForm.solrInstanceName);
             SAStrutsUtil.addSessionMessage("success.starting_solr_instance");
         } catch (final Exception e) {
-            logger.error("Failed to start a solr instance: "
-                    + systemForm.solrInstanceName, e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_start_solr_instance");
+            logger.error("Failed to start a solr instance: " + systemForm.solrInstanceName, e);
+            throw new SSCActionMessagesException(e, "errors.failed_to_start_solr_instance");
         }
         return showIndex(true);
     }
@@ -288,10 +261,8 @@ public class SystemAction implements Serializable {
             webManagementHelper.stop(systemForm.solrInstanceName);
             SAStrutsUtil.addSessionMessage("success.stopping_solr_instance");
         } catch (final Exception e) {
-            logger.error("Failed to stop a solr instance: "
-                    + systemForm.solrInstanceName, e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_stop_solr_instance");
+            logger.error("Failed to stop a solr instance: " + systemForm.solrInstanceName, e);
+            throw new SSCActionMessagesException(e, "errors.failed_to_stop_solr_instance");
         }
         return showIndex(true);
     }
@@ -303,17 +274,14 @@ public class SystemAction implements Serializable {
             webManagementHelper.reload(systemForm.solrInstanceName);
             SAStrutsUtil.addSessionMessage("success.reloading_solr_instance");
         } catch (final Exception e) {
-            logger.error("Failed to reload a solr instance: "
-                    + systemForm.solrInstanceName, e);
-            throw new SSCActionMessagesException(e,
-                    "errors.failed_to_reload_solr_instance");
+            logger.error("Failed to reload a solr instance: " + systemForm.solrInstanceName, e);
+            throw new SSCActionMessagesException(e, "errors.failed_to_reload_solr_instance");
         }
         return showIndex(true);
     }
 
     public List<Map<String, String>> getSolrInstanceList() {
-        final List<String> solrInstanceNameList = webManagementHelper
-                .getSolrInstanceNameList();
+        final List<String> solrInstanceNameList = webManagementHelper.getSolrInstanceNameList();
         final List<Map<String, String>> solrInstanceList = new ArrayList<Map<String, String>>();
         for (final String solrInstanceName : solrInstanceNameList) {
             final Map<String, String> map = new HashMap<String, String>();

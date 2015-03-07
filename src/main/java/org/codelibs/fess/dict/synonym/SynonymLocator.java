@@ -29,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SynonymLocator extends DictionaryLocator {
-    private static final Logger logger = LoggerFactory
-            .getLogger(SynonymLocator.class);
+    private static final Logger logger = LoggerFactory.getLogger(SynonymLocator.class);
 
     public String synonymFilePrefix = "synonym";
 
@@ -43,8 +42,7 @@ public class SynonymLocator extends DictionaryLocator {
             if (logger.isInfoEnabled()) {
                 logger.info("Synonym Files from " + path);
             }
-            final File[] files = findFiles(path, synonymFilePrefix,
-                    excludedSynonymList);
+            final File[] files = findFiles(path, synonymFilePrefix, excludedSynonymList);
             for (final File file : files) {
                 if (logger.isInfoEnabled()) {
                     logger.info("Synonym File: " + file.getAbsolutePath());
@@ -52,15 +50,12 @@ public class SynonymLocator extends DictionaryLocator {
                 fileList.add(new SynonymFile(file));
             }
         }
-        Collections.sort(fileList,
-                new Comparator<DictionaryFile<? extends DictionaryItem>>() {
-                    @Override
-                    public int compare(
-                            final DictionaryFile<? extends DictionaryItem> o1,
-                            final DictionaryFile<? extends DictionaryItem> o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
+        Collections.sort(fileList, new Comparator<DictionaryFile<? extends DictionaryItem>>() {
+            @Override
+            public int compare(final DictionaryFile<? extends DictionaryItem> o1, final DictionaryFile<? extends DictionaryItem> o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return fileList;
     }
 

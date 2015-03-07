@@ -30,10 +30,8 @@ public class UserDictFileTest extends S2TestCase {
     @Override
     protected void setUp() throws Exception {
         file1 = File.createTempFile("userdict_", ".txt");
-        FileUtil.write(
-                file1.getAbsolutePath(),
-                "token1,seg1,reading1,pos1\ntoken2,seg2,reading2,pos2\ntoken3,seg3,reading3,pos3"
-                        .getBytes(Constants.UTF_8));
+        FileUtil.write(file1.getAbsolutePath(),
+                "token1,seg1,reading1,pos1\ntoken2,seg2,reading2,pos2\ntoken3,seg3,reading3,pos3".getBytes(Constants.UTF_8));
     }
 
     @Override
@@ -43,15 +41,13 @@ public class UserDictFileTest extends S2TestCase {
 
     public void test_selectList() {
         final UserDictFile userDictFile = new UserDictFile(file1);
-        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0, 20);
         assertEquals(3, itemList1.size());
         assertEquals(3, itemList1.getAllRecordCount());
         assertEquals(1, itemList1.getCurrentPageNumber());
         assertEquals(20, itemList1.getPageSize());
 
-        final PagingList<UserDictItem> itemList2 = userDictFile
-                .selectList(2, 2);
+        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(2, 2);
         assertEquals(1, itemList2.size());
         assertEquals(3, itemList2.getAllRecordCount());
         assertEquals(2, itemList2.getCurrentPageNumber());
@@ -77,26 +73,21 @@ public class UserDictFileTest extends S2TestCase {
 
     public void test_insert() {
         final UserDictFile userDictFile = new UserDictFile(file1);
-        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0, 20);
         assertEquals(3, itemList1.size());
 
-        final UserDictItem userDictItem1 = new UserDictItem(0, "token4",
-                "seg4", "reading4", "pos4");
+        final UserDictItem userDictItem1 = new UserDictItem(0, "token4", "seg4", "reading4", "pos4");
         userDictFile.insert(userDictItem1);
-        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(0, 20);
         assertEquals(4, itemList2.size());
         assertEquals("token4", itemList2.get(3).getToken());
         assertEquals("seg4", itemList2.get(3).getSegmentation());
         assertEquals("reading4", itemList2.get(3).getReading());
         assertEquals("pos4", itemList2.get(3).getPos());
 
-        final UserDictItem userDictItem2 = new UserDictItem(0, "token5",
-                "seg5", "reading5", "pos5");
+        final UserDictItem userDictItem2 = new UserDictItem(0, "token5", "seg5", "reading5", "pos5");
         userDictFile.insert(userDictItem2);
-        final PagingList<UserDictItem> itemList3 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList3 = userDictFile.selectList(0, 20);
         assertEquals(5, itemList3.size());
         assertEquals("token5", itemList3.get(4).getToken());
         assertEquals("seg5", itemList3.get(4).getSegmentation());
@@ -106,8 +97,7 @@ public class UserDictFileTest extends S2TestCase {
 
     public void test_update() {
         final UserDictFile userDictFile = new UserDictFile(file1);
-        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0, 20);
         assertEquals(3, itemList1.size());
 
         final UserDictItem userDictItem1 = itemList1.get(0);
@@ -116,8 +106,7 @@ public class UserDictFileTest extends S2TestCase {
         userDictItem1.setNewReading("READING1");
         userDictItem1.setNewPos("POS1");
         userDictFile.update(userDictItem1);
-        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(0, 20);
         assertEquals(3, itemList2.size());
         final UserDictItem userDictItem2 = itemList2.get(0);
         assertEquals("TOKEN1", userDictItem2.getToken());
@@ -132,8 +121,7 @@ public class UserDictFileTest extends S2TestCase {
         userDictItem3.setNewReading("READING3");
         userDictItem3.setNewPos("POS3");
         userDictFile.update(userDictItem3);
-        final PagingList<UserDictItem> itemList3 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList3 = userDictFile.selectList(0, 20);
         assertEquals(3, itemList3.size());
         final UserDictItem userDictItem4 = itemList3.get(2);
         assertEquals("TOKEN3", userDictItem4.getToken());
@@ -145,24 +133,20 @@ public class UserDictFileTest extends S2TestCase {
 
     public void test_delete() throws Exception {
         final UserDictFile userDictFile = new UserDictFile(file1);
-        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList1 = userDictFile.selectList(0, 20);
         assertEquals(3, itemList1.size());
 
         final UserDictItem userDictItem1 = itemList1.get(0);
         userDictFile.delete(userDictItem1);
-        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList2 = userDictFile.selectList(0, 20);
         assertEquals(2, itemList2.size());
 
         final UserDictItem userDictItem2 = itemList2.get(1);
         userDictFile.delete(userDictItem2);
-        final PagingList<UserDictItem> itemList3 = userDictFile.selectList(0,
-                20);
+        final PagingList<UserDictItem> itemList3 = userDictFile.selectList(0, 20);
         assertEquals(1, itemList3.size());
 
-        assertEquals("token2,seg2,reading2,pos2" + Constants.LINE_SEPARATOR,
-                new String(FileUtil.getBytes(file1), Constants.UTF_8));
+        assertEquals("token2,seg2,reading2,pos2" + Constants.LINE_SEPARATOR, new String(FileUtil.getBytes(file1), Constants.UTF_8));
 
     }
 }

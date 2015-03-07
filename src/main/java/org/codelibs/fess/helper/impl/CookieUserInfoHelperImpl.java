@@ -117,8 +117,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     }
 
     @Override
-    public String generateQueryId(final String query,
-            final List<Map<String, Object>> documentItems) {
+    public String generateQueryId(final String query, final List<Map<String, Object>> documentItems) {
         final HttpSession session = RequestUtil.getRequest().getSession(false);
         if (session != null) {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
@@ -135,8 +134,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
             if (!docIdList.isEmpty()) {
                 final Map<String, String[]> resultDocIdsCache = getResultDocIdsCache(session);
-                resultDocIdsCache.put(queryId,
-                        docIdList.toArray(new String[docIdList.size()]));
+                resultDocIdsCache.put(queryId, docIdList.toArray(new String[docIdList.size()]));
                 return queryId;
             }
         }
@@ -158,13 +156,10 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
     private Map<String, String[]> getResultDocIdsCache(final HttpSession session) {
         @SuppressWarnings("unchecked")
-        Map<String, String[]> resultDocIdsCache = (Map<String, String[]>) session
-                .getAttribute(Constants.RESULT_DOC_ID_CACHE);
+        Map<String, String[]> resultDocIdsCache = (Map<String, String[]>) session.getAttribute(Constants.RESULT_DOC_ID_CACHE);
         if (resultDocIdsCache == null) {
-            resultDocIdsCache = new LruHashMap<String, String[]>(
-                    resultDocIdsCacheSize);
-            session.setAttribute(Constants.RESULT_DOC_ID_CACHE,
-                    resultDocIdsCache);
+            resultDocIdsCache = new LruHashMap<String, String[]>(resultDocIdsCacheSize);
+            session.setAttribute(Constants.RESULT_DOC_ID_CACHE, resultDocIdsCache);
         }
         return resultDocIdsCache;
     }

@@ -26,8 +26,7 @@ import org.codelibs.fess.db.bsentity.BsDataConfigToLabelTypeMapping;
  * </p>
  * @author DBFlute(AutoGenerator)
  */
-public class DataConfigToLabelTypeMapping extends
-        BsDataConfigToLabelTypeMapping {
+public class DataConfigToLabelTypeMapping extends BsDataConfigToLabelTypeMapping {
 
     /** Serial version UID. (Default) */
     private static final long serialVersionUID = 1L;

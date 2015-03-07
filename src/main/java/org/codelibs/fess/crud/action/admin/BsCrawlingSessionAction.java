@@ -43,8 +43,7 @@ public class BsCrawlingSessionAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory
-            .getLog(BsCrawlingSessionAction.class);
+    private static final Log log = LogFactory.getLog(BsCrawlingSessionAction.class);
 
     // for list
 
@@ -64,14 +63,12 @@ public class BsCrawlingSessionAction implements Serializable {
 
     protected String displayList(final boolean redirect) {
         // page navi
-        crawlingSessionItems = crawlingSessionService
-                .getCrawlingSessionList(crawlingSessionPager);
+        crawlingSessionItems = crawlingSessionService.getCrawlingSessionList(crawlingSessionPager);
 
         // restore from pager
-        Beans.copy(crawlingSessionPager, crawlingSessionForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(crawlingSessionPager, crawlingSessionForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,12 +87,10 @@ public class BsCrawlingSessionAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(crawlingSessionForm.pageNumber)) {
             try {
-                crawlingSessionPager.setCurrentPageNumber(Integer
-                        .parseInt(crawlingSessionForm.pageNumber));
+                crawlingSessionPager.setCurrentPageNumber(Integer.parseInt(crawlingSessionForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: "
-                            + crawlingSessionForm.pageNumber, e);
+                    log.debug("Invalid value: " + crawlingSessionForm.pageNumber, e);
                 }
             }
         }
@@ -105,10 +100,9 @@ public class BsCrawlingSessionAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(crawlingSessionForm.searchParams, crawlingSessionPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(crawlingSessionForm.searchParams, crawlingSessionPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
-                .execute();
+        .execute();
 
         return displayList(false);
     }
@@ -134,9 +128,8 @@ public class BsCrawlingSessionAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
         if (crawlingSessionForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.CONFIRM_MODE,
-                            crawlingSessionForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    crawlingSessionForm.crudMode });
         }
 
         loadCrawlingSession();
@@ -158,9 +151,8 @@ public class BsCrawlingSessionAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
         if (crawlingSessionForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE,
-                            crawlingSessionForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    crawlingSessionForm.crudMode });
         }
 
         loadCrawlingSession();
@@ -194,9 +186,8 @@ public class BsCrawlingSessionAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
         if (crawlingSessionForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            crawlingSessionForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    crawlingSessionForm.crudMode });
         }
 
         loadCrawlingSession();
@@ -231,8 +222,7 @@ public class BsCrawlingSessionAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_create_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
 
@@ -253,8 +243,7 @@ public class BsCrawlingSessionAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_update_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
@@ -262,20 +251,17 @@ public class BsCrawlingSessionAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (crawlingSessionForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.DELETE_MODE,
-                            crawlingSessionForm.crudMode });
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    crawlingSessionForm.crudMode });
         }
 
         try {
-            final CrawlingSession crawlingSession = crawlingSessionService
-                    .getCrawlingSession(createKeyMap());
+            final CrawlingSession crawlingSession = crawlingSessionService.getCrawlingSession(createKeyMap());
             if (crawlingSession == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { crawlingSessionForm.id });
+                new Object[] { crawlingSessionForm.id });
 
             }
 
@@ -291,50 +277,43 @@ public class BsCrawlingSessionAction implements Serializable {
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            throw new ActionMessagesException(
-                    "errors.crud_failed_to_delete_crud_table");
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
     protected void loadCrawlingSession() {
 
-        final CrawlingSession crawlingSession = crawlingSessionService
-                .getCrawlingSession(createKeyMap());
+        final CrawlingSession crawlingSession = crawlingSessionService.getCrawlingSession(createKeyMap());
         if (crawlingSession == null) {
             // throw an exception
-            throw new ActionMessagesException(
-                    "errors.crud_could_not_find_crud_table",
+            throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                    new Object[] { crawlingSessionForm.id });
+            new Object[] { crawlingSessionForm.id });
 
         }
 
-        Beans.copy(crawlingSession, crawlingSessionForm)
-                .excludes("searchParams", "mode")
+        Beans.copy(crawlingSession, crawlingSessionForm).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
     }
 
     protected CrawlingSession createCrawlingSession() {
         CrawlingSession crawlingSession;
         if (crawlingSessionForm.crudMode == CommonConstants.EDIT_MODE) {
-            crawlingSession = crawlingSessionService
-                    .getCrawlingSession(createKeyMap());
+            crawlingSession = crawlingSessionService.getCrawlingSession(createKeyMap());
             if (crawlingSession == null) {
                 // throw an exception
-                throw new ActionMessagesException(
-                        "errors.crud_could_not_find_crud_table",
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                        new Object[] { crawlingSessionForm.id });
+                new Object[] { crawlingSessionForm.id });
 
             }
         } else {
             crawlingSession = new CrawlingSession();
         }
-        Beans.copy(crawlingSessionForm, crawlingSession)
-                .excludes("searchParams", "mode")
+        Beans.copy(crawlingSessionForm, crawlingSession).excludes("searchParams", "mode")
 
-                .execute();
+        .execute();
 
         return crawlingSession;
     }

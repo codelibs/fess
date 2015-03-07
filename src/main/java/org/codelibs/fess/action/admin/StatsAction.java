@@ -70,8 +70,7 @@ public class StatsAction implements Serializable {
         reportTypeItems = searchFieldLogService.getGroupedFieldNames();
 
         // restore from pager
-        Beans.copy(statsPager, statsForm.searchParams)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsPager, statsForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         if (redirect) {
             return "index?redirect=true";
@@ -90,8 +89,7 @@ public class StatsAction implements Serializable {
         // page navi
         if (StringUtil.isNotBlank(statsForm.pageNumber)) {
             try {
-                statsPager.setCurrentPageNumber(Integer
-                        .parseInt(statsForm.pageNumber));
+                statsPager.setCurrentPageNumber(Integer.parseInt(statsForm.pageNumber));
             } catch (final NumberFormatException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid value: " + statsForm.pageNumber, e);
@@ -104,8 +102,7 @@ public class StatsAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(statsForm.searchParams, statsPager)
-                .excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        Beans.copy(statsForm.searchParams, statsPager).excludes(CommonConstants.PAGER_CONVERSION_RULE).execute();
 
         return displayList(false);
     }

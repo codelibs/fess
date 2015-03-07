@@ -36,8 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class WebDriverGenerator extends BaseScreenShotGenerator {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(WebDriverGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebDriverGenerator.class);
 
     public WebDriver webDriver;
 
@@ -54,8 +53,7 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
         if (webDriver == null) {
             webDriver = new PhantomJSDriver();
         }
-        webDriver.manage().window()
-                .setSize(new Dimension(windowWidth, windowHeight));
+        webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
     }
 
     @DestroyMethod
@@ -71,8 +69,7 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
 
         if (outputFile.exists()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("The screenshot file exists: "
-                        + outputFile.getAbsolutePath());
+                logger.debug("The screenshot file exists: " + outputFile.getAbsolutePath());
             }
             return;
         }
@@ -88,26 +85,20 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
 
         if (webDriver instanceof TakesScreenshot) {
             webDriver.get(url);
-            final File screenshot = ((TakesScreenshot) webDriver)
-                    .getScreenshotAs(OutputType.FILE);
+            final File screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
             convert(screenshot, outputFile);
         } else {
-            logger.warn("WebDriver is not instance of TakesScreenshot: "
-                    + webDriver);
+            logger.warn("WebDriver is not instance of TakesScreenshot: " + webDriver);
         }
     }
 
     protected void convert(final File inputFile, final File outputFile) {
         try {
             final BufferedImage image = loadImage(inputFile);
-            final int screenShotHeight = screenShotWidth * image.getHeight()
-                    / windowWidth;
-            final BufferedImage screenShotImage = new BufferedImage(
-                    screenShotWidth, screenShotHeight, image.getType());
-            screenShotImage.getGraphics().drawImage(
-                    image.getScaledInstance(screenShotWidth, screenShotHeight,
-                            Image.SCALE_AREA_AVERAGING), 0, 0, screenShotWidth,
-                    screenShotHeight, null);
+            final int screenShotHeight = screenShotWidth * image.getHeight() / windowWidth;
+            final BufferedImage screenShotImage = new BufferedImage(screenShotWidth, screenShotHeight, image.getType());
+            screenShotImage.getGraphics().drawImage(image.getScaledInstance(screenShotWidth, screenShotHeight, Image.SCALE_AREA_AVERAGING),
+                    0, 0, screenShotWidth, screenShotHeight, null);
 
             ImageIO.write(screenShotImage, imageFormatName, outputFile);
         } catch (final Exception e) {

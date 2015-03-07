@@ -23,8 +23,7 @@ import java.util.Date;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.form.admin.BsOverlappingHostForm;
 
-public class OverlappingHostForm extends BsOverlappingHostForm implements
-        Serializable {
+public class OverlappingHostForm extends BsOverlappingHostForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,8 +33,7 @@ public class OverlappingHostForm extends BsOverlappingHostForm implements
         sortOrder = "0";
         // Temporary data
         createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                Constants.DEFAULT_DATETIME_FORMAT);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
         createdTime = sdf.format(new Date());
     }
 }
