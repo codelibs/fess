@@ -3,6 +3,7 @@
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
 	<include path="aop.dicon"/>
+	<include path="saflute.dicon"/>
 	<include path="dbflute.dicon"/>
 	<component name="overlappingHostHelper" class="org.codelibs.fess.helper.OverlappingHostHelper">
 		<initMethod name="add">
