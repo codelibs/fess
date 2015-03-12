@@ -111,10 +111,6 @@ new String[] {
 			<arg>"error.jsp"</arg>
 		</initMethod>
 		<initMethod name="addDesignJspFileName">
-			<arg>"appletLauncher"</arg>
-			<arg>"applet/launcher.jsp"</arg>
-		</initMethod>
-		<initMethod name="addDesignJspFileName">
 			<arg>"errorHeader"</arg>
 			<arg>"error/header.jsp"</arg>
 		</initMethod>

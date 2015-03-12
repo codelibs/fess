@@ -30,6 +30,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
+    public static final int DEFAULT_ADMIN_PAGE_NUMBER = 1;
+
     public static final int DEFAULT_ADMIN_PAGE_SIZE = 25;
 
     public static final String WEB_API_VERSION = FESS_VERSION;
@@ -154,8 +156,6 @@ public class Constants extends CoreLibConstants {
     public static final String SEARCH_FILE_PROXY_PROPERTY = "search.file.proxy";
 
     public static final String SEARCH_DESKTOP_PROPERTY = "search.desktop";
-
-    public static final String SEARCH_FILE_LAUNCHER_PROPERTY = "search.file.launcher";
 
     public static final String SEARCH_RESULT_MAX_PAGE_SIZE = "search.result.max_page_size";
 

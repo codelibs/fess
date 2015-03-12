@@ -460,9 +460,6 @@ public class IndexAction {
 
                 ResponseUtil.getResponse().setStatus(HttpServletResponse.SC_NO_CONTENT);
                 return null;
-            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_FILE_LAUNCHER_PROPERTY, Constants.TRUE))) {
-                ResponseUtil.getResponse().sendRedirect(
-                        RequestUtil.getRequest().getContextPath() + "/applet/launcher?uri=" + S2Functions.u(url));
             } else {
                 ResponseUtil.getResponse().sendRedirect(url + hash);
             }

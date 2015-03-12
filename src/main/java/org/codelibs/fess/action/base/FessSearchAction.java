@@ -13,17 +13,8 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.lasta.web.action;
+package org.codelibs.fess.action.base;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public abstract class FessSearchAction extends FessBaseAction {
 
-/**
- * @author jflute
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(value = ElementType.METHOD)
-public @interface FessPerformLogin {
 }
