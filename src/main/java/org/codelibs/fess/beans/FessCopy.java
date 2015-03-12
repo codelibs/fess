@@ -24,7 +24,6 @@ import java.util.Locale;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.beans.converter.LocalDateTimeConverter;
 import org.seasar.framework.beans.Converter;
-import org.seasar.framework.beans.converter.DateConverter;
 import org.seasar.framework.beans.util.Copy;
 import org.seasar.framework.util.TimestampConversionUtil;
 
@@ -61,7 +60,7 @@ public class FessCopy extends Copy {
     }
 
     public Copy commonColumnDateConverter() {
-        return dateConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime", "updatedTime", "deletedTime");
+        return converter(new LocalDateTimeConverter(Constants.DEFAULT_DATETIME_FORMAT), "createdTime", "updatedTime", "deletedTime");
     }
 
     protected Converter findDefaultConverter(Class<?> clazz) {
