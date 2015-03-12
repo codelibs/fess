@@ -46,6 +46,8 @@ public class DataIndexHelper implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(DataIndexHelper.class);
 
+    private static final String DELETE_OLD_DOCS = "delete_old_docs";
+
     @Resource
     protected DynamicProperties crawlerProperties;
 
@@ -254,6 +256,9 @@ public class DataIndexHelper implements Serializable {
         }
 
         private void deleteOldDocs() {
+            if (Constants.FALSE.equals(initParamMap.get(DELETE_OLD_DOCS))) {
+                return;
+            }
             final String sessionId = initParamMap.get(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
                 logger.warn("Invalid sessionId at " + dataCrawlingConfig);
