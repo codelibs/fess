@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
 
 public class FailureUrlAction extends FessAdminAction {
 
-	private static final Logger logger = LoggerFactory.getLogger(FailureUrlAction.class);
-	
-	// for list
+    private static final Logger logger = LoggerFactory.getLogger(FailureUrlAction.class);
+
+    // for list
 
     public List<FailureUrl> failureUrlItems;
 
@@ -60,14 +60,14 @@ public class FailureUrlAction extends FessAdminAction {
 
     @Resource
     protected FailureUrlPager failureUrlPager;
-	
+
     @Resource
     protected SystemHelper systemHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("failureUrl");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         failureUrlItems = failureUrlService.getFailureUrlList(failureUrlPager);
@@ -332,7 +332,7 @@ public class FailureUrlAction extends FessAdminAction {
 
         return keys;
     }
-    
+
     @Execute(validator = false, input = "error.jsp")
     public String deleteall() {
         failureUrlService.deleteAll(failureUrlPager);

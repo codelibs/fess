@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.action.admin;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,42 +23,44 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
+import org.codelibs.fess.db.exentity.CrawlingSession;
 import org.codelibs.fess.db.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.form.admin.CrawlingSessionForm;
-import org.codelibs.fess.pager.CrawlingSessionPager;
-import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.pager.CrawlingSessionPager;
+import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CrawlingSessionAction extends FessAdminAction {
 
-    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(CrawlingSessionAction.class);
 
     //for list
     public List<CrawlingSession> crawlingSessionItems;
-    
+
     // for edit/confirm/delete
     @ActionForm
     @Resource
     protected CrawlingSessionForm crawlingSessionForm;
-    
+
     @Resource
     protected CrawlingSessionService crawlingSessionService;
-    
+
     @Resource
     protected CrawlingSessionPager crawlingSessionPager;
-    
+
     @Resource
     protected SystemHelper systemHelper;
 
@@ -69,7 +70,7 @@ public class CrawlingSessionAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("crawlingSession");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         crawlingSessionItems = crawlingSessionService.getCrawlingSessionList(crawlingSessionPager);
@@ -99,13 +100,12 @@ public class CrawlingSessionAction extends FessAdminAction {
         SAStrutsUtil.addSessionMessage("success.crawling_session_delete_all");
         return displayList(true);
     }
-    
-    
+
     @Execute(validator = false, input = "error.jsp")
     public String index() {
         return displayList(false);
     }
-    
+
     @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
     public String list() {
         // page navi
@@ -170,7 +170,7 @@ public class CrawlingSessionAction extends FessAdminAction {
 
         return "edit.jsp";
     }
-    
+
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
@@ -183,7 +183,7 @@ public class CrawlingSessionAction extends FessAdminAction {
 
         return "edit.jsp";
     }
-    
+
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String editfromconfirm() {
@@ -305,7 +305,6 @@ public class CrawlingSessionAction extends FessAdminAction {
         }
     }
 
-    
     protected void loadCrawlingSession() {
 
         final CrawlingSession crawlingSession = crawlingSessionService.getCrawlingSession(createKeyMap());
@@ -350,5 +349,5 @@ public class CrawlingSessionAction extends FessAdminAction {
 
         return keys;
     }
-    
+
 }

@@ -53,10 +53,9 @@ import org.slf4j.LoggerFactory;
 
 public class DataCrawlingConfigAction extends FessAdminAction {
 
-	private static final Logger logger = LoggerFactory.getLogger(DataCrawlingConfigAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataCrawlingConfigAction.class);
 
-	
-	// for list
+    // for list
 
     public List<DataCrawlingConfig> dataCrawlingConfigItems;
 
@@ -284,8 +283,7 @@ public class DataCrawlingConfigAction extends FessAdminAction {
 
         return keys;
     }
-    
-    
+
     protected void loadDataCrawlingConfig() {
 
         final DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigService.getDataCrawlingConfig(createKeyMap());

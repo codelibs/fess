@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.action.admin;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +24,9 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
@@ -35,36 +34,37 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.FileAuthentication;
 import org.codelibs.fess.db.exentity.FileCrawlingConfig;
 import org.codelibs.fess.form.admin.FileAuthenticationForm;
-import org.codelibs.fess.pager.FileAuthenticationPager;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.pager.FileAuthenticationPager;
+import org.codelibs.fess.service.FileAuthenticationService;
 import org.codelibs.fess.service.FileCrawlingConfigService;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileAuthenticationAction extends FessAdminAction {
-	
-	private static final Logger logger = LoggerFactory.getLogger(FileAuthenticationAction.class);
-    
-	
-	// for list
+
+    private static final Logger logger = LoggerFactory.getLogger(FileAuthenticationAction.class);
+
+    // for list
     public List<FileAuthentication> fileAuthenticationItems;
-    
+
     // for edit/confirm/delete
 
-    @ActionForm	
+    @ActionForm
     @Resource
     protected FileCrawlingConfigService fileCrawlingConfigService;
 
     @Resource
     protected SystemHelper systemHelper;
-    
+
     @Resource
     protected FileAuthenticationForm fileAuthenticationForm;
 
@@ -77,7 +77,7 @@ public class FileAuthenticationAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("fileAuthentication");
     }
-        
+
     protected String displayList(final boolean redirect) {
         // page navi
         fileAuthenticationItems = fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager);
@@ -93,7 +93,7 @@ public class FileAuthenticationAction extends FessAdminAction {
             return "index.jsp";
         }
     }
-    
+
     @Execute(validator = false, input = "error.jsp")
     public String index() {
         return displayList(false);
@@ -253,52 +253,17 @@ public class FileAuthenticationAction extends FessAdminAction {
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-        	logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-        	logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-        	logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
 
-    @Token(save = false, validate = true)
-    @Execute(validator = false, input = "error.jsp")
-    public String delete() {
-        if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    fileAuthenticationForm.crudMode });
-        }
-
-        try {
-            final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
-            if (fileAuthentication == null) {
-                // throw an exception
-                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
-
-                new Object[] { fileAuthenticationForm.id });
-
-            }
-
-            fileAuthenticationService.delete(fileAuthentication);
-            SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
-
-            return displayList(true);
-        } catch (final ActionMessagesException e) {
-        	logger.error(e.getMessage(), e);
-            throw e;
-        } catch (final CrudMessageException e) {
-            logger.error(e.getMessage(), e);
-            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
-        } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
-        }
-    }
-    
-    
     protected void loadFileAuthentication() {
 
         final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
@@ -362,13 +327,13 @@ public class FileAuthenticationAction extends FessAdminAction {
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
@@ -380,7 +345,7 @@ public class FileAuthenticationAction extends FessAdminAction {
 
         return keys;
     }
-    
+
     public boolean isDisplayCreateLink() {
         return !fileCrawlingConfigService.getAllFileCrawlingConfigList(false, false, false, null).isEmpty();
     }
