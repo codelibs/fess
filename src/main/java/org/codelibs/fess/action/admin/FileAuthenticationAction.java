@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.action.admin;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,42 +25,280 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.crud.action.admin.BsFileAuthenticationAction;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.FileAuthentication;
 import org.codelibs.fess.db.exentity.FileCrawlingConfig;
+import org.codelibs.fess.form.admin.FileAuthenticationForm;
+import org.codelibs.fess.pager.FileAuthenticationPager;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.service.FileCrawlingConfigService;
+import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.framework.util.StringUtil;
+import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
 
-public class FileAuthenticationAction extends BsFileAuthenticationAction {
+public class FileAuthenticationAction extends FessAdminAction {
+	
+	private static final Logger logger = LoggerFactory.getLogger(FileAuthenticationAction.class);
+    
+	
+	// for list
+    public List<FileAuthentication> fileAuthenticationItems;
+    
+    // for edit/confirm/delete
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Log log = LogFactory.getLog(FileAuthenticationAction.class);
-
+    @ActionForm	
     @Resource
     protected FileCrawlingConfigService fileCrawlingConfigService;
 
     @Resource
     protected SystemHelper systemHelper;
+    
+    @Resource
+    protected FileAuthenticationForm fileAuthenticationForm;
+
+    @Resource
+    protected FileAuthenticationService fileAuthenticationService;
+
+    @Resource
+    protected FileAuthenticationPager fileAuthenticationPager;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("fileAuthentication");
     }
+        
+    protected String displayList(final boolean redirect) {
+        // page navi
+        fileAuthenticationItems = fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager);
 
-    @Override
+        // restore from pager
+        Beans.copy(fileAuthenticationPager, fileAuthenticationForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        if (redirect) {
+            return "index?redirect=true";
+        } else {
+            return "index.jsp";
+        }
+    }
+    
+    @Execute(validator = false, input = "error.jsp")
+    public String index() {
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
+    public String list() {
+        // page navi
+        if (StringUtil.isNotBlank(fileAuthenticationForm.pageNumber)) {
+            try {
+                fileAuthenticationPager.setCurrentPageNumber(Integer.parseInt(fileAuthenticationForm.pageNumber));
+            } catch (final NumberFormatException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + fileAuthenticationForm.pageNumber, e);
+                }
+            }
+        }
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String search() {
+        Beans.copy(fileAuthenticationForm.searchParams, fileAuthenticationPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String reset() {
+        fileAuthenticationPager.clear();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String back() {
+        return displayList(false);
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String editagain() {
+        return "edit.jsp";
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
+    public String confirmpage() {
+        if (fileAuthenticationForm.crudMode != CommonConstants.CONFIRM_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    fileAuthenticationForm.crudMode });
+        }
+
+        loadFileAuthentication();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String createpage() {
+        // page navi
+        fileAuthenticationForm.initialize();
+        fileAuthenticationForm.crudMode = CommonConstants.CREATE_MODE;
+
+        return "edit.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
+    public String editpage() {
+        if (fileAuthenticationForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    fileAuthenticationForm.crudMode });
+        }
+
+        loadFileAuthentication();
+
+        return "edit.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String editfromconfirm() {
+        fileAuthenticationForm.crudMode = CommonConstants.EDIT_MODE;
+
+        loadFileAuthentication();
+
+        return "edit.jsp";
+    }
+
+    @Token(save = false, validate = true, keep = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String confirmfromcreate() {
+        return "confirm.jsp";
+    }
+
+    @Token(save = false, validate = true, keep = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String confirmfromupdate() {
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
+    public String deletepage() {
+        if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    fileAuthenticationForm.crudMode });
+        }
+
+        loadFileAuthentication();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String deletefromconfirm() {
+        fileAuthenticationForm.crudMode = CommonConstants.DELETE_MODE;
+
+        loadFileAuthentication();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String create() {
+        try {
+            final FileAuthentication fileAuthentication = createFileAuthentication();
+            fileAuthenticationService.store(fileAuthentication);
+            SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+            logger.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
+        }
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String update() {
+        try {
+            final FileAuthentication fileAuthentication = createFileAuthentication();
+            fileAuthenticationService.store(fileAuthentication);
+            SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+        	logger.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+        	logger.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+        	logger.error(e.getMessage(), e);
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
+        }
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = false, input = "error.jsp")
+    public String delete() {
+        if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    fileAuthenticationForm.crudMode });
+        }
+
+        try {
+            final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
+            if (fileAuthentication == null) {
+                // throw an exception
+                throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
+
+                new Object[] { fileAuthenticationForm.id });
+
+            }
+
+            fileAuthenticationService.delete(fileAuthentication);
+            SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+        	logger.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+            logger.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
+        }
+    }
+    
+    
     protected void loadFileAuthentication() {
 
         final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
@@ -74,7 +313,6 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
         }
     }
 
-    @Override
     protected FileAuthentication createFileAuthentication() {
         FileAuthentication fileAuthentication;
         final String username = systemHelper.getUsername();
@@ -100,7 +338,6 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
         return fileAuthentication;
     }
 
-    @Override
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (fileAuthenticationForm.crudMode != CommonConstants.DELETE_MODE) {
@@ -136,6 +373,14 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
         }
     }
 
+    protected Map<String, String> createKeyMap() {
+        final Map<String, String> keys = new HashMap<String, String>();
+
+        keys.put("id", fileAuthenticationForm.id);
+
+        return keys;
+    }
+    
     public boolean isDisplayCreateLink() {
         return !fileCrawlingConfigService.getAllFileCrawlingConfigList(false, false, false, null).isEmpty();
     }
