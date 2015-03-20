@@ -38,6 +38,8 @@ import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.client.ftp.FtpAuthentication;
+import org.codelibs.robot.client.ftp.FtpClient;
 import org.codelibs.robot.client.http.Authentication;
 import org.codelibs.robot.client.http.HcHttpClient;
 import org.codelibs.robot.client.http.impl.AuthenticationImpl;
@@ -315,7 +317,8 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
         final String fileAuthStr = paramMap.get(S2ROBOT_FILE_AUTH);
         if (StringUtil.isNotBlank(fileAuthStr)) {
             final String[] fileAuthNames = fileAuthStr.split(",");
-            final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
+            final List<SmbAuthentication> smbAuthList = new ArrayList<>();
+            final List<FtpAuthentication> ftpAuthList = new ArrayList<>();
             for (final String fileAuthName : fileAuthNames) {
                 final String scheme = paramMap.get(S2ROBOT_FILE_AUTH + "."
                         + fileAuthName + ".scheme");
@@ -352,11 +355,45 @@ public class DataCrawlingConfig extends BsDataCrawlingConfig implements
                     smbAuth.setPassword(password == null ? StringUtil.EMPTY
                             : password);
                     smbAuthList.add(smbAuth);
+                } else if (Constants.FTP.equals(scheme)) {
+                    final String hostname = paramMap.get(S2ROBOT_FILE_AUTH
+                            + "." + fileAuthName + ".host");
+                    final String port = paramMap.get(S2ROBOT_FILE_AUTH + "."
+                            + fileAuthName + ".port");
+                    final String username = paramMap.get(S2ROBOT_FILE_AUTH
+                            + "." + fileAuthName + ".username");
+                    final String password = paramMap.get(S2ROBOT_FILE_AUTH
+                            + "." + fileAuthName + ".password");
+
+                    if (StringUtil.isEmpty(username)) {
+                        logger.warn("username is empty. fileAuth:"
+                                + fileAuthName);
+                        continue;
+                    }
+
+                    final FtpAuthentication ftpAuth = new FtpAuthentication();
+                    ftpAuth.setServer(hostname);
+                    if (StringUtil.isNotBlank(port)) {
+                        try {
+                            ftpAuth.setPort(Integer.parseInt(port));
+                        } catch (final NumberFormatException e) {
+                            logger.warn("Failed to parse " + port, e);
+                        }
+                    }
+                    ftpAuth.setUsername(username);
+                    ftpAuth.setPassword(password == null ? StringUtil.EMPTY
+                            : password);
+                    ftpAuthList.add(ftpAuth);
                 }
             }
             if (!smbAuthList.isEmpty()) {
                 factoryParamMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY,
                         smbAuthList.toArray(new SmbAuthentication[smbAuthList
+                                .size()]));
+            }
+            if (!ftpAuthList.isEmpty()) {
+                factoryParamMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY,
+                        ftpAuthList.toArray(new FtpAuthentication[ftpAuthList
                                 .size()]));
             }
         }

@@ -256,6 +256,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SAMBA = "SAMBA";
 
+    public static final String FTP = "FTP";
+
     public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(",
             ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":", "/" };
 

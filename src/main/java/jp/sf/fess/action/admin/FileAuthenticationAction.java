@@ -174,6 +174,9 @@ public class FileAuthenticationAction extends BsFileAuthenticationAction {
         items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
                 .getRequest().getLocale(),
                 "labels.file_authentication_scheme_samba"), Constants.SAMBA));
+        items.add(createItem(MessageResourcesUtil.getMessage(RequestUtil
+                .getRequest().getLocale(),
+                "labels.file_authentication_scheme_ftp"), Constants.FTP));
         return items;
     }
 

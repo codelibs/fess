@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>jp.sf.fess</groupId>
   <artifactId>fess</artifactId>
-  <version>9.3.4-SNAPSHOT</version>
+  <version>9.4.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Fess</name>
   <description>Fess is Full tExt Search System.</description>
@@ -109,7 +109,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <dbflute.version>1.0.5L</dbflute.version>
-    <s2robot.version>0.8.0</s2robot.version>
+    <s2robot.version>0.8.1</s2robot.version>
     <solr.version>4.10.3</solr.version>
     <slf4j.version>1.7.7</slf4j.version>
     <tika.version>1.6</tika.version>

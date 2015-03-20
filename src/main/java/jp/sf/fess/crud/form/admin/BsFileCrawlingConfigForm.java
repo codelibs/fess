@@ -52,7 +52,7 @@ public abstract class BsFileCrawlingConfigForm {
     public String name;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    @UriType(protocols = "file:,smb:")
+    @UriType(protocols = "file:,smb:,ftp:")
     @Maxbytelength(maxbytelength = 4000)
     public String paths;
 

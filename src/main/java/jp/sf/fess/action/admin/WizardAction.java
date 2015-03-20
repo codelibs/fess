@@ -277,7 +277,7 @@ public class WizardAction implements Serializable {
 
     protected String convertCrawlingPath(final String path) {
         if (path.startsWith("http:") || path.startsWith("https:")
-                || path.startsWith("smb:")) {
+                || path.startsWith("smb:") || path.startsWith("ftp:")) {
             return path;
         }
 
