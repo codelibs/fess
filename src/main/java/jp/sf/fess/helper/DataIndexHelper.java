@@ -284,6 +284,9 @@ public class DataIndexHelper implements Serializable {
         }
 
         private void deleteOldDocs() {
+            if (Constants.FALSE.equals(initParamMap.get("delete_old_docs"))) {
+                return;
+            }
             final String sessionId = initParamMap.get(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
                 logger.warn("Invalid sessionId at " + dataCrawlingConfig);
