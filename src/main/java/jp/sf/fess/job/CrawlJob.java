@@ -129,7 +129,7 @@ public class CrawlJob {
             final String[] webConfigIds, final String[] fileConfigIds,
             final String[] dataConfigIds, final String operation) {
         jobExecutor(jobExecutor);
-        operation(Constants.COMMIT);
+        operation(operation);
         webConfigIds(webConfigIds);
         fileConfigIds(fileConfigIds);
         dataConfigIds(dataConfigIds);
@@ -142,7 +142,7 @@ public class CrawlJob {
             final String[] fileConfigIds, final String[] dataConfigIds,
             final String operation) {
         jobExecutor(jobExecutor);
-        operation(Constants.COMMIT);
+        operation(operation);
         webConfigIds(webConfigIds);
         fileConfigIds(fileConfigIds);
         dataConfigIds(dataConfigIds);
