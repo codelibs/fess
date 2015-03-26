@@ -280,13 +280,14 @@ public class KeyMatchAction extends FessAdminAction {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "edit.jsp")
     public String update() {
-        ComponentUtil.getKeyMatchHelper().update();
         try {
             final KeyMatch keyMatch = createKeyMatch();
             keyMatchService.store(keyMatch);
             SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
 
-            return displayList(true);
+            final String result = displayList(true);
+            ComponentUtil.getKeyMatchHelper().update();
+            return result;
         } catch (final ActionMessagesException e) {
             logger.error(e.getMessage(), e);
             throw e;
