@@ -27,6 +27,10 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
+<<<<<<< HEAD
+=======
+import org.codelibs.fess.crud.action.admin.BsJobLogAction;
+>>>>>>> 51bcde16892e677a8f00914daaa2b948b12451c6
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.JobLog;
 import org.codelibs.fess.form.admin.JobLogForm;
@@ -44,7 +48,11 @@ import org.slf4j.LoggerFactory;
 
 public class JobLogAction extends FessAdminAction {
 
+<<<<<<< HEAD
 	private static final Logger logger = LoggerFactory.getLogger(JobLogAction.class);
+=======
+	private static final Logger logger = LoggerFactory.getLogger(BsJobLogAction.class);
+>>>>>>> 51bcde16892e677a8f00914daaa2b948b12451c6
     
     // for list
 
