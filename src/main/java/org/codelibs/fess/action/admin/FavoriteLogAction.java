@@ -17,7 +17,6 @@
 package org.codelibs.fess.action.admin;
 
 import java.io.BufferedWriter;
-import java.io.Serializable;
 import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
@@ -42,7 +42,6 @@ import org.codelibs.fess.service.FavoriteLogService;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
@@ -56,7 +55,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 public class FavoriteLogAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(FavoriteLogAction.class);
-    
+
     // for list
 
     public List<FavoriteLog> favoriteLogItems;
@@ -72,14 +71,14 @@ public class FavoriteLogAction extends FessAdminAction {
 
     @Resource
     protected FavoriteLogPager favoriteLogPager;
-    
+
     @Resource
     protected SystemHelper systemHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("favoriteLog");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         favoriteLogItems = favoriteLogService.getFavoriteLogList(favoriteLogPager);
@@ -108,8 +107,8 @@ public class FavoriteLogAction extends FessAdminAction {
             try {
                 favoriteLogPager.setCurrentPageNumber(Integer.parseInt(favoriteLogForm.pageNumber));
             } catch (final NumberFormatException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: " + favoriteLogForm.pageNumber, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + favoriteLogForm.pageNumber, e);
                 }
             }
         }
@@ -234,13 +233,13 @@ public class FavoriteLogAction extends FessAdminAction {
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
@@ -255,13 +254,13 @@ public class FavoriteLogAction extends FessAdminAction {
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
@@ -289,13 +288,13 @@ public class FavoriteLogAction extends FessAdminAction {
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
@@ -344,7 +343,6 @@ public class FavoriteLogAction extends FessAdminAction {
 
         return keys;
     }
-    
 
     @Execute(validator = false, input = "error.jsp")
     public String deleteall() {
@@ -366,7 +364,7 @@ public class FavoriteLogAction extends FessAdminAction {
             favoriteLogService.dump(writer, favoriteLogPager);
             writer.flush();
         } catch (final Exception e) {
-            log.error("Could not create FessSearchLog.csv.", e);
+            logger.error("Could not create FessSearchLog.csv.", e);
             throw new SSCActionMessagesException(e, "errors.could_not_create_search_log_csv");
         } finally {
             IOUtils.closeQuietly(writer);
