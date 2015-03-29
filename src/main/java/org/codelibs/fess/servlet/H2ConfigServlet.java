@@ -16,6 +16,8 @@
 
 package org.codelibs.fess.servlet;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +48,11 @@ public class H2ConfigServlet extends HttpServlet {
             if (value != null) {
                 argList.add(value);
             } else {
-                argList.add(getServletContext().getRealPath("/WEB-INF/db/"));
+                String baseDir = getServletContext().getRealPath("/WEB-INF/db/");
+                if (Files.notExists(Paths.get(baseDir))) {
+                    baseDir = getServletContext().getRealPath("/WEB-INF/") + "/../../h2/webapp/WEB-INF/db/";
+                }
+                argList.add(baseDir);
             }
 
             argList.add("-tcp");

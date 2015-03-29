@@ -61,6 +61,8 @@ public class SuggestHelper {
         final Thread th = new Thread(new Runnable() {
             @Override
             public void run() {
+                // TODO replace with Elasticsearch
+                /*
                 while (true) {
                     final PingResponse response = searchService.ping();
                     final int status = response.getStatus();
@@ -77,6 +79,7 @@ public class SuggestHelper {
                         //ignore
                     }
                 }
+                */
             }
         });
         th.start();

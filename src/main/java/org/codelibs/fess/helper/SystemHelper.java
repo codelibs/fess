@@ -16,8 +16,6 @@
 
 package org.codelibs.fess.helper;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -39,20 +37,16 @@ import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.db.exentity.RoleType;
 import org.codelibs.fess.service.RoleTypeService;
-import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.codelibs.solr.lib.SolrGroup;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.FileUtil;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,17 +90,7 @@ public class SystemHelper implements Serializable {
 
     private String[] supportedUploadedMediaExtentions = new String[] { "jpg", "jpeg", "gif", "png", "swf" };
 
-    private String jarDir = "/jar/";
-
-    private String launcherFileNamePrefix = "fess-launcher-";
-
     private int maxTextLength = 4000;
-
-    // readonly
-    private String launcherJarPath;
-
-    // readonly
-    private String launcherJnlpPath;
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
@@ -117,45 +101,6 @@ public class SystemHelper implements Serializable {
 
     @InitMethod
     public void init() {
-        final File[] files = ResourceUtil.getJarFiles(launcherFileNamePrefix);
-        if (files.length > 0) {
-            final String fileName = files[0].getName();
-            final String jarPath = ServletContextUtil.getServletContext().getRealPath(jarDir);
-            final File[] jarFiles = new File(jarPath).listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(final File dir, final String name) {
-                    return name.startsWith(launcherFileNamePrefix);
-                }
-            });
-            if (jarFiles != null) {
-                for (final File jarFile : jarFiles) {
-                    if (jarFile.exists() && !jarFile.delete()) {
-                        logger.warn("Could not delete " + jarFile.getAbsolutePath());
-                    }
-                }
-            }
-            final File launcherJarFile = new File(jarPath, fileName);
-            final File parentLauncherJarFile = launcherJarFile.getParentFile();
-            if (!parentLauncherJarFile.exists() && !parentLauncherJarFile.mkdirs()) {
-                logger.warn("Could not create " + parentLauncherJarFile.getAbsolutePath());
-            }
-            FileUtil.copy(files[0], launcherJarFile);
-            launcherJarPath = jarDir + fileName;
-            launcherJnlpPath = launcherJarPath.replace(".jar", ".jnlp");
-            final File launcherJnlpFile = new File(launcherJarFile.getAbsolutePath().replace(".jar", ".jnlp"));
-            final File jnlpTemplateFile = new File(ResourceUtil.getOrigPath("jnlp/fess-launcher.jnlp"));
-            if (!jnlpTemplateFile.isFile()) {
-                throw new FessSystemException(jnlpTemplateFile.getAbsolutePath() + " is not found.");
-            }
-            try {
-                String content = new String(FileUtil.getBytes(jnlpTemplateFile), Constants.UTF_8);
-                content = content.replace("${launcherJarFile}", fileName);
-                FileUtil.write(launcherJnlpFile.getAbsolutePath(), content.getBytes(Constants.UTF_8));
-            } catch (final UnsupportedEncodingException e) {
-                throw new FessSystemException("Could not write " + jnlpTemplateFile.getAbsolutePath(), e);
-            }
-        }
-
         langItemsCache =
                 CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
                         .build(new CacheLoader<String, List<Map<String, String>>>() {
@@ -371,30 +316,6 @@ public class SystemHelper implements Serializable {
 
     public void setSupportedUploadedMediaExtentions(final String[] supportedUploadedMediaExtentions) {
         this.supportedUploadedMediaExtentions = supportedUploadedMediaExtentions;
-    }
-
-    public String getJarDir() {
-        return jarDir;
-    }
-
-    public void setJarDir(final String jarDir) {
-        this.jarDir = jarDir;
-    }
-
-    public String getLauncherFileNamePrefix() {
-        return launcherFileNamePrefix;
-    }
-
-    public void setLauncherFileNamePrefix(final String launcherFileNamePrefix) {
-        this.launcherFileNamePrefix = launcherFileNamePrefix;
-    }
-
-    public String getLauncherJarPath() {
-        return launcherJarPath;
-    }
-
-    public String getLauncherJnlpPath() {
-        return launcherJnlpPath;
     }
 
     public int getMaxTextLength() {

@@ -45,6 +45,7 @@
 -->
   <root>
     <priority value="info"/>
-    <appender-ref ref="rollingFile"/>
+    <!-- TODO replace for production -->
+    <appender-ref ref="stdout"/>
   </root>
 </log4j:configuration>
