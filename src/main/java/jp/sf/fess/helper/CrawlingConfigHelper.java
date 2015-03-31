@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.sf.fess.Constants;
@@ -47,6 +48,7 @@ import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.util.StreamUtil;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.Base64Util;
+import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,10 +184,11 @@ public class CrawlingConfigHelper implements Serializable {
         }
         final ResponseData responseData = client.execute(RequestDataBuilder
                 .newRequestData().get().url(url).build());
+        final HttpServletRequest request = RequestUtil.getRequest();
         final HttpServletResponse response = ResponseUtil.getResponse();
-        writeFileName(response, responseData);
-        writeContentType(response, responseData);
-        writeNoCache(response, responseData);
+        writeFileName(request, response, responseData);
+        writeContentType(request, response, responseData);
+        writeNoCache(request, response, responseData);
         InputStream is = null;
         OutputStream os = null;
         try {
@@ -208,18 +211,27 @@ public class CrawlingConfigHelper implements Serializable {
         }
     }
 
-    protected void writeNoCache(final HttpServletResponse response,
-            final ResponseData responseData) {
-        response.setHeader("Pragma", "no-cache");
-        response.setHeader("Cache-Control", "no-cache");
+    protected void writeNoCache(final HttpServletRequest request,
+            final HttpServletResponse response, final ResponseData responseData) {
+        final UserAgentHelper userAgentHelper = ComponentUtil
+                .getUserAgentHelper();
+        int ieMajorVersion = userAgentHelper.getIEMajorVersion(request);
+        if (ieMajorVersion == 0 || ieMajorVersion > 9) {
+            response.setHeader("Pragma", "no-cache");
+            response.setHeader("Cache-Control", "no-cache");
+        } else {
+            response.setHeader("Pragma", "public");
+            response.setHeader("Cache-Control", "public");
+        }
         response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
     }
 
-    protected void writeFileName(final HttpServletResponse response,
-            final ResponseData responseData) {
+    protected void writeFileName(final HttpServletRequest request,
+            final HttpServletResponse response, final ResponseData responseData) {
         final UserAgentHelper userAgentHelper = ComponentUtil
                 .getUserAgentHelper();
-        final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
+        final UserAgentType userAgentType = userAgentHelper
+                .getUserAgentType(request);
         String charset = responseData.getCharSet();
         if (charset == null) {
             charset = Constants.UTF_8;
@@ -274,8 +286,8 @@ public class CrawlingConfigHelper implements Serializable {
         }
     }
 
-    protected void writeContentType(final HttpServletResponse response,
-            final ResponseData responseData) {
+    protected void writeContentType(final HttpServletRequest request,
+            final HttpServletResponse response, final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
         if (logger.isDebugEnabled()) {
             logger.debug("mimeType: " + mimeType);

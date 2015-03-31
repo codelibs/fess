@@ -19,14 +19,23 @@ package jp.sf.fess.helper;
 import javax.servlet.http.HttpServletRequest;
 
 import org.seasar.struts.util.RequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserAgentHelper {
+    private static final Logger logger = LoggerFactory
+            .getLogger(UserAgentHelper.class);
+
     private static final String USER_AGENT = "user-agent";
 
     private static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
 
     public UserAgentType getUserAgentType() {
         final HttpServletRequest request = RequestUtil.getRequest();
+        return getUserAgentType(request);
+    }
+
+    public UserAgentType getUserAgentType(final HttpServletRequest request) {
         UserAgentType uaType = (UserAgentType) request
                 .getAttribute(USER_AGENT_TYPE);
         if (uaType == null) {
@@ -51,6 +60,27 @@ public class UserAgentHelper {
             request.setAttribute(USER_AGENT_TYPE, uaType);
         }
         return uaType;
+    }
+
+    public int getIEMajorVersion(final HttpServletRequest request) {
+        UserAgentType userAgentType = getUserAgentType(request);
+        if (userAgentType == UserAgentType.IE) {
+            final String userAgent = request.getHeader(USER_AGENT);
+            try {
+                if (userAgent.contains("MSIE")) {
+                    String substring = userAgent.substring(
+                            userAgent.indexOf("MSIE")).split(";")[0];
+                    return Integer.parseInt(substring.split("[ \\.]")[1]);
+                } else if (userAgent.contains("rv")) {
+                    String substring = userAgent.substring(
+                            userAgent.indexOf("rv"), userAgent.indexOf(")"));
+                    return Integer.parseInt(substring.split("[ :\\.]")[1]);
+                }
+            } catch (Exception e) {
+                logger.debug("Invalid request header: " + userAgent, e);
+            }
+        }
+        return 0;
     }
 
     public enum UserAgentType {
