@@ -334,7 +334,8 @@ public class WebFsIndexHelper implements Serializable {
                 if (StringUtil.isNotBlank(u)) {
                     u = u.trim();
                     if (!u.startsWith("#")) {
-                        if (!u.startsWith("file:") && !u.startsWith("smb:") && !u.startsWith("ftp:")) {
+                        if (!u.startsWith("file:") && !u.startsWith("smb:")
+                                && !u.startsWith("ftp:")) {
                             if (u.startsWith("/")) {
                                 u = "file:" + u;
                             } else {
