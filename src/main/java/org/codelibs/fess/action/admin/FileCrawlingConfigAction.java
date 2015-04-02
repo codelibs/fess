@@ -51,7 +51,11 @@ import org.slf4j.LoggerFactory;
 public class FileCrawlingConfigAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(FileCrawlingConfigAction.class);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
     // for list
 
     public List<FileCrawlingConfig> fileCrawlingConfigItems;
@@ -83,7 +87,7 @@ public class FileCrawlingConfigAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("fileCrawlingConfig");
     }
-
+    
     protected String displayList(final boolean redirect) {
         // page navi
         fileCrawlingConfigItems = fileCrawlingConfigService.getFileCrawlingConfigList(fileCrawlingConfigPager);
@@ -178,6 +182,103 @@ public class FileCrawlingConfigAction extends FessAdminAction {
                     fileCrawlingConfigForm.crudMode });
         }
 
+<<<<<<< HEAD
+    protected String displayList(final boolean redirect) {
+        // page navi
+        fileCrawlingConfigItems = fileCrawlingConfigService.getFileCrawlingConfigList(fileCrawlingConfigPager);
+
+        // restore from pager
+        Beans.copy(fileCrawlingConfigPager, fileCrawlingConfigForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        if (redirect) {
+            return "index?redirect=true";
+        } else {
+            return "index.jsp";
+        }
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String index() {
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
+    public String list() {
+        // page navi
+        if (StringUtil.isNotBlank(fileCrawlingConfigForm.pageNumber)) {
+            try {
+                fileCrawlingConfigPager.setCurrentPageNumber(Integer.parseInt(fileCrawlingConfigForm.pageNumber));
+            } catch (final NumberFormatException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + fileCrawlingConfigForm.pageNumber, e);
+                }
+            }
+        }
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String search() {
+        Beans.copy(fileCrawlingConfigForm.searchParams, fileCrawlingConfigPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String reset() {
+        fileCrawlingConfigPager.clear();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String back() {
+        return displayList(false);
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String editagain() {
+        return "edit.jsp";
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
+    public String confirmpage() {
+        if (fileCrawlingConfigForm.crudMode != CommonConstants.CONFIRM_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    fileCrawlingConfigForm.crudMode });
+        }
+
+        loadFileCrawlingConfig();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String createpage() {
+        // page navi
+        fileCrawlingConfigForm.initialize();
+        fileCrawlingConfigForm.crudMode = CommonConstants.CREATE_MODE;
+
+        return "edit.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
+    public String editpage() {
+        if (fileCrawlingConfigForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    fileCrawlingConfigForm.crudMode });
+        }
+
+=======
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
         loadFileCrawlingConfig();
 
         return "edit.jsp";
@@ -277,7 +378,11 @@ public class FileCrawlingConfigAction extends FessAdminAction {
 
         return keys;
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
     protected void loadFileCrawlingConfig() {
 
         final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigService.getFileCrawlingConfig(createKeyMap());
