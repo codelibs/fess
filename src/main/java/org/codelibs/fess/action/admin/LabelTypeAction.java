@@ -17,54 +17,30 @@
 package org.codelibs.fess.action.admin;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.action.base.FessAdminAction;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
+import org.codelibs.fess.crud.action.admin.BsLabelTypeAction;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.LabelType;
 import org.codelibs.fess.db.exentity.RoleType;
-import org.codelibs.fess.form.admin.LabelTypeForm;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.LabelTypePager;
-import org.codelibs.fess.service.LabelTypeService;
 import org.codelibs.fess.service.RoleTypeService;
-import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
-import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LabelTypeAction extends FessAdminAction {
+public class LabelTypeAction extends BsLabelTypeAction {
+    private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(LabelTypeAction.class);
-    
-    // for list
+    private static final Log log = LogFactory.getLog(LabelTypeAction.class);
 
-    public List<LabelType> labelTypeItems;
-
-    // for edit/confirm/delete
-
-    @ActionForm
-    @Resource
-    protected LabelTypeForm labelTypeForm;
-
-    @Resource
-    protected LabelTypeService labelTypeService;
-
-    @Resource
-    protected LabelTypePager labelTypePager;
-    
     @Resource
     protected RoleTypeService roleTypeService;
 
@@ -74,203 +50,8 @@ public class LabelTypeAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("labelType");
     }
-    
-    protected String displayList(final boolean redirect) {
-        // page navi
-        labelTypeItems = labelTypeService.getLabelTypeList(labelTypePager);
 
-        // restore from pager
-        Beans.copy(labelTypePager, labelTypeForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
-
-        .execute();
-
-        if (redirect) {
-            return "index?redirect=true";
-        } else {
-            return "index.jsp";
-        }
-    }
-
-    @Execute(validator = false, input = "error.jsp")
-    public String index() {
-        return displayList(false);
-    }
-
-    @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
-    public String list() {
-        // page navi
-        if (StringUtil.isNotBlank(labelTypeForm.pageNumber)) {
-            try {
-                labelTypePager.setCurrentPageNumber(Integer.parseInt(labelTypeForm.pageNumber));
-            } catch (final NumberFormatException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Invalid value: " + labelTypeForm.pageNumber, e);
-                }
-            }
-        }
-
-        return displayList(false);
-    }
-
-    @Execute(validator = false, input = "error.jsp")
-    public String search() {
-        Beans.copy(labelTypeForm.searchParams, labelTypePager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
-
-        .execute();
-
-        return displayList(false);
-    }
-
-    @Execute(validator = false, input = "error.jsp")
-    public String reset() {
-        labelTypePager.clear();
-
-        return displayList(false);
-    }
-
-    @Execute(validator = false, input = "error.jsp")
-    public String back() {
-        return displayList(false);
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false, input = "error.jsp")
-    public String editagain() {
-        return "edit.jsp";
-    }
-
-    @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
-    public String confirmpage() {
-        if (labelTypeForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
-                    labelTypeForm.crudMode });
-        }
-
-        loadLabelType();
-
-        return "confirm.jsp";
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false, input = "error.jsp")
-    public String createpage() {
-        // page navi
-        labelTypeForm.initialize();
-        labelTypeForm.crudMode = CommonConstants.CREATE_MODE;
-
-        return "edit.jsp";
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
-    public String editpage() {
-        if (labelTypeForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE, labelTypeForm.crudMode });
-        }
-
-        loadLabelType();
-
-        return "edit.jsp";
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false, input = "error.jsp")
-    public String editfromconfirm() {
-        labelTypeForm.crudMode = CommonConstants.EDIT_MODE;
-
-        loadLabelType();
-
-        return "edit.jsp";
-    }
-
-    @Token(save = false, validate = true, keep = true)
-    @Execute(validator = true, input = "edit.jsp")
-    public String confirmfromcreate() {
-        return "confirm.jsp";
-    }
-
-    @Token(save = false, validate = true, keep = true)
-    @Execute(validator = true, input = "edit.jsp")
-    public String confirmfromupdate() {
-        return "confirm.jsp";
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
-    public String deletepage() {
-        if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    labelTypeForm.crudMode });
-        }
-
-        loadLabelType();
-
-        return "confirm.jsp";
-    }
-
-    @Token(save = true, validate = false)
-    @Execute(validator = false, input = "error.jsp")
-    public String deletefromconfirm() {
-        labelTypeForm.crudMode = CommonConstants.DELETE_MODE;
-
-        loadLabelType();
-
-        return "confirm.jsp";
-    }
-
-    @Token(save = false, validate = true)
-    @Execute(validator = true, input = "edit.jsp")
-    public String create() {
-        try {
-            final LabelType labelType = createLabelType();
-            labelTypeService.store(labelType);
-            SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
-
-            return displayList(true);
-        } catch (final ActionMessagesException e) {
-            logger.error(e.getMessage(), e);
-            throw e;
-        } catch (final CrudMessageException e) {
-            logger.error(e.getMessage(), e);
-            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
-        } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
-        }
-    }
-
-    @Token(save = false, validate = true)
-    @Execute(validator = true, input = "edit.jsp")
-    public String update() {
-        try {
-            final LabelType labelType = createLabelType();
-            labelTypeService.store(labelType);
-            SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
-
-            return displayList(true);
-        } catch (final ActionMessagesException e) {
-            logger.error(e.getMessage(), e);
-            throw e;
-        } catch (final CrudMessageException e) {
-            logger.error(e.getMessage(), e);
-            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
-        } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
-        }
-    }
-
-
-    protected Map<String, String> createKeyMap() {
-        final Map<String, String> keys = new HashMap<String, String>();
-
-        keys.put("id", labelTypeForm.id);
-
-        return keys;
-    }
-    
-
+    @Override
     protected void loadLabelType() {
 
         final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
@@ -282,6 +63,7 @@ public class LabelTypeAction extends FessAdminAction {
         FessBeans.copy(labelType, labelTypeForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
+    @Override
     protected LabelType createLabelType() {
         LabelType labelType;
         final String username = systemHelper.getUsername();
@@ -304,6 +86,7 @@ public class LabelTypeAction extends FessAdminAction {
         return labelType;
     }
 
+    @Override
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
@@ -328,13 +111,13 @@ public class LabelTypeAction extends FessAdminAction {
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new SSCActionMessagesException(e, e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new SSCActionMessagesException(e, "errors.crud_failed_to_delete_crud_table");
         }
     }
