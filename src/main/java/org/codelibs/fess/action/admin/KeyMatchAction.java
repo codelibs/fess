@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 public class KeyMatchAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(KeyMatchAction.class);
+<<<<<<< HEAD
 
     // for list
 
@@ -63,14 +64,32 @@ public class KeyMatchAction extends FessAdminAction {
 
     @Resource
     protected KeyMatchPager keyMatchPager;
+=======
+    
+    // for list
 
+    public List<KeyMatch> keyMatchItems;
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
+
+    // for edit/confirm/delete
+
+    @ActionForm
+    @Resource
+    protected KeyMatchForm keyMatchForm;
+
+    @Resource
+    protected KeyMatchService keyMatchService;
+
+    @Resource
+    protected KeyMatchPager keyMatchPager;
+    
     @Resource
     protected SystemHelper systemHelper;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("keyMatch");
     }
-
+    
     protected String displayList(final boolean redirect) {
         // page navi
         keyMatchItems = keyMatchService.getKeyMatchList(keyMatchPager);
@@ -164,6 +183,102 @@ public class KeyMatchAction extends FessAdminAction {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, keyMatchForm.crudMode });
         }
 
+<<<<<<< HEAD
+    protected String displayList(final boolean redirect) {
+        // page navi
+        keyMatchItems = keyMatchService.getKeyMatchList(keyMatchPager);
+
+        // restore from pager
+        Beans.copy(keyMatchPager, keyMatchForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        if (redirect) {
+            return "index?redirect=true";
+        } else {
+            return "index.jsp";
+        }
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String index() {
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
+    public String list() {
+        // page navi
+        if (StringUtil.isNotBlank(keyMatchForm.pageNumber)) {
+            try {
+                keyMatchPager.setCurrentPageNumber(Integer.parseInt(keyMatchForm.pageNumber));
+            } catch (final NumberFormatException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + keyMatchForm.pageNumber, e);
+                }
+            }
+        }
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String search() {
+        Beans.copy(keyMatchForm.searchParams, keyMatchPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String reset() {
+        keyMatchPager.clear();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String back() {
+        return displayList(false);
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String editagain() {
+        return "edit.jsp";
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
+    public String confirmpage() {
+        if (keyMatchForm.crudMode != CommonConstants.CONFIRM_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    keyMatchForm.crudMode });
+        }
+
+        loadKeyMatch();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String createpage() {
+        // page navi
+        keyMatchForm.initialize();
+        keyMatchForm.crudMode = CommonConstants.CREATE_MODE;
+
+        return "edit.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
+    public String editpage() {
+        if (keyMatchForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, keyMatchForm.crudMode });
+        }
+
+=======
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
         loadKeyMatch();
 
         return "edit.jsp";
@@ -221,7 +336,11 @@ public class KeyMatchAction extends FessAdminAction {
 
         return keys;
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
     protected void loadKeyMatch() {
 
         final KeyMatch keyMatch = keyMatchService.getKeyMatch(createKeyMap());
@@ -280,14 +399,22 @@ public class KeyMatchAction extends FessAdminAction {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "edit.jsp")
     public String update() {
+<<<<<<< HEAD
+=======
+        ComponentUtil.getKeyMatchHelper().update();
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
         try {
             final KeyMatch keyMatch = createKeyMatch();
             keyMatchService.store(keyMatch);
             SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
 
+<<<<<<< HEAD
             final String result = displayList(true);
             ComponentUtil.getKeyMatchHelper().update();
             return result;
+=======
+            return displayList(true);
+>>>>>>> 54e5e6c69f136354f051f88cbbd9aa07a3648500
         } catch (final ActionMessagesException e) {
             logger.error(e.getMessage(), e);
             throw e;
