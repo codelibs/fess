@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.crud.action.admin;
+package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -23,50 +23,56 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.PathMapping;
-import org.codelibs.fess.pager.PathMappingPager;
-import org.codelibs.fess.service.PathMappingService;
-import org.codelibs.fess.web.admin.PathMappingForm;
+import org.codelibs.fess.db.exentity.FailureUrl;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.pager.FailureUrlPager;
+import org.codelibs.fess.service.FailureUrlService;
+import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BsPathMappingAction implements Serializable {
+public class FailureUrlAction extends FessAdminAction {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Log log = LogFactory.getLog(BsPathMappingAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(FailureUrlAction.class);
 
     // for list
 
-    public List<PathMapping> pathMappingItems;
+    public List<FailureUrl> failureUrlItems;
 
     // for edit/confirm/delete
 
     @ActionForm
     @Resource
-    protected PathMappingForm pathMappingForm;
+    protected FailureUrlForm failureUrlForm;
 
     @Resource
-    protected PathMappingService pathMappingService;
+    protected FailureUrlService failureUrlService;
 
     @Resource
-    protected PathMappingPager pathMappingPager;
+    protected FailureUrlPager failureUrlPager;
+
+    @Resource
+    protected SystemHelper systemHelper;
+
+    public String getHelpLink() {
+        return systemHelper.getHelpLink("failureUrl");
+    }
 
     protected String displayList(final boolean redirect) {
         // page navi
-        pathMappingItems = pathMappingService.getPathMappingList(pathMappingPager);
+        failureUrlItems = failureUrlService.getFailureUrlList(failureUrlPager);
 
         // restore from pager
-        Beans.copy(pathMappingPager, pathMappingForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(failureUrlPager, failureUrlForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
         .execute();
 
@@ -85,12 +91,12 @@ public class BsPathMappingAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
     public String list() {
         // page navi
-        if (StringUtil.isNotBlank(pathMappingForm.pageNumber)) {
+        if (StringUtil.isNotBlank(failureUrlForm.pageNumber)) {
             try {
-                pathMappingPager.setCurrentPageNumber(Integer.parseInt(pathMappingForm.pageNumber));
+                failureUrlPager.setCurrentPageNumber(Integer.parseInt(failureUrlForm.pageNumber));
             } catch (final NumberFormatException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: " + pathMappingForm.pageNumber, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + failureUrlForm.pageNumber, e);
                 }
             }
         }
@@ -100,7 +106,7 @@ public class BsPathMappingAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(pathMappingForm.searchParams, pathMappingPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(failureUrlForm.searchParams, failureUrlPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
         .execute();
 
@@ -109,7 +115,7 @@ public class BsPathMappingAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String reset() {
-        pathMappingPager.clear();
+        failureUrlPager.clear();
 
         return displayList(false);
     }
@@ -127,12 +133,12 @@ public class BsPathMappingAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
-        if (pathMappingForm.crudMode != CommonConstants.CONFIRM_MODE) {
+        if (failureUrlForm.crudMode != CommonConstants.CONFIRM_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
-                    pathMappingForm.crudMode });
+                    failureUrlForm.crudMode });
         }
 
-        loadPathMapping();
+        loadFailureUrl();
 
         return "confirm.jsp";
     }
@@ -141,8 +147,8 @@ public class BsPathMappingAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String createpage() {
         // page navi
-        pathMappingForm.initialize();
-        pathMappingForm.crudMode = CommonConstants.CREATE_MODE;
+        failureUrlForm.initialize();
+        failureUrlForm.crudMode = CommonConstants.CREATE_MODE;
 
         return "edit.jsp";
     }
@@ -150,12 +156,12 @@ public class BsPathMappingAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
-        if (pathMappingForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
-                    pathMappingForm.crudMode });
+        if (failureUrlForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode",
+                    new Object[] { CommonConstants.EDIT_MODE, failureUrlForm.crudMode });
         }
 
-        loadPathMapping();
+        loadFailureUrl();
 
         return "edit.jsp";
     }
@@ -163,9 +169,9 @@ public class BsPathMappingAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String editfromconfirm() {
-        pathMappingForm.crudMode = CommonConstants.EDIT_MODE;
+        failureUrlForm.crudMode = CommonConstants.EDIT_MODE;
 
-        loadPathMapping();
+        loadFailureUrl();
 
         return "edit.jsp";
     }
@@ -185,12 +191,12 @@ public class BsPathMappingAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
-        if (pathMappingForm.crudMode != CommonConstants.DELETE_MODE) {
+        if (failureUrlForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    pathMappingForm.crudMode });
+                    failureUrlForm.crudMode });
         }
 
-        loadPathMapping();
+        loadFailureUrl();
 
         return "confirm.jsp";
     }
@@ -198,9 +204,9 @@ public class BsPathMappingAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String deletefromconfirm() {
-        pathMappingForm.crudMode = CommonConstants.DELETE_MODE;
+        failureUrlForm.crudMode = CommonConstants.DELETE_MODE;
 
-        loadPathMapping();
+        loadFailureUrl();
 
         return "confirm.jsp";
     }
@@ -209,19 +215,19 @@ public class BsPathMappingAction implements Serializable {
     @Execute(validator = true, input = "edit.jsp")
     public String create() {
         try {
-            final PathMapping pathMapping = createPathMapping();
-            pathMappingService.store(pathMapping);
+            final FailureUrl failureUrl = createFailureUrl();
+            failureUrlService.store(failureUrl);
             SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
@@ -230,19 +236,19 @@ public class BsPathMappingAction implements Serializable {
     @Execute(validator = true, input = "edit.jsp")
     public String update() {
         try {
-            final PathMapping pathMapping = createPathMapping();
-            pathMappingService.store(pathMapping);
+            final FailureUrl failureUrl = createFailureUrl();
+            failureUrlService.store(failureUrl);
             SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
@@ -250,79 +256,86 @@ public class BsPathMappingAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
-        if (pathMappingForm.crudMode != CommonConstants.DELETE_MODE) {
+        if (failureUrlForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    pathMappingForm.crudMode });
+                    failureUrlForm.crudMode });
         }
 
         try {
-            final PathMapping pathMapping = pathMappingService.getPathMapping(createKeyMap());
-            if (pathMapping == null) {
+            final FailureUrl failureUrl = failureUrlService.getFailureUrl(createKeyMap());
+            if (failureUrl == null) {
                 // throw an exception
                 throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                new Object[] { pathMappingForm.id });
+                new Object[] { failureUrlForm.id });
 
             }
 
-            pathMappingService.delete(pathMapping);
+            failureUrlService.delete(failureUrl);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
-    protected void loadPathMapping() {
+    protected void loadFailureUrl() {
 
-        final PathMapping pathMapping = pathMappingService.getPathMapping(createKeyMap());
-        if (pathMapping == null) {
+        final FailureUrl failureUrl = failureUrlService.getFailureUrl(createKeyMap());
+        if (failureUrl == null) {
             // throw an exception
             throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-            new Object[] { pathMappingForm.id });
+            new Object[] { failureUrlForm.id });
 
         }
 
-        Beans.copy(pathMapping, pathMappingForm).excludes("searchParams", "mode")
+        Beans.copy(failureUrl, failureUrlForm).excludes("searchParams", "mode")
 
         .execute();
     }
 
-    protected PathMapping createPathMapping() {
-        PathMapping pathMapping;
-        if (pathMappingForm.crudMode == CommonConstants.EDIT_MODE) {
-            pathMapping = pathMappingService.getPathMapping(createKeyMap());
-            if (pathMapping == null) {
+    protected FailureUrl createFailureUrl() {
+        FailureUrl failureUrl;
+        if (failureUrlForm.crudMode == CommonConstants.EDIT_MODE) {
+            failureUrl = failureUrlService.getFailureUrl(createKeyMap());
+            if (failureUrl == null) {
                 // throw an exception
                 throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                new Object[] { pathMappingForm.id });
+                new Object[] { failureUrlForm.id });
 
             }
         } else {
-            pathMapping = new PathMapping();
+            failureUrl = new FailureUrl();
         }
-        Beans.copy(pathMappingForm, pathMapping).excludes("searchParams", "mode")
+        Beans.copy(failureUrlForm, failureUrl).excludes("searchParams", "mode")
 
         .execute();
 
-        return pathMapping;
+        return failureUrl;
     }
 
     protected Map<String, String> createKeyMap() {
         final Map<String, String> keys = new HashMap<String, String>();
 
-        keys.put("id", pathMappingForm.id);
+        keys.put("id", failureUrlForm.id);
 
         return keys;
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String deleteall() {
+        failureUrlService.deleteAll(failureUrlPager);
+        SAStrutsUtil.addSessionMessage("success.failure_url_delete_all");
+        return displayList(true);
     }
 }
