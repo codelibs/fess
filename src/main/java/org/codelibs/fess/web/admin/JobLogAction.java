@@ -14,59 +14,66 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.crud.action.admin;
+package org.codelibs.fess.web.admin;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.LabelType;
-import org.codelibs.fess.pager.LabelTypePager;
-import org.codelibs.fess.service.LabelTypeService;
-import org.codelibs.fess.web.admin.LabelTypeForm;
+import org.codelibs.fess.db.exentity.JobLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.pager.JobLogPager;
+import org.codelibs.fess.service.JobLogService;
+import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BsLabelTypeAction implements Serializable {
+public class JobLogAction extends FessAdminAction {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Log log = LogFactory.getLog(BsLabelTypeAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(JobLogAction.class);
 
     // for list
 
-    public List<LabelType> labelTypeItems;
+    public List<JobLog> jobLogItems;
 
     // for edit/confirm/delete
 
     @ActionForm
     @Resource
-    protected LabelTypeForm labelTypeForm;
+    protected JobLogForm jobLogForm;
 
     @Resource
-    protected LabelTypeService labelTypeService;
+    protected JobLogService jobLogService;
 
     @Resource
-    protected LabelTypePager labelTypePager;
+    protected JobLogPager jobLogPager;
+
+    @Resource
+    protected SystemHelper systemHelper;
+
+    public String getHelpLink() {
+        return systemHelper.getHelpLink("jobLog");
+    }
 
     protected String displayList(final boolean redirect) {
         // page navi
-        labelTypeItems = labelTypeService.getLabelTypeList(labelTypePager);
+        jobLogItems = jobLogService.getJobLogList(jobLogPager);
 
         // restore from pager
-        Beans.copy(labelTypePager, labelTypeForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(jobLogPager, jobLogForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
         .execute();
 
@@ -85,12 +92,12 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
     public String list() {
         // page navi
-        if (StringUtil.isNotBlank(labelTypeForm.pageNumber)) {
+        if (StringUtil.isNotBlank(jobLogForm.pageNumber)) {
             try {
-                labelTypePager.setCurrentPageNumber(Integer.parseInt(labelTypeForm.pageNumber));
+                jobLogPager.setCurrentPageNumber(Integer.parseInt(jobLogForm.pageNumber));
             } catch (final NumberFormatException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: " + labelTypeForm.pageNumber, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + jobLogForm.pageNumber, e);
                 }
             }
         }
@@ -100,7 +107,7 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(labelTypeForm.searchParams, labelTypePager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(jobLogForm.searchParams, jobLogPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
         .execute();
 
@@ -109,7 +116,7 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String reset() {
-        labelTypePager.clear();
+        jobLogPager.clear();
 
         return displayList(false);
     }
@@ -127,12 +134,12 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
-        if (labelTypeForm.crudMode != CommonConstants.CONFIRM_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
-                    labelTypeForm.crudMode });
+        if (jobLogForm.crudMode != CommonConstants.CONFIRM_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode",
+                    new Object[] { CommonConstants.CONFIRM_MODE, jobLogForm.crudMode });
         }
 
-        loadLabelType();
+        loadJobLog();
 
         return "confirm.jsp";
     }
@@ -141,8 +148,8 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String createpage() {
         // page navi
-        labelTypeForm.initialize();
-        labelTypeForm.crudMode = CommonConstants.CREATE_MODE;
+        jobLogForm.initialize();
+        jobLogForm.crudMode = CommonConstants.CREATE_MODE;
 
         return "edit.jsp";
     }
@@ -150,12 +157,11 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
-        if (labelTypeForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE, labelTypeForm.crudMode });
+        if (jobLogForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE, jobLogForm.crudMode });
         }
 
-        loadLabelType();
+        loadJobLog();
 
         return "edit.jsp";
     }
@@ -163,9 +169,9 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String editfromconfirm() {
-        labelTypeForm.crudMode = CommonConstants.EDIT_MODE;
+        jobLogForm.crudMode = CommonConstants.EDIT_MODE;
 
-        loadLabelType();
+        loadJobLog();
 
         return "edit.jsp";
     }
@@ -185,12 +191,11 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
-        if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    labelTypeForm.crudMode });
+        if (jobLogForm.crudMode != CommonConstants.DELETE_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE, jobLogForm.crudMode });
         }
 
-        loadLabelType();
+        loadJobLog();
 
         return "confirm.jsp";
     }
@@ -198,9 +203,9 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String deletefromconfirm() {
-        labelTypeForm.crudMode = CommonConstants.DELETE_MODE;
+        jobLogForm.crudMode = CommonConstants.DELETE_MODE;
 
-        loadLabelType();
+        loadJobLog();
 
         return "confirm.jsp";
     }
@@ -209,19 +214,19 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = true, input = "edit.jsp")
     public String create() {
         try {
-            final LabelType labelType = createLabelType();
-            labelTypeService.store(labelType);
+            final JobLog jobLog = createJobLog();
+            jobLogService.store(jobLog);
             SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
@@ -230,19 +235,19 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = true, input = "edit.jsp")
     public String update() {
         try {
-            final LabelType labelType = createLabelType();
-            labelTypeService.store(labelType);
+            final JobLog jobLog = createJobLog();
+            jobLogService.store(jobLog);
             SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
@@ -250,79 +255,88 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
-        if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    labelTypeForm.crudMode });
+        if (jobLogForm.crudMode != CommonConstants.DELETE_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE, jobLogForm.crudMode });
         }
 
         try {
-            final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
-            if (labelType == null) {
+            final JobLog jobLog = jobLogService.getJobLog(createKeyMap());
+            if (jobLog == null) {
                 // throw an exception
                 throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                new Object[] { labelTypeForm.id });
+                new Object[] { jobLogForm.id });
 
             }
 
-            labelTypeService.delete(labelType);
+            jobLogService.delete(jobLog);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
-    protected void loadLabelType() {
+    protected void loadJobLog() {
 
-        final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
-        if (labelType == null) {
+        final JobLog jobLog = jobLogService.getJobLog(createKeyMap());
+        if (jobLog == null) {
             // throw an exception
             throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-            new Object[] { labelTypeForm.id });
+            new Object[] { jobLogForm.id });
 
         }
 
-        Beans.copy(labelType, labelTypeForm).excludes("searchParams", "mode")
+        Beans.copy(jobLog, jobLogForm).excludes("searchParams", "mode")
 
         .execute();
     }
 
-    protected LabelType createLabelType() {
-        LabelType labelType;
-        if (labelTypeForm.crudMode == CommonConstants.EDIT_MODE) {
-            labelType = labelTypeService.getLabelType(createKeyMap());
-            if (labelType == null) {
+    protected JobLog createJobLog() {
+        JobLog jobLog;
+        if (jobLogForm.crudMode == CommonConstants.EDIT_MODE) {
+            jobLog = jobLogService.getJobLog(createKeyMap());
+            if (jobLog == null) {
                 // throw an exception
                 throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                new Object[] { labelTypeForm.id });
+                new Object[] { jobLogForm.id });
 
             }
         } else {
-            labelType = new LabelType();
+            jobLog = new JobLog();
         }
-        Beans.copy(labelTypeForm, labelType).excludes("searchParams", "mode")
+        Beans.copy(jobLogForm, jobLog).excludes("searchParams", "mode")
 
         .execute();
 
-        return labelType;
+        return jobLog;
     }
 
     protected Map<String, String> createKeyMap() {
         final Map<String, String> keys = new HashMap<String, String>();
 
-        keys.put("id", labelTypeForm.id);
+        keys.put("id", jobLogForm.id);
 
         return keys;
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String deleteall() {
+        final List<String> jobStatusList = new ArrayList<String>();
+        jobStatusList.add(Constants.OK);
+        jobStatusList.add(Constants.FAIL);
+        jobLogService.deleteByJobStatus(jobStatusList);
+        SAStrutsUtil.addSessionMessage("success.joblog_delete_all");
+        return displayList(true);
     }
 }

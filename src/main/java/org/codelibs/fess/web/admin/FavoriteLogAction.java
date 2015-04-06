@@ -14,59 +14,76 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.crud.action.admin;
+package org.codelibs.fess.web.admin;
 
-import java.io.Serializable;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.io.IOUtils;
+import org.codelibs.core.util.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.LabelType;
-import org.codelibs.fess.pager.LabelTypePager;
-import org.codelibs.fess.service.LabelTypeService;
-import org.codelibs.fess.web.admin.LabelTypeForm;
+import org.codelibs.fess.db.exentity.FavoriteLog;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.pager.FavoriteLogPager;
+import org.codelibs.fess.service.FavoriteLogService;
+import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
+import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
+import org.seasar.struts.util.RequestUtil;
+import org.seasar.struts.util.ResponseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BsLabelTypeAction implements Serializable {
+import com.ibm.icu.text.SimpleDateFormat;
 
-    private static final long serialVersionUID = 1L;
+public class FavoriteLogAction extends FessAdminAction {
 
-    private static final Log log = LogFactory.getLog(BsLabelTypeAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(FavoriteLogAction.class);
 
     // for list
 
-    public List<LabelType> labelTypeItems;
+    public List<FavoriteLog> favoriteLogItems;
 
     // for edit/confirm/delete
 
     @ActionForm
     @Resource
-    protected LabelTypeForm labelTypeForm;
+    protected FavoriteLogForm favoriteLogForm;
 
     @Resource
-    protected LabelTypeService labelTypeService;
+    protected FavoriteLogService favoriteLogService;
 
     @Resource
-    protected LabelTypePager labelTypePager;
+    protected FavoriteLogPager favoriteLogPager;
+
+    @Resource
+    protected SystemHelper systemHelper;
+
+    public String getHelpLink() {
+        return systemHelper.getHelpLink("favoriteLog");
+    }
 
     protected String displayList(final boolean redirect) {
         // page navi
-        labelTypeItems = labelTypeService.getLabelTypeList(labelTypePager);
+        favoriteLogItems = favoriteLogService.getFavoriteLogList(favoriteLogPager);
 
         // restore from pager
-        Beans.copy(labelTypePager, labelTypeForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(favoriteLogPager, favoriteLogForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
         .execute();
 
@@ -85,12 +102,12 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
     public String list() {
         // page navi
-        if (StringUtil.isNotBlank(labelTypeForm.pageNumber)) {
+        if (StringUtil.isNotBlank(favoriteLogForm.pageNumber)) {
             try {
-                labelTypePager.setCurrentPageNumber(Integer.parseInt(labelTypeForm.pageNumber));
+                favoriteLogPager.setCurrentPageNumber(Integer.parseInt(favoriteLogForm.pageNumber));
             } catch (final NumberFormatException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid value: " + labelTypeForm.pageNumber, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid value: " + favoriteLogForm.pageNumber, e);
                 }
             }
         }
@@ -100,7 +117,7 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String search() {
-        Beans.copy(labelTypeForm.searchParams, labelTypePager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+        Beans.copy(favoriteLogForm.searchParams, favoriteLogPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
 
         .execute();
 
@@ -109,7 +126,7 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp")
     public String reset() {
-        labelTypePager.clear();
+        favoriteLogPager.clear();
 
         return displayList(false);
     }
@@ -127,12 +144,12 @@ public class BsLabelTypeAction implements Serializable {
 
     @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
     public String confirmpage() {
-        if (labelTypeForm.crudMode != CommonConstants.CONFIRM_MODE) {
+        if (favoriteLogForm.crudMode != CommonConstants.CONFIRM_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
-                    labelTypeForm.crudMode });
+                    favoriteLogForm.crudMode });
         }
 
-        loadLabelType();
+        loadFavoriteLog();
 
         return "confirm.jsp";
     }
@@ -141,8 +158,8 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = false, input = "error.jsp")
     public String createpage() {
         // page navi
-        labelTypeForm.initialize();
-        labelTypeForm.crudMode = CommonConstants.CREATE_MODE;
+        favoriteLogForm.initialize();
+        favoriteLogForm.crudMode = CommonConstants.CREATE_MODE;
 
         return "edit.jsp";
     }
@@ -150,12 +167,12 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
     public String editpage() {
-        if (labelTypeForm.crudMode != CommonConstants.EDIT_MODE) {
-            throw new ActionMessagesException("errors.crud_invalid_mode",
-                    new Object[] { CommonConstants.EDIT_MODE, labelTypeForm.crudMode });
+        if (favoriteLogForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    favoriteLogForm.crudMode });
         }
 
-        loadLabelType();
+        loadFavoriteLog();
 
         return "edit.jsp";
     }
@@ -163,9 +180,9 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String editfromconfirm() {
-        labelTypeForm.crudMode = CommonConstants.EDIT_MODE;
+        favoriteLogForm.crudMode = CommonConstants.EDIT_MODE;
 
-        loadLabelType();
+        loadFavoriteLog();
 
         return "edit.jsp";
     }
@@ -185,12 +202,12 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
     public String deletepage() {
-        if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
+        if (favoriteLogForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    labelTypeForm.crudMode });
+                    favoriteLogForm.crudMode });
         }
 
-        loadLabelType();
+        loadFavoriteLog();
 
         return "confirm.jsp";
     }
@@ -198,9 +215,9 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = true, validate = false)
     @Execute(validator = false, input = "error.jsp")
     public String deletefromconfirm() {
-        labelTypeForm.crudMode = CommonConstants.DELETE_MODE;
+        favoriteLogForm.crudMode = CommonConstants.DELETE_MODE;
 
-        loadLabelType();
+        loadFavoriteLog();
 
         return "confirm.jsp";
     }
@@ -209,19 +226,19 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = true, input = "edit.jsp")
     public String create() {
         try {
-            final LabelType labelType = createLabelType();
-            labelTypeService.store(labelType);
+            final FavoriteLog favoriteLog = createFavoriteLog();
+            favoriteLogService.store(favoriteLog);
             SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
         }
     }
@@ -230,19 +247,19 @@ public class BsLabelTypeAction implements Serializable {
     @Execute(validator = true, input = "edit.jsp")
     public String update() {
         try {
-            final LabelType labelType = createLabelType();
-            labelTypeService.store(labelType);
+            final FavoriteLog favoriteLog = createFavoriteLog();
+            favoriteLogService.store(favoriteLog);
             SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
         }
     }
@@ -250,79 +267,119 @@ public class BsLabelTypeAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
-        if (labelTypeForm.crudMode != CommonConstants.DELETE_MODE) {
+        if (favoriteLogForm.crudMode != CommonConstants.DELETE_MODE) {
             throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
-                    labelTypeForm.crudMode });
+                    favoriteLogForm.crudMode });
         }
 
         try {
-            final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
-            if (labelType == null) {
+            final FavoriteLog favoriteLog = favoriteLogService.getFavoriteLog(createKeyMap());
+            if (favoriteLog == null) {
                 // throw an exception
                 throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                new Object[] { labelTypeForm.id });
+                new Object[] { favoriteLogForm.id });
 
             }
 
-            labelTypeService.delete(labelType);
+            favoriteLogService.delete(favoriteLog);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
         } catch (final ActionMessagesException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         } catch (final CrudMessageException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException(e.getMessageId(), e.getArgs());
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new ActionMessagesException("errors.crud_failed_to_delete_crud_table");
         }
     }
 
-    protected void loadLabelType() {
+    protected void loadFavoriteLog() {
 
-        final LabelType labelType = labelTypeService.getLabelType(createKeyMap());
-        if (labelType == null) {
+        final FavoriteLog favoriteLog = favoriteLogService.getFavoriteLog(createKeyMap());
+        if (favoriteLog == null) {
             // throw an exception
             throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-            new Object[] { labelTypeForm.id });
+            new Object[] { favoriteLogForm.id });
 
         }
 
-        Beans.copy(labelType, labelTypeForm).excludes("searchParams", "mode")
+        Beans.copy(favoriteLog, favoriteLogForm).excludes("searchParams", "mode")
 
         .execute();
     }
 
-    protected LabelType createLabelType() {
-        LabelType labelType;
-        if (labelTypeForm.crudMode == CommonConstants.EDIT_MODE) {
-            labelType = labelTypeService.getLabelType(createKeyMap());
-            if (labelType == null) {
+    protected FavoriteLog createFavoriteLog() {
+        FavoriteLog favoriteLog;
+        if (favoriteLogForm.crudMode == CommonConstants.EDIT_MODE) {
+            favoriteLog = favoriteLogService.getFavoriteLog(createKeyMap());
+            if (favoriteLog == null) {
                 // throw an exception
                 throw new ActionMessagesException("errors.crud_could_not_find_crud_table",
 
-                new Object[] { labelTypeForm.id });
+                new Object[] { favoriteLogForm.id });
 
             }
         } else {
-            labelType = new LabelType();
+            favoriteLog = new FavoriteLog();
         }
-        Beans.copy(labelTypeForm, labelType).excludes("searchParams", "mode")
+        Beans.copy(favoriteLogForm, favoriteLog).excludes("searchParams", "mode")
 
         .execute();
 
-        return labelType;
+        return favoriteLog;
     }
 
     protected Map<String, String> createKeyMap() {
         final Map<String, String> keys = new HashMap<String, String>();
 
-        keys.put("id", labelTypeForm.id);
+        keys.put("id", favoriteLogForm.id);
 
         return keys;
     }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String deleteall() {
+        favoriteLogService.deleteAll(favoriteLogPager);
+        SAStrutsUtil.addSessionMessage("success.favorite_log_delete_all");
+        return displayList(true);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String download() {
+        BufferedWriter writer = null;
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        final String fileName = "FessFavoriteLog_" + sdf.format(new Date()) + ".csv";
+        final HttpServletResponse response = ResponseUtil.getResponse();
+        response.setContentType("text/csv");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), getCsvEncoding()));
+            favoriteLogService.dump(writer, favoriteLogPager);
+            writer.flush();
+        } catch (final Exception e) {
+            logger.error("Could not create FessSearchLog.csv.", e);
+            throw new SSCActionMessagesException(e, "errors.could_not_create_search_log_csv");
+        } finally {
+            IOUtils.closeQuietly(writer);
+        }
+        return null;
+    }
+
+    private String getCsvEncoding() {
+        if (StringUtil.isNotBlank(favoriteLogForm.csvEncoding)) {
+            return favoriteLogForm.csvEncoding;
+        }
+        final Locale locale = RequestUtil.getRequest().getLocale();
+        if ("ja".equals(locale.getLanguage())) {
+            return Constants.MS932;
+        }
+        return Constants.UTF_8;
+    }
+
 }
