@@ -24,28 +24,49 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.codelibs.fess.action.base.FessAdminAction;
 import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.crud.action.admin.BsRequestHeaderAction;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.RequestHeader;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
+import org.codelibs.fess.form.admin.RequestHeaderForm;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.pager.RequestHeaderPager;
+import org.codelibs.fess.service.RequestHeaderService;
 import org.codelibs.fess.service.WebCrawlingConfigService;
+import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.framework.util.StringUtil;
+import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class RequestHeaderAction extends BsRequestHeaderAction {
+public class RequestHeaderAction extends FessAdminAction {
 
-    private static final long serialVersionUID = 1L;
+    private static final Logger log = LoggerFactory.getLogger(RequestHeaderAction.class);
 
-    private static final Log log = LogFactory.getLog(RequestHeaderAction.class);
+    // for list
+
+    public List<RequestHeader> requestHeaderItems;
+
+    // for edit/confirm/delete
+
+    @ActionForm
+    @Resource
+    protected RequestHeaderForm requestHeaderForm;
+
+    @Resource
+    protected RequestHeaderService requestHeaderService;
+
+    @Resource
+    protected RequestHeaderPager requestHeaderPager;
 
     @Resource
     protected WebCrawlingConfigService webCrawlingConfigService;
@@ -53,11 +74,204 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
     @Resource
     protected SystemHelper systemHelper;
 
+    protected String displayList(final boolean redirect) {
+        // page navi
+        requestHeaderItems = requestHeaderService.getRequestHeaderList(requestHeaderPager);
+
+        // restore from pager
+        Beans.copy(requestHeaderPager, requestHeaderForm.searchParams).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        if (redirect) {
+            return "index?redirect=true";
+        } else {
+            return "index.jsp";
+        }
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String index() {
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "list/{pageNumber}")
+    public String list() {
+        // page navi
+        if (StringUtil.isNotBlank(requestHeaderForm.pageNumber)) {
+            try {
+                requestHeaderPager.setCurrentPageNumber(Integer.parseInt(requestHeaderForm.pageNumber));
+            } catch (final NumberFormatException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid value: " + requestHeaderForm.pageNumber, e);
+                }
+            }
+        }
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String search() {
+        Beans.copy(requestHeaderForm.searchParams, requestHeaderPager).excludes(CommonConstants.PAGER_CONVERSION_RULE)
+
+        .execute();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String reset() {
+        requestHeaderPager.clear();
+
+        return displayList(false);
+    }
+
+    @Execute(validator = false, input = "error.jsp")
+    public String back() {
+        return displayList(false);
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String editagain() {
+        return "edit.jsp";
+    }
+
+    @Execute(validator = false, input = "error.jsp", urlPattern = "confirmpage/{crudMode}/{id}")
+    public String confirmpage() {
+        if (requestHeaderForm.crudMode != CommonConstants.CONFIRM_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.CONFIRM_MODE,
+                    requestHeaderForm.crudMode });
+        }
+
+        loadRequestHeader();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String createpage() {
+        // page navi
+        requestHeaderForm.initialize();
+        requestHeaderForm.crudMode = CommonConstants.CREATE_MODE;
+
+        return "edit.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp", urlPattern = "editpage/{crudMode}/{id}")
+    public String editpage() {
+        if (requestHeaderForm.crudMode != CommonConstants.EDIT_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.EDIT_MODE,
+                    requestHeaderForm.crudMode });
+        }
+
+        loadRequestHeader();
+
+        return "edit.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String editfromconfirm() {
+        requestHeaderForm.crudMode = CommonConstants.EDIT_MODE;
+
+        loadRequestHeader();
+
+        return "edit.jsp";
+    }
+
+    @Token(save = false, validate = true, keep = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String confirmfromcreate() {
+        return "confirm.jsp";
+    }
+
+    @Token(save = false, validate = true, keep = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String confirmfromupdate() {
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp", urlPattern = "deletepage/{crudMode}/{id}")
+    public String deletepage() {
+        if (requestHeaderForm.crudMode != CommonConstants.DELETE_MODE) {
+            throw new ActionMessagesException("errors.crud_invalid_mode", new Object[] { CommonConstants.DELETE_MODE,
+                    requestHeaderForm.crudMode });
+        }
+
+        loadRequestHeader();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "error.jsp")
+    public String deletefromconfirm() {
+        requestHeaderForm.crudMode = CommonConstants.DELETE_MODE;
+
+        loadRequestHeader();
+
+        return "confirm.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String create() {
+        try {
+            final RequestHeader requestHeader = createRequestHeader();
+            requestHeaderService.store(requestHeader);
+            SAStrutsUtil.addSessionMessage("success.crud_create_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException("errors.crud_failed_to_create_crud_table");
+        }
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "edit.jsp")
+    public String update() {
+        try {
+            final RequestHeader requestHeader = createRequestHeader();
+            requestHeaderService.store(requestHeader);
+            SAStrutsUtil.addSessionMessage("success.crud_update_crud_table");
+
+            return displayList(true);
+        } catch (final ActionMessagesException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final CrudMessageException e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException(e.getMessageId(), e.getArgs());
+        } catch (final Exception e) {
+            log.error(e.getMessage(), e);
+            throw new ActionMessagesException("errors.crud_failed_to_update_crud_table");
+        }
+    }
+
+    protected Map<String, String> createKeyMap() {
+        final Map<String, String> keys = new HashMap<String, String>();
+
+        keys.put("id", requestHeaderForm.id);
+
+        return keys;
+    }
+
     public String getHelpLink() {
         return systemHelper.getHelpLink("requestHeader");
     }
 
-    @Override
     protected void loadRequestHeader() {
 
         final RequestHeader requestHeader = requestHeaderService.getRequestHeader(createKeyMap());
@@ -69,7 +283,6 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
         FessBeans.copy(requestHeader, requestHeaderForm).commonColumnDateConverter().excludes("searchParams", "mode").execute();
     }
 
-    @Override
     protected RequestHeader createRequestHeader() {
         RequestHeader requestHeader;
         final String username = systemHelper.getUsername();
@@ -92,7 +305,6 @@ public class RequestHeaderAction extends BsRequestHeaderAction {
         return requestHeader;
     }
 
-    @Override
     @Execute(validator = false, input = "error.jsp")
     public String delete() {
         if (requestHeaderForm.crudMode != CommonConstants.DELETE_MODE) {
