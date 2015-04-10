@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class LabelTypeAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(LabelTypeAction.class);
-    
+
     // for list
 
     public List<LabelType> labelTypeItems;
@@ -73,7 +73,7 @@ public class LabelTypeAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("labelType");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         labelTypeItems = labelTypeService.getLabelTypeList(labelTypePager);
@@ -267,7 +267,7 @@ public class LabelTypeAction extends FessAdminAction {
 
         return keys;
     }
-    
+
     protected void loadLabelType() {
 
         final LabelType labelType = labelTypeService.getLabelType(createKeyMap());

@@ -67,7 +67,7 @@ public class WebCrawlingConfigAction extends FessAdminAction {
 
     @Resource
     protected WebCrawlingConfigPager webCrawlingConfigPager;
-    
+
     @Resource
     protected RoleTypeService roleTypeService;
 
@@ -83,7 +83,7 @@ public class WebCrawlingConfigAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("webCrawlingConfig");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         webCrawlingConfigItems = webCrawlingConfigService.getWebCrawlingConfigList(webCrawlingConfigPager);

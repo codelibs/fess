@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class OverlappingHostAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(OverlappingHostAction.class);
-    
+
     // for list
 
     public List<OverlappingHost> overlappingHostItems;
@@ -68,7 +68,7 @@ public class OverlappingHostAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("overlappingHost");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         overlappingHostItems = overlappingHostService.getOverlappingHostList(overlappingHostPager);

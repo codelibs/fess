@@ -27,9 +27,9 @@ import org.seasar.struts.annotation.Maxbytelength;
 import org.seasar.struts.annotation.Required;
 
 public class CrawlingSessionForm implements Serializable {
-	
+
     private static final long serialVersionUID = 1L;
-    
+
     @IntegerType
     public String pageNumber;
 
@@ -69,5 +69,5 @@ public class CrawlingSessionForm implements Serializable {
         createdTime = null;
 
     }
-    
+
 }

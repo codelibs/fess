@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class PathMappingAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(PathMappingAction.class);
-    
+
     // for list
 
     public List<PathMapping> pathMappingItems;
@@ -72,12 +72,12 @@ public class PathMappingAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("pathMapping");
     }
-    
+
     protected String displayList(final boolean redirect) {
-    	if (redirect) {
+        if (redirect) {
             pathMappingHelper.init();
         }
-    	
+
         // page navi
         pathMappingItems = pathMappingService.getPathMappingList(pathMappingPager);
 

@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 public class RequestHeaderAction extends FessAdminAction {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestHeaderAction.class);
-    
+
     // for list
 
     public List<RequestHeader> requestHeaderItems;
@@ -76,7 +76,7 @@ public class RequestHeaderAction extends FessAdminAction {
     public String getHelpLink() {
         return systemHelper.getHelpLink("requestHeader");
     }
-    
+
     protected String displayList(final boolean redirect) {
         // page navi
         requestHeaderItems = requestHeaderService.getRequestHeaderList(requestHeaderPager);
