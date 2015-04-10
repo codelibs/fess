@@ -17,15 +17,57 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.codelibs.fess.crud.form.admin.BsCrawlingSessionForm;
+import org.seasar.struts.annotation.DateType;
+import org.seasar.struts.annotation.IntegerType;
+import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Maxbytelength;
+import org.seasar.struts.annotation.Required;
 
-public class CrawlingSessionForm extends BsCrawlingSessionForm implements Serializable {
-
+public class CrawlingSessionForm implements Serializable {
+	
     private static final long serialVersionUID = 1L;
+    
+    @IntegerType
+    public String pageNumber;
 
-    @Override
-    public void initialize() {
-        super.initialize();
+    public Map<String, String> searchParams = new HashMap<String, String>();
+
+    @IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
     }
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @LongType
+    public String id;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 20)
+    public String sessionId;
+
+    @Maxbytelength(maxbytelength = 20)
+    public String name;
+
+    @DateType
+    public String expiredTime;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @DateType
+    public String createdTime;
+
+    public void initialize() {
+
+        id = null;
+        sessionId = null;
+        name = null;
+        expiredTime = null;
+        createdTime = null;
+
+    }
+    
 }
