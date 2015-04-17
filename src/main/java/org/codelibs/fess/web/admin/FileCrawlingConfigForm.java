@@ -19,11 +19,20 @@ package org.codelibs.fess.web.admin;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.form.admin.BsFileCrawlingConfigForm;
+import org.codelibs.fess.annotation.UriType;
+import org.seasar.struts.annotation.DateType;
+import org.seasar.struts.annotation.IntRange;
+import org.seasar.struts.annotation.IntegerType;
+import org.seasar.struts.annotation.LongRange;
+import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Maxbytelength;
+import org.seasar.struts.annotation.Required;
 
-public class FileCrawlingConfigForm extends BsFileCrawlingConfigForm implements Serializable {
+public class FileCrawlingConfigForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,9 +40,120 @@ public class FileCrawlingConfigForm extends BsFileCrawlingConfigForm implements 
 
     public String[] labelTypeIds;
 
-    @Override
+    @IntegerType
+    public String pageNumber;
+
+    public Map<String, String> searchParams = new HashMap<String, String>();
+
+    @IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @LongType
+    public String id;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 200)
+    public String name;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @UriType(protocols = "file:,smb:")
+    @Maxbytelength(maxbytelength = 4000)
+    public String paths;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String includedPaths;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String excludedPaths;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String includedDocPaths;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String excludedDocPaths;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String configParameter;
+
+    @IntRange(min = 0, max = 2147483647)
+    public String depth;
+
+    @LongRange(min = 0, max = 9223372036854775807l)
+    public String maxAccessCount;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String numOfThread;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String intervalTime;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String boost;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 1)
+    public String available;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @IntegerType
+    @IntRange(min = 0, max = 2147483647)
+    public String sortOrder;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 255)
+    public String createdBy;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String createdTime;
+
+    @Maxbytelength(maxbytelength = 255)
+    public String updatedBy;
+
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String updatedTime;
+
+    @Maxbytelength(maxbytelength = 255)
+    public String deletedBy;
+
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String deletedTime;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @IntegerType
+    public String versionNo;
+
     public void initialize() {
-        super.initialize();
+        id = null;
+        name = null;
+        paths = null;
+        includedPaths = null;
+        excludedPaths = null;
+        includedDocPaths = null;
+        excludedDocPaths = null;
+        configParameter = null;
+        depth = null;
+        maxAccessCount = null;
+        numOfThread = null;
+        intervalTime = null;
+        boost = "1";
+        available = null;
+        sortOrder = null;
+        createdBy = null;
+        createdTime = null;
+        updatedBy = null;
+        updatedTime = null;
+        deletedBy = null;
+        deletedTime = null;
+        versionNo = null;
         sortOrder = "0";
         numOfThread = Integer.toString(Constants.DEFAULT_NUM_OF_THREAD_FOR_FS);
         intervalTime = Integer.toString(Constants.DEFAULT_INTERVAL_TIME_FOR_FS);

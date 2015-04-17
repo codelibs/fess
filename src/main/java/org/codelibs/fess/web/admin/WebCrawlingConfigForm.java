@@ -19,13 +19,22 @@ package org.codelibs.fess.web.admin;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.form.admin.BsWebCrawlingConfigForm;
+import org.codelibs.fess.annotation.UriType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.seasar.struts.annotation.DateType;
+import org.seasar.struts.annotation.IntRange;
+import org.seasar.struts.annotation.IntegerType;
+import org.seasar.struts.annotation.LongRange;
+import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Maxbytelength;
+import org.seasar.struts.annotation.Required;
 
-public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements Serializable {
+public class WebCrawlingConfigForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,9 +42,124 @@ public class WebCrawlingConfigForm extends BsWebCrawlingConfigForm implements Se
 
     public String[] labelTypeIds;
 
-    @Override
+    @IntegerType
+    public String pageNumber;
+
+    public Map<String, String> searchParams = new HashMap<String, String>();
+
+    @IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @LongType
+    public String id;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 200)
+    public String name;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @UriType(protocols = "http:,https:")
+    @Maxbytelength(maxbytelength = 4000)
+    public String urls;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String includedUrls;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String excludedUrls;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String includedDocUrls;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String excludedDocUrls;
+
+    @Maxbytelength(maxbytelength = 4000)
+    public String configParameter;
+
+    @IntRange(min = 0, max = 2147483647)
+    public String depth;
+
+    @LongRange(min = 0, max = 9223372036854775807l)
+    public String maxAccessCount;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 200)
+    public String userAgent;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String numOfThread;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String intervalTime;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String boost;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 1)
+    public String available;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @IntRange(min = 0, max = 2147483647)
+    public String sortOrder;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 255)
+    public String createdBy;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String createdTime;
+
+    @Maxbytelength(maxbytelength = 255)
+    public String updatedBy;
+
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String updatedTime;
+
+    @Maxbytelength(maxbytelength = 255)
+    public String deletedBy;
+
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String deletedTime;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @IntegerType
+    public String versionNo;
+
     public void initialize() {
-        super.initialize();
+        id = null;
+        name = null;
+        urls = null;
+        includedUrls = null;
+        excludedUrls = null;
+        includedDocUrls = null;
+        excludedDocUrls = null;
+        configParameter = null;
+        depth = null;
+        maxAccessCount = null;
+        userAgent = null;
+        numOfThread = null;
+        intervalTime = null;
+        boost = "1";
+        available = null;
+        sortOrder = null;
+        createdBy = null;
+        createdTime = null;
+        updatedBy = null;
+        updatedTime = null;
+        deletedBy = null;
+        deletedTime = null;
+        versionNo = null;
         sortOrder = "0";
         userAgent = ComponentUtil.getUserAgentName();
         if (StringUtil.isBlank(userAgent)) {
