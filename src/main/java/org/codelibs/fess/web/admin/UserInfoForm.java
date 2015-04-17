@@ -17,15 +17,50 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.codelibs.fess.crud.form.admin.BsUserInfoForm;
+import org.codelibs.fess.Constants;
+import org.seasar.struts.annotation.DateType;
+import org.seasar.struts.annotation.IntegerType;
+import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Required;
 
-public class UserInfoForm extends BsUserInfoForm implements Serializable {
+public class UserInfoForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @IntegerType
+    public String pageNumber;
+
+    public Map<String, String> searchParams = new HashMap<String, String>();
+
+    @IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @LongType
+    public String id;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    public String code;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String createdTime;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String updatedTime;
+
     public void initialize() {
-        super.initialize();
+        id = null;
+        code = null;
+        createdTime = null;
+        updatedTime = null;
     }
 }
