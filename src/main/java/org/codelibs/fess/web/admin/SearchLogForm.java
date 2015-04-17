@@ -17,12 +17,17 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.codelibs.fess.crud.form.admin.BsSearchLogForm;
 import org.codelibs.fess.db.exentity.ClickLog;
+import org.seasar.struts.annotation.DateType;
+import org.seasar.struts.annotation.IntegerType;
+import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Required;
 
-public class SearchLogForm extends BsSearchLogForm implements Serializable {
+public class SearchLogForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,8 +35,71 @@ public class SearchLogForm extends BsSearchLogForm implements Serializable {
 
     public List<ClickLog> clickLogList;
 
-    @Override
+    @IntegerType
+    public String pageNumber;
+
+    public Map<String, String> searchParams = new HashMap<String, String>();
+
+    @IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @LongType
+    public String id;
+
+    public String searchWord;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @DateType
+    public String requestedTime;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntegerType
+    public String responseTime;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @LongType
+    public String hitCount;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntegerType
+    public String queryOffset;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @IntegerType
+    public String queryPageSize;
+
+    public String userAgent;
+
+    public String referer;
+
+    public String clientIp;
+
+    public String userSessionId;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    public String accessType;
+
+    @LongType
+    public String userId;
+
     public void initialize() {
-        super.initialize();
+        id = null;
+        searchWord = null;
+        requestedTime = null;
+        responseTime = null;
+        hitCount = null;
+        queryOffset = null;
+        queryPageSize = null;
+        userAgent = null;
+        referer = null;
+        clientIp = null;
+        userSessionId = null;
+        accessType = null;
+        userId = null;
     }
 }
