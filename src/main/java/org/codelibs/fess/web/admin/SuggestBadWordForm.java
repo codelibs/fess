@@ -17,20 +17,81 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.struts.upload.FormFile;
-import org.codelibs.fess.crud.form.admin.BsSuggestBadWordForm;
+import org.codelibs.fess.Constants;
+import org.seasar.struts.annotation.DateType;
+import org.seasar.struts.annotation.IntegerType;
+import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Maxbytelength;
 import org.seasar.struts.annotation.Required;
 
-public class SuggestBadWordForm extends BsSuggestBadWordForm implements Serializable {
+public class SuggestBadWordForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @IntegerType
+    public String pageNumber;
+
+    public Map<String, String> searchParams = new HashMap<String, String>();
+
+    @IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @LongType
+    public String id;
+
+    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    public String suggestWord;
+
+    public String targetRole;
+
+    public String targetLabel;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @Maxbytelength(maxbytelength = 255)
+    public String createdBy;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String createdTime;
+
+    @Maxbytelength(maxbytelength = 255)
+    public String updatedBy;
+
+    @DateType
+    public String updatedTime;
+
+    public String deletedBy;
+
+    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    public String deletedTime;
+
+    @Required(target = "confirmfromupdate,update,delete")
+    @IntegerType
+    public String versionNo;
 
     @Required(target = "upload")
     public FormFile suggestBadWordFile;
 
-    @Override
     public void initialize() {
-        super.initialize();
+        id = null;
+        suggestWord = null;
+        targetRole = null;
+        targetLabel = null;
+        createdBy = null;
+        createdTime = null;
+        updatedBy = null;
+        updatedTime = null;
+        deletedBy = null;
+        deletedTime = null;
+        versionNo = null;
     }
 }
