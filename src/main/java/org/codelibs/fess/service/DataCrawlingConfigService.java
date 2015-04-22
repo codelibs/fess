@@ -24,16 +24,20 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.service.BsDataCrawlingConfigService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.DataCrawlingConfigCB;
 import org.codelibs.fess.db.exbhv.DataConfigToLabelTypeMappingBhv;
 import org.codelibs.fess.db.exbhv.DataConfigToRoleTypeMappingBhv;
+import org.codelibs.fess.db.exbhv.DataCrawlingConfigBhv;
 import org.codelibs.fess.db.exentity.DataConfigToLabelTypeMapping;
 import org.codelibs.fess.db.exentity.DataConfigToRoleTypeMapping;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.pager.DataCrawlingConfigPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class DataCrawlingConfigService extends BsDataCrawlingConfigService implements Serializable {
+public class DataCrawlingConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +46,37 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService imple
 
     @Resource
     protected DataConfigToLabelTypeMappingBhv dataConfigToLabelTypeMappingBhv;
+
+    @Resource
+    protected DataCrawlingConfigBhv dataCrawlingConfigBhv;
+
+    public DataCrawlingConfigService() {
+        super();
+    }
+
+    public List<DataCrawlingConfig> getDataCrawlingConfigList(final DataCrawlingConfigPager dataCrawlingConfigPager) {
+
+        final PagingResultBean<DataCrawlingConfig> dataCrawlingConfigList = dataCrawlingConfigBhv.selectPage(cb -> {
+            cb.paging(dataCrawlingConfigPager.getPageSize(), dataCrawlingConfigPager.getCurrentPageNumber());
+
+            setupListCondition(cb, dataCrawlingConfigPager);
+        });
+
+        // update pager
+        Beans.copy(dataCrawlingConfigList, dataCrawlingConfigPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        dataCrawlingConfigPager.setPageNumberList(dataCrawlingConfigList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return dataCrawlingConfigList;
+    }
+
+    public void delete(final DataCrawlingConfig dataCrawlingConfig) throws CrudMessageException {
+        setupDeleteCondition(dataCrawlingConfig);
+
+        dataCrawlingConfigBhv.delete(dataCrawlingConfig);
+
+    }
 
     public List<DataCrawlingConfig> getAllDataCrawlingConfigList() {
         return getAllDataCrawlingConfigList(true, true, true, null);
@@ -83,9 +118,12 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService imple
         return list;
     }
 
-    @Override
     public DataCrawlingConfig getDataCrawlingConfig(final Map<String, String> keys) {
-        final DataCrawlingConfig dataCrawlingConfig = super.getDataCrawlingConfig(keys);
+
+        final DataCrawlingConfig dataCrawlingConfig = dataCrawlingConfigBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
 
         if (dataCrawlingConfig != null) {
 
@@ -120,12 +158,13 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService imple
         return dataCrawlingConfig;
     }
 
-    @Override
     public void store(final DataCrawlingConfig dataCrawlingConfig) {
         final boolean isNew = dataCrawlingConfig.getId() == null;
         final String[] labelTypeIds = dataCrawlingConfig.getLabelTypeIds();
         final String[] roleTypeIds = dataCrawlingConfig.getRoleTypeIds();
-        super.store(dataCrawlingConfig);
+        setupStoreCondition(dataCrawlingConfig);
+
+        dataCrawlingConfigBhv.insertOrUpdate(dataCrawlingConfig);
         final Long dataConfigId = dataCrawlingConfig.getId();
         if (isNew) {
             // Insert
@@ -210,9 +249,11 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService imple
         }
     }
 
-    @Override
     protected void setupListCondition(final DataCrawlingConfigCB cb, final DataCrawlingConfigPager dataCrawlingConfigPager) {
-        super.setupListCondition(cb, dataCrawlingConfigPager);
+        if (dataCrawlingConfigPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(dataCrawlingConfigPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -222,26 +263,20 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService imple
 
     }
 
-    @Override
     protected void setupEntityCondition(final DataCrawlingConfigCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final DataCrawlingConfig dataCrawlingConfig) {
-        super.setupStoreCondition(dataCrawlingConfig);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final DataCrawlingConfig dataCrawlingConfig) {
-        super.setupDeleteCondition(dataCrawlingConfig);
 
         // setup condition
 
