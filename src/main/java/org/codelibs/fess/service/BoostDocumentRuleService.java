@@ -20,18 +20,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsBoostDocumentRuleService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.BoostDocumentRuleCB;
+import org.codelibs.fess.db.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.db.exentity.BoostDocumentRule;
 import org.codelibs.fess.pager.BoostDocumentRulePager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class BoostDocumentRuleService extends BsBoostDocumentRuleService implements Serializable {
+public class BoostDocumentRuleService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @Resource
+    protected BoostDocumentRuleBhv boostDocumentRuleBhv;
+
+    public BoostDocumentRuleService() {
+        super();
+    }
+
+    public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocumentRulePager boostDocumentRulePager) {
+
+        final PagingResultBean<BoostDocumentRule> boostDocumentRuleList = boostDocumentRuleBhv.selectPage(cb -> {
+            cb.paging(boostDocumentRulePager.getPageSize(), boostDocumentRulePager.getCurrentPageNumber());
+            setupListCondition(cb, boostDocumentRulePager);
+        });
+
+        // update pager
+        Beans.copy(boostDocumentRuleList, boostDocumentRulePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return boostDocumentRuleList;
+    }
+
+    public BoostDocumentRule getBoostDocumentRule(final Map<String, String> keys) {
+        final BoostDocumentRule boostDocumentRule = boostDocumentRuleBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (boostDocumentRule == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return boostDocumentRule;
+    }
+
+    public void store(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
+        setupStoreCondition(boostDocumentRule);
+
+        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule);
+
+    }
+
+    public void delete(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
+        setupDeleteCondition(boostDocumentRule);
+
+        boostDocumentRuleBhv.delete(boostDocumentRule);
+
+    }
+
     protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocumentRulePager boostDocumentRulePager) {
-        super.setupListCondition(cb, boostDocumentRulePager);
+        if (boostDocumentRulePager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(boostDocumentRulePager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -41,25 +99,19 @@ public class BoostDocumentRuleService extends BsBoostDocumentRuleService impleme
 
     }
 
-    @Override
     protected void setupEntityCondition(final BoostDocumentRuleCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final BoostDocumentRule boostDocumentRule) {
-        super.setupStoreCondition(boostDocumentRule);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final BoostDocumentRule boostDocumentRule) {
-        super.setupDeleteCondition(boostDocumentRule);
 
         // setup condition
 

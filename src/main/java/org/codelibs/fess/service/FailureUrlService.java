@@ -30,7 +30,8 @@ import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.service.BsFailureUrlService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.FailureUrlCB;
 import org.codelibs.fess.db.exbhv.FailureUrlBhv;
 import org.codelibs.fess.db.exentity.CrawlingConfig;
@@ -39,18 +40,72 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.FailureUrlPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.container.SingletonS2Container;
 
-public class FailureUrlService extends BsFailureUrlService implements Serializable {
+public class FailureUrlService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Resource
     protected DynamicProperties crawlerProperties;
 
-    @Override
+    @Resource
+    protected FailureUrlBhv failureUrlBhv;
+
+    public FailureUrlService() {
+        super();
+    }
+
+    public List<FailureUrl> getFailureUrlList(final FailureUrlPager failureUrlPager) {
+
+        final PagingResultBean<FailureUrl> failureUrlList = failureUrlBhv.selectPage(cb -> {
+            cb.paging(failureUrlPager.getPageSize(), failureUrlPager.getCurrentPageNumber());
+            setupListCondition(cb, failureUrlPager);
+        });
+
+        // update pager
+        Beans.copy(failureUrlList, failureUrlPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        failureUrlPager.setPageNumberList(failureUrlList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return failureUrlList;
+    }
+
+    public FailureUrl getFailureUrl(final Map<String, String> keys) {
+        final FailureUrl failureUrl = failureUrlBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);
+        if (failureUrl == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return failureUrl;
+    }
+
+    public void store(final FailureUrl failureUrl) throws CrudMessageException {
+        setupStoreCondition(failureUrl);
+
+        failureUrlBhv.insertOrUpdate(failureUrl);
+
+    }
+
+    public void delete(final FailureUrl failureUrl) throws CrudMessageException {
+        setupDeleteCondition(failureUrl);
+
+        failureUrlBhv.delete(failureUrl);
+
+    }
+
     protected void setupListCondition(final FailureUrlCB cb, final FailureUrlPager failureUrlPager) {
-        super.setupListCondition(cb, failureUrlPager);
+        if (failureUrlPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(failureUrlPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().addOrderBy_LastAccessTime_Desc();
@@ -58,25 +113,19 @@ public class FailureUrlService extends BsFailureUrlService implements Serializab
         buildSearchCondition(failureUrlPager, cb);
     }
 
-    @Override
     protected void setupEntityCondition(final FailureUrlCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final FailureUrl failureUrl) {
-        super.setupStoreCondition(failureUrl);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final FailureUrl failureUrl) {
-        super.setupDeleteCondition(failureUrl);
 
         // setup condition
 

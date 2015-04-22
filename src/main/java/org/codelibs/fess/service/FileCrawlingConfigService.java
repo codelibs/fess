@@ -24,16 +24,20 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.service.BsFileCrawlingConfigService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.FileCrawlingConfigCB;
 import org.codelibs.fess.db.exbhv.FileConfigToLabelTypeMappingBhv;
 import org.codelibs.fess.db.exbhv.FileConfigToRoleTypeMappingBhv;
+import org.codelibs.fess.db.exbhv.FileCrawlingConfigBhv;
 import org.codelibs.fess.db.exentity.FileConfigToLabelTypeMapping;
 import org.codelibs.fess.db.exentity.FileConfigToRoleTypeMapping;
 import org.codelibs.fess.db.exentity.FileCrawlingConfig;
 import org.codelibs.fess.pager.FileCrawlingConfigPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class FileCrawlingConfigService extends BsFileCrawlingConfigService implements Serializable {
+public class FileCrawlingConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +46,36 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService imple
 
     @Resource
     protected FileConfigToLabelTypeMappingBhv fileConfigToLabelTypeMappingBhv;
+
+    @Resource
+    protected FileCrawlingConfigBhv fileCrawlingConfigBhv;
+
+    public FileCrawlingConfigService() {
+        super();
+    }
+
+    public List<FileCrawlingConfig> getFileCrawlingConfigList(final FileCrawlingConfigPager fileCrawlingConfigPager) {
+
+        final PagingResultBean<FileCrawlingConfig> fileCrawlingConfigList = fileCrawlingConfigBhv.selectPage(cb -> {
+            cb.paging(fileCrawlingConfigPager.getPageSize(), fileCrawlingConfigPager.getCurrentPageNumber());
+            setupListCondition(cb, fileCrawlingConfigPager);
+        });
+
+        // update pager
+        Beans.copy(fileCrawlingConfigList, fileCrawlingConfigPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        fileCrawlingConfigPager.setPageNumberList(fileCrawlingConfigList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return fileCrawlingConfigList;
+    }
+
+    public void delete(final FileCrawlingConfig fileCrawlingConfig) throws CrudMessageException {
+        setupDeleteCondition(fileCrawlingConfig);
+
+        fileCrawlingConfigBhv.delete(fileCrawlingConfig);
+
+    }
 
     public List<FileCrawlingConfig> getAllFileCrawlingConfigList() {
         return getAllFileCrawlingConfigList(true, true, true, null);
@@ -83,9 +117,11 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService imple
         return list;
     }
 
-    @Override
     public FileCrawlingConfig getFileCrawlingConfig(final Map<String, String> keys) {
-        final FileCrawlingConfig fileCrawlingConfig = super.getFileCrawlingConfig(keys);
+        final FileCrawlingConfig fileCrawlingConfig = fileCrawlingConfigBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
 
         if (fileCrawlingConfig != null) {
 
@@ -120,12 +156,13 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService imple
         return fileCrawlingConfig;
     }
 
-    @Override
     public void store(final FileCrawlingConfig fileCrawlingConfig) {
         final boolean isNew = fileCrawlingConfig.getId() == null;
         final String[] labelTypeIds = fileCrawlingConfig.getLabelTypeIds();
         final String[] roleTypeIds = fileCrawlingConfig.getRoleTypeIds();
-        super.store(fileCrawlingConfig);
+        setupStoreCondition(fileCrawlingConfig);
+
+        fileCrawlingConfigBhv.insertOrUpdate(fileCrawlingConfig);
         final Long fileConfigId = fileCrawlingConfig.getId();
         if (isNew) {
             // Insert
@@ -210,9 +247,11 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService imple
         }
     }
 
-    @Override
     protected void setupListCondition(final FileCrawlingConfigCB cb, final FileCrawlingConfigPager fileCrawlingConfigPager) {
-        super.setupListCondition(cb, fileCrawlingConfigPager);
+        if (fileCrawlingConfigPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(fileCrawlingConfigPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -222,26 +261,20 @@ public class FileCrawlingConfigService extends BsFileCrawlingConfigService imple
 
     }
 
-    @Override
     protected void setupEntityCondition(final FileCrawlingConfigCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final FileCrawlingConfig fileCrawlingConfig) {
-        super.setupStoreCondition(fileCrawlingConfig);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final FileCrawlingConfig fileCrawlingConfig) {
-        super.setupDeleteCondition(fileCrawlingConfig);
 
         // setup condition
 

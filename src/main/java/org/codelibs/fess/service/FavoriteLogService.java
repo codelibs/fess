@@ -38,8 +38,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.StringUtil;
-import org.codelibs.fess.crud.service.BsFavoriteLogService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.FavoriteLogCB;
+import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.db.exbhv.UserInfoBhv;
 import org.codelibs.fess.db.exentity.FavoriteLog;
 import org.codelibs.fess.db.exentity.UserInfo;
@@ -47,10 +49,12 @@ import org.codelibs.fess.pager.FavoriteLogPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class FavoriteLogService extends BsFavoriteLogService implements Serializable {
+public class FavoriteLogService implements Serializable {
     private static final Log log = LogFactory.getLog(FavoriteLogService.class);
 
     private static final long serialVersionUID = 1L;
@@ -58,9 +62,62 @@ public class FavoriteLogService extends BsFavoriteLogService implements Serializ
     @Resource
     protected UserInfoBhv userInfoBhv;
 
-    @Override
+    @Resource
+    protected FavoriteLogBhv favoriteLogBhv;
+
+    public FavoriteLogService() {
+        super();
+    }
+
+    public List<FavoriteLog> getFavoriteLogList(final FavoriteLogPager favoriteLogPager) {
+
+        final PagingResultBean<FavoriteLog> favoriteLogList = favoriteLogBhv.selectPage(cb -> {
+            cb.paging(favoriteLogPager.getPageSize(), favoriteLogPager.getCurrentPageNumber());
+            setupListCondition(cb, favoriteLogPager);
+        });
+
+        // update pager
+        Beans.copy(favoriteLogList, favoriteLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        favoriteLogPager.setPageNumberList(favoriteLogList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return favoriteLogList;
+    }
+
+    public FavoriteLog getFavoriteLog(final Map<String, String> keys) {
+        final FavoriteLog favoriteLog = favoriteLogBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (favoriteLog == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return favoriteLog;
+    }
+
+    public void store(final FavoriteLog favoriteLog) throws CrudMessageException {
+        setupStoreCondition(favoriteLog);
+
+        favoriteLogBhv.insertOrUpdate(favoriteLog);
+
+    }
+
+    public void delete(final FavoriteLog favoriteLog) throws CrudMessageException {
+        setupDeleteCondition(favoriteLog);
+
+        favoriteLogBhv.delete(favoriteLog);
+
+    }
+
     protected void setupListCondition(final FavoriteLogCB cb, final FavoriteLogPager favoriteLogPager) {
-        super.setupListCondition(cb, favoriteLogPager);
+        if (favoriteLogPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(favoriteLogPager.id));
+        }
+        // TODO Long, Integer, String supported only.
+
         cb.setupSelect_UserInfo();
 
         cb.query().addOrderBy_CreatedTime_Desc();
@@ -71,25 +128,19 @@ public class FavoriteLogService extends BsFavoriteLogService implements Serializ
         buildSearchCondition(favoriteLogPager, cb);
     }
 
-    @Override
     protected void setupEntityCondition(final FavoriteLogCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final FavoriteLog favoriteLog) {
-        super.setupStoreCondition(favoriteLog);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final FavoriteLog favoriteLog) {
-        super.setupDeleteCondition(favoriteLog);
 
         // setup condition
 

@@ -20,18 +20,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsFileAuthenticationService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.FileAuthenticationCB;
+import org.codelibs.fess.db.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.db.exentity.FileAuthentication;
 import org.codelibs.fess.pager.FileAuthenticationPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class FileAuthenticationService extends BsFileAuthenticationService implements Serializable {
+public class FileAuthenticationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @Resource
+    protected FileAuthenticationBhv fileAuthenticationBhv;
+
+    public FileAuthenticationService() {
+        super();
+    }
+
+    public List<FileAuthentication> getFileAuthenticationList(final FileAuthenticationPager fileAuthenticationPager) {
+
+        final PagingResultBean<FileAuthentication> fileAuthenticationList = fileAuthenticationBhv.selectPage(cb -> {
+            cb.paging(fileAuthenticationPager.getPageSize(), fileAuthenticationPager.getCurrentPageNumber());
+            setupListCondition(cb, fileAuthenticationPager);
+        });
+
+        // update pager
+        Beans.copy(fileAuthenticationList, fileAuthenticationPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        fileAuthenticationPager.setPageNumberList(fileAuthenticationList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return fileAuthenticationList;
+    }
+
+    public FileAuthentication getFileAuthentication(final Map<String, String> keys) {
+        final FileAuthentication fileAuthentication = fileAuthenticationBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (fileAuthentication == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return fileAuthentication;
+    }
+
+    public void store(final FileAuthentication fileAuthentication) throws CrudMessageException {
+        setupStoreCondition(fileAuthentication);
+
+        fileAuthenticationBhv.insertOrUpdate(fileAuthentication);
+
+    }
+
+    public void delete(final FileAuthentication fileAuthentication) throws CrudMessageException {
+        setupDeleteCondition(fileAuthentication);
+
+        fileAuthenticationBhv.delete(fileAuthentication);
+
+    }
+
     protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthenticationPager fileAuthenticationPager) {
-        super.setupListCondition(cb, fileAuthenticationPager);
+        if (fileAuthenticationPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(fileAuthenticationPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.setupSelect_FileCrawlingConfig();
@@ -43,26 +101,20 @@ public class FileAuthenticationService extends BsFileAuthenticationService imple
 
     }
 
-    @Override
     protected void setupEntityCondition(final FileAuthenticationCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final FileAuthentication fileAuthentication) {
-        super.setupStoreCondition(fileAuthentication);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final FileAuthentication fileAuthentication) {
-        super.setupDeleteCondition(fileAuthentication);
 
         // setup condition
 
