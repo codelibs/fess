@@ -16,23 +16,143 @@
 
 package org.codelibs.fess.pager;
 
+import java.util.List;
+
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.pager.BsScheduledJobPager;
 
-public class ScheduledJobPager extends BsScheduledJobPager {
+public class ScheduledJobPager {
 
-    private static final long serialVersionUID = 1L;
+    public static final int DEFAULT_PAGE_SIZE = 20;
+
+    public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
+
+    private int allRecordCount;
+
+    private int allPageCount;
+
+    private boolean existPrePage;
+
+    private boolean existNextPage;
+
+    private List<Integer> pageNumberList;
+
+    private int pageSize;
+
+    private int currentPageNumber;
+
+    public String id;
+
+    public String name;
+
+    public String target;
+
+    public String cronExpression;
+
+    public String scriptType;
+
+    public String crawler;
+
+    public String jobLogging;
+
+    public String available;
+
+    public String sortOrder;
+
+    public String createdBy;
+
+    public String createdTime;
+
+    public String versionNo;
+
+    public void clear() {
+        pageSize = getDefaultPageSize();
+        currentPageNumber = getDefaultCurrentPageNumber();
+
+        id = null;
+        name = null;
+        target = null;
+        cronExpression = null;
+        scriptType = null;
+        crawler = null;
+        jobLogging = null;
+        available = null;
+        sortOrder = null;
+        createdBy = null;
+        createdTime = null;
+        versionNo = null;
+
+    }
+
+    protected int getDefaultCurrentPageNumber() {
+        return DEFAULT_CURRENT_PAGE_NUMBER;
+    }
+
+    public int getAllRecordCount() {
+        return allRecordCount;
+    }
+
+    public void setAllRecordCount(final int allRecordCount) {
+        this.allRecordCount = allRecordCount;
+    }
+
+    public int getAllPageCount() {
+        return allPageCount;
+    }
+
+    public void setAllPageCount(final int allPageCount) {
+        this.allPageCount = allPageCount;
+    }
+
+    public boolean isExistPrePage() {
+        return existPrePage;
+    }
+
+    public void setExistPrePage(final boolean existPrePage) {
+        this.existPrePage = existPrePage;
+    }
+
+    public boolean isExistNextPage() {
+        return existNextPage;
+    }
+
+    public void setExistNextPage(final boolean existNextPage) {
+        this.existNextPage = existNextPage;
+    }
+
+    public int getPageSize() {
+        if (pageSize <= 0) {
+            pageSize = getDefaultPageSize();
+        }
+        return pageSize;
+    }
+
+    public void setPageSize(final int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public int getCurrentPageNumber() {
+        if (currentPageNumber <= 0) {
+            currentPageNumber = getDefaultCurrentPageNumber();
+        }
+        return currentPageNumber;
+    }
+
+    public void setCurrentPageNumber(final int currentPageNumber) {
+        this.currentPageNumber = currentPageNumber;
+    }
+
+    public List<Integer> getPageNumberList() {
+        return pageNumberList;
+    }
+
+    public void setPageNumberList(final List<Integer> pageNumberList) {
+        this.pageNumberList = pageNumberList;
+    }
 
     public ScheduledJobPager() {
         super();
     }
 
-    @Override
-    public void clear() {
-        super.clear();
-    }
-
-    @Override
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }
