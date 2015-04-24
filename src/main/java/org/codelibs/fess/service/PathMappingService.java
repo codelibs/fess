@@ -21,15 +21,71 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsPathMappingService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.db.cbean.PathMappingCB;
+import org.codelibs.fess.db.exbhv.PathMappingBhv;
 import org.codelibs.fess.db.exentity.PathMapping;
 import org.codelibs.fess.pager.PathMappingPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class PathMappingService extends BsPathMappingService implements Serializable {
+public class PathMappingService implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @Resource
+    protected PathMappingBhv pathMappingBhv;
+
+    public PathMappingService() {
+        super();
+    }
+
+    public List<PathMapping> getPathMappingList(final PathMappingPager pathMappingPager) {
+
+        final PagingResultBean<PathMapping> pathMappingList = pathMappingBhv.selectPage(cb -> {
+            cb.paging(pathMappingPager.getPageSize(), pathMappingPager.getCurrentPageNumber());
+            setupListCondition(cb, pathMappingPager);
+        });
+
+        // update pager
+        Beans.copy(pathMappingList, pathMappingPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        pathMappingPager.setPageNumberList(pathMappingList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return pathMappingList;
+    }
+
+    public PathMapping getPathMapping(final Map<String, String> keys) {
+        final PathMapping pathMapping = pathMappingBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (pathMapping == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return pathMapping;
+    }
+
+    public void store(final PathMapping pathMapping) throws CrudMessageException {
+        setupStoreCondition(pathMapping);
+
+        pathMappingBhv.insertOrUpdate(pathMapping);
+
+    }
+
+    public void delete(final PathMapping pathMapping) throws CrudMessageException {
+        setupDeleteCondition(pathMapping);
+
+        pathMappingBhv.delete(pathMapping);
+
+    }
 
     public List<PathMapping> getPathMappingList(final Collection<CDef.ProcessType> cdefList) {
 
@@ -40,9 +96,11 @@ public class PathMappingService extends BsPathMappingService implements Serializ
         });
     }
 
-    @Override
     protected void setupListCondition(final PathMappingCB cb, final PathMappingPager pathMappingPager) {
-        super.setupListCondition(cb, pathMappingPager);
+        if (pathMappingPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(pathMappingPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -52,26 +110,20 @@ public class PathMappingService extends BsPathMappingService implements Serializ
 
     }
 
-    @Override
     protected void setupEntityCondition(final PathMappingCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final PathMapping pathMapping) {
-        super.setupStoreCondition(pathMapping);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final PathMapping pathMapping) {
-        super.setupDeleteCondition(pathMapping);
 
         // setup condition
 

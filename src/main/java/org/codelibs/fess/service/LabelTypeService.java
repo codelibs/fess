@@ -23,8 +23,10 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.crud.service.BsLabelTypeService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.LabelTypeCB;
+import org.codelibs.fess.db.exbhv.LabelTypeBhv;
 import org.codelibs.fess.db.exbhv.LabelTypeToRoleTypeMappingBhv;
 import org.codelibs.fess.db.exentity.LabelType;
 import org.codelibs.fess.db.exentity.LabelTypeToRoleTypeMapping;
@@ -32,17 +34,51 @@ import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.pager.LabelTypePager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class LabelTypeService extends BsLabelTypeService implements Serializable {
+public class LabelTypeService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Resource
     protected LabelTypeToRoleTypeMappingBhv labelTypeToRoleTypeMappingBhv;
 
-    @Override
+    @Resource
+    protected LabelTypeBhv labelTypeBhv;
+
+    public LabelTypeService() {
+        super();
+    }
+
+    public List<LabelType> getLabelTypeList(final LabelTypePager labelTypePager) {
+
+        final PagingResultBean<LabelType> labelTypeList = labelTypeBhv.selectPage(cb -> {
+            cb.paging(labelTypePager.getPageSize(), labelTypePager.getCurrentPageNumber());
+            setupListCondition(cb, labelTypePager);
+        });
+
+        // update pager
+        Beans.copy(labelTypeList, labelTypePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        labelTypePager.setPageNumberList(labelTypeList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return labelTypeList;
+    }
+
+    public void delete(final LabelType labelType) throws CrudMessageException {
+        setupDeleteCondition(labelType);
+
+        labelTypeBhv.delete(labelType);
+
+    }
+
     protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
-        super.setupListCondition(cb, labelTypePager);
+        if (labelTypePager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(labelTypePager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -52,26 +88,20 @@ public class LabelTypeService extends BsLabelTypeService implements Serializable
 
     }
 
-    @Override
     protected void setupEntityCondition(final LabelTypeCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final LabelType labelType) {
-        super.setupStoreCondition(labelType);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final LabelType labelType) {
-        super.setupDeleteCondition(labelType);
 
         // setup condition
 
@@ -100,11 +130,12 @@ public class LabelTypeService extends BsLabelTypeService implements Serializable
         return labelTypeList;
     }
 
-    @Override
     public void store(final LabelType labelType) {
         final boolean isNew = labelType.getId() == null;
         final String[] roleTypeIds = labelType.getRoleTypeIds();
-        super.store(labelType);
+        setupStoreCondition(labelType);
+
+        labelTypeBhv.insertOrUpdate(labelType);
         final Long labelTypeId = labelType.getId();
         if (isNew) {
             // Insert
@@ -156,9 +187,11 @@ public class LabelTypeService extends BsLabelTypeService implements Serializable
         }
     }
 
-    @Override
     public LabelType getLabelType(final Map<String, String> keys) {
-        final LabelType labelType = super.getLabelType(keys);
+        final LabelType labelType = labelTypeBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (labelType != null) {
             final List<LabelTypeToRoleTypeMapping> wctrtmList = labelTypeToRoleTypeMappingBhv.selectList(wctrtmCb -> {
                 wctrtmCb.query().setLabelTypeId_Equal(labelType.getId());

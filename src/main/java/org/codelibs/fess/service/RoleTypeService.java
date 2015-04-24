@@ -20,18 +20,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsRoleTypeService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.RoleTypeCB;
+import org.codelibs.fess.db.exbhv.RoleTypeBhv;
 import org.codelibs.fess.db.exentity.RoleType;
 import org.codelibs.fess.pager.RoleTypePager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class RoleTypeService extends BsRoleTypeService implements Serializable {
+public class RoleTypeService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @Resource
+    protected RoleTypeBhv roleTypeBhv;
+
+    public RoleTypeService() {
+        super();
+    }
+
+    public List<RoleType> getRoleTypeList(final RoleTypePager roleTypePager) {
+
+        final PagingResultBean<RoleType> roleTypeList = roleTypeBhv.selectPage(cb -> {
+            cb.paging(roleTypePager.getPageSize(), roleTypePager.getCurrentPageNumber());
+            setupListCondition(cb, roleTypePager);
+        });
+
+        // update pager
+        Beans.copy(roleTypeList, roleTypePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        roleTypePager.setPageNumberList(roleTypeList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return roleTypeList;
+    }
+
+    public RoleType getRoleType(final Map<String, String> keys) {
+        final RoleType roleType = roleTypeBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (roleType == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return roleType;
+    }
+
+    public void store(final RoleType roleType) throws CrudMessageException {
+        setupStoreCondition(roleType);
+
+        roleTypeBhv.insertOrUpdate(roleType);
+
+    }
+
+    public void delete(final RoleType roleType) throws CrudMessageException {
+        setupDeleteCondition(roleType);
+
+        roleTypeBhv.delete(roleType);
+
+    }
+
     protected void setupListCondition(final RoleTypeCB cb, final RoleTypePager roleTypePager) {
-        super.setupListCondition(cb, roleTypePager);
+        if (roleTypePager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(roleTypePager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -41,26 +99,20 @@ public class RoleTypeService extends BsRoleTypeService implements Serializable {
 
     }
 
-    @Override
     protected void setupEntityCondition(final RoleTypeCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final RoleType roleType) {
-        super.setupStoreCondition(roleType);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final RoleType roleType) {
-        super.setupDeleteCondition(roleType);
 
         // setup condition
 

@@ -20,18 +20,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsKeyMatchService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.KeyMatchCB;
+import org.codelibs.fess.db.exbhv.KeyMatchBhv;
 import org.codelibs.fess.db.exentity.KeyMatch;
 import org.codelibs.fess.pager.KeyMatchPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class KeyMatchService extends BsKeyMatchService implements Serializable {
+public class KeyMatchService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @Resource
+    protected KeyMatchBhv keyMatchBhv;
+
+    public KeyMatchService() {
+        super();
+    }
+
+    public List<KeyMatch> getKeyMatchList(final KeyMatchPager keyMatchPager) {
+
+        final PagingResultBean<KeyMatch> keyMatchList = keyMatchBhv.selectPage(cb -> {
+            cb.paging(keyMatchPager.getPageSize(), keyMatchPager.getCurrentPageNumber());
+            setupListCondition(cb, keyMatchPager);
+        });
+
+        // update pager
+        Beans.copy(keyMatchList, keyMatchPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        keyMatchPager.setPageNumberList(keyMatchList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return keyMatchList;
+    }
+
+    public KeyMatch getKeyMatch(final Map<String, String> keys) {
+        final KeyMatch keyMatch = keyMatchBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (keyMatch == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return keyMatch;
+    }
+
+    public void store(final KeyMatch keyMatch) throws CrudMessageException {
+        setupStoreCondition(keyMatch);
+
+        keyMatchBhv.insertOrUpdate(keyMatch);
+
+    }
+
+    public void delete(final KeyMatch keyMatch) throws CrudMessageException {
+        setupDeleteCondition(keyMatch);
+
+        keyMatchBhv.delete(keyMatch);
+
+    }
+
     protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
-        super.setupListCondition(cb, keyMatchPager);
+        if (keyMatchPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(keyMatchPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -41,25 +99,19 @@ public class KeyMatchService extends BsKeyMatchService implements Serializable {
 
     }
 
-    @Override
     protected void setupEntityCondition(final KeyMatchCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final KeyMatch keyMatch) {
-        super.setupStoreCondition(keyMatch);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final KeyMatch keyMatch) {
-        super.setupDeleteCondition(keyMatch);
 
         // setup condition
 

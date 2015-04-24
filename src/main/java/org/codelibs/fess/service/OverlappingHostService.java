@@ -20,14 +20,70 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsOverlappingHostService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.OverlappingHostCB;
+import org.codelibs.fess.db.exbhv.OverlappingHostBhv;
 import org.codelibs.fess.db.exentity.OverlappingHost;
 import org.codelibs.fess.pager.OverlappingHostPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class OverlappingHostService extends BsOverlappingHostService implements Serializable {
+public class OverlappingHostService implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @Resource
+    protected OverlappingHostBhv overlappingHostBhv;
+
+    public OverlappingHostService() {
+        super();
+    }
+
+    public List<OverlappingHost> getOverlappingHostList(final OverlappingHostPager overlappingHostPager) {
+
+        final PagingResultBean<OverlappingHost> overlappingHostList = overlappingHostBhv.selectPage(cb -> {
+            cb.paging(overlappingHostPager.getPageSize(), overlappingHostPager.getCurrentPageNumber());
+            setupListCondition(cb, overlappingHostPager);
+        });
+
+        // update pager
+        Beans.copy(overlappingHostList, overlappingHostPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        overlappingHostPager.setPageNumberList(overlappingHostList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return overlappingHostList;
+    }
+
+    public OverlappingHost getOverlappingHost(final Map<String, String> keys) {
+        final OverlappingHost overlappingHost = overlappingHostBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (overlappingHost == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return overlappingHost;
+    }
+
+    public void store(final OverlappingHost overlappingHost) throws CrudMessageException {
+        setupStoreCondition(overlappingHost);
+
+        overlappingHostBhv.insertOrUpdate(overlappingHost);
+
+    }
+
+    public void delete(final OverlappingHost overlappingHost) throws CrudMessageException {
+        setupDeleteCondition(overlappingHost);
+
+        overlappingHostBhv.delete(overlappingHost);
+
+    }
 
     public List<OverlappingHost> getOverlappingHostList() {
 
@@ -39,9 +95,11 @@ public class OverlappingHostService extends BsOverlappingHostService implements 
         });
     }
 
-    @Override
     protected void setupListCondition(final OverlappingHostCB cb, final OverlappingHostPager overlappingHostPager) {
-        super.setupListCondition(cb, overlappingHostPager);
+        if (overlappingHostPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(overlappingHostPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -51,26 +109,20 @@ public class OverlappingHostService extends BsOverlappingHostService implements 
 
     }
 
-    @Override
     protected void setupEntityCondition(final OverlappingHostCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final OverlappingHost overlappingHost) {
-        super.setupStoreCondition(overlappingHost);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final OverlappingHost overlappingHost) {
-        super.setupDeleteCondition(overlappingHost);
 
         // setup condition
 

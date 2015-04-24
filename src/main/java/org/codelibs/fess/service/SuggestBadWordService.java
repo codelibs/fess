@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 import jp.sf.orangesignal.csv.CsvWriter;
@@ -32,14 +34,18 @@ import jp.sf.orangesignal.csv.CsvWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.util.StringUtil;
-import org.codelibs.fess.crud.service.BsSuggestBadWordService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.SuggestBadWordCB;
+import org.codelibs.fess.db.exbhv.SuggestBadWordBhv;
 import org.codelibs.fess.db.exentity.SuggestBadWord;
 import org.codelibs.fess.pager.SuggestBadWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class SuggestBadWordService extends BsSuggestBadWordService implements Serializable {
+public class SuggestBadWordService implements Serializable {
 
     private static final String DELETE_PREFIX = "--";
 
@@ -47,9 +53,61 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements Se
 
     private static final Log log = LogFactory.getLog(SuggestBadWordService.class);
 
-    @Override
+    @Resource
+    protected SuggestBadWordBhv suggestBadWordBhv;
+
+    public SuggestBadWordService() {
+        super();
+    }
+
+    public List<SuggestBadWord> getSuggestBadWordList(final SuggestBadWordPager suggestBadWordPager) {
+
+        final PagingResultBean<SuggestBadWord> suggestBadWordList = suggestBadWordBhv.selectPage(cb -> {
+            cb.paging(suggestBadWordPager.getPageSize(), suggestBadWordPager.getCurrentPageNumber());
+            setupListCondition(cb, suggestBadWordPager);
+        });
+
+        // update pager
+        Beans.copy(suggestBadWordList, suggestBadWordPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        suggestBadWordPager.setPageNumberList(suggestBadWordList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return suggestBadWordList;
+    }
+
+    public SuggestBadWord getSuggestBadWord(final Map<String, String> keys) {
+        final SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (suggestBadWord == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return suggestBadWord;
+    }
+
+    public void store(final SuggestBadWord suggestBadWord) throws CrudMessageException {
+        setupStoreCondition(suggestBadWord);
+
+        suggestBadWordBhv.insertOrUpdate(suggestBadWord);
+
+    }
+
+    public void delete(final SuggestBadWord suggestBadWord) throws CrudMessageException {
+        setupDeleteCondition(suggestBadWord);
+
+        suggestBadWordBhv.delete(suggestBadWord);
+
+    }
+
     protected void setupListCondition(final SuggestBadWordCB cb, final SuggestBadWordPager suggestBadWordPager) {
-        super.setupListCondition(cb, suggestBadWordPager);
+        if (suggestBadWordPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(suggestBadWordPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -59,25 +117,19 @@ public class SuggestBadWordService extends BsSuggestBadWordService implements Se
 
     }
 
-    @Override
     protected void setupEntityCondition(final SuggestBadWordCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final SuggestBadWord suggestBadWord) {
-        super.setupStoreCondition(suggestBadWord);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final SuggestBadWord suggestBadWord) {
-        super.setupDeleteCondition(suggestBadWord);
 
         // setup condition
 

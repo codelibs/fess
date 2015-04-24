@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 import jp.sf.orangesignal.csv.CsvWriter;
@@ -33,22 +35,78 @@ import jp.sf.orangesignal.csv.CsvWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.util.StringUtil;
-import org.codelibs.fess.crud.service.BsSuggestElevateWordService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.SuggestElevateWordCB;
+import org.codelibs.fess.db.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.db.exentity.SuggestElevateWord;
 import org.codelibs.fess.pager.SuggestElevateWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class SuggestElevateWordService extends BsSuggestElevateWordService implements Serializable {
+public class SuggestElevateWordService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private static final Log log = LogFactory.getLog(SuggestElevateWordService.class);
 
-    @Override
+    @Resource
+    protected SuggestElevateWordBhv suggestElevateWordBhv;
+
+    public SuggestElevateWordService() {
+        super();
+    }
+
+    public List<SuggestElevateWord> getSuggestElevateWordList(final SuggestElevateWordPager suggestElevateWordPager) {
+
+        final PagingResultBean<SuggestElevateWord> suggestElevateWordList = suggestElevateWordBhv.selectPage(cb -> {
+            cb.paging(suggestElevateWordPager.getPageSize(), suggestElevateWordPager.getCurrentPageNumber());
+            setupListCondition(cb, suggestElevateWordPager);
+        });
+
+        // update pager
+        Beans.copy(suggestElevateWordList, suggestElevateWordPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        suggestElevateWordPager.setPageNumberList(suggestElevateWordList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return suggestElevateWordList;
+    }
+
+    public SuggestElevateWord getSuggestElevateWord(final Map<String, String> keys) {
+        final SuggestElevateWord suggestElevateWord = suggestElevateWordBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (suggestElevateWord == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return suggestElevateWord;
+    }
+
+    public void store(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
+        setupStoreCondition(suggestElevateWord);
+
+        suggestElevateWordBhv.insertOrUpdate(suggestElevateWord);
+
+    }
+
+    public void delete(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
+        setupDeleteCondition(suggestElevateWord);
+
+        suggestElevateWordBhv.delete(suggestElevateWord);
+
+    }
+
     protected void setupListCondition(final SuggestElevateWordCB cb, final SuggestElevateWordPager suggestElevateWordPager) {
-        super.setupListCondition(cb, suggestElevateWordPager);
+        if (suggestElevateWordPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(suggestElevateWordPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -58,25 +116,19 @@ public class SuggestElevateWordService extends BsSuggestElevateWordService imple
 
     }
 
-    @Override
     protected void setupEntityCondition(final SuggestElevateWordCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final SuggestElevateWord suggestElevateWord) {
-        super.setupStoreCondition(suggestElevateWord);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final SuggestElevateWord suggestElevateWord) {
-        super.setupDeleteCondition(suggestElevateWord);
 
         // setup condition
 
