@@ -20,19 +20,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsWebAuthenticationService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.WebAuthenticationCB;
+import org.codelibs.fess.db.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.db.exentity.WebAuthentication;
 import org.codelibs.fess.pager.WebAuthenticationPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class WebAuthenticationService extends BsWebAuthenticationService implements Serializable {
+public class WebAuthenticationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
-    protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthenticationPager webAuthenticationPager) {
-        super.setupListCondition(cb, webAuthenticationPager);
+    @Resource
+    protected WebAuthenticationBhv webAuthenticationBhv;
 
+    public WebAuthenticationService() {
+        super();
+    }
+
+    public List<WebAuthentication> getWebAuthenticationList(final WebAuthenticationPager webAuthenticationPager) {
+
+        final PagingResultBean<WebAuthentication> webAuthenticationList = webAuthenticationBhv.selectPage(cb -> {
+            cb.paging(webAuthenticationPager.getPageSize(), webAuthenticationPager.getCurrentPageNumber());
+            setupListCondition(cb, webAuthenticationPager);
+        });
+
+        // update pager
+        Beans.copy(webAuthenticationList, webAuthenticationPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        webAuthenticationPager.setPageNumberList(webAuthenticationList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return webAuthenticationList;
+    }
+
+    public WebAuthentication getWebAuthentication(final Map<String, String> keys) {
+        final WebAuthentication webAuthentication = webAuthenticationBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (webAuthentication == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return webAuthentication;
+    }
+
+    public void store(final WebAuthentication webAuthentication) throws CrudMessageException {
+        setupStoreCondition(webAuthentication);
+
+        webAuthenticationBhv.insertOrUpdate(webAuthentication);
+
+    }
+
+    public void delete(final WebAuthentication webAuthentication) throws CrudMessageException {
+        setupDeleteCondition(webAuthentication);
+
+        webAuthenticationBhv.delete(webAuthentication);
+
+    }
+
+    protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthenticationPager webAuthenticationPager) {
+        if (webAuthenticationPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(webAuthenticationPager.id));
+        }
+        // TODO Long, Integer, String supported only.
         // setup condition
         cb.setupSelect_WebCrawlingConfig();
         cb.query().setDeletedBy_IsNull();
@@ -43,26 +100,20 @@ public class WebAuthenticationService extends BsWebAuthenticationService impleme
 
     }
 
-    @Override
     protected void setupEntityCondition(final WebAuthenticationCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final WebAuthentication webAuthentication) {
-        super.setupStoreCondition(webAuthentication);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final WebAuthentication webAuthentication) {
-        super.setupDeleteCondition(webAuthentication);
 
         // setup condition
 
