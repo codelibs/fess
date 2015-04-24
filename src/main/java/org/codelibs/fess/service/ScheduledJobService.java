@@ -23,22 +23,71 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.service.BsScheduledJobService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.ScheduledJobCB;
+import org.codelibs.fess.db.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.db.exentity.ScheduledJob;
 import org.codelibs.fess.job.JobScheduler;
 import org.codelibs.fess.pager.ScheduledJobPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class ScheduledJobService extends BsScheduledJobService implements Serializable {
+public class ScheduledJobService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Resource
+    protected ScheduledJobBhv scheduledJobBhv;
+
+    public ScheduledJobService() {
+        super();
+    }
+
+    public List<ScheduledJob> getScheduledJobList(final ScheduledJobPager scheduledJobPager) {
+
+        final PagingResultBean<ScheduledJob> scheduledJobList = scheduledJobBhv.selectPage(cb -> {
+            cb.paging(scheduledJobPager.getPageSize(), scheduledJobPager.getCurrentPageNumber());
+            setupListCondition(cb, scheduledJobPager);
+        });
+
+        // update pager
+        Beans.copy(scheduledJobList, scheduledJobPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        scheduledJobPager.setPageNumberList(scheduledJobList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return scheduledJobList;
+    }
+
+    public ScheduledJob getScheduledJob(final Map<String, String> keys) {
+        final ScheduledJob scheduledJob = scheduledJobBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (scheduledJob == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return scheduledJob;
+    }
+
+    public void delete(final ScheduledJob scheduledJob) throws CrudMessageException {
+        setupDeleteCondition(scheduledJob);
+
+        scheduledJobBhv.delete(scheduledJob);
+
+    }
+
+    @Resource
     protected JobScheduler jobScheduler;
 
-    @Override
     protected void setupListCondition(final ScheduledJobCB cb, final ScheduledJobPager scheduledJobPager) {
-        super.setupListCondition(cb, scheduledJobPager);
+        if (scheduledJobPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(scheduledJobPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -49,26 +98,20 @@ public class ScheduledJobService extends BsScheduledJobService implements Serial
 
     }
 
-    @Override
     protected void setupEntityCondition(final ScheduledJobCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final ScheduledJob scheduledJob) {
-        super.setupStoreCondition(scheduledJob);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final ScheduledJob scheduledJob) {
-        super.setupDeleteCondition(scheduledJob);
 
         // setup condition
 
@@ -82,11 +125,12 @@ public class ScheduledJobService extends BsScheduledJobService implements Serial
         });
     }
 
-    @Override
     public void store(final ScheduledJob scheduledJob) {
         final boolean isNew = scheduledJob.getId() == null;
         final boolean isDelete = scheduledJob.getDeletedBy() != null;
-        super.store(scheduledJob);
+        setupStoreCondition(scheduledJob);
+
+        scheduledJobBhv.insertOrUpdate(scheduledJob);
         if (!isNew) {
             jobScheduler.unregister(scheduledJob);
         }
