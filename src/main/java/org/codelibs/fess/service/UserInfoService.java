@@ -17,21 +17,26 @@
 package org.codelibs.fess.service;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.util.StringUtil;
-import org.codelibs.fess.crud.service.BsUserInfoService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.UserInfoCB;
 import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
+import org.codelibs.fess.db.exbhv.UserInfoBhv;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.codelibs.fess.db.exentity.UserInfo;
 import org.codelibs.fess.pager.UserInfoPager;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class UserInfoService extends BsUserInfoService implements Serializable {
+public class UserInfoService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,7 +46,56 @@ public class UserInfoService extends BsUserInfoService implements Serializable {
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
 
-    @Override
+    @Resource
+    protected UserInfoBhv userInfoBhv;
+
+    public UserInfoService() {
+        super();
+    }
+
+    public List<UserInfo> getUserInfoList(final UserInfoPager userInfoPager) {
+
+        final PagingResultBean<UserInfo> userInfoList = userInfoBhv.selectPage(cb -> {
+            cb.paging(userInfoPager.getPageSize(), userInfoPager.getCurrentPageNumber());
+            setupListCondition(cb, userInfoPager);
+        });
+
+        // update pager
+        Beans.copy(userInfoList, userInfoPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        userInfoPager.setPageNumberList(userInfoList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return userInfoList;
+    }
+
+    public UserInfo getUserInfo(final Map<String, String> keys) {
+        final UserInfo userInfo = userInfoBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (userInfo == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return userInfo;
+    }
+
+    public void store(final UserInfo userInfo) throws CrudMessageException {
+        setupStoreCondition(userInfo);
+
+        userInfoBhv.insertOrUpdate(userInfo);
+
+    }
+
+    public void delete(final UserInfo userInfo) throws CrudMessageException {
+        setupDeleteCondition(userInfo);
+
+        userInfoBhv.delete(userInfo);
+
+    }
+
     protected void setupListCondition(final UserInfoCB cb, final UserInfoPager userInfoPager) {
         // setup condition
         cb.query().addOrderBy_UpdatedTime_Desc();
@@ -52,23 +106,18 @@ public class UserInfoService extends BsUserInfoService implements Serializable {
         }
     }
 
-    @Override
     protected void setupEntityCondition(final UserInfoCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final UserInfo userInfo) {
-        super.setupStoreCondition(userInfo);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final UserInfo userInfo) {
         final Long userInfoId = userInfo.getId();
         final SearchLog searchLog = new SearchLog();
@@ -80,8 +129,6 @@ public class UserInfoService extends BsUserInfoService implements Serializable {
         favoriteLogBhv.queryDelete(cb2 -> {
             cb2.query().setUserId_Equal(userInfoId);
         });
-
-        super.setupDeleteCondition(userInfo);
 
         // setup condition
 
