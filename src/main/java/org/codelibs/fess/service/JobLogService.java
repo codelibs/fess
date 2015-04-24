@@ -21,19 +21,77 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsJobLogService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.JobLogCB;
+import org.codelibs.fess.db.exbhv.JobLogBhv;
 import org.codelibs.fess.db.exentity.JobLog;
 import org.codelibs.fess.pager.JobLogPager;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class JobLogService extends BsJobLogService implements Serializable {
+public class JobLogService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @Resource
+    protected JobLogBhv jobLogBhv;
+
+    public JobLogService() {
+        super();
+    }
+
+    public List<JobLog> getJobLogList(final JobLogPager jobLogPager) {
+
+        final PagingResultBean<JobLog> jobLogList = jobLogBhv.selectPage(cb -> {
+            cb.paging(jobLogPager.getPageSize(), jobLogPager.getCurrentPageNumber());
+            setupListCondition(cb, jobLogPager);
+        });
+
+        // update pager
+        Beans.copy(jobLogList, jobLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        jobLogPager.setPageNumberList(jobLogList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return jobLogList;
+    }
+
+    public JobLog getJobLog(final Map<String, String> keys) {
+        final JobLog jobLog = jobLogBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (jobLog == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return jobLog;
+    }
+
+    public void store(final JobLog jobLog) throws CrudMessageException {
+        setupStoreCondition(jobLog);
+
+        jobLogBhv.insertOrUpdate(jobLog);
+
+    }
+
+    public void delete(final JobLog jobLog) throws CrudMessageException {
+        setupDeleteCondition(jobLog);
+
+        jobLogBhv.delete(jobLog);
+
+    }
+
     protected void setupListCondition(final JobLogCB cb, final JobLogPager jobLogPager) {
-        super.setupListCondition(cb, jobLogPager);
+        if (jobLogPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(jobLogPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().addOrderBy_StartTime_Desc();
@@ -43,25 +101,19 @@ public class JobLogService extends BsJobLogService implements Serializable {
 
     }
 
-    @Override
     protected void setupEntityCondition(final JobLogCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final JobLog jobLog) {
-        super.setupStoreCondition(jobLog);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final JobLog jobLog) {
-        super.setupDeleteCondition(jobLog);
 
         // setup condition
 
