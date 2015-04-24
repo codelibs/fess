@@ -20,18 +20,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.crud.service.BsRequestHeaderService;
+import javax.annotation.Resource;
+
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.RequestHeaderCB;
+import org.codelibs.fess.db.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.db.exentity.RequestHeader;
 import org.codelibs.fess.pager.RequestHeaderPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class RequestHeaderService extends BsRequestHeaderService implements Serializable {
+public class RequestHeaderService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
+    @Resource
+    protected RequestHeaderBhv requestHeaderBhv;
+
+    public RequestHeaderService() {
+        super();
+    }
+
+    public List<RequestHeader> getRequestHeaderList(final RequestHeaderPager requestHeaderPager) {
+
+        final PagingResultBean<RequestHeader> requestHeaderList = requestHeaderBhv.selectPage(cb -> {
+            cb.paging(requestHeaderPager.getPageSize(), requestHeaderPager.getCurrentPageNumber());
+            setupListCondition(cb, requestHeaderPager);
+        });
+
+        // update pager
+        Beans.copy(requestHeaderList, requestHeaderPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        requestHeaderPager.setPageNumberList(requestHeaderList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return requestHeaderList;
+    }
+
+    public RequestHeader getRequestHeader(final Map<String, String> keys) {
+        final RequestHeader requestHeader = requestHeaderBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
+        if (requestHeader == null) {
+            // TODO exception?
+            return null;
+        }
+
+        return requestHeader;
+    }
+
+    public void store(final RequestHeader requestHeader) throws CrudMessageException {
+        setupStoreCondition(requestHeader);
+
+        requestHeaderBhv.insertOrUpdate(requestHeader);
+
+    }
+
+    public void delete(final RequestHeader requestHeader) throws CrudMessageException {
+        setupDeleteCondition(requestHeader);
+
+        requestHeaderBhv.delete(requestHeader);
+
+    }
+
     protected void setupListCondition(final RequestHeaderCB cb, final RequestHeaderPager requestHeaderPager) {
-        super.setupListCondition(cb, requestHeaderPager);
+        if (requestHeaderPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(requestHeaderPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.setupSelect_WebCrawlingConfig();
@@ -43,26 +101,20 @@ public class RequestHeaderService extends BsRequestHeaderService implements Seri
 
     }
 
-    @Override
     protected void setupEntityCondition(final RequestHeaderCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final RequestHeader requestHeader) {
-        super.setupStoreCondition(requestHeader);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final RequestHeader requestHeader) {
-        super.setupDeleteCondition(requestHeader);
 
         // setup condition
 
