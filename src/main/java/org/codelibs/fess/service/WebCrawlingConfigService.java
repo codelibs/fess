@@ -24,16 +24,20 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.service.BsWebCrawlingConfigService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.cbean.WebCrawlingConfigCB;
 import org.codelibs.fess.db.exbhv.WebConfigToLabelTypeMappingBhv;
 import org.codelibs.fess.db.exbhv.WebConfigToRoleTypeMappingBhv;
+import org.codelibs.fess.db.exbhv.WebCrawlingConfigBhv;
 import org.codelibs.fess.db.exentity.WebConfigToLabelTypeMapping;
 import org.codelibs.fess.db.exentity.WebConfigToRoleTypeMapping;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
 import org.codelibs.fess.pager.WebCrawlingConfigPager;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
-public class WebCrawlingConfigService extends BsWebCrawlingConfigService implements Serializable {
+public class WebCrawlingConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +46,36 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService impleme
 
     @Resource
     protected WebConfigToRoleTypeMappingBhv webConfigToRoleTypeMappingBhv;
+
+    @Resource
+    protected WebCrawlingConfigBhv webCrawlingConfigBhv;
+
+    public WebCrawlingConfigService() {
+        super();
+    }
+
+    public List<WebCrawlingConfig> getWebCrawlingConfigList(final WebCrawlingConfigPager webCrawlingConfigPager) {
+
+        final PagingResultBean<WebCrawlingConfig> webCrawlingConfigList = webCrawlingConfigBhv.selectPage(cb -> {
+            cb.paging(webCrawlingConfigPager.getPageSize(), webCrawlingConfigPager.getCurrentPageNumber());
+            setupListCondition(cb, webCrawlingConfigPager);
+        });
+
+        // update pager
+        Beans.copy(webCrawlingConfigList, webCrawlingConfigPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        webCrawlingConfigPager.setPageNumberList(webCrawlingConfigList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return webCrawlingConfigList;
+    }
+
+    public void delete(final WebCrawlingConfig webCrawlingConfig) throws CrudMessageException {
+        setupDeleteCondition(webCrawlingConfig);
+
+        webCrawlingConfigBhv.delete(webCrawlingConfig);
+
+    }
 
     public List<WebCrawlingConfig> getAllWebCrawlingConfigList() {
         return getAllWebCrawlingConfigList(true, true, true, null);
@@ -83,9 +117,11 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService impleme
         return list;
     }
 
-    @Override
     public WebCrawlingConfig getWebCrawlingConfig(final Map<String, String> keys) {
-        final WebCrawlingConfig webCrawlingConfig = super.getWebCrawlingConfig(keys);
+        final WebCrawlingConfig webCrawlingConfig = webCrawlingConfigBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
 
         if (webCrawlingConfig != null) {
             final List<WebConfigToLabelTypeMapping> wctltmList = webConfigToLabelTypeMappingBhv.selectList(wctltmCb -> {
@@ -118,12 +154,13 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService impleme
         return webCrawlingConfig;
     }
 
-    @Override
     public void store(final WebCrawlingConfig webCrawlingConfig) {
         final boolean isNew = webCrawlingConfig.getId() == null;
         final String[] labelTypeIds = webCrawlingConfig.getLabelTypeIds();
         final String[] roleTypeIds = webCrawlingConfig.getRoleTypeIds();
-        super.store(webCrawlingConfig);
+        setupStoreCondition(webCrawlingConfig);
+
+        webCrawlingConfigBhv.insertOrUpdate(webCrawlingConfig);
         final Long webConfigId = webCrawlingConfig.getId();
         if (isNew) {
             // Insert
@@ -208,9 +245,11 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService impleme
         }
     }
 
-    @Override
     protected void setupListCondition(final WebCrawlingConfigCB cb, final WebCrawlingConfigPager webCrawlingConfigPager) {
-        super.setupListCondition(cb, webCrawlingConfigPager);
+        if (webCrawlingConfigPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(webCrawlingConfigPager.id));
+        }
+        // TODO Long, Integer, String supported only.
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
@@ -221,26 +260,20 @@ public class WebCrawlingConfigService extends BsWebCrawlingConfigService impleme
 
     }
 
-    @Override
     protected void setupEntityCondition(final WebCrawlingConfigCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
         cb.query().setDeletedBy_IsNull();
 
     }
 
-    @Override
     protected void setupStoreCondition(final WebCrawlingConfig webCrawlingConfig) {
-        super.setupStoreCondition(webCrawlingConfig);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final WebCrawlingConfig webCrawlingConfig) {
-        super.setupDeleteCondition(webCrawlingConfig);
 
         // setup condition
 
