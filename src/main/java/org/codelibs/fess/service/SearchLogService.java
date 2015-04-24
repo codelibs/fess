@@ -42,22 +42,26 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.crud.service.BsSearchLogService;
+import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.db.allcommon.CDef.AccessType;
 import org.codelibs.fess.db.cbean.ClickLogCB;
 import org.codelibs.fess.db.cbean.SearchLogCB;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.SearchFieldLogBhv;
+import org.codelibs.fess.db.exbhv.SearchLogBhv;
 import org.codelibs.fess.db.exentity.SearchFieldLog;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.codelibs.fess.pager.SearchLogPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.seasar.framework.beans.util.Beans;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class SearchLogService extends BsSearchLogService implements Serializable {
+public class SearchLogService implements Serializable {
     private static final Log log = LogFactory.getLog(SearchLogService.class);
 
     private static final long serialVersionUID = 1L;
@@ -68,9 +72,34 @@ public class SearchLogService extends BsSearchLogService implements Serializable
     @Resource
     protected SearchFieldLogBhv searchFieldLogBhv;
 
-    @Override
+    @Resource
+    protected SearchLogBhv searchLogBhv;
+
+    public SearchLogService() {
+        super();
+    }
+
+    public List<SearchLog> getSearchLogList(final SearchLogPager searchLogPager) {
+
+        final PagingResultBean<SearchLog> searchLogList = searchLogBhv.selectPage(cb -> {
+            cb.paging(searchLogPager.getPageSize(), searchLogPager.getCurrentPageNumber());
+            setupListCondition(cb, searchLogPager);
+        });
+
+        // update pager
+        Beans.copy(searchLogList, searchLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        searchLogPager.setPageNumberList(searchLogList.pageRange(op -> {
+            op.rangeSize(5);
+        }).createPageNumberList());
+
+        return searchLogList;
+    }
+
     protected void setupListCondition(final SearchLogCB cb, final SearchLogPager searchLogPager) {
-        super.setupListCondition(cb, searchLogPager);
+        if (searchLogPager.id != null) {
+            cb.query().setId_Equal(Long.parseLong(searchLogPager.id));
+        }
+        // TODO Long, Integer, String supported only.
         cb.setupSelect_UserInfo();
 
         // setup condition
@@ -113,9 +142,11 @@ public class SearchLogService extends BsSearchLogService implements Serializable
         buildSearchCondition(searchLogPager, cb);
     }
 
-    @Override
     public SearchLog getSearchLog(final Map<String, String> keys) {
-        final SearchLog searchLog = super.getSearchLog(keys);
+        final SearchLog searchLog = searchLogBhv.selectEntity(cb -> {
+            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            setupEntityCondition(cb, keys);
+        }).orElse(null);//TODO
         if (searchLog != null) {
             searchLog.setClickLogList(clickLogBhv.selectList(cb -> {
                 cb.query().setSearchId_Equal(searchLog.getId());
@@ -124,37 +155,32 @@ public class SearchLogService extends BsSearchLogService implements Serializable
         return searchLog;
     }
 
-    @Override
     protected void setupEntityCondition(final SearchLogCB cb, final Map<String, String> keys) {
-        super.setupEntityCondition(cb, keys);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupStoreCondition(final SearchLog searchLog) {
-        super.setupStoreCondition(searchLog);
 
         // setup condition
 
     }
 
-    @Override
     protected void setupDeleteCondition(final SearchLog searchLog) {
-        super.setupDeleteCondition(searchLog);
 
         // setup condition
 
     }
 
-    @Override
-    public void delete(final SearchLog searchLog) {
+    public void delete(final SearchLog searchLog) throws CrudMessageException {
         clickLogBhv.batchDelete(searchLog.getClickLogList());
         searchFieldLogBhv.varyingQueryDelete(cb -> {
             cb.query().setSearchId_Equal(searchLog.getId());
         }, op -> op.allowNonQueryDelete());
-        super.delete(searchLog);
+        setupDeleteCondition(searchLog);
+
+        searchLogBhv.delete(searchLog);
     }
 
     public void deleteAll(final SearchLogPager searchLogPager) {
@@ -545,9 +571,10 @@ public class SearchLogService extends BsSearchLogService implements Serializable
         }
     }
 
-    @Override
-    public void store(final SearchLog searchLog) {
-        super.store(searchLog);
+    public void store(final SearchLog searchLog) throws CrudMessageException {
+        setupStoreCondition(searchLog);
+
+        searchLogBhv.insertOrUpdate(searchLog);
         final List<SearchFieldLog> searchFieldLogList = searchLog.getSearchFieldLogList();
         if (!searchFieldLogList.isEmpty()) {
             final List<SearchFieldLog> fieldLogList = new ArrayList<SearchFieldLog>();
