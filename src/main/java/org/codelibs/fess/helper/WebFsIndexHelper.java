@@ -42,7 +42,6 @@ import org.codelibs.robot.S2RobotContext;
 import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.service.UrlFilterService;
 import org.codelibs.robot.service.UrlQueueService;
-import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +83,9 @@ public class WebFsIndexHelper implements Serializable {
 
     private final List<S2Robot> s2RobotList = Collections.synchronizedList(new ArrayList<S2Robot>());
 
-    public void crawl(final String sessionId, final SolrGroup solrGroup) {
+    // needed?
+    @Deprecated
+    public void crawl(final String sessionId) {
         final List<WebCrawlingConfig> webConfigList = webCrawlingConfigService.getAllWebCrawlingConfigList();
         final List<FileCrawlingConfig> fileConfigList = fileCrawlingConfigService.getAllFileCrawlingConfigList();
 
@@ -96,10 +97,10 @@ public class WebFsIndexHelper implements Serializable {
             return;
         }
 
-        crawl(sessionId, solrGroup, webConfigList, fileConfigList);
+        doCrawl(sessionId, webConfigList, fileConfigList);
     }
 
-    public void crawl(final String sessionId, final List<Long> webConfigIdList, final List<Long> fileConfigIdList, final SolrGroup solrGroup) {
+    public void crawl(final String sessionId, final List<Long> webConfigIdList, final List<Long> fileConfigIdList) {
         final boolean runAll = webConfigIdList == null && fileConfigIdList == null;
         final List<WebCrawlingConfig> webConfigList;
         if (runAll || webConfigIdList != null) {
@@ -122,23 +123,15 @@ public class WebFsIndexHelper implements Serializable {
             return;
         }
 
-        crawl(sessionId, solrGroup, webConfigList, fileConfigList);
+        doCrawl(sessionId, webConfigList, fileConfigList);
     }
 
-    protected void crawl(final String sessionId, final SolrGroup solrGroup, final List<WebCrawlingConfig> webConfigList,
+    protected void doCrawl(final String sessionId, final List<WebCrawlingConfig> webConfigList,
             final List<FileCrawlingConfig> fileConfigList) {
         int multiprocessCrawlingCount = 5;
         String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
             multiprocessCrawlingCount = Integer.parseInt(value);
-        } catch (final NumberFormatException e) {
-            // NOP
-        }
-
-        long commitPerCount = Constants.DEFAULT_COMMIT_PER_COUNT;
-        value = crawlerProperties.getProperty(Constants.COMMIT_PER_COUNT_PROPERTY, Long.toString(Constants.DEFAULT_COMMIT_PER_COUNT));
-        try {
-            commitPerCount = Long.parseLong(value);
         } catch (final NumberFormatException e) {
             // NOP
         }
@@ -401,9 +394,7 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setName("IndexUpdater");
         indexUpdater.setPriority(indexUpdaterPriority);
         indexUpdater.setSessionIdList(sessionIdList);
-        indexUpdater.setSolrGroup(solrGroup);
         indexUpdater.setDaemon(true);
-        indexUpdater.setCommitPerCount(commitPerCount);
         indexUpdater.setS2RobotList(s2RobotList);
         for (final BoostDocumentRule rule : boostDocumentRuleService.getAvailableBoostDocumentRuleList()) {
             indexUpdater.addBoostDocumentRule(new org.codelibs.fess.solr.BoostDocumentRule(rule));

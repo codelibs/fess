@@ -21,65 +21,50 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.solr.client.solrj.beans.Field;
 import org.codelibs.fess.taglib.FessFunctions;
 
 public class Document implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Field
     public String id;
 
-    //    @Field
+    //    
     //    public String segment;
 
-    @Field
     public String digest;
 
-    //    @Field
+    //    
     //    public String boost;
 
-    @Field
     public String host;
 
-    @Field
     public String site;
 
-    @Field
     public String url;
 
-    @Field
     public String content;
 
-    @Field
     public String title;
 
-    @Field
     public String cache;
 
-    @Field
     public String tstamp;
 
-    @Field
     public List<String> anchor;
 
-    @Field
     public List<String> type;
 
-    @Field
     public Long contentLength;
 
-    @Field
     public String lastModified;
 
-    //    @Field
+    //    
     //    public String date;
 
-    //    @Field
+    //    
     //    public String lang;
 
-    @Field
     public String mimetype;
 
     //    public String getContentTitle() {

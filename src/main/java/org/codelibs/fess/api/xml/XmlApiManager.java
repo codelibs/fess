@@ -40,11 +40,9 @@ import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.api.WebApiResponse;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.allcommon.CDef;
-import org.codelibs.fess.entity.FieldAnalysisResponse;
 import org.codelibs.fess.entity.PingResponse;
-import org.codelibs.fess.entity.PingResponse.Target;
-import org.codelibs.fess.service.SearchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
@@ -86,9 +84,6 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         case SPELLCHECK:
             processSpellCheckRequest(request, response, chain);
             break;
-        case ANALYSIS:
-            processAnalysisRequest(request, response, chain);
-            break;
         case PING:
             processPingRequest(request, response, chain);
             break;
@@ -100,26 +95,12 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchService searchService = ComponentUtil.getSearchService();
+        final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
         int status;
-        final StringBuilder buf = new StringBuilder(1000);
         String errMsg = null;
         try {
-            final PingResponse pingResponse = searchService.ping();
+            final PingResponse pingResponse = searchClient.ping();
             status = pingResponse.getStatus();
-            buf.append("<result>");
-            for (final Target target : pingResponse.getTargets()) {
-                buf.append("<server><status>");
-                buf.append(target.getStatus());
-                buf.append("</status><url>");
-                buf.append(escapeXml(target.getUrl()));
-                buf.append("</url><query-time>");
-                buf.append(target.getQueryTime());
-                buf.append("</query-time><search-time>");
-                buf.append(target.getSearchTime());
-                buf.append("</search-time></server>");
-            }
-            buf.append("</result>");
         } catch (final Exception e) {
             status = 9;
             errMsg = e.getMessage();
@@ -131,7 +112,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             }
         }
 
-        writeXmlResponse(status, buf.toString(), errMsg);
+        writeXmlResponse(status, null, errMsg);
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
@@ -452,61 +433,6 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         writeXmlResponse(status, buf.toString(), errMsg);
     }
 
-    protected String processAnalysisRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, ANALYSIS_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final FieldAnalysisResponse fieldAnalysis = WebApiUtil.getObject("fieldAnalysis");
-
-            buf.append("<record-count>");
-            buf.append(fieldAnalysis.size());
-            buf.append("</record-count>");
-            if (fieldAnalysis.size() > 0) {
-                buf.append("<result>");
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis.entrySet()) {
-
-                    buf.append("<field name=\"").append(escapeXml(fEntry.getKey())).append("\">");
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry.getValue().entrySet()) {
-                        buf.append("<analysis name=\"").append(escapeXml(aEntry.getKey())).append("\">");
-                        for (final Map<String, Object> dataMap : aEntry.getValue()) {
-                            buf.append("<token>");
-                            for (final Map.Entry<String, Object> dEntry : dataMap.entrySet()) {
-                                final String key = dEntry.getKey();
-                                final Object value = dEntry.getValue();
-                                if (StringUtil.isNotBlank(key) && value != null) {
-                                    buf.append("<value name=\"").append(escapeXml(key)).append("\">").append(escapeXml(value))
-                                            .append("</value>");
-                                }
-                            }
-                            buf.append("</token>");
-                        }
-                        buf.append("</analysis>");
-                    }
-                    buf.append("</field>");
-                }
-                buf.append("</result>");
-            }
-
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a suggest request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-        return null;
-    }
-
     protected void writeXmlResponse(final int status, final String body, final String errMsg) {
         final StringBuilder buf = new StringBuilder(1000);
         buf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -518,7 +444,9 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         buf.append(status);
         buf.append("</status>");
         if (status == 0) {
-            buf.append(body);
+            if (StringUtil.isNotBlank(body)) {
+                buf.append(body);
+            }
         } else {
             buf.append("<message>");
             buf.append(escapeXml(errMsg));

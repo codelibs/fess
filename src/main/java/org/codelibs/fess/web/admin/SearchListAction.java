@@ -28,18 +28,15 @@ import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.SearchService;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.codelibs.solr.lib.SolrGroup;
-import org.codelibs.solr.lib.SolrGroupManager;
-import org.codelibs.solr.lib.policy.QueryType;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -62,10 +59,7 @@ public class SearchListAction implements Serializable {
     protected SearchListForm searchListForm;
 
     @Resource
-    protected SolrGroupManager solrGroupManager;
-
-    @Resource
-    protected SearchService searchService;
+    protected SearchClient searchClient;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -159,9 +153,7 @@ public class SearchListAction implements Serializable {
         final int offset = Integer.parseInt(searchListForm.start);
         final int size = Integer.parseInt(searchListForm.num);
         try {
-            documentItems =
-                    searchService.getDocumentList(query, offset, size, null, null, null, queryHelper.getResponseFields(), new String[] {
-                            fieldHelper.clickCountField, fieldHelper.favoriteCountField }, false);
+            documentItems = searchClient.getDocumentList(query, offset, size, null, null, queryHelper.getResponseFields(), false);
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -254,34 +246,28 @@ public class SearchListAction implements Serializable {
         if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException("errors.failed_to_start_solr_process_because_of_running");
         }
-        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.DELETE);
-        if (solrGroup == null) {
-            throw new SSCActionMessagesException("errors.failed_to_delete_solr_index");
-        } else {
-            final Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!jobHelper.isCrawlProcessRunning()) {
-                        final long time = System.currentTimeMillis();
-                        try {
-                            solrGroup.deleteByQuery(fieldHelper.docIdField + ":" + docId);
-                            solrGroup.commit(true, true, false, true);
-                            if (logger.isInfoEnabled()) {
-                                logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - time) + "ms");
-                            }
-                        } catch (final Exception e) {
-                            logger.error("Failed to delete index (query=" + fieldHelper.docIdField + ":" + docId + ").", e);
-                        }
-                    } else {
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!jobHelper.isCrawlProcessRunning()) {
+                    final long time = System.currentTimeMillis();
+                    try {
+                        searchClient.deleteByQuery(fieldHelper.docIdField, docId);
                         if (logger.isInfoEnabled()) {
-                            logger.info("could not start index cleanup process" + " because of running solr process.");
+                            logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - time) + "ms");
                         }
+                    } catch (final Exception e) {
+                        logger.error("Failed to delete index (query=" + fieldHelper.docIdField + ":" + docId + ").", e);
+                    }
+                } else {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("could not start index cleanup process" + " because of running solr process.");
                     }
                 }
-            });
-            thread.start();
-            SAStrutsUtil.addSessionMessage("success.delete_solr_index");
-        }
+            }
+        });
+        thread.start();
+        SAStrutsUtil.addSessionMessage("success.delete_solr_index");
         return "search?query=" + S2Functions.u(searchListForm.query) + "&redirect=true";
     }
 

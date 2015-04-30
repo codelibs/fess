@@ -25,6 +25,7 @@ import java.util.Map;
 import jp.sf.orangesignal.csv.CsvConfig;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
@@ -45,7 +46,6 @@ import org.codelibs.robot.rule.Rule;
 import org.codelibs.robot.rule.RuleManager;
 import org.codelibs.robot.transformer.Transformer;
 import org.codelibs.robot.util.LruHashMap;
-import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
 import org.slf4j.Logger;
@@ -240,7 +240,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
                     final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                     for (final String id : deleteIdList) {
-                        indexingHelper.deleteDocument(indexUpdateCallback.getSolrGroup(), id);
+                        indexingHelper.deleteDocument(indexUpdateCallback.getElasticsearchClient(), id);
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("Deleted " + deleteIdList);
@@ -253,13 +253,8 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         @Override
-        public void setSolrGroup(final SolrGroup solrGroup) {
-            indexUpdateCallback.setSolrGroup(solrGroup);
-        }
-
-        @Override
-        public void setCommitPerCount(final long commitPerCount) {
-            indexUpdateCallback.setCommitPerCount(commitPerCount);
+        public void setElasticsearchClient(final SearchClient searchClient) {
+            indexUpdateCallback.setElasticsearchClient(searchClient);
         }
 
         @Override
@@ -273,22 +268,8 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         @Override
-        public void commit() {
-            if (!deleteIdList.isEmpty()) {
-                final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-                for (final String id : deleteIdList) {
-                    indexingHelper.deleteDocument(indexUpdateCallback.getSolrGroup(), id);
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Deleted " + deleteIdList);
-                }
-            }
-            indexUpdateCallback.commit();
-        }
-
-        @Override
-        public SolrGroup getSolrGroup() {
-            return indexUpdateCallback.getSolrGroup();
+        public SearchClient getElasticsearchClient() {
+            return indexUpdateCallback.getElasticsearchClient();
         }
     }
 }

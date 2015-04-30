@@ -16,15 +16,22 @@
 
 package org.codelibs.fess.solr;
 
-import org.codelibs.solr.lib.exception.SolrLibQueryException;
+import org.codelibs.fess.FessSystemException;
 
-public class FessSolrQueryException extends SolrLibQueryException {
-    /**
-     *
-     */
+public class FessSolrQueryException extends FessSystemException {
+
     private static final long serialVersionUID = 1L;
 
-    public FessSolrQueryException(final String messageCode, final Object[] args) {
-        super(messageCode, args);
+    public FessSolrQueryException(String message, Throwable cause) {
+        super(message, cause);
     }
+
+    public FessSolrQueryException(String message) {
+        super(message);
+    }
+
+    public FessSolrQueryException(Throwable cause) {
+        super(cause);
+    }
+
 }

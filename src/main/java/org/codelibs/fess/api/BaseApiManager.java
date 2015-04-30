@@ -23,8 +23,6 @@ public class BaseApiManager {
 
     protected static final String HOT_SEARCH_WORD_API = "/hotSearchWordApi";
 
-    protected static final String ANALYSIS_API = "/analysisApi";
-
     protected static final String SUGGEST_API = "/suggestApi";
 
     protected static final String SPELLCHECK_API = "/spellCheckApi";
@@ -32,7 +30,7 @@ public class BaseApiManager {
     protected static final String SEARCH_API = "/searchApi";
 
     protected static enum FormatType {
-        SEARCH, LABEL, SUGGEST, SPELLCHECK, ANALYSIS, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
+        SEARCH, LABEL, SUGGEST, SPELLCHECK, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
     public BaseApiManager() {
@@ -52,8 +50,6 @@ public class BaseApiManager {
             return FormatType.SUGGEST;
         } else if (FormatType.SPELLCHECK.name().equals(type)) {
             return FormatType.SPELLCHECK;
-        } else if (FormatType.ANALYSIS.name().equals(type)) {
-            return FormatType.ANALYSIS;
         } else if (FormatType.HOTSEARCHWORD.name().equals(type)) {
             return FormatType.HOTSEARCHWORD;
         } else if (FormatType.FAVORITE.name().equals(type)) {

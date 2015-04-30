@@ -23,10 +23,10 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
@@ -47,8 +47,6 @@ import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.service.UrlFilterService;
 import org.codelibs.robot.service.UrlQueueService;
 import org.codelibs.robot.transformer.Transformer;
-import org.codelibs.solr.lib.SolrGroup;
-import org.codelibs.solr.lib.exception.SolrLibException;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
@@ -60,7 +58,7 @@ public class IndexUpdater extends Thread {
 
     protected List<String> sessionIdList;
 
-    protected SolrGroup solrGroup;
+    protected SearchClient searchClient;
 
     @Resource
     protected DataService dataService;
@@ -103,8 +101,6 @@ public class IndexUpdater extends Thread {
     protected long executeTime;
 
     protected long documentSize;
-
-    protected long commitPerCount = 0;
 
     protected int maxSolrErrorCount = 0;
 
@@ -184,13 +180,12 @@ public class IndexUpdater extends Thread {
             cb.fetchFirst(maxDocumentCacheSize);
             cb.fetchPage(1);
 
-            final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
+            final List<Map<String, Object>> docList = new ArrayList<>();
             final List<org.codelibs.robot.entity.AccessResult> accessResultList = new ArrayList<org.codelibs.robot.entity.AccessResult>();
             final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList =
                     new ArrayList<org.codelibs.robot.db.exentity.AccessResultData>();
 
             long updateTime = System.currentTimeMillis();
-            int solrErrorCount = 0;
             int errorCount = 0;
             int emptyListCount = 0;
             while (!finishCrawling || !accessResultList.isEmpty()) {
@@ -240,7 +235,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     if (!docList.isEmpty()) {
-                        indexingHelper.sendDocuments(solrGroup, docList);
+                        indexingHelper.sendDocuments(searchClient, docList);
                     }
 
                     synchronized (finishedSessionIdList) {
@@ -255,14 +250,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     // reset count
-                    solrErrorCount = 0;
                     errorCount = 0;
-                } catch (final SolrLibException e) {
-                    if (solrErrorCount > maxSolrErrorCount) {
-                        throw e;
-                    }
-                    solrErrorCount++;
-                    logger.warn("Failed to access a solr group. Retry to access.. " + solrErrorCount, e);
                 } catch (final Exception e) {
                     if (errorCount > maxErrorCount) {
                         throw e;
@@ -318,7 +306,7 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void processAccessResults(final List<SolrInputDocument> docList,
+    private void processAccessResults(final List<Map<String, Object>> docList,
             final List<org.codelibs.robot.entity.AccessResult> accessResultList,
             final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList, final PagingResultBean<AccessResult> arList) {
         for (final AccessResult accessResult : arList) {
@@ -364,29 +352,20 @@ public class IndexUpdater extends Thread {
                         map.remove(Constants.INDEXING_TARGET);
                     }
 
-                    final SolrInputDocument doc = createSolrDocument(map);
+                    updateDocument(map);
 
-                    docList.add(doc);
+                    docList.add(map);
                     if (logger.isDebugEnabled()) {
                         logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
                     }
 
                     if (docList.size() >= maxDocumentCacheSize) {
-                        indexingHelper.sendDocuments(solrGroup, docList);
+                        indexingHelper.sendDocuments(searchClient, docList);
                     }
                     documentSize++;
-                    // commit
-                    if (commitPerCount > 0 && documentSize % commitPerCount == 0) {
-                        if (!docList.isEmpty()) {
-                            indexingHelper.sendDocuments(solrGroup, docList);
-                        }
-                        commitDocuments();
-                    }
                     if (logger.isDebugEnabled()) {
                         logger.debug("The number of an added document is " + documentSize + ".");
                     }
-                } catch (final SolrLibException e) {
-                    throw e;
                 } catch (final Exception e) {
                     logger.warn("Could not add a doc: " + accessResult.getUrl(), e);
                 }
@@ -399,25 +378,13 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    protected SolrInputDocument createSolrDocument(final Map<String, Object> map) {
-        final SolrInputDocument doc = new SolrInputDocument();
-        float documentBoost = 0.0f;
-        // add data
-        for (final Map.Entry<String, Object> entry : map.entrySet()) {
-            if (fieldHelper.boostField.equals(entry.getKey())) {
-                // boost
-                documentBoost = Float.valueOf(entry.getValue().toString());
-            } else {
-                doc.addField(entry.getKey(), entry.getValue());
-            }
-        }
-
+    protected void updateDocument(final Map<String, Object> map) {
         if (clickCountEnabled) {
-            addClickCountField(map, doc);
+            addClickCountField(map);
         }
 
         if (favoriteCountEnabled) {
-            addFavoriteCountField(map, doc);
+            addFavoriteCountField(map);
         }
 
         // default values
@@ -429,6 +396,7 @@ public class IndexUpdater extends Thread {
             }
         }
 
+        float documentBoost = 0.0f;
         for (final BoostDocumentRule rule : boostRuleList) {
             if (rule.match(map)) {
                 documentBoost = rule.getValue(map);
@@ -437,39 +405,35 @@ public class IndexUpdater extends Thread {
         }
 
         if (documentBoost > 0) {
-            addBoostValue(map, documentBoost, doc);
+            addBoostValue(map, documentBoost);
         }
 
         if (!map.containsKey(fieldHelper.docIdField)) {
-            doc.addField(fieldHelper.docIdField, systemHelper.generateDocId(map));
+            map.put(fieldHelper.docIdField, systemHelper.generateDocId(map));
         }
-
-        return doc;
     }
 
-    protected void addBoostValue(final Map<String, Object> map, final float documentBoost, final SolrInputDocument doc) {
-        doc.addField(fieldHelper.boostField, documentBoost);
-        doc.setDocumentBoost(documentBoost);
+    protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {
+        map.put(fieldHelper.boostField, documentBoost);
         if (logger.isDebugEnabled()) {
             logger.debug("Set a document boost (" + documentBoost + ").");
         }
     }
 
-    protected void addClickCountField(final Map<String, Object> map, final SolrInputDocument doc) {
-        final String url = (String) map.get(fieldHelper.urlField);
+    protected void addClickCountField(final Map<String, Object> doc) {
+        final String url = (String) doc.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
             final int count = clickLogBhv.selectCount(cb -> {
                 cb.query().setUrl_Equal(url);
             });
-            doc.addField(fieldHelper.clickCountField, count);
-            map.put(fieldHelper.clickCountField, count);
+            doc.put(fieldHelper.clickCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Click Count: " + count + ", url: " + url);
             }
         }
     }
 
-    protected void addFavoriteCountField(final Map<String, Object> map, final SolrInputDocument doc) {
+    protected void addFavoriteCountField(final Map<String, Object> map) {
         final String url = (String) map.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
             final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
@@ -481,7 +445,6 @@ public class IndexUpdater extends Thread {
                 count = list.get(0).getCnt().longValue();
             }
 
-            doc.addField(fieldHelper.favoriteCountField, count);
             map.put(fieldHelper.favoriteCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Favorite Count: " + count + ", url: " + url);
@@ -561,19 +524,6 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void commitDocuments() {
-        final long execTime = System.currentTimeMillis();
-        if (logger.isInfoEnabled()) {
-            logger.info("Committing documents. ");
-        }
-        synchronized (solrGroup) {
-            solrGroup.commit(true, true, false, true);
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Committed documents. The execution time is " + (System.currentTimeMillis() - execTime) + "ms.");
-        }
-    }
-
     private void forceStop() {
         systemHelper.setForceStop(true);
         for (final S2Robot s2Robot : s2RobotList) {
@@ -593,24 +543,12 @@ public class IndexUpdater extends Thread {
         this.sessionIdList = sessionIdList;
     }
 
-    public SolrGroup getSolrGroup() {
-        return solrGroup;
-    }
-
-    public void setSolrGroup(final SolrGroup solrGroup) {
-        this.solrGroup = solrGroup;
-    }
-
     public void setFinishCrawling(final boolean finishCrawling) {
         this.finishCrawling = finishCrawling;
     }
 
     public long getDocumentSize() {
         return documentSize;
-    }
-
-    public void setCommitPerCount(final long commitPerCount) {
-        this.commitPerCount = commitPerCount;
     }
 
     @Binding(bindingType = BindingType.MAY)

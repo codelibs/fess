@@ -41,11 +41,9 @@ import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.api.WebApiResponse;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.allcommon.CDef;
-import org.codelibs.fess.entity.FieldAnalysisResponse;
 import org.codelibs.fess.entity.PingResponse;
-import org.codelibs.fess.entity.PingResponse.Target;
-import org.codelibs.fess.service.SearchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
@@ -89,9 +87,6 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         case SPELLCHECK:
             processSpellCheckRequest(request, response, chain);
             break;
-        case ANALYSIS:
-            processAnalysisRequest(request, response, chain);
-            break;
         case HOTSEARCHWORD:
             processHotSearchWordRequest(request, response, chain);
             break;
@@ -111,32 +106,12 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchService searchService = ComponentUtil.getSearchService();
+        final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
         int status;
-        final StringBuilder buf = new StringBuilder(1000);
         String errMsg = null;
         try {
-            final PingResponse pingResponse = searchService.ping();
+            final PingResponse pingResponse = searchClient.ping();
             status = pingResponse.getStatus();
-            buf.append("\"result\":[");
-            boolean appended = false;
-            for (final Target target : pingResponse.getTargets()) {
-                if (appended) {
-                    buf.append(',');
-                } else {
-                    appended = true;
-                }
-                buf.append("{\"status\":");
-                buf.append(target.getStatus());
-                buf.append(",\"url\":\"");
-                buf.append(escapeJson(target.getUrl()));
-                buf.append("\",\"queryTime\":");
-                buf.append(target.getQueryTime());
-                buf.append(",\"searchTime\":");
-                buf.append(target.getSearchTime());
-                buf.append("}");
-            }
-            buf.append(']');
         } catch (final Exception e) {
             status = 9;
             errMsg = e.getMessage();
@@ -148,7 +123,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             }
         }
 
-        writeJsonResponse(status, buf.toString(), errMsg);
+        writeJsonResponse(status, null, errMsg);
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
@@ -526,83 +501,6 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     }
 
-    protected void processAnalysisRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, ANALYSIS_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final FieldAnalysisResponse fieldAnalysis = WebApiUtil.getObject("fieldAnalysis");
-
-            buf.append("\"recordCount\":");
-            buf.append(fieldAnalysis.size());
-
-            if (fieldAnalysis.size() > 0) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis.entrySet()) {
-                    if (first1) {
-                        first1 = false;
-                    } else {
-                        buf.append(',');
-                    }
-                    buf.append("{\"field\":").append(escapeJson(fEntry.getKey())).append(",\"analysis\":[");
-                    boolean first2 = true;
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry.getValue().entrySet()) {
-                        if (first2) {
-                            first2 = false;
-                        } else {
-                            buf.append(',');
-                        }
-                        buf.append("{\"name\":").append(escapeJson(aEntry.getKey())).append(",\"data\":[");
-                        boolean first3 = true;
-                        for (final Map<String, Object> dataMap : aEntry.getValue()) {
-                            if (first3) {
-                                first3 = false;
-                            } else {
-                                buf.append(',');
-                            }
-                            buf.append('{');
-                            boolean first4 = true;
-                            for (final Map.Entry<String, Object> dEntry : dataMap.entrySet()) {
-                                final String key = dEntry.getKey();
-                                final Object value = dEntry.getValue();
-                                if (StringUtil.isNotBlank(key) && value != null) {
-                                    if (first4) {
-                                        first4 = false;
-                                    } else {
-                                        buf.append(',');
-                                    }
-                                    buf.append(escapeJson(key)).append(':').append(escapeJson(value));
-                                }
-                            }
-                            buf.append('}');
-                        }
-                        buf.append("]}");
-                    }
-                    buf.append("]}");
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a suggest request.", e);
-            }
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-    }
-
     protected void processHotSearchWordRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
 
         int status = 0;
@@ -719,10 +617,13 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         buf.append(',');
         buf.append("\"status\":");
         buf.append(status);
-        buf.append(',');
         if (status == 0) {
-            buf.append(body);
+            if (StringUtil.isNotBlank(body)) {
+                buf.append(',');
+                buf.append(body);
+            }
         } else {
+            buf.append(',');
             buf.append("\"message\":");
             buf.append(escapeJson(errMsg));
         }

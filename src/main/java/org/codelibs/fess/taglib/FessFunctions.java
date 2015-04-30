@@ -17,6 +17,7 @@
 package org.codelibs.fess.taglib;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -29,7 +30,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.solr.common.util.DateUtil;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -41,6 +41,7 @@ import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.URLEncoderUtil;
 
 public class FessFunctions {
+
     private static final String GEO_PREFIX = "geo.";
 
     private static final String FACET_PREFIX = "facet.";
@@ -142,26 +143,22 @@ public class FessFunctions {
             return null;
         }
         try {
-            return DateUtil.parseDate(value);
+            return new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT).parse(value);
         } catch (final ParseException e) {
             return null;
         }
     }
 
     public static String formatDate(final Date date) {
-        return DateUtil.getThreadLocalDateFormat().format(date);
+        return new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT).format(date);
     }
 
     public static String formatDate(final LocalDateTime date) {
-        return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT));
+        return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
     }
 
     public static String facetQuery() {
         return createQuery(Constants.FACET_QUERY, FACET_PREFIX);
-    }
-
-    public static String mltQuery() {
-        return createQuery(Constants.MLT_QUERY, MLT_PREFIX);
     }
 
     public static String geoQuery() {
@@ -170,10 +167,6 @@ public class FessFunctions {
 
     public static String facetForm() {
         return createForm(Constants.FACET_FORM, FACET_PREFIX);
-    }
-
-    public static String mltForm() {
-        return createForm(Constants.MLT_FORM, MLT_PREFIX);
     }
 
     public static String geoForm() {

@@ -118,7 +118,6 @@ public class CrawlJob {
 
     public String execute(final JobExecutor jobExecutor) {
         jobExecutor(jobExecutor);
-        operation(Constants.COMMIT);
         return execute();
     }
 

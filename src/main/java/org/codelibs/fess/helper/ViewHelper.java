@@ -103,8 +103,6 @@ public class ViewHelper implements Serializable {
 
     private final Map<String, String> initFacetParamMap = new HashMap<String, String>();
 
-    private final Map<String, String> initMltParamMap = new HashMap<String, String>();
-
     private final Map<String, String> initGeoParamMap = new HashMap<String, String>();
 
     private final List<FacetQueryView> facetQueryViewList = new ArrayList<FacetQueryView>();
@@ -473,14 +471,6 @@ public class ViewHelper implements Serializable {
 
     public Map<String, String> getInitFacetParamMap() {
         return initFacetParamMap;
-    }
-
-    public void addInitMltParam(final String key, final String value) {
-        initMltParamMap.put(value, key);
-    }
-
-    public Map<String, String> getInitMltParamMap() {
-        return initMltParamMap;
     }
 
     public void addInitGeoParam(final String key, final String value) {

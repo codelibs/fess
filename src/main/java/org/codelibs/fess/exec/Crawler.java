@@ -37,7 +37,7 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
@@ -50,13 +50,10 @@ import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.screenshot.ScreenShotManager;
 import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.fess.service.PathMappingService;
-import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.codelibs.solr.lib.SolrGroup;
-import org.codelibs.solr.lib.SolrGroupManager;
-import org.codelibs.solr.lib.policy.QueryType;
-import org.codelibs.solr.lib.policy.StatusPolicy;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -91,7 +88,7 @@ public class Crawler implements Serializable {
     private static final String MAIL_TEMPLATE_NAME = "crawler";
 
     @Resource
-    protected SolrGroupManager solrGroupManager;
+    protected SearchClient searchClient;
 
     @Binding(bindingType = BindingType.MAY)
     @Resource
@@ -137,9 +134,6 @@ public class Crawler implements Serializable {
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
         protected String propertiesPath;
 
-        @Option(name = "-o", aliases = "--operation", metaVar = "operation", usage = "Opration when crawlwer is finised")
-        protected String operation;
-
         @Option(name = "-e", aliases = "--expires", metaVar = "expires", usage = "Expires for documents")
         protected String expires;
 
@@ -182,13 +176,6 @@ public class Crawler implements Serializable {
             return idList;
         }
 
-        public boolean isOptimize() {
-            return Constants.OPTIMIZE.equalsIgnoreCase(operation);
-        }
-
-        public boolean isCommit() {
-            return Constants.COMMIT.equalsIgnoreCase(operation);
-        }
     }
 
     public static void main(final String[] args) {
@@ -374,11 +361,6 @@ public class Crawler implements Serializable {
         try {
             writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_START_TIME);
 
-            final SolrGroup updateSolrGroup = solrGroupManager.getSolrGroup(QueryType.ADD);
-            if (!updateSolrGroup.isActive(QueryType.ADD)) {
-                throw new FessSystemException("SolrGroup " + updateSolrGroup.getGroupName() + " is not available.");
-            }
-
             // setup path mapping
             final List<CDef.ProcessType> ptList = new ArrayList<CDef.ProcessType>();
             ptList.add(CDef.ProcessType.Crawling);
@@ -411,7 +393,7 @@ public class Crawler implements Serializable {
                     public void run() {
                         // crawl web
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_START_TIME);
-                        webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList, updateSolrGroup);
+                        webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList);
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_END_TIME);
                     }
                 }, WEB_FS_CRAWLING_PROCESS);
@@ -424,7 +406,7 @@ public class Crawler implements Serializable {
                     public void run() {
                         // crawl data system
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_START_TIME);
-                        dataIndexHelper.crawl(options.sessionId, dataConfigIdList, updateSolrGroup);
+                        dataIndexHelper.crawl(options.sessionId, dataConfigIdList);
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_END_TIME);
                     }
                 }, DATA_CRAWLING_PROCESS);
@@ -435,30 +417,16 @@ public class Crawler implements Serializable {
             joinCrawlerThread(dataCrawlerThread);
 
             // clean up
+            QueryBuilder queryBuilder =
+                    QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(fieldHelper.expiresField).to(new Date()))
+                            .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, options.sessionId));
             try {
-                updateSolrGroup.deleteByQuery(fieldHelper.expiresField + ":[* TO " + FessFunctions.formatDate(new Date())
-                        + "] NOT segment:" + options.sessionId);
+                searchClient.deleteByQuery(queryBuilder);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Could not delete expired sessions in " + updateSolrGroup.getGroupName(), e);
+                    logger.warn("Could not delete expired sessions: " + queryBuilder.toString(), e);
                 }
                 exitCode = Constants.EXIT_FAIL;
-            }
-
-            if (options.isCommit()) {
-                commit(crawlingSessionHelper, updateSolrGroup);
-            } else if (options.isOptimize()) {
-                optimize(crawlingSessionHelper, updateSolrGroup);
-            } else {
-                if (logger.isInfoEnabled()) {
-                    logger.info("No index commit.");
-                }
-            }
-
-            final String serverRotationStr = crawlerProperties.getProperty(Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
-            if (Constants.TRUE.equalsIgnoreCase(serverRotationStr)) {
-                // apply
-                solrGroupManager.applyNewSolrGroup();
             }
 
             if (logger.isInfoEnabled()) {
@@ -476,52 +444,6 @@ public class Crawler implements Serializable {
             writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_END_TIME);
             crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
 
-        }
-    }
-
-    protected void optimize(final CrawlingSessionHelper crawlingSessionHelper, final SolrGroup solrGroup) {
-        writeTimeToSessionInfo(crawlingSessionHelper, Constants.OPTIMIZE_START_TIME);
-        long startTime = System.currentTimeMillis();
-        solrGroup.optimize();
-        startTime = System.currentTimeMillis() - startTime;
-        writeTimeToSessionInfo(crawlingSessionHelper, Constants.OPTIMIZE_END_TIME);
-        if (crawlingSessionHelper != null) {
-            crawlingSessionHelper.putToInfoMap(Constants.OPTIMIZE_EXEC_TIME, Long.toString(startTime));
-        }
-
-        // update status
-        final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
-        for (final String serverName : solrGroup.getServerNames()) {
-            if (statusPolicy.isActive(QueryType.OPTIMIZE, serverName)) {
-                statusPolicy.activate(QueryType.OPTIMIZE, serverName);
-            }
-        }
-
-        if (logger.isInfoEnabled()) {
-            logger.info("[EXEC TIME] index optimize time: " + startTime + "ms");
-        }
-    }
-
-    protected void commit(final CrawlingSessionHelper crawlingSessionHelper, final SolrGroup solrGroup) {
-        writeTimeToSessionInfo(crawlingSessionHelper, Constants.COMMIT_START_TIME);
-        long startTime = System.currentTimeMillis();
-        solrGroup.commit(true, true, false, true);
-        startTime = System.currentTimeMillis() - startTime;
-        writeTimeToSessionInfo(crawlingSessionHelper, Constants.COMMIT_END_TIME);
-        if (crawlingSessionHelper != null) {
-            crawlingSessionHelper.putToInfoMap(Constants.COMMIT_EXEC_TIME, Long.toString(startTime));
-        }
-
-        // update status
-        final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
-        for (final String serverName : solrGroup.getServerNames()) {
-            if (statusPolicy.isActive(QueryType.COMMIT, serverName)) {
-                statusPolicy.activate(QueryType.COMMIT, serverName);
-            }
-        }
-
-        if (logger.isInfoEnabled()) {
-            logger.info("[EXEC TIME] index commit time: " + startTime + "ms");
         }
     }
 

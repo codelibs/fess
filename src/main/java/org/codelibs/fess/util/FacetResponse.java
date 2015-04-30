@@ -21,29 +21,31 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.codelibs.fess.Constants;
+import org.elasticsearch.common.base.Charsets;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.filter.Filter;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+
+import com.google.common.io.BaseEncoding;
 
 public class FacetResponse {
-    protected Map<String, Long> queryCountMap;
+    protected Map<String, Long> queryCountMap = new LinkedHashMap<String, Long>();
 
-    protected List<Field> fieldList;
+    protected List<Field> fieldList = new ArrayList<FacetResponse.Field>();
 
-    public FacetResponse(final List<FacetField> facetFields, final Map<String, Integer> facetQueryMap) {
-        if (facetFields != null && !facetFields.isEmpty()) {
-            fieldList = new ArrayList<FacetResponse.Field>();
-            for (final FacetField facetField : facetFields) {
-                if (facetField.getValues() != null) {
-                    fieldList.add(new Field(facetField));
-                }
+    public FacetResponse(final Aggregations aggregations) {
+        aggregations.forEach(aggregation -> {
+            if (aggregation.getName().startsWith(Constants.FACET_FIELD_PREFIX)) {
+                final Terms termFacet = (Terms) aggregation;
+                fieldList.add(new Field(termFacet));
+            } else if (aggregation.getName().startsWith(Constants.FACET_QUERY_PREFIX)) {
+                final Filter queryFacet = (Filter) aggregation;
+                String encodedQuery = queryFacet.getName().substring(Constants.FACET_QUERY_PREFIX.length());
+                queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), Charsets.UTF_8), queryFacet.getDocCount());
             }
-        }
-        if (facetQueryMap != null && !facetQueryMap.isEmpty()) {
-            queryCountMap = new LinkedHashMap<String, Long>();
-            for (final Map.Entry<String, Integer> entry : facetQueryMap.entrySet()) {
-                queryCountMap.put(entry.getKey(), entry.getValue().longValue());
-            }
-        }
+
+        });
     }
 
     public boolean hasFacetResponse() {
@@ -55,11 +57,11 @@ public class FacetResponse {
 
         protected String name;
 
-        public Field(final FacetField facetField) {
-            name = facetField.getName();
-            valueCountMap = new LinkedHashMap<String, Long>();
-            for (final Count count : facetField.getValues()) {
-                valueCountMap.put(count.getName(), count.getCount());
+        public Field(final Terms termFacet) {
+            String encodedField = termFacet.getName().substring(Constants.FACET_FIELD_PREFIX.length());
+            name = new String(BaseEncoding.base64().decode(encodedField), Charsets.UTF_8);
+            for (final Terms.Bucket tfEntry : termFacet.getBuckets()) {
+                valueCountMap.put(tfEntry.getKeyAsText().string(), tfEntry.getDocCount());
             }
         }
 

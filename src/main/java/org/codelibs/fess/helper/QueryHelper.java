@@ -51,7 +51,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
-import org.codelibs.fess.entity.MoreLikeThisInfo;
 import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
 import org.codelibs.fess.util.QueryUtil;
@@ -125,19 +124,15 @@ public class QueryHelper implements Serializable {
 
     protected int highlightSnippetSize = 5;
 
-    protected String shards;
-
     protected boolean useBigram = true;
 
     protected String additionalQuery;
 
     protected int maxFilterQueriesForRole = Integer.MAX_VALUE;
 
-    protected int timeAllowed = -1;
+    protected long timeAllowed = -1;
 
     protected Map<String, String[]> requestParameterMap = new HashMap<String, String[]>();
-
-    protected String additionalGeoQuery;
 
     protected Map<String, String> fieldLanguageMap = new HashMap<String, String>();
 
@@ -152,8 +147,6 @@ public class QueryHelper implements Serializable {
     protected String defType = "edismax";
 
     protected FacetInfo defaultFacetInfo;
-
-    protected MoreLikeThisInfo defaultMoreLikeThisInfo;
 
     protected GeoInfo defaultGeoInfo;
 
@@ -1220,20 +1213,6 @@ public class QueryHelper implements Serializable {
     }
 
     /**
-     * @return the shards
-     */
-    public String getShards() {
-        return shards;
-    }
-
-    /**
-     * @param shards the shards to set
-     */
-    public void setShards(final String shards) {
-        this.shards = shards;
-    }
-
-    /**
      * @return the useBigram
      */
     public boolean isUseBigram() {
@@ -1272,14 +1251,14 @@ public class QueryHelper implements Serializable {
     /**
      * @return the timeAllowed
      */
-    public int getTimeAllowed() {
+    public long getTimeAllowed() {
         return timeAllowed;
     }
 
     /**
      * @param timeAllowed the timeAllowed to set
      */
-    public void setTimeAllowed(final int timeAllowed) {
+    public void setTimeAllowed(final long timeAllowed) {
         this.timeAllowed = timeAllowed;
     }
 
@@ -1295,14 +1274,6 @@ public class QueryHelper implements Serializable {
 
     public Set<Entry<String, String[]>> getRequestParameterSet() {
         return requestParameterMap.entrySet();
-    }
-
-    public String getAdditionalGeoQuery() {
-        return additionalGeoQuery;
-    }
-
-    public void setAdditionalGeoQuery(final String additionalGeoQuery) {
-        this.additionalGeoQuery = additionalGeoQuery;
     }
 
     public void addFieldLanguage(final String lang, final String fieldLang) {
@@ -1402,14 +1373,6 @@ public class QueryHelper implements Serializable {
 
     public void setDefaultFacetInfo(final FacetInfo defaultFacetInfo) {
         this.defaultFacetInfo = defaultFacetInfo;
-    }
-
-    public MoreLikeThisInfo getDefaultMoreLikeThisInfo() {
-        return defaultMoreLikeThisInfo;
-    }
-
-    public void setDefaultMoreLikeThisInfo(final MoreLikeThisInfo defaultMoreLikeThisInfo) {
-        this.defaultMoreLikeThisInfo = defaultMoreLikeThisInfo;
     }
 
     public GeoInfo getDefaultGeoInfo() {

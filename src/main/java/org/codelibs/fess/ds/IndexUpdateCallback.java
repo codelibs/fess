@@ -18,22 +18,18 @@ package org.codelibs.fess.ds;
 
 import java.util.Map;
 
-import org.codelibs.solr.lib.SolrGroup;
+import org.codelibs.fess.client.SearchClient;
 
 public interface IndexUpdateCallback {
 
     boolean store(Map<String, Object> dataMap);
 
-    void setSolrGroup(SolrGroup solrGroup);
+    void setElasticsearchClient(SearchClient solrGroup);
 
-    SolrGroup getSolrGroup();
-
-    void setCommitPerCount(long commitPerCount);
+    SearchClient getElasticsearchClient();
 
     long getDocumentSize();
 
     long getExecuteTime();
-
-    void commit();
 
 }

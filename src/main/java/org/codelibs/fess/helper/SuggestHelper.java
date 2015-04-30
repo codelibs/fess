@@ -35,16 +35,11 @@ import org.codelibs.fess.db.exbhv.SuggestBadWordBhv;
 import org.codelibs.fess.db.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.db.exentity.SuggestBadWord;
 import org.codelibs.fess.db.exentity.SuggestElevateWord;
-import org.codelibs.fess.entity.PingResponse;
-import org.codelibs.fess.service.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
     private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
-
-    @Resource
-    protected SearchService searchService;
 
     @Resource
     protected SuggestService suggestService;

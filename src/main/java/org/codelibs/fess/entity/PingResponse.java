@@ -16,70 +16,18 @@
 
 package org.codelibs.fess.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 
 public class PingResponse {
-    private final int status = 0;
+    private int status = 0;
 
-    private final Target[] targets;
-
-    public PingResponse(final Collection<SolrPingResponse> responses) {
-        final List<Target> targetList = new ArrayList<>();
-        for (final SolrPingResponse response : responses) {
-            int status = response.getStatus();
-            if (status != 0) {
-                status = 1;
-            }
-            targetList.add(new Target(status, response.getRequestUrl(), response.getElapsedTime(), response.getQTime()));
-        }
-        targets = targetList.toArray(new Target[targetList.size()]);
-    }
-
-    public static class Target {
-
-        private final int status;
-
-        private final String url;
-
-        private final long searchTime;
-
-        private final int queryTime;
-
-        public Target(final int status, final String url, final long elapsedTime, final int qTime) {
-            this.status = status;
-            this.url = url;
-            searchTime = elapsedTime;
-            queryTime = qTime;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public long getSearchTime() {
-            return searchTime;
-        }
-
-        public int getQueryTime() {
-            return queryTime;
-        }
-
+    public PingResponse(final ClusterHealthResponse response) {
+        status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
     }
 
     public int getStatus() {
         return status;
-    }
-
-    public Target[] getTargets() {
-        return targets;
     }
 
 }

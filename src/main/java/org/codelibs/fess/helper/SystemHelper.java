@@ -40,9 +40,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.db.exentity.RoleType;
 import org.codelibs.fess.service.RoleTypeService;
 import org.codelibs.robot.util.CharUtil;
-import org.codelibs.solr.lib.SolrGroup;
-import org.codelibs.solr.lib.policy.QueryType;
-import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.struts.util.MessageResourcesUtil;
@@ -324,14 +321,6 @@ public class SystemHelper implements Serializable {
 
     public void setMaxTextLength(final int maxTextLength) {
         this.maxTextLength = maxTextLength;
-    }
-
-    public void updateStatus(final SolrGroup solrGroup, final QueryType queryType) {
-        final StatusPolicy statusPolicy = solrGroup.getStatusPolicy();
-        for (final String serverName : solrGroup.getServerNames()) {
-            statusPolicy.activate(queryType, serverName);
-        }
-
     }
 
     public boolean isForceStop() {

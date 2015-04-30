@@ -25,18 +25,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exentity.CrawlingSession;
 import org.codelibs.fess.db.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.solr.lib.SolrGroup;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,8 @@ public class CrawlingSessionHelper implements Serializable {
     protected Map<String, String> infoMap;
 
     protected LocalDateTime documentExpires;
+
+    private int maxSessionIdsInList = 100;
 
     protected CrawlingSessionService getCrawlingSessionService() {
         return SingletonS2Container.getComponent(CrawlingSessionService.class);
@@ -147,28 +153,22 @@ public class CrawlingSessionHelper implements Serializable {
         return generateId(url, roleTypeList);
     }
 
-    public List<Map<String, String>> getSessionIdList(final SolrGroup serverGroup) {
+    public List<Map<String, String>> getSessionIdList(final SearchClient searchClient) {
         final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
-        final SolrQuery query = new SolrQuery();
-        query.setQuery("*:*");
-        query.setFacet(true);
-        query.addFacetField(fieldHelper.segmentField);
-        query.addSort(fieldHelper.segmentField, ORDER.desc);
+        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
+        TermsBuilder termsBuilder =
+                AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(maxSessionIdsInList)
+                        .order(Order.term(false));
 
-        final QueryResponse queryResponse = serverGroup.query(query);
-        final List<FacetField> facets = queryResponse.getFacetFields();
-        for (final FacetField facet : facets) {
-            final List<FacetField.Count> facetEntries = facet.getValues();
-            if (facetEntries != null) {
-                for (final FacetField.Count fcount : facetEntries) {
-                    final Map<String, String> map = new HashMap<String, String>(2);
-                    map.put(fieldHelper.segmentField, fcount.getName());
-                    map.put(FACET_COUNT_KEY, Long.toString(fcount.getCount()));
-                    sessionIdList.add(map);
-                }
-            }
+        final SearchResponse searchResponse = searchClient.query(queryBuilder, termsBuilder, null);
+        Terms terms = searchResponse.getAggregations().get(fieldHelper.segmentField);
+        for (Bucket bucket : terms.getBuckets()) {
+            final Map<String, String> map = new HashMap<String, String>(2);
+            map.put(fieldHelper.segmentField, bucket.getKey());
+            map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
+            sessionIdList.add(map);
         }
         return sessionIdList;
     }

@@ -25,7 +25,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
@@ -35,7 +34,8 @@ import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.service.DataCrawlingConfigService;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.solr.lib.SolrGroup;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class DataIndexHelper implements Serializable {
 
     private final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<DataCrawlingThread>());
 
-    public void crawl(final String sessionId, final SolrGroup solrGroup) {
+    public void crawl(final String sessionId) {
         final List<DataCrawlingConfig> configList = dataCrawlingConfigService.getAllDataCrawlingConfigList();
 
         if (configList.isEmpty()) {
@@ -74,10 +74,10 @@ public class DataIndexHelper implements Serializable {
             return;
         }
 
-        crawl(sessionId, solrGroup, configList);
+        doCrawl(sessionId, configList);
     }
 
-    public void crawl(final String sessionId, final List<Long> configIdList, final SolrGroup solrGroup) {
+    public void crawl(final String sessionId, final List<Long> configIdList) {
         final List<DataCrawlingConfig> configList = dataCrawlingConfigService.getDataCrawlingConfigListByIds(configIdList);
 
         if (configList.isEmpty()) {
@@ -88,10 +88,10 @@ public class DataIndexHelper implements Serializable {
             return;
         }
 
-        crawl(sessionId, solrGroup, configList);
+        doCrawl(sessionId, configList);
     }
 
-    protected void crawl(final String sessionId, final SolrGroup solrGroup, final List<DataCrawlingConfig> configList) {
+    protected void doCrawl(final String sessionId, final List<DataCrawlingConfig> configList) {
         int multiprocessCrawlingCount = 5;
         String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
@@ -100,19 +100,9 @@ public class DataIndexHelper implements Serializable {
             // NOP
         }
 
-        long commitPerCount = Constants.DEFAULT_COMMIT_PER_COUNT;
-        value = crawlerProperties.getProperty(Constants.COMMIT_PER_COUNT_PROPERTY, Long.toString(Constants.DEFAULT_COMMIT_PER_COUNT));
-        try {
-            commitPerCount = Long.parseLong(value);
-        } catch (final NumberFormatException e) {
-            // NOP
-        }
-
         final long startTime = System.currentTimeMillis();
 
         final IndexUpdateCallback indexUpdateCallback = SingletonS2Container.getComponent(IndexUpdateCallback.class);
-        indexUpdateCallback.setSolrGroup(solrGroup);
-        indexUpdateCallback.setCommitPerCount(commitPerCount);
 
         final List<String> sessionIdList = new ArrayList<String>();
         final Map<String, String> initParamMap = new HashMap<String, String>();
@@ -193,8 +183,6 @@ public class DataIndexHelper implements Serializable {
         dataCrawlingThreadList.clear();
         dataCrawlingThreadStatusList.clear();
 
-        indexUpdateCallback.commit();
-
         // put cralwing info
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
 
@@ -265,13 +253,11 @@ public class DataIndexHelper implements Serializable {
                 return;
             }
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-            final StringBuilder buf = new StringBuilder(100);
-            buf.append(fieldHelper.configIdField).append(':').append(dataCrawlingConfig.getConfigId());
-            buf.append(" NOT ");
-            buf.append(fieldHelper.segmentField).append(':').append(ClientUtils.escapeQueryChars(sessionId));
-
+            QueryBuilder queryBuilder =
+                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.configIdField, dataCrawlingConfig.getConfigId()))
+                            .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, sessionId));
             try {
-                indexUpdateCallback.getSolrGroup().deleteByQuery(buf.toString());
+                ComponentUtil.getElasticsearchClient().deleteByQuery(queryBuilder);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at " + dataCrawlingConfig, e);
             }

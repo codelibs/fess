@@ -60,7 +60,6 @@ public class CrawlAction implements Serializable {
     protected String showIndex(final boolean redirect) {
         crawlForm.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
         crawlForm.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
-        crawlForm.serverRotation = crawlerProperties.getProperty(Constants.SERVER_ROTATION_PROPERTY, Constants.FALSE);
         crawlForm.dayForCleanup = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
         crawlForm.crawlingThreadCount = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         crawlForm.searchLog = crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
@@ -105,9 +104,6 @@ public class CrawlAction implements Serializable {
                 crawlForm.diffCrawling != null && Constants.ON.equalsIgnoreCase(crawlForm.diffCrawling) ? Constants.TRUE : Constants.FALSE);
         crawlerProperties.setProperty(Constants.USE_ACL_AS_ROLE,
                 crawlForm.useAclAsRole != null && Constants.ON.equalsIgnoreCase(crawlForm.useAclAsRole) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.SERVER_ROTATION_PROPERTY,
-                crawlForm.serverRotation != null && Constants.ON.equalsIgnoreCase(crawlForm.serverRotation) ? Constants.TRUE
-                        : Constants.FALSE);
         crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, crawlForm.dayForCleanup);
         crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, crawlForm.crawlingThreadCount);
         crawlerProperties.setProperty(Constants.SEARCH_LOG_PROPERTY,

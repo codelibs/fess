@@ -20,7 +20,6 @@ import java.io.Serializable;
 
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
-import org.codelibs.fess.entity.MoreLikeThisInfo;
 import org.codelibs.fess.util.SearchParamMap;
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.Maxbytelength;
@@ -94,10 +93,6 @@ public class IndexForm implements Serializable {
     // facet
 
     public FacetInfo facet;
-
-    // mlt
-
-    public MoreLikeThisInfo mlt;
 
     // advance
 

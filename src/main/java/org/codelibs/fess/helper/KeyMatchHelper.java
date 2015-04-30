@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.util.StringUtil;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exentity.KeyMatch;
 import org.codelibs.fess.service.KeyMatchService;
-import org.codelibs.fess.service.SearchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
@@ -81,11 +81,11 @@ public class KeyMatchHelper {
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
-        final SearchService searchService = ComponentUtil.getSearchService();
+        final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final List<Map<String, Object>> documentList =
-                searchService.getDocumentList(keyMatch.getQuery(), 0, keyMatch.getMaxSize(), null, null, null,
-                        new String[] { fieldHelper.docIdField }, null, false);
+                searchClient.getDocumentList(keyMatch.getQuery(), 0, keyMatch.getMaxSize(), null, null,
+                        new String[] { fieldHelper.docIdField }, false);
         return documentList;
     }
 

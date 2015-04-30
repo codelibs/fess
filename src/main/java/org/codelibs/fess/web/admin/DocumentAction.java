@@ -29,13 +29,10 @@ import jp.sf.fess.suggest.SuggestConstants;
 import jp.sf.fess.suggest.server.SuggestSolrServer;
 import jp.sf.fess.suggest.service.SuggestService;
 
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
@@ -44,11 +41,16 @@ import org.codelibs.fess.helper.WebManagementHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.codelibs.solr.lib.SolrGroup;
-import org.codelibs.solr.lib.SolrGroupManager;
-import org.codelibs.solr.lib.SolrLibConstants;
-import org.codelibs.solr.lib.policy.QueryType;
-import org.codelibs.solr.lib.policy.impl.StatusPolicyImpl;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.taglib.S2Functions;
@@ -71,10 +73,7 @@ public class DocumentAction implements Serializable {
     protected DocumentForm documentForm;
 
     @Resource
-    protected DynamicProperties solrProperties;
-
-    @Resource
-    protected SolrGroupManager solrGroupManager;
+    protected SearchClient searchClient;
 
     @Resource
     protected WebManagementHelper webManagementHelper;
@@ -98,60 +97,7 @@ public class DocumentAction implements Serializable {
     }
 
     protected String showIndex(final boolean redirect) {
-        final Map<String, DynamicProperties> groupPropMap = new HashMap<String, DynamicProperties>();
-        for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            final DynamicProperties props = ComponentUtil.getSolrGroupProperties(groupName);
-            if (props != null) {
-                groupPropMap.put(groupName, props);
-            }
-        }
-
-        final String[] serverNames = solrGroupManager.getSolrServerNames();
-        for (final String name : serverNames) {
-            final String[] names = name.split(":");
-            if (names.length == 2) {
-                final Map<String, String> map = new HashMap<String, String>(4);
-                map.put("groupName", names[0]);
-                map.put("serverName", names[1]);
-                final DynamicProperties props = groupPropMap.get(names[0]);
-                if (props != null) {
-                    String status = props.getProperty(StatusPolicyImpl.STATUS_PREFIX + names[1]);
-                    if (StringUtil.isBlank(status)) {
-                        status = StatusPolicyImpl.ACTIVE;
-                    }
-                    map.put("status", status);
-                    String index = props.getProperty(StatusPolicyImpl.INDEX_PREFIX + names[1]);
-                    if (StringUtil.isBlank(index)) {
-                        index = StatusPolicyImpl.READY;
-                    }
-                    map.put("index", index);
-                } else {
-                    map.put("status", StatusPolicyImpl.ACTIVE);
-                    map.put("index", StatusPolicyImpl.READY);
-                }
-                documentForm.serverStatusList.add(map);
-            }
-        }
-
-        suggestDocumentNums = getSuggestDocumentNum();
-
-        // select group status
-        documentForm.currentServerForSelect = solrProperties.getProperty(SolrLibConstants.SELECT_GROUP);
-        final SolrGroup selectSolrGroup = solrGroupManager.getSolrGroup(documentForm.currentServerForSelect);
-        if (selectSolrGroup != null && selectSolrGroup.isActive(QueryType.QUERY)) {
-            documentForm.currentServerStatusForSelect = Constants.ACTIVE;
-        } else {
-            documentForm.currentServerStatusForSelect = Constants.INACTIVE;
-        }
-
-        // update group status
-        documentForm.currentServerForUpdate = solrProperties.getProperty(SolrLibConstants.SELECT_GROUP);
-        final SolrGroup updateSolrGroup = solrGroupManager.getSolrGroup(documentForm.currentServerForUpdate);
-        if (updateSolrGroup != null && updateSolrGroup.isActive(QueryType.QUERY)) {
-            documentForm.currentServerStatusForUpdate = Constants.ACTIVE;
-        } else {
-            documentForm.currentServerStatusForUpdate = Constants.INACTIVE;
-        }
+        // TODO
 
         if (redirect) {
             return "index?redirect=true";
@@ -169,87 +115,36 @@ public class DocumentAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String commit() {
+        // TODO change to flush
         if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException("errors.failed_to_start_solr_process_because_of_running");
         }
-        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(documentForm.groupName);
-        if (solrGroup == null) {
-            throw new SSCActionMessagesException("errors.failed_to_commit_solr_index");
-        } else {
-            final Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!jobHelper.isCrawlProcessRunning()) {
-                        final long execTime = System.currentTimeMillis();
-                        try {
-                            systemHelper.updateStatus(solrGroup, QueryType.ADD);
-                            solrGroup.commit(true, true, false, true);
-                            systemHelper.updateStatus(solrGroup, QueryType.COMMIT);
-                            if (logger.isInfoEnabled()) {
-                                logger.info("[EXEC TIME] index commit time: " + (System.currentTimeMillis() - execTime) + "ms");
-                            }
-                        } catch (final Exception e) {
-                            logger.error("Failed to commit index.", e);
-                        }
-                    } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("could not start index cleanup process" + " because of running solr process.");
-                        }
-                    }
-                }
-            });
-            thread.start();
-            SAStrutsUtil.addSessionMessage("success.commit_solr_index");
-        }
+
+        searchClient.flush();
+        SAStrutsUtil.addSessionMessage("success.commit_solr_index");
         return showIndex(true);
     }
 
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String optimize() {
+        // TODO change to optimize
         if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException("errors.failed_to_start_solr_process_because_of_running");
         }
-        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(documentForm.groupName);
-        if (solrGroup == null) {
-            throw new SSCActionMessagesException("errors.failed_to_optimize_solr_index");
-        } else {
-            final Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!jobHelper.isCrawlProcessRunning()) {
-                        final long execTime = System.currentTimeMillis();
-                        try {
-                            systemHelper.updateStatus(solrGroup, QueryType.ADD);
-                            solrGroup.optimize();
-                            systemHelper.updateStatus(solrGroup, QueryType.OPTIMIZE);
-                            if (logger.isInfoEnabled()) {
-                                logger.info("[EXEC TIME] index optimize time: " + (System.currentTimeMillis() - execTime) + "ms");
-                            }
-                        } catch (final Exception e) {
-                            logger.error("Failed to optimize index.", e);
-                        }
-                    } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("could not start index cleanup process" + " because of running solr process.");
-                        }
-                    }
-                }
-            });
-            thread.start();
-            SAStrutsUtil.addSessionMessage("success.optimize_solr_index");
-        }
+        searchClient.optimize();
+        SAStrutsUtil.addSessionMessage("success.optimize_solr_index");
         return showIndex(true);
     }
 
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String delete() {
-        String deleteQuery;
+        QueryBuilder deleteQuery;
         if ("*".equals(documentForm.sessionId)) {
-            deleteQuery = "*:*";
+            deleteQuery = QueryBuilders.matchAllQuery();
         } else {
-            deleteQuery = fieldHelper.segmentField + ":" + documentForm.sessionId;
+            deleteQuery = QueryBuilders.termQuery(fieldHelper.segmentField, documentForm.sessionId);
         }
         return deleteByQuery(deleteQuery);
     }
@@ -264,99 +159,37 @@ public class DocumentAction implements Serializable {
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String deleteByUrl() {
-        final String deleteUrl = documentForm.deleteUrl;
-        final String deleteQuery = fieldHelper.urlField + ":\"" + deleteUrl + "\"";
-        return deleteByQuery(deleteQuery);
+        return deleteByQuery(QueryBuilders.termQuery(fieldHelper.urlField, documentForm.deleteUrl));
     }
 
-    private String deleteByQuery(final String deleteQuery) {
+    private String deleteByQuery(final QueryBuilder queryBuilder) {
         if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException("errors.failed_to_start_solr_process_because_of_running");
         }
-        final SolrGroup solrGroup = solrGroupManager.getSolrGroup(documentForm.groupName);
-        if (solrGroup == null) {
-            throw new SSCActionMessagesException("errors.failed_to_delete_solr_index");
-        } else {
-            final Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!jobHelper.isCrawlProcessRunning()) {
-                        final long execTime = System.currentTimeMillis();
-                        try {
-                            systemHelper.updateStatus(solrGroup, QueryType.DELETE);
-                            solrGroup.deleteByQuery(deleteQuery);
-                            solrGroup.commit(true, true, false, true);
-                            systemHelper.updateStatus(solrGroup, QueryType.OPTIMIZE);
-                            if (logger.isInfoEnabled()) {
-                                logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - execTime) + "ms");
-                            }
-                        } catch (final Exception e) {
-                            logger.error("Failed to delete index (query=" + deleteQuery + ").", e);
-                        }
-                    } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("could not start index cleanup process" + " because of running solr process.");
-                        }
-                    }
-                }
-            });
-            thread.start();
-            SAStrutsUtil.addSessionMessage("success.delete_solr_index");
-        }
-        return showIndex(true);
-    }
 
-    public List<Map<String, Object>> getGroupActionItems() {
-        final List<Map<String, Object>> groupActionItems = new ArrayList<Map<String, Object>>();
-        for (final String groupName : solrGroupManager.getSolrGroupNames()) {
-            try {
-                final Map<String, Object> map = new HashMap<String, Object>();
-                map.put("groupName", groupName);
-                final SessionIdList<Map<String, String>> sessionIdList = getSessionIdList(groupName);
-                map.put("sessionIdItems", sessionIdList);
-                map.put("totalCount", sessionIdList.getTotalCount());
-                groupActionItems.add(map);
-            } catch (final Exception e) {
-                logger.info("could not get server groups.", e);
-            }
-        }
-        return groupActionItems;
+        searchClient.deleteByQuery(queryBuilder);
+        SAStrutsUtil.addSessionMessage("success.delete_solr_index");
+        return showIndex(true);
     }
 
     protected SessionIdList<Map<String, String>> getSessionIdList(final String groupName) {
         final SessionIdList<Map<String, String>> sessionIdList = new SessionIdList<Map<String, String>>();
 
-        SolrGroup serverGroup;
-        try {
-            serverGroup = solrGroupManager.getSolrGroup(groupName);
-        } catch (final Exception e) {
-            if (logger.isInfoEnabled()) {
-                logger.info(e.getMessage());
-            }
-            return sessionIdList;
+        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
+        TermsBuilder termsBuilder =
+                AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(100).order(Order.count(false));
+
+        SearchResponse response = searchClient.query(queryBuilder, termsBuilder, null);
+        Terms terms = response.getAggregations().get(fieldHelper.segmentField);
+        for (Bucket bucket : terms.getBuckets()) {
+            final Map<String, String> map = new HashMap<String, String>(3);
+            map.put("label", bucket.getKey() + " (" + bucket.getDocCount() + ")");
+            map.put("value", bucket.getKey());
+            map.put("count", Long.toString(bucket.getDocCount()));
+            sessionIdList.add(map);
+            sessionIdList.addTotalCount(bucket.getDocCount());
         }
 
-        final SolrQuery query = new SolrQuery();
-        query.setQuery("*:*");
-        query.setFacet(true);
-        query.addFacetField(fieldHelper.segmentField);
-        query.addSort(fieldHelper.segmentField, ORDER.desc);
-
-        final QueryResponse queryResponse = serverGroup.query(query);
-        final List<FacetField> facets = queryResponse.getFacetFields();
-        for (final FacetField facet : facets) {
-            final List<FacetField.Count> facetEntries = facet.getValues();
-            if (facetEntries != null) {
-                for (final FacetField.Count fcount : facetEntries) {
-                    final Map<String, String> map = new HashMap<String, String>(3);
-                    map.put("label", fcount.getName() + " (" + fcount.getCount() + ")");
-                    map.put("value", fcount.getName());
-                    map.put("count", Long.toString(fcount.getCount()));
-                    sessionIdList.add(map);
-                    sessionIdList.addTotalCount(fcount.getCount());
-                }
-            }
-        }
         return sessionIdList;
     }
 
@@ -392,6 +225,8 @@ public class DocumentAction implements Serializable {
         }
 
         if (StringUtil.isNotBlank(query)) {
+            // TODO
+            /*
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -415,6 +250,7 @@ public class DocumentAction implements Serializable {
             });
             thread.start();
             SAStrutsUtil.addSessionMessage("success.delete_solr_index");
+            */
         }
         return showIndex(true);
     }

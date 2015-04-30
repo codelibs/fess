@@ -19,6 +19,7 @@ package org.codelibs.fess.util;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -43,10 +44,8 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.job.JobExecutor;
-import org.codelibs.fess.service.SearchService;
 import org.codelibs.fess.solr.IndexUpdater;
 import org.codelibs.robot.extractor.ExtractorFactory;
-import org.codelibs.solr.lib.SolrGroupManager;
 import org.seasar.framework.container.SingletonS2Container;
 
 public final class ComponentUtil {
@@ -116,6 +115,8 @@ public final class ComponentUtil {
 
     private static final String FIELD_HELPER = "fieldHelper";
 
+    private static final String ELASTICSEARCH_CLIENT = "searchClient";
+
     private ComponentUtil() {
     }
 
@@ -133,10 +134,6 @@ public final class ComponentUtil {
 
     public static DynamicProperties getCrawlerProperties() {
         return SingletonS2Container.getComponent(CRAWLER_PROPERTIES);
-    }
-
-    public static SolrGroupManager getSolrGroupManager() {
-        return SingletonS2Container.getComponent(SOLR_GROUP_MANAGER);
     }
 
     public static SystemHelper getSystemHelper() {
@@ -239,10 +236,6 @@ public final class ComponentUtil {
         return SingletonS2Container.getComponent(USER_AGENT_NAME);
     }
 
-    public static SearchService getSearchService() {
-        return SingletonS2Container.getComponent(SEARCH_SERVICE);
-    }
-
     public static KeyMatchHelper getKeyMatchHelper() {
         return SingletonS2Container.getComponent(KEY_MATCH_HELPER);
     }
@@ -255,7 +248,12 @@ public final class ComponentUtil {
         return SingletonS2Container.getComponent(FIELD_HELPER);
     }
 
+    public static SearchClient getElasticsearchClient() {
+        return SingletonS2Container.getComponent(ELASTICSEARCH_CLIENT);
+    }
+
     public static <T> T getComponent(Class<T> clazz) {
         return SingletonS2Container.getComponent(clazz);
     }
+
 }

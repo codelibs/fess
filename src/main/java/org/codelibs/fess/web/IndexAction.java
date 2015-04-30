@@ -61,11 +61,11 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.UnsupportedSearchException;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.db.exentity.ClickLog;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.codelibs.fess.db.exentity.UserInfo;
-import org.codelibs.fess.entity.FieldAnalysisResponse;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.DocumentHelper;
@@ -82,7 +82,6 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.screenshot.ScreenShotManager;
 import org.codelibs.fess.service.FavoriteLogService;
-import org.codelibs.fess.service.SearchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.MoreLikeThisResponse;
@@ -91,7 +90,6 @@ import org.codelibs.fess.util.WebApiUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.codelibs.solr.lib.exception.SolrLibQueryException;
 import org.dbflute.optional.OptionalEntity;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.container.annotation.tiger.Binding;
@@ -135,7 +133,7 @@ public class IndexAction {
     protected IndexForm indexForm;
 
     @Resource
-    protected SearchService searchService;
+    protected SearchClient searchClient;
 
     @Resource
     protected FavoriteLogService favoriteLogService;
@@ -344,7 +342,7 @@ public class IndexAction {
     public String cache() {
         Map<String, Object> doc = null;
         try {
-            doc = searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getCacheResponseFields(), null);
+            doc = searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getCacheResponseFields());
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -367,9 +365,7 @@ public class IndexAction {
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
-            doc =
-                    searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getResponseFields(),
-                            new String[] { fieldHelper.clickCountField });
+            doc = searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getResponseFields());
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -501,7 +497,7 @@ public class IndexAction {
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
-            final Map<String, Object> doc = searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId);
+            final Map<String, Object> doc = searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId);
             final String url = doc == null ? null : (String) doc.get(fieldHelper.urlField);
             if (StringUtil.isBlank(indexForm.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
                 // 404
@@ -683,33 +679,6 @@ public class IndexAction {
     }
 
     @Execute(validator = false)
-    public String analysisApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_ANALYSIS_PROPERTY, Constants.TRUE))) {
-            WebApiUtil.setError(9, "Unsupported operation.");
-            return null;
-        }
-
-        if (indexForm.fn == null || indexForm.fn.length == 0) {
-            WebApiUtil.setError(2, "The field name is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.query)) {
-            WebApiUtil.setError(3, "Your query is empty.");
-            return null;
-        }
-
-        try {
-            final String[] fieldNames = indexForm.fn;
-            final FieldAnalysisResponse fieldAnalysis = searchService.getFieldAnalysisResponse(fieldNames, indexForm.query);
-            WebApiUtil.setObject("fieldAnalysis", fieldAnalysis);
-        } catch (final Exception e) {
-            WebApiUtil.setError(1, e);
-        }
-        return null;
-    }
-
-    @Execute(validator = false)
     public String hotSearchWordApi() {
         if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
@@ -751,8 +720,8 @@ public class IndexAction {
 
         try {
             final Map<String, Object> doc =
-                    indexForm.docId == null ? null : searchService.getDocument(fieldHelper.docIdField + ":" + indexForm.docId,
-                            queryHelper.getResponseFields(), new String[] { fieldHelper.favoriteCountField });
+                    indexForm.docId == null ? null : searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId,
+                            queryHelper.getResponseFields());
             final String userCode = userInfoHelper.getUserCode();
             final String favoriteUrl = doc == null ? null : (String) doc.get(fieldHelper.urlField);
 
@@ -822,7 +791,7 @@ public class IndexAction {
 
             final String[] docIds = userInfoHelper.getResultDocIds(indexForm.queryId);
             final List<Map<String, Object>> docList =
-                    searchService.getDocumentListByDocIds(docIds, queryHelper.getResponseFields(),
+                    searchClient.getDocumentListByDocIds(docIds, queryHelper.getResponseFields(),
                             new String[] { fieldHelper.favoriteCountField }, getMaxPageSize());
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
@@ -969,13 +938,8 @@ public class IndexAction {
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
             documentItems =
-                    searchService.getDocumentList(query, pageStart, pageNum, indexForm.facet, indexForm.geo, indexForm.mlt,
-                            queryHelper.getResponseFields(), queryHelper.getResponseDocValuesFields());
-        } catch (final SolrLibQueryException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
-            }
-            throw new SSCActionMessagesException(e, "errors.invalid_query_unknown");
+                    searchClient
+                            .getDocumentList(query, pageStart, pageNum, indexForm.facet, indexForm.geo, queryHelper.getResponseFields());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -1121,10 +1085,6 @@ public class IndexAction {
             indexForm.facet = queryHelper.getDefaultFacetInfo();
         }
 
-        if (indexForm.mlt == null) {
-            indexForm.mlt = queryHelper.getDefaultMoreLikeThisInfo();
-        }
-
         if (indexForm.geo == null) {
             indexForm.geo = queryHelper.getDefaultGeoInfo();
         }
@@ -1259,7 +1219,6 @@ public class IndexAction {
 
     protected void buildInitParams() {
         buildInitParamMap(viewHelper.getInitFacetParamMap(), Constants.FACET_QUERY, Constants.FACET_FORM);
-        buildInitParamMap(viewHelper.getInitMltParamMap(), Constants.MLT_QUERY, Constants.MLT_FORM);
         buildInitParamMap(viewHelper.getInitGeoParamMap(), Constants.GEO_QUERY, Constants.GEO_FORM);
     }
 

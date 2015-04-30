@@ -29,10 +29,9 @@ import jcifs.smb.ACE;
 import jcifs.smb.SID;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exentity.CrawlingConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
@@ -49,9 +48,6 @@ import org.codelibs.robot.entity.RequestData;
 import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.entity.UrlQueue;
 import org.codelibs.robot.log.LogType;
-import org.codelibs.solr.lib.SolrGroup;
-import org.codelibs.solr.lib.SolrGroupManager;
-import org.codelibs.solr.lib.policy.QueryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,10 +67,8 @@ public class FessS2RobotThread extends S2RobotThread {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            final SolrGroupManager solrGroupManager = ComponentUtil.getSolrGroupManager();
+            final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
             final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
-
-            final SolrGroup solrGroup = solrGroupManager.getSolrGroup(QueryType.ADD);
 
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;
@@ -107,20 +101,20 @@ public class FessS2RobotThread extends S2RobotThread {
                 dataMap.put(fieldHelper.roleField, roleTypeList);
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
-                final SolrDocument solrDocument =
-                        indexingHelper.getSolrDocument(solrGroup, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
+                final Map<String, Object> solrDocument =
+                        indexingHelper.getSolrDocument(searchClient, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
                                 fieldHelper.anchorField, fieldHelper.segmentField, fieldHelper.expiresField, fieldHelper.clickCountField,
                                 fieldHelper.favoriteCountField });
                 if (solrDocument == null) {
-                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(solrGroup, id));
+                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(searchClient, id));
                     return true;
                 }
 
                 final Date expires = (Date) solrDocument.get(fieldHelper.expiresField);
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
-                    final Object idValue = solrDocument.getFieldValue(fieldHelper.idField);
+                    final Object idValue = solrDocument.get(fieldHelper.idField);
                     if (idValue != null) {
-                        indexingHelper.deleteDocument(solrGroup, idValue.toString());
+                        indexingHelper.deleteDocument(searchClient, idValue.toString());
                     }
                     return true;
                 }
@@ -159,7 +153,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(solrDocument.get(fieldHelper.anchorField)));
-                    indexingHelper.deleteDocument(solrGroup, id);
+                    indexingHelper.deleteDocument(searchClient, id);
                     return false;
                 } else if (responseData.getLastModified() == null) {
                     return true;
@@ -218,10 +212,11 @@ public class FessS2RobotThread extends S2RobotThread {
         return childUrlSet;
     }
 
-    protected Set<RequestData> getChildUrlSet(final SolrGroup solrGroup, final String id) {
+    protected Set<RequestData> getChildUrlSet(final SearchClient searchClient, final String id) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-        final SolrDocumentList docList = indexingHelper.getChildSolrDocumentList(solrGroup, id, new String[] { fieldHelper.urlField });
+        final List<Map<String, Object>> docList =
+                indexingHelper.getChildSolrDocumentList(searchClient, id, new String[] { fieldHelper.urlField });
         if (docList.isEmpty()) {
             return null;
         }
@@ -229,7 +224,7 @@ public class FessS2RobotThread extends S2RobotThread {
             logger.debug("Found solr documents: " + docList);
         }
         final Set<RequestData> urlSet = new HashSet<>(docList.size());
-        for (final SolrDocument doc : docList) {
+        for (final Map<String, Object> doc : docList) {
             final Object obj = doc.get(fieldHelper.urlField);
             if (obj != null) {
                 urlSet.add(RequestDataBuilder.newRequestData().get().url(obj.toString()).build());

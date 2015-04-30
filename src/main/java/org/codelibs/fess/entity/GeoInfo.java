@@ -17,6 +17,9 @@
 package org.codelibs.fess.entity;
 
 import org.codelibs.core.util.StringUtil;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.seasar.struts.annotation.Mask;
 import org.seasar.struts.annotation.Maxbytelength;
 
@@ -35,14 +38,14 @@ public class GeoInfo {
 
     private boolean isInit = false;
 
+    private FilterBuilder builder;
+
     private void init() {
         if (!isInit) {
             isInit = true;
 
             if (StringUtil.isBlank(latitude) || StringUtil.isBlank(longitude) || StringUtil.isBlank(distance)) {
-                latitude = null;
-                longitude = null;
-                distance = null;
+                clear();
                 return;
             }
 
@@ -51,10 +54,9 @@ public class GeoInfo {
                 double lat = Double.parseDouble(latitude);
                 double lon = Double.parseDouble(longitude);
 
-                if (dist > 0) {
-                    distance = Double.toString(dist);
-                } else {
-                    distance = null;
+                if (dist <= 0) {
+                    clear();
+                    return;
                 }
 
                 if (lat > 90) {
@@ -75,24 +77,28 @@ public class GeoInfo {
                     }
                 }
 
-                latitude = Double.toString(lat);
-                longitude = Double.toString(lon);
+                builder = FilterBuilders.geoDistanceFilter("geo_info").distance(dist, DistanceUnit.KILOMETERS).lat(lat).lon(lon);
             } catch (final NumberFormatException e) {
-                latitude = null;
-                longitude = null;
-                distance = null;
+                clear();
             }
         }
     }
 
-    public boolean isAvailable() {
-        init();
-        return StringUtil.isNotBlank(latitude) && StringUtil.isNotBlank(longitude) && StringUtil.isNotBlank(distance);
+    private void clear() {
+        latitude = null;
+        longitude = null;
+        distance = null;
+        builder = null;
     }
 
-    public String toGeoQueryString() {
+    public boolean isAvailable() {
         init();
-        return "{!geofilt pt=" + latitude + "," + longitude + " sfield=location d=" + distance + "}";
+        return builder != null;
+    }
+
+    public FilterBuilder toFilterBuilder() {
+        init();
+        return builder;
     }
 
     @Override

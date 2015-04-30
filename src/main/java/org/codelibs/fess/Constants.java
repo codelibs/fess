@@ -22,9 +22,9 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.StringUtil;
 
 public class Constants extends CoreLibConstants {
-    public static final int MAJOR_VERSION = 9;
+    public static final int MAJOR_VERSION = 10;
 
-    public static final int MINOR_VERSION = 3;
+    public static final int MINOR_VERSION = 0;
 
     public static final String FESS_VERSION = String.valueOf(MAJOR_VERSION) + "." + String.valueOf(MINOR_VERSION);
 
@@ -70,10 +70,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String MS932 = "MS932";
 
-    public static final String OPTIMIZE = "optimize";
-
-    public static final String COMMIT = "commit";
-
     public static final String DEFAULT_CRON_EXPRESSION = "0 0 0 * * ?";
 
     public static final String DEFAULT_SEARCH_LOG_CRON_EXPRESSION = "0 * * * * ?";
@@ -91,8 +87,6 @@ public class Constants extends CoreLibConstants {
     public static final int DEFAULT_NUM_OF_THREAD_FOR_WEB = 3;
 
     public static final long DEFAULT_CRAWLING_EXECUTION_INTERVAL = 5000L;
-
-    public static final long DEFAULT_COMMIT_PER_COUNT = 0L;
 
     /** Solr Status: Active */
     public static final String ACTIVE = "ACTIVE";
@@ -116,10 +110,6 @@ public class Constants extends CoreLibConstants {
     public static final String CRAWLING_THREAD_COUNT_PROPERTY = "crawling.thread.count";
 
     public static final String DAY_FOR_CLEANUP_PROPERTY = "day.for.cleanup";
-
-    public static final String COMMIT_PER_COUNT_PROPERTY = "commit.count";
-
-    public static final String SERVER_ROTATION_PROPERTY = "server.rotation";
 
     public static final String WEB_API_XML_PROPERTY = "web.api.xml";
 
@@ -176,6 +166,7 @@ public class Constants extends CoreLibConstants {
     public static final String FIELD_LOGS = "org.codelibs.fess.FieldLogs";
 
     public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public static final int DONE_STATUS = 9999;
 
@@ -211,18 +202,6 @@ public class Constants extends CoreLibConstants {
     public static final String DATA_CRAWLER_START_TIME = "DataCrawlStartTime";
 
     public static final String DATA_CRAWLER_END_TIME = "DataCrawlEndTime";
-
-    public static final String OPTIMIZE_START_TIME = "OptimizeStartTime";
-
-    public static final String OPTIMIZE_END_TIME = "OptimizeEndTime";
-
-    public static final String OPTIMIZE_EXEC_TIME = "OptimizeExecTime";
-
-    public static final String COMMIT_START_TIME = "CommitStartTime";
-
-    public static final String COMMIT_END_TIME = "CommitEndTime";
-
-    public static final String COMMIT_EXEC_TIME = "CommitExecTime";
 
     public static final String WEB_FS_CRAWLING_EXEC_TIME = "WebFsCrawlExecTime";
 
@@ -281,13 +260,9 @@ public class Constants extends CoreLibConstants {
 
     public static final String FACET_QUERY = "org.codelibs.fess.tag.FacetQuery";
 
-    public static final String MLT_QUERY = "org.codelibs.fess.tag.MLTQuery";
-
     public static final String GEO_QUERY = "org.codelibs.fess.tag.GeoQuery";
 
     public static final String FACET_FORM = "org.codelibs.fess.tag.FacetForm";
-
-    public static final String MLT_FORM = "org.codelibs.fess.tag.MLTForm";
 
     public static final String GEO_FORM = "org.codelibs.fess.tag.GeoForm";
 
@@ -325,5 +300,9 @@ public class Constants extends CoreLibConstants {
     public static final String INVALID_NUMERIC_PARAMETER = "-1";
 
     public static final String NOW = "NOW";
+
+    public static final String FACET_FIELD_PREFIX = "field:";
+
+    public static final String FACET_QUERY_PREFIX = "query:";
 
 }

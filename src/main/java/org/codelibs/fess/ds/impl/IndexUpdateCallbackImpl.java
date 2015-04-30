@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.solr.common.SolrInputDocument;
 import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
@@ -30,7 +30,6 @@ import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.solr.lib.SolrGroup;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LoggerFactory.getLogger(IndexUpdateCallbackImpl.class);
 
-    protected SolrGroup solrGroup;
+    protected SearchClient searchClient;
 
     public int maxDocumentCacheSize = 5;
 
@@ -48,11 +47,9 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected volatile AtomicLong documentSize = new AtomicLong(0);
 
-    protected volatile long commitPerCount = 0;
-
     protected volatile long executeTime = 0;
 
-    final List<SolrInputDocument> docList = new ArrayList<SolrInputDocument>();
+    final List<Map<String, Object>> docList = new ArrayList<>();
 
     private FieldHelper fieldHelper;
 
@@ -82,23 +79,20 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         dataMap.put(fieldHelper.idField, crawlingSessionHelper.generateId(dataMap));
 
-        final SolrInputDocument doc = createSolrDocument(dataMap);
+        updateDocument(dataMap);
 
-        docList.add(doc);
+        docList.add(dataMap);
         if (logger.isDebugEnabled()) {
             logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
         }
 
         if (docList.size() >= maxDocumentCacheSize) {
-            indexingHelper.sendDocuments(solrGroup, docList);
+            indexingHelper.sendDocuments(searchClient, docList);
         }
         documentSize.getAndIncrement();
-        // commit
-        if (commitPerCount > 0 && documentSize.get() % commitPerCount == 0) {
-            if (!docList.isEmpty()) {
-                indexingHelper.sendDocuments(solrGroup, docList);
-            }
-            commitDocuments();
+
+        if (!docList.isEmpty()) {
+            indexingHelper.sendDocuments(searchClient, docList);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("The number of an added document is " + documentSize.get() + ".");
@@ -108,73 +102,37 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         return true;
     }
 
-    protected SolrInputDocument createSolrDocument(final Map<String, Object> dataMap) {
+    protected void updateDocument(final Map<String, Object> dataMap) {
         final String url = dataMap.get(fieldHelper.urlField).toString();
 
-        final SolrInputDocument doc = new SolrInputDocument();
-        for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            if (fieldHelper.boostField.equals(entry.getKey())) {
-                // boost
-                final float documentBoost = Float.valueOf(entry.getValue().toString());
-                doc.setDocumentBoost(documentBoost);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Set a document boost (" + documentBoost + ").");
-                }
-            }
-            doc.addField(entry.getKey(), entry.getValue());
-        }
-
         if (clickCountEnabled) {
-            addClickCountField(doc, url, fieldHelper.clickCountField);
+            addClickCountField(dataMap, url, fieldHelper.clickCountField);
         }
 
         if (favoriteCountEnabled) {
-            addFavoriteCountField(doc, url, fieldHelper.favoriteCountField);
+            addFavoriteCountField(dataMap, url, fieldHelper.favoriteCountField);
         }
 
         if (!dataMap.containsKey(fieldHelper.docIdField)) {
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-            doc.addField(fieldHelper.docIdField, systemHelper.generateDocId(dataMap));
+            dataMap.put(fieldHelper.docIdField, systemHelper.generateDocId(dataMap));
         }
 
-        return doc;
     }
 
-    @Override
-    public void commit() {
-        if (!docList.isEmpty()) {
-            final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            indexingHelper.sendDocuments(solrGroup, docList);
-        }
-        commitDocuments();
-    }
-
-    protected void commitDocuments() {
-        final long execTime = System.currentTimeMillis();
-        if (logger.isInfoEnabled()) {
-            logger.info("Committing documents. ");
-        }
-        synchronized (solrGroup) {
-            solrGroup.commit(true, true, false, true);
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Committed documents. The execution time is " + (System.currentTimeMillis() - execTime) + "ms.");
-        }
-    }
-
-    protected void addClickCountField(final SolrInputDocument doc, final String url, final String clickCountField) {
+    protected void addClickCountField(final Map<String, Object> doc, final String url, final String clickCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final int count = searchLogHelper.getClickCount(url);
-        doc.addField(clickCountField, count);
+        doc.put(clickCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Click Count: " + count + ", url: " + url);
         }
     }
 
-    protected void addFavoriteCountField(final SolrInputDocument doc, final String url, final String favoriteCountField) {
+    protected void addFavoriteCountField(final Map<String, Object> doc, final String url, final String favoriteCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final long count = searchLogHelper.getFavoriteCount(url);
-        doc.addField(favoriteCountField, count);
+        doc.put(favoriteCountField, count);
         if (logger.isDebugEnabled()) {
             logger.debug("Favorite Count: " + count + ", url: " + url);
         }
@@ -191,18 +149,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     @Override
-    public SolrGroup getSolrGroup() {
-        return solrGroup;
+    public SearchClient getElasticsearchClient() {
+        return searchClient;
     }
 
     @Override
-    public void setSolrGroup(final SolrGroup solrGroup) {
-        this.solrGroup = solrGroup;
-    }
-
-    @Override
-    public void setCommitPerCount(final long commitPerCount) {
-        this.commitPerCount = commitPerCount;
+    public void setElasticsearchClient(final SearchClient searchClient) {
+        this.searchClient = searchClient;
     }
 
 }
