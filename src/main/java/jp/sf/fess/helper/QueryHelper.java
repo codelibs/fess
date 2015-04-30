@@ -431,7 +431,7 @@ public class QueryHelper implements Serializable {
                             buf.append('*');
                         }
                         appendQueryValue(buf, targetWord, isInUrl ? false
-                                : useBigram);
+                                : isBigramField(field));
                         if (isInUrl) {
                             buf.append('*');
                         }
@@ -444,7 +444,7 @@ public class QueryHelper implements Serializable {
                             queryBuf.append('*');
                         }
                         appendQueryValue(queryBuf, targetWord, isInUrl ? false
-                                : useBigram);
+                                : isBigramField(field));
                         if (isInUrl) {
                             queryBuf.append('*');
                         }
@@ -903,12 +903,13 @@ public class QueryHelper implements Serializable {
                     if (notOperatorFlag) {
                         final StringBuilder buf = new StringBuilder(100);
                         buf.append(prefix);
-                        appendQueryValue(buf, targetWord, useBigram);
+                        appendQueryValue(buf, targetWord, isBigramField(field));
                         notOperatorList.add(buf.toString());
                         notOperatorFlag = false;
                     } else {
                         queryBuf.append(prefix);
-                        appendQueryValue(queryBuf, targetWord, useBigram);
+                        appendQueryValue(queryBuf, targetWord,
+                                isBigramField(field));
                         queryOperandCount++;
                     }
                     nonPrefix = true;
@@ -1000,6 +1001,14 @@ public class QueryHelper implements Serializable {
             appendFieldBoostValue(buf, languageField, value);
         }
         buf.append(')');
+    }
+
+    protected boolean isBigramField(String field) {
+        if (fieldHelper.titleField.equals(field)
+                || fieldHelper.contentField.equals(field)) {
+            return useBigram;
+        }
+        return false;
     }
 
     protected String getQueryLanguage() {
