@@ -37,6 +37,8 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -252,7 +254,8 @@ public class SearchListAction implements Serializable {
                 if (!jobHelper.isCrawlProcessRunning()) {
                     final long time = System.currentTimeMillis();
                     try {
-                        searchClient.deleteByQuery(fieldHelper.docIdField, docId);
+                        QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
+                        searchClient.deleteByQuery(query);
                         if (logger.isInfoEnabled()) {
                             logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - time) + "ms");
                         }

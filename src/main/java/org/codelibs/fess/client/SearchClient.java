@@ -28,11 +28,11 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateResponse;
@@ -60,7 +60,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.BaseEncoding;
 
-// TODO rename to SearchClient
 public class SearchClient {
     private static final Logger logger = LoggerFactory.getLogger(SearchClient.class);
 
@@ -108,13 +107,21 @@ public class SearchClient {
     }
 
     public void deleteByQuery(QueryBuilder queryBuilder) {
-        DeleteByQueryResponse response = client.prepareDeleteByQuery(index).setQuery(queryBuilder).execute().actionGet();
-        // TODO
-    }
-
-    public void deleteByQuery(String field, String value) {
-        // TODO Auto-generated method stub
-
+        try {
+            client.prepareDeleteByQuery(index).setQuery(queryBuilder).execute().actionGet().forEach(res -> {
+                ShardOperationFailedException[] failures = res.getFailures();
+                if (failures.length > 0) {
+                    StringBuilder buf = new StringBuilder(200);
+                    buf.append("Failed to delete documents in some shards.");
+                    for (ShardOperationFailedException failure : failures) {
+                        buf.append('\n').append(failure.toString());
+                    }
+                    throw new SearchException(buf.toString());
+                }
+            });
+        } catch (ElasticsearchException e) {
+            throw new SearchException("Failed to delete documents.", e);
+        }
     }
 
     public Map<String, Object> getDocument(final String query) {
