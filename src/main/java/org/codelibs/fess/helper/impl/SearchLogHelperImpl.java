@@ -197,6 +197,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final Map.Entry<String, Long> entry : clickCountMap.entrySet()) {
             try {
+                // TODO buik update
                 documentHelper.update(entry.getKey(), fieldHelper.clickCountField, entry.getValue() + 1);
             } catch (final Exception e) {
                 logger.warn("Failed to update a clickCount(" + entry.getValue() + ") for " + entry.getKey(), e);

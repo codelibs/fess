@@ -305,10 +305,12 @@ public class SearchClient {
         return query.execute().actionGet();
     }
 
-    public void update(String id, String field, Object value) {
-        UpdateResponse response = client.prepareUpdate(index, type, id).setDoc(field, value).execute().actionGet();
-        // TODO
-
+    public boolean update(String id, String field, Object value) {
+        try {
+            return client.prepareUpdate(index, type, id).setDoc(field, value).execute().actionGet().isCreated();
+        } catch (ElasticsearchException e) {
+            throw new SearchException("Failed to set " + value + " to " + field + " for doc " + id, e);
+        }
     }
 
     public void refresh() {
