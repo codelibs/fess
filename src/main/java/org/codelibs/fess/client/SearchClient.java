@@ -33,6 +33,8 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateResponse;
@@ -124,10 +126,12 @@ public class SearchClient {
         }
     }
 
+    // TODO 
     public Map<String, Object> getDocument(final String query) {
         return getDocument(query, queryHelper.getResponseFields());
     }
 
+    // TODO 
     public Map<String, Object> getDocument(final String query, final String[] responseFields) {
         final List<Map<String, Object>> docList = getDocumentList(query, 0, 1, null, null, responseFields);
         if (!docList.isEmpty()) {
@@ -136,6 +140,7 @@ public class SearchClient {
         return null;
     }
 
+    // TODO 
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] responseFields,
             final String[] docValuesFields, final int pageSize) {
         if (docIds == null || docIds.length == 0) {
@@ -152,11 +157,13 @@ public class SearchClient {
         return getDocumentList(buf.toString(), 0, pageSize, null, null, responseFields);
     }
 
+    // TODO 
     public List<Map<String, Object>> getDocumentList(final String query, final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final String[] responseFields) {
         return getDocumentList(query, start, rows, facetInfo, geoInfo, responseFields, true);
     }
 
+    // TODO 
     public List<Map<String, Object>> getDocumentList(final String query, final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final String[] responseFields, final boolean forUser) {
         if (start > queryHelper.getMaxSearchResultOffset()) {
@@ -317,12 +324,14 @@ public class SearchClient {
         client.admin().indices().prepareRefresh(index).execute(new ActionListener<RefreshResponse>() {
             @Override
             public void onResponse(RefreshResponse response) {
-                // TODO Auto-generated method stub
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Refreshed " + index + "/" + type + ".");
+                }
             }
 
             @Override
             public void onFailure(Throwable e) {
-                // TODO Auto-generated method stub       
+                logger.error("Failed to refresh " + index + "/" + type + ".", e);
             }
         });
 
@@ -333,14 +342,14 @@ public class SearchClient {
 
             @Override
             public void onResponse(FlushResponse response) {
-                // TODO Auto-generated method stub
-
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Flushed " + index + "/" + type + ".");
+                }
             }
 
             @Override
             public void onFailure(Throwable e) {
-                // TODO Auto-generated method stub
-
+                logger.error("Failed to flush " + index + "/" + type + ".", e);
             }
         });
 
@@ -351,27 +360,37 @@ public class SearchClient {
 
             @Override
             public void onResponse(OptimizeResponse response) {
-                // TODO Auto-generated method stub
-
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Optimzed " + index + "/" + type + ".");
+                }
             }
 
             @Override
             public void onFailure(Throwable e) {
-                // TODO Auto-generated method stub
-
+                logger.error("Failed to optimze " + index + "/" + type + ".", e);
             }
         });
     }
 
     public PingResponse ping() {
-        ClusterHealthResponse response = client.admin().cluster().prepareHealth().execute().actionGet();
-        return new PingResponse(response);
-
+        try {
+            ClusterHealthResponse response = client.admin().cluster().prepareHealth().execute().actionGet();
+            return new PingResponse(response);
+        } catch (ElasticsearchException e) {
+            throw new SearchException("Failed to process a ping request.", e);
+        }
     }
 
     public void addAll(List<Map<String, Object>> docList) {
-        // TODO Auto-generated method stub
-
+        BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
+        for (Map<String, Object> doc : docList) {
+            bulkRequestBuilder.add(client.prepareIndex(index, type).setSource(doc));
+        }
+        BulkResponse response = bulkRequestBuilder.execute().actionGet();
+        String failureMessage = response.buildFailureMessage();
+        if (StringUtil.isNotBlank(failureMessage)) {
+            throw new SearchException(failureMessage);
+        }
     }
 
 }
