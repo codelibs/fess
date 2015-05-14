@@ -130,6 +130,8 @@ public class QueryHelper implements Serializable {
 
     protected boolean useBigram = true;
 
+    protected boolean useFuzzyOnTextField = false;
+
     protected String additionalQuery;
 
     protected int maxFilterQueriesForRole = Integer.MAX_VALUE;
@@ -431,7 +433,7 @@ public class QueryHelper implements Serializable {
                             buf.append('*');
                         }
                         appendQueryValue(buf, targetWord, isInUrl ? false
-                                : isBigramField(field));
+                                : isBigramField(field), true);
                         if (isInUrl) {
                             buf.append('*');
                         }
@@ -444,7 +446,7 @@ public class QueryHelper implements Serializable {
                             queryBuf.append('*');
                         }
                         appendQueryValue(queryBuf, targetWord, isInUrl ? false
-                                : isBigramField(field));
+                                : isBigramField(field), true);
                         if (isInUrl) {
                             queryBuf.append('*');
                         }
@@ -569,7 +571,7 @@ public class QueryHelper implements Serializable {
     }
 
     protected void appendQueryValue(final StringBuilder buf,
-            final String query, final boolean useBigram) {
+            final String query, final boolean useBigram, final boolean useFuzzy) {
         // check reserved
         boolean reserved = false;
         for (final String element : Constants.RESERVED) {
@@ -662,7 +664,9 @@ public class QueryHelper implements Serializable {
         }
 
         if (fuzzyValue != null) {
-            buf.append(fuzzyValue);
+            if (useFuzzy) {
+                buf.append(fuzzyValue);
+            }
         } else if (proximityValue != null) {
             buf.append(proximityValue);
         } else if (caretValue != null) {
@@ -903,13 +907,14 @@ public class QueryHelper implements Serializable {
                     if (notOperatorFlag) {
                         final StringBuilder buf = new StringBuilder(100);
                         buf.append(prefix);
-                        appendQueryValue(buf, targetWord, isBigramField(field));
+                        appendQueryValue(buf, targetWord, isBigramField(field),
+                                true);
                         notOperatorList.add(buf.toString());
                         notOperatorFlag = false;
                     } else {
                         queryBuf.append(prefix);
                         appendQueryValue(queryBuf, targetWord,
-                                isBigramField(field));
+                                isBigramField(field), true);
                         queryOperandCount++;
                     }
                     nonPrefix = true;
@@ -986,18 +991,18 @@ public class QueryHelper implements Serializable {
             final String value, final String queryLanguage) {
         buf.append('(');
         buf.append(fieldHelper.titleField).append(':');
-        appendQueryValue(buf, value, useBigram);
+        appendQueryValue(buf, value, useBigram, useFuzzyOnTextField);
         appendFieldBoostValue(buf, fieldHelper.titleField, value);
         buf.append(_OR_);
         buf.append(fieldHelper.contentField).append(':');
-        appendQueryValue(buf, value, useBigram);
+        appendQueryValue(buf, value, useBigram, useFuzzyOnTextField);
         appendFieldBoostValue(buf, fieldHelper.contentField, value);
         if (StringUtil.isNotBlank(queryLanguage)) {
             final String languageField = "content_" + queryLanguage;
             buf.append(_OR_);
             buf.append(languageField);
             buf.append(':');
-            appendQueryValue(buf, value, false);
+            appendQueryValue(buf, value, false, true);
             appendFieldBoostValue(buf, languageField, value);
         }
         buf.append(')');
@@ -1329,6 +1334,14 @@ public class QueryHelper implements Serializable {
      */
     public void setUseBigram(final boolean useBigram) {
         this.useBigram = useBigram;
+    }
+
+    public boolean isUseFuzzyOnTextField() {
+        return useFuzzyOnTextField;
+    }
+
+    public void setUseFuzzyOnTextField(boolean useFuzzyOnTextField) {
+        this.useFuzzyOnTextField = useFuzzyOnTextField;
     }
 
     /**
