@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.lasta.core.direction;
 
-import org.codelibs.fess.lasta.core.direction.FessEnv;
-
 /**
  * @author FreeGen
  */

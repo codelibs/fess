@@ -35,8 +35,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;

@@ -35,10 +35,10 @@ import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
+import org.seasar.framework.util.StringUtil;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

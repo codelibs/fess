@@ -19,7 +19,6 @@ package org.codelibs.fess.web.admin;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,9 +28,7 @@ import jp.sf.fess.suggest.SuggestConstants;
 import jp.sf.fess.suggest.server.SuggestSolrServer;
 import jp.sf.fess.suggest.service.SuggestService;
 
-import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.FieldHelper;
@@ -41,11 +38,8 @@ import org.codelibs.fess.helper.WebManagementHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
@@ -173,24 +167,32 @@ public class DocumentAction implements Serializable {
     }
 
     protected SessionIdList<Map<String, String>> getSessionIdList(final String groupName) {
-        final SessionIdList<Map<String, String>> sessionIdList = new SessionIdList<Map<String, String>>();
+        // TODO remove groupName?
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        return searchClient.search(
+                queryRequestBuilder -> {
+                    queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
+                    TermsBuilder termsBuilder =
+                            AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(100)
+                                    .order(Order.count(false));
+                    queryRequestBuilder.addAggregation(termsBuilder);
+                    return true;
+                }, (queryRequestBuilder, execTime, searchResponse) -> {
+                    final SessionIdList<Map<String, String>> sessionIdList = new SessionIdList<Map<String, String>>();
+                    searchResponse.ifPresent(response -> {
+                        Terms terms = response.getAggregations().get(fieldHelper.segmentField);
+                        for (Bucket bucket : terms.getBuckets()) {
+                            final Map<String, String> map = new HashMap<String, String>(3);
+                            map.put("label", bucket.getKey() + " (" + bucket.getDocCount() + ")");
+                            map.put("value", bucket.getKey());
+                            map.put("count", Long.toString(bucket.getDocCount()));
+                            sessionIdList.add(map);
+                            sessionIdList.addTotalCount(bucket.getDocCount());
+                        }
+                    });
+                    return sessionIdList;
+                });
 
-        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
-        TermsBuilder termsBuilder =
-                AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(100).order(Order.count(false));
-
-        SearchResponse response = searchClient.query(queryBuilder, termsBuilder, null);
-        Terms terms = response.getAggregations().get(fieldHelper.segmentField);
-        for (Bucket bucket : terms.getBuckets()) {
-            final Map<String, String> map = new HashMap<String, String>(3);
-            map.put("label", bucket.getKey() + " (" + bucket.getDocCount() + ")");
-            map.put("value", bucket.getKey());
-            map.put("count", Long.toString(bucket.getDocCount()));
-            sessionIdList.add(map);
-            sessionIdList.addTotalCount(bucket.getDocCount());
-        }
-
-        return sessionIdList;
     }
 
     public boolean isSolrProcessRunning() {

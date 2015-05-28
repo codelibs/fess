@@ -33,8 +33,6 @@ import org.codelibs.fess.db.exentity.CrawlingSession;
 import org.codelibs.fess.db.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.fess.util.ComponentUtil;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
@@ -154,23 +152,28 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public List<Map<String, String>> getSessionIdList(final SearchClient searchClient) {
-        final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-
-        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
-        TermsBuilder termsBuilder =
-                AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(maxSessionIdsInList)
-                        .order(Order.term(false));
-
-        final SearchResponse searchResponse = searchClient.query(queryBuilder, termsBuilder, null);
-        Terms terms = searchResponse.getAggregations().get(fieldHelper.segmentField);
-        for (Bucket bucket : terms.getBuckets()) {
-            final Map<String, String> map = new HashMap<String, String>(2);
-            map.put(fieldHelper.segmentField, bucket.getKey());
-            map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
-            sessionIdList.add(map);
-        }
-        return sessionIdList;
+        return searchClient.search(
+                queryRequestBuilder -> {
+                    queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
+                    TermsBuilder termsBuilder =
+                            AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(maxSessionIdsInList)
+                                    .order(Order.term(false));
+                    queryRequestBuilder.addAggregation(termsBuilder);
+                    return true;
+                }, (queryRequestBuilder, execTime, searchResponse) -> {
+                    final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
+                    searchResponse.ifPresent(response -> {
+                        Terms terms = response.getAggregations().get(fieldHelper.segmentField);
+                        for (Bucket bucket : terms.getBuckets()) {
+                            final Map<String, String> map = new HashMap<String, String>(2);
+                            map.put(fieldHelper.segmentField, bucket.getKey());
+                            map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
+                            sessionIdList.add(map);
+                        }
+                    });
+                    return sessionIdList;
+                });
     }
 
     private String generateId(final String url, final List<String> roleTypeList) {

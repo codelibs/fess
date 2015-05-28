@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.lasta.web.action;
 
-import org.apache.struts.action.ActionMessages;
 import org.apache.struts.action.ActionMessage;
+import org.apache.struts.action.ActionMessages;
 
 /**
  * The keys for message.

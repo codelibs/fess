@@ -17,8 +17,8 @@
 package org.codelibs.fess.web.admin;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;

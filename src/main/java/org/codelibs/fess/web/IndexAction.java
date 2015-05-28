@@ -91,6 +91,9 @@ import org.codelibs.robot.util.CharUtil;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.seasar.framework.beans.util.Beans;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.framework.container.annotation.tiger.BindingType;
@@ -342,7 +345,12 @@ public class IndexAction {
     public String cache() {
         Map<String, Object> doc = null;
         try {
-            doc = searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getCacheResponseFields());
+            doc = searchClient.getDocument(queryRequestBuilder -> {
+                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+                queryRequestBuilder.setQuery(termQuery);
+                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                return true;
+            }).get();
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -365,7 +373,12 @@ public class IndexAction {
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
-            doc = searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId, queryHelper.getResponseFields());
+            doc = searchClient.getDocument(queryRequestBuilder -> {
+                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+                queryRequestBuilder.setQuery(termQuery);
+                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                return true;
+            }).get();
         } catch (final Exception e) {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
@@ -497,7 +510,12 @@ public class IndexAction {
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
-            final Map<String, Object> doc = searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId);
+            final Map<String, Object> doc = searchClient.getDocument(queryRequestBuilder -> {
+                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+                queryRequestBuilder.setQuery(termQuery);
+                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                return true;
+            }).get();
             final String url = doc == null ? null : (String) doc.get(fieldHelper.urlField);
             if (StringUtil.isBlank(indexForm.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
                 // 404
@@ -719,9 +737,12 @@ public class IndexAction {
         }
 
         try {
-            final Map<String, Object> doc =
-                    indexForm.docId == null ? null : searchClient.getDocument(fieldHelper.docIdField + ":" + indexForm.docId,
-                            queryHelper.getResponseFields());
+            final Map<String, Object> doc = indexForm.docId == null ? null : searchClient.getDocument(queryRequestBuilder -> {
+                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+                queryRequestBuilder.setQuery(termQuery);
+                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                return true;
+            }).get();
             final String userCode = userInfoHelper.getUserCode();
             final String favoriteUrl = doc == null ? null : (String) doc.get(fieldHelper.urlField);
 
@@ -790,9 +811,20 @@ public class IndexAction {
             }
 
             final String[] docIds = userInfoHelper.getResultDocIds(indexForm.queryId);
-            final List<Map<String, Object>> docList =
-                    searchClient.getDocumentListByDocIds(docIds, queryHelper.getResponseFields(),
-                            new String[] { fieldHelper.favoriteCountField }, getMaxPageSize());
+            final List<Map<String, Object>> docList = searchClient.getDocumentList(queryRequstBuilder -> {
+                if (docIds == null || docIds.length == 0) {
+                    return false;
+                }
+
+                queryRequstBuilder.setFrom(0).setSize(getMaxPageSize());
+                queryRequstBuilder.addFields(queryHelper.getResponseFields());
+                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                for (int i = 0; i < docIds.length && i < getMaxPageSize(); i++) {
+                    boolQuery.should(QueryBuilders.termQuery(fieldHelper.docIdField, docIds[i]));
+                }
+                queryRequstBuilder.setQuery(boolQuery);
+                return true;
+            }).get();
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final Object urlObj = doc.get(fieldHelper.urlField);

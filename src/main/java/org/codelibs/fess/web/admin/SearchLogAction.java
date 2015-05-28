@@ -19,6 +19,8 @@ package org.codelibs.fess.web.admin;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -26,33 +28,28 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.codelibs.fess.crud.CrudMessageException;
+import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.SearchLog;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.SearchLogPager;
 import org.codelibs.fess.service.SearchLogService;
 import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
+import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.framework.beans.util.Beans;
+import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.exception.ActionMessagesException;
 import org.seasar.struts.util.RequestUtil;
 import org.seasar.struts.util.ResponseUtil;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.exception.ActionMessagesException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ibm.icu.text.SimpleDateFormat;
-
-import java.util.HashMap;
-import java.util.List;
 
 public class SearchLogAction extends FessAdminAction {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogAction.class);

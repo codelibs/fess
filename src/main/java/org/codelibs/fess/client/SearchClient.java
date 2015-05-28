@@ -1,10 +1,10 @@
 package org.codelibs.fess.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -20,7 +20,6 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.solr.FessSolrQueryException;
@@ -37,7 +36,6 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -47,12 +45,11 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
@@ -73,10 +70,15 @@ public class SearchClient {
 
     @Resource
     protected RoleQueryHelper roleQueryHelper;
+
     protected ElasticsearchClusterRunner runner;
+
     protected List<TransportAddress> transportAddressList = new ArrayList<>();
+
     protected Client client;
+
     protected String index;
+
     protected String type;
 
     @InitMethod
@@ -126,35 +128,53 @@ public class SearchClient {
         }
     }
 
-    // TODO 
-    public Map<String, Object> getDocument(final String query) {
-        return getDocument(query, queryHelper.getResponseFields());
-    }
+    public <T> T search(SearchCondition condition, SearchResult<T> searchResult) {
+        final long startTime = System.currentTimeMillis();
 
-    // TODO 
-    public Map<String, Object> getDocument(final String query, final String[] responseFields) {
-        final List<Map<String, Object>> docList = getDocumentList(query, 0, 1, null, null, responseFields);
-        if (!docList.isEmpty()) {
-            return docList.get(0);
-        }
-        return null;
-    }
+        SearchResponse searchResponse = null;
+        SearchRequestBuilder queryRequestBuilder = client.prepareSearch(index);
+        if (condition.build(queryRequestBuilder)) {
 
-    // TODO 
-    public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] responseFields,
-            final String[] docValuesFields, final int pageSize) {
-        if (docIds == null || docIds.length == 0) {
-            return Collections.emptyList();
-        }
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final StringBuilder buf = new StringBuilder(1000);
-        for (int i = 0; i < docIds.length; i++) {
-            if (i != 0) {
-                buf.append(" OR ");
+            if (queryHelper.getTimeAllowed() >= 0) {
+                queryRequestBuilder.setTimeout(TimeValue.timeValueMillis(queryHelper.getTimeAllowed()));
             }
-            buf.append(fieldHelper.docIdField + ":").append(docIds[i]);
+
+            final Set<Entry<String, String[]>> paramSet = queryHelper.getRequestParameterSet();
+            if (!paramSet.isEmpty()) {
+                for (final Map.Entry<String, String[]> entry : paramSet) {
+                    queryRequestBuilder.putHeader(entry.getKey(), entry.getValue());
+                }
+            }
+
+            searchResponse = queryRequestBuilder.execute().actionGet();
         }
-        return getDocumentList(buf.toString(), 0, pageSize, null, null, responseFields);
+        final long execTime = System.currentTimeMillis() - startTime;
+
+        return searchResult.build(queryRequestBuilder, execTime, Optional.ofNullable(searchResponse));
+    }
+
+    public Optional<Map<String, Object>> getDocument(final SearchCondition condition) {
+        return search(condition, (queryBuilder, execTime, searchResponse) -> {
+            return searchResponse.map(response -> {
+                SearchHit[] hits = response.getHits().hits();
+                if (hits.length > 0) {
+                    return hits[0].getSource();
+                }
+                return null;
+            });
+        });
+    }
+
+    public Optional<List<Map<String, Object>>> getDocumentList(final SearchCondition condition) {
+        return search(condition, (queryRequestBuilder, execTime, searchResponse) -> {
+            List<Map<String, Object>> list = new ArrayList<>();
+            searchResponse.ifPresent(response -> {
+                response.getHits().forEach(hit -> {
+                    list.add(hit.getSource());
+                });
+            });
+            return Optional.of(list);
+        });
     }
 
     // TODO 
@@ -300,18 +320,6 @@ public class SearchClient {
         return queryResponseList;
     }
 
-    // TODO search
-    public SearchResponse query(QueryBuilder queryBuilder, AbstractAggregationBuilder aggregationBuilder, SortBuilder sortBuilder) {
-        SearchRequestBuilder query = client.prepareSearch(index).setQuery(queryBuilder);
-        if (aggregationBuilder != null) {
-            query.addAggregation(aggregationBuilder);
-        }
-        if (sortBuilder != null) {
-            query.addSort(sortBuilder);
-        }
-        return query.execute().actionGet();
-    }
-
     public boolean update(String id, String field, Object value) {
         try {
             return client.prepareUpdate(index, type, id).setDoc(field, value).execute().actionGet().isCreated();
@@ -393,4 +401,11 @@ public class SearchClient {
         }
     }
 
+    public interface SearchCondition {
+        boolean build(SearchRequestBuilder queryRequestBuilder);
+    }
+
+    public interface SearchResult<T> {
+        T build(SearchRequestBuilder queryRequestBuilder, long execTime, Optional<SearchResponse> searchResponse);
+    }
 }
