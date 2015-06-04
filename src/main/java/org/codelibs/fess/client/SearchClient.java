@@ -1,27 +1,27 @@
 package org.codelibs.fess.client;
 
+import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Resource;
+import java.util.UUID;
 
 import org.apache.commons.codec.Charsets;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
+import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
-import org.codelibs.fess.helper.QueryHelper;
-import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.solr.FessSolrQueryException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
@@ -29,6 +29,8 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
@@ -62,30 +64,51 @@ import com.google.common.io.BaseEncoding;
 public class SearchClient {
     private static final Logger logger = LoggerFactory.getLogger(SearchClient.class);
 
-    @Resource
-    protected SearchClient searchClient;
-
-    @Resource
-    protected QueryHelper queryHelper;
-
-    @Resource
-    protected RoleQueryHelper roleQueryHelper;
-
     protected ElasticsearchClusterRunner runner;
 
     protected List<TransportAddress> transportAddressList = new ArrayList<>();
 
     protected Client client;
 
-    protected String index;
+    protected String index = "fess";
 
-    protected String type;
+    protected String type = "doc";
+
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setRunner(ElasticsearchClusterRunner runner) {
+        this.runner = runner;
+    }
+
+    public void addTransportAddress(String host, int port) {
+        transportAddressList.add(new InetSocketTransportAddress(host, port));
+    }
 
     @InitMethod
     public void open() {
         if (transportAddressList.isEmpty()) {
             if (runner == null) {
-                throw new FessSystemException("No elasticsearch instance.");
+                runner = new ElasticsearchClusterRunner();
+                Configs config = newConfigs().clusterName("fess-" + UUID.randomUUID().toString()).numOfNode(1);
+                String esDir = System.getProperty("fess.es.dir");
+                if (esDir != null) {
+                    config.basePath(esDir);
+                }
+                runner.build(config);
             }
             client = runner.client();
         } else {
@@ -94,6 +117,33 @@ public class SearchClient {
                 transportClient.addTransportAddress(address);
             }
             client = transportClient;
+        }
+
+        waitForYellowStatus();
+
+        if (!isIndexExists()) {
+            createIndex();
+            waitForYellowStatus();
+        }
+    }
+
+    private void createIndex() {
+        String source = FileUtil.readText("json/index.json");
+        CreateIndexResponse response = client.admin().indices().prepareCreate(index).setSource(source).execute().actionGet();
+        if (!response.isAcknowledged()) {
+            logger.warn("Failed to create {0}.", index);
+        }
+    }
+
+    private boolean isIndexExists() {
+        IndicesExistsResponse response = client.admin().indices().prepareExists(index).execute().actionGet();
+        return response.isExists();
+    }
+
+    private void waitForYellowStatus() {
+        ClusterHealthResponse response = client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Elasticsearch Cluster Status: {0}", response.getStatus());
         }
     }
 
@@ -104,10 +154,6 @@ public class SearchClient {
         } catch (ElasticsearchException e) {
             logger.warn("Failed to close Client: " + client, e);
         }
-    }
-
-    public void addTransportAddress(String host, int port) {
-        transportAddressList.add(new InetSocketTransportAddress(host, port));
     }
 
     public void deleteByQuery(QueryBuilder queryBuilder) {
@@ -135,11 +181,11 @@ public class SearchClient {
         SearchRequestBuilder queryRequestBuilder = client.prepareSearch(index);
         if (condition.build(queryRequestBuilder)) {
 
-            if (queryHelper.getTimeAllowed() >= 0) {
-                queryRequestBuilder.setTimeout(TimeValue.timeValueMillis(queryHelper.getTimeAllowed()));
+            if (ComponentUtil.getQueryHelper().getTimeAllowed() >= 0) {
+                queryRequestBuilder.setTimeout(TimeValue.timeValueMillis(ComponentUtil.getQueryHelper().getTimeAllowed()));
             }
 
-            final Set<Entry<String, String[]>> paramSet = queryHelper.getRequestParameterSet();
+            final Set<Entry<String, String[]>> paramSet = ComponentUtil.getQueryHelper().getRequestParameterSet();
             if (!paramSet.isEmpty()) {
                 for (final Map.Entry<String, String[]> entry : paramSet) {
                     queryRequestBuilder.putHeader(entry.getKey(), entry.getValue());
@@ -186,7 +232,7 @@ public class SearchClient {
     // TODO 
     public List<Map<String, Object>> getDocumentList(final String query, final int start, final int rows, final FacetInfo facetInfo,
             final GeoInfo geoInfo, final String[] responseFields, final boolean forUser) {
-        if (start > queryHelper.getMaxSearchResultOffset()) {
+        if (start > ComponentUtil.getQueryHelper().getMaxSearchResultOffset()) {
             throw new ResultOffsetExceededException("The number of result size is exceeded.");
         }
 
@@ -194,7 +240,7 @@ public class SearchClient {
 
         SearchResponse searchResponse = null;
         SearchRequestBuilder queryRequestBuilder = client.prepareSearch(index);
-        final SearchQuery searchQuery = queryHelper.build(query, forUser);
+        final SearchQuery searchQuery = ComponentUtil.getQueryHelper().build(query, forUser);
         final String q = searchQuery.getQuery();
         if (StringUtil.isNotBlank(q)) {
 
@@ -205,7 +251,7 @@ public class SearchClient {
             // query
             QueryBuilder queryBuilder = QueryBuilders.queryStringQuery(q);
             queryRequestBuilder.setFrom(start).setSize(rows);
-            for (final Map.Entry<String, String[]> entry : queryHelper.getQueryParamMap().entrySet()) {
+            for (final Map.Entry<String, String[]> entry : ComponentUtil.getQueryHelper().getQueryParamMap().entrySet()) {
                 queryRequestBuilder.putHeader(entry.getKey(), entry.getValue());
             }
             // filter query
@@ -229,8 +275,8 @@ public class SearchClient {
                     }
                     queryRequestBuilder.addSort(fieldSort);
                 }
-            } else if (queryHelper.hasDefaultSortFields()) {
-                for (final SortField sortField : queryHelper.getDefaultSortFields()) {
+            } else if (ComponentUtil.getQueryHelper().hasDefaultSortFields()) {
+                for (final SortField sortField : ComponentUtil.getQueryHelper().getDefaultSortFields()) {
                     FieldSortBuilder fieldSort = SortBuilders.fieldSort(sortField.getField());
                     if (Constants.DESC.equals(sortField.getOrder())) {
                         fieldSort.order(SortOrder.DESC);
@@ -241,9 +287,10 @@ public class SearchClient {
                 }
             }
             // highlighting
-            if (queryHelper.getHighlightingFields() != null && queryHelper.getHighlightingFields().length != 0) {
-                for (final String hf : queryHelper.getHighlightingFields()) {
-                    queryRequestBuilder.addHighlightedField(hf, queryHelper.getHighlightSnippetSize());
+            if (ComponentUtil.getQueryHelper().getHighlightingFields() != null
+                    && ComponentUtil.getQueryHelper().getHighlightingFields().length != 0) {
+                for (final String hf : ComponentUtil.getQueryHelper().getHighlightingFields()) {
+                    queryRequestBuilder.addHighlightedField(hf, ComponentUtil.getQueryHelper().getHighlightSnippetSize());
                 }
             }
             // geo
@@ -257,7 +304,7 @@ public class SearchClient {
             if (facetInfo != null) {
                 if (facetInfo.field != null) {
                     for (final String f : facetInfo.field) {
-                        if (queryHelper.isFacetField(f)) {
+                        if (ComponentUtil.getQueryHelper().isFacetField(f)) {
                             String encodedField = BaseEncoding.base64().encode(f.getBytes(Charsets.UTF_8));
                             TermsBuilder termsBuilder = AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
                             // TODO order
@@ -273,7 +320,7 @@ public class SearchClient {
                 }
                 if (facetInfo.query != null) {
                     for (final String fq : facetInfo.query) {
-                        final String facetQuery = queryHelper.buildFacetQuery(fq);
+                        final String facetQuery = ComponentUtil.getQueryHelper().buildFacetQuery(fq);
                         if (StringUtil.isNotBlank(facetQuery)) {
                             final String encodedFacetQuery = BaseEncoding.base64().encode(facetQuery.getBytes(Charsets.UTF_8));
                             FilterAggregationBuilder filterBuilder =
@@ -292,10 +339,10 @@ public class SearchClient {
                 }
             }
 
-            if (queryHelper.getTimeAllowed() >= 0) {
-                queryRequestBuilder.setTimeout(TimeValue.timeValueMillis(queryHelper.getTimeAllowed()));
+            if (ComponentUtil.getQueryHelper().getTimeAllowed() >= 0) {
+                queryRequestBuilder.setTimeout(TimeValue.timeValueMillis(ComponentUtil.getQueryHelper().getTimeAllowed()));
             }
-            final Set<Entry<String, String[]>> paramSet = queryHelper.getRequestParameterSet();
+            final Set<Entry<String, String[]>> paramSet = ComponentUtil.getQueryHelper().getRequestParameterSet();
             if (!paramSet.isEmpty()) {
                 for (final Map.Entry<String, String[]> entry : paramSet) {
                     queryRequestBuilder.putHeader(entry.getKey(), entry.getValue());

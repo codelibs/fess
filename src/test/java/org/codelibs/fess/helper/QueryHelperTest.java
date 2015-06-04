@@ -165,73 +165,73 @@ public class QueryHelperTest extends S2TestCase {
             assertEquals("", searchQuery.getQuery());
             assertEquals(0, searchQuery.getSortFields().length);
 
-            query = "sort:contentLength";
+            query = "sort:content_length";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("", searchQuery.getQuery());
             assertEquals(1, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
 
-            query = "sort:contentLength.desc";
+            query = "sort:content_length.desc";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("", searchQuery.getQuery());
             assertEquals(1, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.DESC, searchQuery.getSortFields()[0].getOrder());
 
-            query = "sort:contentLength.asc,lastModified";
+            query = "sort:content_length.asc,last_modified";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("", searchQuery.getQuery());
             assertEquals(2, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
-            assertEquals("lastModified", searchQuery.getSortFields()[1].getField());
+            assertEquals("last_modified", searchQuery.getSortFields()[1].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[1].getOrder());
 
-            query = "QUERY sort:contentLength";
+            query = "QUERY sort:content_length";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("title:QUERY OR content:QUERY", searchQuery.getQuery());
             assertEquals(1, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
 
-            query = "QUERY sort:contentLength.desc";
+            query = "QUERY sort:content_length.desc";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("title:QUERY OR content:QUERY", searchQuery.getQuery());
             assertEquals(1, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.DESC, searchQuery.getSortFields()[0].getOrder());
 
-            query = "QUERY sort:contentLength.asc,lastModified";
+            query = "QUERY sort:content_length.asc,last_modified";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("title:QUERY OR content:QUERY", searchQuery.getQuery());
             assertEquals(2, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
-            assertEquals("lastModified", searchQuery.getSortFields()[1].getField());
+            assertEquals("last_modified", searchQuery.getSortFields()[1].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[1].getOrder());
 
-            query = "QUERY mimetype:QUERY1 sort:contentLength";
+            query = "QUERY mimetype:QUERY1 sort:content_length";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("(title:QUERY OR content:QUERY) " + op + " mimetype:QUERY1", searchQuery.getQuery());
             assertEquals(1, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
 
-            query = "QUERY sort:contentLength.desc  mimetype:QUERY1";
+            query = "QUERY sort:content_length.desc  mimetype:QUERY1";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("(title:QUERY OR content:QUERY) " + op + " mimetype:QUERY1", searchQuery.getQuery());
             assertEquals(1, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.DESC, searchQuery.getSortFields()[0].getOrder());
 
-            query = "QUERY sort:contentLength.asc,lastModified mimetype:QUERY1";
+            query = "QUERY sort:content_length.asc,last_modified mimetype:QUERY1";
             searchQuery = queryHelper.buildQuery(query);
             assertEquals("(title:QUERY OR content:QUERY) " + op + " mimetype:QUERY1", searchQuery.getQuery());
             assertEquals(2, searchQuery.getSortFields().length);
-            assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+            assertEquals("content_length", searchQuery.getSortFields()[0].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
-            assertEquals("lastModified", searchQuery.getSortFields()[1].getField());
+            assertEquals("last_modified", searchQuery.getSortFields()[1].getField());
             assertEquals(Constants.ASC, searchQuery.getSortFields()[1].getOrder());
         }
     }
@@ -245,16 +245,16 @@ public class QueryHelperTest extends S2TestCase {
         assertEquals("", searchQuery.getQuery());
         assertEquals(0, searchQuery.getSortFields().length);
 
-        query = "sort:contentLength.hoge";
+        query = "sort:content_length.hoge";
         searchQuery = queryHelper.buildQuery(query);
         assertEquals("", searchQuery.getQuery());
         assertEquals(0, searchQuery.getSortFields().length);
 
-        query = "sort:contentLength.asc,hoge";
+        query = "sort:content_length.asc,hoge";
         searchQuery = queryHelper.buildQuery(query);
         assertEquals("", searchQuery.getQuery());
         assertEquals(1, searchQuery.getSortFields().length);
-        assertEquals("contentLength", searchQuery.getSortFields()[0].getField());
+        assertEquals("content_length", searchQuery.getSortFields()[0].getField());
         assertEquals(Constants.ASC, searchQuery.getSortFields()[0].getOrder());
     }
 
@@ -369,70 +369,70 @@ public class QueryHelperTest extends S2TestCase {
             // mod_date:[20020101 TO 20030101]
             assertEquals("title:[20020101 TO 20030101] OR content:[20020101 TO 20030101]", queryHelper.buildQuery("[20020101 TO 20030101]")
                     .getQuery());
-            assertEquals("lastModified:[20020101 TO 20030101]", queryHelper.buildQuery("lastModified:[20020101 TO 20030101]").getQuery());
-            assertEquals("(title:QUERY OR content:QUERY) " + op + " lastModified:[20020101 TO 20030101]",
-                    queryHelper.buildQuery("QUERY lastModified:[20020101 TO 20030101]").getQuery());
+            assertEquals("last_modified:[20020101 TO 20030101]", queryHelper.buildQuery("last_modified:[20020101 TO 20030101]").getQuery());
+            assertEquals("(title:QUERY OR content:QUERY) " + op + " last_modified:[20020101 TO 20030101]",
+                    queryHelper.buildQuery("QUERY last_modified:[20020101 TO 20030101]").getQuery());
             assertEquals("title:{Aida TO Carmen} OR content:{Aida TO Carmen}", queryHelper.buildQuery("{Aida TO Carmen}").getQuery());
-            assertEquals("lastModified:{Aida TO Carmen}", queryHelper.buildQuery("lastModified:{Aida TO Carmen}").getQuery());
+            assertEquals("last_modified:{Aida TO Carmen}", queryHelper.buildQuery("last_modified:{Aida TO Carmen}").getQuery());
             assertEquals("(title:QUERY OR content:QUERY) " + op + " title:{Aida TO Carmen}",
                     queryHelper.buildQuery("QUERY title:{Aida TO Carmen}").getQuery());
-            assertEquals("lastModified:[20020101 TO abc]", queryHelper.buildQuery("lastModified:[20020101 TO abc]").getQuery());
-            assertEquals("lastModified:[abc TO 20020101]", queryHelper.buildQuery("lastModified:[abc TO 20020101]").getQuery());
-            assertEquals("lastModified:[20020101 TO *]", queryHelper.buildQuery("lastModified:[20020101 TO *]").getQuery());
-            assertEquals("lastModified:[* TO 20020101]", queryHelper.buildQuery("lastModified:[* TO 20020101]").getQuery());
+            assertEquals("last_modified:[20020101 TO abc]", queryHelper.buildQuery("last_modified:[20020101 TO abc]").getQuery());
+            assertEquals("last_modified:[abc TO 20020101]", queryHelper.buildQuery("last_modified:[abc TO 20020101]").getQuery());
+            assertEquals("last_modified:[20020101 TO *]", queryHelper.buildQuery("last_modified:[20020101 TO *]").getQuery());
+            assertEquals("last_modified:[* TO 20020101]", queryHelper.buildQuery("last_modified:[* TO 20020101]").getQuery());
 
             rangeQuery = "(content:[1 TO 2] OR content:[3 TO 4]) " + op + " (content:[5 TO 6] OR content:[7 TO 8])";
             assertEquals(rangeQuery, queryHelper.buildQuery(rangeQuery).getQuery());
 
             try {
-                queryHelper.buildQuery("lastModified:[20020101 TO]").getQuery();
+                queryHelper.buildQuery("last_modified:[20020101 TO]").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
             try {
-                queryHelper.buildQuery("lastModified:[TO 20030101]").getQuery();
+                queryHelper.buildQuery("last_modified:[TO 20030101]").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
             try {
-                queryHelper.buildQuery("lastModified:[20020101]").getQuery();
+                queryHelper.buildQuery("last_modified:[20020101]").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
             try {
-                queryHelper.buildQuery("lastModified:[20030101]").getQuery();
+                queryHelper.buildQuery("last_modified:[20030101]").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
 
             // mod_date:{20020101 TO 20030101}
             assertEquals("title:{20020101 TO 20030101} OR content:{20020101 TO 20030101}", queryHelper.buildQuery("{20020101 TO 20030101}")
                     .getQuery());
-            assertEquals("lastModified:{20020101 TO 20030101}", queryHelper.buildQuery("lastModified:{20020101 TO 20030101}").getQuery());
-            assertEquals("(title:QUERY OR content:QUERY) " + op + " lastModified:{20020101 TO 20030101}",
-                    queryHelper.buildQuery("QUERY lastModified:{20020101 TO 20030101}").getQuery());
+            assertEquals("last_modified:{20020101 TO 20030101}", queryHelper.buildQuery("last_modified:{20020101 TO 20030101}").getQuery());
+            assertEquals("(title:QUERY OR content:QUERY) " + op + " last_modified:{20020101 TO 20030101}",
+                    queryHelper.buildQuery("QUERY last_modified:{20020101 TO 20030101}").getQuery());
             assertEquals("title:{Aida TO Carmen} OR content:{Aida TO Carmen}", queryHelper.buildQuery("{Aida TO Carmen}").getQuery());
-            assertEquals("lastModified:{Aida TO Carmen}", queryHelper.buildQuery("lastModified:{Aida TO Carmen}").getQuery());
+            assertEquals("last_modified:{Aida TO Carmen}", queryHelper.buildQuery("last_modified:{Aida TO Carmen}").getQuery());
             assertEquals("(title:QUERY OR content:QUERY) " + op + " title:{Aida TO Carmen}",
                     queryHelper.buildQuery("QUERY title:{Aida TO Carmen}").getQuery());
-            assertEquals("lastModified:{20020101 TO abc}", queryHelper.buildQuery("lastModified:{20020101 TO abc}").getQuery());
-            assertEquals("lastModified:{abc TO 20020101}", queryHelper.buildQuery("lastModified:{abc TO 20020101}").getQuery());
-            assertEquals("lastModified:{20020101 TO *}", queryHelper.buildQuery("lastModified:{20020101 TO *}").getQuery());
-            assertEquals("lastModified:{* TO 20020101}", queryHelper.buildQuery("lastModified:{* TO 20020101}").getQuery());
+            assertEquals("last_modified:{20020101 TO abc}", queryHelper.buildQuery("last_modified:{20020101 TO abc}").getQuery());
+            assertEquals("last_modified:{abc TO 20020101}", queryHelper.buildQuery("last_modified:{abc TO 20020101}").getQuery());
+            assertEquals("last_modified:{20020101 TO *}", queryHelper.buildQuery("last_modified:{20020101 TO *}").getQuery());
+            assertEquals("last_modified:{* TO 20020101}", queryHelper.buildQuery("last_modified:{* TO 20020101}").getQuery());
 
             rangeQuery = "(content:{1 TO 2} OR content:{3 TO 4}) " + op + " (content:{5 TO 6} OR content:{7 TO 8})";
             assertEquals(rangeQuery, queryHelper.buildQuery(rangeQuery).getQuery());
 
             try {
-                queryHelper.buildQuery("lastModified:{20020101 TO}").getQuery();
+                queryHelper.buildQuery("last_modified:{20020101 TO}").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
             try {
-                queryHelper.buildQuery("lastModified:{TO 20030101}").getQuery();
+                queryHelper.buildQuery("last_modified:{TO 20030101}").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
             try {
-                queryHelper.buildQuery("lastModified:{20020101}").getQuery();
+                queryHelper.buildQuery("last_modified:{20020101}").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
             try {
-                queryHelper.buildQuery("lastModified:{20030101}").getQuery();
+                queryHelper.buildQuery("last_modified:{20030101}").getQuery();
                 fail();
             } catch (final InvalidQueryException e) {}
 
@@ -670,39 +670,39 @@ public class QueryHelperTest extends S2TestCase {
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("", searchQuery);
 
-            query = "sort:contentLength";
+            query = "sort:content_length";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("", searchQuery);
 
-            query = "sort:contentLength.desc";
+            query = "sort:content_length.desc";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("", searchQuery);
 
-            query = "sort:contentLength.asc,lastModified";
+            query = "sort:content_length.asc,last_modified";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("", searchQuery);
 
-            query = "QUERY sort:contentLength";
+            query = "QUERY sort:content_length";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("title:QUERY OR content:QUERY", searchQuery);
 
-            query = "QUERY sort:contentLength.desc";
+            query = "QUERY sort:content_length.desc";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("title:QUERY OR content:QUERY", searchQuery);
 
-            query = "QUERY sort:contentLength.asc,lastModified";
+            query = "QUERY sort:content_length.asc,last_modified";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("title:QUERY OR content:QUERY", searchQuery);
 
-            query = "QUERY mimetype:QUERY1 sort:contentLength";
+            query = "QUERY mimetype:QUERY1 sort:content_length";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("(title:QUERY OR content:QUERY) " + op + " mimetype:QUERY1", searchQuery);
 
-            query = "QUERY sort:contentLength.desc  mimetype:QUERY1";
+            query = "QUERY sort:content_length.desc  mimetype:QUERY1";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("(title:QUERY OR content:QUERY) " + op + " mimetype:QUERY1", searchQuery);
 
-            query = "QUERY sort:contentLength.asc,lastModified mimetype:QUERY1";
+            query = "QUERY sort:content_length.asc,last_modified mimetype:QUERY1";
             searchQuery = queryHelper.buildFacetQuery(query);
             assertEquals("(title:QUERY OR content:QUERY) " + op + " mimetype:QUERY1", searchQuery);
         }
@@ -716,11 +716,11 @@ public class QueryHelperTest extends S2TestCase {
         searchQuery = queryHelper.buildFacetQuery(query);
         assertEquals("", searchQuery);
 
-        query = "sort:contentLength.hoge";
+        query = "sort:content_length.hoge";
         searchQuery = queryHelper.buildFacetQuery(query);
         assertEquals("", searchQuery);
 
-        query = "sort:contentLength.asc,hoge";
+        query = "sort:content_length.asc,hoge";
         searchQuery = queryHelper.buildFacetQuery(query);
         assertEquals("", searchQuery);
     }
@@ -840,15 +840,15 @@ public class QueryHelperTest extends S2TestCase {
             // mod_date:[20020101 TO 20030101]
             assertEquals("title:[20020101 TO 20030101] OR content:[20020101 TO 20030101]",
                     queryHelper.buildFacetQuery("[20020101 TO 20030101]"));
-            assertEquals("lastModified:[20020101 TO 20030101]", queryHelper.buildFacetQuery("lastModified:[20020101 TO 20030101]"));
-            assertEquals("(title:QUERY OR content:QUERY) " + op + " lastModified:[20020101 TO 20030101]",
-                    queryHelper.buildFacetQuery("QUERY lastModified:[20020101 TO 20030101]"));
+            assertEquals("last_modified:[20020101 TO 20030101]", queryHelper.buildFacetQuery("last_modified:[20020101 TO 20030101]"));
+            assertEquals("(title:QUERY OR content:QUERY) " + op + " last_modified:[20020101 TO 20030101]",
+                    queryHelper.buildFacetQuery("QUERY last_modified:[20020101 TO 20030101]"));
 
             // TODO more..
 
             // title:{Aida TO Carmen}
             assertEquals("title:{Aida TO Carmen} OR content:{Aida TO Carmen}", queryHelper.buildFacetQuery("{Aida TO Carmen}"));
-            assertEquals("lastModified:{Aida TO Carmen}", queryHelper.buildFacetQuery("lastModified:{Aida TO Carmen}"));
+            assertEquals("last_modified:{Aida TO Carmen}", queryHelper.buildFacetQuery("last_modified:{Aida TO Carmen}"));
             assertEquals("(title:QUERY OR content:QUERY) " + op + " title:{Aida TO Carmen}",
                     queryHelper.buildFacetQuery("QUERY title:{Aida TO Carmen}"));
 

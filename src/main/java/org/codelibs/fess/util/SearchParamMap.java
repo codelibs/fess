@@ -18,7 +18,7 @@ package org.codelibs.fess.util;
 
 import java.util.HashMap;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 
 public class SearchParamMap extends HashMap<String, String[]> {
 

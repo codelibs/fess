@@ -8,7 +8,7 @@
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
-	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
+	<component name="crawlerProperties" class="org.codelibs.core.misc.DynamicProperties">
 		<arg>
 			@org.seasar.framework.util.ResourceUtil@getBuildDir(@org.codelibs.fess.FessClass@class).getCanonicalPath()
 			+ "/conf/crawler.properties"

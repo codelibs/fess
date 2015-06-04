@@ -16,11 +16,11 @@
 
 package org.codelibs.fess.job.impl;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-
 import org.codelibs.fess.job.JobExecutor;
 import org.seasar.framework.container.factory.SingletonS2ContainerFactory;
+
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 
 public class GroovyExecutor extends JobExecutor {
 

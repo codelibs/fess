@@ -22,7 +22,7 @@ import org.apache.commons.validator.Field;
 import org.apache.commons.validator.Validator;
 import org.apache.commons.validator.ValidatorAction;
 import org.apache.struts.action.ActionMessages;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.quartz.CronExpression;
 import org.seasar.struts.validator.S2FieldChecks;
 

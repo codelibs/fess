@@ -22,9 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.suggest.service.SuggestService;
-
-import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
@@ -50,9 +48,6 @@ public abstract class SearchLogHelper {
     protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
 
     protected Map<String, Long> userInfoCache;
-
-    @Resource
-    protected SuggestService suggestService;
 
     @InitMethod
     public void init() {

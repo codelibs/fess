@@ -33,11 +33,11 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.lucene.analysis.ja.util.CSVUtil;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
+import org.codelibs.fess.util.UserDictCSVUtil;
 import org.codelibs.robot.util.StreamUtil;
 
 public class UserDictFile extends DictionaryFile<UserDictItem> {
@@ -160,7 +160,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                     continue;
                 }
 
-                final String[] values = CSVUtil.parse(line);
+                final String[] values = UserDictCSVUtil.parse(line);
                 String token = null;
                 String segmentation = null;
                 String reading = null;

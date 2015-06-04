@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.dict.DictionaryExpiredException;
 import org.codelibs.fess.dict.DictionaryFile;

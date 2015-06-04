@@ -91,7 +91,7 @@
 							<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
 								<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 					<li><s:link
-							href="search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">
+							href="search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
 							${f:h(fe:label(countEntry.key))} (${f:h(countEntry.value)})</s:link></li>
 								</c:if>
 							</c:forEach>
@@ -102,7 +102,7 @@
 						<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 								<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 					<li><s:link
-							href="search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">
+							href="search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
 							<bean:message key="${queryEntry.key}" /> (${f:h(facetResponse.queryCountMap[queryEntry.value])})</s:link></li>
 								</c:if>
 						</c:forEach>
@@ -125,7 +125,7 @@
 		<ul>
 			<c:if test="${existPrevPage}">
 				<li class="prev"><s:link
-						href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">
+						href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
 						<bean:message key="labels.prev_page" />
 					</s:link></li>
 			</c:if>
@@ -139,12 +139,12 @@
 					<c:if test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="active"</c:if>
 					>
 					<s:link
-						href="move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</s:link>
+						href="move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</s:link>
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
 				<li class="next"><s:link
-						href="next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">
+						href="next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
 						<bean:message key="labels.next_page" />
 					</s:link></li>
 			</c:if>

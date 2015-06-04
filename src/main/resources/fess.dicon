@@ -2,11 +2,10 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<include path="solrlib.dicon"/>
 	<include path="fess_ds.dicon"/>
-	<include path="fess_suggest.dicon"/>
+	<include path="fess_es.dicon"/>
 
-	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
+	<component name="crawlerProperties" class="org.codelibs.core.misc.DynamicProperties">
 		<arg>
 			@org.codelibs.fess.util.ResourceUtil@getConfPath("crawler.properties")
 		</arg>

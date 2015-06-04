@@ -6,7 +6,6 @@
 	<include path="aop.dicon" />
 	<include path="dbflute.dicon" />
 	<include path="fess.dicon" />
-	<include path="fess_suggest.dicon"/>
 
 	<include path="s2robot_db.dicon" />
 

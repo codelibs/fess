@@ -32,7 +32,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.db.bsentity.BsDataCrawlingConfig;
 import org.codelibs.fess.util.ParameterUtil;

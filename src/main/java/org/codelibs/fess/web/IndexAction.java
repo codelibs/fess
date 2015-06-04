@@ -47,16 +47,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jp.sf.fess.suggest.Suggester;
-import jp.sf.fess.suggest.entity.SpellCheckResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse;
-import jp.sf.fess.suggest.service.SuggestService;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codelibs.core.util.DynamicProperties;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
@@ -168,12 +163,6 @@ public class IndexAction {
 
     @Resource
     protected FieldHelper fieldHelper;
-
-    @Resource
-    protected Suggester suggester;
-
-    @Resource
-    protected SuggestService suggestService;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -596,8 +585,8 @@ public class IndexAction {
         final String[] fieldNames = indexForm.fn;
         final String[] labels = indexForm.fields.get("label");
 
-        final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
-        WebApiUtil.setObject("suggestResultList", suggestResultList);
+        //        final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
+        //        WebApiUtil.setObject("suggestResultList", suggestResultList);
 
         final List<String> suggestFieldName = Arrays.asList(fieldNames);
         WebApiUtil.setObject("suggestFieldName", suggestFieldName);
@@ -617,79 +606,15 @@ public class IndexAction {
                 roleSet = new HashSet<>();
             }
 
-            final SuggestResponse suggestResponse =
-                    suggestService.getSuggestResponse(indexForm.query, suggestFieldName, labelList, new ArrayList<String>(roleSet), num);
-
-            if (!suggestResponse.isEmpty()) {
-                suggestResultList.add(suggestResponse);
-            }
+            // TODO
+            //            final SuggestResponse suggestResponse =
+            //                    suggestService.getSuggestResponse(indexForm.query, suggestFieldName, labelList, new ArrayList<String>(roleSet), num);
+            //
+            //            if (!suggestResponse.isEmpty()) {
+            //                suggestResultList.add(suggestResponse);
+            //            }
 
             WebApiUtil.setObject("suggestRecordCount", 1);
-        } catch (final Exception e) {
-            WebApiUtil.setError(1, e);
-        }
-        return null;
-    }
-
-    @Execute(validator = false)
-    public String spellCheckApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_SPELLCHECK_PROPERTY, Constants.TRUE))) {
-            WebApiUtil.setError(9, "Unsupported operation.");
-            return null;
-        }
-
-        if (indexForm.fn == null || indexForm.fn.length == 0) {
-            WebApiUtil.setError(2, "The field name is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.query)) {
-            WebApiUtil.setError(3, "Your query is empty.");
-            return null;
-        }
-
-        if (StringUtil.isBlank(indexForm.num)) {
-            indexForm.num = String.valueOf(DEFAULT_SPELLCHECK_PAGE_SIZE);
-        }
-
-        int num = Integer.parseInt(indexForm.num);
-        if (num > getMaxPageSize()) {
-            num = getMaxPageSize();
-        }
-
-        final String[] fieldNames = indexForm.fn;
-        final String[] labels = indexForm.fields.get("label");
-
-        final List<SpellCheckResponse> spellCheckResultList = new ArrayList<SpellCheckResponse>();
-        WebApiUtil.setObject("spellCheckResultList", spellCheckResultList);
-
-        final List<String> spellCheckFieldName = Arrays.asList(fieldNames);
-        WebApiUtil.setObject("spellCheckFieldName", spellCheckFieldName);
-
-        final List<String> labelList;
-        if (labels == null) {
-            labelList = new ArrayList<String>();
-        } else {
-            labelList = Arrays.asList(labels);
-        }
-
-        try {
-            final Set<String> roleSet;
-            if (roleQueryHelper != null) {
-                roleSet = roleQueryHelper.build();
-            } else {
-                roleSet = new HashSet<>();
-            }
-
-            final SpellCheckResponse spellCheckResponse =
-                    suggestService.getSpellCheckResponse(indexForm.query, spellCheckFieldName, labelList, new ArrayList<String>(roleSet),
-                            num);
-
-            if (!spellCheckResponse.isEmpty()) {
-                spellCheckResultList.add(spellCheckResponse);
-            }
-
-            WebApiUtil.setObject("spellCheckRecordCount", 1);
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
         }

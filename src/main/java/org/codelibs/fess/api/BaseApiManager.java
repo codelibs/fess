@@ -25,12 +25,10 @@ public class BaseApiManager {
 
     protected static final String SUGGEST_API = "/suggestApi";
 
-    protected static final String SPELLCHECK_API = "/spellCheckApi";
-
     protected static final String SEARCH_API = "/searchApi";
 
     protected static enum FormatType {
-        SEARCH, LABEL, SUGGEST, SPELLCHECK, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
+        SEARCH, LABEL, SUGGEST, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
     public BaseApiManager() {
@@ -48,8 +46,6 @@ public class BaseApiManager {
             return FormatType.LABEL;
         } else if (FormatType.SUGGEST.name().equals(type)) {
             return FormatType.SUGGEST;
-        } else if (FormatType.SPELLCHECK.name().equals(type)) {
-            return FormatType.SPELLCHECK;
         } else if (FormatType.HOTSEARCHWORD.name().equals(type)) {
             return FormatType.HOTSEARCHWORD;
         } else if (FormatType.FAVORITE.name().equals(type)) {

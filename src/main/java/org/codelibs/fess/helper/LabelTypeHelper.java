@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.db.exentity.LabelType;
 import org.codelibs.fess.service.LabelTypeService;

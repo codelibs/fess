@@ -2,9 +2,8 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<include path="solrlib.dicon"/>
 
-	<component name="crawlerProperties" class="org.codelibs.core.util.DynamicProperties">
+	<component name="crawlerProperties" class="org.codelibs.core.misc.DynamicProperties">
 		<arg>
 			@org.seasar.framework.util.ResourceUtil@getBuildDir(@org.codelibs.fess.FessClass@class).getCanonicalPath()
 			+ "/conf/crawler.properties"

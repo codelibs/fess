@@ -28,13 +28,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jp.sf.fess.suggest.entity.SpellCheckResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse.SuggestResponseList;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.WebApiException;
 import org.codelibs.fess.api.BaseApiManager;
@@ -83,9 +79,6 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             break;
         case SUGGEST:
             processSuggestRequest(request, response, chain);
-            break;
-        case SPELLCHECK:
-            processSpellCheckRequest(request, response, chain);
             break;
         case HOTSEARCHWORD:
             processHotSearchWordRequest(request, response, chain);
@@ -350,154 +343,78 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
-            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
-            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
-
-            buf.append("\"recordCount\":");
-            buf.append(suggestRecordCount);
-
-            if (suggestResultList.size() > 0) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (int i = 0; i < suggestResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = suggestResultList.get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
-                        final String fn = suggestFieldName.get(i);
-                        if (!first1) {
-                            buf.append(',');
-                        } else {
-                            first1 = false;
-                        }
-
-                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
-
-                        buf.append("{\"token\":");
-                        buf.append(escapeJson(entry.getKey()));
-                        buf.append(", \"fn\":");
-                        buf.append(escapeJson(fn));
-                        buf.append(", \"startOffset\":");
-                        buf.append(Integer.toString(srList.getStartOffset()));
-                        buf.append(", \"endOffset\":");
-                        buf.append(Integer.toString(srList.getEndOffset()));
-                        buf.append(", \"numFound\":");
-                        buf.append(Integer.toString(srList.getNumFound()));
-                        buf.append(", ");
-                        buf.append("\"result\":[");
-                        boolean first2 = true;
-                        for (final String value : srList) {
-                            if (!first2) {
-                                buf.append(',');
-                            } else {
-                                first2 = false;
-                            }
-                            buf.append(escapeJson(value));
-                        }
-                        buf.append("]}");
-                    }
-
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a suggest request.", e);
-            }
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
-
-    }
-
-    protected void processSpellCheckRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final Integer spellCheckRecordCount = WebApiUtil.getObject("spellCheckRecordCount");
-            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil.getObject("spellCheckResultList");
-            final List<String> spellCheckFieldName = WebApiUtil.getObject("spellCheckFieldName");
-
-            buf.append("\"recordCount\":");
-            buf.append(spellCheckRecordCount);
-
-            if (spellCheckResultList.size() > 0) {
-                buf.append(',');
-                buf.append("\"result\":[");
-                boolean first1 = true;
-                for (int i = 0; i < spellCheckResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = spellCheckResultList.get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
-                        final String fn = spellCheckFieldName.get(i);
-                        if (!first1) {
-                            buf.append(',');
-                        } else {
-                            first1 = false;
-                        }
-
-                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
-
-                        buf.append("{\"token\":");
-                        buf.append(escapeJson(entry.getKey()));
-                        buf.append(", \"fn\":");
-                        buf.append(escapeJson(fn));
-                        buf.append(", \"startOffset\":");
-                        buf.append(Integer.toString(srList.getStartOffset()));
-                        buf.append(", \"endOffset\":");
-                        buf.append(Integer.toString(srList.getEndOffset()));
-                        buf.append(", \"numFound\":");
-                        buf.append(Integer.toString(srList.getNumFound()));
-                        buf.append(", ");
-                        buf.append("\"result\":[");
-                        boolean first2 = true;
-                        for (final String value : srList) {
-                            if (!first2) {
-                                buf.append(',');
-                            } else {
-                                first2 = false;
-                            }
-                            buf.append(escapeJson(value));
-                        }
-                        buf.append("]}");
-                    }
-
-                }
-                buf.append(']');
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a spellcheck request.", e);
-            }
-        }
-
-        writeJsonResponse(status, buf.toString(), errMsg);
+        // TODO
+        //        int status = 0;
+        //        String errMsg = StringUtil.EMPTY;
+        //        final StringBuilder buf = new StringBuilder(255);
+        //        try {
+        //            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
+        //            WebApiUtil.validate();
+        //            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
+        //            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
+        //            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
+        //
+        //            buf.append("\"recordCount\":");
+        //            buf.append(suggestRecordCount);
+        //
+        //            if (suggestResultList.size() > 0) {
+        //                buf.append(',');
+        //                buf.append("\"result\":[");
+        //                boolean first1 = true;
+        //                for (int i = 0; i < suggestResultList.size(); i++) {
+        //
+        //                    final SuggestResponse suggestResponse = suggestResultList.get(i);
+        //
+        //                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
+        //                        final String fn = suggestFieldName.get(i);
+        //                        if (!first1) {
+        //                            buf.append(',');
+        //                        } else {
+        //                            first1 = false;
+        //                        }
+        //
+        //                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
+        //
+        //                        buf.append("{\"token\":");
+        //                        buf.append(escapeJson(entry.getKey()));
+        //                        buf.append(", \"fn\":");
+        //                        buf.append(escapeJson(fn));
+        //                        buf.append(", \"startOffset\":");
+        //                        buf.append(Integer.toString(srList.getStartOffset()));
+        //                        buf.append(", \"endOffset\":");
+        //                        buf.append(Integer.toString(srList.getEndOffset()));
+        //                        buf.append(", \"numFound\":");
+        //                        buf.append(Integer.toString(srList.getNumFound()));
+        //                        buf.append(", ");
+        //                        buf.append("\"result\":[");
+        //                        boolean first2 = true;
+        //                        for (final String value : srList) {
+        //                            if (!first2) {
+        //                                buf.append(',');
+        //                            } else {
+        //                                first2 = false;
+        //                            }
+        //                            buf.append(escapeJson(value));
+        //                        }
+        //                        buf.append("]}");
+        //                    }
+        //
+        //                }
+        //                buf.append(']');
+        //            }
+        //        } catch (final Exception e) {
+        //            if (e instanceof WebApiException) {
+        //                status = ((WebApiException) e).getStatusCode();
+        //            } else {
+        //                status = 1;
+        //            }
+        //            errMsg = e.getMessage();
+        //            if (logger.isDebugEnabled()) {
+        //                logger.debug("Failed to process a suggest request.", e);
+        //            }
+        //        }
+        //
+        //        writeJsonResponse(status, buf.toString(), errMsg);
 
     }
 

@@ -19,7 +19,7 @@ package org.codelibs.fess.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.db.exentity.CrawlingConfig.ConfigName;
 

@@ -19,7 +19,7 @@ package org.codelibs.fess.db.exentity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.db.bsentity.BsLabelType;
 
 /**

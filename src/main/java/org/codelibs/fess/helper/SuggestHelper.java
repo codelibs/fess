@@ -16,10 +16,7 @@
 
 package org.codelibs.fess.helper;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,22 +24,15 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.suggest.SuggestConstants;
-import jp.sf.fess.suggest.service.SuggestService;
-
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.db.exbhv.SuggestBadWordBhv;
 import org.codelibs.fess.db.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.db.exentity.SuggestBadWord;
-import org.codelibs.fess.db.exentity.SuggestElevateWord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
     private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
-
-    @Resource
-    protected SuggestService suggestService;
 
     @Resource
     protected SuggestElevateWordBhv suggestElevateWordBhv;
@@ -86,21 +76,22 @@ public class SuggestHelper {
     }
 
     public void storeAllElevateWords() {
-        suggestService.deleteAllElevateWords();
-
-        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
-        });
-        for (final SuggestElevateWord suggestElevateWord : list) {
-            final String word = suggestElevateWord.getSuggestWord();
-            final String reading = suggestElevateWord.getReading();
-            final String labelStr = suggestElevateWord.getTargetLabel();
-            final String roleStr = suggestElevateWord.getTargetRole();
-            final long boost = suggestElevateWord.getBoost().longValue();
-
-            addElevateWord(word, reading, labelStr, roleStr, boost, false);
-        }
-        suggestService.commit();
+        // TODO
+        //        suggestService.deleteAllElevateWords();
+        //
+        //        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
+        //            cb.query().setDeletedBy_IsNull();
+        //        });
+        //        for (final SuggestElevateWord suggestElevateWord : list) {
+        //            final String word = suggestElevateWord.getSuggestWord();
+        //            final String reading = suggestElevateWord.getReading();
+        //            final String labelStr = suggestElevateWord.getTargetLabel();
+        //            final String roleStr = suggestElevateWord.getTargetRole();
+        //            final long boost = suggestElevateWord.getBoost().longValue();
+        //
+        //            addElevateWord(word, reading, labelStr, roleStr, boost, false);
+        //        }
+        //        suggestService.commit();
     }
 
     public void addElevateWord(final String word, final String reading, final String labels, final String roles, final long boost) {
@@ -131,11 +122,12 @@ public class SuggestHelper {
             }
         }
 
-        suggestService.addElevateWord(word, reading, labelList, roleList, boost);
-
-        if (commit) {
-            suggestService.commit();
-        }
+        // TODO
+        //        suggestService.addElevateWord(word, reading, labelList, roleList, boost);
+        //
+        //        if (commit) {
+        //            suggestService.commit();
+        //        }
     }
 
     public void deleteAllBadWord() {
@@ -147,9 +139,10 @@ public class SuggestHelper {
             final String word = suggestBadWord.getSuggestWord();
             badWords.add(word);
         }
-        suggestService.updateBadWords(badWords);
-        suggestService.deleteBadWords();
-        suggestService.commit();
+        // TODO
+        //        suggestService.updateBadWords(badWords);
+        //        suggestService.deleteBadWords();
+        //        suggestService.commit();
     }
 
     public void updateSolrBadwordFile() {
@@ -163,28 +156,29 @@ public class SuggestHelper {
             return;
         }
 
-        final File file = new File(dir, SuggestConstants.BADWORD_FILENAME);
-        BufferedWriter bw = null;
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            bw = new BufferedWriter(new FileWriter(file, false));
-            for (final SuggestBadWord suggestBadWord : list) {
-                bw.write(suggestBadWord.getSuggestWord());
-                bw.newLine();
-            }
-            bw.close();
-        } catch (final IOException e) {
-            logger.warn("Failed to update badword file.", e);
-        } finally {
-            if (bw != null) {
-                try {
-                    bw.close();
-                } catch (final Exception e2) {
-                    //ignore
-                }
-            }
-        }
+        // TODO
+        //        final File file = new File(dir, SuggestConstants.BADWORD_FILENAME);
+        //        BufferedWriter bw = null;
+        //        try {
+        //            if (!file.exists()) {
+        //                file.createNewFile();
+        //            }
+        //            bw = new BufferedWriter(new FileWriter(file, false));
+        //            for (final SuggestBadWord suggestBadWord : list) {
+        //                bw.write(suggestBadWord.getSuggestWord());
+        //                bw.newLine();
+        //            }
+        //            bw.close();
+        //        } catch (final IOException e) {
+        //            logger.warn("Failed to update badword file.", e);
+        //        } finally {
+        //            if (bw != null) {
+        //                try {
+        //                    bw.close();
+        //                } catch (final Exception e2) {
+        //                    //ignore
+        //                }
+        //            }
+        //        }
     }
 }

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
 import org.codelibs.fess.db.exbhv.pmbean.HotSearchWordPmb;
 import org.codelibs.fess.util.ComponentUtil;

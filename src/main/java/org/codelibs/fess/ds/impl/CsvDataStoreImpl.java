@@ -28,11 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
-
 import org.apache.commons.io.IOUtils;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStoreCrawlingException;
@@ -44,6 +41,9 @@ import org.codelibs.robot.RobotMultipleCrawlAccessException;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jp.sf.orangesignal.csv.CsvConfig;
+import jp.sf.orangesignal.csv.CsvReader;
 
 public class CsvDataStoreImpl extends AbstractDataStoreImpl {
     private static final Logger logger = LoggerFactory.getLogger(CsvDataStoreImpl.class);

@@ -17,7 +17,7 @@
 package org.codelibs.fess.util;
 
 import org.codelibs.core.crypto.CachedCipher;
-import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.ds.DataStoreFactory;

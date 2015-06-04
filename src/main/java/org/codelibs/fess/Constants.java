@@ -19,7 +19,7 @@ package org.codelibs.fess;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 
 public class Constants extends CoreLibConstants {
     public static final int MAJOR_VERSION = 10;
@@ -116,8 +116,6 @@ public class Constants extends CoreLibConstants {
     public static final String WEB_API_JSON_PROPERTY = "web.api.json";
 
     public static final String WEB_API_SUGGEST_PROPERTY = "web.api.suggest";
-
-    public static final String WEB_API_SPELLCHECK_PROPERTY = "web.api.spellcheck";
 
     public static final String WEB_API_ANALYSIS_PROPERTY = "web.api.analysis";
 

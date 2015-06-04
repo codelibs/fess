@@ -30,7 +30,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.HotSearchWordHelper;
@@ -45,8 +45,6 @@ public class FessFunctions {
     private static final String GEO_PREFIX = "geo.";
 
     private static final String FACET_PREFIX = "facet.";
-
-    private static final String MLT_PREFIX = "mlt.";
 
     protected FessFunctions() {
         // nothing

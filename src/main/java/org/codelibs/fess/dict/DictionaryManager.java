@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.seasar.extension.timer.TimeoutManager;
 import org.seasar.extension.timer.TimeoutTarget;
 import org.seasar.extension.timer.TimeoutTask;

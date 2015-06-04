@@ -52,7 +52,7 @@
 				</div>
 				<s:form styleClass="form-stacked" action="search" method="get"
 					styleId="searchForm">
-					${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
+					${fe:facetForm()}${fe:geoForm()}
 					<fieldset>
 						<div class="clearfix">
 							<div class="input">
@@ -65,7 +65,7 @@
 								<p class="hotSearchWordBody ellipsis">
 									<bean:message key="labels.search_hot_search_word" />
 									<c:forEach var="item" items="${fe:hsw(null, 5)}">
-										<html:link href="search?query=${f:u(item)}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">${f:h(item)}</html:link>
+										<html:link href="search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</html:link>
 									</c:forEach>
 								</p>
 							</div>

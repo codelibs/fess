@@ -16,7 +16,7 @@
 
 package org.codelibs.fess.helper.impl;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.DatabaseHelper;
 import org.codelibs.fess.util.ResourceUtil;
 import org.h2.tools.DeleteDbFiles;

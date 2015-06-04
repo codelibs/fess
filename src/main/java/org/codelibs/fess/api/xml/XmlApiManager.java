@@ -27,15 +27,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jp.sf.fess.suggest.entity.SpellCheckResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse.SuggestResponseList;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.WebApiException;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
@@ -80,9 +75,6 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             break;
         case SUGGEST:
             processSuggestRequest(request, response, chain);
-            break;
-        case SPELLCHECK:
-            processSpellCheckRequest(request, response, chain);
             break;
         case PING:
             processPingRequest(request, response, chain);
@@ -296,141 +288,72 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
-            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
-            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
-
-            buf.append("<record-count>");
-            buf.append(suggestRecordCount);
-            buf.append("</record-count>");
-            if (suggestResultList.size() > 0) {
-                buf.append("<result>");
-
-                for (int i = 0; i < suggestResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = suggestResultList.get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
-                        final String fn = suggestFieldName.get(i);
-                        buf.append("<suggest>");
-                        buf.append("<token>");
-                        buf.append(escapeXml(entry.getKey()));
-                        buf.append("</token>");
-                        buf.append("<fn>");
-                        buf.append(escapeXml(fn));
-                        buf.append("</fn>");
-                        buf.append("<start-offset>");
-                        buf.append(escapeXml(Integer.toString(srList.getStartOffset())));
-                        buf.append("</start-offset>");
-                        buf.append("<end-offset>");
-                        buf.append(escapeXml(Integer.toString(srList.getEndOffset())));
-                        buf.append("</end-offset>");
-                        buf.append("<num-found>");
-                        buf.append(escapeXml(Integer.toString(srList.getNumFound())));
-                        buf.append("</num-found>");
-                        buf.append("<result>");
-                        for (final String value : srList) {
-                            buf.append("<value>");
-                            buf.append(escapeXml(value));
-                            buf.append("</value>");
-                        }
-                        buf.append("</result>");
-                        buf.append("</suggest>");
-
-                    }
-                }
-                buf.append("</result>");
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a suggest request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-    }
-
-    protected void processSpellCheckRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final Integer spellCheckRecordCount = WebApiUtil.getObject("spellCheckRecordCount");
-            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil.getObject("spellCheckResultList");
-            final List<String> spellCheckFieldName = WebApiUtil.getObject("spellCheckFieldName");
-
-            buf.append("<record-count>");
-            buf.append(spellCheckRecordCount);
-            buf.append("</record-count>");
-            if (spellCheckResultList.size() > 0) {
-                buf.append("<result>");
-
-                for (int i = 0; i < spellCheckResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = spellCheckResultList.get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
-                        final String fn = spellCheckFieldName.get(i);
-                        buf.append("<suggest>");
-                        buf.append("<token>");
-                        buf.append(escapeXml(entry.getKey()));
-                        buf.append("</token>");
-                        buf.append("<fn>");
-                        buf.append(escapeXml(fn));
-                        buf.append("</fn>");
-                        buf.append("<start-offset>");
-                        buf.append(escapeXml(Integer.toString(srList.getStartOffset())));
-                        buf.append("</start-offset>");
-                        buf.append("<end-offset>");
-                        buf.append(escapeXml(Integer.toString(srList.getEndOffset())));
-                        buf.append("</end-offset>");
-                        buf.append("<num-found>");
-                        buf.append(escapeXml(Integer.toString(srList.getNumFound())));
-                        buf.append("</num-found>");
-                        buf.append("<result>");
-                        for (final String value : srList) {
-                            buf.append("<value>");
-                            buf.append(escapeXml(value));
-                            buf.append("</value>");
-                        }
-                        buf.append("</result>");
-                        buf.append("</suggest>");
-
-                    }
-                }
-                buf.append("</result>");
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a spellcheck request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
+        // TODO
+        //        int status = 0;
+        //        String errMsg = StringUtil.EMPTY;
+        //        final StringBuilder buf = new StringBuilder(255);
+        //        try {
+        //            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
+        //            WebApiUtil.validate();
+        //            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
+        //            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
+        //            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
+        //
+        //            buf.append("<record-count>");
+        //            buf.append(suggestRecordCount);
+        //            buf.append("</record-count>");
+        //            if (suggestResultList.size() > 0) {
+        //                buf.append("<result>");
+        //
+        //                for (int i = 0; i < suggestResultList.size(); i++) {
+        //
+        //                    final SuggestResponse suggestResponse = suggestResultList.get(i);
+        //
+        //                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
+        //                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
+        //                        final String fn = suggestFieldName.get(i);
+        //                        buf.append("<suggest>");
+        //                        buf.append("<token>");
+        //                        buf.append(escapeXml(entry.getKey()));
+        //                        buf.append("</token>");
+        //                        buf.append("<fn>");
+        //                        buf.append(escapeXml(fn));
+        //                        buf.append("</fn>");
+        //                        buf.append("<start-offset>");
+        //                        buf.append(escapeXml(Integer.toString(srList.getStartOffset())));
+        //                        buf.append("</start-offset>");
+        //                        buf.append("<end-offset>");
+        //                        buf.append(escapeXml(Integer.toString(srList.getEndOffset())));
+        //                        buf.append("</end-offset>");
+        //                        buf.append("<num-found>");
+        //                        buf.append(escapeXml(Integer.toString(srList.getNumFound())));
+        //                        buf.append("</num-found>");
+        //                        buf.append("<result>");
+        //                        for (final String value : srList) {
+        //                            buf.append("<value>");
+        //                            buf.append(escapeXml(value));
+        //                            buf.append("</value>");
+        //                        }
+        //                        buf.append("</result>");
+        //                        buf.append("</suggest>");
+        //
+        //                    }
+        //                }
+        //                buf.append("</result>");
+        //            }
+        //        } catch (final Exception e) {
+        //            if (e instanceof WebApiException) {
+        //                status = ((WebApiException) e).getStatusCode();
+        //            } else {
+        //                status = 1;
+        //            }
+        //            errMsg = e.getMessage();
+        //            if (logger.isDebugEnabled()) {
+        //                logger.debug("Failed to process a suggest request.", e);
+        //            }
+        //        }
+        //
+        //        writeXmlResponse(status, buf.toString(), errMsg);
     }
 
     protected void writeXmlResponse(final int status, final String body, final String errMsg) {

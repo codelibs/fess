@@ -17,25 +17,25 @@
 package org.codelibs.fess.helper;
 
 public class FieldHelper {
-    public String favoriteCountField = "favoriteCount_l_x_dv";
+    public String favoriteCountField = "favorite_count";
 
-    public String clickCountField = "clickCount_l_x_dv";
+    public String clickCountField = "click_count";
 
-    public String configIdField = "cid_s";
+    public String configIdField = "config_id";
 
-    public String expiresField = "expires_dt";
+    public String expiresField = "expires";
 
     public String urlField = "url";
 
-    public String docIdField = "docId";
+    public String docIdField = "doc_id";
 
     public String idField = "id";
 
-    public String langField = "lang_s";
+    public String langField = "lang";
 
-    public String hasCacheField = "hasCache_s_s";
+    public String hasCacheField = "has_cache";
 
-    public String lastModifiedField = "lastModified";
+    public String lastModifiedField = "last_modified";
 
     public String anchorField = "anchor";
 
@@ -51,7 +51,7 @@ public class FieldHelper {
 
     public String mimetypeField = "mimetype";
 
-    public String parentIdField = "parentId";
+    public String parentIdField = "parent_id";
 
     public String contentField = "content";
 
@@ -65,8 +65,8 @@ public class FieldHelper {
 
     public String siteField = "site";
 
-    public String contentLengthField = "contentLength";
+    public String contentLengthField = "content_length";
 
-    public String filetypeField = "filetype_s";
+    public String filetypeField = "filetype";
 
 }

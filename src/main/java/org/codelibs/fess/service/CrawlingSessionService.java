@@ -30,14 +30,10 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
-import jp.sf.orangesignal.csv.CsvWriter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
@@ -52,6 +48,10 @@ import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
+
+import jp.sf.orangesignal.csv.CsvConfig;
+import jp.sf.orangesignal.csv.CsvReader;
+import jp.sf.orangesignal.csv.CsvWriter;
 
 public class CrawlingSessionService implements Serializable {
 

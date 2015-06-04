@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <s:form action="search" method="get" styleId="searchForm" styleClass="searchResultForm">
-${fe:facetForm()}${fe:mltForm()}${fe:geoForm()}
+${fe:facetForm()}${fe:geoForm()}
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container">

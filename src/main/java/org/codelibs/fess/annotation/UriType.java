@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.seasar.struts.annotation.Arg;
 import org.seasar.struts.annotation.Msg;
 import org.seasar.struts.annotation.Validator;

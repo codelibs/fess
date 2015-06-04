@@ -16,7 +16,7 @@
 
 package org.codelibs.fess.job;
 
-import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.fess.service.JobLogService;

@@ -28,15 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jcifs.smb.ACE;
-import jcifs.smb.SID;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
-import org.codelibs.core.util.DynamicProperties;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.db.exentity.CrawlingConfig;
 import org.codelibs.fess.db.exentity.CrawlingConfig.ConfigName;
@@ -66,6 +63,9 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jcifs.smb.ACE;
+import jcifs.smb.SID;
 
 public abstract class AbstractFessFileTransformer extends AbstractFessXpathTransformer {
     private static final Logger logger = LoggerFactory // NOPMD

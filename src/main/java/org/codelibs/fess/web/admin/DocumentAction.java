@@ -24,11 +24,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.suggest.SuggestConstants;
-import jp.sf.fess.suggest.server.SuggestSolrServer;
-import jp.sf.fess.suggest.service.SuggestService;
-
-import org.codelibs.core.util.StringUtil;
 import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.FieldHelper;
@@ -80,9 +75,6 @@ public class DocumentAction implements Serializable {
 
     @Resource
     protected JobHelper jobHelper;
-
-    @Resource
-    protected SuggestService suggestService;
 
     public Map<String, Long> suggestDocumentNums;
 
@@ -205,15 +197,17 @@ public class DocumentAction implements Serializable {
 
     protected Map<String, Long> getSuggestDocumentNum() {
         final Map<String, Long> map = new HashMap<String, Long>();
-        map.put(SUGGEST_TYPE_CONTENT, suggestService.getContentDocumentNum());
-        map.put(SUGGEST_TYPE_SEARCH_LOG, suggestService.getSearchLogDocumentNum());
-        map.put(SUGGEST_TYPE_ALL, suggestService.getDocumentNum());
+        //        map.put(SUGGEST_TYPE_CONTENT, suggestService.getContentDocumentNum());
+        //        map.put(SUGGEST_TYPE_SEARCH_LOG, suggestService.getSearchLogDocumentNum());
+        //        map.put(SUGGEST_TYPE_ALL, suggestService.getDocumentNum());
         return map;
     }
 
     @Token(save = false, validate = true)
     @Execute(validator = true, input = "index")
     public String deleteSuggest() {
+        // TODO
+        /*
         final SuggestSolrServer suggestSolrServer = suggestService.getSuggestSolrServer();
         final String query;
         if (SUGGEST_TYPE_CONTENT.equals(documentForm.deleteSuggestType)) {
@@ -227,8 +221,6 @@ public class DocumentAction implements Serializable {
         }
 
         if (StringUtil.isNotBlank(query)) {
-            // TODO
-            /*
             final Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -252,8 +244,8 @@ public class DocumentAction implements Serializable {
             });
             thread.start();
             SAStrutsUtil.addSessionMessage("success.delete_solr_index");
-            */
         }
+             */
         return showIndex(true);
     }
 

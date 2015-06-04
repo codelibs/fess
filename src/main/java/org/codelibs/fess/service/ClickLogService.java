@@ -27,19 +27,19 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
-import jp.sf.orangesignal.csv.CsvWriter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
 import org.codelibs.fess.db.exentity.ClickLog;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.dbflute.bhv.readable.EntityRowHandler;
+
+import jp.sf.orangesignal.csv.CsvConfig;
+import jp.sf.orangesignal.csv.CsvReader;
+import jp.sf.orangesignal.csv.CsvWriter;
 
 public class ClickLogService implements Serializable {
 

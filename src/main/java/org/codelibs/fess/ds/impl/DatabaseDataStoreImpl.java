@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStoreException;

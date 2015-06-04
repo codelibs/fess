@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
@@ -50,6 +48,8 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.util.SerializeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jp.sf.orangesignal.csv.CsvConfig;
 
 public class FileListDataStoreImpl extends CsvDataStoreImpl {
 

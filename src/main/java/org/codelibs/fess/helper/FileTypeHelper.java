@@ -19,7 +19,7 @@ package org.codelibs.fess.helper;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 
 public class FileTypeHelper {
 

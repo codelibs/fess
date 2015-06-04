@@ -29,8 +29,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.codelibs.core.util.DynamicProperties;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;

@@ -32,15 +32,10 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
-import jp.sf.orangesignal.csv.CsvWriter;
-import net.arnx.jsonic.JSON;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
@@ -60,6 +55,11 @@ import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
 
 import com.ibm.icu.text.SimpleDateFormat;
+
+import jp.sf.orangesignal.csv.CsvConfig;
+import jp.sf.orangesignal.csv.CsvReader;
+import jp.sf.orangesignal.csv.CsvWriter;
+import net.arnx.jsonic.JSON;
 
 public class SearchLogService implements Serializable {
     private static final Log log = LogFactory.getLog(SearchLogService.class);

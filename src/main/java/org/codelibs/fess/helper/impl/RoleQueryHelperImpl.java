@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.crypto.CachedCipher;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;

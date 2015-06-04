@@ -23,14 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
 import org.codelibs.fess.db.exbhv.UserInfoBhv;
 import org.codelibs.fess.db.exentity.ClickLog;
-import org.codelibs.fess.db.exentity.SearchFieldLog;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.codelibs.fess.db.exentity.UserInfo;
 import org.codelibs.fess.helper.DocumentHelper;
@@ -107,20 +106,21 @@ public class SearchLogHelperImpl extends SearchLogHelper {
                 }
                 searchLogList.add(searchLog);
 
-                if (suggestAvailable && searchLog.getHitCount() > 0) {
-                    final List<SearchFieldLog> searchFieldLogList = searchLog.getSearchFieldLogList();
-                    for (final SearchFieldLog searchFieldLog : searchFieldLogList) {
-                        if ("solrQuery".equals(searchFieldLog.getName())) {
-                            suggestService.addSolrParams(searchFieldLog.getValue(), dayForCleanup);
-                            addedSuggest = true;
-                        }
-                    }
-                }
+                // TODO
+                //                if (suggestAvailable && searchLog.getHitCount() > 0) {
+                //                    final List<SearchFieldLog> searchFieldLogList = searchLog.getSearchFieldLogList();
+                //                    for (final SearchFieldLog searchFieldLog : searchFieldLogList) {
+                //                        if ("solrQuery".equals(searchFieldLog.getName())) {
+                //                            suggestService.addSolrParams(searchFieldLog.getValue(), dayForCleanup);
+                //                            addedSuggest = true;
+                //                        }
+                //                    }
+                //                }
             }
         }
-        if (addedSuggest) {
-            suggestService.commit();
-        }
+        //        if (addedSuggest) {
+        //            suggestService.commit();
+        //        }
 
         if (!userInfoMap.isEmpty()) {
             final List<UserInfo> insertList = new ArrayList<UserInfo>(userInfoMap.values());

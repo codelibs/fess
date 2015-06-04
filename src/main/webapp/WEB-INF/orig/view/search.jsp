@@ -93,7 +93,7 @@
 					<p class="hotSearchWordBody ellipsis">
 						<bean:message key="labels.search_hot_search_word" />
 						<c:forEach var="item" items="${fe:hsw(null, 5)}">
-							<html:link href="search?query=${f:u(item)}${fe:facetQuery()}${fe:mltQuery()}${fe:geoQuery()}">${f:h(item)}</html:link>
+							<html:link href="search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</html:link>
 						</c:forEach>
 					</p>
 				</div>

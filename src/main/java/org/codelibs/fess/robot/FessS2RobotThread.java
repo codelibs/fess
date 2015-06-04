@@ -25,11 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jcifs.smb.ACE;
-import jcifs.smb.SID;
-
 import org.apache.commons.io.IOUtils;
-import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.client.SearchClient;
 import org.codelibs.fess.db.exentity.CrawlingConfig;
@@ -50,6 +47,9 @@ import org.codelibs.robot.entity.UrlQueue;
 import org.codelibs.robot.log.LogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jcifs.smb.ACE;
+import jcifs.smb.SID;
 
 public class FessS2RobotThread extends S2RobotThread {
     private static final Logger logger = LoggerFactory.getLogger(FessS2RobotThread.class);
