@@ -236,6 +236,7 @@ public class DataIndexHelper implements Serializable {
                 } catch (final Exception e) {
                     logger.error("Failed to process a data crawling: " + dataCrawlingConfig.getName(), e);
                 } finally {
+                    indexUpdateCallback.commit();
                     deleteOldDocs();
                 }
             }

@@ -26,7 +26,7 @@
 <c:if test="${!empty groupActionItems}">
 			<div>
 				<h3>
-					<bean:message key="labels.solr_title_action" />
+					<bean:message key="labels.es_title_action" />
 				</h3>
 				<table class="bordered-table zebra-striped">
 					<tbody>
@@ -40,11 +40,11 @@
 									<html:submit
 										property="commit" disabled="${solrProcessRunning}"
 										styleClass="btn">
-										<bean:message key="labels.solr_action_commit" />
+										<bean:message key="labels.es_action_commit" />
 									</html:submit>
 									<html:submit property="optimize"
 										disabled="${solrProcessRunning}" styleClass="btn">
-										<bean:message key="labels.solr_action_optimize" />
+										<bean:message key="labels.es_action_optimize" />
 									</html:submit>
 								</td>
 							</tr>
@@ -56,7 +56,7 @@
 
 			<div style="margin-top: 5px;">
 				<h3>
-					<bean:message key="labels.solr_title_delete" />
+					<bean:message key="labels.es_title_delete" />
 				</h3>
 				<table class="bordered-table zebra-striped">
 					<tbody>
@@ -68,18 +68,18 @@
 									<html:select property="sessionId"
 										disabled="${solrProcessRunning}">
 										<html:option value="">
-											<bean:message key="labels.solr_action_none" />
+											<bean:message key="labels.es_action_none" />
 										</html:option>
 										<c:forEach var="sessionIdItem"
 											items="${groupAction.sessionIdItems}">
 											<html:option value="${f:u(sessionIdItem.value)}">${f:h(sessionIdItem.label)}</html:option>
 										</c:forEach>
 										<html:option value="*">
-											<bean:message key="labels.solr_action_all" /> (${f:h(groupAction.totalCount)})</html:option>
+											<bean:message key="labels.es_action_all" /> (${f:h(groupAction.totalCount)})</html:option>
 									</html:select>
 									<html:submit styleClass="btn" property="delete"
 										disabled="${solrProcessRunning}">
-										<bean:message key="labels.solr_action_delete" />
+										<bean:message key="labels.es_action_delete" />
 									</html:submit>
 									<html:hidden property="groupName"
 										value="${f:u(groupAction.groupName)}" />
@@ -87,16 +87,16 @@
 							</tr>
 							<tr>
 								<td style="vertical-align: middle;">
-									<bean:message key="labels.solr_action_url_delete" />
+									<bean:message key="labels.es_action_url_delete" />
 									<html:text property="deleteUrl" style="width:150px;"
 										disabled="${solrProcessRunning}"></html:text> <html:submit
 										property="confirmByUrl" styleClass="btn"
 										disabled="${solrProcessRunning}">
-										<bean:message key="labels.solr_action_confirm_list" />
+										<bean:message key="labels.es_action_confirm_list" />
 									</html:submit>
 									<html:submit property="deleteByUrl"
 										disabled="${solrProcessRunning}" styleClass="btn">
-										<bean:message key="labels.solr_action_delete" />
+										<bean:message key="labels.es_action_delete" />
 									</html:submit>
 								</td>
 							</tr>
@@ -108,14 +108,14 @@
 
 			<div style="margin-top: 5px;">
 				<h3>
-					<bean:message key="labels.solr_document_title" />
+					<bean:message key="labels.es_document_title" />
 				</h3>
 				<table class="bordered-table zebra-striped">
 					<thead>
 						<tr>
-							<th style="width:200px;"><bean:message key="labels.solr_group_name" /></th>
+							<th style="width:200px;"><bean:message key="labels.es_group_name" /></th>
 							<th><bean:message key="labels.session_name" /></th>
-							<th><bean:message key="labels.solr_num_of_docs" /></th>
+							<th><bean:message key="labels.es_num_of_docs" /></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -149,7 +149,7 @@
 					<thead>
 						<tr>
 							<th style="width:200px;"><bean:message key="labels.suggest_type" /></th>
-							<th><bean:message key="labels.solr_num_of_docs" /></th>
+							<th><bean:message key="labels.es_num_of_docs" /></th>
 							<th></th>
 						</tr>
 					</thead>
@@ -169,7 +169,7 @@
 										value="content" />
 									<html:submit styleClass="btn" property="deleteSuggest"
 										disabled="${solrProcessRunning}">
-										<bean:message key="labels.solr_action_delete" />
+										<bean:message key="labels.es_action_delete" />
 									</html:submit>
 								</s:form>
 							</td>
@@ -183,7 +183,7 @@
 										value="searchLog" />
 									<html:submit styleClass="btn" property="deleteSuggest"
 										disabled="${solrProcessRunning}">
-										<bean:message key="labels.solr_action_delete" />
+										<bean:message key="labels.es_action_delete" />
 									</html:submit>
 								</s:form>
 							</td>

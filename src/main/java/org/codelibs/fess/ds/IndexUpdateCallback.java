@@ -32,4 +32,6 @@ public interface IndexUpdateCallback {
 
     long getExecuteTime();
 
+    void commit();
+
 }

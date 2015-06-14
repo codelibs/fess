@@ -237,15 +237,31 @@ public class CrawlJob {
         buf.append("WEB-INF");
         buf.append(File.separator);
         buf.append("classes");
+        // target/classes
+        final String userDir = System.getProperty("user.dir");
+        final File targetClassesDir = new File(userDir, "target" + File.separator + "classes");
+        if (targetClassesDir.isDirectory()) {
+            buf.append(cpSeparator);
+            buf.append(targetClassesDir.getAbsolutePath());
+        }
         // WEB-INF/lib
-        appendJarFile(cpSeparator, servletContext, buf, "/WEB-INF/lib", "WEB-INF" + File.separator + "lib" + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF/lib" + File.separator);
         // WEB-INF/cmd/lib
-        appendJarFile(cpSeparator, servletContext, buf, "/WEB-INF/cmd/lib", "WEB-INF" + File.separator + "cmd" + File.separator + "lib"
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/cmd/lib")), "WEB-INF/cmd" + File.separator + "lib"
                 + File.separator);
+        final File targetLibDir =
+                new File(userDir, "target" + File.separator + "fess" + File.separator + "WEB-INF" + File.separator + "lib");
+        if (targetLibDir.isDirectory()) {
+            appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
+        }
         crawlerCmdList.add(buf.toString());
 
+        String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
+        if (StringUtil.isNotBlank(transportAddresses)) {
+            crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+        }
+
         crawlerCmdList.add("-Dfess.crawler.process=true");
-        crawlerCmdList.add("-Dsolr.solr.home=" + systemHelper.getSolrHome());
         if (logFilePath == null) {
             logFilePath = systemHelper.getLogFilePath();
         }
@@ -297,7 +313,7 @@ public class CrawlJob {
             crawlerCmdList.add(Integer.toString(documentExpires));
         }
 
-        final File baseDir = new File(servletContext.getRealPath("/"));
+        final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
         if (logger.isInfoEnabled()) {
             logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions=" + crawlerCmdList);
@@ -357,9 +373,7 @@ public class CrawlJob {
         logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
     }
 
-    protected void appendJarFile(final String cpSeparator, final ServletContext servletContext, final StringBuilder buf,
-            final String libDirPath, final String basePath) {
-        final File libDir = new File(servletContext.getRealPath(libDirPath));
+    protected void appendJarFile(final String cpSeparator, final StringBuilder buf, final File libDir, final String basePath) {
         final File[] jarFiles = libDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(final File dir, final String name) {

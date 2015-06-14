@@ -26,17 +26,22 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.SearchClient.SearchConditionBuilder;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
+import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.seasar.framework.beans.util.Beans;
@@ -51,10 +56,6 @@ public class SearchListAction implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(SearchListAction.class);
 
     private static final long serialVersionUID = 1L;
-
-    protected static final int DEFAULT_PAGE_SIZE = 20;
-
-    protected static final long DEFAULT_START_COUNT = 0;
 
     @ActionForm
     @Resource
@@ -130,16 +131,16 @@ public class SearchListAction implements Serializable {
 
         // init pager
         if (StringUtil.isBlank(searchListForm.start)) {
-            searchListForm.start = String.valueOf(DEFAULT_START_COUNT);
+            searchListForm.start = String.valueOf(Constants.DEFAULT_START_COUNT);
         } else {
             try {
                 Long.parseLong(searchListForm.start);
             } catch (final NumberFormatException e) {
-                searchListForm.start = String.valueOf(DEFAULT_START_COUNT);
+                searchListForm.start = String.valueOf(Constants.DEFAULT_START_COUNT);
             }
         }
         if (StringUtil.isBlank(searchListForm.num)) {
-            searchListForm.num = String.valueOf(DEFAULT_PAGE_SIZE);
+            searchListForm.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
         } else {
             try {
                 final int num = Integer.parseInt(searchListForm.num);
@@ -148,14 +149,19 @@ public class SearchListAction implements Serializable {
                     searchListForm.num = "100";
                 }
             } catch (final NumberFormatException e) {
-                searchListForm.num = String.valueOf(DEFAULT_PAGE_SIZE);
+                searchListForm.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
             }
         }
 
         final int offset = Integer.parseInt(searchListForm.start);
         final int size = Integer.parseInt(searchListForm.num);
         try {
-            documentItems = searchClient.getDocumentList(query, offset, size, null, null, queryHelper.getResponseFields(), false);
+            documentItems =
+                    searchClient.getDocumentList(
+                            searchRequestBuilder -> {
+                                return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().offset(offset)
+                                        .size(size).responseFields(queryHelper.getResponseFields()).build();
+                            }).get();
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -203,19 +209,19 @@ public class SearchListAction implements Serializable {
     }
 
     protected String doMove(final int move) {
-        int size = DEFAULT_PAGE_SIZE;
+        int size = Constants.DEFAULT_PAGE_SIZE;
         if (StringUtil.isBlank(searchListForm.num)) {
-            searchListForm.num = String.valueOf(DEFAULT_PAGE_SIZE);
+            searchListForm.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
         } else {
             try {
                 size = Integer.parseInt(searchListForm.num);
             } catch (final NumberFormatException e) {
-                searchListForm.num = String.valueOf(DEFAULT_PAGE_SIZE);
+                searchListForm.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
             }
         }
 
         if (StringUtil.isBlank(searchListForm.pn)) {
-            searchListForm.start = String.valueOf(DEFAULT_START_COUNT);
+            searchListForm.start = String.valueOf(Constants.DEFAULT_START_COUNT);
         } else {
             Integer pageNumber = Integer.parseInt(searchListForm.pn);
             if (pageNumber != null && pageNumber > 0) {
@@ -225,7 +231,7 @@ public class SearchListAction implements Serializable {
                 }
                 searchListForm.start = String.valueOf((pageNumber - 1) * size);
             } else {
-                searchListForm.start = String.valueOf(DEFAULT_START_COUNT);
+                searchListForm.start = String.valueOf(Constants.DEFAULT_START_COUNT);
             }
         }
 

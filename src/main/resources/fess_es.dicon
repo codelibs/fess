@@ -3,5 +3,8 @@
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
 	<component name="searchClient" class="org.codelibs.fess.client.SearchClient">
+		<property name="settings">
+			#{"http.cors.enabled" : "true"}
+		</property>
 	</component>
 </components>

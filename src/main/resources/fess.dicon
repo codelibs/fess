@@ -42,24 +42,6 @@
             @System@getProperty("fess.log.file").replaceAll(".out", "_crawler.out")
         </property>
         <property name="crawlerJavaOptions">
-@System@getProperty("java.version").startsWith("1.7") ?
-new String[] {
-"-Djava.awt.headless=true",
-"-server",
-"-Xmx256m",
-"-XX:MaxPermSize=128m",
-"-XX:-UseGCOverheadLimit",
-"-XX:+UseConcMarkSweepGC",
-"-XX:CMSInitiatingOccupancyFraction=75",
-"-XX:+CMSIncrementalMode",
-"-XX:+CMSIncrementalPacing",
-"-XX:CMSIncrementalDutyCycleMin=0",
-"-XX:+UseParNewGC",
-"-XX:+UseStringCache",
-"-XX:+UseTLAB",
-"-XX:+DisableExplicitGC"
-}
-:
 new String[] {
 "-Djava.awt.headless=true",
 "-server",

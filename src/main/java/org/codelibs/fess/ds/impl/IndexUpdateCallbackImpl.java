@@ -120,6 +120,14 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     }
 
+    @Override
+    public void commit() {
+        if (!docList.isEmpty()) {
+            final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
+            indexingHelper.sendDocuments(searchClient, docList);
+        }
+    }
+
     protected void addClickCountField(final Map<String, Object> doc, final String url, final String clickCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final int count = searchLogHelper.getClickCount(url);

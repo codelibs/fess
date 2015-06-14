@@ -56,8 +56,6 @@ public class SystemHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
-
     private final Set<String> adminRoleSet = new HashSet<>();
 
     private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx512m", "-XX:MaxPermSize=128m",
@@ -66,8 +64,6 @@ public class SystemHelper implements Serializable {
             "-XX:+DisableExplicitGC" };
 
     private String logFilePath = System.getProperty("fess.log.file");
-
-    private String solrHome = System.getProperty("solr.solr.home");
 
     private String javaCommandPath = "java";
 
@@ -217,14 +213,6 @@ public class SystemHelper implements Serializable {
 
     public void setCrawlerJavaOptions(final String[] crawlerJavaOptions) {
         this.crawlerJavaOptions = crawlerJavaOptions;
-    }
-
-    public String getSolrHome() {
-        return solrHome;
-    }
-
-    public void setSolrHome(final String solrHome) {
-        this.solrHome = solrHome;
     }
 
     public String getJavaCommandPath() {

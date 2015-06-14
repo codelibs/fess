@@ -253,6 +253,20 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         @Override
+        public void commit() {
+            if (!deleteIdList.isEmpty()) {
+                final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
+                for (final String id : deleteIdList) {
+                    indexingHelper.deleteDocument(indexUpdateCallback.getElasticsearchClient(), id);
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Deleted " + deleteIdList);
+                }
+            }
+            indexUpdateCallback.commit();
+        }
+
+        @Override
         public void setElasticsearchClient(final SearchClient searchClient) {
             indexUpdateCallback.setElasticsearchClient(searchClient);
         }

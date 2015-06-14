@@ -17,10 +17,7 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -35,17 +32,12 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.WebManagementHelper;
 import org.codelibs.fess.service.ScheduledJobService;
 import org.codelibs.sastruts.core.annotation.Token;
-import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.util.RequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SystemAction implements Serializable {
     private static final String STARTING_CRAWL_PROCESS = "startingCrawlProcess";
-
-    private static final Logger logger = LoggerFactory.getLogger(SystemAction.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -57,9 +49,6 @@ public class SystemAction implements Serializable {
     protected SearchClient searchClient;
 
     @Resource
-    protected WebManagementHelper webManagementHelper;
-
-    @Resource
     protected SystemHelper systemHelper;
 
     @Resource
@@ -67,6 +56,10 @@ public class SystemAction implements Serializable {
 
     @Resource
     protected ScheduledJobService scheduledJobService;
+
+    public String clusterName;
+
+    public String clusterStatus;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("system");
@@ -119,57 +112,6 @@ public class SystemAction implements Serializable {
             SAStrutsUtil.addSessionMessage("errors.no_running_crawl_process");
         }
         return showIndex(true);
-    }
-
-    @Token(save = false, validate = true)
-    @Execute(validator = true, input = "index.jsp")
-    public String startSolrInstance() {
-        try {
-            webManagementHelper.start(systemForm.solrInstanceName);
-            SAStrutsUtil.addSessionMessage("success.starting_solr_instance");
-        } catch (final Exception e) {
-            logger.error("Failed to start a solr instance: " + systemForm.solrInstanceName, e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_start_solr_instance");
-        }
-        return showIndex(true);
-    }
-
-    @Token(save = false, validate = true)
-    @Execute(validator = true, input = "index.jsp")
-    public String stopSolrInstance() {
-        try {
-            webManagementHelper.stop(systemForm.solrInstanceName);
-            SAStrutsUtil.addSessionMessage("success.stopping_solr_instance");
-        } catch (final Exception e) {
-            logger.error("Failed to stop a solr instance: " + systemForm.solrInstanceName, e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_stop_solr_instance");
-        }
-        return showIndex(true);
-    }
-
-    @Token(save = false, validate = true)
-    @Execute(validator = true, input = "index.jsp")
-    public String reloadSolrInstance() {
-        try {
-            webManagementHelper.reload(systemForm.solrInstanceName);
-            SAStrutsUtil.addSessionMessage("success.reloading_solr_instance");
-        } catch (final Exception e) {
-            logger.error("Failed to reload a solr instance: " + systemForm.solrInstanceName, e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_reload_solr_instance");
-        }
-        return showIndex(true);
-    }
-
-    public List<Map<String, String>> getSolrInstanceList() {
-        final List<String> solrInstanceNameList = webManagementHelper.getSolrInstanceNameList();
-        final List<Map<String, String>> solrInstanceList = new ArrayList<Map<String, String>>();
-        for (final String solrInstanceName : solrInstanceNameList) {
-            final Map<String, String> map = new HashMap<String, String>();
-            map.put("name", solrInstanceName);
-            map.put("status", webManagementHelper.getStatus(solrInstanceName));
-            solrInstanceList.add(map);
-        }
-        return solrInstanceList;
     }
 
     public boolean isCrawlerRunning() {

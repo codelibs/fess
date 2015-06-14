@@ -303,4 +303,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String FACET_QUERY_PREFIX = "query:";
 
+    public static final String FESS_ES_TRANSPORT_ADDRESSES = "fess.es.transport_addresses";
+
+    public static final int DEFAULT_PAGE_SIZE = 20;
+
+    public static final int DEFAULT_START_COUNT = 0;
+
 }

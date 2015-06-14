@@ -27,24 +27,13 @@
 				<table class="bordered-table zebra-striped">
 					<tbody>
 						<tr>
-							<th><bean:message key="labels.solr_current_select_server" />
+							<th><bean:message key="labels.es_cluster_name" />
 							</th>
-							<td>${f:h(currentServerForSelect)} (<c:if
-									test="${currentServerStatusForSelect=='ACTIVE'}">
-									<bean:message key="labels.solr_active" />
-								</c:if> <c:if test="${currentServerStatusForSelect!='ACTIVE'}">
-									<bean:message key="labels.solr_inactive" />
-								</c:if>)
-							</td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.solr_current_update_server" />
-							</th>
-							<td>${f:h(currentServerForUpdate)} (<c:if
-									test="${currentServerStatusForUpdate=='ACTIVE'}">
-									<bean:message key="labels.solr_active" />
-								</c:if> <c:if test="${currentServerStatusForUpdate!='ACTIVE'}">
-									<bean:message key="labels.solr_inactive" />
+							<td>${f:h(clusterName)} (<c:if
+									test="${clusterStatus=='ACTIVE'}">
+									<bean:message key="labels.es_active" />
+								</c:if> <c:if test="${clusterStatus!='ACTIVE'}">
+									<bean:message key="labels.es_inactive" />
 								</c:if>)
 							</td>
 						</tr>
@@ -96,113 +85,6 @@
 					</table>
 				</div>
 			</s:form>
-
-			<s:form>
-				<div style="margin-top: 5px;">
-					<h3>
-						<bean:message key="labels.solr_title_edit" />
-					</h3>
-					<table class="bordered-table zebra-striped">
-						<thead>
-							<tr>
-								<th><bean:message key="labels.system_group_server_name" /></th>
-								<th><bean:message key="labels.system_server_status" /></th>
-								<th><bean:message key="labels.system_index_status" /></th>
-							</tr>
-						</thead>
-						<tbody>
-							<c:forEach var="serverStatus" items="${serverStatusList}">
-								<tr>
-									<td style="width: 200px;">
-									${f:h(serverStatus.groupName)}
-									:
-									${f:h(serverStatus.serverName)}
-									</td>
-									<td>
-									<html:select name="serverStatusList"
-											property="${serverStatus.groupName}/${serverStatus.serverName}/status"
-											value="${serverStatus.status}" indexed="true" style="width:100px">
-											<html:option value="active">
-												<bean:message key="labels.solr_active" />
-											</html:option>
-											<html:option value="inactive">
-												<bean:message key="labels.solr_inactive" />
-											</html:option>
-									</html:select>
-									</td>
-									<td>
-									<html:select name="serverStatusList"
-											property="${serverStatus.groupName}/${serverStatus.serverName}/index"
-											value="${serverStatus.index}" indexed="true" style="width:100px">
-											<html:option value="ready">
-												<bean:message key="labels.solr_ready" />
-											</html:option>
-											<html:option value="completed">
-												<bean:message key="labels.solr_completed" />
-											</html:option>
-											<html:option value="unfinished">
-												<bean:message key="labels.solr_unfinished" />
-											</html:option>
-									</html:select>
-									</td>
-								</tr>
-							</c:forEach>
-						</tbody>
-						<tfoot>
-							<tr>
-								<td colspan="3"><input type="submit" class="btn"
-									name="update"
-									value="<bean:message key="labels.solr_button_update"/>" /></td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
-			</s:form>
-
-
-			<div style="margin-top: 5px;">
-				<h3>
-					<bean:message key="labels.solr_management_title" />
-				</h3>
-				<table class="bordered-table zebra-striped">
-					<tbody>
-						<tr>
-							<th style="width: 200px;"><bean:message
-									key="labels.solr_instance_name" /></th>
-							<th style="width: 100px;"><bean:message
-									key="labels.solr_instance_status" /></th>
-							<th><bean:message key="labels.solr_instance_action" /></th>
-						</tr>
-						<c:forEach var="solrInstance" items="${solrInstanceList}">
-							<tr>
-								<td>${f:h(solrInstance.name)}</td>
-								<td style="text-align: center;">
-									${f:h(solrInstance.status)}</td>
-								<td style="text-align: center;"><s:form style="margin-bottom:0;">
-										<input type="hidden" name="solrInstanceName"
-											value="${f:h(solrInstance.name)}" />
-										<c:if test="${solrInstance.status!='running'}">
-											<html:submit styleClass="btn" property="startSolrInstance"
-												disabled="${crawlerRunning}">
-												<bean:message key="labels.solr_instance_start" />
-											</html:submit>
-										</c:if>
-										<c:if test="${solrInstance.status=='running'}">
-											<html:submit property="stopSolrInstance"
-												disabled="${crawlerRunning}" styleClass="btn">
-												<bean:message key="labels.solr_instance_stop" />
-											</html:submit>
-											<html:submit property="reloadSolrInstance"
-												disabled="${crawlerRunning}" styleClass="btn">
-												<bean:message key="labels.solr_instance_reload" />
-											</html:submit>
-										</c:if>
-									</s:form></td>
-							</tr>
-						</c:forEach>
-					</tbody>
-				</table>
-			</div>
 
 		</div>
 		<c:if test="${crawlerRunning}">

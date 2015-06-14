@@ -17,9 +17,6 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import org.seasar.struts.annotation.Required;
 
@@ -27,25 +24,7 @@ public class SystemForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public String currentServerForUpdate;
-
-    public String currentServerForSelect;
-
-    public String currentServerStatusForUpdate;
-
-    public String currentServerStatusForSelect;
-
-    public List<Map<String, String>> serverStatusList = new ArrayList<Map<String, String>>();
-
-    @Required(target = "commit,optimize,delete")
-    public String groupName;
-
     @Required(target = "delete")
     public String sessionId;
 
-    @Required(target = "deleteByUrl,confirmByUrl")
-    public String deleteUrl;
-
-    @Required(target = "startSolrInstance,stopSolrInstance,reloadSolrInstance")
-    public String solrInstanceName;
 }

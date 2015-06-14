@@ -57,6 +57,7 @@ import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.UnsupportedSearchException;
 import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.SearchClient.SearchConditionBuilder;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.db.exentity.ClickLog;
 import org.codelibs.fess.db.exentity.SearchLog;
@@ -895,8 +896,12 @@ public class IndexAction {
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
             documentItems =
-                    searchClient
-                            .getDocumentList(query, pageStart, pageNum, indexForm.facet, indexForm.geo, queryHelper.getResponseFields());
+                    searchClient.getDocumentList(
+                            searchRequestBuilder -> {
+                                return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageNum)
+                                        .facetInfo(indexForm.facet).geoInfo(indexForm.geo).responseFields(queryHelper.getResponseFields())
+                                        .build();
+                            }).get();
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
