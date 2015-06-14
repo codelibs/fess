@@ -272,6 +272,7 @@ public class DataIndexHelper implements Serializable {
                 try {
                     dataStore.store(dataCrawlingConfig, indexUpdateCallback,
                             initParamMap);
+                    indexUpdateCallback.commit();
                 } catch (final Exception e) {
                     logger.error("Failed to process a data crawling: "
                             + dataCrawlingConfig.getName(), e);
