@@ -112,8 +112,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
 
-        super.storeData(dataConfig, new FileListIndexUpdateCallback(callback),
-                paramMap, scriptMap, defaultDataMap);
+        final FileListIndexUpdateCallback flCallback = new FileListIndexUpdateCallback(callback);
+        super.storeData(dataConfig, flCallback, paramMap, scriptMap, defaultDataMap);
+        flCallback.commit();
     }
 
     @Override
