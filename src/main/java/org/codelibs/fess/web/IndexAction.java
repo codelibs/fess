@@ -56,15 +56,14 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.UnsupportedSearchException;
-import org.codelibs.fess.client.SearchClient;
-import org.codelibs.fess.client.SearchClient.SearchConditionBuilder;
+import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.db.exentity.ClickLog;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.codelibs.fess.db.exentity.UserInfo;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
-import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
@@ -132,7 +131,7 @@ public class IndexAction {
     protected IndexForm indexForm;
 
     @Resource
-    protected SearchClient searchClient;
+    protected FessEsClient fessEsClient;
 
     @Resource
     protected FavoriteLogService favoriteLogService;
@@ -335,8 +334,8 @@ public class IndexAction {
     public String cache() {
         Map<String, Object> doc = null;
         try {
-            doc = searchClient.getDocument(queryRequestBuilder -> {
-                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+            doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
+                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
                 queryRequestBuilder.setQuery(termQuery);
                 queryRequestBuilder.addFields(queryHelper.getResponseFields());
                 return true;
@@ -363,8 +362,8 @@ public class IndexAction {
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
-            doc = searchClient.getDocument(queryRequestBuilder -> {
-                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+            doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
+                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
                 queryRequestBuilder.setQuery(termQuery);
                 queryRequestBuilder.addFields(queryHelper.getResponseFields());
                 return true;
@@ -390,7 +389,7 @@ public class IndexAction {
                 final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
                 final ClickLog clickLog = new ClickLog();
                 clickLog.setUrl(url);
-                LocalDateTime now = systemHelper.getCurrentTime();
+                final LocalDateTime now = systemHelper.getCurrentTime();
                 clickLog.setRequestedTime(now);
                 clickLog.setQueryRequestedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(indexForm.rt)),
                         ZoneId.systemDefault()));
@@ -500,8 +499,8 @@ public class IndexAction {
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
-            final Map<String, Object> doc = searchClient.getDocument(queryRequestBuilder -> {
-                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+            final Map<String, Object> doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
+                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
                 queryRequestBuilder.setQuery(termQuery);
                 queryRequestBuilder.addFields(queryHelper.getResponseFields());
                 return true;
@@ -592,19 +591,17 @@ public class IndexAction {
         final List<String> suggestFieldName = Arrays.asList(fieldNames);
         WebApiUtil.setObject("suggestFieldName", suggestFieldName);
 
-        final List<String> labelList;
         if (labels == null) {
-            labelList = new ArrayList<String>();
+            new ArrayList<String>();
         } else {
-            labelList = Arrays.asList(labels);
+            Arrays.asList(labels);
         }
 
         try {
-            final Set<String> roleSet;
             if (roleQueryHelper != null) {
-                roleSet = roleQueryHelper.build();
+                roleQueryHelper.build();
             } else {
-                roleSet = new HashSet<>();
+                new HashSet<>();
             }
 
             // TODO
@@ -663,12 +660,14 @@ public class IndexAction {
         }
 
         try {
-            final Map<String, Object> doc = indexForm.docId == null ? null : searchClient.getDocument(queryRequestBuilder -> {
-                TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
-                queryRequestBuilder.setQuery(termQuery);
-                queryRequestBuilder.addFields(queryHelper.getResponseFields());
-                return true;
-            }).get();
+            final Map<String, Object> doc =
+                    indexForm.docId == null ? null : fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType,
+                            queryRequestBuilder -> {
+                                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, indexForm.docId);
+                                queryRequestBuilder.setQuery(termQuery);
+                                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                                return true;
+                            }).get();
             final String userCode = userInfoHelper.getUserCode();
             final String favoriteUrl = doc == null ? null : (String) doc.get(fieldHelper.urlField);
 
@@ -703,10 +702,11 @@ public class IndexAction {
                 return null;
             }
 
-            final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
+            final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
             final Object count = doc.get(fieldHelper.favoriteCountField);
             if (count instanceof Long) {
-                documentHelper.update(indexForm.docId, fieldHelper.favoriteCountField, ((Long) count).longValue() + 1);
+                fessEsClient.update(fieldHelper.docIndex, fieldHelper.docType, indexForm.docId, fieldHelper.favoriteCountField,
+                        ((Long) count).longValue() + 1);
             } else {
                 WebApiUtil.setError(7, "Failed to update count: " + favoriteUrl);
                 return null;
@@ -737,20 +737,21 @@ public class IndexAction {
             }
 
             final String[] docIds = userInfoHelper.getResultDocIds(indexForm.queryId);
-            final List<Map<String, Object>> docList = searchClient.getDocumentList(queryRequstBuilder -> {
-                if (docIds == null || docIds.length == 0) {
-                    return false;
-                }
+            final List<Map<String, Object>> docList =
+                    fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, queryRequstBuilder -> {
+                        if (docIds == null || docIds.length == 0) {
+                            return false;
+                        }
 
-                queryRequstBuilder.setFrom(0).setSize(getMaxPageSize());
-                queryRequstBuilder.addFields(queryHelper.getResponseFields());
-                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-                for (int i = 0; i < docIds.length && i < getMaxPageSize(); i++) {
-                    boolQuery.should(QueryBuilders.termQuery(fieldHelper.docIdField, docIds[i]));
-                }
-                queryRequstBuilder.setQuery(boolQuery);
-                return true;
-            }).get();
+                        queryRequstBuilder.setFrom(0).setSize(getMaxPageSize());
+                        queryRequstBuilder.addFields(queryHelper.getResponseFields());
+                        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                        for (int i = 0; i < docIds.length && i < getMaxPageSize(); i++) {
+                            boolQuery.should(QueryBuilders.termQuery(fieldHelper.docIdField, docIds[i]));
+                        }
+                        queryRequstBuilder.setQuery(boolQuery);
+                        return true;
+                    });
             List<String> urlList = new ArrayList<String>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final Object urlObj = doc.get(fieldHelper.urlField);
@@ -896,12 +897,12 @@ public class IndexAction {
         final int pageNum = Integer.parseInt(indexForm.num);
         try {
             documentItems =
-                    searchClient.getDocumentList(
+                    fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType,
                             searchRequestBuilder -> {
                                 return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageNum)
                                         .facetInfo(indexForm.facet).geoInfo(indexForm.geo).responseFields(queryHelper.getResponseFields())
                                         .build();
-                            }).get();
+                            });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -1223,13 +1224,13 @@ public class IndexAction {
     }
 
     protected int getMaxPageSize() {
-        Object maxPageSize = crawlerProperties.get(Constants.SEARCH_RESULT_MAX_PAGE_SIZE);
+        final Object maxPageSize = crawlerProperties.get(Constants.SEARCH_RESULT_MAX_PAGE_SIZE);
         if (maxPageSize == null) {
             return MAX_PAGE_SIZE;
         }
         try {
             return Integer.parseInt(maxPageSize.toString());
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return MAX_PAGE_SIZE;
         }
     }

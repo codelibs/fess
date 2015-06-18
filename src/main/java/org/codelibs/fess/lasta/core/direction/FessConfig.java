@@ -37,6 +37,7 @@ public interface FessConfig extends FessEnv {
      * @param propertyKey The key of the property. (NotNull)
      * @return The value of found property. (NullAllowed: if null, not found)
      */
+    @Override
     String get(String propertyKey);
 
     /**
@@ -44,6 +45,7 @@ public interface FessConfig extends FessEnv {
      * @param propertyKey The key of the property which is boolean type. (NotNull)
      * @return The determination, true or false. (if the property can be true, returns true)
      */
+    @Override
     boolean is(String propertyKey);
 
     /**
@@ -106,31 +108,37 @@ public interface FessConfig extends FessEnv {
         private static final long serialVersionUID = 1L;
 
         /** {@inheritDoc} */
+        @Override
         public String getDomainTitle() {
             return get(FessConfig.DOMAIN_TITLE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getCookieDefaultPath() {
             return get(FessConfig.COOKIE_DEFAULT_PATH);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getCookieDefaultExpire() {
             return get(FessConfig.COOKIE_DEFAULT_EXPIRE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public Integer getCookieDefaultExpireAsInteger() {
             return getAsInteger(FessConfig.COOKIE_DEFAULT_EXPIRE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getCookieEternalExpire() {
             return get(FessConfig.COOKIE_ETERNAL_EXPIRE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public Integer getCookieEternalExpireAsInteger() {
             return getAsInteger(FessConfig.COOKIE_ETERNAL_EXPIRE);
         }

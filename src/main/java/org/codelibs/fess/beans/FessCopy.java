@@ -16,21 +16,12 @@
 
 package org.codelibs.fess.beans;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import org.codelibs.fess.Constants;
-import org.codelibs.fess.beans.converter.LocalDateTimeConverter;
-import org.seasar.framework.beans.Converter;
 import org.seasar.framework.beans.util.Copy;
-import org.seasar.framework.util.TimestampConversionUtil;
 
 public class FessCopy extends Copy {
-
-    protected static final Converter DEFAULT_LOCALDATETIME_CONVERTER = new LocalDateTimeConverter(TimestampConversionUtil.getPattern(Locale
-            .getDefault()));
 
     public FessCopy(final Object src, final Object dest) {
         super(src, dest);
@@ -48,25 +39,16 @@ public class FessCopy extends Copy {
         list.add("createdTime");
         list.add("updatedBy");
         list.add("updatedTime");
-        list.add("deletedBy");
-        list.add("deletedTime");
         if (propertyNames.length > 0) {
             for (final CharSequence propertyName : propertyNames) {
                 list.add(propertyName);
             }
         }
-        return super.excludes(list.toArray(new CharSequence[list.size()])).dateConverter(Constants.DEFAULT_DATETIME_FORMAT, "createdTime",
-                "updatedTime", "deletedTime");
+        return super.excludes(list.toArray(new CharSequence[list.size()]));
     }
 
     public Copy commonColumnDateConverter() {
-        return converter(new LocalDateTimeConverter(Constants.DEFAULT_DATETIME_FORMAT), "createdTime", "updatedTime", "deletedTime");
+        return this;
     }
 
-    protected Converter findDefaultConverter(Class<?> clazz) {
-        if (LocalDateTime.class.isAssignableFrom(clazz)) {
-            return DEFAULT_LOCALDATETIME_CONVERTER;
-        }
-        return super.findDefaultConverter(clazz);
-    }
 }

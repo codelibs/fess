@@ -24,12 +24,11 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.db.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.helper.WebManagementHelper;
 import org.codelibs.fess.service.ScheduledJobService;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.seasar.struts.annotation.ActionForm;
@@ -46,7 +45,7 @@ public class SystemAction implements Serializable {
     protected SystemForm systemForm;
 
     @Resource
-    protected SearchClient searchClient;
+    protected FessEsClient fessEsClient;
 
     @Resource
     protected SystemHelper systemHelper;

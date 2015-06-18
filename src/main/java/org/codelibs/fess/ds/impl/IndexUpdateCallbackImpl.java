@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LoggerFactory.getLogger(IndexUpdateCallbackImpl.class);
 
-    protected SearchClient searchClient;
+    protected FessEsClient fessEsClient;
 
     public int maxDocumentCacheSize = 5;
 
@@ -87,12 +87,12 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (docList.size() >= maxDocumentCacheSize) {
-            indexingHelper.sendDocuments(searchClient, docList);
+            indexingHelper.sendDocuments(fessEsClient, docList);
         }
         documentSize.getAndIncrement();
 
         if (!docList.isEmpty()) {
-            indexingHelper.sendDocuments(searchClient, docList);
+            indexingHelper.sendDocuments(fessEsClient, docList);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("The number of an added document is " + documentSize.get() + ".");
@@ -124,7 +124,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     public void commit() {
         if (!docList.isEmpty()) {
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            indexingHelper.sendDocuments(searchClient, docList);
+            indexingHelper.sendDocuments(fessEsClient, docList);
         }
     }
 
@@ -157,13 +157,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     @Override
-    public SearchClient getElasticsearchClient() {
-        return searchClient;
+    public FessEsClient getsClient() {
+        return fessEsClient;
     }
 
     @Override
-    public void setElasticsearchClient(final SearchClient searchClient) {
-        this.searchClient = searchClient;
+    public void setEsClient(final FessEsClient fessEsClient) {
+        this.fessEsClient = fessEsClient;
     }
 
 }

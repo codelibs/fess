@@ -38,16 +38,18 @@ public final class UserDictCSVUtil {
 
     /**
      * Parse CSV line
-     * @param line line containing csv-encoded data
+     * 
+     * @param line
+     *            line containing csv-encoded data
      * @return Array of values
      */
     public static String[] parse(String line) {
         boolean insideQuote = false;
-        ArrayList<String> result = new ArrayList<>();
+        final ArrayList<String> result = new ArrayList<>();
         int quoteCount = 0;
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
+            final char c = line.charAt(i);
 
             if (c == QUOTE) {
                 insideQuote = !insideQuote;
@@ -80,7 +82,7 @@ public final class UserDictCSVUtil {
 
         // Unquote
         if (result.indexOf('\"') >= 0) {
-            Matcher m = QUOTE_REPLACE_PATTERN.matcher(original);
+            final Matcher m = QUOTE_REPLACE_PATTERN.matcher(original);
             if (m.matches()) {
                 result = m.group(1);
             }

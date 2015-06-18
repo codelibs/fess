@@ -28,7 +28,7 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.exentity.CrawlingConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
@@ -67,7 +67,7 @@ public class FessS2RobotThread extends S2RobotThread {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
+            final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
             final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
 
             final String url = urlQueue.getUrl();
@@ -81,7 +81,7 @@ public class FessS2RobotThread extends S2RobotThread {
                     roleTypeList.add(roleType);
                 }
                 if (useAclAsRole && url.startsWith("smb://")) {
-                    //  head method
+                    // head method
                     responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                     if (responseData == null) {
                         return true;
@@ -102,11 +102,11 @@ public class FessS2RobotThread extends S2RobotThread {
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
                 final Map<String, Object> solrDocument =
-                        indexingHelper.getSolrDocument(searchClient, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
+                        indexingHelper.getSolrDocument(fessEsClient, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
                                 fieldHelper.anchorField, fieldHelper.segmentField, fieldHelper.expiresField, fieldHelper.clickCountField,
                                 fieldHelper.favoriteCountField });
                 if (solrDocument == null) {
-                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(searchClient, id));
+                    storeChildUrlsToQueue(urlQueue, getChildUrlSet(fessEsClient, id));
                     return true;
                 }
 
@@ -114,7 +114,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
                     final Object idValue = solrDocument.get(fieldHelper.idField);
                     if (idValue != null) {
-                        indexingHelper.deleteDocument(searchClient, idValue.toString());
+                        indexingHelper.deleteDocument(fessEsClient, idValue.toString());
                     }
                     return true;
                 }
@@ -143,7 +143,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 }
 
                 if (responseData == null) {
-                    //  head method
+                    // head method
                     responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                     if (responseData == null) {
                         return true;
@@ -153,7 +153,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(solrDocument.get(fieldHelper.anchorField)));
-                    indexingHelper.deleteDocument(searchClient, id);
+                    indexingHelper.deleteDocument(fessEsClient, id);
                     return false;
                 } else if (responseData.getLastModified() == null) {
                     return true;
@@ -183,7 +183,7 @@ public class FessS2RobotThread extends S2RobotThread {
     protected void storeChildUrlsToQueue(final UrlQueue urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
             synchronized (robotContext.getAccessCountLock()) {
-                //  add an url
+                // add an url
                 storeChildUrls(childUrlSet, urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
             }
         }
@@ -212,11 +212,11 @@ public class FessS2RobotThread extends S2RobotThread {
         return childUrlSet;
     }
 
-    protected Set<RequestData> getChildUrlSet(final SearchClient searchClient, final String id) {
+    protected Set<RequestData> getChildUrlSet(final FessEsClient fessEsClient, final String id) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final List<Map<String, Object>> docList =
-                indexingHelper.getChildSolrDocumentList(searchClient, id, new String[] { fieldHelper.urlField });
+                indexingHelper.getChildSolrDocumentList(fessEsClient, id, new String[] { fieldHelper.urlField });
         if (docList.isEmpty()) {
             return null;
         }
@@ -232,5 +232,4 @@ public class FessS2RobotThread extends S2RobotThread {
         }
         return urlSet;
     }
-
 }

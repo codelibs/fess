@@ -43,10 +43,8 @@ public class SuggestHelper {
     public String badwordFileDir = "./solr/core1/conf/";
 
     public void init() {
-        final Thread th = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // TODO replace with Elasticsearch
+        final Thread th = new Thread(() -> {
+            // TODO replace with Elasticsearch
                 /*
                 while (true) {
                     final PingResponse response = searchService.ping();
@@ -65,8 +63,7 @@ public class SuggestHelper {
                     }
                 }
                 */
-            }
-        });
+            });
         th.start();
     }
 
@@ -146,7 +143,7 @@ public class SuggestHelper {
     }
 
     public void updateSolrBadwordFile() {
-        final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb -> {
+        suggestBadWordBhv.selectList(cb -> {
             cb.query().setDeletedBy_IsNull();
         });
 

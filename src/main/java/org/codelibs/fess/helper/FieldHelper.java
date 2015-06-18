@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.helper;
 
+// TODO move to properties file
 public class FieldHelper {
     public String favoriteCountField = "favorite_count";
 
@@ -68,5 +69,13 @@ public class FieldHelper {
     public String contentLengthField = "content_length";
 
     public String filetypeField = "filetype";
+
+    public String docIndex = "fess";
+
+    public String docType = "doc";
+
+    public String configIndex = ".fess_config";
+
+    public String boostDocumentRuleType = "boost_document_rule";
 
 }

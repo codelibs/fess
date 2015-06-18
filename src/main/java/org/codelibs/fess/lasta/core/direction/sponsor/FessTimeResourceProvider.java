@@ -46,6 +46,7 @@ public class FessTimeResourceProvider implements TimeResourceProvider {
     // ===================================================================================
     //                                                                      Basic Handling
     //                                                                      ==============
+    @Override
     public BusinessTimeHandler provideBusinessTimeHandler(TimeManager timeManager) {
         return new TypicalBusinessTimeHandler(() -> {
             return timeManager.getCurrentMillis();
@@ -54,6 +55,7 @@ public class FessTimeResourceProvider implements TimeResourceProvider {
         });
     }
 
+    @Override
     public boolean isCurrentIgnoreTransaction() {
         // this project uses transaction time for current date
         return false; // fixedly
@@ -62,17 +64,19 @@ public class FessTimeResourceProvider implements TimeResourceProvider {
     // ===================================================================================
     //                                                                     Time Adjustment
     //                                                                     ===============
+    @Override
     public boolean isAdjustAbsoluteMode() { // *1
         final String exp = maihamaConfig.getTimeAdjustTimeMillis();
         return exp.startsWith("$"); // means absolute e.g. $(2014/07/10)
     }
 
+    @Override
     public long provideAdjustTimeMillis() { // *1
         final String exp = maihamaConfig.getTimeAdjustTimeMillis();
         try {
             return doProvideAdjustTimeMillis(exp);
-        } catch (RuntimeException e) {
-            String msg = "Illegal property for time.adjust.time.millis: " + exp;
+        } catch (final RuntimeException e) {
+            final String msg = "Illegal property for time.adjust.time.millis: " + exp;
             throw new IllegalStateException(msg);
         }
     }

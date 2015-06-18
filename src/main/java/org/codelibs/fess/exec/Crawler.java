@@ -37,7 +37,7 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
@@ -88,7 +88,7 @@ public class Crawler implements Serializable {
     private static final String MAIL_TEMPLATE_NAME = "crawler";
 
     @Resource
-    protected SearchClient searchClient;
+    protected FessEsClient fessEsClient;
 
     @Binding(bindingType = BindingType.MAY)
     @Resource
@@ -388,28 +388,22 @@ public class Crawler implements Serializable {
             Thread dataCrawlerThread = null;
 
             if (runAll || webConfigIdList != null || fileConfigIdList != null) {
-                webFsCrawlerThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // crawl web
+                webFsCrawlerThread = new Thread((Runnable) () -> {
+                    // crawl web
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_START_TIME);
                         webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList);
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_END_TIME);
-                    }
-                }, WEB_FS_CRAWLING_PROCESS);
+                    }, WEB_FS_CRAWLING_PROCESS);
                 webFsCrawlerThread.start();
             }
 
             if (runAll || dataConfigIdList != null) {
-                dataCrawlerThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // crawl data system
+                dataCrawlerThread = new Thread((Runnable) () -> {
+                    // crawl data system
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_START_TIME);
                         dataIndexHelper.crawl(options.sessionId, dataConfigIdList);
                         writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_END_TIME);
-                    }
-                }, DATA_CRAWLING_PROCESS);
+                    }, DATA_CRAWLING_PROCESS);
                 dataCrawlerThread.start();
             }
 
@@ -417,11 +411,11 @@ public class Crawler implements Serializable {
             joinCrawlerThread(dataCrawlerThread);
 
             // clean up
-            QueryBuilder queryBuilder =
+            final QueryBuilder queryBuilder =
                     QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(fieldHelper.expiresField).to(new Date()))
                             .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, options.sessionId));
             try {
-                searchClient.deleteByQuery(queryBuilder);
+                fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, queryBuilder);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Could not delete expired sessions: " + queryBuilder.toString(), e);

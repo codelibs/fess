@@ -33,7 +33,6 @@ import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.exec.Crawler;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.job.JobExecutor.ShutdownListener;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
@@ -193,12 +192,7 @@ public class CrawlJob {
         }
 
         if (jobExecutor != null) {
-            jobExecutor.addShutdownListener(new ShutdownListener() {
-                @Override
-                public void onShutdown() {
-                    ComponentUtil.getJobHelper().destroyCrawlerProcess(sessionId);
-                }
-            });
+            jobExecutor.addShutdownListener(() -> ComponentUtil.getJobHelper().destroyCrawlerProcess(sessionId));
         }
 
         try {
@@ -256,7 +250,7 @@ public class CrawlJob {
         }
         crawlerCmdList.add(buf.toString());
 
-        String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
+        final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
         if (StringUtil.isNotBlank(transportAddresses)) {
             crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
         }
@@ -374,12 +368,7 @@ public class CrawlJob {
     }
 
     protected void appendJarFile(final String cpSeparator, final StringBuilder buf, final File libDir, final String basePath) {
-        final File[] jarFiles = libDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(final File dir, final String name) {
-                return name.toLowerCase().endsWith(".jar");
-            }
-        });
+        final File[] jarFiles = libDir.listFiles((FilenameFilter) (dir, name) -> name.toLowerCase().endsWith(".jar"));
         if (jarFiles != null) {
             for (final File file : jarFiles) {
                 buf.append(cpSeparator);

@@ -144,9 +144,9 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>com.marvinformatics.formatter</groupId>
+        <groupId>net.revelc.code</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
-        <version>1.4.0</version>
+        <version>0.5.2</version>
         <executions>
           <execution>
             <goals>
@@ -154,6 +154,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <configFile>${basedir}/src/config/eclipse/formatter/java.xml</configFile>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>

@@ -77,26 +77,23 @@ public class JobHelper {
 
             final CountDownLatch latch = new CountDownLatch(1);
             final Process process = jobProcess.getProcess();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        IOUtils.closeQuietly(process.getInputStream());
-                    } catch (final Exception e) {
-                        logger.warn("Could not close a process input stream.", e);
-                    }
-                    try {
-                        IOUtils.closeQuietly(process.getErrorStream());
-                    } catch (final Exception e) {
-                        logger.warn("Could not close a process error stream.", e);
-                    }
-                    try {
-                        IOUtils.closeQuietly(process.getOutputStream());
-                    } catch (final Exception e) {
-                        logger.warn("Could not close a process output stream.", e);
-                    }
-                    latch.countDown();
+            new Thread((Runnable) () -> {
+                try {
+                    IOUtils.closeQuietly(process.getInputStream());
+                } catch (final Exception e1) {
+                    logger.warn("Could not close a process input stream.", e1);
                 }
+                try {
+                    IOUtils.closeQuietly(process.getErrorStream());
+                } catch (final Exception e2) {
+                    logger.warn("Could not close a process error stream.", e2);
+                }
+                try {
+                    IOUtils.closeQuietly(process.getOutputStream());
+                } catch (final Exception e3) {
+                    logger.warn("Could not close a process output stream.", e3);
+                }
+                latch.countDown();
             }, "ProcessCloser").start();
 
             try {

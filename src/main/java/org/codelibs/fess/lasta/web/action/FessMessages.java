@@ -671,7 +671,7 @@ public class FessMessages extends ActionMessages {
      */
     protected void assertPropertyNotNull(String property) {
         if (property == null) {
-            String msg = "The argument 'property' for message should not be null.";
+            final String msg = "The argument 'property' for message should not be null.";
             throw new IllegalArgumentException(msg);
         }
     }

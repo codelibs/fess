@@ -26,7 +26,7 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
@@ -58,7 +58,7 @@ public class IndexUpdater extends Thread {
 
     protected List<String> sessionIdList;
 
-    protected SearchClient searchClient;
+    protected FessEsClient fessEsClient;
 
     @Resource
     protected DataService dataService;
@@ -235,7 +235,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     if (!docList.isEmpty()) {
-                        indexingHelper.sendDocuments(searchClient, docList);
+                        indexingHelper.sendDocuments(fessEsClient, docList);
                     }
 
                     synchronized (finishedSessionIdList) {
@@ -360,7 +360,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     if (docList.size() >= maxDocumentCacheSize) {
-                        indexingHelper.sendDocuments(searchClient, docList);
+                        indexingHelper.sendDocuments(fessEsClient, docList);
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
@@ -103,7 +103,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
     protected void storeData(final DataCrawlingConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
 
-        super.storeData(dataConfig, new FileListIndexUpdateCallback(callback), paramMap, scriptMap, defaultDataMap);
+        final FileListIndexUpdateCallback fileListIndexUpdateCallback = new FileListIndexUpdateCallback(callback);
+        super.storeData(dataConfig, fileListIndexUpdateCallback, paramMap, scriptMap, defaultDataMap);
+        fileListIndexUpdateCallback.commit();
     }
 
     @Override
@@ -160,7 +162,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         protected boolean addDocument(final Map<String, Object> dataMap) {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             synchronized (indexUpdateCallback) {
-                //   required check
+                // required check
                 if (!dataMap.containsKey(fieldHelper.urlField) || dataMap.get(fieldHelper.urlField) == null) {
                     logger.warn("Could not add a doc. Invalid data: " + dataMap);
                     return false;
@@ -228,7 +230,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
-            //   required check
+            // required check
             if (!dataMap.containsKey(fieldHelper.urlField) || dataMap.get(fieldHelper.urlField) == null) {
                 logger.warn("Could not delete a doc. Invalid data: " + dataMap);
                 return false;
@@ -240,7 +242,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
                     final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                     for (final String id : deleteIdList) {
-                        indexingHelper.deleteDocument(indexUpdateCallback.getElasticsearchClient(), id);
+                        indexingHelper.deleteDocument(indexUpdateCallback.getsClient(), id);
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("Deleted " + deleteIdList);
@@ -257,7 +259,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             if (!deleteIdList.isEmpty()) {
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                 for (final String id : deleteIdList) {
-                    indexingHelper.deleteDocument(indexUpdateCallback.getElasticsearchClient(), id);
+                    indexingHelper.deleteDocument(indexUpdateCallback.getsClient(), id);
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Deleted " + deleteIdList);
@@ -267,8 +269,8 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         @Override
-        public void setElasticsearchClient(final SearchClient searchClient) {
-            indexUpdateCallback.setElasticsearchClient(searchClient);
+        public void setEsClient(final FessEsClient fessEsClient) {
+            indexUpdateCallback.setEsClient(fessEsClient);
         }
 
         @Override
@@ -282,8 +284,8 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         @Override
-        public SearchClient getElasticsearchClient() {
-            return indexUpdateCallback.getElasticsearchClient();
+        public FessEsClient getsClient() {
+            return indexUpdateCallback.getsClient();
         }
     }
 }

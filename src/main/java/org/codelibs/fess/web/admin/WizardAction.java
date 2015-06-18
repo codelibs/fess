@@ -265,12 +265,7 @@ public class WizardAction implements Serializable {
         if (!jobHelper.isCrawlProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawloerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        new TriggeredJob().execute(scheduledJob);
-                    }
-                }).start();
+                new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();
             }
             SAStrutsUtil.addSessionMessage("success.start_crawl_process");
         } else {

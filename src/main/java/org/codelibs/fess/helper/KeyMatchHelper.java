@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.client.SearchClient;
-import org.codelibs.fess.client.SearchClient.SearchConditionBuilder;
+import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.db.exentity.KeyMatch;
 import org.codelibs.fess.service.KeyMatchService;
 import org.codelibs.fess.util.ComponentUtil;
@@ -44,12 +44,7 @@ public class KeyMatchHelper {
     }
 
     public void update() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                reload(reloadInterval);
-            }
-        }).start();
+        new Thread(() -> reload(reloadInterval)).start();
     }
 
     protected void reload(final long interval) {
@@ -82,14 +77,13 @@ public class KeyMatchHelper {
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
-        final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
+        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final List<Map<String, Object>> documentList =
-                searchClient.getDocumentList(
-                        searchRequestBuilder -> {
-                            return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().size(keyMatch.getMaxSize())
-                                    .responseFields(new String[] { fieldHelper.docIdField }).build();
-                        }).get();
+                fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, searchRequestBuilder -> {
+                    return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().size(keyMatch.getMaxSize())
+                            .responseFields(new String[] { fieldHelper.docIdField }).build();
+                });
         return documentList;
     }
 

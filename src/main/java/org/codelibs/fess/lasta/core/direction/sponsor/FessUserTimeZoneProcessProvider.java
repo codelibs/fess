@@ -31,6 +31,7 @@ public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvi
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isUseTimeZoneHandling() {
         return false;
     }
@@ -38,6 +39,7 @@ public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvi
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isAcceptCookieTimeZone() {
         return false;
     }
@@ -45,6 +47,7 @@ public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvi
     /**
      * {@inheritDoc}
      */
+    @Override
     public TimeZone findBusinessTimeZone(ActionExecuteMeta executeMeta, RequestManager requestManager) {
         return null;
     }
@@ -52,6 +55,7 @@ public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvi
     /**
      * {@inheritDoc}
      */
+    @Override
     public TimeZone getRequestedTimeZone(RequestManager requestManager) {
         return centralTimeZone; // same as fall-back
     }
@@ -59,6 +63,7 @@ public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvi
     /**
      * {@inheritDoc}
      */
+    @Override
     public TimeZone getFallbackTimeZone() {
         return centralTimeZone;
     }

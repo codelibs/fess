@@ -52,11 +52,6 @@ public class ScheduledJob extends BsScheduledJob {
 
     public void start() {
         final ScheduledJob scheduledJob = this;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                new TriggeredJob().execute(scheduledJob);
-            }
-        }).start();
+        new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();
     }
 }

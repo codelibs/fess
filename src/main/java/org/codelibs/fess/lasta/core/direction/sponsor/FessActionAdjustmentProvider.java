@@ -31,30 +31,37 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
 
     private static final int INDEXED_PROPERTY_SIZE_LIMIT = 200; // hard coding for now
 
+    @Override
     public int provideIndexedPropertySizeLimit() {
         return INDEXED_PROPERTY_SIZE_LIMIT;
     }
 
+    @Override
     public String decodeUrlParameterPropertyValue(Object bean, String name, String value) {
         return null;
     }
 
+    @Override
     public String filterJspPath(String path, ActionMappingWrapper actionMappingWrapper) {
         return null;
     }
 
+    @Override
     public List<String> prepareJspRetryWordList(String requestPath, List<String> wordList) {
         return null;
     }
 
+    @Override
     public boolean isForcedRoutingTarget(HttpServletRequest request, String requestPath) {
         return false;
     }
 
+    @Override
     public boolean isForcedSuppressRedirectWithSlash(HttpServletRequest request, String requestPath, S2ExecuteConfig executeConfig) {
         return false;
     }
 
+    @Override
     public String customizeActionMappingRequestPath(String requestPath) {
         return null;
     }

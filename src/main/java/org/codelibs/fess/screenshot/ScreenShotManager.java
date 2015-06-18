@@ -88,17 +88,14 @@ public class ScreenShotManager {
         }
 
         generating = true;
-        screenshotGeneratorThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (generating) {
-                    try {
-                        screenShotTaskQueue.take().generate();
-                    } catch (final InterruptedException e) {
-                        logger.debug("Interupted task.", e);
-                    } catch (final Exception e) {
-                        logger.warn("Failed to generage a screenshot.", e);
-                    }
+        screenshotGeneratorThread = new Thread((Runnable) () -> {
+            while (generating) {
+                try {
+                    screenShotTaskQueue.take().generate();
+                } catch (final InterruptedException e1) {
+                    logger.debug("Interupted task.", e1);
+                } catch (final Exception e2) {
+                    logger.warn("Failed to generage a screenshot.", e2);
                 }
             }
         }, "ScreenShotGenerator");

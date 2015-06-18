@@ -25,9 +25,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.db.bsbhv.BsClickLogBhv;
-import org.codelibs.fess.db.bsbhv.BsFavoriteLogBhv;
-import org.codelibs.fess.db.bsbhv.BsSearchLogBhv;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
@@ -112,7 +109,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectSearchWordRanking;
         final PagingResultBean<SearchWordRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -140,7 +136,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectSearchQueryRanking;
         final PagingResultBean<SearchQueryRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -168,7 +163,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectSolrQueryRanking;
         final PagingResultBean<SolrQueryRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -196,7 +190,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectUserAgentRanking;
         final PagingResultBean<UserAgentRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -224,7 +217,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectRefererRanking;
         final PagingResultBean<RefererRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -252,7 +244,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectClientIpRanking;
         final PagingResultBean<ClientIpRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -280,7 +271,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsClickLogBhv.PATH_selectClickUrlRanking;
         final PagingResultBean<ClickUrlRanking> statsList = clicklogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -308,7 +298,6 @@ public class StatsService implements Serializable {
         pmb.setFromCreatedTime(statsPager.getFromRequestedTime());
         pmb.setToCreatedTime(statsPager.getToRequestedTime());
 
-        final String path = BsFavoriteLogBhv.PATH_selectFavoriteUrlRanking;
         final PagingResultBean<FavoriteUrlRanking> statsList = favoriteLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -337,7 +326,6 @@ public class StatsService implements Serializable {
         pmb.setFromRequestedTime(statsPager.getFromRequestedTime());
         pmb.setToRequestedTime(statsPager.getToRequestedTime());
 
-        final String path = BsSearchLogBhv.PATH_selectSearchFieldRanking;
         final PagingResultBean<SearchFieldRanking> statsList = searchLogBhv.outsideSql().selectPage(pmb);
 
         // update pager
@@ -355,5 +343,4 @@ public class StatsService implements Serializable {
 
         return mapList;
     }
-
 }

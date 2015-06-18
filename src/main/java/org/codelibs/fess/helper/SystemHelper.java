@@ -44,8 +44,6 @@ import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.seasar.struts.util.MessageResourcesUtil;
 import org.seasar.struts.util.RequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -131,6 +129,10 @@ public class SystemHelper implements Serializable {
 
     public LocalDateTime getCurrentTime() {
         return LocalDateTime.now();
+    }
+
+    public long getCurrentTimeAsLong() {
+        return System.currentTimeMillis();
     }
 
     public String getLogFilePath() {

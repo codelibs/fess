@@ -18,15 +18,15 @@ package org.codelibs.fess.ds;
 
 import java.util.Map;
 
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 
 public interface IndexUpdateCallback {
 
     boolean store(Map<String, Object> dataMap);
 
-    void setElasticsearchClient(SearchClient solrGroup);
+    void setEsClient(FessEsClient fessEsClient);
 
-    SearchClient getElasticsearchClient();
+    FessEsClient getsClient();
 
     long getDocumentSize();
 

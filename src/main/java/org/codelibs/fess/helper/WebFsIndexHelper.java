@@ -26,9 +26,9 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.BoostDocumentRule;
 import org.codelibs.fess.db.exentity.FileCrawlingConfig;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
+import org.codelibs.fess.entity.BoostDocumentRule;
 import org.codelibs.fess.interval.FessIntervalController;
 import org.codelibs.fess.service.BoostDocumentRuleService;
 import org.codelibs.fess.service.FailureUrlService;
@@ -129,7 +129,7 @@ public class WebFsIndexHelper implements Serializable {
     protected void doCrawl(final String sessionId, final List<WebCrawlingConfig> webConfigList,
             final List<FileCrawlingConfig> fileConfigList) {
         int multiprocessCrawlingCount = 5;
-        String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
             multiprocessCrawlingCount = Integer.parseInt(value);
         } catch (final NumberFormatException e) {

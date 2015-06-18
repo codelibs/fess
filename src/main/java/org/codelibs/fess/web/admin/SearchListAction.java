@@ -29,19 +29,16 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
-import org.codelibs.fess.client.SearchClient;
-import org.codelibs.fess.client.SearchClient.SearchConditionBuilder;
+import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.seasar.framework.beans.util.Beans;
@@ -62,7 +59,7 @@ public class SearchListAction implements Serializable {
     protected SearchListForm searchListForm;
 
     @Resource
-    protected SearchClient searchClient;
+    protected FessEsClient fessEsClient;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -157,11 +154,10 @@ public class SearchListAction implements Serializable {
         final int size = Integer.parseInt(searchListForm.num);
         try {
             documentItems =
-                    searchClient.getDocumentList(
-                            searchRequestBuilder -> {
-                                return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().offset(offset)
-                                        .size(size).responseFields(queryHelper.getResponseFields()).build();
-                            }).get();
+                    fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, searchRequestBuilder -> {
+                        return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().offset(offset).size(size)
+                                .responseFields(queryHelper.getResponseFields()).build();
+                    });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -254,24 +250,21 @@ public class SearchListAction implements Serializable {
         if (jobHelper.isCrawlProcessRunning()) {
             throw new SSCActionMessagesException("errors.failed_to_start_solr_process_because_of_running");
         }
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (!jobHelper.isCrawlProcessRunning()) {
-                    final long time = System.currentTimeMillis();
-                    try {
-                        QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
-                        searchClient.deleteByQuery(query);
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - time) + "ms");
-                        }
-                    } catch (final Exception e) {
-                        logger.error("Failed to delete index (query=" + fieldHelper.docIdField + ":" + docId + ").", e);
-                    }
-                } else {
+        final Thread thread = new Thread(() -> {
+            if (!jobHelper.isCrawlProcessRunning()) {
+                final long time = System.currentTimeMillis();
+                try {
+                    final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
+                    fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
                     if (logger.isInfoEnabled()) {
-                        logger.info("could not start index cleanup process" + " because of running solr process.");
+                        logger.info("[EXEC TIME] index cleanup time: " + (System.currentTimeMillis() - time) + "ms");
                     }
+                } catch (final Exception e) {
+                    logger.error("Failed to delete index (query=" + fieldHelper.docIdField + ":" + docId + ").", e);
+                }
+            } else {
+                if (logger.isInfoEnabled()) {
+                    logger.info("could not start index cleanup process" + " because of running solr process.");
                 }
             }
         });

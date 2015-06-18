@@ -428,23 +428,21 @@ public class SuggestBadWordAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.unknown_import_file");
             }
             final String enc = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-            new Thread(new Runnable() {
-                public void run() {
-                    Reader reader = null;
-                    try {
-                        reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
-                        suggestBadWordService.importCsv(reader);
-                    } catch (final Exception e) {
-                        logger.error("Failed to import data.", e);
-                        throw new FessSystemException("Failed to import data.", e);
-                    } finally {
-                        if (!oFile.delete()) {
-                            logger.warn("Could not delete " + oFile.getAbsolutePath());
-                        }
-                        IOUtils.closeQuietly(reader);
-                        suggestHelper.deleteAllBadWord();
-                        suggestHelper.updateSolrBadwordFile();
+            new Thread(() -> {
+                Reader reader = null;
+                try {
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
+                    suggestBadWordService.importCsv(reader);
+                } catch (final Exception e) {
+                    logger.error("Failed to import data.", e);
+                    throw new FessSystemException("Failed to import data.", e);
+                } finally {
+                    if (!oFile.delete()) {
+                        logger.warn("Could not delete " + oFile.getAbsolutePath());
                     }
+                    IOUtils.closeQuietly(reader);
+                    suggestHelper.deleteAllBadWord();
+                    suggestHelper.updateSolrBadwordFile();
                 }
             }).start();
         } catch (final ActionMessagesException e) {

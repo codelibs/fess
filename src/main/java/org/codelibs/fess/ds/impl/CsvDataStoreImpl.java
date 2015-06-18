@@ -95,12 +95,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             for (final String path : values) {
                 final File dir = new File(path);
                 if (dir.isDirectory()) {
-                    final File[] files = dir.listFiles(new FilenameFilter() {
-                        @Override
-                        public boolean accept(final File file, final String name) {
-                            return isCsvFile(file, name);
-                        }
-                    });
+                    final File[] files = dir.listFiles((FilenameFilter) (file, name) -> isCsvFile(file, name));
                     for (final File file : files) {
                         fileList.add(file);
                     }

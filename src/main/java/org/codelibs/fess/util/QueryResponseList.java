@@ -25,7 +25,6 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.elasticsearch.action.search.SearchResponse;
@@ -89,7 +88,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
     public void init(final SearchResponse searchResponse, final long start, final int pageSize) {
         long numFound = 0;
         if (searchResponse != null) {
-            SearchHits searchHits = searchResponse.getHits();
+            final SearchHits searchHits = searchResponse.getHits();
             numFound = searchHits.getTotalHits();
             queryTime = searchResponse.getTookInMillis();
 
@@ -99,24 +98,24 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
             // build highlighting fields
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            ComponentUtil.getFieldHelper();
             final String hlPrefix = queryHelper.getHighlightingPrefix();
             for (final SearchHit searchHit : searchHits.getHits()) {
                 final Map<String, Object> docMap = new HashMap<String, Object>();
                 docMap.putAll(searchHit.getSource());
 
-                Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
+                final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
                 try {
                     if (highlightFields != null) {
-                        for (Map.Entry<String, HighlightField> entry : highlightFields.entrySet()) {
-                            HighlightField highlightField = entry.getValue();
-                            Text[] fragments = highlightField.fragments();
+                        for (final Map.Entry<String, HighlightField> entry : highlightFields.entrySet()) {
+                            final HighlightField highlightField = entry.getValue();
+                            final Text[] fragments = highlightField.fragments();
                             if (fragments != null && fragments.length != 0) {
-                                String[] texts = new String[fragments.length];
+                                final String[] texts = new String[fragments.length];
                                 for (int i = 0; i < fragments.length; i++) {
                                     texts[i] = fragments[i].string();
                                 }
-                                String value = StringUtils.join(texts, "...");
+                                final String value = StringUtils.join(texts, "...");
                                 docMap.put(hlPrefix + highlightField.getName(), value);
                             }
                         }
@@ -140,7 +139,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
 
             // facet
-            Aggregations aggregations = searchResponse.getAggregations();
+            final Aggregations aggregations = searchResponse.getAggregations();
             if (aggregations != null) {
                 facetResponse = new FacetResponse(aggregations);
             }

@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -44,7 +43,6 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.service.ClickLogService;
 import org.codelibs.fess.service.CrawlingSessionService;
-import org.codelibs.fess.service.DatabaseService;
 import org.codelibs.fess.service.SearchLogService;
 import org.codelibs.robot.util.StreamUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
@@ -64,9 +62,6 @@ public class DataAction implements Serializable {
     @Resource
     @ActionForm
     protected DataForm dataForm;
-
-    @Resource
-    protected DatabaseService databaseService;
 
     @Resource
     protected CrawlingSessionService crawlingSessionService;
@@ -92,33 +87,6 @@ public class DataAction implements Serializable {
         // set a default value
         dataForm.overwrite = "on";
         return "index.jsp";
-    }
-
-    @Execute(validator = false)
-    public String download() {
-        final DateFormat df = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_DIGIT_ONLY);
-        final StringBuilder buf = new StringBuilder();
-        buf.append("backup-");
-        buf.append(df.format(new Date()));
-        buf.append(".xml");
-
-        final HttpServletResponse response = ResponseUtil.getResponse();
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + buf.toString() + "\"");
-
-        try {
-            final ServletOutputStream sos = response.getOutputStream();
-            try {
-                databaseService.exportData(sos);
-                sos.flush();
-            } finally {
-                sos.close();
-            }
-            return null;
-        } catch (final Exception e) {
-            logger.error("Failed to export data.", e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_export_data");
-        }
     }
 
     @Execute(validator = false)
@@ -208,17 +176,7 @@ public class DataAction implements Serializable {
     @Execute(validator = true, input = "index")
     public String upload() {
         final String fileName = dataForm.uploadedFile.getFileName();
-        if (fileName.endsWith(".xml")) {
-            try {
-                databaseService.importData(dataForm.uploadedFile.getInputStream(),
-                        dataForm.overwrite != null && "on".equalsIgnoreCase(dataForm.overwrite));
-                SAStrutsUtil.addSessionMessage("success.importing_data");
-                return "index?redirect=true";
-            } catch (final Exception e) {
-                logger.error("Failed to import data.", e);
-                throw new SSCActionMessagesException(e, "errors.failed_to_import_data");
-            }
-        } else if (fileName.endsWith(".csv")) {
+        if (fileName.endsWith(".csv")) {
             BufferedInputStream is = null;
             File tempFile = null;
             FileOutputStream fos = null;
@@ -252,33 +210,30 @@ public class DataAction implements Serializable {
                     throw new SSCActionMessagesException("errors.unknown_import_file");
                 }
                 final String enc = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Reader reader = null;
-                        try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
-                            if (head.startsWith("SessionId,")) {
-                                // Crawling Session
-                                crawlingSessionService.importCsv(reader);
-                            } else if (head.startsWith("SearchWord,")) {
-                                // Search Log
-                                searchLogService.importCsv(reader);
-                            } else if (head.startsWith("SearchId,")) {
-                                // Click Log
-                                clickLogService.importCsv(reader);
-                            }
-                        } catch (final Exception e) {
-                            logger.error("Failed to import data.", e);
-                            throw new FessSystemException("Failed to import data.", e);
-                        } finally {
-                            if (!oFile.delete()) {
-                                logger.warn("Could not delete " + oFile.getAbsolutePath());
-                            }
-                            IOUtils.closeQuietly(reader);
-                        }
+                new Thread(() -> {
+                    Reader reader = null;
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
+                        if (head.startsWith("SessionId,")) {
+                            // Crawling Session
+                        crawlingSessionService.importCsv(reader);
+                    } else if (head.startsWith("SearchWord,")) {
+                        // Search Log
+                        searchLogService.importCsv(reader);
+                    } else if (head.startsWith("SearchId,")) {
+                        // Click Log
+                        clickLogService.importCsv(reader);
                     }
-                }).start();
+                } catch (final Exception e) {
+                    logger.error("Failed to import data.", e);
+                    throw new FessSystemException("Failed to import data.", e);
+                } finally {
+                    if (!oFile.delete()) {
+                        logger.warn("Could not delete " + oFile.getAbsolutePath());
+                    }
+                    IOUtils.closeQuietly(reader);
+                }
+            }   ).start();
             } catch (final ActionMessagesException e) {
                 if (!oFile.delete()) {
                     logger.warn("Could not delete " + oFile.getAbsolutePath());

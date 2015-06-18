@@ -19,13 +19,12 @@ package org.codelibs.fess.util;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DatabaseHelper;
-import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
@@ -69,8 +68,6 @@ public final class ComponentUtil {
 
     private static final String WEB_API_MANAGER_FACTORY = "webApiManagerFactory";
 
-    private static final String DOCUMENT_HELPER = "documentHelper";
-
     private static final String JOB_HELPER = "jobHelper";
 
     private static final String OVERLAPPING_HOST_HELPER = "overlappingHostHelper";
@@ -97,8 +94,6 @@ public final class ComponentUtil {
 
     private static final String AD_ROLE_HELPER = "adRoleHelper";
 
-    private static final String SOLR_GROUP_MANAGER = "solrGroupManager";
-
     private static final String CRAWLER_PROPERTIES = "crawlerProperties";
 
     private static final String PROPERTIES_SUFFIX = "Properties";
@@ -107,15 +102,13 @@ public final class ComponentUtil {
 
     private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
 
-    private static final String SEARCH_SERVICE = "searchService";
-
     private static final String KEY_MATCH_HELPER = "keyMatchHelper";
 
     private static final String INDEXING_HELPER = "indexingHelper";
 
     private static final String FIELD_HELPER = "fieldHelper";
 
-    private static final String ELASTICSEARCH_CLIENT = "searchClient";
+    private static final String ELASTICSEARCH_CLIENT = "fessEsClient";
 
     private ComponentUtil() {
     }
@@ -184,10 +177,6 @@ public final class ComponentUtil {
         return SingletonS2Container.getComponent(JOB_HELPER);
     }
 
-    public static DocumentHelper getDocumentHelper() {
-        return SingletonS2Container.getComponent(DOCUMENT_HELPER);
-    }
-
     public static WebApiManagerFactory getWebApiManagerFactory() {
         return SingletonS2Container.getComponent(WEB_API_MANAGER_FACTORY);
     }
@@ -248,7 +237,7 @@ public final class ComponentUtil {
         return SingletonS2Container.getComponent(FIELD_HELPER);
     }
 
-    public static SearchClient getElasticsearchClient() {
+    public static FessEsClient getElasticsearchClient() {
         return SingletonS2Container.getComponent(ELASTICSEARCH_CLIENT);
     }
 

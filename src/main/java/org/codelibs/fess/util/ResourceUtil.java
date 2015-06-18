@@ -83,12 +83,7 @@ public class ResourceUtil {
             return new File[0];
         }
         final File libDir = new File(libPath);
-        return libDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(final File file, final String name) {
-                return name.startsWith(namePrefix);
-            }
-        });
+        return libDir.listFiles((FilenameFilter) (file, name) -> name.startsWith(namePrefix));
     }
 
     public static String resolve(final String value) {

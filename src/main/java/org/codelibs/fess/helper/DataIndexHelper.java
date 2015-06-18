@@ -93,7 +93,7 @@ public class DataIndexHelper implements Serializable {
 
     protected void doCrawl(final String sessionId, final List<DataCrawlingConfig> configList) {
         int multiprocessCrawlingCount = 5;
-        String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
             multiprocessCrawlingCount = Integer.parseInt(value);
         } catch (final NumberFormatException e) {
@@ -254,11 +254,11 @@ public class DataIndexHelper implements Serializable {
                 return;
             }
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-            QueryBuilder queryBuilder =
+            final QueryBuilder queryBuilder =
                     QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.configIdField, dataCrawlingConfig.getConfigId()))
                             .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, sessionId));
             try {
-                ComponentUtil.getElasticsearchClient().deleteByQuery(queryBuilder);
+                ComponentUtil.getElasticsearchClient().deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, queryBuilder);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at " + dataCrawlingConfig, e);
             }

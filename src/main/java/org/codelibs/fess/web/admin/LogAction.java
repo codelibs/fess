@@ -25,7 +25,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -104,26 +103,20 @@ public class LogAction implements Serializable {
                     logger.warn("Log directory does not exist: " + parentDir.getAbsolutePath());
                     return logFileItems;
                 }
-                final File[] files = parentDir.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(final File dir, final String name) {
-                        if (name.indexOf(".out") > 0) {
-                            return true;
-                        }
-                        return false;
+                final File[] files = parentDir.listFiles((FilenameFilter) (dir, name) -> {
+                    if (name.indexOf(".out") > 0) {
+                        return true;
                     }
+                    return false;
                 });
                 if (files == null) {
                     return logFileItems;
                 }
-                Arrays.sort(files, new Comparator<File>() {
-                    @Override
-                    public int compare(final File o1, final File o2) {
-                        if (o1.lastModified() < o2.lastModified()) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
+                Arrays.sort(files, (o1, o2) -> {
+                    if (o1.lastModified() < o2.lastModified()) {
+                        return 1;
+                    } else {
+                        return -1;
                     }
                 });
                 for (final File logFile : files) {

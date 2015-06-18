@@ -2,9 +2,15 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="searchClient" class="org.codelibs.fess.client.SearchClient">
+	<component name="fessEsClient" class="org.codelibs.fess.client.FessEsClient">
 		<property name="settings">
 			#{"http.cors.enabled" : "true"}
 		</property>
+		<initMethod name="addIndexConfig">
+			<arg>"fess/doc"</arg>
+		</initMethod>
+		<initMethod name="addIndexConfig">
+			<arg>".fess_config/boost_document_rule"</arg>
+		</initMethod>
 	</component>
 </components>

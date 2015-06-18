@@ -26,13 +26,13 @@ import java.util.Queue;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.beans.FessBeans;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.exbhv.ClickLogBhv;
 import org.codelibs.fess.db.exbhv.SearchLogBhv;
 import org.codelibs.fess.db.exbhv.UserInfoBhv;
 import org.codelibs.fess.db.exentity.ClickLog;
 import org.codelibs.fess.db.exentity.SearchLog;
 import org.codelibs.fess.db.exentity.UserInfo;
-import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.service.SearchLogService;
@@ -76,15 +76,12 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             botNames = value.split(",");
         }
 
-        final boolean suggestAvailable =
-                Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE));
+        Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE));
         final String dayForCleanupStr = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
-        int dayForCleanup = -1;
         try {
-            dayForCleanup = Integer.parseInt(dayForCleanupStr);
+            Integer.parseInt(dayForCleanupStr);
         } catch (final NumberFormatException e) {}
 
-        boolean addedSuggest = false;
         final Map<String, UserInfo> userInfoMap = new HashMap<String, UserInfo>();
         for (final SearchLog searchLog : queue) {
             boolean add = true;
@@ -193,12 +190,13 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             }
         }
 
-        final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
+        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final Map.Entry<String, Long> entry : clickCountMap.entrySet()) {
             try {
                 // TODO buik update
-                documentHelper.update(entry.getKey(), fieldHelper.clickCountField, entry.getValue() + 1);
+                fessEsClient.update(fieldHelper.docIndex, fieldHelper.docType, entry.getKey(), fieldHelper.clickCountField,
+                        entry.getValue() + 1);
             } catch (final Exception e) {
                 logger.warn("Failed to update a clickCount(" + entry.getValue() + ") for " + entry.getKey(), e);
             }

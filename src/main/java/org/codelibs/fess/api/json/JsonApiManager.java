@@ -37,7 +37,7 @@ import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.api.WebApiResponse;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.util.ComponentUtil;
@@ -99,11 +99,11 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final SearchClient searchClient = ComponentUtil.getElasticsearchClient();
+        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
         int status;
         String errMsg = null;
         try {
-            final PingResponse pingResponse = searchClient.ping();
+            final PingResponse pingResponse = fessEsClient.ping();
             status = pingResponse.getStatus();
         } catch (final Exception e) {
             status = 9;

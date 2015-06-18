@@ -31,6 +31,7 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isAcceptCookieLocale() {
         return false;
     }
@@ -38,6 +39,7 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Locale findBusinessLocale(ActionExecuteMeta executeMeta, RequestManager requestManager) {
         return null;
     }
@@ -45,6 +47,7 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Locale getRequestedLocale(RequestManager requestManager) {
         return null; // null means browser default
     }
@@ -52,6 +55,7 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Locale getFallbackLocale() {
         return centralLocale;
     }

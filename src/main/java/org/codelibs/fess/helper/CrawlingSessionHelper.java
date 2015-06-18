@@ -28,7 +28,7 @@ import java.util.Map;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.client.SearchClient;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.db.exentity.CrawlingSession;
 import org.codelibs.fess.db.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.service.CrawlingSessionService;
@@ -54,7 +54,7 @@ public class CrawlingSessionHelper implements Serializable {
 
     protected LocalDateTime documentExpires;
 
-    private int maxSessionIdsInList = 100;
+    private final int maxSessionIdsInList = 100;
 
     protected CrawlingSessionService getCrawlingSessionService() {
         return SingletonS2Container.getComponent(CrawlingSessionService.class);
@@ -151,12 +151,12 @@ public class CrawlingSessionHelper implements Serializable {
         return generateId(url, roleTypeList);
     }
 
-    public List<Map<String, String>> getSessionIdList(final SearchClient searchClient) {
+    public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        return searchClient.search(
+        return fessEsClient.search(fieldHelper.docIndex, fieldHelper.docType,
                 queryRequestBuilder -> {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
-                    TermsBuilder termsBuilder =
+                    final TermsBuilder termsBuilder =
                             AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(maxSessionIdsInList)
                                     .order(Order.term(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
@@ -164,8 +164,8 @@ public class CrawlingSessionHelper implements Serializable {
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
                     final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
                     searchResponse.ifPresent(response -> {
-                        Terms terms = response.getAggregations().get(fieldHelper.segmentField);
-                        for (Bucket bucket : terms.getBuckets()) {
+                        final Terms terms = response.getAggregations().get(fieldHelper.segmentField);
+                        for (final Bucket bucket : terms.getBuckets()) {
                             final Map<String, String> map = new HashMap<String, String>(2);
                             map.put(fieldHelper.segmentField, bucket.getKey());
                             map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));

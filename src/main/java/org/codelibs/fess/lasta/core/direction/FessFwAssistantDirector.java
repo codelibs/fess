@@ -23,13 +23,10 @@ import org.codelibs.fess.lasta.core.direction.sponsor.FessActionAdjustmentProvid
 import org.codelibs.fess.lasta.core.direction.sponsor.FessTimeResourceProvider;
 import org.codelibs.fess.lasta.core.direction.sponsor.FessUserLocaleProcessProvider;
 import org.codelibs.fess.lasta.core.direction.sponsor.FessUserTimeZoneProcessProvider;
-import org.dbflute.saflute.core.direction.BootProcessCallback;
 import org.dbflute.saflute.core.direction.CachedFwAssistantDirector;
-import org.dbflute.saflute.core.direction.FwAssistantDirector;
 import org.dbflute.saflute.core.direction.OptionalAssistDirection;
 import org.dbflute.saflute.core.direction.OptionalCoreDirection;
 import org.dbflute.saflute.core.security.InvertibleCipher;
-import org.dbflute.saflute.core.security.SecurityResourceProvider;
 import org.dbflute.saflute.db.dbflute.OptionalDBFluteDirection;
 import org.dbflute.saflute.web.action.OptionalActionDirection;
 import org.dbflute.saflute.web.servlet.OptionalServletDirection;
@@ -108,11 +105,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directFrameworkDebug(fessConfig.isFrameworkDebug()); // basically false
 
         // you can add your own process when your application is booting
-        direction.directBootProcessCallback(new BootProcessCallback() {
-            public void callback(FwAssistantDirector assistantDirector) {
-                processDBFluteSystem();
-            }
-        });
+        direction.directBootProcessCallback(assistantDirector -> processDBFluteSystem());
     }
 
     protected void processDBFluteSystem() {
@@ -120,6 +113,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         DBFluteSystem.setFinalTimeZoneProvider(new DfFinalTimeZoneProvider() {
             protected final TimeZone provided = FessUserTimeZoneProcessProvider.centralTimeZone;
 
+            @Override
             public TimeZone provide() {
                 return provided;
             }
@@ -138,11 +132,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     protected void prepareSecurity(OptionalCoreDirection direction) {
         final String key = getPrimarySecurityWord();
         final InvertibleCipher primaryInvertibleCipher = InvertibleCipher.createAesCipher(key); // AES for now
-        direction.directSecurity(new SecurityResourceProvider() {
-            public InvertibleCipher providePrimaryInvertibleCipher() {
-                return primaryInvertibleCipher;
-            }
-        });
+        direction.directSecurity(() -> primaryInvertibleCipher);
     }
 
     protected String getPrimarySecurityWord() {
@@ -233,14 +223,17 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         final Integer cookieDefaultExpire = fessConfig.getCookieDefaultExpireAsInteger();
         final InvertibleCipher cookieCipher = InvertibleCipher.createAesCipher(key); // AES for now
         direction.directCookie(new CookieResourceProvider() {
+            @Override
             public String provideDefaultPath() {
                 return cookieDefaultPath;
             }
 
+            @Override
             public Integer provideDefaultExpire() {
                 return cookieDefaultExpire;
             }
 
+            @Override
             public InvertibleCipher provideCipher() {
                 return cookieCipher;
             }
