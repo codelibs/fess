@@ -18,17 +18,23 @@ package org.codelibs.fess.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.BoostDocumentRuleCB;
-import org.codelibs.fess.db.exbhv.BoostDocumentRuleBhv;
-import org.codelibs.fess.db.exentity.BoostDocumentRule;
+import org.codelibs.fess.entity.BoostDocumentRule;
+import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.pager.BoostDocumentRulePager;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.seasar.framework.beans.util.Beans;
 
 public class BoostDocumentRuleService implements Serializable {
@@ -36,18 +42,47 @@ public class BoostDocumentRuleService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Resource
-    protected BoostDocumentRuleBhv boostDocumentRuleBhv;
+    protected FessEsClient fessEsClient;
 
-    public BoostDocumentRuleService() {
-        super();
-    }
+    @Resource
+    protected FieldHelper fieldHelper;
 
     public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocumentRulePager boostDocumentRulePager) {
+        final PagingResultBean<BoostDocumentRule> boostDocumentRuleList =
+                fessEsClient.search(getIndex(), getType(), searchRequestBuilder -> {
+                    if (boostDocumentRulePager.id != null) {
+                        searchRequestBuilder.setQuery(QueryBuilders.idsQuery(getType()).addIds(boostDocumentRulePager.id));
+                    }
+                    searchRequestBuilder.addSort(SortBuilders.fieldSort("sortOrder").order(SortOrder.ASC));
+                    searchRequestBuilder.setVersion(true);
 
-        final PagingResultBean<BoostDocumentRule> boostDocumentRuleList = boostDocumentRuleBhv.selectPage(cb -> {
-            cb.paging(boostDocumentRulePager.getPageSize(), boostDocumentRulePager.getCurrentPageNumber());
-            setupListCondition(cb, boostDocumentRulePager);
-        });
+                    final int size = boostDocumentRulePager.getPageSize();
+                    final int pageNum = boostDocumentRulePager.getCurrentPageNumber();
+                    // TODO modify size/pageNum
+                        searchRequestBuilder.setFrom(size * (pageNum - 1));
+                        searchRequestBuilder.setSize(size);
+                        return true;
+                    }, (searchRequestBuilder, execTime, searchResponse) -> {
+                        return searchResponse.map(response -> {
+                            final PagingResultBean<BoostDocumentRule> list = new PagingResultBean<>();
+                            list.setTableDbName(getType());
+                            final SearchHits searchHits = response.getHits();
+                            searchHits.forEach(hit -> {
+                                list.add(createEntity(response, hit));
+                            });
+                            list.setAllRecordCount((int) searchHits.totalHits());
+                            list.setPageSize(boostDocumentRulePager.getPageSize());
+                            list.setCurrentPageNumber(boostDocumentRulePager.getCurrentPageNumber());
+                            return list;
+                        }).orElseGet(() -> {
+                            final PagingResultBean<BoostDocumentRule> emptyList = new PagingResultBean<>();
+                            emptyList.setTableDbName(getType());
+                            emptyList.setAllRecordCount(0);
+                            emptyList.setPageSize(boostDocumentRulePager.getPageSize());
+                            emptyList.setCurrentPageNumber(1);
+                            return emptyList;
+                        });
+                    });
 
         // update pager
         Beans.copy(boostDocumentRuleList, boostDocumentRulePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
@@ -58,70 +93,41 @@ public class BoostDocumentRuleService implements Serializable {
         return boostDocumentRuleList;
     }
 
-    public BoostDocumentRule getBoostDocumentRule(final Map<String, String> keys) {
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (boostDocumentRule == null) {
-            // TODO exception?
-            return null;
-        }
+    public BoostDocumentRule getBoostDocumentRule(final String id) {
+        return fessEsClient.getDocument(getIndex(), getType(), searchRequestBuilder -> {
+            searchRequestBuilder.setQuery(QueryBuilders.idsQuery(getType()).addIds(id));
+            searchRequestBuilder.setVersion(true);
+            return true;
+        }, this::createEntity).get();
+    }
 
-        return boostDocumentRule;
+    protected String getType() {
+        return fieldHelper.boostDocumentRuleType;
+    }
+
+    protected String getIndex() {
+        return fieldHelper.configIndex;
     }
 
     public void store(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
-        setupStoreCondition(boostDocumentRule);
-
-        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule);
-
+        fessEsClient.store(getIndex(), getType(), boostDocumentRule);
     }
 
     public void delete(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
-        setupDeleteCondition(boostDocumentRule);
-
-        boostDocumentRuleBhv.delete(boostDocumentRule);
-
-    }
-
-    protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocumentRulePager boostDocumentRulePager) {
-        if (boostDocumentRulePager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(boostDocumentRulePager.id));
-        }
-        // TODO Long, Integer, String supported only.
-
-        // setup condition
-        cb.query().setDeletedBy_IsNull();
-        cb.query().addOrderBy_SortOrder_Asc();
-
-        // search
-
-    }
-
-    protected void setupEntityCondition(final BoostDocumentRuleCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final BoostDocumentRule boostDocumentRule) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final BoostDocumentRule boostDocumentRule) {
-
-        // setup condition
-
+        fessEsClient.delete(getIndex(), getType(), boostDocumentRule.getId(), boostDocumentRule.getVersion());
     }
 
     public List<BoostDocumentRule> getAvailableBoostDocumentRuleList() {
-        return boostDocumentRuleBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
-            cb.query().addOrderBy_SortOrder_Asc();
-        });
+        return fessEsClient.getDocumentList(getIndex(), getType(), searchRequestBuilder -> {
+            return true;
+        }, this::createEntity);
+    }
+
+    protected BoostDocumentRule createEntity(SearchResponse response, SearchHit hit) {
+        final BoostDocumentRule boostDocumentRule = BeanUtil.copyMapToNewBean(hit.getSource(), BoostDocumentRule.class);
+        boostDocumentRule.setId(hit.getId());
+        boostDocumentRule.setVersion(hit.getVersion());
+        return boostDocumentRule;
     }
 
 }

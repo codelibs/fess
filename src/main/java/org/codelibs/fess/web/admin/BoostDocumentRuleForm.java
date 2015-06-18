@@ -41,7 +41,7 @@ public class BoostDocumentRuleForm {
     }
 
     @Required(target = "confirmfromupdate,update,delete")
-    @LongType
+    @Maxbytelength(maxbytelength = 200)
     public String id;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
@@ -62,23 +62,18 @@ public class BoostDocumentRuleForm {
     public String createdBy;
 
     @Required(target = "confirmfromupdate,update,delete")
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    @LongType
     public String createdTime;
 
     @Maxbytelength(maxbytelength = 255)
     public String updatedBy;
 
-    @DateType
+    @LongType
     public String updatedTime;
 
-    public String deletedBy;
-
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
-    public String deletedTime;
-
     @Required(target = "confirmfromupdate,update,delete")
-    @IntegerType
-    public String versionNo;
+    @LongType
+    public String version;
 
     public void initialize() {
 
@@ -90,9 +85,7 @@ public class BoostDocumentRuleForm {
         createdTime = null;
         updatedBy = null;
         updatedTime = null;
-        deletedBy = null;
-        deletedTime = null;
-        versionNo = null;
+        version = null;
 
         sortOrder = "0";
     }

@@ -53,7 +53,7 @@
 			<div>
 				<c:if test="${crudMode==2}">
 					<html:hidden property="id" />
-					<html:hidden property="versionNo" />
+					<html:hidden property="version" />
 				</c:if>
 				<html:hidden property="createdBy" />
 				<html:hidden property="createdTime" />

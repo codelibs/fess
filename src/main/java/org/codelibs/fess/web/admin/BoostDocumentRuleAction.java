@@ -16,10 +16,7 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -27,7 +24,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.BoostDocumentRule;
+import org.codelibs.fess.entity.BoostDocumentRule;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.BoostDocumentRulePager;
 import org.codelibs.fess.service.BoostDocumentRuleService;
@@ -253,17 +250,9 @@ public class BoostDocumentRuleAction extends FessAdminAction {
         }
     }
 
-    protected Map<String, String> createKeyMap() {
-        final Map<String, String> keys = new HashMap<String, String>();
-
-        keys.put("id", boostDocumentRuleForm.id);
-
-        return keys;
-    }
-
     protected void loadBoostDocumentRule() {
 
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
+        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(boostDocumentRuleForm.id);
         if (boostDocumentRule == null) {
             // throw an exception
             throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { boostDocumentRuleForm.id });
@@ -275,9 +264,9 @@ public class BoostDocumentRuleAction extends FessAdminAction {
     protected BoostDocumentRule createBoostDocumentRule() {
         BoostDocumentRule boostDocumentRule;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (boostDocumentRuleForm.crudMode == CommonConstants.EDIT_MODE) {
-            boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
+            boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(boostDocumentRuleForm.id);
             if (boostDocumentRule == null) {
                 // throw an exception
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { boostDocumentRuleForm.id });
@@ -302,17 +291,13 @@ public class BoostDocumentRuleAction extends FessAdminAction {
         }
 
         try {
-            final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap());
+            final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(boostDocumentRuleForm.id);
             if (boostDocumentRule == null) {
                 // throw an exception
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { boostDocumentRuleForm.id });
             }
 
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            boostDocumentRule.setDeletedBy(username);
-            boostDocumentRule.setDeletedTime(currentTime);
-            boostDocumentRuleService.store(boostDocumentRule);
+            boostDocumentRuleService.delete(boostDocumentRule);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
