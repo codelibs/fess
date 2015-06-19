@@ -305,7 +305,7 @@ public class DesignAction implements Serializable {
         final List<File> fileList = getAccessibleFileList(baseDir);
         final int length = baseDir.getAbsolutePath().length();
         for (final File file : fileList) {
-            fileNameItems.add(file.getAbsolutePath().substring(length));
+            fileNameItems.add(file.getAbsolutePath().substring(length).replace("\\", "/"));
         }
     }
 
