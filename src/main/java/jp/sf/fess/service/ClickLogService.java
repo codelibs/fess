@@ -33,6 +33,7 @@ import jp.sf.fess.db.exbhv.ClickLogBhv;
 import jp.sf.fess.db.exbhv.SearchLogBhv;
 import jp.sf.fess.db.exentity.ClickLog;
 import jp.sf.fess.db.exentity.SearchLog;
+import jp.sf.fess.util.CsvUtil;
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 import jp.sf.orangesignal.csv.CsvWriter;
@@ -58,26 +59,32 @@ public class ClickLogService implements Serializable {
     protected ClickLogBhv clickLogBhv;
 
     public void importCsv(final Reader reader) {
-        final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+        final CsvConfig cfg = new CsvConfig(',', '"', '"');
+        cfg.setEscapeDisabled(false);
+        cfg.setQuoteDisabled(false);
+        @SuppressWarnings("resource")
+        final CsvReader csvReader = new CsvReader(reader, cfg);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
             while ((list = csvReader.readValues()) != null) {
                 try {
                     final SearchLogCB cb = new SearchLogCB();
-                    cb.query().setRequestedTime_Equal(
-                            new Timestamp(sdf.parse(list.get(3)).getTime()));
-                    cb.query().setUserSessionId_Equal(list.get(4));
+                    cb.query().setRequestedTime_Equal(CsvUtil.getAsTimestamp(list, 3, new Timestamp(System.currentTimeMillis())));
+                    cb.query().setUserSessionId_Equal(CsvUtil.get(list, 4));
                     final SearchLog searchLog = searchLogBhv.selectEntity(cb);
                     if (searchLog != null) {
                         final ClickLog entity = new ClickLog();
-                        entity.setId(Long.parseLong(list.get(0)));
+                        final long id = CsvUtil.getAsLong(list, 0, -1);
+                        final Timestamp requestedTime = CsvUtil.getAsTimestamp(list, 2, new Timestamp(0));
+                        if (id == -1 || requestedTime.getTime() == 0) {
+                            log.warn("Invalid id or timestamp for search log: " + list);
+                            continue;
+                        }
+                        entity.setId(id);
                         entity.setSearchId(searchLog.getId());
-                        entity.setUrl(list.get(1));
-                        entity.setRequestedTime(new Timestamp(sdf.parse(
-                                list.get(2)).getTime()));
+                        entity.setUrl(CsvUtil.get(list, 1, StringUtil.EMPTY));
+                        entity.setRequestedTime(requestedTime);
                         clickLogBhv.insert(entity);
                     } else {
                         log.warn("The search log is not found: " + list);
@@ -95,6 +102,7 @@ public class ClickLogService implements Serializable {
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);
         cfg.setQuoteDisabled(false);
+        @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
         final ClickLogCB cb = new ClickLogCB();
         cb.setupSelect_SearchLog();

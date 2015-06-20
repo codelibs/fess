@@ -270,7 +270,7 @@ public class DataAction implements Serializable {
 
             final File oFile = tempFile;
             try {
-                final String head = new String(b, Constants.UTF_8);
+                final String head = new String(b, Constants.UTF_8).replace("\"", "");
                 if (!head.startsWith("SessionId,")
                         && !head.startsWith("SearchWord,")
                         && !head.startsWith("SearchId,")) {

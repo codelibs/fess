@@ -29,18 +29,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import jp.sf.fess.FessSystemException;
-import jp.sf.fess.crud.service.BsCrawlingSessionService;
-import jp.sf.fess.db.cbean.CrawlingSessionCB;
-import jp.sf.fess.db.cbean.CrawlingSessionInfoCB;
-import jp.sf.fess.db.exbhv.CrawlingSessionInfoBhv;
-import jp.sf.fess.db.exentity.CrawlingSession;
-import jp.sf.fess.db.exentity.CrawlingSessionInfo;
-import jp.sf.fess.pager.CrawlingSessionPager;
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
-import jp.sf.orangesignal.csv.CsvWriter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
@@ -51,6 +39,19 @@ import org.seasar.dbflute.cbean.ListResultBean;
 import org.seasar.dbflute.cbean.coption.LikeSearchOption;
 
 import com.ibm.icu.text.SimpleDateFormat;
+
+import jp.sf.fess.FessSystemException;
+import jp.sf.fess.crud.service.BsCrawlingSessionService;
+import jp.sf.fess.db.cbean.CrawlingSessionCB;
+import jp.sf.fess.db.cbean.CrawlingSessionInfoCB;
+import jp.sf.fess.db.exbhv.CrawlingSessionInfoBhv;
+import jp.sf.fess.db.exentity.CrawlingSession;
+import jp.sf.fess.db.exentity.CrawlingSessionInfo;
+import jp.sf.fess.pager.CrawlingSessionPager;
+import jp.sf.fess.util.CsvUtil;
+import jp.sf.orangesignal.csv.CsvConfig;
+import jp.sf.orangesignal.csv.CsvReader;
+import jp.sf.orangesignal.csv.CsvWriter;
 
 public class CrawlingSessionService extends BsCrawlingSessionService implements
         Serializable {
@@ -183,40 +184,45 @@ public class CrawlingSessionService extends BsCrawlingSessionService implements
     }
 
     public void importCsv(final Reader reader) {
-        final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+        final CsvConfig cfg = new CsvConfig(',', '"', '"');
+        cfg.setEscapeDisabled(false);
+        cfg.setQuoteDisabled(false);
+        @SuppressWarnings("resource")
+        final CsvReader csvReader = new CsvReader(reader, cfg);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
             while ((list = csvReader.readValues()) != null) {
+                final String sessionId = CsvUtil.get(list, 0);
+                if (sessionId == null) {
+                    log.warn("No crawling session log: Line " + csvReader.getLineNumber());
+                    continue;
+                }
                 try {
                     final CrawlingSessionCB cb = new CrawlingSessionCB();
-                    cb.query().setSessionId_Equal(list.get(0));
+                    cb.query().setSessionId_Equal(sessionId);
                     cb.specify().columnSessionId();
                     CrawlingSession crawlingSession = crawlingSessionBhv
                             .selectEntity(cb);
                     if (crawlingSession == null) {
                         crawlingSession = new CrawlingSession();
-                        crawlingSession.setSessionId(list.get(0));
-                        crawlingSession.setCreatedTime(new Timestamp(sdf.parse(
-                                list.get(1)).getTime()));
+                        crawlingSession.setSessionId(sessionId);
+                        crawlingSession.setCreatedTime(CsvUtil.getAsTimestamp(list, 1, new Timestamp(System.currentTimeMillis())));
                         crawlingSessionBhv.insert(crawlingSession);
                     }
 
                     final CrawlingSessionInfo entity = new CrawlingSessionInfo();
                     entity.setCrawlingSessionId(crawlingSession.getId());
-                    entity.setKey(list.get(2));
-                    entity.setValue(list.get(3));
-                    entity.setCreatedTime(new Timestamp(sdf.parse(list.get(4))
-                            .getTime()));
+                    entity.setKey(CsvUtil.get(list, 2, "Unknown"));
+                    entity.setValue(CsvUtil.get(list, 3,StringUtil.EMPTY));
+                    entity.setCreatedTime(CsvUtil.getAsTimestamp(list, 4, new Timestamp(System.currentTimeMillis())));
                     crawlingSessionInfoBhv.insert(entity);
                 } catch (final Exception e) {
-                    log.warn("Failed to read a click log: " + list, e);
+                    log.warn("Failed to read a crawling session info: " + list, e);
                 }
             }
         } catch (final IOException e) {
-            log.warn("Failed to read a click log.", e);
+            log.warn("Failed to read a crawling session info.", e);
         }
     }
 

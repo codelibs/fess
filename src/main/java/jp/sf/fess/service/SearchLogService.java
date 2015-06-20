@@ -40,6 +40,7 @@ import jp.sf.fess.db.exbhv.SearchFieldLogBhv;
 import jp.sf.fess.db.exentity.SearchFieldLog;
 import jp.sf.fess.db.exentity.SearchLog;
 import jp.sf.fess.pager.SearchLogPager;
+import jp.sf.fess.util.CsvUtil;
 import jp.sf.orangesignal.csv.CsvConfig;
 import jp.sf.orangesignal.csv.CsvReader;
 import jp.sf.orangesignal.csv.CsvWriter;
@@ -179,31 +180,39 @@ public class SearchLogService extends BsSearchLogService implements
     }
 
     public void importCsv(final Reader reader) {
-        final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
-        final SimpleDateFormat sdf = new SimpleDateFormat(
-                CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+        final CsvConfig cfg = new CsvConfig(',', '"', '"');
+        cfg.setEscapeDisabled(false);
+        cfg.setQuoteDisabled(false);
+        @SuppressWarnings("resource")
+        final CsvReader csvReader = new CsvReader(reader, cfg);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
             while ((list = csvReader.readValues()) != null) {
+                final String searchWord = CsvUtil.get(list, 0);
+                if(StringUtil.isBlank(searchWord)){
+                    if(log.isDebugEnabled()){
+                        log.debug("Search Word is empty: "+list);
+                    }
+                    continue;
+                }
                 try {
                     final SearchLog entity = new SearchLog();
-                    entity.setSearchWord(list.get(0));
-                    entity.setSearchQuery(list.get(1));
-                    entity.setSolrQuery(list.get(2));
-                    entity.setRequestedTime(new Timestamp(sdf
-                            .parse(list.get(3)).getTime()));
-                    entity.setResponseTime(Integer.parseInt(list.get(4)));
-                    entity.setHitCount(Long.parseLong(list.get(5)));
-                    entity.setQueryOffset(Integer.parseInt(list.get(6)));
-                    entity.setQueryPageSize(Integer.parseInt(list.get(7)));
-                    entity.setUserAgent(list.get(8));
-                    entity.setReferer(list.get(9));
-                    entity.setClientIp(list.get(10));
-                    entity.setUserSessionId(list.get(11));
-                    entity.setAccessType(list.get(12));
+                    entity.setSearchWord(searchWord);
+                    entity.setSearchQuery(CsvUtil.get(list, 1, "Unknown"));
+                    entity.setSolrQuery(CsvUtil.get(list, 2, "Unknown"));
+                    entity.setRequestedTime(CsvUtil.getAsTimestamp(list, 3, new Timestamp(System.currentTimeMillis())));
+                    entity.setResponseTime(CsvUtil.getAsInt(list, 4, 0));
+                    entity.setHitCount(CsvUtil.getAsLong(list, 5, 0L));
+                    entity.setQueryOffset(CsvUtil.getAsInt(list, 6, 0));
+                    entity.setQueryPageSize(CsvUtil.getAsInt(list, 7, 20));
+                    entity.setUserAgent(CsvUtil.get(list, 8, StringUtil.EMPTY));
+                    entity.setReferer(CsvUtil.get(list, 9, StringUtil.EMPTY));
+                    entity.setClientIp(CsvUtil.get(list, 10, StringUtil.EMPTY));
+                    entity.setUserSessionId(CsvUtil.get(list, 11, StringUtil.EMPTY));
+                    entity.setAccessType(CsvUtil.get(list, 12, StringUtil.EMPTY));
                     if (list.size() >= 14) {
-                        final String jsonStr = list.get(13);
+                        final String jsonStr = CsvUtil.get(list, 13,StringUtil.EMPTY);
                         @SuppressWarnings("rawtypes")
                         final List objList = JSON.decode(jsonStr);
                         for (final Object obj : objList) {
@@ -228,6 +237,7 @@ public class SearchLogService extends BsSearchLogService implements
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);
         cfg.setQuoteDisabled(false);
+        @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
         final SearchLogCB cb = new SearchLogCB();
         if (searchLogPager != null) {
