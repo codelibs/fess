@@ -187,12 +187,22 @@ public class SynonymAction {
     @Token(save = false, validate = true, keep = true)
     @Execute(validator = true, input = "edit.jsp")
     public String confirmfromcreate() {
+        final String[] newInputs = splitLine(synonymForm.inputs);
+        validateSynonymString(newInputs);
+        final String[] newOutputs = splitLine(synonymForm.outputs);
+        validateSynonymString(newOutputs);
+
         return "confirm.jsp";
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute(validator = true, input = "edit.jsp")
     public String confirmfromupdate() {
+        final String[] newInputs = splitLine(synonymForm.inputs);
+        validateSynonymString(newInputs);
+        final String[] newOutputs = splitLine(synonymForm.outputs);
+        validateSynonymString(newOutputs);
+
         return "confirm.jsp";
     }
 
@@ -413,11 +423,27 @@ public class SynonymAction {
         }
 
         final String[] newInputs = splitLine(synonymForm.inputs);
+        validateSynonymString(newInputs);
         synonymItem.setNewInputs(newInputs);
         final String[] newOutputs = splitLine(synonymForm.outputs);
+        validateSynonymString(newOutputs);
         synonymItem.setNewOutputs(newOutputs);
 
         return synonymItem;
+    }
+
+    private void validateSynonymString(String[] values) {
+        if (values.length == 0) {
+            return;
+        }
+        for (String value : values) {
+            if (value.indexOf(",") >= 0) {
+                throw new SSCActionMessagesException("errors.invalid_str_is_included", value, ",");
+            }
+            if (value.indexOf("=>") >= 0) {
+                throw new SSCActionMessagesException("errors.invalid_str_is_included", value, "=>");
+            }
+        }
     }
 
     private String[] splitLine(final String value) {
