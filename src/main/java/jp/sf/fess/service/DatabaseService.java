@@ -447,8 +447,8 @@ public class DatabaseService {
                         final ScheduledJobCB cb = new ScheduledJobCB();
                         cb.query().setName_Equal(scheduledJob.getName());
                         cb.query().setDeletedBy_IsNull();
-                        final ScheduledJob entity = scheduledJobBhv
-                                .selectEntity(cb);
+                        final List<ScheduledJob> list = scheduledJobBhv.selectList(cb);
+                        final ScheduledJob entity = list.size() == 1 ? list.get(0) : null;
                         scheduledJob.setId(null);
                         if (entity == null) {
                             scheduledJobBhv.insert(scheduledJob);
@@ -484,7 +484,8 @@ public class DatabaseService {
                         final LabelTypeCB cb = new LabelTypeCB();
                         cb.query().setValue_Equal(labelType.getValue());
                         cb.query().setDeletedBy_IsNull();
-                        final LabelType entity = labelTypeBhv.selectEntity(cb);
+                        final List<LabelType> list = labelTypeBhv.selectList(cb);
+                        final LabelType entity = list.size() == 1 ? list.get(0) : null;
                         labelType.setId(null);
                         if (entity == null) {
                             labelTypeBhv.insert(labelType);
@@ -527,7 +528,8 @@ public class DatabaseService {
                         final RoleTypeCB cb = new RoleTypeCB();
                         cb.query().setValue_Equal(roleType.getValue());
                         cb.query().setDeletedBy_IsNull();
-                        final RoleType entity = roleTypeBhv.selectEntity(cb);
+                        final List<RoleType> list = roleTypeBhv.selectList(cb);
+                        final RoleType entity = list.size() == 1 ? list.get(0) : null;
                         roleType.setId(null);
                         if (entity == null) {
                             roleTypeBhv.insert(roleType);
@@ -629,8 +631,8 @@ public class DatabaseService {
                         final FileCrawlingConfigCB cb = new FileCrawlingConfigCB();
                         cb.query().setName_Equal(fileCrawlingConfig.getName());
                         cb.query().setDeletedBy_IsNull();
-                        final FileCrawlingConfig entity = fileCrawlingConfigBhv
-                                .selectEntity(cb);
+                        final List<FileCrawlingConfig> list = fileCrawlingConfigBhv.selectList(cb);
+                        final FileCrawlingConfig entity = list.size() == 1 ? list.get(0) : null;
                         fileCrawlingConfig.setId(null);
                         if (entity == null) {
                             fileCrawlingConfigBhv.insert(fileCrawlingConfig);
@@ -669,8 +671,8 @@ public class DatabaseService {
                         final DataCrawlingConfigCB cb = new DataCrawlingConfigCB();
                         cb.query().setName_Equal(dataCrawlingConfig.getName());
                         cb.query().setDeletedBy_IsNull();
-                        final DataCrawlingConfig entity = dataCrawlingConfigBhv
-                                .selectEntity(cb);
+                        final List<DataCrawlingConfig> list = dataCrawlingConfigBhv.selectList(cb);
+                        final DataCrawlingConfig entity = list.size() == 1 ? list.get(0) : null;
                         dataCrawlingConfig.setId(null);
                         if (entity == null) {
                             dataCrawlingConfigBhv.insert(dataCrawlingConfig);
@@ -709,8 +711,8 @@ public class DatabaseService {
                         final PathMappingCB cb = new PathMappingCB();
                         cb.query().setRegex_Equal(pathMapping.getRegex());
                         cb.query().setDeletedBy_IsNull();
-                        final PathMapping entity = pathMappingBhv
-                                .selectEntity(cb);
+                        final List<PathMapping> list = pathMappingBhv.selectList(cb);
+                        final PathMapping entity = list.size() == 1 ? list.get(0) : null;
                         pathMapping.setId(null);
                         if (pathMapping.getProcessType() == null) {
                             pathMapping.setProcessType_Crawling();
@@ -752,8 +754,8 @@ public class DatabaseService {
                         cb.query().setOverlappingName_Equal(
                                 overlappingHost.getOverlappingName());
                         cb.query().setDeletedBy_IsNull();
-                        final OverlappingHost entity = overlappingHostBhv
-                                .selectEntity(cb);
+                        final List<OverlappingHost> list = overlappingHostBhv.selectList(cb);
+                        final OverlappingHost entity = list.size() == 1 ? list.get(0) : null;
                         overlappingHost.setId(null);
                         if (entity == null) {
                             overlappingHostBhv.insert(overlappingHost);
@@ -789,8 +791,8 @@ public class DatabaseService {
                         final WebCrawlingConfigCB cb = new WebCrawlingConfigCB();
                         cb.query().setName_Equal(webCrawlingConfig.getName());
                         cb.query().setDeletedBy_IsNull();
-                        final WebCrawlingConfig entity = webCrawlingConfigBhv
-                                .selectEntity(cb);
+                        final List<WebCrawlingConfig> list = webCrawlingConfigBhv.selectList(cb);
+                        final WebCrawlingConfig entity = list.size() == 1 ? list.get(0) : null;
                         webCrawlingConfig.setId(null);
                         if (entity == null) {
                             webCrawlingConfigBhv.insert(webCrawlingConfig);
@@ -843,8 +845,8 @@ public class DatabaseService {
                         final FileConfigToLabelTypeMappingCB cb = new FileConfigToLabelTypeMappingCB();
                         cb.query().setLabelTypeId_Equal(labelTypeId);
                         cb.query().setFileConfigId_Equal(fileConfigId);
-                        final FileConfigToLabelTypeMapping entity = fileConfigToLabelTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<FileConfigToLabelTypeMapping> list = fileConfigToLabelTypeMappingBhv.selectList(cb);
+                        final FileConfigToLabelTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             fileConfigToLabelTypeMapping = new FileConfigToLabelTypeMapping();
                             fileConfigToLabelTypeMapping
@@ -892,8 +894,8 @@ public class DatabaseService {
                         final DataConfigToLabelTypeMappingCB cb = new DataConfigToLabelTypeMappingCB();
                         cb.query().setLabelTypeId_Equal(labelTypeId);
                         cb.query().setDataConfigId_Equal(dataConfigId);
-                        final DataConfigToLabelTypeMapping entity = dataConfigToLabelTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<DataConfigToLabelTypeMapping> list = dataConfigToLabelTypeMappingBhv.selectList(cb);
+                        final DataConfigToLabelTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             dataConfigToLabelTypeMapping = new DataConfigToLabelTypeMapping();
                             dataConfigToLabelTypeMapping
@@ -937,8 +939,8 @@ public class DatabaseService {
                         final WebConfigToLabelTypeMappingCB cb = new WebConfigToLabelTypeMappingCB();
                         cb.query().setLabelTypeId_Equal(labelTypeId);
                         cb.query().setWebConfigId_Equal(webConfigId);
-                        final WebConfigToLabelTypeMapping entity = webConfigToLabelTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<WebConfigToLabelTypeMapping> list = webConfigToLabelTypeMappingBhv.selectList(cb);
+                        final WebConfigToLabelTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             webConfigToLabelTypeMapping = new WebConfigToLabelTypeMapping();
                             webConfigToLabelTypeMapping
@@ -982,8 +984,8 @@ public class DatabaseService {
                         final FileConfigToRoleTypeMappingCB cb = new FileConfigToRoleTypeMappingCB();
                         cb.query().setRoleTypeId_Equal(roleTypeId);
                         cb.query().setFileConfigId_Equal(fileConfigId);
-                        final FileConfigToRoleTypeMapping entity = fileConfigToRoleTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<FileConfigToRoleTypeMapping> list = fileConfigToRoleTypeMappingBhv.selectList(cb);
+                        final FileConfigToRoleTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             fileConfigToRoleTypeMapping = new FileConfigToRoleTypeMapping();
                             fileConfigToRoleTypeMapping
@@ -1027,8 +1029,8 @@ public class DatabaseService {
                         final DataConfigToRoleTypeMappingCB cb = new DataConfigToRoleTypeMappingCB();
                         cb.query().setRoleTypeId_Equal(roleTypeId);
                         cb.query().setDataConfigId_Equal(dataConfigId);
-                        final DataConfigToRoleTypeMapping entity = dataConfigToRoleTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<DataConfigToRoleTypeMapping> list = dataConfigToRoleTypeMappingBhv.selectList(cb);
+                        final DataConfigToRoleTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             dataConfigToRoleTypeMapping = new DataConfigToRoleTypeMapping();
                             dataConfigToRoleTypeMapping
@@ -1072,8 +1074,8 @@ public class DatabaseService {
                         final WebConfigToRoleTypeMappingCB cb = new WebConfigToRoleTypeMappingCB();
                         cb.query().setRoleTypeId_Equal(roleTypeId);
                         cb.query().setWebConfigId_Equal(webConfigId);
-                        final WebConfigToRoleTypeMapping entity = webConfigToRoleTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<WebConfigToRoleTypeMapping> list = webConfigToRoleTypeMappingBhv.selectList(cb);
+                        final WebConfigToRoleTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             webConfigToRoleTypeMapping = new WebConfigToRoleTypeMapping();
                             webConfigToRoleTypeMapping
@@ -1114,8 +1116,8 @@ public class DatabaseService {
                         final LabelTypeToRoleTypeMappingCB cb = new LabelTypeToRoleTypeMappingCB();
                         cb.query().setRoleTypeId_Equal(roleTypeId);
                         cb.query().setLabelTypeId_Equal(labelTypeId);
-                        final LabelTypeToRoleTypeMapping entity = labelTypeToRoleTypeMappingBhv
-                                .selectEntity(cb);
+                        final List<LabelTypeToRoleTypeMapping> list = labelTypeToRoleTypeMappingBhv.selectList(cb);
+                        final LabelTypeToRoleTypeMapping entity = list.size() == 1 ? list.get(0) : null;
                         if (entity == null) {
                             labelTypeToRoleTypeMapping = new LabelTypeToRoleTypeMapping();
                             labelTypeToRoleTypeMapping
@@ -1333,7 +1335,8 @@ public class DatabaseService {
                         final KeyMatchCB cb = new KeyMatchCB();
                         cb.query().setTerm_Equal(keyMatch.getTerm());
                         cb.query().setDeletedBy_IsNull();
-                        final KeyMatch entity = keyMatchBhv.selectEntity(cb);
+                        final List<KeyMatch> list = keyMatchBhv.selectList(cb);
+                        final KeyMatch entity = list.size() == 1 ? list.get(0) : null;
                         keyMatch.setId(null);
                         if (entity == null) {
                             keyMatchBhv.insert(keyMatch);
@@ -1370,8 +1373,8 @@ public class DatabaseService {
                         cb.query().setUrlExpr_Equal(
                                 boostDocumentRule.getUrlExpr());
                         cb.query().setDeletedBy_IsNull();
-                        final BoostDocumentRule entity = boostDocumentRuleBhv
-                                .selectEntity(cb);
+                        final List<BoostDocumentRule> list = boostDocumentRuleBhv.selectList(cb);
+                        final BoostDocumentRule entity = list.size() == 1 ? list.get(0) : null;
                         boostDocumentRule.setId(null);
                         if (entity == null) {
                             boostDocumentRuleBhv.insert(boostDocumentRule);
@@ -1409,8 +1412,8 @@ public class DatabaseService {
                         cb.query().setSuggestWord_Equal(
                                 suggestElevateWord.getSuggestWord());
                         cb.query().setDeletedBy_IsNull();
-                        final SuggestElevateWord entity = suggestElevateWordBhv
-                                .selectEntity(cb);
+                        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb);
+                        final SuggestElevateWord entity = list.size() == 1 ? list.get(0) : null;
                         suggestElevateWord.setId(null);
                         if (entity == null) {
                             suggestElevateWordBhv.insert(suggestElevateWord);
@@ -1450,8 +1453,8 @@ public class DatabaseService {
                         cb.query().setSuggestWord_Equal(
                                 suggestNGWord.getSuggestWord());
                         cb.query().setDeletedBy_IsNull();
-                        final SuggestBadWord entity = suggestBadWordBhv
-                                .selectEntity(cb);
+                        final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb);
+                        final SuggestBadWord entity = list.size() == 1 ? list.get(0) : null;
                         suggestNGWord.setId(null);
                         if (entity == null) {
                             suggestBadWordBhv.insert(suggestNGWord);
