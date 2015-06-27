@@ -1,0 +1,27 @@
+{
+  "web_config_to_role": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "_id": {
+      "path": "id"
+    },
+    "properties": {
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "webConfigId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "roleTypeId": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "search_field_log": {
     "_source": {
       "enabled": true
     },
@@ -14,30 +14,17 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "searchLogId": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "name": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
-        "type": "integer"
-      },
-      "createdBy": {
+      "value": {
         "type": "string",
         "index": "not_analyzed"
-      },
-      "createdTime": {
-        "type": "long"
-      },
-      "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "updatedTime": {
-        "type": "long"
       }
     }
   }

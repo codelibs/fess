@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "job_log": {
     "_source": {
       "enabled": true
     },
@@ -14,29 +14,34 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "jobName": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "jobStatus": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
-        "type": "integer"
-      },
-      "createdBy": {
+      "target": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "createdTime": {
+      "scriptType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "scriptData": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "scriptResult": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "startTime": {
         "type": "long"
       },
-      "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "updatedTime": {
+      "endTime": {
         "type": "long"
       }
     }

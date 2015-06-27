@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "data_config": {
     "_source": {
       "enabled": true
     },
@@ -14,13 +14,27 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "name": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "handlerName": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "handlerParameter": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "handlerScript": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "boost": {
+        "type": "float"
+      },
+      "available": {
+        "type": "boolean"
       },
       "sortOrder": {
         "type": "integer"

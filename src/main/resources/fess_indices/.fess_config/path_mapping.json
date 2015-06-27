@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "path_mapping": {
     "_source": {
       "enabled": true
     },
@@ -14,11 +14,15 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "regex": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "replacement": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "processType": {
         "type": "string",
         "index": "not_analyzed"
       },

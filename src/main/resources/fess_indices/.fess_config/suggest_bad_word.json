@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "suggest_bad_word": {
     "_source": {
       "enabled": true
     },
@@ -14,16 +14,17 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "suggestWord": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "targetRole": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
-        "type": "integer"
+      "targetLabel": {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "createdBy": {
         "type": "string",
