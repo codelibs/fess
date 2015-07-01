@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "favorite_log": {
     "_source": {
       "enabled": true
     },
@@ -14,29 +14,15 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "userInfoId": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "sortOrder": {
-        "type": "integer"
-      },
-      "createdBy": {
+      "url": {
         "type": "string",
         "index": "not_analyzed"
       },
       "createdTime": {
-        "type": "long"
-      },
-      "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "updatedTime": {
         "type": "long"
       }
     }

@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "scheduled_job": {
     "_source": {
       "enabled": true
     },
@@ -14,13 +14,35 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "name": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "target": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "cronExpression": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "scriptType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "scriptData": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "crawler": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "jobLogging": {
+        "type": "boolean"
+      },
+      "available": {
+        "type": "boolean"
       },
       "sortOrder": {
         "type": "integer"

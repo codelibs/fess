@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "request_header": {
     "_source": {
       "enabled": true
     },
@@ -14,16 +14,17 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "name": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "value": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
-        "type": "integer"
+      "webConfigId": {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "createdBy": {
         "type": "string",

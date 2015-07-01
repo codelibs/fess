@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "role_type": {
     "_source": {
       "enabled": true
     },
@@ -14,11 +14,11 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "name": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "value": {
         "type": "string",
         "index": "not_analyzed"
       },

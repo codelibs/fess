@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "crawling_session": {
     "_source": {
       "enabled": true
     },
@@ -14,29 +14,18 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "sessionId": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "name": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
-        "type": "integer"
-      },
-      "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "createdTime": {
+      "expiredTime": {
         "type": "long"
       },
-      "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "updatedTime": {
+      "createdTime": {
         "type": "long"
       }
     }

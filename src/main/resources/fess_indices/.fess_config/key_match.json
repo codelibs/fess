@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "key_match": {
     "_source": {
       "enabled": true
     },
@@ -14,16 +14,19 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "term": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "query": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
+      "maxSize": {
         "type": "integer"
+      },
+      "boost": {
+        "type": "float"
       },
       "createdBy": {
         "type": "string",

@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "overlapping_host": {
     "_source": {
       "enabled": true
     },
@@ -14,11 +14,11 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "regularName": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "overlappingName": {
         "type": "string",
         "index": "not_analyzed"
       },

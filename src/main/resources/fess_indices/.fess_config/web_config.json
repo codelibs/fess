@@ -1,0 +1,86 @@
+{
+  "web_config": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "_id": {
+      "path": "id"
+    },
+    "properties": {
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "urls": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "includedUrls": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "excludedUrls": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "includedDocUrls": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "excludedDocUrls": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "configParameter": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "depth": {
+        "type": "integer"
+      },
+      "maxAccessCount": {
+        "type": "long"
+      },
+      "userAgent": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "numOfThread": {
+        "type": "integer"
+      },
+      "intervalTime": {
+        "type": "integer"
+      },
+      "boost": {
+        "type": "float"
+      },
+      "available": {
+        "type": "boolean"
+      },
+      "sortOrder": {
+        "type": "integer"
+      },
+      "createdBy": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+  }
+}

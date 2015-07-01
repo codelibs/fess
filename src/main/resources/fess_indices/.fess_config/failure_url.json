@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "failure_url": {
     "_source": {
       "enabled": true
     },
@@ -14,30 +14,31 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "url": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "threadName": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
+      "errorName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "errorLog": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "errorCount": {
         "type": "integer"
       },
-      "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "createdTime": {
+      "lastAccessTime": {
         "type": "long"
       },
-      "updatedBy": {
+      "configId": {
         "type": "string",
         "index": "not_analyzed"
-      },
-      "updatedTime": {
-        "type": "long"
       }
     }
   }

@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "web_authentication": {
     "_source": {
       "enabled": true
     },
@@ -14,16 +14,36 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "hostname": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "sortOrder": {
+      "port": {
         "type": "integer"
+      },
+      "authRealm": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "protocolScheme": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "username": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "password": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "parameters": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "webConfigId": {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "createdBy": {
         "type": "string",

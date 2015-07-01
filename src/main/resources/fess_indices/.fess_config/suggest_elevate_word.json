@@ -1,5 +1,5 @@
 {
-  "boost_document_rule": {
+  "suggest_elevate_word": {
     "_source": {
       "enabled": true
     },
@@ -14,16 +14,24 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "urlExpr": {
+      "suggestWord": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "boostExpr": {
+      "reading": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "sortOrder": {
-        "type": "integer"
+      "targetRole": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "targetLabel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "boost": {
+        "type": "float"
       },
       "createdBy": {
         "type": "string",
