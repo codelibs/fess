@@ -1,0 +1,134 @@
+package ${request.package}.cbean.bs;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import ${request.package}.bsentity.dbmeta.${table.camelizedName}Dbm;
+import ${request.package}.cbean.${table.camelizedName}CB;
+import ${request.package}.cbean.cq.${table.camelizedName}CQ;
+import ${request.package}.cbean.cq.bs.Bs${table.camelizedName}CQ;
+import org.dbflute.cbean.ConditionQuery;
+import org.elasticsearch.action.count.CountRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+
+/**
+ * @author FreeGen
+ */
+public class Bs${table.camelizedName}CB extends AbstractConditionBean {
+
+    protected Bs${table.camelizedName}CQ _conditionQuery;
+
+    protected HpSpecification _specification;
+
+    @Override
+    public ${table.camelizedName}Dbm asDBMeta() {
+        return ${table.camelizedName}Dbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "${table.name}";
+    }
+
+    @Override
+    public boolean hasSpecifiedColumn() {
+        return _specification != null;
+    }
+
+    @Override
+    public ConditionQuery localCQ() {
+        return doGetConditionQuery();
+    }
+
+    public ${table.camelizedName}CB acceptPK(String id) {
+        assertObjectNotNull("id", id);
+        Bs${table.camelizedName}CB cb = this;
+        cb.query().docMeta().setId_Equal(id);
+        return (${table.camelizedName}CB) this;
+    }
+
+    @Override
+    public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
+        acceptPK((String)primaryKeyMap.get("_id"));
+    }
+
+    @Override
+    public CountRequestBuilder build(CountRequestBuilder builder) {
+        if (_conditionQuery != null) {
+            QueryBuilder queryBuilder = _conditionQuery.getQuery();
+            if (queryBuilder != null) {
+                builder.setQuery(queryBuilder);
+            }
+        }
+        return builder;
+    }
+
+    @Override
+    public SearchRequestBuilder build(SearchRequestBuilder builder) {
+        if (_conditionQuery != null) {
+            QueryBuilder queryBuilder = _conditionQuery.getQuery();
+            if (queryBuilder != null) {
+                builder.setQuery(queryBuilder);
+            }
+            _conditionQuery.getFieldSortBuilderList().forEach(sort -> {
+                builder.addSort(sort);
+            });
+        }
+
+        if (_specification != null) {
+            builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
+        }
+
+        return builder;
+    }
+
+    public Bs${table.camelizedName}CQ query() {
+        assertQueryPurpose();
+        return doGetConditionQuery();
+    }
+
+    protected Bs${table.camelizedName}CQ doGetConditionQuery() {
+        if (_conditionQuery == null) {
+            _conditionQuery = createLocalCQ();
+        }
+        return _conditionQuery;
+    }
+
+    protected Bs${table.camelizedName}CQ createLocalCQ() {
+        return new ${table.camelizedName}CQ();
+    }
+
+    public HpSpecification specify() {
+        assertSpecifyPurpose();
+        if (_specification == null) {
+            _specification = new HpSpecification();
+        }
+        return _specification;
+    }
+
+    protected void assertQueryPurpose() {
+        // TODO
+    }
+
+    protected void assertSpecifyPurpose() {
+        // TODO
+    }
+
+    public static class HpSpecification {
+        private List<String> columnList = new ArrayList<>();
+
+        private void doColumn(String name) {
+            columnList.add(name);
+        }
+
+#foreach ($column in $table.columnList)
+#if ($column.isNormalColumn)
+        public void column${column.capCamelName}() {
+            doColumn("${column.name}");
+        }
+#end
+#end
+    }
+}

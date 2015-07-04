@@ -2,45 +2,39 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<component name="fessEsClient" class="org.codelibs.fess.client.FessEsClient">
-		<property name="settings">
-			#{"http.cors.enabled" : "true"}
-		</property>
-		<initMethod name="addIndexConfig">
-			<arg>"fess/doc"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
-			<arg>".fess_config/boost_document_rule"</arg>
-			<arg>".fess_config/click_log"</arg>
-			<arg>".fess_config/crawling_session"</arg>
-			<arg>".fess_config/crawling_session_info"</arg>
-			<arg>".fess_config/data_config"</arg>
-			<arg>".fess_config/data_config_to_label"</arg>
-			<arg>".fess_config/data_config_to_role"</arg>
-			<arg>".fess_config/failure_url"</arg>
-			<arg>".fess_config/favorite_log"</arg>
-			<arg>".fess_config/file_authentication"</arg>
-			<arg>".fess_config/file_config"</arg>
-			<arg>".fess_config/file_config_to_label"</arg>
-			<arg>".fess_config/file_config_to_role"</arg>
-			<arg>".fess_config/job_log"</arg>
-			<arg>".fess_config/key_match"</arg>
-			<arg>".fess_config/label_to_role"</arg>
-			<arg>".fess_config/label_type"</arg>
-			<arg>".fess_config/overlapping_host"</arg>
-			<arg>".fess_config/path_mapping"</arg>
-			<arg>".fess_config/request_header"</arg>
-			<arg>".fess_config/role_type"</arg>
-			<arg>".fess_config/scheduled_job"</arg>
-			<arg>".fess_config/search_field_log"</arg>
-			<arg>".fess_config/search_log"</arg>
-			<arg>".fess_config/suggest_bad_word"</arg>
-			<arg>".fess_config/suggest_elevate_word"</arg>
-			<arg>".fess_config/user_info"</arg>
-			<arg>".fess_config/web_authentication"</arg>
-			<arg>".fess_config/web_config"</arg>
-			<arg>".fess_config/web_config_to_label"</arg>
-			<arg>".fess_config/web_config_to_role"</arg>
-		</initMethod>
-	</component>
+	<include path="esclient.dicon"/>
+
+    <!-- The components of Behavior. -->
+    <component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.exbhv.BoostDocumentRuleBhv"/>
+    <component name="clickLogBhv" class="org.codelibs.fess.es.exbhv.ClickLogBhv"/>
+    <component name="crawlingSessionBhv" class="org.codelibs.fess.es.exbhv.CrawlingSessionBhv"/>
+    <component name="crawlingSessionInfoBhv" class="org.codelibs.fess.es.exbhv.CrawlingSessionInfoBhv"/>
+    <component name="dataConfigToLabelBhv" class="org.codelibs.fess.es.exbhv.DataConfigToLabelBhv"/>
+    <component name="dataConfigToRoleBhv" class="org.codelibs.fess.es.exbhv.DataConfigToRoleBhv"/>
+    <component name="dataConfigBhv" class="org.codelibs.fess.es.exbhv.DataConfigBhv"/>
+    <component name="failureUrlBhv" class="org.codelibs.fess.es.exbhv.FailureUrlBhv"/>
+    <component name="favoriteLogBhv" class="org.codelibs.fess.es.exbhv.FavoriteLogBhv"/>
+    <component name="fileAuthenticationBhv" class="org.codelibs.fess.es.exbhv.FileAuthenticationBhv"/>
+    <component name="fileConfigToLabelBhv" class="org.codelibs.fess.es.exbhv.FileConfigToLabelBhv"/>
+    <component name="fileConfigToRoleBhv" class="org.codelibs.fess.es.exbhv.FileConfigToRoleBhv"/>
+    <component name="fileConfigBhv" class="org.codelibs.fess.es.exbhv.FileConfigBhv"/>
+    <component name="jobLogBhv" class="org.codelibs.fess.es.exbhv.JobLogBhv"/>
+    <component name="keyMatchBhv" class="org.codelibs.fess.es.exbhv.KeyMatchBhv"/>
+    <component name="labelTypeBhv" class="org.codelibs.fess.es.exbhv.LabelTypeBhv"/>
+    <component name="labelToRoleBhv" class="org.codelibs.fess.es.exbhv.LabelToRoleBhv"/>
+    <component name="overlappingHostBhv" class="org.codelibs.fess.es.exbhv.OverlappingHostBhv"/>
+    <component name="pathMappingBhv" class="org.codelibs.fess.es.exbhv.PathMappingBhv"/>
+    <component name="requestHeaderBhv" class="org.codelibs.fess.es.exbhv.RequestHeaderBhv"/>
+    <component name="roleTypeBhv" class="org.codelibs.fess.es.exbhv.RoleTypeBhv"/>
+    <component name="scheduledJobBhv" class="org.codelibs.fess.es.exbhv.ScheduledJobBhv"/>
+    <component name="searchFieldLogBhv" class="org.codelibs.fess.es.exbhv.SearchFieldLogBhv"/>
+    <component name="searchLogBhv" class="org.codelibs.fess.es.exbhv.SearchLogBhv"/>
+    <component name="suggestBadWordBhv" class="org.codelibs.fess.es.exbhv.SuggestBadWordBhv"/>
+    <component name="suggestElevateWordBhv" class="org.codelibs.fess.es.exbhv.SuggestElevateWordBhv"/>
+    <component name="userInfoBhv" class="org.codelibs.fess.es.exbhv.UserInfoBhv"/>
+    <component name="webAuthenticationBhv" class="org.codelibs.fess.es.exbhv.WebAuthenticationBhv"/>
+    <component name="webConfigToLabelBhv" class="org.codelibs.fess.es.exbhv.WebConfigToLabelBhv"/>
+    <component name="webConfigToRoleBhv" class="org.codelibs.fess.es.exbhv.WebConfigToRoleBhv"/>
+    <component name="webConfigBhv" class="org.codelibs.fess.es.exbhv.WebConfigBhv"/>
+
 </components>

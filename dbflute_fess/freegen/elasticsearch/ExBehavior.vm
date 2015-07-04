@@ -1,0 +1,10 @@
+package ${request.package}.exbhv;
+
+import ${request.package}.bsbhv.Bs${table.camelizedName}Bhv;
+
+/**
+ * @author FreeGen
+ */
+public class ${table.camelizedName}Bhv extends Bs${table.camelizedName}Bhv {
+
+}

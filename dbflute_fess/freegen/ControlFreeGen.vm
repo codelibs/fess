@@ -1,0 +1,154 @@
+
+$manager.info("requestList: ${requestList.size()}")
+
+#foreach ($request in $requestList)
+#set ($tableMap = $request.tableMap)
+$request.enableOutputDirectory()
+$manager.makeDirectory($request.generateDirPath)
+
+#if ($request.isResourceTypeJsonSchema())
+#if ($request.requestName == "JsonBeanGen")
+  ##
+  ## <<<  Json Schema Gen  >>>
+  ##
+  #foreach ($table in $request.tableList)
+    #set ($path = "${request.generateDirPath}/bean/bs/Bs${table.camelizedName}.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./json/BsJsonBean.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/bean/ex/${table.camelizedName}.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    #if (!$files.file(${generator.outputPath},$path).exists())
+      $generator.parse("./json/ExJsonBean.vm", $path, "", "")
+    #end
+  #end
+#end
+#elseif ($request.isResourceTypeSolr())
+#if ($request.requestName == "SolrBeanGen")
+  ##
+  ## <<<  Solr (Xml) Gen  >>>
+  ##
+  #set ($table = $request.table)
+  #set ($path = "${request.generateDirPath}/bean/bs/${tableMap.baseBeanClassName}.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./solr/BsSolrBean.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/bean/ex/${tableMap.extendedBeanClassName}.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  #if (!$files.file(${generator.outputPath},$path).exists())
+    $generator.parse("./solr/ExSolrBean.vm", $path, "", "")
+  #end
+#end
+#elseif ($request.isResourceTypeElasticsearch())
+#if ($request.requestName == "ElasticsearchBeanGen")
+  ##
+  ## <<<  Elasticsearch Schema Gen  >>>
+  ##
+  #foreach ($table in $request.tableList)
+    #set ($path = "${request.generateDirPath}/bsentity/dbmeta/${table.camelizedName}Dbm.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./elasticsearch/DBMeta.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/bsentity/Bs${table.camelizedName}.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./elasticsearch/BsEntity.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/exentity/${table.camelizedName}.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    #if (!$files.file(${generator.outputPath},$path).exists())
+      $generator.parse("./elasticsearch/ExEntity.vm", $path, "", "")
+    #end
+
+    #set ($path = "${request.generateDirPath}/cbean/bs/Bs${table.camelizedName}CB.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./elasticsearch/BsConditionBean.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/cbean/${table.camelizedName}CB.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    #if (!$files.file(${generator.outputPath},$path).exists())
+      $generator.parse("./elasticsearch/ExConditionBean.vm", $path, "", "")
+    #end
+
+    #set ($path = "${request.generateDirPath}/cbean/cq/bs/Bs${table.camelizedName}CQ.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./elasticsearch/BsConditionQuery.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/cbean/cq/${table.camelizedName}CQ.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    #if (!$files.file(${generator.outputPath},$path).exists())
+      $generator.parse("./elasticsearch/ExConditionQuery.vm", $path, "", "")
+    #end
+
+    #set ($path = "${request.generateDirPath}/bsbhv/Bs${table.camelizedName}Bhv.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./elasticsearch/BsBehavior.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/exbhv/${table.camelizedName}Bhv.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    #if (!$files.file(${generator.outputPath},$path).exists())
+      $generator.parse("./elasticsearch/ExBehavior.vm", $path, "", "")
+    #end
+  #end
+
+  #set ($path = "${request.generateDirPath}/cbean/bs/AbstractConditionBean.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/AbstractConditionBean.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/cbean/cq/bs/AbstractConditionQuery.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/AbstractConditionQuery.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/bsentity/AbstractEntity.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/AbstractEntity.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/bsbhv/AbstractBehavior.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/AbstractBehavior.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/cbean/result/EsPagingResultBean.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/EsPagingResultBean.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/cbean/sqlclause/SqlClauseEs.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/SqlClauseEs.vm", $path, "", "")
+#end
+#else
+  ##
+  ## <<<  Normal Gen  >>>
+  ##
+  #if ($request.isOnlyOneTable())
+    #set ($table = $request.table)
+    $request.info("parse('${request.generateFilePath}')")
+    $generator.parse($request.templatePath, $request.generateFilePath, "", "")
+  #else
+    #foreach ($table in $request.tableList)
+      #set ($path = "${request.generateDirPath}/${table.camelizedName}.java")
+      $manager.makeDirectory($path)
+      $request.info("parse('${path}')")
+      $generator.parse($request.templatePath, $path, "", "")
+    #end
+  #end
+#end
+
+#end
