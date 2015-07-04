@@ -25,10 +25,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.allcommon.CDef;
-import org.codelibs.fess.db.cbean.PathMappingCB;
-import org.codelibs.fess.db.exbhv.PathMappingBhv;
-import org.codelibs.fess.db.exentity.PathMapping;
+import org.codelibs.fess.es.cbean.PathMappingCB;
+import org.codelibs.fess.es.exbhv.PathMappingBhv;
+import org.codelibs.fess.es.exentity.PathMapping;
 import org.codelibs.fess.pager.PathMappingPager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -39,10 +38,6 @@ public class PathMappingService implements Serializable {
 
     @Resource
     protected PathMappingBhv pathMappingBhv;
-
-    public PathMappingService() {
-        super();
-    }
 
     public List<PathMapping> getPathMappingList(final PathMappingPager pathMappingPager) {
 
@@ -62,7 +57,8 @@ public class PathMappingService implements Serializable {
 
     public PathMapping getPathMapping(final Map<String, String> keys) {
         final PathMapping pathMapping = pathMappingBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
+            cb.request().setVersion(true);
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (pathMapping == null) {
@@ -76,34 +72,36 @@ public class PathMappingService implements Serializable {
     public void store(final PathMapping pathMapping) throws CrudMessageException {
         setupStoreCondition(pathMapping);
 
-        pathMappingBhv.insertOrUpdate(pathMapping);
+        pathMappingBhv.insertOrUpdate(pathMapping, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final PathMapping pathMapping) throws CrudMessageException {
         setupDeleteCondition(pathMapping);
 
-        pathMappingBhv.delete(pathMapping);
+        pathMappingBhv.delete(pathMapping, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
-    public List<PathMapping> getPathMappingList(final Collection<CDef.ProcessType> cdefList) {
+    public List<PathMapping> getPathMappingList(final Collection<String> processTypeList) {
 
         return pathMappingBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
-            cb.query().setProcessType_InScope_AsProcessType(cdefList);
+            cb.query().setProcessType_InScope(processTypeList);
         });
     }
 
     protected void setupListCondition(final PathMappingCB cb, final PathMappingPager pathMappingPager) {
         if (pathMappingPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(pathMappingPager.id));
+            cb.query().docMeta().setId_Equal(pathMappingPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
@@ -113,7 +111,6 @@ public class PathMappingService implements Serializable {
     protected void setupEntityCondition(final PathMappingCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 

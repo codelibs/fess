@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.codelibs.fess.db.allcommon.CDef;
-import org.codelibs.fess.db.exbhv.PathMappingBhv;
-import org.codelibs.fess.db.exentity.PathMapping;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.exbhv.PathMappingBhv;
+import org.codelibs.fess.es.exentity.PathMapping;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
@@ -43,16 +43,15 @@ public class PathMappingHelper implements Serializable {
 
     @InitMethod
     public void init() {
-        final List<CDef.ProcessType> ptList = new ArrayList<CDef.ProcessType>();
-        ptList.add(CDef.ProcessType.Displaying);
-        ptList.add(CDef.ProcessType.Both);
+        final List<String> ptList = new ArrayList<>();
+        ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
+        ptList.add(Constants.PROCESS_TYPE_BOTH);
 
         try {
             final PathMappingBhv pathMappingBhv = SingletonS2Container.getComponent(PathMappingBhv.class);
             cachedPathMappingList = pathMappingBhv.selectList(cb -> {
-                cb.query().setDeletedBy_IsNull();
                 cb.query().addOrderBy_SortOrder_Asc();
-                cb.query().setProcessType_InScope_AsProcessType(ptList);
+                cb.query().setProcessType_InScope(ptList);
             });
         } catch (final Exception e) {
             logger.warn("Failed to load path mappings.", e);

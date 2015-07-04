@@ -309,4 +309,10 @@ public class Constants extends CoreLibConstants {
 
     public static final int DEFAULT_START_COUNT = 0;
 
+    public static final String PROCESS_TYPE_CRAWLING = "C";
+
+    public static final String PROCESS_TYPE_DISPLAYING = "D";
+
+    public static final String PROCESS_TYPE_BOTH = "B";
+
 }

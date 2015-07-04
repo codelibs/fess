@@ -362,9 +362,9 @@ public class Crawler implements Serializable {
             writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_START_TIME);
 
             // setup path mapping
-            final List<CDef.ProcessType> ptList = new ArrayList<CDef.ProcessType>();
-            ptList.add(CDef.ProcessType.Crawling);
-            ptList.add(CDef.ProcessType.Both);
+            final List<String> ptList = new ArrayList<>();
+            ptList.add(Constants.PROCESS_TYPE_CRAWLING);
+            ptList.add(Constants.PROCESS_TYPE_BOTH);
             pathMappingHelper.setPathMappingList(options.sessionId, pathMappingService.getPathMappingList(ptList));
 
             // overlapping host

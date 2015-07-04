@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.PathMapping;
+import org.codelibs.fess.es.exentity.PathMapping;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.PathMappingPager;
@@ -285,7 +284,7 @@ public class PathMappingAction extends FessAdminAction {
     protected PathMapping createPathMapping() {
         PathMapping pathMapping;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (pathMappingForm.crudMode == CommonConstants.EDIT_MODE) {
             pathMapping = pathMappingService.getPathMapping(createKeyMap());
             if (pathMapping == null) {
@@ -318,12 +317,7 @@ public class PathMappingAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { pathMappingForm.id });
             }
 
-            //            pathMappingService.delete(pathMapping);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            pathMapping.setDeletedBy(username);
-            pathMapping.setDeletedTime(currentTime);
-            pathMappingService.store(pathMapping);
+            pathMappingService.delete(pathMapping);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
