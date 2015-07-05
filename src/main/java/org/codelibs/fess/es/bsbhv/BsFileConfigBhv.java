@@ -41,25 +41,25 @@ public abstract class BsFileConfigBhv extends AbstractBehavior<FileConfig, FileC
     protected <RESULT extends FileConfig> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable((Boolean) source.get("available"));
-            result.setBoost((Float) source.get("boost"));
-            result.setConfigParameter((String) source.get("configParameter"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setDepth((Integer) source.get("depth"));
-            result.setExcludedDocPaths((String) source.get("excludedDocPaths"));
-            result.setExcludedPaths((String) source.get("excludedPaths"));
-            result.setId((String) source.get("id"));
-            result.setIncludedDocPaths((String) source.get("includedDocPaths"));
-            result.setIncludedPaths((String) source.get("includedPaths"));
-            result.setIntervalTime((Integer) source.get("intervalTime"));
-            result.setMaxAccessCount((Long) source.get("maxAccessCount"));
-            result.setName((String) source.get("name"));
-            result.setNumOfThread((Integer) source.get("numOfThread"));
-            result.setPaths((String) source.get("paths"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setAvailable(toBoolean(source.get("available")));
+            result.setBoost(toFloat(source.get("boost")));
+            result.setConfigParameter(toString(source.get("configParameter")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setDepth(toInteger(source.get("depth")));
+            result.setExcludedDocPaths(toString(source.get("excludedDocPaths")));
+            result.setExcludedPaths(toString(source.get("excludedPaths")));
+            result.setId(toString(source.get("id")));
+            result.setIncludedDocPaths(toString(source.get("includedDocPaths")));
+            result.setIncludedPaths(toString(source.get("includedPaths")));
+            result.setIntervalTime(toInteger(source.get("intervalTime")));
+            result.setMaxAccessCount(toLong(source.get("maxAccessCount")));
+            result.setName(toString(source.get("name")));
+            result.setNumOfThread(toInteger(source.get("numOfThread")));
+            result.setPaths(toString(source.get("paths")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

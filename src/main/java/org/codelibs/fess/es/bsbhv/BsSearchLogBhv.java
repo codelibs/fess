@@ -41,19 +41,19 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
     protected <RESULT extends SearchLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAccessType((String) source.get("accessType"));
-            result.setClientIp((String) source.get("clientIp"));
-            result.setHitCount((Long) source.get("hitCount"));
-            result.setId((String) source.get("id"));
-            result.setQueryOffset((Integer) source.get("queryOffset"));
-            result.setQueryPageSize((Integer) source.get("queryPageSize"));
-            result.setReferer((String) source.get("referer"));
-            result.setRequestedTime((Long) source.get("requestedTime"));
-            result.setResponseTime((Integer) source.get("responseTime"));
-            result.setSearchWord((String) source.get("searchWord"));
-            result.setUserAgent((String) source.get("userAgent"));
-            result.setUserId((Long) source.get("userId"));
-            result.setUserSessionId((String) source.get("userSessionId"));
+            result.setAccessType(toString(source.get("accessType")));
+            result.setClientIp(toString(source.get("clientIp")));
+            result.setHitCount(toLong(source.get("hitCount")));
+            result.setId(toString(source.get("id")));
+            result.setQueryOffset(toInteger(source.get("queryOffset")));
+            result.setQueryPageSize(toInteger(source.get("queryPageSize")));
+            result.setReferer(toString(source.get("referer")));
+            result.setRequestedTime(toLong(source.get("requestedTime")));
+            result.setResponseTime(toInteger(source.get("responseTime")));
+            result.setSearchWord(toString(source.get("searchWord")));
+            result.setUserAgent(toString(source.get("userAgent")));
+            result.setUserId(toLong(source.get("userId")));
+            result.setUserSessionId(toString(source.get("userSessionId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

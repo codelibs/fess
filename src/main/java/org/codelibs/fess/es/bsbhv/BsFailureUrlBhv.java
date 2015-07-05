@@ -41,14 +41,14 @@ public abstract class BsFailureUrlBhv extends AbstractBehavior<FailureUrl, Failu
     protected <RESULT extends FailureUrl> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setConfigId((String) source.get("configId"));
-            result.setErrorCount((Integer) source.get("errorCount"));
-            result.setErrorLog((String) source.get("errorLog"));
-            result.setErrorName((String) source.get("errorName"));
-            result.setId((String) source.get("id"));
-            result.setLastAccessTime((Long) source.get("lastAccessTime"));
-            result.setThreadName((String) source.get("threadName"));
-            result.setUrl((String) source.get("url"));
+            result.setConfigId(toString(source.get("configId")));
+            result.setErrorCount(toInteger(source.get("errorCount")));
+            result.setErrorLog(toString(source.get("errorLog")));
+            result.setErrorName(toString(source.get("errorName")));
+            result.setId(toString(source.get("id")));
+            result.setLastAccessTime(toLong(source.get("lastAccessTime")));
+            result.setThreadName(toString(source.get("threadName")));
+            result.setUrl(toString(source.get("url")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

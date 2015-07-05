@@ -134,5 +134,72 @@ public abstract class AbstractBehavior<ENTITY extends Entity, CB extends Conditi
         return response.isFound() ? 1 : 0;
     }
 
+    protected static String toString(Object value) {
+        if (value != null) {
+            return value.toString();
+        } else {
+            return null;
+        }
+    }
+
+    protected static Short toShort(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).shortValue();
+        } else if (value instanceof String) {
+            return Short.parseShort(value.toString());
+        } else {
+            return null;
+        }
+    }
+
+    protected static Integer toInteger(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        } else if (value instanceof String) {
+            return Integer.parseInt(value.toString());
+        } else {
+            return null;
+        }
+    }
+
+    protected static Long toLong(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        } else if (value instanceof String) {
+            return Long.parseLong(value.toString());
+        } else {
+            return null;
+        }
+    }
+
+    protected static Float toFloat(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        } else if (value instanceof String) {
+            return Float.parseFloat(value.toString());
+        } else {
+            return null;
+        }
+    }
+
+    protected static Double toDouble(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        } else if (value instanceof String) {
+            return Double.parseDouble(value.toString());
+        } else {
+            return null;
+        }
+    }
+
+    protected static Boolean toBoolean(Object value) {
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
+        } else if (value instanceof String) {
+            return Boolean.parseBoolean(value.toString());
+        } else {
+            return null;
+        }
+    }
 }
 

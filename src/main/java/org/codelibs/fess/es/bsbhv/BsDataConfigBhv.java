@@ -41,18 +41,18 @@ public abstract class BsDataConfigBhv extends AbstractBehavior<DataConfig, DataC
     protected <RESULT extends DataConfig> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable((Boolean) source.get("available"));
-            result.setBoost((Float) source.get("boost"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setHandlerName((String) source.get("handlerName"));
-            result.setHandlerParameter((String) source.get("handlerParameter"));
-            result.setHandlerScript((String) source.get("handlerScript"));
-            result.setId((String) source.get("id"));
-            result.setName((String) source.get("name"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setAvailable(toBoolean(source.get("available")));
+            result.setBoost(toFloat(source.get("boost")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setHandlerName(toString(source.get("handlerName")));
+            result.setHandlerParameter(toString(source.get("handlerParameter")));
+            result.setHandlerScript(toString(source.get("handlerScript")));
+            result.setId(toString(source.get("id")));
+            result.setName(toString(source.get("name")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

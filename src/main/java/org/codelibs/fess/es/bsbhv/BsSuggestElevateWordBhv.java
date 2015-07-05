@@ -41,16 +41,16 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
     protected <RESULT extends SuggestElevateWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setBoost((Float) source.get("boost"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setReading((String) source.get("reading"));
-            result.setSuggestWord((String) source.get("suggestWord"));
-            result.setTargetLabel((String) source.get("targetLabel"));
-            result.setTargetRole((String) source.get("targetRole"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setBoost(toFloat(source.get("boost")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setReading(toString(source.get("reading")));
+            result.setSuggestWord(toString(source.get("suggestWord")));
+            result.setTargetLabel(toString(source.get("targetLabel")));
+            result.setTargetRole(toString(source.get("targetRole")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

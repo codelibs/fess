@@ -41,9 +41,9 @@ public abstract class BsDataConfigToRoleBhv extends AbstractBehavior<DataConfigT
     protected <RESULT extends DataConfigToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setDataConfigId((String) source.get("dataConfigId"));
-            result.setId((String) source.get("id"));
-            result.setRoleTypeId((String) source.get("roleTypeId"));
+            result.setDataConfigId(toString(source.get("dataConfigId")));
+            result.setId(toString(source.get("id")));
+            result.setRoleTypeId(toString(source.get("roleTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

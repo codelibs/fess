@@ -41,14 +41,14 @@ public abstract class BsOverlappingHostBhv extends AbstractBehavior<OverlappingH
     protected <RESULT extends OverlappingHost> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setOverlappingName((String) source.get("overlappingName"));
-            result.setRegularName((String) source.get("regularName"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setOverlappingName(toString(source.get("overlappingName")));
+            result.setRegularName(toString(source.get("regularName")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

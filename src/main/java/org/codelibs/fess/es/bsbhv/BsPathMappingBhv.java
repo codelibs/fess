@@ -41,15 +41,15 @@ public abstract class BsPathMappingBhv extends AbstractBehavior<PathMapping, Pat
     protected <RESULT extends PathMapping> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setProcessType((String) source.get("processType"));
-            result.setRegex((String) source.get("regex"));
-            result.setReplacement((String) source.get("replacement"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setProcessType(toString(source.get("processType")));
+            result.setRegex(toString(source.get("regex")));
+            result.setReplacement(toString(source.get("replacement")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

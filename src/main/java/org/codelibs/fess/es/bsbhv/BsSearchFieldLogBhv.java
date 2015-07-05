@@ -41,10 +41,10 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehavior<SearchFieldLo
     protected <RESULT extends SearchFieldLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId((String) source.get("id"));
-            result.setName((String) source.get("name"));
-            result.setSearchLogId((String) source.get("searchLogId"));
-            result.setValue((String) source.get("value"));
+            result.setId(toString(source.get("id")));
+            result.setName(toString(source.get("name")));
+            result.setSearchLogId(toString(source.get("searchLogId")));
+            result.setValue(toString(source.get("value")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

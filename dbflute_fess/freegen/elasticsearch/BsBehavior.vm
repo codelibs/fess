@@ -29,7 +29,7 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
 
     @Override
     protected String asIndexEsName() {
-        return "${table.elasticsearchSettings.index}";
+        return "${table.indexSettings.index}";
     }
 
     @Override
@@ -44,7 +44,7 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
-            result.set${column.capCamelName}(($javaNative) source.get("${column.name}"));
+            result.set${column.capCamelName}(to$javaNative(source.get("${column.name}")));
 #end
 #end
             return result;

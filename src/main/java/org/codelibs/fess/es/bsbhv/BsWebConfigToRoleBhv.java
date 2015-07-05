@@ -41,9 +41,9 @@ public abstract class BsWebConfigToRoleBhv extends AbstractBehavior<WebConfigToR
     protected <RESULT extends WebConfigToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId((String) source.get("id"));
-            result.setRoleTypeId((String) source.get("roleTypeId"));
-            result.setWebConfigId((String) source.get("webConfigId"));
+            result.setId(toString(source.get("id")));
+            result.setRoleTypeId(toString(source.get("roleTypeId")));
+            result.setWebConfigId(toString(source.get("webConfigId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

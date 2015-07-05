@@ -41,9 +41,9 @@ public abstract class BsDataConfigToLabelBhv extends AbstractBehavior<DataConfig
     protected <RESULT extends DataConfigToLabel> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setDataConfigId((String) source.get("dataConfigId"));
-            result.setId((String) source.get("id"));
-            result.setLabelTypeId((String) source.get("labelTypeId"));
+            result.setDataConfigId(toString(source.get("dataConfigId")));
+            result.setId(toString(source.get("id")));
+            result.setLabelTypeId(toString(source.get("labelTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

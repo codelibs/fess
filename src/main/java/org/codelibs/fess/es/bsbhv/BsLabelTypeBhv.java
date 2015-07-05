@@ -41,16 +41,16 @@ public abstract class BsLabelTypeBhv extends AbstractBehavior<LabelType, LabelTy
     protected <RESULT extends LabelType> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setExcludedPaths((String) source.get("excludedPaths"));
-            result.setId((String) source.get("id"));
-            result.setIncludedPaths((String) source.get("includedPaths"));
-            result.setName((String) source.get("name"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
-            result.setValue((String) source.get("value"));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setExcludedPaths(toString(source.get("excludedPaths")));
+            result.setId(toString(source.get("id")));
+            result.setIncludedPaths(toString(source.get("includedPaths")));
+            result.setName(toString(source.get("name")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setValue(toString(source.get("value")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

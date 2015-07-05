@@ -41,10 +41,10 @@ public abstract class BsUserInfoBhv extends AbstractBehavior<UserInfo, UserInfoC
     protected <RESULT extends UserInfo> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCode((String) source.get("code"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setCode(toString(source.get("code")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

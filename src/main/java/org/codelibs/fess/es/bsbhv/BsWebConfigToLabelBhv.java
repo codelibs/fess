@@ -41,9 +41,9 @@ public abstract class BsWebConfigToLabelBhv extends AbstractBehavior<WebConfigTo
     protected <RESULT extends WebConfigToLabel> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId((String) source.get("id"));
-            result.setLabelTypeId((String) source.get("labelTypeId"));
-            result.setWebConfigId((String) source.get("webConfigId"));
+            result.setId(toString(source.get("id")));
+            result.setLabelTypeId(toString(source.get("labelTypeId")));
+            result.setWebConfigId(toString(source.get("webConfigId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -41,18 +41,18 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehavior<FileAuthe
     protected <RESULT extends FileAuthentication> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setFileConfigId((String) source.get("fileConfigId"));
-            result.setHostname((String) source.get("hostname"));
-            result.setId((String) source.get("id"));
-            result.setParameters((String) source.get("parameters"));
-            result.setPassword((String) source.get("password"));
-            result.setPort((Integer) source.get("port"));
-            result.setProtocolScheme((String) source.get("protocolScheme"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
-            result.setUsername((String) source.get("username"));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setFileConfigId(toString(source.get("fileConfigId")));
+            result.setHostname(toString(source.get("hostname")));
+            result.setId(toString(source.get("id")));
+            result.setParameters(toString(source.get("parameters")));
+            result.setPassword(toString(source.get("password")));
+            result.setPort(toInteger(source.get("port")));
+            result.setProtocolScheme(toString(source.get("protocolScheme")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setUsername(toString(source.get("username")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

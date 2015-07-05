@@ -41,14 +41,14 @@ public abstract class BsBoostDocumentRuleBhv extends AbstractBehavior<BoostDocum
     protected <RESULT extends BoostDocumentRule> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setBoostExpr((String) source.get("boostExpr"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
-            result.setUrlExpr((String) source.get("urlExpr"));
+            result.setBoostExpr(toString(source.get("boostExpr")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setUrlExpr(toString(source.get("urlExpr")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

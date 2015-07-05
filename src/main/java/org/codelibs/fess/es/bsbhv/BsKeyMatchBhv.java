@@ -41,15 +41,15 @@ public abstract class BsKeyMatchBhv extends AbstractBehavior<KeyMatch, KeyMatchC
     protected <RESULT extends KeyMatch> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setBoost((Float) source.get("boost"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setMaxSize((Integer) source.get("maxSize"));
-            result.setQuery((String) source.get("query"));
-            result.setTerm((String) source.get("term"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setBoost(toFloat(source.get("boost")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setMaxSize(toInteger(source.get("maxSize")));
+            result.setQuery(toString(source.get("query")));
+            result.setTerm(toString(source.get("term")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

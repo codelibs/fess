@@ -41,11 +41,11 @@ public abstract class BsCrawlingSessionInfoBhv extends AbstractBehavior<Crawling
     protected <RESULT extends CrawlingSessionInfo> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCrawlingSessionId((String) source.get("crawlingSessionId"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setKey((String) source.get("key"));
-            result.setValue((String) source.get("value"));
+            result.setCrawlingSessionId(toString(source.get("crawlingSessionId")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setKey(toString(source.get("key")));
+            result.setValue(toString(source.get("value")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

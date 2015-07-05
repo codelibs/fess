@@ -41,9 +41,9 @@ public abstract class BsLabelToRoleBhv extends AbstractBehavior<LabelToRole, Lab
     protected <RESULT extends LabelToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId((String) source.get("id"));
-            result.setLabelTypeId((String) source.get("labelTypeId"));
-            result.setRoleTypeId((String) source.get("roleTypeId"));
+            result.setId(toString(source.get("id")));
+            result.setLabelTypeId(toString(source.get("labelTypeId")));
+            result.setRoleTypeId(toString(source.get("roleTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -41,14 +41,14 @@ public abstract class BsRequestHeaderBhv extends AbstractBehavior<RequestHeader,
     protected <RESULT extends RequestHeader> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setName((String) source.get("name"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
-            result.setValue((String) source.get("value"));
-            result.setWebConfigId((String) source.get("webConfigId"));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setName(toString(source.get("name")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setValue(toString(source.get("value")));
+            result.setWebConfigId(toString(source.get("webConfigId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -41,15 +41,15 @@ public abstract class BsJobLogBhv extends AbstractBehavior<JobLog, JobLogCB> {
     protected <RESULT extends JobLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setEndTime((Long) source.get("endTime"));
-            result.setId((String) source.get("id"));
-            result.setJobName((String) source.get("jobName"));
-            result.setJobStatus((String) source.get("jobStatus"));
-            result.setScriptData((String) source.get("scriptData"));
-            result.setScriptResult((String) source.get("scriptResult"));
-            result.setScriptType((String) source.get("scriptType"));
-            result.setStartTime((Long) source.get("startTime"));
-            result.setTarget((String) source.get("target"));
+            result.setEndTime(toLong(source.get("endTime")));
+            result.setId(toString(source.get("id")));
+            result.setJobName(toString(source.get("jobName")));
+            result.setJobStatus(toString(source.get("jobStatus")));
+            result.setScriptData(toString(source.get("scriptData")));
+            result.setScriptResult(toString(source.get("scriptResult")));
+            result.setScriptType(toString(source.get("scriptType")));
+            result.setStartTime(toLong(source.get("startTime")));
+            result.setTarget(toString(source.get("target")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

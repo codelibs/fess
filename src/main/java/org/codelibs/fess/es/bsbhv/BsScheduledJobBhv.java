@@ -41,20 +41,20 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
     protected <RESULT extends ScheduledJob> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable((Boolean) source.get("available"));
-            result.setCrawler((String) source.get("crawler"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setCronExpression((String) source.get("cronExpression"));
-            result.setId((String) source.get("id"));
-            result.setJobLogging((Boolean) source.get("jobLogging"));
-            result.setName((String) source.get("name"));
-            result.setScriptData((String) source.get("scriptData"));
-            result.setScriptType((String) source.get("scriptType"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setTarget((String) source.get("target"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setAvailable(toBoolean(source.get("available")));
+            result.setCrawler(toString(source.get("crawler")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setCronExpression(toString(source.get("cronExpression")));
+            result.setId(toString(source.get("id")));
+            result.setJobLogging(toBoolean(source.get("jobLogging")));
+            result.setName(toString(source.get("name")));
+            result.setScriptData(toString(source.get("scriptData")));
+            result.setScriptType(toString(source.get("scriptType")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setTarget(toString(source.get("target")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

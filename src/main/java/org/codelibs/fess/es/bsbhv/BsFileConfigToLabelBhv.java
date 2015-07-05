@@ -41,9 +41,9 @@ public abstract class BsFileConfigToLabelBhv extends AbstractBehavior<FileConfig
     protected <RESULT extends FileConfigToLabel> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setFileConfigId((String) source.get("fileConfigId"));
-            result.setId((String) source.get("id"));
-            result.setLabelTypeId((String) source.get("labelTypeId"));
+            result.setFileConfigId(toString(source.get("fileConfigId")));
+            result.setId(toString(source.get("id")));
+            result.setLabelTypeId(toString(source.get("labelTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

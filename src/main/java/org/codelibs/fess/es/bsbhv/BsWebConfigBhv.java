@@ -41,26 +41,26 @@ public abstract class BsWebConfigBhv extends AbstractBehavior<WebConfig, WebConf
     protected <RESULT extends WebConfig> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable((Boolean) source.get("available"));
-            result.setBoost((Float) source.get("boost"));
-            result.setConfigParameter((String) source.get("configParameter"));
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setDepth((Integer) source.get("depth"));
-            result.setExcludedDocUrls((String) source.get("excludedDocUrls"));
-            result.setExcludedUrls((String) source.get("excludedUrls"));
-            result.setId((String) source.get("id"));
-            result.setIncludedDocUrls((String) source.get("includedDocUrls"));
-            result.setIncludedUrls((String) source.get("includedUrls"));
-            result.setIntervalTime((Integer) source.get("intervalTime"));
-            result.setMaxAccessCount((Long) source.get("maxAccessCount"));
-            result.setName((String) source.get("name"));
-            result.setNumOfThread((Integer) source.get("numOfThread"));
-            result.setSortOrder((Integer) source.get("sortOrder"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
-            result.setUrls((String) source.get("urls"));
-            result.setUserAgent((String) source.get("userAgent"));
+            result.setAvailable(toBoolean(source.get("available")));
+            result.setBoost(toFloat(source.get("boost")));
+            result.setConfigParameter(toString(source.get("configParameter")));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setDepth(toInteger(source.get("depth")));
+            result.setExcludedDocUrls(toString(source.get("excludedDocUrls")));
+            result.setExcludedUrls(toString(source.get("excludedUrls")));
+            result.setId(toString(source.get("id")));
+            result.setIncludedDocUrls(toString(source.get("includedDocUrls")));
+            result.setIncludedUrls(toString(source.get("includedUrls")));
+            result.setIntervalTime(toInteger(source.get("intervalTime")));
+            result.setMaxAccessCount(toLong(source.get("maxAccessCount")));
+            result.setName(toString(source.get("name")));
+            result.setNumOfThread(toInteger(source.get("numOfThread")));
+            result.setSortOrder(toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setUrls(toString(source.get("urls")));
+            result.setUserAgent(toString(source.get("userAgent")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

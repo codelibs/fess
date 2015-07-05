@@ -41,9 +41,9 @@ public abstract class BsFileConfigToRoleBhv extends AbstractBehavior<FileConfigT
     protected <RESULT extends FileConfigToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setFileConfigId((String) source.get("fileConfigId"));
-            result.setId((String) source.get("id"));
-            result.setRoleTypeId((String) source.get("roleTypeId"));
+            result.setFileConfigId(toString(source.get("fileConfigId")));
+            result.setId(toString(source.get("id")));
+            result.setRoleTypeId(toString(source.get("roleTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

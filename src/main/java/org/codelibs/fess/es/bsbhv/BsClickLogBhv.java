@@ -41,10 +41,10 @@ public abstract class BsClickLogBhv extends AbstractBehavior<ClickLog, ClickLogC
     protected <RESULT extends ClickLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId((String) source.get("id"));
-            result.setRequestedTime((Long) source.get("requestedTime"));
-            result.setSearchLogId((String) source.get("searchLogId"));
-            result.setUrl((String) source.get("url"));
+            result.setId(toString(source.get("id")));
+            result.setRequestedTime(toLong(source.get("requestedTime")));
+            result.setSearchLogId(toString(source.get("searchLogId")));
+            result.setUrl(toString(source.get("url")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

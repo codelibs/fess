@@ -41,10 +41,10 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
     protected <RESULT extends FavoriteLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setUrl((String) source.get("url"));
-            result.setUserInfoId((String) source.get("userInfoId"));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setUrl(toString(source.get("url")));
+            result.setUserInfoId(toString(source.get("userInfoId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

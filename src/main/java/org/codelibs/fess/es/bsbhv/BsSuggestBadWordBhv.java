@@ -41,14 +41,14 @@ public abstract class BsSuggestBadWordBhv extends AbstractBehavior<SuggestBadWor
     protected <RESULT extends SuggestBadWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy((String) source.get("createdBy"));
-            result.setCreatedTime((Long) source.get("createdTime"));
-            result.setId((String) source.get("id"));
-            result.setSuggestWord((String) source.get("suggestWord"));
-            result.setTargetLabel((String) source.get("targetLabel"));
-            result.setTargetRole((String) source.get("targetRole"));
-            result.setUpdatedBy((String) source.get("updatedBy"));
-            result.setUpdatedTime((Long) source.get("updatedTime"));
+            result.setCreatedBy(toString(source.get("createdBy")));
+            result.setCreatedTime(toLong(source.get("createdTime")));
+            result.setId(toString(source.get("id")));
+            result.setSuggestWord(toString(source.get("suggestWord")));
+            result.setTargetLabel(toString(source.get("targetLabel")));
+            result.setTargetRole(toString(source.get("targetRole")));
+            result.setUpdatedBy(toString(source.get("updatedBy")));
+            result.setUpdatedTime(toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
