@@ -27,7 +27,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.KeyMatch;
+import org.codelibs.fess.es.exentity.KeyMatch;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.KeyMatchPager;
 import org.codelibs.fess.service.KeyMatchService;
@@ -235,7 +235,7 @@ public class KeyMatchAction extends FessAdminAction {
     protected KeyMatch createKeyMatch() {
         KeyMatch keyMatch;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (keyMatchForm.crudMode == CommonConstants.EDIT_MODE) {
             keyMatch = keyMatchService.getKeyMatch(createKeyMap());
             if (keyMatch == null) {
@@ -313,12 +313,7 @@ public class KeyMatchAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { keyMatchForm.id });
             }
 
-            //           keyMatchService.delete(keyMatch);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            keyMatch.setDeletedBy(username);
-            keyMatch.setDeletedTime(currentTime);
-            keyMatchService.store(keyMatch);
+            keyMatchService.delete(keyMatch);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             ComponentUtil.getKeyMatchHelper().update();

@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.KeyMatchCB;
-import org.codelibs.fess.db.exbhv.KeyMatchBhv;
-import org.codelibs.fess.db.exentity.KeyMatch;
+import org.codelibs.fess.es.cbean.KeyMatchCB;
+import org.codelibs.fess.es.exbhv.KeyMatchBhv;
+import org.codelibs.fess.es.exentity.KeyMatch;
 import org.codelibs.fess.pager.KeyMatchPager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -60,7 +60,7 @@ public class KeyMatchService implements Serializable {
 
     public KeyMatch getKeyMatch(final Map<String, String> keys) {
         final KeyMatch keyMatch = keyMatchBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (keyMatch == null) {
@@ -74,25 +74,28 @@ public class KeyMatchService implements Serializable {
     public void store(final KeyMatch keyMatch) throws CrudMessageException {
         setupStoreCondition(keyMatch);
 
-        keyMatchBhv.insertOrUpdate(keyMatch);
+        keyMatchBhv.insertOrUpdate(keyMatch, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final KeyMatch keyMatch) throws CrudMessageException {
         setupDeleteCondition(keyMatch);
 
-        keyMatchBhv.delete(keyMatch);
+        keyMatchBhv.delete(keyMatch, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
         if (keyMatchPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(keyMatchPager.id));
+            cb.query().docMeta().setId_Equal(keyMatchPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_Term_Asc();
 
         // search
@@ -119,7 +122,7 @@ public class KeyMatchService implements Serializable {
 
     public List<KeyMatch> getAvailableKeyMatchList() {
         return keyMatchBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
+            cb.query().matchAll();
         });
     }
 
