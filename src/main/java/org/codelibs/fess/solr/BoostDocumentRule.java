@@ -33,7 +33,7 @@ public class BoostDocumentRule {
         // nothing
     }
 
-    public BoostDocumentRule(final org.codelibs.fess.entity.BoostDocumentRule rule) {
+    public BoostDocumentRule(final org.codelibs.fess.es.exentity.BoostDocumentRule rule) {
         matchExpression = rule.getUrlExpr();
         boostExpression = rule.getBoostExpr();
     }

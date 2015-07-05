@@ -28,7 +28,7 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.db.exentity.FileCrawlingConfig;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
-import org.codelibs.fess.entity.BoostDocumentRule;
+import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.codelibs.fess.interval.FessIntervalController;
 import org.codelibs.fess.service.BoostDocumentRuleService;
 import org.codelibs.fess.service.FailureUrlService;
