@@ -1,0 +1,9 @@
+package ${request.package}.cbean.cf;
+
+import ${request.package}.cbean.cf.bs.Bs${table.camelizedName}CF;
+
+/**
+ * @author FreeGen
+ */
+public class ${table.camelizedName}CF extends Bs${table.camelizedName}CF {
+}

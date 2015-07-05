@@ -3,6 +3,7 @@ package ${request.package}.cbean.cq.bs;
 import java.util.Collection;
 
 import ${request.package}.cbean.cq.${table.camelizedName}CQ;
+import ${request.package}.cbean.cf.${table.camelizedName}CF;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
@@ -28,16 +29,17 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
         return "${table.name}";
     }
 
-    public void filtered(FilteredCall<${table.camelizedName}CQ> filteredLambda) {
+    public void filtered(FilteredCall<${table.camelizedName}CQ, ${table.camelizedName}CF> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<${table.camelizedName}CQ> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<${table.camelizedName}CQ, ${table.camelizedName}CF> filteredLambda,
+            ConditionOptionCall<FilteredQueryBuilder> opLambda) {
         ${table.camelizedName}CQ query = new ${table.camelizedName}CQ();
-        filteredLambda.callback(query);
-        if (!query.queryBuilderList.isEmpty()) {
-            // TODO filter
-            FilteredQueryBuilder builder = reqFilteredQ(query.getQuery(), null);
+        ${table.camelizedName}CF filter = new ${table.camelizedName}CF();
+        filteredLambda.callback(query, filter);
+        if (query.hasQueries()) {
+            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -53,8 +55,8 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
         ${table.camelizedName}CQ shouldQuery = new ${table.camelizedName}CQ();
         ${table.camelizedName}CQ mustNotQuery = new ${table.camelizedName}CQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (!mustQuery.queryBuilderList.isEmpty() || !shouldQuery.queryBuilderList.isEmpty() || !mustNotQuery.queryBuilderList.isEmpty()) {
-            BoolQueryBuilder builder = reqBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -69,29 +71,29 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_Term($javaNative ${column.uncapCamelName}, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("${column.name}", ${column.uncapCamelName});
+        TermQueryBuilder builder = regTermQ("${column.name}", ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void set${column.capCamelName}_Terms(Collection<$javaNative> ${column.uncapCamelName}List) {
-        set${column.capCamelName}_MatchPhrasePrefix(${column.uncapCamelName}List, null);
+        set${column.capCamelName}_Terms(${column.uncapCamelName}List, null);
     }
 
-    public void set${column.capCamelName}_MatchPhrasePrefix(Collection<$javaNative> ${column.uncapCamelName}List, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("${column.name}", ${column.uncapCamelName}List);
+    public void set${column.capCamelName}_Terms(Collection<$javaNative> ${column.uncapCamelName}List, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("${column.name}", ${column.uncapCamelName}List);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void set${column.capCamelName}_InScope(Collection<$javaNative> ${column.uncapCamelName}List) {
-        set${column.capCamelName}_MatchPhrasePrefix(${column.uncapCamelName}List, null);
+        set${column.capCamelName}_Terms(${column.uncapCamelName}List, null);
     }
 
     public void set${column.capCamelName}_InScope(Collection<$javaNative> ${column.uncapCamelName}List, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        set${column.capCamelName}_MatchPhrasePrefix(${column.uncapCamelName}List, opLambda);
+        set${column.capCamelName}_Terms(${column.uncapCamelName}List, opLambda);
     }
 
     public void set${column.capCamelName}_Match($javaNative ${column.uncapCamelName}) {
@@ -99,7 +101,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_Match($javaNative ${column.uncapCamelName}, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("${column.name}", ${column.uncapCamelName});
+        MatchQueryBuilder builder = regMatchQ("${column.name}", ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -110,7 +112,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_MatchPhrase($javaNative ${column.uncapCamelName}, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("${column.name}", ${column.uncapCamelName});
+        MatchQueryBuilder builder = regMatchPhraseQ("${column.name}", ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -121,7 +123,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_MatchPhrasePrefix($javaNative ${column.uncapCamelName}, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("${column.name}", ${column.uncapCamelName});
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("${column.name}", ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -132,7 +134,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_Fuzzy($javaNative ${column.uncapCamelName}, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("${column.name}", ${column.uncapCamelName});
+        FuzzyQueryBuilder builder = regFuzzyQ("${column.name}", ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -144,7 +146,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_Prefix($javaNative ${column.uncapCamelName}, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("${column.name}", ${column.uncapCamelName});
+        PrefixQueryBuilder builder = regPrefixQ("${column.name}", ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -156,7 +158,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_GreaterThan($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("${column.name}", ConditionKey.CK_GREATER_THAN, ${column.uncapCamelName});
+        RangeQueryBuilder builder = regRangeQ("${column.name}", ConditionKey.CK_GREATER_THAN, ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -167,7 +169,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_LessThan($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("${column.name}", ConditionKey.CK_LESS_THAN, ${column.uncapCamelName});
+        RangeQueryBuilder builder = regRangeQ("${column.name}", ConditionKey.CK_LESS_THAN, ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -178,7 +180,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_GreaterEqual($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("${column.name}", ConditionKey.CK_GREATER_EQUAL, ${column.uncapCamelName});
+        RangeQueryBuilder builder = regRangeQ("${column.name}", ConditionKey.CK_GREATER_EQUAL, ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -189,7 +191,7 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
     }
 
     public void set${column.capCamelName}_LessEqual($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("${column.name}", ConditionKey.CK_LESS_EQUAL, ${column.uncapCamelName});
+        RangeQueryBuilder builder = regRangeQ("${column.name}", ConditionKey.CK_LESS_EQUAL, ${column.uncapCamelName});
         if (opLambda != null) {
             opLambda.callback(builder);
         }

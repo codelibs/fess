@@ -90,6 +90,18 @@ $manager.makeDirectory($request.generateDirPath)
       $generator.parse("./elasticsearch/ExConditionQuery.vm", $path, "", "")
     #end
 
+    #set ($path = "${request.generateDirPath}/cbean/cf/bs/Bs${table.camelizedName}CF.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    $generator.parse("./elasticsearch/BsConditionFilter.vm", $path, "", "")
+
+    #set ($path = "${request.generateDirPath}/cbean/cf/${table.camelizedName}CF.java")
+    $manager.makeDirectory($path)
+    $request.info("parse('${path}')")
+    #if (!$files.file(${generator.outputPath},$path).exists())
+      $generator.parse("./elasticsearch/ExConditionFilter.vm", $path, "", "")
+    #end
+
     #set ($path = "${request.generateDirPath}/bsbhv/Bs${table.camelizedName}Bhv.java")
     $manager.makeDirectory($path)
     $request.info("parse('${path}')")
@@ -112,6 +124,11 @@ $manager.makeDirectory($request.generateDirPath)
   $manager.makeDirectory($path)
   $request.info("parse('${path}')")
   $generator.parse("./elasticsearch/AbstractConditionQuery.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}/cbean/cf/bs/AbstractConditionFilter.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("./elasticsearch/AbstractConditionFilter.vm", $path, "", "")
 
   #set ($path = "${request.generateDirPath}/bsentity/AbstractEntity.java")
   $manager.makeDirectory($path)

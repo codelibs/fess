@@ -592,6 +592,8 @@ public abstract class AbstractConditionBean implements ConditionBean {
 
         private Boolean version;
 
+        private int terminateAfter = 0;
+
         public void build(SearchRequestBuilder builder) {
             if (explain != null) {
                 builder.setExplain(explain);
@@ -613,6 +615,9 @@ public abstract class AbstractConditionBean implements ConditionBean {
             }
             if (version != null) {
                 builder.setVersion(version);
+            }
+            if (terminateAfter > 0) {
+                builder.setTerminateAfter(terminateAfter);
             }
         }
 
@@ -642,6 +647,10 @@ public abstract class AbstractConditionBean implements ConditionBean {
 
         public void setVersion(boolean version) {
             this.version = version;
+        }
+
+        public void setTerminateAfter(int terminateAfter) {
+            this.terminateAfter = terminateAfter;
         }
 
     }

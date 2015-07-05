@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import ${request.package}.cbean.cf.bs.AbstractConditionFilter;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.ConditionQuery;
 import org.dbflute.cbean.ckey.ConditionKey;
@@ -20,6 +21,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -56,6 +58,10 @@ public abstract class AbstractConditionQuery implements ConditionQuery {
         return fieldSortBuilderList == null ? Collections.emptyList() : fieldSortBuilderList;
     }
 
+    public boolean hasQueries() {
+        return queryBuilderList != null && !queryBuilderList.isEmpty();
+    }
+
     public QueryBuilder getQuery() {
         if (queryBuilderList == null) {
             return null;
@@ -70,7 +76,7 @@ public abstract class AbstractConditionQuery implements ConditionQuery {
     }
 
     public void addQuery(QueryBuilder queryBuilder) {
-        queryBuilderList.add(queryBuilder);
+        regQ(queryBuilder);
     }
 
     public void queryString(String queryString) {
@@ -85,11 +91,23 @@ public abstract class AbstractConditionQuery implements ConditionQuery {
         }
     }
 
-    protected FilteredQueryBuilder reqFilteredQ(QueryBuilder queryBuilder, FilterBuilder filterBuilder) {
+    public void matchAll() {
+        matchAll(null);
+    }
+
+    public void matchAll(ConditionOptionCall<MatchAllQueryBuilder> opLambda) {
+        MatchAllQueryBuilder builder = QueryBuilders.matchAllQuery();
+        regQ(builder);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    protected FilteredQueryBuilder regFilteredQ(QueryBuilder queryBuilder, FilterBuilder filterBuilder) {
         return QueryBuilders.filteredQuery(queryBuilder, filterBuilder);
     }
 
-    protected BoolQueryBuilder reqBoolCQ(List<QueryBuilder> mustList, List<QueryBuilder> shouldList, List<QueryBuilder> mustNotList) {
+    protected BoolQueryBuilder regBoolCQ(List<QueryBuilder> mustList, List<QueryBuilder> shouldList, List<QueryBuilder> mustNotList) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         mustList.forEach(query -> {
             boolQuery.must(query);
@@ -103,49 +121,49 @@ public abstract class AbstractConditionQuery implements ConditionQuery {
         return boolQuery;
     }
 
-    protected TermQueryBuilder reqTermQ(String name, Object value) {
+    protected TermQueryBuilder regTermQ(String name, Object value) {
         TermQueryBuilder termQuery = QueryBuilders.termQuery(name, value);
         regQ(termQuery);
         return termQuery;
     }
 
-    protected TermsQueryBuilder reqTermsQ(String name, Collection<?> value) {
+    protected TermsQueryBuilder regTermsQ(String name, Collection<?> value) {
         TermsQueryBuilder termsQuery = QueryBuilders.termsQuery(name, value);
         regQ(termsQuery);
         return termsQuery;
     }
 
-    protected MatchQueryBuilder reqMatchQ(String name, Object value) {
+    protected MatchQueryBuilder regMatchQ(String name, Object value) {
         MatchQueryBuilder matchQuery = QueryBuilders.matchQuery(name, value);
         regQ(matchQuery);
         return matchQuery;
     }
 
-    protected MatchQueryBuilder reqMatchPhraseQ(String name, Object value) {
+    protected MatchQueryBuilder regMatchPhraseQ(String name, Object value) {
         MatchQueryBuilder matchQuery = QueryBuilders.matchPhraseQuery(name, value);
         regQ(matchQuery);
         return matchQuery;
     }
 
-    protected MatchQueryBuilder reqMatchPhrasePrefixQ(String name, Object value) {
+    protected MatchQueryBuilder regMatchPhrasePrefixQ(String name, Object value) {
         MatchQueryBuilder matchQuery = QueryBuilders.matchPhrasePrefixQuery(name, value);
         regQ(matchQuery);
         return matchQuery;
     }
 
-    protected FuzzyQueryBuilder reqFuzzyQ(String name, Object value) {
+    protected FuzzyQueryBuilder regFuzzyQ(String name, Object value) {
         FuzzyQueryBuilder fuzzyQuery = QueryBuilders.fuzzyQuery(name, value);
         regQ(fuzzyQuery);
         return fuzzyQuery;
     }
 
-    protected PrefixQueryBuilder reqPrefixQ(String name, String prefix) {
+    protected PrefixQueryBuilder regPrefixQ(String name, String prefix) {
         PrefixQueryBuilder prefixQuery = QueryBuilders.prefixQuery(name, prefix);
         regQ(prefixQuery);
         return prefixQuery;
     }
 
-    protected RangeQueryBuilder reqRangeQ(String name, ConditionKey ck, Object value) {
+    protected RangeQueryBuilder regRangeQ(String name, ConditionKey ck, Object value) {
         for (QueryBuilder builder : queryBuilderList) {
             if (builder instanceof RangeQueryBuilder) {
                 RangeQueryBuilder rangeQueryBuilder = (RangeQueryBuilder) builder;
@@ -353,10 +371,15 @@ public abstract class AbstractConditionQuery implements ConditionQuery {
     }
 
     @FunctionalInterface
-    public interface FilteredCall<CQ extends AbstractConditionQuery> {
+    public interface FilteredCall<CQ extends AbstractConditionQuery, CF extends AbstractConditionFilter> {
 
-        void callback(CQ query);
+        void callback(CQ query, CF filter);
+    }
+
+    @FunctionalInterface
+    public interface OperatorCall<CQ extends AbstractConditionQuery> {
+
+        void callback(CQ and);
     }
 }
-
 
