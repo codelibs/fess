@@ -3,6 +3,7 @@ package org.codelibs.fess.es.cbean.cq.bs;
 import java.util.Collection;
 
 import org.codelibs.fess.es.cbean.cq.WebAuthenticationCQ;
+import org.codelibs.fess.es.cbean.cf.WebAuthenticationCF;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
@@ -28,16 +29,17 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
         return "web_authentication";
     }
 
-    public void filtered(FilteredCall<WebAuthenticationCQ> filteredLambda) {
+    public void filtered(FilteredCall<WebAuthenticationCQ, WebAuthenticationCF> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<WebAuthenticationCQ> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<WebAuthenticationCQ, WebAuthenticationCF> filteredLambda,
+            ConditionOptionCall<FilteredQueryBuilder> opLambda) {
         WebAuthenticationCQ query = new WebAuthenticationCQ();
-        filteredLambda.callback(query);
-        if (!query.queryBuilderList.isEmpty()) {
-            // TODO filter
-            FilteredQueryBuilder builder = reqFilteredQ(query.getQuery(), null);
+        WebAuthenticationCF filter = new WebAuthenticationCF();
+        filteredLambda.callback(query, filter);
+        if (query.hasQueries()) {
+            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -53,8 +55,8 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
         WebAuthenticationCQ shouldQuery = new WebAuthenticationCQ();
         WebAuthenticationCQ mustNotQuery = new WebAuthenticationCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (!mustQuery.queryBuilderList.isEmpty() || !shouldQuery.queryBuilderList.isEmpty() || !mustNotQuery.queryBuilderList.isEmpty()) {
-            BoolQueryBuilder builder = reqBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -66,29 +68,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_Term(String authRealm, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("authRealm", authRealm);
+        TermQueryBuilder builder = regTermQ("authRealm", authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setAuthRealm_Terms(Collection<String> authRealmList) {
-        setAuthRealm_MatchPhrasePrefix(authRealmList, null);
+        setAuthRealm_Terms(authRealmList, null);
     }
 
-    public void setAuthRealm_MatchPhrasePrefix(Collection<String> authRealmList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("authRealm", authRealmList);
+    public void setAuthRealm_Terms(Collection<String> authRealmList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("authRealm", authRealmList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setAuthRealm_InScope(Collection<String> authRealmList) {
-        setAuthRealm_MatchPhrasePrefix(authRealmList, null);
+        setAuthRealm_Terms(authRealmList, null);
     }
 
     public void setAuthRealm_InScope(Collection<String> authRealmList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setAuthRealm_MatchPhrasePrefix(authRealmList, opLambda);
+        setAuthRealm_Terms(authRealmList, opLambda);
     }
 
     public void setAuthRealm_Match(String authRealm) {
@@ -96,7 +98,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_Match(String authRealm, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("authRealm", authRealm);
+        MatchQueryBuilder builder = regMatchQ("authRealm", authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -107,7 +109,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_MatchPhrase(String authRealm, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("authRealm", authRealm);
+        MatchQueryBuilder builder = regMatchPhraseQ("authRealm", authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -118,7 +120,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_MatchPhrasePrefix(String authRealm, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("authRealm", authRealm);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("authRealm", authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -129,7 +131,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_Fuzzy(String authRealm, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("authRealm", authRealm);
+        FuzzyQueryBuilder builder = regFuzzyQ("authRealm", authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -140,7 +142,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_Prefix(String authRealm, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("authRealm", authRealm);
+        PrefixQueryBuilder builder = regPrefixQ("authRealm", authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -151,7 +153,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_GreaterThan(String authRealm, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("authRealm", ConditionKey.CK_GREATER_THAN, authRealm);
+        RangeQueryBuilder builder = regRangeQ("authRealm", ConditionKey.CK_GREATER_THAN, authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -162,7 +164,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_LessThan(String authRealm, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("authRealm", ConditionKey.CK_LESS_THAN, authRealm);
+        RangeQueryBuilder builder = regRangeQ("authRealm", ConditionKey.CK_LESS_THAN, authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -173,7 +175,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_GreaterEqual(String authRealm, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("authRealm", ConditionKey.CK_GREATER_EQUAL, authRealm);
+        RangeQueryBuilder builder = regRangeQ("authRealm", ConditionKey.CK_GREATER_EQUAL, authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -184,7 +186,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setAuthRealm_LessEqual(String authRealm, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("authRealm", ConditionKey.CK_LESS_EQUAL, authRealm);
+        RangeQueryBuilder builder = regRangeQ("authRealm", ConditionKey.CK_LESS_EQUAL, authRealm);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -205,29 +207,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Term(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("createdBy", createdBy);
+        TermQueryBuilder builder = regTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedBy_Terms(Collection<String> createdByList) {
-        setCreatedBy_MatchPhrasePrefix(createdByList, null);
+        setCreatedBy_Terms(createdByList, null);
     }
 
-    public void setCreatedBy_MatchPhrasePrefix(Collection<String> createdByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("createdBy", createdByList);
+    public void setCreatedBy_Terms(Collection<String> createdByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("createdBy", createdByList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedBy_InScope(Collection<String> createdByList) {
-        setCreatedBy_MatchPhrasePrefix(createdByList, null);
+        setCreatedBy_Terms(createdByList, null);
     }
 
     public void setCreatedBy_InScope(Collection<String> createdByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCreatedBy_MatchPhrasePrefix(createdByList, opLambda);
+        setCreatedBy_Terms(createdByList, opLambda);
     }
 
     public void setCreatedBy_Match(String createdBy) {
@@ -235,7 +237,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Match(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("createdBy", createdBy);
+        MatchQueryBuilder builder = regMatchQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -246,7 +248,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_MatchPhrase(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("createdBy", createdBy);
+        MatchQueryBuilder builder = regMatchPhraseQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -257,7 +259,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_MatchPhrasePrefix(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("createdBy", createdBy);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -268,7 +270,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Fuzzy(String createdBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("createdBy", createdBy);
+        FuzzyQueryBuilder builder = regFuzzyQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -279,7 +281,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Prefix(String createdBy, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("createdBy", createdBy);
+        PrefixQueryBuilder builder = regPrefixQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -290,7 +292,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_GreaterThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -301,7 +303,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_LessThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_LESS_THAN, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_THAN, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -312,7 +314,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_GreaterEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -323,7 +325,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -344,29 +346,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_Term(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("createdTime", createdTime);
+        TermQueryBuilder builder = regTermQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
-        setCreatedTime_MatchPhrasePrefix(createdTimeList, null);
+        setCreatedTime_Terms(createdTimeList, null);
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("createdTime", createdTimeList);
+    public void setCreatedTime_Terms(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("createdTime", createdTimeList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedTime_InScope(Collection<Long> createdTimeList) {
-        setCreatedTime_MatchPhrasePrefix(createdTimeList, null);
+        setCreatedTime_Terms(createdTimeList, null);
     }
 
     public void setCreatedTime_InScope(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCreatedTime_MatchPhrasePrefix(createdTimeList, opLambda);
+        setCreatedTime_Terms(createdTimeList, opLambda);
     }
 
     public void setCreatedTime_Match(Long createdTime) {
@@ -374,7 +376,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_Match(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("createdTime", createdTime);
+        MatchQueryBuilder builder = regMatchQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -385,7 +387,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("createdTime", createdTime);
+        MatchQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -396,7 +398,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("createdTime", createdTime);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -407,7 +409,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("createdTime", createdTime);
+        FuzzyQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -418,7 +420,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -429,7 +431,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_LessThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -440,7 +442,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -451,7 +453,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_LessEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -472,29 +474,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_Term(String hostname, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("hostname", hostname);
+        TermQueryBuilder builder = regTermQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setHostname_Terms(Collection<String> hostnameList) {
-        setHostname_MatchPhrasePrefix(hostnameList, null);
+        setHostname_Terms(hostnameList, null);
     }
 
-    public void setHostname_MatchPhrasePrefix(Collection<String> hostnameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("hostname", hostnameList);
+    public void setHostname_Terms(Collection<String> hostnameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("hostname", hostnameList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setHostname_InScope(Collection<String> hostnameList) {
-        setHostname_MatchPhrasePrefix(hostnameList, null);
+        setHostname_Terms(hostnameList, null);
     }
 
     public void setHostname_InScope(Collection<String> hostnameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setHostname_MatchPhrasePrefix(hostnameList, opLambda);
+        setHostname_Terms(hostnameList, opLambda);
     }
 
     public void setHostname_Match(String hostname) {
@@ -502,7 +504,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_Match(String hostname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("hostname", hostname);
+        MatchQueryBuilder builder = regMatchQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -513,7 +515,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_MatchPhrase(String hostname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("hostname", hostname);
+        MatchQueryBuilder builder = regMatchPhraseQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -524,7 +526,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_MatchPhrasePrefix(String hostname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("hostname", hostname);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -535,7 +537,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_Fuzzy(String hostname, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("hostname", hostname);
+        FuzzyQueryBuilder builder = regFuzzyQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -546,7 +548,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_Prefix(String hostname, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("hostname", hostname);
+        PrefixQueryBuilder builder = regPrefixQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -557,7 +559,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_GreaterThan(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("hostname", ConditionKey.CK_GREATER_THAN, hostname);
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_GREATER_THAN, hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -568,7 +570,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_LessThan(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("hostname", ConditionKey.CK_LESS_THAN, hostname);
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_LESS_THAN, hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -579,7 +581,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_GreaterEqual(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("hostname", ConditionKey.CK_GREATER_EQUAL, hostname);
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_GREATER_EQUAL, hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -590,7 +592,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setHostname_LessEqual(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("hostname", ConditionKey.CK_LESS_EQUAL, hostname);
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_LESS_EQUAL, hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -611,29 +613,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("id", id);
+        TermQueryBuilder builder = regTermQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_Terms(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
-    public void setId_MatchPhrasePrefix(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("id", idList);
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("id", idList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_InScope(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
     public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_MatchPhrasePrefix(idList, opLambda);
+        setId_Terms(idList, opLambda);
     }
 
     public void setId_Match(String id) {
@@ -641,7 +643,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("id", id);
+        MatchQueryBuilder builder = regMatchQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -652,7 +654,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("id", id);
+        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -663,7 +665,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("id", id);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -674,7 +676,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("id", id);
+        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -685,7 +687,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("id", id);
+        PrefixQueryBuilder builder = regPrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -696,7 +698,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -707,7 +709,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -718,7 +720,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -729,7 +731,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -750,29 +752,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_Term(String parameters, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("parameters", parameters);
+        TermQueryBuilder builder = regTermQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setParameters_Terms(Collection<String> parametersList) {
-        setParameters_MatchPhrasePrefix(parametersList, null);
+        setParameters_Terms(parametersList, null);
     }
 
-    public void setParameters_MatchPhrasePrefix(Collection<String> parametersList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("parameters", parametersList);
+    public void setParameters_Terms(Collection<String> parametersList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("parameters", parametersList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setParameters_InScope(Collection<String> parametersList) {
-        setParameters_MatchPhrasePrefix(parametersList, null);
+        setParameters_Terms(parametersList, null);
     }
 
     public void setParameters_InScope(Collection<String> parametersList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setParameters_MatchPhrasePrefix(parametersList, opLambda);
+        setParameters_Terms(parametersList, opLambda);
     }
 
     public void setParameters_Match(String parameters) {
@@ -780,7 +782,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_Match(String parameters, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("parameters", parameters);
+        MatchQueryBuilder builder = regMatchQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -791,7 +793,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_MatchPhrase(String parameters, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("parameters", parameters);
+        MatchQueryBuilder builder = regMatchPhraseQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -802,7 +804,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_MatchPhrasePrefix(String parameters, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("parameters", parameters);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -813,7 +815,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_Fuzzy(String parameters, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("parameters", parameters);
+        FuzzyQueryBuilder builder = regFuzzyQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -824,7 +826,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_Prefix(String parameters, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("parameters", parameters);
+        PrefixQueryBuilder builder = regPrefixQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -835,7 +837,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_GreaterThan(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("parameters", ConditionKey.CK_GREATER_THAN, parameters);
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_GREATER_THAN, parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -846,7 +848,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_LessThan(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("parameters", ConditionKey.CK_LESS_THAN, parameters);
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_LESS_THAN, parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -857,7 +859,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_GreaterEqual(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("parameters", ConditionKey.CK_GREATER_EQUAL, parameters);
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_GREATER_EQUAL, parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -868,7 +870,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setParameters_LessEqual(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("parameters", ConditionKey.CK_LESS_EQUAL, parameters);
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_LESS_EQUAL, parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -889,29 +891,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_Term(String password, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("password", password);
+        TermQueryBuilder builder = regTermQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setPassword_Terms(Collection<String> passwordList) {
-        setPassword_MatchPhrasePrefix(passwordList, null);
+        setPassword_Terms(passwordList, null);
     }
 
-    public void setPassword_MatchPhrasePrefix(Collection<String> passwordList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("password", passwordList);
+    public void setPassword_Terms(Collection<String> passwordList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("password", passwordList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setPassword_InScope(Collection<String> passwordList) {
-        setPassword_MatchPhrasePrefix(passwordList, null);
+        setPassword_Terms(passwordList, null);
     }
 
     public void setPassword_InScope(Collection<String> passwordList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setPassword_MatchPhrasePrefix(passwordList, opLambda);
+        setPassword_Terms(passwordList, opLambda);
     }
 
     public void setPassword_Match(String password) {
@@ -919,7 +921,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_Match(String password, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("password", password);
+        MatchQueryBuilder builder = regMatchQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -930,7 +932,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_MatchPhrase(String password, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("password", password);
+        MatchQueryBuilder builder = regMatchPhraseQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -941,7 +943,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_MatchPhrasePrefix(String password, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("password", password);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -952,7 +954,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_Fuzzy(String password, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("password", password);
+        FuzzyQueryBuilder builder = regFuzzyQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -963,7 +965,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_Prefix(String password, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("password", password);
+        PrefixQueryBuilder builder = regPrefixQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -974,7 +976,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_GreaterThan(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("password", ConditionKey.CK_GREATER_THAN, password);
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_GREATER_THAN, password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -985,7 +987,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_LessThan(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("password", ConditionKey.CK_LESS_THAN, password);
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_LESS_THAN, password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -996,7 +998,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_GreaterEqual(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("password", ConditionKey.CK_GREATER_EQUAL, password);
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_GREATER_EQUAL, password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1007,7 +1009,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPassword_LessEqual(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("password", ConditionKey.CK_LESS_EQUAL, password);
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_LESS_EQUAL, password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1028,29 +1030,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_Term(Integer port, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("port", port);
+        TermQueryBuilder builder = regTermQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setPort_Terms(Collection<Integer> portList) {
-        setPort_MatchPhrasePrefix(portList, null);
+        setPort_Terms(portList, null);
     }
 
-    public void setPort_MatchPhrasePrefix(Collection<Integer> portList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("port", portList);
+    public void setPort_Terms(Collection<Integer> portList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("port", portList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setPort_InScope(Collection<Integer> portList) {
-        setPort_MatchPhrasePrefix(portList, null);
+        setPort_Terms(portList, null);
     }
 
     public void setPort_InScope(Collection<Integer> portList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setPort_MatchPhrasePrefix(portList, opLambda);
+        setPort_Terms(portList, opLambda);
     }
 
     public void setPort_Match(Integer port) {
@@ -1058,7 +1060,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_Match(Integer port, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("port", port);
+        MatchQueryBuilder builder = regMatchQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1069,7 +1071,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_MatchPhrase(Integer port, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("port", port);
+        MatchQueryBuilder builder = regMatchPhraseQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1080,7 +1082,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_MatchPhrasePrefix(Integer port, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("port", port);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1091,7 +1093,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_Fuzzy(Integer port, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("port", port);
+        FuzzyQueryBuilder builder = regFuzzyQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1102,7 +1104,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_GreaterThan(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("port", ConditionKey.CK_GREATER_THAN, port);
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_GREATER_THAN, port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1113,7 +1115,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_LessThan(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("port", ConditionKey.CK_LESS_THAN, port);
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_LESS_THAN, port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1124,7 +1126,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_GreaterEqual(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("port", ConditionKey.CK_GREATER_EQUAL, port);
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_GREATER_EQUAL, port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1135,7 +1137,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setPort_LessEqual(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("port", ConditionKey.CK_LESS_EQUAL, port);
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_LESS_EQUAL, port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1156,29 +1158,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_Term(String protocolScheme, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("protocolScheme", protocolScheme);
+        TermQueryBuilder builder = regTermQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setProtocolScheme_Terms(Collection<String> protocolSchemeList) {
-        setProtocolScheme_MatchPhrasePrefix(protocolSchemeList, null);
+        setProtocolScheme_Terms(protocolSchemeList, null);
     }
 
-    public void setProtocolScheme_MatchPhrasePrefix(Collection<String> protocolSchemeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("protocolScheme", protocolSchemeList);
+    public void setProtocolScheme_Terms(Collection<String> protocolSchemeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("protocolScheme", protocolSchemeList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setProtocolScheme_InScope(Collection<String> protocolSchemeList) {
-        setProtocolScheme_MatchPhrasePrefix(protocolSchemeList, null);
+        setProtocolScheme_Terms(protocolSchemeList, null);
     }
 
     public void setProtocolScheme_InScope(Collection<String> protocolSchemeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setProtocolScheme_MatchPhrasePrefix(protocolSchemeList, opLambda);
+        setProtocolScheme_Terms(protocolSchemeList, opLambda);
     }
 
     public void setProtocolScheme_Match(String protocolScheme) {
@@ -1186,7 +1188,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_Match(String protocolScheme, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("protocolScheme", protocolScheme);
+        MatchQueryBuilder builder = regMatchQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1197,7 +1199,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_MatchPhrase(String protocolScheme, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("protocolScheme", protocolScheme);
+        MatchQueryBuilder builder = regMatchPhraseQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1208,7 +1210,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_MatchPhrasePrefix(String protocolScheme, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("protocolScheme", protocolScheme);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1219,7 +1221,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_Fuzzy(String protocolScheme, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("protocolScheme", protocolScheme);
+        FuzzyQueryBuilder builder = regFuzzyQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1230,7 +1232,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_Prefix(String protocolScheme, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("protocolScheme", protocolScheme);
+        PrefixQueryBuilder builder = regPrefixQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1241,7 +1243,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_GreaterThan(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("protocolScheme", ConditionKey.CK_GREATER_THAN, protocolScheme);
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_GREATER_THAN, protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1252,7 +1254,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_LessThan(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("protocolScheme", ConditionKey.CK_LESS_THAN, protocolScheme);
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_LESS_THAN, protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1263,7 +1265,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_GreaterEqual(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("protocolScheme", ConditionKey.CK_GREATER_EQUAL, protocolScheme);
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_GREATER_EQUAL, protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1274,7 +1276,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setProtocolScheme_LessEqual(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("protocolScheme", ConditionKey.CK_LESS_EQUAL, protocolScheme);
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_LESS_EQUAL, protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1295,29 +1297,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Term(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("updatedBy", updatedBy);
+        TermQueryBuilder builder = regTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedBy_Terms(Collection<String> updatedByList) {
-        setUpdatedBy_MatchPhrasePrefix(updatedByList, null);
+        setUpdatedBy_Terms(updatedByList, null);
     }
 
-    public void setUpdatedBy_MatchPhrasePrefix(Collection<String> updatedByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("updatedBy", updatedByList);
+    public void setUpdatedBy_Terms(Collection<String> updatedByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("updatedBy", updatedByList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedBy_InScope(Collection<String> updatedByList) {
-        setUpdatedBy_MatchPhrasePrefix(updatedByList, null);
+        setUpdatedBy_Terms(updatedByList, null);
     }
 
     public void setUpdatedBy_InScope(Collection<String> updatedByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUpdatedBy_MatchPhrasePrefix(updatedByList, opLambda);
+        setUpdatedBy_Terms(updatedByList, opLambda);
     }
 
     public void setUpdatedBy_Match(String updatedBy) {
@@ -1325,7 +1327,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Match(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("updatedBy", updatedBy);
+        MatchQueryBuilder builder = regMatchQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1336,7 +1338,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_MatchPhrase(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("updatedBy", updatedBy);
+        MatchQueryBuilder builder = regMatchPhraseQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1347,7 +1349,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_MatchPhrasePrefix(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("updatedBy", updatedBy);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1358,7 +1360,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Fuzzy(String updatedBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("updatedBy", updatedBy);
+        FuzzyQueryBuilder builder = regFuzzyQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1369,7 +1371,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Prefix(String updatedBy, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("updatedBy", updatedBy);
+        PrefixQueryBuilder builder = regPrefixQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1380,7 +1382,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_GreaterThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1391,7 +1393,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1402,7 +1404,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_GreaterEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1413,7 +1415,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1434,29 +1436,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_Term(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("updatedTime", updatedTime);
+        TermQueryBuilder builder = regTermQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedTime_Terms(Collection<Long> updatedTimeList) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTimeList, null);
+        setUpdatedTime_Terms(updatedTimeList, null);
     }
 
-    public void setUpdatedTime_MatchPhrasePrefix(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("updatedTime", updatedTimeList);
+    public void setUpdatedTime_Terms(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("updatedTime", updatedTimeList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedTime_InScope(Collection<Long> updatedTimeList) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTimeList, null);
+        setUpdatedTime_Terms(updatedTimeList, null);
     }
 
     public void setUpdatedTime_InScope(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTimeList, opLambda);
+        setUpdatedTime_Terms(updatedTimeList, opLambda);
     }
 
     public void setUpdatedTime_Match(Long updatedTime) {
@@ -1464,7 +1466,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_Match(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("updatedTime", updatedTime);
+        MatchQueryBuilder builder = regMatchQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1475,7 +1477,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("updatedTime", updatedTime);
+        MatchQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1486,7 +1488,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("updatedTime", updatedTime);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1497,7 +1499,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("updatedTime", updatedTime);
+        FuzzyQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1508,7 +1510,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1519,7 +1521,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1530,7 +1532,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1541,7 +1543,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1562,29 +1564,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_Term(String username, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("username", username);
+        TermQueryBuilder builder = regTermQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUsername_Terms(Collection<String> usernameList) {
-        setUsername_MatchPhrasePrefix(usernameList, null);
+        setUsername_Terms(usernameList, null);
     }
 
-    public void setUsername_MatchPhrasePrefix(Collection<String> usernameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("username", usernameList);
+    public void setUsername_Terms(Collection<String> usernameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("username", usernameList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUsername_InScope(Collection<String> usernameList) {
-        setUsername_MatchPhrasePrefix(usernameList, null);
+        setUsername_Terms(usernameList, null);
     }
 
     public void setUsername_InScope(Collection<String> usernameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUsername_MatchPhrasePrefix(usernameList, opLambda);
+        setUsername_Terms(usernameList, opLambda);
     }
 
     public void setUsername_Match(String username) {
@@ -1592,7 +1594,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_Match(String username, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("username", username);
+        MatchQueryBuilder builder = regMatchQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1603,7 +1605,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_MatchPhrase(String username, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("username", username);
+        MatchQueryBuilder builder = regMatchPhraseQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1614,7 +1616,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_MatchPhrasePrefix(String username, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("username", username);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1625,7 +1627,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_Fuzzy(String username, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("username", username);
+        FuzzyQueryBuilder builder = regFuzzyQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1636,7 +1638,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_Prefix(String username, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("username", username);
+        PrefixQueryBuilder builder = regPrefixQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1647,7 +1649,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_GreaterThan(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("username", ConditionKey.CK_GREATER_THAN, username);
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_GREATER_THAN, username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1658,7 +1660,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_LessThan(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("username", ConditionKey.CK_LESS_THAN, username);
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_LESS_THAN, username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1669,7 +1671,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_GreaterEqual(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("username", ConditionKey.CK_GREATER_EQUAL, username);
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_GREATER_EQUAL, username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1680,7 +1682,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setUsername_LessEqual(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("username", ConditionKey.CK_LESS_EQUAL, username);
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_LESS_EQUAL, username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1701,29 +1703,29 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Term(String webConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("webConfigId", webConfigId);
+        TermQueryBuilder builder = regTermQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setWebConfigId_Terms(Collection<String> webConfigIdList) {
-        setWebConfigId_MatchPhrasePrefix(webConfigIdList, null);
+        setWebConfigId_Terms(webConfigIdList, null);
     }
 
-    public void setWebConfigId_MatchPhrasePrefix(Collection<String> webConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("webConfigId", webConfigIdList);
+    public void setWebConfigId_Terms(Collection<String> webConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("webConfigId", webConfigIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setWebConfigId_InScope(Collection<String> webConfigIdList) {
-        setWebConfigId_MatchPhrasePrefix(webConfigIdList, null);
+        setWebConfigId_Terms(webConfigIdList, null);
     }
 
     public void setWebConfigId_InScope(Collection<String> webConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setWebConfigId_MatchPhrasePrefix(webConfigIdList, opLambda);
+        setWebConfigId_Terms(webConfigIdList, opLambda);
     }
 
     public void setWebConfigId_Match(String webConfigId) {
@@ -1731,7 +1733,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Match(String webConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("webConfigId", webConfigId);
+        MatchQueryBuilder builder = regMatchQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1742,7 +1744,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_MatchPhrase(String webConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("webConfigId", webConfigId);
+        MatchQueryBuilder builder = regMatchPhraseQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1753,7 +1755,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_MatchPhrasePrefix(String webConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("webConfigId", webConfigId);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1764,7 +1766,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Fuzzy(String webConfigId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("webConfigId", webConfigId);
+        FuzzyQueryBuilder builder = regFuzzyQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1775,7 +1777,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Prefix(String webConfigId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("webConfigId", webConfigId);
+        PrefixQueryBuilder builder = regPrefixQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1786,7 +1788,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_GreaterThan(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_GREATER_THAN, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_GREATER_THAN, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1797,7 +1799,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_LessThan(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_LESS_THAN, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_LESS_THAN, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1808,7 +1810,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_GreaterEqual(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_GREATER_EQUAL, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_GREATER_EQUAL, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1819,7 +1821,7 @@ public abstract class BsWebAuthenticationCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_LessEqual(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_LESS_EQUAL, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_LESS_EQUAL, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

@@ -3,6 +3,7 @@ package org.codelibs.fess.es.cbean.cq.bs;
 import java.util.Collection;
 
 import org.codelibs.fess.es.cbean.cq.DataConfigToLabelCQ;
+import org.codelibs.fess.es.cbean.cf.DataConfigToLabelCF;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
@@ -28,16 +29,17 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
         return "data_config_to_label";
     }
 
-    public void filtered(FilteredCall<DataConfigToLabelCQ> filteredLambda) {
+    public void filtered(FilteredCall<DataConfigToLabelCQ, DataConfigToLabelCF> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<DataConfigToLabelCQ> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<DataConfigToLabelCQ, DataConfigToLabelCF> filteredLambda,
+            ConditionOptionCall<FilteredQueryBuilder> opLambda) {
         DataConfigToLabelCQ query = new DataConfigToLabelCQ();
-        filteredLambda.callback(query);
-        if (!query.queryBuilderList.isEmpty()) {
-            // TODO filter
-            FilteredQueryBuilder builder = reqFilteredQ(query.getQuery(), null);
+        DataConfigToLabelCF filter = new DataConfigToLabelCF();
+        filteredLambda.callback(query, filter);
+        if (query.hasQueries()) {
+            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -53,8 +55,8 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
         DataConfigToLabelCQ shouldQuery = new DataConfigToLabelCQ();
         DataConfigToLabelCQ mustNotQuery = new DataConfigToLabelCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (!mustQuery.queryBuilderList.isEmpty() || !shouldQuery.queryBuilderList.isEmpty() || !mustNotQuery.queryBuilderList.isEmpty()) {
-            BoolQueryBuilder builder = reqBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -66,29 +68,29 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_Term(String dataConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("dataConfigId", dataConfigId);
+        TermQueryBuilder builder = regTermQ("dataConfigId", dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setDataConfigId_Terms(Collection<String> dataConfigIdList) {
-        setDataConfigId_MatchPhrasePrefix(dataConfigIdList, null);
+        setDataConfigId_Terms(dataConfigIdList, null);
     }
 
-    public void setDataConfigId_MatchPhrasePrefix(Collection<String> dataConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("dataConfigId", dataConfigIdList);
+    public void setDataConfigId_Terms(Collection<String> dataConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("dataConfigId", dataConfigIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setDataConfigId_InScope(Collection<String> dataConfigIdList) {
-        setDataConfigId_MatchPhrasePrefix(dataConfigIdList, null);
+        setDataConfigId_Terms(dataConfigIdList, null);
     }
 
     public void setDataConfigId_InScope(Collection<String> dataConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setDataConfigId_MatchPhrasePrefix(dataConfigIdList, opLambda);
+        setDataConfigId_Terms(dataConfigIdList, opLambda);
     }
 
     public void setDataConfigId_Match(String dataConfigId) {
@@ -96,7 +98,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_Match(String dataConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("dataConfigId", dataConfigId);
+        MatchQueryBuilder builder = regMatchQ("dataConfigId", dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -107,7 +109,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_MatchPhrase(String dataConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("dataConfigId", dataConfigId);
+        MatchQueryBuilder builder = regMatchPhraseQ("dataConfigId", dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -118,7 +120,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_MatchPhrasePrefix(String dataConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("dataConfigId", dataConfigId);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("dataConfigId", dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -129,7 +131,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_Fuzzy(String dataConfigId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("dataConfigId", dataConfigId);
+        FuzzyQueryBuilder builder = regFuzzyQ("dataConfigId", dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -140,7 +142,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_Prefix(String dataConfigId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("dataConfigId", dataConfigId);
+        PrefixQueryBuilder builder = regPrefixQ("dataConfigId", dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -151,7 +153,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_GreaterThan(String dataConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("dataConfigId", ConditionKey.CK_GREATER_THAN, dataConfigId);
+        RangeQueryBuilder builder = regRangeQ("dataConfigId", ConditionKey.CK_GREATER_THAN, dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -162,7 +164,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_LessThan(String dataConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("dataConfigId", ConditionKey.CK_LESS_THAN, dataConfigId);
+        RangeQueryBuilder builder = regRangeQ("dataConfigId", ConditionKey.CK_LESS_THAN, dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -173,7 +175,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_GreaterEqual(String dataConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("dataConfigId", ConditionKey.CK_GREATER_EQUAL, dataConfigId);
+        RangeQueryBuilder builder = regRangeQ("dataConfigId", ConditionKey.CK_GREATER_EQUAL, dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -184,7 +186,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setDataConfigId_LessEqual(String dataConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("dataConfigId", ConditionKey.CK_LESS_EQUAL, dataConfigId);
+        RangeQueryBuilder builder = regRangeQ("dataConfigId", ConditionKey.CK_LESS_EQUAL, dataConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -205,29 +207,29 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("id", id);
+        TermQueryBuilder builder = regTermQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_Terms(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
-    public void setId_MatchPhrasePrefix(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("id", idList);
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("id", idList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_InScope(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
     public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_MatchPhrasePrefix(idList, opLambda);
+        setId_Terms(idList, opLambda);
     }
 
     public void setId_Match(String id) {
@@ -235,7 +237,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("id", id);
+        MatchQueryBuilder builder = regMatchQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -246,7 +248,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("id", id);
+        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -257,7 +259,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("id", id);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -268,7 +270,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("id", id);
+        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -279,7 +281,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("id", id);
+        PrefixQueryBuilder builder = regPrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -290,7 +292,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -301,7 +303,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -312,7 +314,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -323,7 +325,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -344,29 +346,29 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_Term(String labelTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("labelTypeId", labelTypeId);
+        TermQueryBuilder builder = regTermQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setLabelTypeId_Terms(Collection<String> labelTypeIdList) {
-        setLabelTypeId_MatchPhrasePrefix(labelTypeIdList, null);
+        setLabelTypeId_Terms(labelTypeIdList, null);
     }
 
-    public void setLabelTypeId_MatchPhrasePrefix(Collection<String> labelTypeIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("labelTypeId", labelTypeIdList);
+    public void setLabelTypeId_Terms(Collection<String> labelTypeIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("labelTypeId", labelTypeIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setLabelTypeId_InScope(Collection<String> labelTypeIdList) {
-        setLabelTypeId_MatchPhrasePrefix(labelTypeIdList, null);
+        setLabelTypeId_Terms(labelTypeIdList, null);
     }
 
     public void setLabelTypeId_InScope(Collection<String> labelTypeIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setLabelTypeId_MatchPhrasePrefix(labelTypeIdList, opLambda);
+        setLabelTypeId_Terms(labelTypeIdList, opLambda);
     }
 
     public void setLabelTypeId_Match(String labelTypeId) {
@@ -374,7 +376,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_Match(String labelTypeId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("labelTypeId", labelTypeId);
+        MatchQueryBuilder builder = regMatchQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -385,7 +387,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_MatchPhrase(String labelTypeId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("labelTypeId", labelTypeId);
+        MatchQueryBuilder builder = regMatchPhraseQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -396,7 +398,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_MatchPhrasePrefix(String labelTypeId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("labelTypeId", labelTypeId);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -407,7 +409,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_Fuzzy(String labelTypeId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("labelTypeId", labelTypeId);
+        FuzzyQueryBuilder builder = regFuzzyQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -418,7 +420,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_Prefix(String labelTypeId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("labelTypeId", labelTypeId);
+        PrefixQueryBuilder builder = regPrefixQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -429,7 +431,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_GreaterThan(String labelTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("labelTypeId", ConditionKey.CK_GREATER_THAN, labelTypeId);
+        RangeQueryBuilder builder = regRangeQ("labelTypeId", ConditionKey.CK_GREATER_THAN, labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -440,7 +442,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_LessThan(String labelTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("labelTypeId", ConditionKey.CK_LESS_THAN, labelTypeId);
+        RangeQueryBuilder builder = regRangeQ("labelTypeId", ConditionKey.CK_LESS_THAN, labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -451,7 +453,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_GreaterEqual(String labelTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("labelTypeId", ConditionKey.CK_GREATER_EQUAL, labelTypeId);
+        RangeQueryBuilder builder = regRangeQ("labelTypeId", ConditionKey.CK_GREATER_EQUAL, labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -462,7 +464,7 @@ public abstract class BsDataConfigToLabelCQ extends AbstractConditionQuery {
     }
 
     public void setLabelTypeId_LessEqual(String labelTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("labelTypeId", ConditionKey.CK_LESS_EQUAL, labelTypeId);
+        RangeQueryBuilder builder = regRangeQ("labelTypeId", ConditionKey.CK_LESS_EQUAL, labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

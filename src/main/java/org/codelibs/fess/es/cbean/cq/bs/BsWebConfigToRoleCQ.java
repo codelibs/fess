@@ -3,6 +3,7 @@ package org.codelibs.fess.es.cbean.cq.bs;
 import java.util.Collection;
 
 import org.codelibs.fess.es.cbean.cq.WebConfigToRoleCQ;
+import org.codelibs.fess.es.cbean.cf.WebConfigToRoleCF;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
@@ -28,16 +29,17 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
         return "web_config_to_role";
     }
 
-    public void filtered(FilteredCall<WebConfigToRoleCQ> filteredLambda) {
+    public void filtered(FilteredCall<WebConfigToRoleCQ, WebConfigToRoleCF> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<WebConfigToRoleCQ> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<WebConfigToRoleCQ, WebConfigToRoleCF> filteredLambda,
+            ConditionOptionCall<FilteredQueryBuilder> opLambda) {
         WebConfigToRoleCQ query = new WebConfigToRoleCQ();
-        filteredLambda.callback(query);
-        if (!query.queryBuilderList.isEmpty()) {
-            // TODO filter
-            FilteredQueryBuilder builder = reqFilteredQ(query.getQuery(), null);
+        WebConfigToRoleCF filter = new WebConfigToRoleCF();
+        filteredLambda.callback(query, filter);
+        if (query.hasQueries()) {
+            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -53,8 +55,8 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
         WebConfigToRoleCQ shouldQuery = new WebConfigToRoleCQ();
         WebConfigToRoleCQ mustNotQuery = new WebConfigToRoleCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (!mustQuery.queryBuilderList.isEmpty() || !shouldQuery.queryBuilderList.isEmpty() || !mustNotQuery.queryBuilderList.isEmpty()) {
-            BoolQueryBuilder builder = reqBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -66,29 +68,29 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("id", id);
+        TermQueryBuilder builder = regTermQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_Terms(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
-    public void setId_MatchPhrasePrefix(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("id", idList);
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("id", idList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_InScope(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
     public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_MatchPhrasePrefix(idList, opLambda);
+        setId_Terms(idList, opLambda);
     }
 
     public void setId_Match(String id) {
@@ -96,7 +98,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("id", id);
+        MatchQueryBuilder builder = regMatchQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -107,7 +109,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("id", id);
+        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -118,7 +120,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("id", id);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -129,7 +131,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("id", id);
+        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -140,7 +142,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("id", id);
+        PrefixQueryBuilder builder = regPrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -151,7 +153,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -162,7 +164,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -173,7 +175,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -184,7 +186,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -205,29 +207,29 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_Term(String roleTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("roleTypeId", roleTypeId);
+        TermQueryBuilder builder = regTermQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setRoleTypeId_Terms(Collection<String> roleTypeIdList) {
-        setRoleTypeId_MatchPhrasePrefix(roleTypeIdList, null);
+        setRoleTypeId_Terms(roleTypeIdList, null);
     }
 
-    public void setRoleTypeId_MatchPhrasePrefix(Collection<String> roleTypeIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("roleTypeId", roleTypeIdList);
+    public void setRoleTypeId_Terms(Collection<String> roleTypeIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("roleTypeId", roleTypeIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setRoleTypeId_InScope(Collection<String> roleTypeIdList) {
-        setRoleTypeId_MatchPhrasePrefix(roleTypeIdList, null);
+        setRoleTypeId_Terms(roleTypeIdList, null);
     }
 
     public void setRoleTypeId_InScope(Collection<String> roleTypeIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setRoleTypeId_MatchPhrasePrefix(roleTypeIdList, opLambda);
+        setRoleTypeId_Terms(roleTypeIdList, opLambda);
     }
 
     public void setRoleTypeId_Match(String roleTypeId) {
@@ -235,7 +237,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_Match(String roleTypeId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("roleTypeId", roleTypeId);
+        MatchQueryBuilder builder = regMatchQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -246,7 +248,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_MatchPhrase(String roleTypeId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("roleTypeId", roleTypeId);
+        MatchQueryBuilder builder = regMatchPhraseQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -257,7 +259,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_MatchPhrasePrefix(String roleTypeId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("roleTypeId", roleTypeId);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -268,7 +270,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_Fuzzy(String roleTypeId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("roleTypeId", roleTypeId);
+        FuzzyQueryBuilder builder = regFuzzyQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -279,7 +281,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_Prefix(String roleTypeId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("roleTypeId", roleTypeId);
+        PrefixQueryBuilder builder = regPrefixQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -290,7 +292,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_GreaterThan(String roleTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("roleTypeId", ConditionKey.CK_GREATER_THAN, roleTypeId);
+        RangeQueryBuilder builder = regRangeQ("roleTypeId", ConditionKey.CK_GREATER_THAN, roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -301,7 +303,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_LessThan(String roleTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("roleTypeId", ConditionKey.CK_LESS_THAN, roleTypeId);
+        RangeQueryBuilder builder = regRangeQ("roleTypeId", ConditionKey.CK_LESS_THAN, roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -312,7 +314,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_GreaterEqual(String roleTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("roleTypeId", ConditionKey.CK_GREATER_EQUAL, roleTypeId);
+        RangeQueryBuilder builder = regRangeQ("roleTypeId", ConditionKey.CK_GREATER_EQUAL, roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -323,7 +325,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setRoleTypeId_LessEqual(String roleTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("roleTypeId", ConditionKey.CK_LESS_EQUAL, roleTypeId);
+        RangeQueryBuilder builder = regRangeQ("roleTypeId", ConditionKey.CK_LESS_EQUAL, roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -344,29 +346,29 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Term(String webConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("webConfigId", webConfigId);
+        TermQueryBuilder builder = regTermQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setWebConfigId_Terms(Collection<String> webConfigIdList) {
-        setWebConfigId_MatchPhrasePrefix(webConfigIdList, null);
+        setWebConfigId_Terms(webConfigIdList, null);
     }
 
-    public void setWebConfigId_MatchPhrasePrefix(Collection<String> webConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("webConfigId", webConfigIdList);
+    public void setWebConfigId_Terms(Collection<String> webConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("webConfigId", webConfigIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setWebConfigId_InScope(Collection<String> webConfigIdList) {
-        setWebConfigId_MatchPhrasePrefix(webConfigIdList, null);
+        setWebConfigId_Terms(webConfigIdList, null);
     }
 
     public void setWebConfigId_InScope(Collection<String> webConfigIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setWebConfigId_MatchPhrasePrefix(webConfigIdList, opLambda);
+        setWebConfigId_Terms(webConfigIdList, opLambda);
     }
 
     public void setWebConfigId_Match(String webConfigId) {
@@ -374,7 +376,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Match(String webConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("webConfigId", webConfigId);
+        MatchQueryBuilder builder = regMatchQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -385,7 +387,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_MatchPhrase(String webConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("webConfigId", webConfigId);
+        MatchQueryBuilder builder = regMatchPhraseQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -396,7 +398,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_MatchPhrasePrefix(String webConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("webConfigId", webConfigId);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -407,7 +409,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Fuzzy(String webConfigId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("webConfigId", webConfigId);
+        FuzzyQueryBuilder builder = regFuzzyQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -418,7 +420,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_Prefix(String webConfigId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("webConfigId", webConfigId);
+        PrefixQueryBuilder builder = regPrefixQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -429,7 +431,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_GreaterThan(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_GREATER_THAN, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_GREATER_THAN, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -440,7 +442,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_LessThan(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_LESS_THAN, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_LESS_THAN, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -451,7 +453,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_GreaterEqual(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_GREATER_EQUAL, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_GREATER_EQUAL, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -462,7 +464,7 @@ public abstract class BsWebConfigToRoleCQ extends AbstractConditionQuery {
     }
 
     public void setWebConfigId_LessEqual(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("webConfigId", ConditionKey.CK_LESS_EQUAL, webConfigId);
+        RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_LESS_EQUAL, webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

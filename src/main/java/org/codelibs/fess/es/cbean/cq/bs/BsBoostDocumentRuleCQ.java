@@ -3,6 +3,7 @@ package org.codelibs.fess.es.cbean.cq.bs;
 import java.util.Collection;
 
 import org.codelibs.fess.es.cbean.cq.BoostDocumentRuleCQ;
+import org.codelibs.fess.es.cbean.cf.BoostDocumentRuleCF;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
@@ -28,16 +29,17 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
         return "boost_document_rule";
     }
 
-    public void filtered(FilteredCall<BoostDocumentRuleCQ> filteredLambda) {
+    public void filtered(FilteredCall<BoostDocumentRuleCQ, BoostDocumentRuleCF> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<BoostDocumentRuleCQ> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<BoostDocumentRuleCQ, BoostDocumentRuleCF> filteredLambda,
+            ConditionOptionCall<FilteredQueryBuilder> opLambda) {
         BoostDocumentRuleCQ query = new BoostDocumentRuleCQ();
-        filteredLambda.callback(query);
-        if (!query.queryBuilderList.isEmpty()) {
-            // TODO filter
-            FilteredQueryBuilder builder = reqFilteredQ(query.getQuery(), null);
+        BoostDocumentRuleCF filter = new BoostDocumentRuleCF();
+        filteredLambda.callback(query, filter);
+        if (query.hasQueries()) {
+            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -53,8 +55,8 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
         BoostDocumentRuleCQ shouldQuery = new BoostDocumentRuleCQ();
         BoostDocumentRuleCQ mustNotQuery = new BoostDocumentRuleCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (!mustQuery.queryBuilderList.isEmpty() || !shouldQuery.queryBuilderList.isEmpty() || !mustNotQuery.queryBuilderList.isEmpty()) {
-            BoolQueryBuilder builder = reqBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -66,29 +68,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_Term(String boostExpr, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("boostExpr", boostExpr);
+        TermQueryBuilder builder = regTermQ("boostExpr", boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setBoostExpr_Terms(Collection<String> boostExprList) {
-        setBoostExpr_MatchPhrasePrefix(boostExprList, null);
+        setBoostExpr_Terms(boostExprList, null);
     }
 
-    public void setBoostExpr_MatchPhrasePrefix(Collection<String> boostExprList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("boostExpr", boostExprList);
+    public void setBoostExpr_Terms(Collection<String> boostExprList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("boostExpr", boostExprList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setBoostExpr_InScope(Collection<String> boostExprList) {
-        setBoostExpr_MatchPhrasePrefix(boostExprList, null);
+        setBoostExpr_Terms(boostExprList, null);
     }
 
     public void setBoostExpr_InScope(Collection<String> boostExprList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setBoostExpr_MatchPhrasePrefix(boostExprList, opLambda);
+        setBoostExpr_Terms(boostExprList, opLambda);
     }
 
     public void setBoostExpr_Match(String boostExpr) {
@@ -96,7 +98,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_Match(String boostExpr, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("boostExpr", boostExpr);
+        MatchQueryBuilder builder = regMatchQ("boostExpr", boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -107,7 +109,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_MatchPhrase(String boostExpr, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("boostExpr", boostExpr);
+        MatchQueryBuilder builder = regMatchPhraseQ("boostExpr", boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -118,7 +120,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_MatchPhrasePrefix(String boostExpr, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("boostExpr", boostExpr);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("boostExpr", boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -129,7 +131,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_Fuzzy(String boostExpr, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("boostExpr", boostExpr);
+        FuzzyQueryBuilder builder = regFuzzyQ("boostExpr", boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -140,7 +142,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_Prefix(String boostExpr, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("boostExpr", boostExpr);
+        PrefixQueryBuilder builder = regPrefixQ("boostExpr", boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -151,7 +153,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_GreaterThan(String boostExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("boostExpr", ConditionKey.CK_GREATER_THAN, boostExpr);
+        RangeQueryBuilder builder = regRangeQ("boostExpr", ConditionKey.CK_GREATER_THAN, boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -162,7 +164,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_LessThan(String boostExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("boostExpr", ConditionKey.CK_LESS_THAN, boostExpr);
+        RangeQueryBuilder builder = regRangeQ("boostExpr", ConditionKey.CK_LESS_THAN, boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -173,7 +175,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_GreaterEqual(String boostExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("boostExpr", ConditionKey.CK_GREATER_EQUAL, boostExpr);
+        RangeQueryBuilder builder = regRangeQ("boostExpr", ConditionKey.CK_GREATER_EQUAL, boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -184,7 +186,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setBoostExpr_LessEqual(String boostExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("boostExpr", ConditionKey.CK_LESS_EQUAL, boostExpr);
+        RangeQueryBuilder builder = regRangeQ("boostExpr", ConditionKey.CK_LESS_EQUAL, boostExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -205,29 +207,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Term(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("createdBy", createdBy);
+        TermQueryBuilder builder = regTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedBy_Terms(Collection<String> createdByList) {
-        setCreatedBy_MatchPhrasePrefix(createdByList, null);
+        setCreatedBy_Terms(createdByList, null);
     }
 
-    public void setCreatedBy_MatchPhrasePrefix(Collection<String> createdByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("createdBy", createdByList);
+    public void setCreatedBy_Terms(Collection<String> createdByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("createdBy", createdByList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedBy_InScope(Collection<String> createdByList) {
-        setCreatedBy_MatchPhrasePrefix(createdByList, null);
+        setCreatedBy_Terms(createdByList, null);
     }
 
     public void setCreatedBy_InScope(Collection<String> createdByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCreatedBy_MatchPhrasePrefix(createdByList, opLambda);
+        setCreatedBy_Terms(createdByList, opLambda);
     }
 
     public void setCreatedBy_Match(String createdBy) {
@@ -235,7 +237,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Match(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("createdBy", createdBy);
+        MatchQueryBuilder builder = regMatchQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -246,7 +248,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_MatchPhrase(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("createdBy", createdBy);
+        MatchQueryBuilder builder = regMatchPhraseQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -257,7 +259,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_MatchPhrasePrefix(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("createdBy", createdBy);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -268,7 +270,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Fuzzy(String createdBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("createdBy", createdBy);
+        FuzzyQueryBuilder builder = regFuzzyQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -279,7 +281,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_Prefix(String createdBy, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("createdBy", createdBy);
+        PrefixQueryBuilder builder = regPrefixQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -290,7 +292,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_GreaterThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -301,7 +303,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_LessThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_LESS_THAN, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_THAN, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -312,7 +314,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_GreaterEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -323,7 +325,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -344,29 +346,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_Term(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("createdTime", createdTime);
+        TermQueryBuilder builder = regTermQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
-        setCreatedTime_MatchPhrasePrefix(createdTimeList, null);
+        setCreatedTime_Terms(createdTimeList, null);
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("createdTime", createdTimeList);
+    public void setCreatedTime_Terms(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("createdTime", createdTimeList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setCreatedTime_InScope(Collection<Long> createdTimeList) {
-        setCreatedTime_MatchPhrasePrefix(createdTimeList, null);
+        setCreatedTime_Terms(createdTimeList, null);
     }
 
     public void setCreatedTime_InScope(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCreatedTime_MatchPhrasePrefix(createdTimeList, opLambda);
+        setCreatedTime_Terms(createdTimeList, opLambda);
     }
 
     public void setCreatedTime_Match(Long createdTime) {
@@ -374,7 +376,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_Match(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("createdTime", createdTime);
+        MatchQueryBuilder builder = regMatchQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -385,7 +387,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("createdTime", createdTime);
+        MatchQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -396,7 +398,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("createdTime", createdTime);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -407,7 +409,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("createdTime", createdTime);
+        FuzzyQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -418,7 +420,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -429,7 +431,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_LessThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -440,7 +442,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -451,7 +453,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setCreatedTime_LessEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -472,29 +474,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("id", id);
+        TermQueryBuilder builder = regTermQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_Terms(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
-    public void setId_MatchPhrasePrefix(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("id", idList);
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("id", idList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setId_InScope(Collection<String> idList) {
-        setId_MatchPhrasePrefix(idList, null);
+        setId_Terms(idList, null);
     }
 
     public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_MatchPhrasePrefix(idList, opLambda);
+        setId_Terms(idList, opLambda);
     }
 
     public void setId_Match(String id) {
@@ -502,7 +504,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("id", id);
+        MatchQueryBuilder builder = regMatchQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -513,7 +515,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("id", id);
+        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -524,7 +526,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("id", id);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -535,7 +537,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("id", id);
+        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -546,7 +548,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("id", id);
+        PrefixQueryBuilder builder = regPrefixQ("id", id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -557,7 +559,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -568,7 +570,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_THAN, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -579,7 +581,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -590,7 +592,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
+        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -611,29 +613,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_Term(Integer sortOrder, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("sortOrder", sortOrder);
+        TermQueryBuilder builder = regTermQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setSortOrder_Terms(Collection<Integer> sortOrderList) {
-        setSortOrder_MatchPhrasePrefix(sortOrderList, null);
+        setSortOrder_Terms(sortOrderList, null);
     }
 
-    public void setSortOrder_MatchPhrasePrefix(Collection<Integer> sortOrderList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("sortOrder", sortOrderList);
+    public void setSortOrder_Terms(Collection<Integer> sortOrderList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("sortOrder", sortOrderList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setSortOrder_InScope(Collection<Integer> sortOrderList) {
-        setSortOrder_MatchPhrasePrefix(sortOrderList, null);
+        setSortOrder_Terms(sortOrderList, null);
     }
 
     public void setSortOrder_InScope(Collection<Integer> sortOrderList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setSortOrder_MatchPhrasePrefix(sortOrderList, opLambda);
+        setSortOrder_Terms(sortOrderList, opLambda);
     }
 
     public void setSortOrder_Match(Integer sortOrder) {
@@ -641,7 +643,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_Match(Integer sortOrder, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("sortOrder", sortOrder);
+        MatchQueryBuilder builder = regMatchQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -652,7 +654,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_MatchPhrase(Integer sortOrder, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("sortOrder", sortOrder);
+        MatchQueryBuilder builder = regMatchPhraseQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -663,7 +665,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_MatchPhrasePrefix(Integer sortOrder, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("sortOrder", sortOrder);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -674,7 +676,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_Fuzzy(Integer sortOrder, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("sortOrder", sortOrder);
+        FuzzyQueryBuilder builder = regFuzzyQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -685,7 +687,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_GreaterThan(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("sortOrder", ConditionKey.CK_GREATER_THAN, sortOrder);
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_GREATER_THAN, sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -696,7 +698,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_LessThan(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("sortOrder", ConditionKey.CK_LESS_THAN, sortOrder);
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_LESS_THAN, sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -707,7 +709,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_GreaterEqual(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("sortOrder", ConditionKey.CK_GREATER_EQUAL, sortOrder);
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_GREATER_EQUAL, sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -718,7 +720,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setSortOrder_LessEqual(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("sortOrder", ConditionKey.CK_LESS_EQUAL, sortOrder);
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_LESS_EQUAL, sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -739,29 +741,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Term(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("updatedBy", updatedBy);
+        TermQueryBuilder builder = regTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedBy_Terms(Collection<String> updatedByList) {
-        setUpdatedBy_MatchPhrasePrefix(updatedByList, null);
+        setUpdatedBy_Terms(updatedByList, null);
     }
 
-    public void setUpdatedBy_MatchPhrasePrefix(Collection<String> updatedByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("updatedBy", updatedByList);
+    public void setUpdatedBy_Terms(Collection<String> updatedByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("updatedBy", updatedByList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedBy_InScope(Collection<String> updatedByList) {
-        setUpdatedBy_MatchPhrasePrefix(updatedByList, null);
+        setUpdatedBy_Terms(updatedByList, null);
     }
 
     public void setUpdatedBy_InScope(Collection<String> updatedByList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUpdatedBy_MatchPhrasePrefix(updatedByList, opLambda);
+        setUpdatedBy_Terms(updatedByList, opLambda);
     }
 
     public void setUpdatedBy_Match(String updatedBy) {
@@ -769,7 +771,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Match(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("updatedBy", updatedBy);
+        MatchQueryBuilder builder = regMatchQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -780,7 +782,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_MatchPhrase(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("updatedBy", updatedBy);
+        MatchQueryBuilder builder = regMatchPhraseQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -791,7 +793,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_MatchPhrasePrefix(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("updatedBy", updatedBy);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -802,7 +804,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Fuzzy(String updatedBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("updatedBy", updatedBy);
+        FuzzyQueryBuilder builder = regFuzzyQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -813,7 +815,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_Prefix(String updatedBy, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("updatedBy", updatedBy);
+        PrefixQueryBuilder builder = regPrefixQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -824,7 +826,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_GreaterThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -835,7 +837,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -846,7 +848,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_GreaterEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -857,7 +859,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -878,29 +880,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_Term(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("updatedTime", updatedTime);
+        TermQueryBuilder builder = regTermQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedTime_Terms(Collection<Long> updatedTimeList) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTimeList, null);
+        setUpdatedTime_Terms(updatedTimeList, null);
     }
 
-    public void setUpdatedTime_MatchPhrasePrefix(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("updatedTime", updatedTimeList);
+    public void setUpdatedTime_Terms(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("updatedTime", updatedTimeList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUpdatedTime_InScope(Collection<Long> updatedTimeList) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTimeList, null);
+        setUpdatedTime_Terms(updatedTimeList, null);
     }
 
     public void setUpdatedTime_InScope(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTimeList, opLambda);
+        setUpdatedTime_Terms(updatedTimeList, opLambda);
     }
 
     public void setUpdatedTime_Match(Long updatedTime) {
@@ -908,7 +910,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_Match(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("updatedTime", updatedTime);
+        MatchQueryBuilder builder = regMatchQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -919,7 +921,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("updatedTime", updatedTime);
+        MatchQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -930,7 +932,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("updatedTime", updatedTime);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -941,7 +943,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("updatedTime", updatedTime);
+        FuzzyQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -952,7 +954,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -963,7 +965,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -974,7 +976,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -985,7 +987,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1006,29 +1008,29 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_Term(String urlExpr, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = reqTermQ("urlExpr", urlExpr);
+        TermQueryBuilder builder = regTermQ("urlExpr", urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUrlExpr_Terms(Collection<String> urlExprList) {
-        setUrlExpr_MatchPhrasePrefix(urlExprList, null);
+        setUrlExpr_Terms(urlExprList, null);
     }
 
-    public void setUrlExpr_MatchPhrasePrefix(Collection<String> urlExprList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = reqTermsQ("urlExpr", urlExprList);
+    public void setUrlExpr_Terms(Collection<String> urlExprList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("urlExpr", urlExprList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
     public void setUrlExpr_InScope(Collection<String> urlExprList) {
-        setUrlExpr_MatchPhrasePrefix(urlExprList, null);
+        setUrlExpr_Terms(urlExprList, null);
     }
 
     public void setUrlExpr_InScope(Collection<String> urlExprList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUrlExpr_MatchPhrasePrefix(urlExprList, opLambda);
+        setUrlExpr_Terms(urlExprList, opLambda);
     }
 
     public void setUrlExpr_Match(String urlExpr) {
@@ -1036,7 +1038,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_Match(String urlExpr, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchQ("urlExpr", urlExpr);
+        MatchQueryBuilder builder = regMatchQ("urlExpr", urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1047,7 +1049,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_MatchPhrase(String urlExpr, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhraseQ("urlExpr", urlExpr);
+        MatchQueryBuilder builder = regMatchPhraseQ("urlExpr", urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1058,7 +1060,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_MatchPhrasePrefix(String urlExpr, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = reqMatchPhrasePrefixQ("urlExpr", urlExpr);
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("urlExpr", urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1069,7 +1071,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_Fuzzy(String urlExpr, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = reqFuzzyQ("urlExpr", urlExpr);
+        FuzzyQueryBuilder builder = regFuzzyQ("urlExpr", urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1080,7 +1082,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_Prefix(String urlExpr, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = reqPrefixQ("urlExpr", urlExpr);
+        PrefixQueryBuilder builder = regPrefixQ("urlExpr", urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1091,7 +1093,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_GreaterThan(String urlExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("urlExpr", ConditionKey.CK_GREATER_THAN, urlExpr);
+        RangeQueryBuilder builder = regRangeQ("urlExpr", ConditionKey.CK_GREATER_THAN, urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1102,7 +1104,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_LessThan(String urlExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("urlExpr", ConditionKey.CK_LESS_THAN, urlExpr);
+        RangeQueryBuilder builder = regRangeQ("urlExpr", ConditionKey.CK_LESS_THAN, urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1113,7 +1115,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_GreaterEqual(String urlExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("urlExpr", ConditionKey.CK_GREATER_EQUAL, urlExpr);
+        RangeQueryBuilder builder = regRangeQ("urlExpr", ConditionKey.CK_GREATER_EQUAL, urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1124,7 +1126,7 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     }
 
     public void setUrlExpr_LessEqual(String urlExpr, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = reqRangeQ("urlExpr", ConditionKey.CK_LESS_EQUAL, urlExpr);
+        RangeQueryBuilder builder = regRangeQ("urlExpr", ConditionKey.CK_LESS_EQUAL, urlExpr);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
