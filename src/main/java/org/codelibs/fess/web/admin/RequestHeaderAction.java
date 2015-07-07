@@ -28,7 +28,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.RequestHeader;
+import org.codelibs.fess.es.exentity.RequestHeader;
 import org.codelibs.fess.db.exentity.WebCrawlingConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.RequestHeaderPager;
@@ -285,7 +285,7 @@ public class RequestHeaderAction extends FessAdminAction {
     protected RequestHeader createRequestHeader() {
         RequestHeader requestHeader;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (requestHeaderForm.crudMode == CommonConstants.EDIT_MODE) {
             requestHeader = requestHeaderService.getRequestHeader(createKeyMap());
             if (requestHeader == null) {
@@ -318,12 +318,7 @@ public class RequestHeaderAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { requestHeaderForm.id });
             }
 
-            //           requestHeaderService.delete(requestHeader);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            requestHeader.setDeletedBy(username);
-            requestHeader.setDeletedTime(currentTime);
-            requestHeaderService.store(requestHeader);
+            requestHeaderService.delete(requestHeader);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
