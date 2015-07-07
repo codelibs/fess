@@ -230,6 +230,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements CrawlingCo
         }
         paramMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY, basicAuthList.toArray(new Authentication[basicAuthList.size()]));
 
+        /* TODO CONFIG
         // request header
         final List<RequestHeader> requestHeaderList = requestHeaderService.getRequestHeaderList(getId());
         final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
@@ -237,7 +238,7 @@ public class WebCrawlingConfig extends BsWebCrawlingConfig implements CrawlingCo
             rhList.add(requestHeader.getS2RobotRequestHeader());
         }
         paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList.size()]));
-
+        */
     }
 
     @Override
