@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.OverlappingHostCB;
-import org.codelibs.fess.db.exbhv.OverlappingHostBhv;
-import org.codelibs.fess.db.exentity.OverlappingHost;
+import org.codelibs.fess.es.cbean.OverlappingHostCB;
+import org.codelibs.fess.es.exbhv.OverlappingHostBhv;
+import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.codelibs.fess.pager.OverlappingHostPager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -60,7 +60,7 @@ public class OverlappingHostService implements Serializable {
 
     public OverlappingHost getOverlappingHost(final Map<String, String> keys) {
         final OverlappingHost overlappingHost = overlappingHostBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (overlappingHost == null) {
@@ -74,21 +74,24 @@ public class OverlappingHostService implements Serializable {
     public void store(final OverlappingHost overlappingHost) throws CrudMessageException {
         setupStoreCondition(overlappingHost);
 
-        overlappingHostBhv.insertOrUpdate(overlappingHost);
+        overlappingHostBhv.insertOrUpdate(overlappingHost, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final OverlappingHost overlappingHost) throws CrudMessageException {
         setupDeleteCondition(overlappingHost);
 
-        overlappingHostBhv.delete(overlappingHost);
+        overlappingHostBhv.delete(overlappingHost, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public List<OverlappingHost> getOverlappingHostList() {
 
         return overlappingHostBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_RegularName_Asc();
             cb.query().addOrderBy_OverlappingName_Asc();
@@ -97,12 +100,11 @@ public class OverlappingHostService implements Serializable {
 
     protected void setupListCondition(final OverlappingHostCB cb, final OverlappingHostPager overlappingHostPager) {
         if (overlappingHostPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(overlappingHostPager.id));
+            cb.query().docMeta().setId_Equal(overlappingHostPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
@@ -112,7 +114,6 @@ public class OverlappingHostService implements Serializable {
     protected void setupEntityCondition(final OverlappingHostCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 

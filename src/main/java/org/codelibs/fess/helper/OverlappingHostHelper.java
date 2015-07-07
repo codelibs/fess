@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codelibs.fess.db.exentity.OverlappingHost;
+import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.codelibs.fess.service.OverlappingHostService;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
