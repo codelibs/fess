@@ -62,6 +62,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setAvailable_Equal(Boolean available) {
+        setAvailable_Term(available, null);
+    }
+
+    public void setAvailable_Equal(Boolean available, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setAvailable_Term(available, opLambda);
+    }
+
     public void setAvailable_Term(Boolean available) {
         setAvailable_Term(available, null);
     }
@@ -190,129 +198,126 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
-    public void setCrawler_Term(String crawler) {
+    public void setCrawler_Equal(Boolean crawler) {
         setCrawler_Term(crawler, null);
     }
 
-    public void setCrawler_Term(String crawler, ConditionOptionCall<TermQueryBuilder> opLambda) {
+    public void setCrawler_Equal(Boolean crawler, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCrawler_Term(crawler, opLambda);
+    }
+
+    public void setCrawler_Term(Boolean crawler) {
+        setCrawler_Term(crawler, null);
+    }
+
+    public void setCrawler_Term(Boolean crawler, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("crawler", crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_Terms(Collection<String> crawlerList) {
+    public void setCrawler_Terms(Collection<Boolean> crawlerList) {
         setCrawler_Terms(crawlerList, null);
     }
 
-    public void setCrawler_Terms(Collection<String> crawlerList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setCrawler_Terms(Collection<Boolean> crawlerList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
         TermsQueryBuilder builder = regTermsQ("crawler", crawlerList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_InScope(Collection<String> crawlerList) {
+    public void setCrawler_InScope(Collection<Boolean> crawlerList) {
         setCrawler_Terms(crawlerList, null);
     }
 
-    public void setCrawler_InScope(Collection<String> crawlerList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setCrawler_InScope(Collection<Boolean> crawlerList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
         setCrawler_Terms(crawlerList, opLambda);
     }
 
-    public void setCrawler_Match(String crawler) {
+    public void setCrawler_Match(Boolean crawler) {
         setCrawler_Match(crawler, null);
     }
 
-    public void setCrawler_Match(String crawler, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+    public void setCrawler_Match(Boolean crawler, ConditionOptionCall<MatchQueryBuilder> opLambda) {
         MatchQueryBuilder builder = regMatchQ("crawler", crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_MatchPhrase(String crawler) {
+    public void setCrawler_MatchPhrase(Boolean crawler) {
         setCrawler_MatchPhrase(crawler, null);
     }
 
-    public void setCrawler_MatchPhrase(String crawler, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+    public void setCrawler_MatchPhrase(Boolean crawler, ConditionOptionCall<MatchQueryBuilder> opLambda) {
         MatchQueryBuilder builder = regMatchPhraseQ("crawler", crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_MatchPhrasePrefix(String crawler) {
+    public void setCrawler_MatchPhrasePrefix(Boolean crawler) {
         setCrawler_MatchPhrasePrefix(crawler, null);
     }
 
-    public void setCrawler_MatchPhrasePrefix(String crawler, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+    public void setCrawler_MatchPhrasePrefix(Boolean crawler, ConditionOptionCall<MatchQueryBuilder> opLambda) {
         MatchQueryBuilder builder = regMatchPhrasePrefixQ("crawler", crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_Fuzzy(String crawler) {
+    public void setCrawler_Fuzzy(Boolean crawler) {
         setCrawler_Fuzzy(crawler, null);
     }
 
-    public void setCrawler_Fuzzy(String crawler, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+    public void setCrawler_Fuzzy(Boolean crawler, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
         FuzzyQueryBuilder builder = regFuzzyQ("crawler", crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_Prefix(String crawler) {
-        setCrawler_Prefix(crawler, null);
-    }
-
-    public void setCrawler_Prefix(String crawler, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("crawler", crawler);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setCrawler_GreaterThan(String crawler) {
+    public void setCrawler_GreaterThan(Boolean crawler) {
         setCrawler_GreaterThan(crawler, null);
     }
 
-    public void setCrawler_GreaterThan(String crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setCrawler_GreaterThan(Boolean crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("crawler", ConditionKey.CK_GREATER_THAN, crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_LessThan(String crawler) {
+    public void setCrawler_LessThan(Boolean crawler) {
         setCrawler_LessThan(crawler, null);
     }
 
-    public void setCrawler_LessThan(String crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setCrawler_LessThan(Boolean crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("crawler", ConditionKey.CK_LESS_THAN, crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_GreaterEqual(String crawler) {
+    public void setCrawler_GreaterEqual(Boolean crawler) {
         setCrawler_GreaterEqual(crawler, null);
     }
 
-    public void setCrawler_GreaterEqual(String crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setCrawler_GreaterEqual(Boolean crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("crawler", ConditionKey.CK_GREATER_EQUAL, crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawler_LessEqual(String crawler) {
+    public void setCrawler_LessEqual(Boolean crawler) {
         setCrawler_LessEqual(crawler, null);
     }
 
-    public void setCrawler_LessEqual(String crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setCrawler_LessEqual(Boolean crawler, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("crawler", ConditionKey.CK_LESS_EQUAL, crawler);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -327,6 +332,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
     public BsScheduledJobCQ addOrderBy_Crawler_Desc() {
         regOBD("crawler");
         return this;
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
     }
 
     public void setCreatedBy_Term(String createdBy) {
@@ -468,6 +481,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -594,6 +615,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
     public BsScheduledJobCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setCronExpression_Equal(String cronExpression) {
+        setCronExpression_Term(cronExpression, null);
+    }
+
+    public void setCronExpression_Equal(String cronExpression, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCronExpression_Term(cronExpression, opLambda);
     }
 
     public void setCronExpression_Term(String cronExpression) {
@@ -735,6 +764,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -874,6 +911,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setJobLogging_Equal(Boolean jobLogging) {
+        setJobLogging_Term(jobLogging, null);
+    }
+
+    public void setJobLogging_Equal(Boolean jobLogging, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setJobLogging_Term(jobLogging, opLambda);
+    }
+
     public void setJobLogging_Term(Boolean jobLogging) {
         setJobLogging_Term(jobLogging, null);
     }
@@ -1000,6 +1045,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
     public BsScheduledJobCQ addOrderBy_JobLogging_Desc() {
         regOBD("jobLogging");
         return this;
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setName_Term(name, opLambda);
     }
 
     public void setName_Term(String name) {
@@ -1141,6 +1194,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setScriptData_Equal(String scriptData) {
+        setScriptData_Term(scriptData, null);
+    }
+
+    public void setScriptData_Equal(String scriptData, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setScriptData_Term(scriptData, opLambda);
+    }
+
     public void setScriptData_Term(String scriptData) {
         setScriptData_Term(scriptData, null);
     }
@@ -1278,6 +1339,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
     public BsScheduledJobCQ addOrderBy_ScriptData_Desc() {
         regOBD("scriptData");
         return this;
+    }
+
+    public void setScriptType_Equal(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Equal(String scriptType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setScriptType_Term(scriptType, opLambda);
     }
 
     public void setScriptType_Term(String scriptType) {
@@ -1419,6 +1488,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setSortOrder_Equal(Integer sortOrder) {
+        setSortOrder_Term(sortOrder, null);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSortOrder_Term(sortOrder, opLambda);
+    }
+
     public void setSortOrder_Term(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }
@@ -1545,6 +1622,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
     public BsScheduledJobCQ addOrderBy_SortOrder_Desc() {
         regOBD("sortOrder");
         return this;
+    }
+
+    public void setTarget_Equal(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Equal(String target, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTarget_Term(target, opLambda);
     }
 
     public void setTarget_Term(String target) {
@@ -1686,6 +1771,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
+    }
+
     public void setUpdatedBy_Term(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -1823,6 +1916,14 @@ public abstract class BsScheduledJobCQ extends AbstractConditionQuery {
     public BsScheduledJobCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

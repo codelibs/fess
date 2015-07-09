@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +27,6 @@ public class BsWebConfigToRole extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** id */
-    protected String id;
-
     /** roleTypeId */
     protected String roleTypeId;
 
@@ -41,34 +39,40 @@ public class BsWebConfigToRole extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getRoleTypeId() {
+        checkSpecifiedProperty("roleTypeId");
         return roleTypeId;
     }
 
     public void setRoleTypeId(String value) {
-        roleTypeId = value;
+        registerModifiedProperty("roleTypeId");
+        this.roleTypeId = value;
     }
 
     public String getWebConfigId() {
+        checkSpecifiedProperty("webConfigId");
         return webConfigId;
     }
 
     public void setWebConfigId(String value) {
-        webConfigId = value;
+        registerModifiedProperty("webConfigId");
+        this.webConfigId = value;
     }
 
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (roleTypeId != null) {
             sourceMap.put("roleTypeId", roleTypeId);

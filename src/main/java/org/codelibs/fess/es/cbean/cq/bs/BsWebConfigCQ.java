@@ -62,6 +62,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setAvailable_Equal(Boolean available) {
+        setAvailable_Term(available, null);
+    }
+
+    public void setAvailable_Equal(Boolean available, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setAvailable_Term(available, opLambda);
+    }
+
     public void setAvailable_Term(Boolean available) {
         setAvailable_Term(available, null);
     }
@@ -190,6 +198,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setBoost_Equal(Float boost) {
+        setBoost_Term(boost, null);
+    }
+
+    public void setBoost_Equal(Float boost, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setBoost_Term(boost, opLambda);
+    }
+
     public void setBoost_Term(Float boost) {
         setBoost_Term(boost, null);
     }
@@ -316,6 +332,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_Boost_Desc() {
         regOBD("boost");
         return this;
+    }
+
+    public void setConfigParameter_Equal(String configParameter) {
+        setConfigParameter_Term(configParameter, null);
+    }
+
+    public void setConfigParameter_Equal(String configParameter, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setConfigParameter_Term(configParameter, opLambda);
     }
 
     public void setConfigParameter_Term(String configParameter) {
@@ -457,6 +481,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
+    }
+
     public void setCreatedBy_Term(String createdBy) {
         setCreatedBy_Term(createdBy, null);
     }
@@ -596,6 +628,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -724,6 +764,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setDepth_Equal(Integer depth) {
+        setDepth_Term(depth, null);
+    }
+
+    public void setDepth_Equal(Integer depth, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setDepth_Term(depth, opLambda);
+    }
+
     public void setDepth_Term(Integer depth) {
         setDepth_Term(depth, null);
     }
@@ -850,6 +898,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_Depth_Desc() {
         regOBD("depth");
         return this;
+    }
+
+    public void setExcludedDocUrls_Equal(String excludedDocUrls) {
+        setExcludedDocUrls_Term(excludedDocUrls, null);
+    }
+
+    public void setExcludedDocUrls_Equal(String excludedDocUrls, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setExcludedDocUrls_Term(excludedDocUrls, opLambda);
     }
 
     public void setExcludedDocUrls_Term(String excludedDocUrls) {
@@ -991,6 +1047,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setExcludedUrls_Equal(String excludedUrls) {
+        setExcludedUrls_Term(excludedUrls, null);
+    }
+
+    public void setExcludedUrls_Equal(String excludedUrls, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setExcludedUrls_Term(excludedUrls, opLambda);
+    }
+
     public void setExcludedUrls_Term(String excludedUrls) {
         setExcludedUrls_Term(excludedUrls, null);
     }
@@ -1128,6 +1192,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_ExcludedUrls_Desc() {
         regOBD("excludedUrls");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -1269,6 +1341,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setIncludedDocUrls_Equal(String includedDocUrls) {
+        setIncludedDocUrls_Term(includedDocUrls, null);
+    }
+
+    public void setIncludedDocUrls_Equal(String includedDocUrls, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setIncludedDocUrls_Term(includedDocUrls, opLambda);
+    }
+
     public void setIncludedDocUrls_Term(String includedDocUrls) {
         setIncludedDocUrls_Term(includedDocUrls, null);
     }
@@ -1406,6 +1486,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_IncludedDocUrls_Desc() {
         regOBD("includedDocUrls");
         return this;
+    }
+
+    public void setIncludedUrls_Equal(String includedUrls) {
+        setIncludedUrls_Term(includedUrls, null);
+    }
+
+    public void setIncludedUrls_Equal(String includedUrls, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setIncludedUrls_Term(includedUrls, opLambda);
     }
 
     public void setIncludedUrls_Term(String includedUrls) {
@@ -1547,6 +1635,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setIntervalTime_Equal(Integer intervalTime) {
+        setIntervalTime_Term(intervalTime, null);
+    }
+
+    public void setIntervalTime_Equal(Integer intervalTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setIntervalTime_Term(intervalTime, opLambda);
+    }
+
     public void setIntervalTime_Term(Integer intervalTime) {
         setIntervalTime_Term(intervalTime, null);
     }
@@ -1675,6 +1771,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setMaxAccessCount_Equal(Long maxAccessCount) {
+        setMaxAccessCount_Term(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_Equal(Long maxAccessCount, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setMaxAccessCount_Term(maxAccessCount, opLambda);
+    }
+
     public void setMaxAccessCount_Term(Long maxAccessCount) {
         setMaxAccessCount_Term(maxAccessCount, null);
     }
@@ -1801,6 +1905,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_MaxAccessCount_Desc() {
         regOBD("maxAccessCount");
         return this;
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setName_Term(name, opLambda);
     }
 
     public void setName_Term(String name) {
@@ -1942,6 +2054,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setNumOfThread_Equal(Integer numOfThread) {
+        setNumOfThread_Term(numOfThread, null);
+    }
+
+    public void setNumOfThread_Equal(Integer numOfThread, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setNumOfThread_Term(numOfThread, opLambda);
+    }
+
     public void setNumOfThread_Term(Integer numOfThread) {
         setNumOfThread_Term(numOfThread, null);
     }
@@ -2070,6 +2190,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setSortOrder_Equal(Integer sortOrder) {
+        setSortOrder_Term(sortOrder, null);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSortOrder_Term(sortOrder, opLambda);
+    }
+
     public void setSortOrder_Term(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }
@@ -2196,6 +2324,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_SortOrder_Desc() {
         regOBD("sortOrder");
         return this;
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
     }
 
     public void setUpdatedBy_Term(String updatedBy) {
@@ -2337,6 +2473,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
+    }
+
     public void setUpdatedTime_Term(Long updatedTime) {
         setUpdatedTime_Term(updatedTime, null);
     }
@@ -2463,6 +2607,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
         return this;
+    }
+
+    public void setUrls_Equal(String urls) {
+        setUrls_Term(urls, null);
+    }
+
+    public void setUrls_Equal(String urls, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrls_Term(urls, opLambda);
     }
 
     public void setUrls_Term(String urls) {
@@ -2602,6 +2754,14 @@ public abstract class BsWebConfigCQ extends AbstractConditionQuery {
     public BsWebConfigCQ addOrderBy_Urls_Desc() {
         regOBD("urls");
         return this;
+    }
+
+    public void setUserAgent_Equal(String userAgent) {
+        setUserAgent_Term(userAgent, null);
+    }
+
+    public void setUserAgent_Equal(String userAgent, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserAgent_Term(userAgent, opLambda);
     }
 
     public void setUserAgent_Term(String userAgent) {

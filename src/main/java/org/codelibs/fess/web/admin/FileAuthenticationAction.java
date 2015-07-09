@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +29,12 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.FileAuthentication;
-import org.codelibs.fess.db.exentity.FileCrawlingConfig;
+import org.codelibs.fess.es.exentity.FileAuthentication;
+import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.FileAuthenticationPager;
 import org.codelibs.fess.service.FileAuthenticationService;
-import org.codelibs.fess.service.FileCrawlingConfigService;
+import org.codelibs.fess.service.FileConfigService;
 import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
@@ -59,13 +58,13 @@ public class FileAuthenticationAction extends FessAdminAction {
 
     @ActionForm
     @Resource
-    protected FileCrawlingConfigService fileCrawlingConfigService;
+    protected FileAuthenticationForm fileAuthenticationForm;
+
+    @Resource
+    protected FileConfigService fileConfigService;
 
     @Resource
     protected SystemHelper systemHelper;
-
-    @Resource
-    protected FileAuthenticationForm fileAuthenticationForm;
 
     @Resource
     protected FileAuthenticationService fileAuthenticationService;
@@ -280,7 +279,7 @@ public class FileAuthenticationAction extends FessAdminAction {
     protected FileAuthentication createFileAuthentication() {
         FileAuthentication fileAuthentication;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (fileAuthenticationForm.crudMode == CommonConstants.EDIT_MODE) {
             fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap());
             if (fileAuthentication == null) {
@@ -316,12 +315,7 @@ public class FileAuthenticationAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { fileAuthenticationForm.id });
             }
 
-            //           fileAuthenticationService.delete(fileAuthentication);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            fileAuthentication.setDeletedBy(username);
-            fileAuthentication.setDeletedTime(currentTime);
-            fileAuthenticationService.store(fileAuthentication);
+            fileAuthenticationService.delete(fileAuthentication);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
@@ -346,15 +340,14 @@ public class FileAuthenticationAction extends FessAdminAction {
     }
 
     public boolean isDisplayCreateLink() {
-        return !fileCrawlingConfigService.getAllFileCrawlingConfigList(false, false, false, null).isEmpty();
+        return !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty();
     }
 
-    public List<Map<String, String>> getFileCrawlingConfigItems() {
+    public List<Map<String, String>> getFileConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        final List<FileCrawlingConfig> fileCrawlingConfigList =
-                fileCrawlingConfigService.getAllFileCrawlingConfigList(false, false, false, null);
-        for (final FileCrawlingConfig fileCrawlingConfig : fileCrawlingConfigList) {
-            items.add(createItem(fileCrawlingConfig.getName(), fileCrawlingConfig.getId().toString()));
+        final List<FileConfig> fileConfigList = fileConfigService.getAllFileConfigList(false, false, false, null);
+        for (final FileConfig fileConfig : fileConfigList) {
+            items.add(createItem(fileConfig.getName(), fileConfig.getId().toString()));
         }
         return items;
     }

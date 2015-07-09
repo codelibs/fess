@@ -63,6 +63,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setBoost_Equal(Float boost) {
+        setBoost_Term(boost, null);
+    }
+
+    public void setBoost_Equal(Float boost, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setBoost_Term(boost, opLambda);
+    }
+
     public void setBoost_Term(Float boost) {
         setBoost_Term(boost, null);
     }
@@ -189,6 +197,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
     public BsSuggestElevateWordCQ addOrderBy_Boost_Desc() {
         regOBD("boost");
         return this;
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
     }
 
     public void setCreatedBy_Term(String createdBy) {
@@ -330,6 +346,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -456,6 +480,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
     public BsSuggestElevateWordCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -597,6 +629,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setReading_Equal(String reading) {
+        setReading_Term(reading, null);
+    }
+
+    public void setReading_Equal(String reading, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setReading_Term(reading, opLambda);
+    }
+
     public void setReading_Term(String reading) {
         setReading_Term(reading, null);
     }
@@ -734,6 +774,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
     public BsSuggestElevateWordCQ addOrderBy_Reading_Desc() {
         regOBD("reading");
         return this;
+    }
+
+    public void setSuggestWord_Equal(String suggestWord) {
+        setSuggestWord_Term(suggestWord, null);
+    }
+
+    public void setSuggestWord_Equal(String suggestWord, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSuggestWord_Term(suggestWord, opLambda);
     }
 
     public void setSuggestWord_Term(String suggestWord) {
@@ -875,6 +923,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setTargetLabel_Equal(String targetLabel) {
+        setTargetLabel_Term(targetLabel, null);
+    }
+
+    public void setTargetLabel_Equal(String targetLabel, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTargetLabel_Term(targetLabel, opLambda);
+    }
+
     public void setTargetLabel_Term(String targetLabel) {
         setTargetLabel_Term(targetLabel, null);
     }
@@ -1012,6 +1068,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
     public BsSuggestElevateWordCQ addOrderBy_TargetLabel_Desc() {
         regOBD("targetLabel");
         return this;
+    }
+
+    public void setTargetRole_Equal(String targetRole) {
+        setTargetRole_Term(targetRole, null);
+    }
+
+    public void setTargetRole_Equal(String targetRole, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTargetRole_Term(targetRole, opLambda);
     }
 
     public void setTargetRole_Term(String targetRole) {
@@ -1153,6 +1217,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
+    }
+
     public void setUpdatedBy_Term(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -1290,6 +1362,14 @@ public abstract class BsSuggestElevateWordCQ extends AbstractConditionQuery {
     public BsSuggestElevateWordCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

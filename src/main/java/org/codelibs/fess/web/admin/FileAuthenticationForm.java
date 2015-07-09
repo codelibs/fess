@@ -17,13 +17,10 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.Constants;
-import org.seasar.struts.annotation.DateType;
+import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.struts.annotation.IntRange;
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.LongType;
@@ -47,7 +44,7 @@ public class FileAuthenticationForm implements Serializable {
     }
 
     @Required(target = "confirmfromupdate,update,delete")
-    @LongType
+    @Maxbytelength(maxbytelength = 1000)
     public String id;
 
     @Maxbytelength(maxbytelength = 100)
@@ -71,27 +68,21 @@ public class FileAuthenticationForm implements Serializable {
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @LongType
-    public String fileCrawlingConfigId;
+    public String fileConfigId;
 
     @Required(target = "confirmfromupdate,update,delete")
     @Maxbytelength(maxbytelength = 255)
     public String createdBy;
 
     @Required(target = "confirmfromupdate,update,delete")
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    @LongType
     public String createdTime;
 
     @Maxbytelength(maxbytelength = 255)
     public String updatedBy;
 
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    @LongType
     public String updatedTime;
-
-    @Maxbytelength(maxbytelength = 255)
-    public String deletedBy;
-
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
-    public String deletedTime;
 
     @Required(target = "confirmfromupdate,update,delete")
     @IntegerType
@@ -105,18 +96,12 @@ public class FileAuthenticationForm implements Serializable {
         username = null;
         password = null;
         parameters = null;
-        fileCrawlingConfigId = null;
-        createdBy = null;
-        createdTime = null;
+        fileConfigId = null;
+        createdBy = "system";
+        createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         updatedBy = null;
         updatedTime = null;
-        deletedBy = null;
-        deletedTime = null;
         versionNo = null;
-
-        createdBy = "system";
-        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
-        createdTime = sdf.format(new Date());
     }
 
 }

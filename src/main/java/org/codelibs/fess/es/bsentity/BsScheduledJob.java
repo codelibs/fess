@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class BsScheduledJob extends AbstractEntity {
     protected Boolean available;
 
     /** crawler */
-    protected String crawler;
+    protected Boolean crawler;
 
     /** createdBy */
     protected String createdBy;
@@ -40,9 +41,6 @@ public class BsScheduledJob extends AbstractEntity {
 
     /** cronExpression */
     protected String cronExpression;
-
-    /** id */
-    protected String id;
 
     /** jobLogging */
     protected Boolean jobLogging;
@@ -74,115 +72,143 @@ public class BsScheduledJob extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Boolean getAvailable() {
+        checkSpecifiedProperty("available");
         return available;
     }
 
     public void setAvailable(Boolean value) {
-        available = value;
+        registerModifiedProperty("available");
+        this.available = value;
     }
 
-    public String getCrawler() {
+    public Boolean getCrawler() {
+        checkSpecifiedProperty("crawler");
         return crawler;
     }
 
-    public void setCrawler(String value) {
-        crawler = value;
+    public void setCrawler(Boolean value) {
+        registerModifiedProperty("crawler");
+        this.crawler = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getCronExpression() {
+        checkSpecifiedProperty("cronExpression");
         return cronExpression;
     }
 
     public void setCronExpression(String value) {
-        cronExpression = value;
+        registerModifiedProperty("cronExpression");
+        this.cronExpression = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Boolean getJobLogging() {
+        checkSpecifiedProperty("jobLogging");
         return jobLogging;
     }
 
     public void setJobLogging(Boolean value) {
-        jobLogging = value;
+        registerModifiedProperty("jobLogging");
+        this.jobLogging = value;
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public String getScriptData() {
+        checkSpecifiedProperty("scriptData");
         return scriptData;
     }
 
     public void setScriptData(String value) {
-        scriptData = value;
+        registerModifiedProperty("scriptData");
+        this.scriptData = value;
     }
 
     public String getScriptType() {
+        checkSpecifiedProperty("scriptType");
         return scriptType;
     }
 
     public void setScriptType(String value) {
-        scriptType = value;
+        registerModifiedProperty("scriptType");
+        this.scriptType = value;
     }
 
     public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
         return sortOrder;
     }
 
     public void setSortOrder(Integer value) {
-        sortOrder = value;
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getTarget() {
+        checkSpecifiedProperty("target");
         return target;
     }
 
     public void setTarget(String value) {
-        target = value;
+        registerModifiedProperty("target");
+        this.target = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     @Override
@@ -203,8 +229,8 @@ public class BsScheduledJob extends AbstractEntity {
         if (cronExpression != null) {
             sourceMap.put("cronExpression", cronExpression);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (jobLogging != null) {
             sourceMap.put("jobLogging", jobLogging);

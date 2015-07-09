@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.CrawlingSessionInfoCB;
 import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsCrawlingSessionInfoBhv extends AbstractBehavior<Crawling
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "crawling_session_info";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "crawling_session_info";
     }
 
     @Override
@@ -129,6 +142,14 @@ public abstract class BsCrawlingSessionInfoBhv extends AbstractBehavior<Crawling
         return (PagingResultBean<CrawlingSessionInfo>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<CrawlingSessionInfoCB> cbLambda, EntityRowHandler<CrawlingSessionInfo> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<CrawlingSessionInfoCB> cbLambda, EntityRowHandler<List<CrawlingSessionInfo>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(CrawlingSessionInfo entity) {
         doInsert(entity, null);
     }
@@ -171,6 +192,34 @@ public abstract class BsCrawlingSessionInfoBhv extends AbstractBehavior<Crawling
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<CrawlingSessionInfoCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<CrawlingSessionInfo> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<CrawlingSessionInfo> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<CrawlingSessionInfo> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<CrawlingSessionInfo> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<CrawlingSessionInfo> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<CrawlingSessionInfo> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

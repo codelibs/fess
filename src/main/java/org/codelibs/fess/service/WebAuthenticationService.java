@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.WebAuthenticationCB;
-import org.codelibs.fess.db.exbhv.WebAuthenticationBhv;
-import org.codelibs.fess.db.exentity.WebAuthentication;
+import org.codelibs.fess.es.cbean.WebAuthenticationCB;
+import org.codelibs.fess.es.exbhv.WebAuthenticationBhv;
+import org.codelibs.fess.es.exentity.WebAuthentication;
 import org.codelibs.fess.pager.WebAuthenticationPager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -60,7 +60,7 @@ public class WebAuthenticationService implements Serializable {
 
     public WebAuthentication getWebAuthentication(final Map<String, String> keys) {
         final WebAuthentication webAuthentication = webAuthenticationBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (webAuthentication == null) {
@@ -74,27 +74,29 @@ public class WebAuthenticationService implements Serializable {
     public void store(final WebAuthentication webAuthentication) throws CrudMessageException {
         setupStoreCondition(webAuthentication);
 
-        webAuthenticationBhv.insertOrUpdate(webAuthentication);
+        webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final WebAuthentication webAuthentication) throws CrudMessageException {
         setupDeleteCondition(webAuthentication);
 
-        webAuthenticationBhv.delete(webAuthentication);
+        webAuthenticationBhv.delete(webAuthentication, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthenticationPager webAuthenticationPager) {
         if (webAuthenticationPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(webAuthenticationPager.id));
+            cb.query().docMeta().setId_Equal(webAuthenticationPager.id);
         }
         // TODO Long, Integer, String supported only.
         // setup condition
-        cb.setupSelect_WebCrawlingConfig();
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_Hostname_Asc();
-        cb.query().addOrderBy_WebCrawlingConfigId_Asc();
+        cb.query().addOrderBy_WebConfigId_Asc();
 
         // search
 
@@ -103,7 +105,6 @@ public class WebAuthenticationService implements Serializable {
     protected void setupEntityCondition(final WebAuthenticationCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 
@@ -119,9 +120,9 @@ public class WebAuthenticationService implements Serializable {
 
     }
 
-    public List<WebAuthentication> getWebAuthenticationList(final Long webCrawlingConfigId) {
+    public List<WebAuthentication> getWebAuthenticationList(final String webConfigId) {
         return webAuthenticationBhv.selectList(cb -> {
-            cb.query().setWebCrawlingConfigId_Equal(webCrawlingConfigId);
+            cb.query().setWebConfigId_Equal(webConfigId);
         });
     }
 

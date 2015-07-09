@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,9 +39,6 @@ public class BsFileAuthentication extends AbstractEntity {
     /** hostname */
     protected String hostname;
 
-    /** id */
-    protected String id;
-
     /** parameters */
     protected String parameters;
 
@@ -68,99 +66,123 @@ public class BsFileAuthentication extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getFileConfigId() {
+        checkSpecifiedProperty("fileConfigId");
         return fileConfigId;
     }
 
     public void setFileConfigId(String value) {
-        fileConfigId = value;
+        registerModifiedProperty("fileConfigId");
+        this.fileConfigId = value;
     }
 
     public String getHostname() {
+        checkSpecifiedProperty("hostname");
         return hostname;
     }
 
     public void setHostname(String value) {
-        hostname = value;
+        registerModifiedProperty("hostname");
+        this.hostname = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getParameters() {
+        checkSpecifiedProperty("parameters");
         return parameters;
     }
 
     public void setParameters(String value) {
-        parameters = value;
+        registerModifiedProperty("parameters");
+        this.parameters = value;
     }
 
     public String getPassword() {
+        checkSpecifiedProperty("password");
         return password;
     }
 
     public void setPassword(String value) {
-        password = value;
+        registerModifiedProperty("password");
+        this.password = value;
     }
 
     public Integer getPort() {
+        checkSpecifiedProperty("port");
         return port;
     }
 
     public void setPort(Integer value) {
-        port = value;
+        registerModifiedProperty("port");
+        this.port = value;
     }
 
     public String getProtocolScheme() {
+        checkSpecifiedProperty("protocolScheme");
         return protocolScheme;
     }
 
     public void setProtocolScheme(String value) {
-        protocolScheme = value;
+        registerModifiedProperty("protocolScheme");
+        this.protocolScheme = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     public String getUsername() {
+        checkSpecifiedProperty("username");
         return username;
     }
 
     public void setUsername(String value) {
-        username = value;
+        registerModifiedProperty("username");
+        this.username = value;
     }
 
     @Override
@@ -178,8 +200,8 @@ public class BsFileAuthentication extends AbstractEntity {
         if (hostname != null) {
             sourceMap.put("hostname", hostname);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (parameters != null) {
             sourceMap.put("parameters", parameters);

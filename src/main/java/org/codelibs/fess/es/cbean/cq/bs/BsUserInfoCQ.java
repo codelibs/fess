@@ -62,6 +62,14 @@ public abstract class BsUserInfoCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setCode_Equal(String code) {
+        setCode_Term(code, null);
+    }
+
+    public void setCode_Equal(String code, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCode_Term(code, opLambda);
+    }
+
     public void setCode_Term(String code) {
         setCode_Term(code, null);
     }
@@ -201,6 +209,14 @@ public abstract class BsUserInfoCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -327,6 +343,14 @@ public abstract class BsUserInfoCQ extends AbstractConditionQuery {
     public BsUserInfoCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -466,6 +490,14 @@ public abstract class BsUserInfoCQ extends AbstractConditionQuery {
     public BsUserInfoCQ addOrderBy_Id_Desc() {
         regOBD("id");
         return this;
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

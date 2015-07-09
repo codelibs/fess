@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +26,8 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.LabelType;
-import org.codelibs.fess.db.exentity.RoleType;
+import org.codelibs.fess.es.exentity.LabelType;
+import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.LabelTypePager;
 import org.codelibs.fess.service.LabelTypeService;
@@ -282,7 +281,7 @@ public class LabelTypeAction extends FessAdminAction {
     protected LabelType createLabelType() {
         LabelType labelType;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (labelTypeForm.crudMode == CommonConstants.EDIT_MODE) {
             labelType = labelTypeService.getLabelType(createKeyMap());
             if (labelType == null) {
@@ -315,12 +314,7 @@ public class LabelTypeAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { labelTypeForm.id });
             }
 
-            //           labelTypeService.delete(labelType);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            labelType.setDeletedBy(username);
-            labelType.setDeletedTime(currentTime);
-            labelTypeService.store(labelType);
+            labelTypeService.delete(labelType);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);

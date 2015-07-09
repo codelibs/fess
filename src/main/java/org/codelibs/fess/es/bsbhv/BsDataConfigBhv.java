@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.DataConfigCB;
 import org.codelibs.fess.es.exentity.DataConfig;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsDataConfigBhv extends AbstractBehavior<DataConfig, DataC
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "data_config";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "data_config";
     }
 
     @Override
@@ -135,6 +148,14 @@ public abstract class BsDataConfigBhv extends AbstractBehavior<DataConfig, DataC
         return (PagingResultBean<DataConfig>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<DataConfigCB> cbLambda, EntityRowHandler<DataConfig> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<DataConfigCB> cbLambda, EntityRowHandler<List<DataConfig>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(DataConfig entity) {
         doInsert(entity, null);
     }
@@ -177,6 +198,34 @@ public abstract class BsDataConfigBhv extends AbstractBehavior<DataConfig, DataC
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<DataConfigCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<DataConfig> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<DataConfig> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<DataConfig> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<DataConfig> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<DataConfig> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<DataConfig> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

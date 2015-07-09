@@ -37,7 +37,7 @@ import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.RoleType;
+import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.service.RoleTypeService;
 import org.codelibs.robot.util.CharUtil;
 import org.seasar.framework.container.SingletonS2Container;

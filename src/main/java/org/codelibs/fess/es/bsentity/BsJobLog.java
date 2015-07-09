@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,6 @@ public class BsJobLog extends AbstractEntity {
     /** endTime */
     protected Long endTime;
 
-    /** id */
-    protected String id;
-
     /** jobName */
     protected String jobName;
 
@@ -59,75 +57,93 @@ public class BsJobLog extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Long getEndTime() {
+        checkSpecifiedProperty("endTime");
         return endTime;
     }
 
     public void setEndTime(Long value) {
-        endTime = value;
+        registerModifiedProperty("endTime");
+        this.endTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getJobName() {
+        checkSpecifiedProperty("jobName");
         return jobName;
     }
 
     public void setJobName(String value) {
-        jobName = value;
+        registerModifiedProperty("jobName");
+        this.jobName = value;
     }
 
     public String getJobStatus() {
+        checkSpecifiedProperty("jobStatus");
         return jobStatus;
     }
 
     public void setJobStatus(String value) {
-        jobStatus = value;
+        registerModifiedProperty("jobStatus");
+        this.jobStatus = value;
     }
 
     public String getScriptData() {
+        checkSpecifiedProperty("scriptData");
         return scriptData;
     }
 
     public void setScriptData(String value) {
-        scriptData = value;
+        registerModifiedProperty("scriptData");
+        this.scriptData = value;
     }
 
     public String getScriptResult() {
+        checkSpecifiedProperty("scriptResult");
         return scriptResult;
     }
 
     public void setScriptResult(String value) {
-        scriptResult = value;
+        registerModifiedProperty("scriptResult");
+        this.scriptResult = value;
     }
 
     public String getScriptType() {
+        checkSpecifiedProperty("scriptType");
         return scriptType;
     }
 
     public void setScriptType(String value) {
-        scriptType = value;
+        registerModifiedProperty("scriptType");
+        this.scriptType = value;
     }
 
     public Long getStartTime() {
+        checkSpecifiedProperty("startTime");
         return startTime;
     }
 
     public void setStartTime(Long value) {
-        startTime = value;
+        registerModifiedProperty("startTime");
+        this.startTime = value;
     }
 
     public String getTarget() {
+        checkSpecifiedProperty("target");
         return target;
     }
 
     public void setTarget(String value) {
-        target = value;
+        registerModifiedProperty("target");
+        this.target = value;
     }
 
     @Override
@@ -136,8 +152,8 @@ public class BsJobLog extends AbstractEntity {
         if (endTime != null) {
             sourceMap.put("endTime", endTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (jobName != null) {
             sourceMap.put("jobName", jobName);

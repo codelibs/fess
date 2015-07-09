@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +36,6 @@ public class BsBoostDocumentRule extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -56,67 +54,83 @@ public class BsBoostDocumentRule extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getBoostExpr() {
+        checkSpecifiedProperty("boostExpr");
         return boostExpr;
     }
 
     public void setBoostExpr(String value) {
-        boostExpr = value;
+        registerModifiedProperty("boostExpr");
+        this.boostExpr = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
         return sortOrder;
     }
 
     public void setSortOrder(Integer value) {
-        sortOrder = value;
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     public String getUrlExpr() {
+        checkSpecifiedProperty("urlExpr");
         return urlExpr;
     }
 
     public void setUrlExpr(String value) {
-        urlExpr = value;
+        registerModifiedProperty("urlExpr");
+        this.urlExpr = value;
     }
 
     @Override
@@ -131,8 +145,8 @@ public class BsBoostDocumentRule extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (sortOrder != null) {
             sourceMap.put("sortOrder", sortOrder);

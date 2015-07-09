@@ -62,6 +62,14 @@ public abstract class BsFavoriteLogCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -188,6 +196,14 @@ public abstract class BsFavoriteLogCQ extends AbstractConditionQuery {
     public BsFavoriteLogCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -329,6 +345,14 @@ public abstract class BsFavoriteLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUrl_Equal(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Equal(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrl_Term(url, opLambda);
+    }
+
     public void setUrl_Term(String url) {
         setUrl_Term(url, null);
     }
@@ -466,6 +490,14 @@ public abstract class BsFavoriteLogCQ extends AbstractConditionQuery {
     public BsFavoriteLogCQ addOrderBy_Url_Desc() {
         regOBD("url");
         return this;
+    }
+
+    public void setUserInfoId_Equal(String userInfoId) {
+        setUserInfoId_Term(userInfoId, null);
+    }
+
+    public void setUserInfoId_Equal(String userInfoId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserInfoId_Term(userInfoId, opLambda);
     }
 
     public void setUserInfoId_Term(String userInfoId) {

@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.ScheduledJobCB;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "scheduled_job";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "scheduled_job";
     }
 
     @Override
@@ -42,7 +55,7 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
         try {
             final RESULT result = entityType.newInstance();
             result.setAvailable(toBoolean(source.get("available")));
-            result.setCrawler(toString(source.get("crawler")));
+            result.setCrawler(toBoolean(source.get("crawler")));
             result.setCreatedBy(toString(source.get("createdBy")));
             result.setCreatedTime(toLong(source.get("createdTime")));
             result.setCronExpression(toString(source.get("cronExpression")));
@@ -137,6 +150,14 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
         return (PagingResultBean<ScheduledJob>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<ScheduledJobCB> cbLambda, EntityRowHandler<ScheduledJob> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<ScheduledJobCB> cbLambda, EntityRowHandler<List<ScheduledJob>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(ScheduledJob entity) {
         doInsert(entity, null);
     }
@@ -179,6 +200,34 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<ScheduledJobCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<ScheduledJob> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<ScheduledJob> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<ScheduledJob> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<ScheduledJob> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<ScheduledJob> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<ScheduledJob> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

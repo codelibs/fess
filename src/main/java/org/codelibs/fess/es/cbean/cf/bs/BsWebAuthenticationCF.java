@@ -106,6 +106,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setAuthRealm_NotEqual(String authRealm) {
+        setAuthRealm_NotEqual(authRealm, null, null);
+    }
+
+    public void setAuthRealm_NotEqual(String authRealm, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setAuthRealm_Equal(authRealm, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setAuthRealm_Equal(String authRealm) {
+        setAuthRealm_Term(authRealm, null);
+    }
+
+    public void setAuthRealm_Equal(String authRealm, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setAuthRealm_Term(authRealm, opLambda);
+    }
+
     public void setAuthRealm_Term(String authRealm) {
         setAuthRealm_Term(authRealm, null);
     }
@@ -211,6 +230,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy) {
+        setCreatedBy_NotEqual(createdBy, null, null);
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedBy_Equal(createdBy, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
     }
 
     public void setCreatedBy_Term(String createdBy) {
@@ -320,6 +358,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotEqual(createdTime, null, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedTime_Equal(createdTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -414,6 +471,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setHostname_NotEqual(String hostname) {
+        setHostname_NotEqual(hostname, null, null);
+    }
+
+    public void setHostname_NotEqual(String hostname, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setHostname_Equal(hostname, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setHostname_Equal(String hostname) {
+        setHostname_Term(hostname, null);
+    }
+
+    public void setHostname_Equal(String hostname, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setHostname_Term(hostname, opLambda);
     }
 
     public void setHostname_Term(String hostname) {
@@ -523,6 +599,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -628,6 +723,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setParameters_NotEqual(String parameters) {
+        setParameters_NotEqual(parameters, null, null);
+    }
+
+    public void setParameters_NotEqual(String parameters, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setParameters_Equal(parameters, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setParameters_Equal(String parameters) {
+        setParameters_Term(parameters, null);
+    }
+
+    public void setParameters_Equal(String parameters, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setParameters_Term(parameters, opLambda);
     }
 
     public void setParameters_Term(String parameters) {
@@ -737,6 +851,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setPassword_NotEqual(String password) {
+        setPassword_NotEqual(password, null, null);
+    }
+
+    public void setPassword_NotEqual(String password, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setPassword_Equal(password, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setPassword_Equal(String password) {
+        setPassword_Term(password, null);
+    }
+
+    public void setPassword_Equal(String password, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setPassword_Term(password, opLambda);
+    }
+
     public void setPassword_Term(String password) {
         setPassword_Term(password, null);
     }
@@ -844,6 +977,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setPort_NotEqual(Integer port) {
+        setPort_NotEqual(port, null, null);
+    }
+
+    public void setPort_NotEqual(Integer port, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setPort_Equal(port, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setPort_Equal(Integer port) {
+        setPort_Term(port, null);
+    }
+
+    public void setPort_Equal(Integer port, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setPort_Term(port, opLambda);
+    }
+
     public void setPort_Term(Integer port) {
         setPort_Term(port, null);
     }
@@ -938,6 +1090,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setProtocolScheme_NotEqual(String protocolScheme) {
+        setProtocolScheme_NotEqual(protocolScheme, null, null);
+    }
+
+    public void setProtocolScheme_NotEqual(String protocolScheme, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setProtocolScheme_Equal(protocolScheme, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setProtocolScheme_Equal(String protocolScheme) {
+        setProtocolScheme_Term(protocolScheme, null);
+    }
+
+    public void setProtocolScheme_Equal(String protocolScheme, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setProtocolScheme_Term(protocolScheme, opLambda);
     }
 
     public void setProtocolScheme_Term(String protocolScheme) {
@@ -1047,6 +1218,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setUpdatedBy_NotEqual(String updatedBy) {
+        setUpdatedBy_NotEqual(updatedBy, null, null);
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUpdatedBy_Equal(updatedBy, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
+    }
+
     public void setUpdatedBy_Term(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -1154,6 +1344,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         }
     }
 
+    public void setUpdatedTime_NotEqual(Long updatedTime) {
+        setUpdatedTime_NotEqual(updatedTime, null, null);
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUpdatedTime_Equal(updatedTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
+    }
+
     public void setUpdatedTime_Term(Long updatedTime) {
         setUpdatedTime_Term(updatedTime, null);
     }
@@ -1248,6 +1457,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUsername_NotEqual(String username) {
+        setUsername_NotEqual(username, null, null);
+    }
+
+    public void setUsername_NotEqual(String username, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUsername_Equal(username, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUsername_Equal(String username) {
+        setUsername_Term(username, null);
+    }
+
+    public void setUsername_Equal(String username, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUsername_Term(username, opLambda);
     }
 
     public void setUsername_Term(String username) {
@@ -1355,6 +1583,25 @@ public abstract class BsWebAuthenticationCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setWebConfigId_NotEqual(String webConfigId) {
+        setWebConfigId_NotEqual(webConfigId, null, null);
+    }
+
+    public void setWebConfigId_NotEqual(String webConfigId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setWebConfigId_Equal(webConfigId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setWebConfigId_Equal(String webConfigId) {
+        setWebConfigId_Term(webConfigId, null);
+    }
+
+    public void setWebConfigId_Equal(String webConfigId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setWebConfigId_Term(webConfigId, opLambda);
     }
 
     public void setWebConfigId_Term(String webConfigId) {

@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.FileAuthenticationCB;
-import org.codelibs.fess.db.exbhv.FileAuthenticationBhv;
-import org.codelibs.fess.db.exentity.FileAuthentication;
+import org.codelibs.fess.es.cbean.FileAuthenticationCB;
+import org.codelibs.fess.es.exbhv.FileAuthenticationBhv;
+import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.codelibs.fess.pager.FileAuthenticationPager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -60,7 +60,7 @@ public class FileAuthenticationService implements Serializable {
 
     public FileAuthentication getFileAuthentication(final Map<String, String> keys) {
         final FileAuthentication fileAuthentication = fileAuthenticationBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (fileAuthentication == null) {
@@ -74,28 +74,29 @@ public class FileAuthenticationService implements Serializable {
     public void store(final FileAuthentication fileAuthentication) throws CrudMessageException {
         setupStoreCondition(fileAuthentication);
 
-        fileAuthenticationBhv.insertOrUpdate(fileAuthentication);
+        fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final FileAuthentication fileAuthentication) throws CrudMessageException {
         setupDeleteCondition(fileAuthentication);
 
-        fileAuthenticationBhv.delete(fileAuthentication);
+        fileAuthenticationBhv.delete(fileAuthentication, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthenticationPager fileAuthenticationPager) {
         if (fileAuthenticationPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(fileAuthenticationPager.id));
+            cb.query().docMeta().setId_Equal(fileAuthenticationPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.setupSelect_FileCrawlingConfig();
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_Hostname_Asc();
-        cb.query().addOrderBy_FileCrawlingConfigId_Asc();
 
         // search
 
@@ -104,7 +105,6 @@ public class FileAuthenticationService implements Serializable {
     protected void setupEntityCondition(final FileAuthenticationCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 
@@ -120,9 +120,9 @@ public class FileAuthenticationService implements Serializable {
 
     }
 
-    public List<FileAuthentication> getFileAuthenticationList(final Long fileCrawlingConfigId) {
+    public List<FileAuthentication> getFileAuthenticationList(final String fileConfigId) {
         return fileAuthenticationBhv.selectList(cb -> {
-            cb.query().setFileCrawlingConfigId_Equal(fileCrawlingConfigId);
+            cb.query().setFileConfigId_Equal(fileConfigId);
         });
     }
 }

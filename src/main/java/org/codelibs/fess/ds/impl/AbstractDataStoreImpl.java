@@ -16,20 +16,19 @@
 
 package org.codelibs.fess.ds.impl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
-import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.framework.util.OgnlUtil;
 import org.slf4j.Logger;
@@ -49,11 +48,11 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     }
 
     @Override
-    public void store(final DataCrawlingConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
+    public void store(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
         final Map<String, String> configParamMap = config.getHandlerParameterMap();
         final Map<String, String> configScriptMap = config.getHandlerScriptMap();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        final LocalDateTime documentExpires = crawlingSessionHelper.getDocumentExpires();
+        final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
         initParamMap.putAll(configParamMap);
@@ -69,7 +68,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
         //  expires
         if (documentExpires != null) {
-            defaultDataMap.put(fieldHelper.expiresField, FessFunctions.formatDate(documentExpires));
+            defaultDataMap.put(fieldHelper.expiresField, new Date(documentExpires));
         }
         // segment
         defaultDataMap.put(fieldHelper.segmentField, initParamMap.get(Constants.SESSION_ID));
@@ -144,6 +143,6 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         } catch (final Exception e) {}
     }
 
-    protected abstract void storeData(DataCrawlingConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,
+    protected abstract void storeData(DataConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,
             Map<String, String> scriptMap, Map<String, Object> defaultDataMap);
 }

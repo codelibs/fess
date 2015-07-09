@@ -106,6 +106,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setEndTime_NotEqual(Long endTime) {
+        setEndTime_NotEqual(endTime, null, null);
+    }
+
+    public void setEndTime_NotEqual(Long endTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setEndTime_Equal(endTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setEndTime_Equal(Long endTime) {
+        setEndTime_Term(endTime, null);
+    }
+
+    public void setEndTime_Equal(Long endTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setEndTime_Term(endTime, opLambda);
+    }
+
     public void setEndTime_Term(Long endTime) {
         setEndTime_Term(endTime, null);
     }
@@ -200,6 +219,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -309,6 +347,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setJobName_NotEqual(String jobName) {
+        setJobName_NotEqual(jobName, null, null);
+    }
+
+    public void setJobName_NotEqual(String jobName, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setJobName_Equal(jobName, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setJobName_Equal(String jobName) {
+        setJobName_Term(jobName, null);
+    }
+
+    public void setJobName_Equal(String jobName, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setJobName_Term(jobName, opLambda);
+    }
+
     public void setJobName_Term(String jobName) {
         setJobName_Term(jobName, null);
     }
@@ -414,6 +471,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setJobStatus_NotEqual(String jobStatus) {
+        setJobStatus_NotEqual(jobStatus, null, null);
+    }
+
+    public void setJobStatus_NotEqual(String jobStatus, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setJobStatus_Equal(jobStatus, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setJobStatus_Equal(String jobStatus) {
+        setJobStatus_Term(jobStatus, null);
+    }
+
+    public void setJobStatus_Equal(String jobStatus, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setJobStatus_Term(jobStatus, opLambda);
     }
 
     public void setJobStatus_Term(String jobStatus) {
@@ -523,6 +599,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setScriptData_NotEqual(String scriptData) {
+        setScriptData_NotEqual(scriptData, null, null);
+    }
+
+    public void setScriptData_NotEqual(String scriptData, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setScriptData_Equal(scriptData, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setScriptData_Equal(String scriptData) {
+        setScriptData_Term(scriptData, null);
+    }
+
+    public void setScriptData_Equal(String scriptData, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setScriptData_Term(scriptData, opLambda);
+    }
+
     public void setScriptData_Term(String scriptData) {
         setScriptData_Term(scriptData, null);
     }
@@ -628,6 +723,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setScriptResult_NotEqual(String scriptResult) {
+        setScriptResult_NotEqual(scriptResult, null, null);
+    }
+
+    public void setScriptResult_NotEqual(String scriptResult, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setScriptResult_Equal(scriptResult, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setScriptResult_Equal(String scriptResult) {
+        setScriptResult_Term(scriptResult, null);
+    }
+
+    public void setScriptResult_Equal(String scriptResult, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setScriptResult_Term(scriptResult, opLambda);
     }
 
     public void setScriptResult_Term(String scriptResult) {
@@ -737,6 +851,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setScriptType_NotEqual(String scriptType) {
+        setScriptType_NotEqual(scriptType, null, null);
+    }
+
+    public void setScriptType_NotEqual(String scriptType, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setScriptType_Equal(scriptType, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setScriptType_Equal(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Equal(String scriptType, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setScriptType_Term(scriptType, opLambda);
+    }
+
     public void setScriptType_Term(String scriptType) {
         setScriptType_Term(scriptType, null);
     }
@@ -844,6 +977,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setStartTime_NotEqual(Long startTime) {
+        setStartTime_NotEqual(startTime, null, null);
+    }
+
+    public void setStartTime_NotEqual(Long startTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setStartTime_Equal(startTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setStartTime_Equal(Long startTime) {
+        setStartTime_Term(startTime, null);
+    }
+
+    public void setStartTime_Equal(Long startTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setStartTime_Term(startTime, opLambda);
+    }
+
     public void setStartTime_Term(Long startTime) {
         setStartTime_Term(startTime, null);
     }
@@ -938,6 +1090,25 @@ public abstract class BsJobLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setTarget_NotEqual(String target) {
+        setTarget_NotEqual(target, null, null);
+    }
+
+    public void setTarget_NotEqual(String target, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setTarget_Equal(target, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setTarget_Equal(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Equal(String target, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setTarget_Term(target, opLambda);
     }
 
     public void setTarget_Term(String target) {

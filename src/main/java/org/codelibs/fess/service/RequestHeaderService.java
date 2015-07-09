@@ -96,9 +96,7 @@ public class RequestHeaderService implements Serializable {
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        // TODO CONFIG cb.setupSelect_WebCrawlingConfig();
         cb.query().addOrderBy_Name_Asc();
-        // TODO CONFIG cb.query().addOrderBy_WebCrawlingConfigId_Asc();
 
         // search
 
@@ -122,11 +120,10 @@ public class RequestHeaderService implements Serializable {
 
     }
 
-    public List<RequestHeader> getRequestHeaderList(final Long webCrawlingConfigId) {
+    public List<RequestHeader> getRequestHeaderList(final String webConfigId) {
         return requestHeaderBhv.selectList(cb -> {
-            // TODO CONFIG cb.query().setWebCrawlingConfigId_Equal(webCrawlingConfigId);
-                cb.query().matchAll();
-            });
+            cb.query().setWebConfigId_Equal(webConfigId);
+        });
     }
 
 }

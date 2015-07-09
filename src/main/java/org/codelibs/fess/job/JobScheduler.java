@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exbhv.ScheduledJobBhv;
-import org.codelibs.fess.db.exentity.ScheduledJob;
+import org.codelibs.fess.es.exbhv.ScheduledJobBhv;
+import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.quartz.Job;
@@ -66,7 +66,6 @@ public class JobScheduler {
 
         ComponentUtil.getComponent(ScheduledJobBhv.class).selectCursor(cb -> {
             cb.query().setAvailable_Equal(Constants.T);
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
         }, scheduledJob -> register(scheduledJob));
@@ -112,7 +111,7 @@ public class JobScheduler {
             scriptType = "groovy";
         }
 
-        final Long id = scheduledJob.getId();
+        final String id = scheduledJob.getId();
         final String jobId = Constants.JOB_ID_PREFIX + id;
         final String triggerId = TRIGGER_ID_PREFIX + id;
 

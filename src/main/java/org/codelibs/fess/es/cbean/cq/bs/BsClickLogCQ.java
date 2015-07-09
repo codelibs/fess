@@ -62,6 +62,14 @@ public abstract class BsClickLogCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -201,6 +209,14 @@ public abstract class BsClickLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setRequestedTime_Equal(Long requestedTime) {
+        setRequestedTime_Term(requestedTime, null);
+    }
+
+    public void setRequestedTime_Equal(Long requestedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRequestedTime_Term(requestedTime, opLambda);
+    }
+
     public void setRequestedTime_Term(Long requestedTime) {
         setRequestedTime_Term(requestedTime, null);
     }
@@ -327,6 +343,14 @@ public abstract class BsClickLogCQ extends AbstractConditionQuery {
     public BsClickLogCQ addOrderBy_RequestedTime_Desc() {
         regOBD("requestedTime");
         return this;
+    }
+
+    public void setSearchLogId_Equal(String searchLogId) {
+        setSearchLogId_Term(searchLogId, null);
+    }
+
+    public void setSearchLogId_Equal(String searchLogId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSearchLogId_Term(searchLogId, opLambda);
     }
 
     public void setSearchLogId_Term(String searchLogId) {
@@ -466,6 +490,14 @@ public abstract class BsClickLogCQ extends AbstractConditionQuery {
     public BsClickLogCQ addOrderBy_SearchLogId_Desc() {
         regOBD("searchLogId");
         return this;
+    }
+
+    public void setUrl_Equal(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Equal(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrl_Term(url, opLambda);
     }
 
     public void setUrl_Term(String url) {

@@ -35,7 +35,7 @@
 				</ul>
 				</c:if>
 				<c:if test="${!displayCreateLink}">
-					<s:link href="../webCrawlingConfig/index" styleClass="btn primary">
+					<s:link href="../webConfig/index" styleClass="btn primary">
 						<bean:message key="labels.web_authentication_create_web_config" />
 					</s:link>
 				</c:if>
@@ -65,7 +65,7 @@
 									</c:if>${f:h(data.hostname)}:<c:if test="${data.port==-1}">
 										<bean:message key="labels.web_authentication_any" />
 									</c:if> <c:if test="${data.port!=-1}">${f:h(data.port)}</c:if></td>
-								<td>${f:h(data.webCrawlingConfig.name)}</td>
+								<td>${f:h(data.webConfig.name)}</td>
 								<td style="text-align: center;"><s:link
 										href="confirmpage/4/${f:u(data.id)}">
 										<bean:message key="labels.web_authentication_link_details" />

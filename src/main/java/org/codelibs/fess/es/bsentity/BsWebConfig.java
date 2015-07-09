@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,9 +51,6 @@ public class BsWebConfig extends AbstractEntity {
     /** excludedUrls */
     protected String excludedUrls;
 
-    /** id */
-    protected String id;
-
     /** includedDocUrls */
     protected String includedDocUrls;
 
@@ -92,163 +90,203 @@ public class BsWebConfig extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Boolean getAvailable() {
+        checkSpecifiedProperty("available");
         return available;
     }
 
     public void setAvailable(Boolean value) {
-        available = value;
+        registerModifiedProperty("available");
+        this.available = value;
     }
 
     public Float getBoost() {
+        checkSpecifiedProperty("boost");
         return boost;
     }
 
     public void setBoost(Float value) {
-        boost = value;
+        registerModifiedProperty("boost");
+        this.boost = value;
     }
 
     public String getConfigParameter() {
+        checkSpecifiedProperty("configParameter");
         return configParameter;
     }
 
     public void setConfigParameter(String value) {
-        configParameter = value;
+        registerModifiedProperty("configParameter");
+        this.configParameter = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public Integer getDepth() {
+        checkSpecifiedProperty("depth");
         return depth;
     }
 
     public void setDepth(Integer value) {
-        depth = value;
+        registerModifiedProperty("depth");
+        this.depth = value;
     }
 
     public String getExcludedDocUrls() {
+        checkSpecifiedProperty("excludedDocUrls");
         return excludedDocUrls;
     }
 
     public void setExcludedDocUrls(String value) {
-        excludedDocUrls = value;
+        registerModifiedProperty("excludedDocUrls");
+        this.excludedDocUrls = value;
     }
 
     public String getExcludedUrls() {
+        checkSpecifiedProperty("excludedUrls");
         return excludedUrls;
     }
 
     public void setExcludedUrls(String value) {
-        excludedUrls = value;
+        registerModifiedProperty("excludedUrls");
+        this.excludedUrls = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getIncludedDocUrls() {
+        checkSpecifiedProperty("includedDocUrls");
         return includedDocUrls;
     }
 
     public void setIncludedDocUrls(String value) {
-        includedDocUrls = value;
+        registerModifiedProperty("includedDocUrls");
+        this.includedDocUrls = value;
     }
 
     public String getIncludedUrls() {
+        checkSpecifiedProperty("includedUrls");
         return includedUrls;
     }
 
     public void setIncludedUrls(String value) {
-        includedUrls = value;
+        registerModifiedProperty("includedUrls");
+        this.includedUrls = value;
     }
 
     public Integer getIntervalTime() {
+        checkSpecifiedProperty("intervalTime");
         return intervalTime;
     }
 
     public void setIntervalTime(Integer value) {
-        intervalTime = value;
+        registerModifiedProperty("intervalTime");
+        this.intervalTime = value;
     }
 
     public Long getMaxAccessCount() {
+        checkSpecifiedProperty("maxAccessCount");
         return maxAccessCount;
     }
 
     public void setMaxAccessCount(Long value) {
-        maxAccessCount = value;
+        registerModifiedProperty("maxAccessCount");
+        this.maxAccessCount = value;
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public Integer getNumOfThread() {
+        checkSpecifiedProperty("numOfThread");
         return numOfThread;
     }
 
     public void setNumOfThread(Integer value) {
-        numOfThread = value;
+        registerModifiedProperty("numOfThread");
+        this.numOfThread = value;
     }
 
     public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
         return sortOrder;
     }
 
     public void setSortOrder(Integer value) {
-        sortOrder = value;
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     public String getUrls() {
+        checkSpecifiedProperty("urls");
         return urls;
     }
 
     public void setUrls(String value) {
-        urls = value;
+        registerModifiedProperty("urls");
+        this.urls = value;
     }
 
     public String getUserAgent() {
+        checkSpecifiedProperty("userAgent");
         return userAgent;
     }
 
     public void setUserAgent(String value) {
-        userAgent = value;
+        registerModifiedProperty("userAgent");
+        this.userAgent = value;
     }
 
     @Override
@@ -278,8 +316,8 @@ public class BsWebConfig extends AbstractEntity {
         if (excludedUrls != null) {
             sourceMap.put("excludedUrls", excludedUrls);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (includedDocUrls != null) {
             sourceMap.put("includedDocUrls", includedDocUrls);

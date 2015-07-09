@@ -17,7 +17,6 @@
 package org.codelibs.fess.service;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.JobLogCB;
-import org.codelibs.fess.db.exbhv.JobLogBhv;
-import org.codelibs.fess.db.exentity.JobLog;
+import org.codelibs.fess.es.cbean.JobLogCB;
+import org.codelibs.fess.es.exbhv.JobLogBhv;
+import org.codelibs.fess.es.exentity.JobLog;
 import org.codelibs.fess.pager.JobLogPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -62,7 +61,7 @@ public class JobLogService implements Serializable {
 
     public JobLog getJobLog(final Map<String, String> keys) {
         final JobLog jobLog = jobLogBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (jobLog == null) {
@@ -76,20 +75,24 @@ public class JobLogService implements Serializable {
     public void store(final JobLog jobLog) throws CrudMessageException {
         setupStoreCondition(jobLog);
 
-        jobLogBhv.insertOrUpdate(jobLog);
+        jobLogBhv.insertOrUpdate(jobLog, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final JobLog jobLog) throws CrudMessageException {
         setupDeleteCondition(jobLog);
 
-        jobLogBhv.delete(jobLog);
+        jobLogBhv.delete(jobLog, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final JobLogCB cb, final JobLogPager jobLogPager) {
         if (jobLogPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(jobLogPager.id));
+            cb.query().docMeta().setId_Equal(jobLogPager.id);
         }
         // TODO Long, Integer, String supported only.
 
@@ -120,16 +123,17 @@ public class JobLogService implements Serializable {
     }
 
     public void deleteBefore(final int days) {
-        final LocalDateTime targetTime = ComponentUtil.getSystemHelper().getCurrentTime().minusDays(days);
-        jobLogBhv.varyingQueryDelete(cb -> {
+        final long oneday = 24 * 60 * 60 * 1000;
+        final long targetTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong() - days * oneday;
+        jobLogBhv.queryDelete(cb -> {
             cb.query().setEndTime_LessThan(targetTime);
-        }, op -> op.allowNonQueryDelete());
+        });
     }
 
     public void deleteByJobStatus(final List<String> jobStatusList) {
-        jobLogBhv.varyingQueryDelete(cb -> {
+        jobLogBhv.queryDelete(cb -> {
             cb.query().setJobStatus_InScope(jobStatusList);
-        }, op -> op.allowNonQueryDelete());
+        });
     }
 
 }

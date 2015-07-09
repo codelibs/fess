@@ -62,6 +62,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setAvailable_Equal(Boolean available) {
+        setAvailable_Term(available, null);
+    }
+
+    public void setAvailable_Equal(Boolean available, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setAvailable_Term(available, opLambda);
+    }
+
     public void setAvailable_Term(Boolean available) {
         setAvailable_Term(available, null);
     }
@@ -190,6 +198,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setBoost_Equal(Float boost) {
+        setBoost_Term(boost, null);
+    }
+
+    public void setBoost_Equal(Float boost, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setBoost_Term(boost, opLambda);
+    }
+
     public void setBoost_Term(Float boost) {
         setBoost_Term(boost, null);
     }
@@ -316,6 +332,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_Boost_Desc() {
         regOBD("boost");
         return this;
+    }
+
+    public void setConfigParameter_Equal(String configParameter) {
+        setConfigParameter_Term(configParameter, null);
+    }
+
+    public void setConfigParameter_Equal(String configParameter, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setConfigParameter_Term(configParameter, opLambda);
     }
 
     public void setConfigParameter_Term(String configParameter) {
@@ -457,6 +481,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
+    }
+
     public void setCreatedBy_Term(String createdBy) {
         setCreatedBy_Term(createdBy, null);
     }
@@ -596,6 +628,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -724,6 +764,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setDepth_Equal(Integer depth) {
+        setDepth_Term(depth, null);
+    }
+
+    public void setDepth_Equal(Integer depth, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setDepth_Term(depth, opLambda);
+    }
+
     public void setDepth_Term(Integer depth) {
         setDepth_Term(depth, null);
     }
@@ -850,6 +898,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_Depth_Desc() {
         regOBD("depth");
         return this;
+    }
+
+    public void setExcludedDocPaths_Equal(String excludedDocPaths) {
+        setExcludedDocPaths_Term(excludedDocPaths, null);
+    }
+
+    public void setExcludedDocPaths_Equal(String excludedDocPaths, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setExcludedDocPaths_Term(excludedDocPaths, opLambda);
     }
 
     public void setExcludedDocPaths_Term(String excludedDocPaths) {
@@ -991,6 +1047,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setExcludedPaths_Equal(String excludedPaths) {
+        setExcludedPaths_Term(excludedPaths, null);
+    }
+
+    public void setExcludedPaths_Equal(String excludedPaths, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setExcludedPaths_Term(excludedPaths, opLambda);
+    }
+
     public void setExcludedPaths_Term(String excludedPaths) {
         setExcludedPaths_Term(excludedPaths, null);
     }
@@ -1128,6 +1192,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_ExcludedPaths_Desc() {
         regOBD("excludedPaths");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -1269,6 +1341,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setIncludedDocPaths_Equal(String includedDocPaths) {
+        setIncludedDocPaths_Term(includedDocPaths, null);
+    }
+
+    public void setIncludedDocPaths_Equal(String includedDocPaths, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setIncludedDocPaths_Term(includedDocPaths, opLambda);
+    }
+
     public void setIncludedDocPaths_Term(String includedDocPaths) {
         setIncludedDocPaths_Term(includedDocPaths, null);
     }
@@ -1406,6 +1486,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_IncludedDocPaths_Desc() {
         regOBD("includedDocPaths");
         return this;
+    }
+
+    public void setIncludedPaths_Equal(String includedPaths) {
+        setIncludedPaths_Term(includedPaths, null);
+    }
+
+    public void setIncludedPaths_Equal(String includedPaths, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setIncludedPaths_Term(includedPaths, opLambda);
     }
 
     public void setIncludedPaths_Term(String includedPaths) {
@@ -1547,6 +1635,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setIntervalTime_Equal(Integer intervalTime) {
+        setIntervalTime_Term(intervalTime, null);
+    }
+
+    public void setIntervalTime_Equal(Integer intervalTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setIntervalTime_Term(intervalTime, opLambda);
+    }
+
     public void setIntervalTime_Term(Integer intervalTime) {
         setIntervalTime_Term(intervalTime, null);
     }
@@ -1675,6 +1771,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setMaxAccessCount_Equal(Long maxAccessCount) {
+        setMaxAccessCount_Term(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_Equal(Long maxAccessCount, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setMaxAccessCount_Term(maxAccessCount, opLambda);
+    }
+
     public void setMaxAccessCount_Term(Long maxAccessCount) {
         setMaxAccessCount_Term(maxAccessCount, null);
     }
@@ -1801,6 +1905,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_MaxAccessCount_Desc() {
         regOBD("maxAccessCount");
         return this;
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setName_Term(name, opLambda);
     }
 
     public void setName_Term(String name) {
@@ -1942,6 +2054,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setNumOfThread_Equal(Integer numOfThread) {
+        setNumOfThread_Term(numOfThread, null);
+    }
+
+    public void setNumOfThread_Equal(Integer numOfThread, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setNumOfThread_Term(numOfThread, opLambda);
+    }
+
     public void setNumOfThread_Term(Integer numOfThread) {
         setNumOfThread_Term(numOfThread, null);
     }
@@ -2068,6 +2188,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_NumOfThread_Desc() {
         regOBD("numOfThread");
         return this;
+    }
+
+    public void setPaths_Equal(String paths) {
+        setPaths_Term(paths, null);
+    }
+
+    public void setPaths_Equal(String paths, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setPaths_Term(paths, opLambda);
     }
 
     public void setPaths_Term(String paths) {
@@ -2209,6 +2337,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setSortOrder_Equal(Integer sortOrder) {
+        setSortOrder_Term(sortOrder, null);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSortOrder_Term(sortOrder, opLambda);
+    }
+
     public void setSortOrder_Term(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }
@@ -2335,6 +2471,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_SortOrder_Desc() {
         regOBD("sortOrder");
         return this;
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
     }
 
     public void setUpdatedBy_Term(String updatedBy) {
@@ -2474,6 +2618,14 @@ public abstract class BsFileConfigCQ extends AbstractConditionQuery {
     public BsFileConfigCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

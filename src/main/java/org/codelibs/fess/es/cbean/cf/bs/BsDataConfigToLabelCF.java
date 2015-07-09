@@ -106,6 +106,25 @@ public abstract class BsDataConfigToLabelCF extends AbstractConditionFilter {
         }
     }
 
+    public void setDataConfigId_NotEqual(String dataConfigId) {
+        setDataConfigId_NotEqual(dataConfigId, null, null);
+    }
+
+    public void setDataConfigId_NotEqual(String dataConfigId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setDataConfigId_Equal(dataConfigId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setDataConfigId_Equal(String dataConfigId) {
+        setDataConfigId_Term(dataConfigId, null);
+    }
+
+    public void setDataConfigId_Equal(String dataConfigId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setDataConfigId_Term(dataConfigId, opLambda);
+    }
+
     public void setDataConfigId_Term(String dataConfigId) {
         setDataConfigId_Term(dataConfigId, null);
     }
@@ -213,6 +232,25 @@ public abstract class BsDataConfigToLabelCF extends AbstractConditionFilter {
         }
     }
 
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -318,6 +356,25 @@ public abstract class BsDataConfigToLabelCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setLabelTypeId_NotEqual(String labelTypeId) {
+        setLabelTypeId_NotEqual(labelTypeId, null, null);
+    }
+
+    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setLabelTypeId_Equal(labelTypeId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setLabelTypeId_Equal(String labelTypeId) {
+        setLabelTypeId_Term(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Equal(String labelTypeId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setLabelTypeId_Term(labelTypeId, opLambda);
     }
 
     public void setLabelTypeId_Term(String labelTypeId) {

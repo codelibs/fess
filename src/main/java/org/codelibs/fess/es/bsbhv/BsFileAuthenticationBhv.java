@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.FileAuthenticationCB;
 import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehavior<FileAuthe
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "file_authentication";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "file_authentication";
     }
 
     @Override
@@ -136,6 +149,14 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehavior<FileAuthe
         return (PagingResultBean<FileAuthentication>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<FileAuthenticationCB> cbLambda, EntityRowHandler<FileAuthentication> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<FileAuthenticationCB> cbLambda, EntityRowHandler<List<FileAuthentication>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(FileAuthentication entity) {
         doInsert(entity, null);
     }
@@ -178,6 +199,34 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehavior<FileAuthe
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<FileAuthenticationCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<FileAuthentication> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<FileAuthentication> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<FileAuthentication> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<FileAuthentication> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<FileAuthentication> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<FileAuthentication> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

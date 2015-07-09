@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +31,9 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.SuggestBadWordCB;
-import org.codelibs.fess.db.exbhv.SuggestBadWordBhv;
-import org.codelibs.fess.db.exentity.SuggestBadWord;
+import org.codelibs.fess.es.cbean.SuggestBadWordCB;
+import org.codelibs.fess.es.exbhv.SuggestBadWordBhv;
+import org.codelibs.fess.es.exentity.SuggestBadWord;
 import org.codelibs.fess.pager.SuggestBadWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -78,7 +77,7 @@ public class SuggestBadWordService implements Serializable {
 
     public SuggestBadWord getSuggestBadWord(final Map<String, String> keys) {
         final SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (suggestBadWord == null) {
@@ -105,12 +104,11 @@ public class SuggestBadWordService implements Serializable {
 
     protected void setupListCondition(final SuggestBadWordCB cb, final SuggestBadWordPager suggestBadWordPager) {
         if (suggestBadWordPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(suggestBadWordPager.id));
+            cb.query().docMeta().setId_Equal(suggestBadWordPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SuggestWord_Asc();
 
         // search
@@ -156,11 +154,9 @@ public class SuggestBadWordService implements Serializable {
                     SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(target);
                     }).orElse(null);//TODO
-                    final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
+                    final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
                     if (isDelete) {
-                        suggestBadWord.setDeletedBy("system");
-                        suggestBadWord.setDeletedTime(now);
-                        suggestBadWordBhv.update(suggestBadWord);
+                        suggestBadWordBhv.delete(suggestBadWord);
                     } else if (suggestBadWord == null) {
                         suggestBadWord = new SuggestBadWord();
                         suggestBadWord.setSuggestWord(badWord);
@@ -193,7 +189,7 @@ public class SuggestBadWordService implements Serializable {
             csvWriter.writeValues(list);
 
             suggestBadWordBhv.selectCursor(cb -> {
-                cb.query().setDeletedBy_IsNull();
+                cb.query().matchAll();
             }, new EntityRowHandler<SuggestBadWord>() {
                 @Override
                 public void handle(final SuggestBadWord entity) {

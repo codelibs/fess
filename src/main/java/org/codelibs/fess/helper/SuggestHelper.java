@@ -25,9 +25,9 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.db.exbhv.SuggestBadWordBhv;
-import org.codelibs.fess.db.exbhv.SuggestElevateWordBhv;
-import org.codelibs.fess.db.exentity.SuggestBadWord;
+import org.codelibs.fess.es.exbhv.SuggestBadWordBhv;
+import org.codelibs.fess.es.exbhv.SuggestElevateWordBhv;
+import org.codelibs.fess.es.exentity.SuggestBadWord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +129,7 @@ public class SuggestHelper {
 
     public void deleteAllBadWord() {
         final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
+            cb.query().matchAll();
         });
         final Set<String> badWords = new HashSet<String>();
         for (final SuggestBadWord suggestBadWord : list) {
@@ -144,7 +144,7 @@ public class SuggestHelper {
 
     public void updateSolrBadwordFile() {
         suggestBadWordBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
+            cb.query().matchAll();
         });
 
         final File dir = new File(System.getProperty("catalina.home").replace("¥", "/") + "/" + badwordFileDir);

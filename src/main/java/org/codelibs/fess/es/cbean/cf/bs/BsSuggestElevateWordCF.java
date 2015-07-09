@@ -106,6 +106,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         }
     }
 
+    public void setBoost_NotEqual(Float boost) {
+        setBoost_NotEqual(boost, null, null);
+    }
+
+    public void setBoost_NotEqual(Float boost, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setBoost_Equal(boost, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setBoost_Equal(Float boost) {
+        setBoost_Term(boost, null);
+    }
+
+    public void setBoost_Equal(Float boost, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setBoost_Term(boost, opLambda);
+    }
+
     public void setBoost_Term(Float boost) {
         setBoost_Term(boost, null);
     }
@@ -200,6 +219,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy) {
+        setCreatedBy_NotEqual(createdBy, null, null);
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedBy_Equal(createdBy, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
     }
 
     public void setCreatedBy_Term(String createdBy) {
@@ -309,6 +347,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotEqual(createdTime, null, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedTime_Equal(createdTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -403,6 +460,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -512,6 +588,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         }
     }
 
+    public void setReading_NotEqual(String reading) {
+        setReading_NotEqual(reading, null, null);
+    }
+
+    public void setReading_NotEqual(String reading, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setReading_Equal(reading, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setReading_Equal(String reading) {
+        setReading_Term(reading, null);
+    }
+
+    public void setReading_Equal(String reading, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setReading_Term(reading, opLambda);
+    }
+
     public void setReading_Term(String reading) {
         setReading_Term(reading, null);
     }
@@ -617,6 +712,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setSuggestWord_NotEqual(String suggestWord) {
+        setSuggestWord_NotEqual(suggestWord, null, null);
+    }
+
+    public void setSuggestWord_NotEqual(String suggestWord, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setSuggestWord_Equal(suggestWord, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setSuggestWord_Equal(String suggestWord) {
+        setSuggestWord_Term(suggestWord, null);
+    }
+
+    public void setSuggestWord_Equal(String suggestWord, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setSuggestWord_Term(suggestWord, opLambda);
     }
 
     public void setSuggestWord_Term(String suggestWord) {
@@ -726,6 +840,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         }
     }
 
+    public void setTargetLabel_NotEqual(String targetLabel) {
+        setTargetLabel_NotEqual(targetLabel, null, null);
+    }
+
+    public void setTargetLabel_NotEqual(String targetLabel, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setTargetLabel_Equal(targetLabel, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setTargetLabel_Equal(String targetLabel) {
+        setTargetLabel_Term(targetLabel, null);
+    }
+
+    public void setTargetLabel_Equal(String targetLabel, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setTargetLabel_Term(targetLabel, opLambda);
+    }
+
     public void setTargetLabel_Term(String targetLabel) {
         setTargetLabel_Term(targetLabel, null);
     }
@@ -831,6 +964,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setTargetRole_NotEqual(String targetRole) {
+        setTargetRole_NotEqual(targetRole, null, null);
+    }
+
+    public void setTargetRole_NotEqual(String targetRole, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setTargetRole_Equal(targetRole, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setTargetRole_Equal(String targetRole) {
+        setTargetRole_Term(targetRole, null);
+    }
+
+    public void setTargetRole_Equal(String targetRole, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setTargetRole_Term(targetRole, opLambda);
     }
 
     public void setTargetRole_Term(String targetRole) {
@@ -940,6 +1092,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         }
     }
 
+    public void setUpdatedBy_NotEqual(String updatedBy) {
+        setUpdatedBy_NotEqual(updatedBy, null, null);
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUpdatedBy_Equal(updatedBy, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
+    }
+
     public void setUpdatedBy_Term(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -1045,6 +1216,25 @@ public abstract class BsSuggestElevateWordCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime) {
+        setUpdatedTime_NotEqual(updatedTime, null, null);
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUpdatedTime_Equal(updatedTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

@@ -63,6 +63,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setBoostExpr_Equal(String boostExpr) {
+        setBoostExpr_Term(boostExpr, null);
+    }
+
+    public void setBoostExpr_Equal(String boostExpr, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setBoostExpr_Term(boostExpr, opLambda);
+    }
+
     public void setBoostExpr_Term(String boostExpr) {
         setBoostExpr_Term(boostExpr, null);
     }
@@ -200,6 +208,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     public BsBoostDocumentRuleCQ addOrderBy_BoostExpr_Desc() {
         regOBD("boostExpr");
         return this;
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
     }
 
     public void setCreatedBy_Term(String createdBy) {
@@ -341,6 +357,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -467,6 +491,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     public BsBoostDocumentRuleCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -608,6 +640,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setSortOrder_Equal(Integer sortOrder) {
+        setSortOrder_Term(sortOrder, null);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSortOrder_Term(sortOrder, opLambda);
+    }
+
     public void setSortOrder_Term(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }
@@ -734,6 +774,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     public BsBoostDocumentRuleCQ addOrderBy_SortOrder_Desc() {
         regOBD("sortOrder");
         return this;
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
     }
 
     public void setUpdatedBy_Term(String updatedBy) {
@@ -875,6 +923,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
+    }
+
     public void setUpdatedTime_Term(Long updatedTime) {
         setUpdatedTime_Term(updatedTime, null);
     }
@@ -1001,6 +1057,14 @@ public abstract class BsBoostDocumentRuleCQ extends AbstractConditionQuery {
     public BsBoostDocumentRuleCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
         return this;
+    }
+
+    public void setUrlExpr_Equal(String urlExpr) {
+        setUrlExpr_Term(urlExpr, null);
+    }
+
+    public void setUrlExpr_Equal(String urlExpr, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrlExpr_Term(urlExpr, opLambda);
     }
 
     public void setUrlExpr_Term(String urlExpr) {

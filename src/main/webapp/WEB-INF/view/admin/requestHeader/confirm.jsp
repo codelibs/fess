@@ -71,9 +71,9 @@
 						<tr>
 							<th><bean:message
 									key="labels.request_header_web_crawling_config" /></th>
-							<td><c:forEach var="item" items="${webCrawlingConfigItems}">
-									<c:if test="${webCrawlingConfigId==item.value}">${f:h(item.label)}</c:if>
-								</c:forEach> <html:hidden property="webCrawlingConfigId" /></td>
+							<td><c:forEach var="item" items="${webConfigItems}">
+									<c:if test="${webConfigId==item.value}">${f:h(item.label)}</c:if>
+								</c:forEach> <html:hidden property="webConfigId" /></td>
 						</tr>
 					</tbody>
 					<tfoot>

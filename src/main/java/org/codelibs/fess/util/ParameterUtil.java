@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.db.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigName;
 
 public class ParameterUtil {
     protected static final String XPATH_PREFIX = "field.xpath.";

@@ -198,76 +198,91 @@ public interface FessEnv {
         private static final long serialVersionUID = 1L;
 
         /** {@inheritDoc} */
+        @Override
         public String getDevelopmentHere() {
             return get(FessEnv.DEVELOPMENT_HERE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean isDevelopmentHere() {
             return is(FessEnv.DEVELOPMENT_HERE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getEnvironmentTitle() {
             return get(FessEnv.ENVIRONMENT_TITLE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getFrameworkDebug() {
             return get(FessEnv.FRAMEWORK_DEBUG);
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean isFrameworkDebug() {
             return is(FessEnv.FRAMEWORK_DEBUG);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getTimeAdjustTimeMillis() {
             return get(FessEnv.TIME_ADJUST_TIME_MILLIS);
         }
 
         /** {@inheritDoc} */
+        @Override
         public Long getTimeAdjustTimeMillisAsLong() {
             return getAsLong(FessEnv.TIME_ADJUST_TIME_MILLIS);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getMailSendMock() {
             return get(FessEnv.MAIL_SEND_MOCK);
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean isMailSendMock() {
             return is(FessEnv.MAIL_SEND_MOCK);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getMailSmtpServerDefaultHostAndPort() {
             return get(FessEnv.MAIL_SMTP_SERVER_DEFAULT_HOST_AND_PORT);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getJdbcUrl() {
             return get(FessEnv.JDBC_URL);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getJdbcUser() {
             return get(FessEnv.JDBC_USER);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getJdbcPassword() {
             return get(FessEnv.JDBC_PASSWORD);
         }
 
         /** {@inheritDoc} */
+        @Override
         public String getJdbcConnectionPoolingSize() {
             return get(FessEnv.JDBC_CONNECTION_POOLING_SIZE);
         }
 
         /** {@inheritDoc} */
+        @Override
         public Integer getJdbcConnectionPoolingSizeAsInteger() {
             return getAsInteger(FessEnv.JDBC_CONNECTION_POOLING_SIZE);
         }

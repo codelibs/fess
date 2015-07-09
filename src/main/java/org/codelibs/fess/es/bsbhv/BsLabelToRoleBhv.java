@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.LabelToRoleCB;
 import org.codelibs.fess.es.exentity.LabelToRole;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsLabelToRoleBhv extends AbstractBehavior<LabelToRole, Lab
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "label_to_role";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "label_to_role";
     }
 
     @Override
@@ -126,6 +139,14 @@ public abstract class BsLabelToRoleBhv extends AbstractBehavior<LabelToRole, Lab
         return (PagingResultBean<LabelToRole>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<LabelToRoleCB> cbLambda, EntityRowHandler<LabelToRole> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<LabelToRoleCB> cbLambda, EntityRowHandler<List<LabelToRole>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(LabelToRole entity) {
         doInsert(entity, null);
     }
@@ -168,6 +189,34 @@ public abstract class BsLabelToRoleBhv extends AbstractBehavior<LabelToRole, Lab
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<LabelToRoleCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<LabelToRole> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<LabelToRole> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<LabelToRole> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<LabelToRole> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<LabelToRole> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<LabelToRole> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

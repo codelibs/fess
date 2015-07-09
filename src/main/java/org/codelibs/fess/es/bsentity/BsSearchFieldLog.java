@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +27,6 @@ public class BsSearchFieldLog extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** id */
-    protected String id;
-
     /** name */
     protected String name;
 
@@ -44,42 +42,50 @@ public class BsSearchFieldLog extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public String getSearchLogId() {
+        checkSpecifiedProperty("searchLogId");
         return searchLogId;
     }
 
     public void setSearchLogId(String value) {
-        searchLogId = value;
+        registerModifiedProperty("searchLogId");
+        this.searchLogId = value;
     }
 
     public String getValue() {
+        checkSpecifiedProperty("value");
         return value;
     }
 
     public void setValue(String value) {
-        value = value;
+        registerModifiedProperty("value");
+        this.value = value;
     }
 
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (name != null) {
             sourceMap.put("name", name);

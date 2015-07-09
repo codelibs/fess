@@ -38,7 +38,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
 import org.codelibs.fess.helper.DatabaseHelper;
@@ -141,7 +140,7 @@ public class Crawler implements Serializable {
             // noghing
         }
 
-        protected List<Long> getWebConfigIdList() {
+        protected List<String> getWebConfigIdList() {
             if (StringUtil.isNotBlank(webConfigIds)) {
                 final String[] values = webConfigIds.split(",");
                 return createConfigIdList(values);
@@ -149,7 +148,7 @@ public class Crawler implements Serializable {
             return null;
         }
 
-        protected List<Long> getFileConfigIdList() {
+        protected List<String> getFileConfigIdList() {
             if (StringUtil.isNotBlank(fileConfigIds)) {
                 final String[] values = fileConfigIds.split(",");
                 return createConfigIdList(values);
@@ -157,7 +156,7 @@ public class Crawler implements Serializable {
             return null;
         }
 
-        protected List<Long> getDataConfigIdList() {
+        protected List<String> getDataConfigIdList() {
             if (StringUtil.isNotBlank(dataConfigIds)) {
                 final String[] values = dataConfigIds.split(",");
                 return createConfigIdList(values);
@@ -165,13 +164,10 @@ public class Crawler implements Serializable {
             return null;
         }
 
-        private static List<Long> createConfigIdList(final String[] values) {
-            final List<Long> idList = new ArrayList<Long>();
+        private static List<String> createConfigIdList(final String[] values) {
+            final List<String> idList = new ArrayList<>();
             for (final String value : values) {
-                final long id = Long.valueOf(value);
-                if (id > 0) {
-                    idList.add(id);
-                }
+                idList.add(value);
             }
             return idList;
         }
@@ -376,12 +372,12 @@ public class Crawler implements Serializable {
             }
 
             // delete expired sessions
-            crawlingSessionService
-                    .deleteSessionIdsBefore(options.sessionId, options.name, ComponentUtil.getSystemHelper().getCurrentTime());
+            crawlingSessionService.deleteSessionIdsBefore(options.sessionId, options.name, ComponentUtil.getSystemHelper()
+                    .getCurrentTimeAsLong());
 
-            final List<Long> webConfigIdList = options.getWebConfigIdList();
-            final List<Long> fileConfigIdList = options.getFileConfigIdList();
-            final List<Long> dataConfigIdList = options.getDataConfigIdList();
+            final List<String> webConfigIdList = options.getWebConfigIdList();
+            final List<String> fileConfigIdList = options.getFileConfigIdList();
+            final List<String> dataConfigIdList = options.getDataConfigIdList();
             final boolean runAll = webConfigIdList == null && fileConfigIdList == null && dataConfigIdList == null;
 
             Thread webFsCrawlerThread = null;
@@ -434,7 +430,7 @@ public class Crawler implements Serializable {
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
-            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_STATUS, completed ? Constants.T : Constants.F);
+            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_STATUS, completed ? Constants.T.toString() : Constants.F.toString());
             writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_END_TIME);
             crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
 

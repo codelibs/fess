@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +36,6 @@ public class BsLabelType extends AbstractEntity {
     /** excludedPaths */
     protected String excludedPaths;
 
-    /** id */
-    protected String id;
-
     /** includedPaths */
     protected String includedPaths;
 
@@ -62,83 +60,103 @@ public class BsLabelType extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getExcludedPaths() {
+        checkSpecifiedProperty("excludedPaths");
         return excludedPaths;
     }
 
     public void setExcludedPaths(String value) {
-        excludedPaths = value;
+        registerModifiedProperty("excludedPaths");
+        this.excludedPaths = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getIncludedPaths() {
+        checkSpecifiedProperty("includedPaths");
         return includedPaths;
     }
 
     public void setIncludedPaths(String value) {
-        includedPaths = value;
+        registerModifiedProperty("includedPaths");
+        this.includedPaths = value;
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
         return sortOrder;
     }
 
     public void setSortOrder(Integer value) {
-        sortOrder = value;
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     public String getValue() {
+        checkSpecifiedProperty("value");
         return value;
     }
 
     public void setValue(String value) {
-        value = value;
+        registerModifiedProperty("value");
+        this.value = value;
     }
 
     @Override
@@ -153,8 +171,8 @@ public class BsLabelType extends AbstractEntity {
         if (excludedPaths != null) {
             sourceMap.put("excludedPaths", excludedPaths);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (includedPaths != null) {
             sourceMap.put("includedPaths", includedPaths);

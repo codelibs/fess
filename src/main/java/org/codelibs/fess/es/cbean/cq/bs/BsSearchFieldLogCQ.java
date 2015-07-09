@@ -62,6 +62,14 @@ public abstract class BsSearchFieldLogCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -199,6 +207,14 @@ public abstract class BsSearchFieldLogCQ extends AbstractConditionQuery {
     public BsSearchFieldLogCQ addOrderBy_Id_Desc() {
         regOBD("id");
         return this;
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setName_Term(name, opLambda);
     }
 
     public void setName_Term(String name) {
@@ -340,6 +356,14 @@ public abstract class BsSearchFieldLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setSearchLogId_Equal(String searchLogId) {
+        setSearchLogId_Term(searchLogId, null);
+    }
+
+    public void setSearchLogId_Equal(String searchLogId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSearchLogId_Term(searchLogId, opLambda);
+    }
+
     public void setSearchLogId_Term(String searchLogId) {
         setSearchLogId_Term(searchLogId, null);
     }
@@ -477,6 +501,14 @@ public abstract class BsSearchFieldLogCQ extends AbstractConditionQuery {
     public BsSearchFieldLogCQ addOrderBy_SearchLogId_Desc() {
         regOBD("searchLogId");
         return this;
+    }
+
+    public void setValue_Equal(String value) {
+        setValue_Term(value, null);
+    }
+
+    public void setValue_Equal(String value, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setValue_Term(value, opLambda);
     }
 
     public void setValue_Term(String value) {

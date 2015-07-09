@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,6 @@ public class BsDataConfigToRole extends AbstractEntity {
     /** dataConfigId */
     protected String dataConfigId;
 
-    /** id */
-    protected String id;
-
     /** roleTypeId */
     protected String roleTypeId;
 
@@ -41,27 +39,33 @@ public class BsDataConfigToRole extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getDataConfigId() {
+        checkSpecifiedProperty("dataConfigId");
         return dataConfigId;
     }
 
     public void setDataConfigId(String value) {
-        dataConfigId = value;
+        registerModifiedProperty("dataConfigId");
+        this.dataConfigId = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getRoleTypeId() {
+        checkSpecifiedProperty("roleTypeId");
         return roleTypeId;
     }
 
     public void setRoleTypeId(String value) {
-        roleTypeId = value;
+        registerModifiedProperty("roleTypeId");
+        this.roleTypeId = value;
     }
 
     @Override
@@ -70,8 +74,8 @@ public class BsDataConfigToRole extends AbstractEntity {
         if (dataConfigId != null) {
             sourceMap.put("dataConfigId", dataConfigId);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (roleTypeId != null) {
             sourceMap.put("roleTypeId", roleTypeId);

@@ -106,6 +106,25 @@ public abstract class BsCrawlingSessionInfoCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCrawlingSessionId_NotEqual(String crawlingSessionId) {
+        setCrawlingSessionId_NotEqual(crawlingSessionId, null, null);
+    }
+
+    public void setCrawlingSessionId_NotEqual(String crawlingSessionId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCrawlingSessionId_Equal(crawlingSessionId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCrawlingSessionId_Equal(String crawlingSessionId) {
+        setCrawlingSessionId_Term(crawlingSessionId, null);
+    }
+
+    public void setCrawlingSessionId_Equal(String crawlingSessionId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCrawlingSessionId_Term(crawlingSessionId, opLambda);
+    }
+
     public void setCrawlingSessionId_Term(String crawlingSessionId) {
         setCrawlingSessionId_Term(crawlingSessionId, null);
     }
@@ -213,6 +232,25 @@ public abstract class BsCrawlingSessionInfoCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotEqual(createdTime, null, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedTime_Equal(createdTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -307,6 +345,25 @@ public abstract class BsCrawlingSessionInfoCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -416,6 +473,25 @@ public abstract class BsCrawlingSessionInfoCF extends AbstractConditionFilter {
         }
     }
 
+    public void setKey_NotEqual(String key) {
+        setKey_NotEqual(key, null, null);
+    }
+
+    public void setKey_NotEqual(String key, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setKey_Equal(key, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setKey_Equal(String key) {
+        setKey_Term(key, null);
+    }
+
+    public void setKey_Equal(String key, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setKey_Term(key, opLambda);
+    }
+
     public void setKey_Term(String key) {
         setKey_Term(key, null);
     }
@@ -521,6 +597,25 @@ public abstract class BsCrawlingSessionInfoCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setValue_NotEqual(String value) {
+        setValue_NotEqual(value, null, null);
+    }
+
+    public void setValue_NotEqual(String value, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setValue_Equal(value, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setValue_Equal(String value) {
+        setValue_Term(value, null);
+    }
+
+    public void setValue_Equal(String value, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setValue_Term(value, opLambda);
     }
 
     public void setValue_Term(String value) {

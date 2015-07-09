@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,6 @@ public class BsFileConfigToRole extends AbstractEntity {
     /** fileConfigId */
     protected String fileConfigId;
 
-    /** id */
-    protected String id;
-
     /** roleTypeId */
     protected String roleTypeId;
 
@@ -41,27 +39,33 @@ public class BsFileConfigToRole extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getFileConfigId() {
+        checkSpecifiedProperty("fileConfigId");
         return fileConfigId;
     }
 
     public void setFileConfigId(String value) {
-        fileConfigId = value;
+        registerModifiedProperty("fileConfigId");
+        this.fileConfigId = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getRoleTypeId() {
+        checkSpecifiedProperty("roleTypeId");
         return roleTypeId;
     }
 
     public void setRoleTypeId(String value) {
-        roleTypeId = value;
+        registerModifiedProperty("roleTypeId");
+        this.roleTypeId = value;
     }
 
     @Override
@@ -70,8 +74,8 @@ public class BsFileConfigToRole extends AbstractEntity {
         if (fileConfigId != null) {
             sourceMap.put("fileConfigId", fileConfigId);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (roleTypeId != null) {
             sourceMap.put("roleTypeId", roleTypeId);

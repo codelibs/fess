@@ -14,10 +14,12 @@ public class PathMapping extends BsPathMapping {
 
     private Pattern regexPattern;
 
+    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
+    @Override
     public void setId(String id) {
         asDocMeta().id(id);
     }

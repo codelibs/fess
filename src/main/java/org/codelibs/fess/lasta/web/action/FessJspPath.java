@@ -48,17 +48,17 @@ public interface FessJspPath {
     /** The path of the JSP: /admin/data/index.jsp */
     String path_AdminData_IndexJsp = "/admin/data/index.jsp";
 
-    /** The path of the JSP: /admin/dataCrawlingConfig/confirm.jsp */
-    String path_AdminDataCrawlingConfig_ConfirmJsp = "/admin/dataCrawlingConfig/confirm.jsp";
+    /** The path of the JSP: /admin/dataConfig/confirm.jsp */
+    String path_AdminDataConfig_ConfirmJsp = "/admin/dataConfig/confirm.jsp";
 
-    /** The path of the JSP: /admin/dataCrawlingConfig/edit.jsp */
-    String path_AdminDataCrawlingConfig_EditJsp = "/admin/dataCrawlingConfig/edit.jsp";
+    /** The path of the JSP: /admin/dataConfig/edit.jsp */
+    String path_AdminDataConfig_EditJsp = "/admin/dataConfig/edit.jsp";
 
-    /** The path of the JSP: /admin/dataCrawlingConfig/error.jsp */
-    String path_AdminDataCrawlingConfig_ErrorJsp = "/admin/dataCrawlingConfig/error.jsp";
+    /** The path of the JSP: /admin/dataConfig/error.jsp */
+    String path_AdminDataConfig_ErrorJsp = "/admin/dataConfig/error.jsp";
 
-    /** The path of the JSP: /admin/dataCrawlingConfig/index.jsp */
-    String path_AdminDataCrawlingConfig_IndexJsp = "/admin/dataCrawlingConfig/index.jsp";
+    /** The path of the JSP: /admin/dataConfig/index.jsp */
+    String path_AdminDataConfig_IndexJsp = "/admin/dataConfig/index.jsp";
 
     /** The path of the JSP: /admin/design/edit.jsp */
     String path_AdminDesign_EditJsp = "/admin/design/edit.jsp";
@@ -141,17 +141,17 @@ public interface FessJspPath {
     /** The path of the JSP: /admin/fileAuthentication/index.jsp */
     String path_AdminFileAuthentication_IndexJsp = "/admin/fileAuthentication/index.jsp";
 
-    /** The path of the JSP: /admin/fileCrawlingConfig/confirm.jsp */
-    String path_AdminFileCrawlingConfig_ConfirmJsp = "/admin/fileCrawlingConfig/confirm.jsp";
+    /** The path of the JSP: /admin/fileConfig/confirm.jsp */
+    String path_AdminFileConfig_ConfirmJsp = "/admin/fileConfig/confirm.jsp";
 
-    /** The path of the JSP: /admin/fileCrawlingConfig/edit.jsp */
-    String path_AdminFileCrawlingConfig_EditJsp = "/admin/fileCrawlingConfig/edit.jsp";
+    /** The path of the JSP: /admin/fileConfig/edit.jsp */
+    String path_AdminFileConfig_EditJsp = "/admin/fileConfig/edit.jsp";
 
-    /** The path of the JSP: /admin/fileCrawlingConfig/error.jsp */
-    String path_AdminFileCrawlingConfig_ErrorJsp = "/admin/fileCrawlingConfig/error.jsp";
+    /** The path of the JSP: /admin/fileConfig/error.jsp */
+    String path_AdminFileConfig_ErrorJsp = "/admin/fileConfig/error.jsp";
 
-    /** The path of the JSP: /admin/fileCrawlingConfig/index.jsp */
-    String path_AdminFileCrawlingConfig_IndexJsp = "/admin/fileCrawlingConfig/index.jsp";
+    /** The path of the JSP: /admin/fileConfig/index.jsp */
+    String path_AdminFileConfig_IndexJsp = "/admin/fileConfig/index.jsp";
 
     /** The path of the JSP: /admin/jobLog/confirm.jsp */
     String path_AdminJobLog_ConfirmJsp = "/admin/jobLog/confirm.jsp";
@@ -330,17 +330,17 @@ public interface FessJspPath {
     /** The path of the JSP: /admin/webAuthentication/index.jsp */
     String path_AdminWebAuthentication_IndexJsp = "/admin/webAuthentication/index.jsp";
 
-    /** The path of the JSP: /admin/webCrawlingConfig/confirm.jsp */
-    String path_AdminWebCrawlingConfig_ConfirmJsp = "/admin/webCrawlingConfig/confirm.jsp";
+    /** The path of the JSP: /admin/webConfig/confirm.jsp */
+    String path_AdminWebConfig_ConfirmJsp = "/admin/webConfig/confirm.jsp";
 
-    /** The path of the JSP: /admin/webCrawlingConfig/edit.jsp */
-    String path_AdminWebCrawlingConfig_EditJsp = "/admin/webCrawlingConfig/edit.jsp";
+    /** The path of the JSP: /admin/webConfig/edit.jsp */
+    String path_AdminWebConfig_EditJsp = "/admin/webConfig/edit.jsp";
 
-    /** The path of the JSP: /admin/webCrawlingConfig/error.jsp */
-    String path_AdminWebCrawlingConfig_ErrorJsp = "/admin/webCrawlingConfig/error.jsp";
+    /** The path of the JSP: /admin/webConfig/error.jsp */
+    String path_AdminWebConfig_ErrorJsp = "/admin/webConfig/error.jsp";
 
-    /** The path of the JSP: /admin/webCrawlingConfig/index.jsp */
-    String path_AdminWebCrawlingConfig_IndexJsp = "/admin/webCrawlingConfig/index.jsp";
+    /** The path of the JSP: /admin/webConfig/index.jsp */
+    String path_AdminWebConfig_IndexJsp = "/admin/webConfig/index.jsp";
 
     /** The path of the JSP: /admin/wizard/crawlingConfig.jsp */
     String path_AdminWizard_CrawlingConfigJsp = "/admin/wizard/crawlingConfig.jsp";

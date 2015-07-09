@@ -63,6 +63,14 @@ public abstract class BsFileConfigToRoleCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setFileConfigId_Equal(String fileConfigId) {
+        setFileConfigId_Term(fileConfigId, null);
+    }
+
+    public void setFileConfigId_Equal(String fileConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setFileConfigId_Term(fileConfigId, opLambda);
+    }
+
     public void setFileConfigId_Term(String fileConfigId) {
         setFileConfigId_Term(fileConfigId, null);
     }
@@ -202,6 +210,14 @@ public abstract class BsFileConfigToRoleCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -339,6 +355,14 @@ public abstract class BsFileConfigToRoleCQ extends AbstractConditionQuery {
     public BsFileConfigToRoleCQ addOrderBy_Id_Desc() {
         regOBD("id");
         return this;
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId) {
+        setRoleTypeId_Term(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRoleTypeId_Term(roleTypeId, opLambda);
     }
 
     public void setRoleTypeId_Term(String roleTypeId) {

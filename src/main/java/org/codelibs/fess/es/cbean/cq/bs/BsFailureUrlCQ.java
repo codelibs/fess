@@ -62,6 +62,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setConfigId_Equal(String configId) {
+        setConfigId_Term(configId, null);
+    }
+
+    public void setConfigId_Equal(String configId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setConfigId_Term(configId, opLambda);
+    }
+
     public void setConfigId_Term(String configId) {
         setConfigId_Term(configId, null);
     }
@@ -201,6 +209,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setErrorCount_Equal(Integer errorCount) {
+        setErrorCount_Term(errorCount, null);
+    }
+
+    public void setErrorCount_Equal(Integer errorCount, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setErrorCount_Term(errorCount, opLambda);
+    }
+
     public void setErrorCount_Term(Integer errorCount) {
         setErrorCount_Term(errorCount, null);
     }
@@ -327,6 +343,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
     public BsFailureUrlCQ addOrderBy_ErrorCount_Desc() {
         regOBD("errorCount");
         return this;
+    }
+
+    public void setErrorLog_Equal(String errorLog) {
+        setErrorLog_Term(errorLog, null);
+    }
+
+    public void setErrorLog_Equal(String errorLog, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setErrorLog_Term(errorLog, opLambda);
     }
 
     public void setErrorLog_Term(String errorLog) {
@@ -468,6 +492,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setErrorName_Equal(String errorName) {
+        setErrorName_Term(errorName, null);
+    }
+
+    public void setErrorName_Equal(String errorName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setErrorName_Term(errorName, opLambda);
+    }
+
     public void setErrorName_Term(String errorName) {
         setErrorName_Term(errorName, null);
     }
@@ -605,6 +637,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
     public BsFailureUrlCQ addOrderBy_ErrorName_Desc() {
         regOBD("errorName");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -746,6 +786,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setLastAccessTime_Equal(Long lastAccessTime) {
+        setLastAccessTime_Term(lastAccessTime, null);
+    }
+
+    public void setLastAccessTime_Equal(Long lastAccessTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setLastAccessTime_Term(lastAccessTime, opLambda);
+    }
+
     public void setLastAccessTime_Term(Long lastAccessTime) {
         setLastAccessTime_Term(lastAccessTime, null);
     }
@@ -872,6 +920,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
     public BsFailureUrlCQ addOrderBy_LastAccessTime_Desc() {
         regOBD("lastAccessTime");
         return this;
+    }
+
+    public void setThreadName_Equal(String threadName) {
+        setThreadName_Term(threadName, null);
+    }
+
+    public void setThreadName_Equal(String threadName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setThreadName_Term(threadName, opLambda);
     }
 
     public void setThreadName_Term(String threadName) {
@@ -1011,6 +1067,14 @@ public abstract class BsFailureUrlCQ extends AbstractConditionQuery {
     public BsFailureUrlCQ addOrderBy_ThreadName_Desc() {
         regOBD("threadName");
         return this;
+    }
+
+    public void setUrl_Equal(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Equal(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUrl_Term(url, opLambda);
     }
 
     public void setUrl_Term(String url) {

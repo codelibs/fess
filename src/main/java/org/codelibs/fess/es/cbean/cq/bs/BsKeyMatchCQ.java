@@ -62,6 +62,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setBoost_Equal(Float boost) {
+        setBoost_Term(boost, null);
+    }
+
+    public void setBoost_Equal(Float boost, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setBoost_Term(boost, opLambda);
+    }
+
     public void setBoost_Term(Float boost) {
         setBoost_Term(boost, null);
     }
@@ -188,6 +196,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
     public BsKeyMatchCQ addOrderBy_Boost_Desc() {
         regOBD("boost");
         return this;
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
     }
 
     public void setCreatedBy_Term(String createdBy) {
@@ -329,6 +345,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -455,6 +479,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
     public BsKeyMatchCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -596,6 +628,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setMaxSize_Equal(Integer maxSize) {
+        setMaxSize_Term(maxSize, null);
+    }
+
+    public void setMaxSize_Equal(Integer maxSize, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setMaxSize_Term(maxSize, opLambda);
+    }
+
     public void setMaxSize_Term(Integer maxSize) {
         setMaxSize_Term(maxSize, null);
     }
@@ -722,6 +762,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
     public BsKeyMatchCQ addOrderBy_MaxSize_Desc() {
         regOBD("maxSize");
         return this;
+    }
+
+    public void setQuery_Equal(String query) {
+        setQuery_Term(query, null);
+    }
+
+    public void setQuery_Equal(String query, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQuery_Term(query, opLambda);
     }
 
     public void setQuery_Term(String query) {
@@ -863,6 +911,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setTerm_Equal(String term) {
+        setTerm_Term(term, null);
+    }
+
+    public void setTerm_Equal(String term, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTerm_Term(term, opLambda);
+    }
+
     public void setTerm_Term(String term) {
         setTerm_Term(term, null);
     }
@@ -1002,6 +1058,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
+    }
+
     public void setUpdatedBy_Term(String updatedBy) {
         setUpdatedBy_Term(updatedBy, null);
     }
@@ -1139,6 +1203,14 @@ public abstract class BsKeyMatchCQ extends AbstractConditionQuery {
     public BsKeyMatchCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

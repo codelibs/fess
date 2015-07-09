@@ -106,6 +106,25 @@ public abstract class BsSearchFieldLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -211,6 +230,25 @@ public abstract class BsSearchFieldLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setName_NotEqual(String name) {
+        setName_NotEqual(name, null, null);
+    }
+
+    public void setName_NotEqual(String name, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setName_Equal(name, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setName_Term(name, opLambda);
     }
 
     public void setName_Term(String name) {
@@ -320,6 +358,25 @@ public abstract class BsSearchFieldLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setSearchLogId_NotEqual(String searchLogId) {
+        setSearchLogId_NotEqual(searchLogId, null, null);
+    }
+
+    public void setSearchLogId_NotEqual(String searchLogId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setSearchLogId_Equal(searchLogId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setSearchLogId_Equal(String searchLogId) {
+        setSearchLogId_Term(searchLogId, null);
+    }
+
+    public void setSearchLogId_Equal(String searchLogId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setSearchLogId_Term(searchLogId, opLambda);
+    }
+
     public void setSearchLogId_Term(String searchLogId) {
         setSearchLogId_Term(searchLogId, null);
     }
@@ -425,6 +482,25 @@ public abstract class BsSearchFieldLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setValue_NotEqual(String value) {
+        setValue_NotEqual(value, null, null);
+    }
+
+    public void setValue_NotEqual(String value, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setValue_Equal(value, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setValue_Equal(String value) {
+        setValue_Term(value, null);
+    }
+
+    public void setValue_Equal(String value, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setValue_Term(value, opLambda);
     }
 
     public void setValue_Term(String value) {

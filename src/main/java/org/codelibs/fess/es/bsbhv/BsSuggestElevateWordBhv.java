@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.SuggestElevateWordCB;
 import org.codelibs.fess.es.exentity.SuggestElevateWord;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "suggest_elevate_word";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "suggest_elevate_word";
     }
 
     @Override
@@ -134,6 +147,14 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
         return (PagingResultBean<SuggestElevateWord>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<SuggestElevateWordCB> cbLambda, EntityRowHandler<SuggestElevateWord> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<SuggestElevateWordCB> cbLambda, EntityRowHandler<List<SuggestElevateWord>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(SuggestElevateWord entity) {
         doInsert(entity, null);
     }
@@ -176,6 +197,34 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<SuggestElevateWordCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<SuggestElevateWord> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<SuggestElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<SuggestElevateWord> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<SuggestElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<SuggestElevateWord> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<SuggestElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

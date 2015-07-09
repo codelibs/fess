@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.WebAuthenticationCB;
 import org.codelibs.fess.es.exentity.WebAuthentication;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsWebAuthenticationBhv extends AbstractBehavior<WebAuthent
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "web_authentication";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "web_authentication";
     }
 
     @Override
@@ -137,6 +150,14 @@ public abstract class BsWebAuthenticationBhv extends AbstractBehavior<WebAuthent
         return (PagingResultBean<WebAuthentication>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<WebAuthenticationCB> cbLambda, EntityRowHandler<WebAuthentication> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<WebAuthenticationCB> cbLambda, EntityRowHandler<List<WebAuthentication>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(WebAuthentication entity) {
         doInsert(entity, null);
     }
@@ -179,6 +200,34 @@ public abstract class BsWebAuthenticationBhv extends AbstractBehavior<WebAuthent
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<WebAuthenticationCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<WebAuthentication> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<WebAuthentication> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<WebAuthentication> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<WebAuthentication> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<WebAuthentication> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<WebAuthentication> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

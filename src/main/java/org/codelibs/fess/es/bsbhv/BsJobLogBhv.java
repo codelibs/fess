@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.JobLogCB;
 import org.codelibs.fess.es.exentity.JobLog;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsJobLogBhv extends AbstractBehavior<JobLog, JobLogCB> {
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "job_log";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "job_log";
     }
 
     @Override
@@ -132,6 +145,14 @@ public abstract class BsJobLogBhv extends AbstractBehavior<JobLog, JobLogCB> {
         return (PagingResultBean<JobLog>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<JobLogCB> cbLambda, EntityRowHandler<JobLog> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<JobLogCB> cbLambda, EntityRowHandler<List<JobLog>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(JobLog entity) {
         doInsert(entity, null);
     }
@@ -174,6 +195,34 @@ public abstract class BsJobLogBhv extends AbstractBehavior<JobLog, JobLogCB> {
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<JobLogCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<JobLog> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<JobLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<JobLog> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<JobLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<JobLog> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<JobLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

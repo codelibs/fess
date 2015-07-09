@@ -63,6 +63,14 @@ public abstract class BsCrawlingSessionInfoCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setCrawlingSessionId_Equal(String crawlingSessionId) {
+        setCrawlingSessionId_Term(crawlingSessionId, null);
+    }
+
+    public void setCrawlingSessionId_Equal(String crawlingSessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCrawlingSessionId_Term(crawlingSessionId, opLambda);
+    }
+
     public void setCrawlingSessionId_Term(String crawlingSessionId) {
         setCrawlingSessionId_Term(crawlingSessionId, null);
     }
@@ -202,6 +210,14 @@ public abstract class BsCrawlingSessionInfoCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -328,6 +344,14 @@ public abstract class BsCrawlingSessionInfoCQ extends AbstractConditionQuery {
     public BsCrawlingSessionInfoCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -469,6 +493,14 @@ public abstract class BsCrawlingSessionInfoCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setKey_Equal(String key) {
+        setKey_Term(key, null);
+    }
+
+    public void setKey_Equal(String key, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setKey_Term(key, opLambda);
+    }
+
     public void setKey_Term(String key) {
         setKey_Term(key, null);
     }
@@ -606,6 +638,14 @@ public abstract class BsCrawlingSessionInfoCQ extends AbstractConditionQuery {
     public BsCrawlingSessionInfoCQ addOrderBy_Key_Desc() {
         regOBD("key");
         return this;
+    }
+
+    public void setValue_Equal(String value) {
+        setValue_Term(value, null);
+    }
+
+    public void setValue_Equal(String value, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setValue_Term(value, opLambda);
     }
 
     public void setValue_Term(String value) {

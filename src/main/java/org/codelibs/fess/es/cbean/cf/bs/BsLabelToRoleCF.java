@@ -106,6 +106,25 @@ public abstract class BsLabelToRoleCF extends AbstractConditionFilter {
         }
     }
 
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -213,6 +232,25 @@ public abstract class BsLabelToRoleCF extends AbstractConditionFilter {
         }
     }
 
+    public void setLabelTypeId_NotEqual(String labelTypeId) {
+        setLabelTypeId_NotEqual(labelTypeId, null, null);
+    }
+
+    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setLabelTypeId_Equal(labelTypeId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setLabelTypeId_Equal(String labelTypeId) {
+        setLabelTypeId_Term(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Equal(String labelTypeId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setLabelTypeId_Term(labelTypeId, opLambda);
+    }
+
     public void setLabelTypeId_Term(String labelTypeId) {
         setLabelTypeId_Term(labelTypeId, null);
     }
@@ -318,6 +356,25 @@ public abstract class BsLabelToRoleCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setRoleTypeId_NotEqual(String roleTypeId) {
+        setRoleTypeId_NotEqual(roleTypeId, null, null);
+    }
+
+    public void setRoleTypeId_NotEqual(String roleTypeId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setRoleTypeId_Equal(roleTypeId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId) {
+        setRoleTypeId_Term(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setRoleTypeId_Term(roleTypeId, opLambda);
     }
 
     public void setRoleTypeId_Term(String roleTypeId) {

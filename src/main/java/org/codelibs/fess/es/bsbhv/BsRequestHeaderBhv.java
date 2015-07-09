@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.RequestHeaderCB;
 import org.codelibs.fess.es.exentity.RequestHeader;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsRequestHeaderBhv extends AbstractBehavior<RequestHeader,
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "request_header";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "request_header";
     }
 
     @Override
@@ -131,6 +144,14 @@ public abstract class BsRequestHeaderBhv extends AbstractBehavior<RequestHeader,
         return (PagingResultBean<RequestHeader>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<RequestHeaderCB> cbLambda, EntityRowHandler<RequestHeader> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<RequestHeaderCB> cbLambda, EntityRowHandler<List<RequestHeader>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(RequestHeader entity) {
         doInsert(entity, null);
     }
@@ -173,6 +194,34 @@ public abstract class BsRequestHeaderBhv extends AbstractBehavior<RequestHeader,
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<RequestHeaderCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<RequestHeader> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<RequestHeader> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<RequestHeader> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<RequestHeader> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<RequestHeader> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<RequestHeader> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

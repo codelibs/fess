@@ -62,6 +62,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setAccessType_Equal(String accessType) {
+        setAccessType_Term(accessType, null);
+    }
+
+    public void setAccessType_Equal(String accessType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setAccessType_Term(accessType, opLambda);
+    }
+
     public void setAccessType_Term(String accessType) {
         setAccessType_Term(accessType, null);
     }
@@ -199,6 +207,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
     public BsSearchLogCQ addOrderBy_AccessType_Desc() {
         regOBD("accessType");
         return this;
+    }
+
+    public void setClientIp_Equal(String clientIp) {
+        setClientIp_Term(clientIp, null);
+    }
+
+    public void setClientIp_Equal(String clientIp, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setClientIp_Term(clientIp, opLambda);
     }
 
     public void setClientIp_Term(String clientIp) {
@@ -340,6 +356,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setHitCount_Equal(Long hitCount) {
+        setHitCount_Term(hitCount, null);
+    }
+
+    public void setHitCount_Equal(Long hitCount, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setHitCount_Term(hitCount, opLambda);
+    }
+
     public void setHitCount_Term(Long hitCount) {
         setHitCount_Term(hitCount, null);
     }
@@ -466,6 +490,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
     public BsSearchLogCQ addOrderBy_HitCount_Desc() {
         regOBD("hitCount");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -607,6 +639,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setQueryOffset_Equal(Integer queryOffset) {
+        setQueryOffset_Term(queryOffset, null);
+    }
+
+    public void setQueryOffset_Equal(Integer queryOffset, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueryOffset_Term(queryOffset, opLambda);
+    }
+
     public void setQueryOffset_Term(Integer queryOffset) {
         setQueryOffset_Term(queryOffset, null);
     }
@@ -735,6 +775,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setQueryPageSize_Equal(Integer queryPageSize) {
+        setQueryPageSize_Term(queryPageSize, null);
+    }
+
+    public void setQueryPageSize_Equal(Integer queryPageSize, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueryPageSize_Term(queryPageSize, opLambda);
+    }
+
     public void setQueryPageSize_Term(Integer queryPageSize) {
         setQueryPageSize_Term(queryPageSize, null);
     }
@@ -861,6 +909,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
     public BsSearchLogCQ addOrderBy_QueryPageSize_Desc() {
         regOBD("queryPageSize");
         return this;
+    }
+
+    public void setReferer_Equal(String referer) {
+        setReferer_Term(referer, null);
+    }
+
+    public void setReferer_Equal(String referer, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setReferer_Term(referer, opLambda);
     }
 
     public void setReferer_Term(String referer) {
@@ -1002,6 +1058,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setRequestedTime_Equal(Long requestedTime) {
+        setRequestedTime_Term(requestedTime, null);
+    }
+
+    public void setRequestedTime_Equal(Long requestedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRequestedTime_Term(requestedTime, opLambda);
+    }
+
     public void setRequestedTime_Term(Long requestedTime) {
         setRequestedTime_Term(requestedTime, null);
     }
@@ -1130,6 +1194,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setResponseTime_Equal(Integer responseTime) {
+        setResponseTime_Term(responseTime, null);
+    }
+
+    public void setResponseTime_Equal(Integer responseTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setResponseTime_Term(responseTime, opLambda);
+    }
+
     public void setResponseTime_Term(Integer responseTime) {
         setResponseTime_Term(responseTime, null);
     }
@@ -1256,6 +1328,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
     public BsSearchLogCQ addOrderBy_ResponseTime_Desc() {
         regOBD("responseTime");
         return this;
+    }
+
+    public void setSearchWord_Equal(String searchWord) {
+        setSearchWord_Term(searchWord, null);
+    }
+
+    public void setSearchWord_Equal(String searchWord, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSearchWord_Term(searchWord, opLambda);
     }
 
     public void setSearchWord_Term(String searchWord) {
@@ -1397,6 +1477,14 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setUserAgent_Equal(String userAgent) {
+        setUserAgent_Term(userAgent, null);
+    }
+
+    public void setUserAgent_Equal(String userAgent, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserAgent_Term(userAgent, opLambda);
+    }
+
     public void setUserAgent_Term(String userAgent) {
         setUserAgent_Term(userAgent, null);
     }
@@ -1536,132 +1624,159 @@ public abstract class BsSearchLogCQ extends AbstractConditionQuery {
         return this;
     }
 
-    public void setUserId_Term(Long userId) {
-        setUserId_Term(userId, null);
+    public void setUserInfoId_Equal(String userInfoId) {
+        setUserInfoId_Term(userInfoId, null);
     }
 
-    public void setUserId_Term(Long userId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("userId", userId);
+    public void setUserInfoId_Equal(String userInfoId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserInfoId_Term(userInfoId, opLambda);
+    }
+
+    public void setUserInfoId_Term(String userInfoId) {
+        setUserInfoId_Term(userInfoId, null);
+    }
+
+    public void setUserInfoId_Term(String userInfoId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_Terms(Collection<Long> userIdList) {
-        setUserId_Terms(userIdList, null);
+    public void setUserInfoId_Terms(Collection<String> userInfoIdList) {
+        setUserInfoId_Terms(userInfoIdList, null);
     }
 
-    public void setUserId_Terms(Collection<Long> userIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("userId", userIdList);
+    public void setUserInfoId_Terms(Collection<String> userInfoIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("userInfoId", userInfoIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_InScope(Collection<Long> userIdList) {
-        setUserId_Terms(userIdList, null);
+    public void setUserInfoId_InScope(Collection<String> userInfoIdList) {
+        setUserInfoId_Terms(userInfoIdList, null);
     }
 
-    public void setUserId_InScope(Collection<Long> userIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUserId_Terms(userIdList, opLambda);
+    public void setUserInfoId_InScope(Collection<String> userInfoIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUserInfoId_Terms(userInfoIdList, opLambda);
     }
 
-    public void setUserId_Match(Long userId) {
-        setUserId_Match(userId, null);
+    public void setUserInfoId_Match(String userInfoId) {
+        setUserInfoId_Match(userInfoId, null);
     }
 
-    public void setUserId_Match(Long userId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("userId", userId);
+    public void setUserInfoId_Match(String userInfoId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_MatchPhrase(Long userId) {
-        setUserId_MatchPhrase(userId, null);
+    public void setUserInfoId_MatchPhrase(String userInfoId) {
+        setUserInfoId_MatchPhrase(userInfoId, null);
     }
 
-    public void setUserId_MatchPhrase(Long userId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("userId", userId);
+    public void setUserInfoId_MatchPhrase(String userInfoId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_MatchPhrasePrefix(Long userId) {
-        setUserId_MatchPhrasePrefix(userId, null);
+    public void setUserInfoId_MatchPhrasePrefix(String userInfoId) {
+        setUserInfoId_MatchPhrasePrefix(userInfoId, null);
     }
 
-    public void setUserId_MatchPhrasePrefix(Long userId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("userId", userId);
+    public void setUserInfoId_MatchPhrasePrefix(String userInfoId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_Fuzzy(Long userId) {
-        setUserId_Fuzzy(userId, null);
+    public void setUserInfoId_Fuzzy(String userInfoId) {
+        setUserInfoId_Fuzzy(userInfoId, null);
     }
 
-    public void setUserId_Fuzzy(Long userId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("userId", userId);
+    public void setUserInfoId_Fuzzy(String userInfoId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_GreaterThan(Long userId) {
-        setUserId_GreaterThan(userId, null);
+    public void setUserInfoId_Prefix(String userInfoId) {
+        setUserInfoId_Prefix(userInfoId, null);
     }
 
-    public void setUserId_GreaterThan(Long userId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userId", ConditionKey.CK_GREATER_THAN, userId);
+    public void setUserInfoId_Prefix(String userInfoId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_LessThan(Long userId) {
-        setUserId_LessThan(userId, null);
+    public void setUserInfoId_GreaterThan(String userInfoId) {
+        setUserInfoId_GreaterThan(userInfoId, null);
     }
 
-    public void setUserId_LessThan(Long userId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userId", ConditionKey.CK_LESS_THAN, userId);
+    public void setUserInfoId_GreaterThan(String userInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userInfoId", ConditionKey.CK_GREATER_THAN, userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_GreaterEqual(Long userId) {
-        setUserId_GreaterEqual(userId, null);
+    public void setUserInfoId_LessThan(String userInfoId) {
+        setUserInfoId_LessThan(userInfoId, null);
     }
 
-    public void setUserId_GreaterEqual(Long userId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userId", ConditionKey.CK_GREATER_EQUAL, userId);
+    public void setUserInfoId_LessThan(String userInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userInfoId", ConditionKey.CK_LESS_THAN, userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_LessEqual(Long userId) {
-        setUserId_LessEqual(userId, null);
+    public void setUserInfoId_GreaterEqual(String userInfoId) {
+        setUserInfoId_GreaterEqual(userInfoId, null);
     }
 
-    public void setUserId_LessEqual(Long userId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userId", ConditionKey.CK_LESS_EQUAL, userId);
+    public void setUserInfoId_GreaterEqual(String userInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userInfoId", ConditionKey.CK_GREATER_EQUAL, userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsSearchLogCQ addOrderBy_UserId_Asc() {
-        regOBA("userId");
+    public void setUserInfoId_LessEqual(String userInfoId) {
+        setUserInfoId_LessEqual(userInfoId, null);
+    }
+
+    public void setUserInfoId_LessEqual(String userInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userInfoId", ConditionKey.CK_LESS_EQUAL, userInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_UserInfoId_Asc() {
+        regOBA("userInfoId");
         return this;
     }
 
-    public BsSearchLogCQ addOrderBy_UserId_Desc() {
-        regOBD("userId");
+    public BsSearchLogCQ addOrderBy_UserInfoId_Desc() {
+        regOBD("userInfoId");
         return this;
+    }
+
+    public void setUserSessionId_Equal(String userSessionId) {
+        setUserSessionId_Term(userSessionId, null);
+    }
+
+    public void setUserSessionId_Equal(String userSessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserSessionId_Term(userSessionId, opLambda);
     }
 
     public void setUserSessionId_Term(String userSessionId) {

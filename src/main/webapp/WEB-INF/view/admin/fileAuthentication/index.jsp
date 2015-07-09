@@ -36,7 +36,7 @@
 				</ul>
 				</c:if>
 				<c:if test="${!displayCreateLink}">
-					<s:link href="../fileCrawlingConfig/index" styleClass="btn primary">
+					<s:link href="../fileConfig/index" styleClass="btn primary">
 						<bean:message key="labels.file_authentication_create_file_config" />
 					</s:link>
 				</c:if>
@@ -66,7 +66,7 @@
 									</c:if>${f:h(data.hostname)}:<c:if test="${data.port==-1}">
 										<bean:message key="labels.file_authentication_any" />
 									</c:if> <c:if test="${data.port!=-1}">${f:h(data.port)}</c:if></td>
-								<td>${f:h(data.fileCrawlingConfig.name)}</td>
+								<td>${f:h(data.fileConfig.name)}</td>
 								<td style="text-align: center;"><s:link
 										href="confirmpage/4/${f:u(data.id)}">
 										<bean:message key="labels.file_authentication_link_details" />

@@ -106,6 +106,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         }
     }
 
+    public void setConfigId_NotEqual(String configId) {
+        setConfigId_NotEqual(configId, null, null);
+    }
+
+    public void setConfigId_NotEqual(String configId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setConfigId_Equal(configId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setConfigId_Equal(String configId) {
+        setConfigId_Term(configId, null);
+    }
+
+    public void setConfigId_Equal(String configId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setConfigId_Term(configId, opLambda);
+    }
+
     public void setConfigId_Term(String configId) {
         setConfigId_Term(configId, null);
     }
@@ -213,6 +232,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         }
     }
 
+    public void setErrorCount_NotEqual(Integer errorCount) {
+        setErrorCount_NotEqual(errorCount, null, null);
+    }
+
+    public void setErrorCount_NotEqual(Integer errorCount, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setErrorCount_Equal(errorCount, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setErrorCount_Equal(Integer errorCount) {
+        setErrorCount_Term(errorCount, null);
+    }
+
+    public void setErrorCount_Equal(Integer errorCount, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setErrorCount_Term(errorCount, opLambda);
+    }
+
     public void setErrorCount_Term(Integer errorCount) {
         setErrorCount_Term(errorCount, null);
     }
@@ -307,6 +345,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setErrorLog_NotEqual(String errorLog) {
+        setErrorLog_NotEqual(errorLog, null, null);
+    }
+
+    public void setErrorLog_NotEqual(String errorLog, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setErrorLog_Equal(errorLog, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setErrorLog_Equal(String errorLog) {
+        setErrorLog_Term(errorLog, null);
+    }
+
+    public void setErrorLog_Equal(String errorLog, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setErrorLog_Term(errorLog, opLambda);
     }
 
     public void setErrorLog_Term(String errorLog) {
@@ -416,6 +473,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         }
     }
 
+    public void setErrorName_NotEqual(String errorName) {
+        setErrorName_NotEqual(errorName, null, null);
+    }
+
+    public void setErrorName_NotEqual(String errorName, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setErrorName_Equal(errorName, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setErrorName_Equal(String errorName) {
+        setErrorName_Term(errorName, null);
+    }
+
+    public void setErrorName_Equal(String errorName, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setErrorName_Term(errorName, opLambda);
+    }
+
     public void setErrorName_Term(String errorName) {
         setErrorName_Term(errorName, null);
     }
@@ -521,6 +597,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -630,6 +725,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         }
     }
 
+    public void setLastAccessTime_NotEqual(Long lastAccessTime) {
+        setLastAccessTime_NotEqual(lastAccessTime, null, null);
+    }
+
+    public void setLastAccessTime_NotEqual(Long lastAccessTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setLastAccessTime_Equal(lastAccessTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setLastAccessTime_Equal(Long lastAccessTime) {
+        setLastAccessTime_Term(lastAccessTime, null);
+    }
+
+    public void setLastAccessTime_Equal(Long lastAccessTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setLastAccessTime_Term(lastAccessTime, opLambda);
+    }
+
     public void setLastAccessTime_Term(Long lastAccessTime) {
         setLastAccessTime_Term(lastAccessTime, null);
     }
@@ -724,6 +838,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setThreadName_NotEqual(String threadName) {
+        setThreadName_NotEqual(threadName, null, null);
+    }
+
+    public void setThreadName_NotEqual(String threadName, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setThreadName_Equal(threadName, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setThreadName_Equal(String threadName) {
+        setThreadName_Term(threadName, null);
+    }
+
+    public void setThreadName_Equal(String threadName, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setThreadName_Term(threadName, opLambda);
     }
 
     public void setThreadName_Term(String threadName) {
@@ -831,6 +964,25 @@ public abstract class BsFailureUrlCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUrl_NotEqual(String url) {
+        setUrl_NotEqual(url, null, null);
+    }
+
+    public void setUrl_NotEqual(String url, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUrl_Equal(url, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUrl_Equal(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Equal(String url, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUrl_Term(url, opLambda);
     }
 
     public void setUrl_Term(String url) {

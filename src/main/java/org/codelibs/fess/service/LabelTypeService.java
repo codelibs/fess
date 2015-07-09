@@ -25,11 +25,11 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.LabelTypeCB;
-import org.codelibs.fess.db.exbhv.LabelTypeBhv;
-import org.codelibs.fess.db.exbhv.LabelTypeToRoleTypeMappingBhv;
-import org.codelibs.fess.db.exentity.LabelType;
-import org.codelibs.fess.db.exentity.LabelTypeToRoleTypeMapping;
+import org.codelibs.fess.es.cbean.LabelTypeCB;
+import org.codelibs.fess.es.exbhv.LabelToRoleBhv;
+import org.codelibs.fess.es.exbhv.LabelTypeBhv;
+import org.codelibs.fess.es.exentity.LabelToRole;
+import org.codelibs.fess.es.exentity.LabelType;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.pager.LabelTypePager;
 import org.codelibs.fess.util.ComponentUtil;
@@ -42,7 +42,7 @@ public class LabelTypeService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Resource
-    protected LabelTypeToRoleTypeMappingBhv labelTypeToRoleTypeMappingBhv;
+    protected LabelToRoleBhv labelToRoleBhv;
 
     @Resource
     protected LabelTypeBhv labelTypeBhv;
@@ -70,18 +70,22 @@ public class LabelTypeService implements Serializable {
     public void delete(final LabelType labelType) throws CrudMessageException {
         setupDeleteCondition(labelType);
 
-        labelTypeBhv.delete(labelType);
+        labelTypeBhv.delete(labelType, op -> {
+            op.setRefresh(true);
+        });
 
+        labelToRoleBhv.queryDelete(cb -> {
+            cb.query().setLabelTypeId_Equal(labelType.getId());
+        });
     }
 
     protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
         if (labelTypePager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(labelTypePager.id));
+            cb.query().docMeta().setId_Equal(labelTypePager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
         cb.query().addOrderBy_Name_Asc();
         // search
@@ -91,7 +95,6 @@ public class LabelTypeService implements Serializable {
     protected void setupEntityCondition(final LabelTypeCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 
@@ -109,7 +112,6 @@ public class LabelTypeService implements Serializable {
 
     public List<LabelType> getLabelTypeList() {
         return labelTypeBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
         });
@@ -117,14 +119,8 @@ public class LabelTypeService implements Serializable {
 
     public List<LabelType> getLabelTypeListWithRoles() {
         final ListResultBean<LabelType> labelTypeList = labelTypeBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-        });
-
-        labelTypeBhv.loadLabelTypeToRoleTypeMapping(labelTypeList, cb -> {
-            cb.setupSelect_RoleType();
-            cb.query().queryRoleType().addOrderBy_Value_Asc();
         });
 
         return labelTypeList;
@@ -135,32 +131,35 @@ public class LabelTypeService implements Serializable {
         final String[] roleTypeIds = labelType.getRoleTypeIds();
         setupStoreCondition(labelType);
 
-        labelTypeBhv.insertOrUpdate(labelType);
-        final Long labelTypeId = labelType.getId();
+        labelTypeBhv.insertOrUpdate(labelType, op -> {
+            op.setRefresh(true);
+        });
+        final String labelTypeId = labelType.getId();
         if (isNew) {
             // Insert
             if (roleTypeIds != null) {
-                final List<LabelTypeToRoleTypeMapping> lttrtmList = new ArrayList<LabelTypeToRoleTypeMapping>();
+                final List<LabelToRole> lttrtmList = new ArrayList<LabelToRole>();
                 for (final String id : roleTypeIds) {
-                    final LabelTypeToRoleTypeMapping mapping = new LabelTypeToRoleTypeMapping();
+                    final LabelToRole mapping = new LabelToRole();
                     mapping.setLabelTypeId(labelTypeId);
-                    mapping.setRoleTypeId(Long.parseLong(id));
+                    mapping.setRoleTypeId(id);
                     lttrtmList.add(mapping);
                 }
-                labelTypeToRoleTypeMappingBhv.batchInsert(lttrtmList);
+                labelToRoleBhv.batchInsert(lttrtmList, op -> {
+                    op.setRefresh(true);
+                });
             }
         } else {
             // Update
             if (roleTypeIds != null) {
-                final List<LabelTypeToRoleTypeMapping> list = labelTypeToRoleTypeMappingBhv.selectList(lttrtmCb -> {
+                final List<LabelToRole> list = labelToRoleBhv.selectList(lttrtmCb -> {
                     lttrtmCb.query().setLabelTypeId_Equal(labelTypeId);
                 });
-                final List<LabelTypeToRoleTypeMapping> newList = new ArrayList<LabelTypeToRoleTypeMapping>();
-                final List<LabelTypeToRoleTypeMapping> matchedList = new ArrayList<LabelTypeToRoleTypeMapping>();
-                for (final String id : roleTypeIds) {
-                    final Long roleTypeId = Long.parseLong(id);
+                final List<LabelToRole> newList = new ArrayList<LabelToRole>();
+                final List<LabelToRole> matchedList = new ArrayList<LabelToRole>();
+                for (final String roleTypeId : roleTypeIds) {
                     boolean exist = false;
-                    for (final LabelTypeToRoleTypeMapping mapping : list) {
+                    for (final LabelToRole mapping : list) {
                         if (mapping.getRoleTypeId().equals(roleTypeId)) {
                             exist = true;
                             matchedList.add(mapping);
@@ -169,15 +168,19 @@ public class LabelTypeService implements Serializable {
                     }
                     if (!exist) {
                         // new
-                        final LabelTypeToRoleTypeMapping mapping = new LabelTypeToRoleTypeMapping();
+                        final LabelToRole mapping = new LabelToRole();
                         mapping.setLabelTypeId(labelTypeId);
                         mapping.setRoleTypeId(roleTypeId);
                         newList.add(mapping);
                     }
                 }
                 list.removeAll(matchedList);
-                labelTypeToRoleTypeMappingBhv.batchInsert(newList);
-                labelTypeToRoleTypeMappingBhv.batchDelete(list);
+                labelToRoleBhv.batchInsert(newList, op -> {
+                    op.setRefresh(true);
+                });
+                labelToRoleBhv.batchDelete(list, op -> {
+                    op.setRefresh(true);
+                });
             }
         }
 
@@ -189,19 +192,17 @@ public class LabelTypeService implements Serializable {
 
     public LabelType getLabelType(final Map<String, String> keys) {
         final LabelType labelType = labelTypeBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (labelType != null) {
-            final List<LabelTypeToRoleTypeMapping> wctrtmList = labelTypeToRoleTypeMappingBhv.selectList(wctrtmCb -> {
+            final List<LabelToRole> wctrtmList = labelToRoleBhv.selectList(wctrtmCb -> {
                 wctrtmCb.query().setLabelTypeId_Equal(labelType.getId());
-                wctrtmCb.query().queryRoleType().setDeletedBy_IsNull();
-                wctrtmCb.query().queryLabelType().setDeletedBy_IsNull();
             });
             if (!wctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
-                for (final LabelTypeToRoleTypeMapping mapping : wctrtmList) {
-                    roleTypeIds.add(Long.toString(mapping.getRoleTypeId()));
+                for (final LabelToRole mapping : wctrtmList) {
+                    roleTypeIds.add(mapping.getRoleTypeId());
                 }
                 labelType.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }

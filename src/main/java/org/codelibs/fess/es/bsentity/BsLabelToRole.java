@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +27,6 @@ public class BsLabelToRole extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** id */
-    protected String id;
-
     /** labelTypeId */
     protected String labelTypeId;
 
@@ -41,34 +39,40 @@ public class BsLabelToRole extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getLabelTypeId() {
+        checkSpecifiedProperty("labelTypeId");
         return labelTypeId;
     }
 
     public void setLabelTypeId(String value) {
-        labelTypeId = value;
+        registerModifiedProperty("labelTypeId");
+        this.labelTypeId = value;
     }
 
     public String getRoleTypeId() {
+        checkSpecifiedProperty("roleTypeId");
         return roleTypeId;
     }
 
     public void setRoleTypeId(String value) {
-        roleTypeId = value;
+        registerModifiedProperty("roleTypeId");
+        this.roleTypeId = value;
     }
 
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (labelTypeId != null) {
             sourceMap.put("labelTypeId", labelTypeId);

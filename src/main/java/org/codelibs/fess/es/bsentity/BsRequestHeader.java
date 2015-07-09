@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,6 @@ public class BsRequestHeader extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** name */
     protected String name;
 
@@ -56,67 +54,83 @@ public class BsRequestHeader extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     public String getValue() {
+        checkSpecifiedProperty("value");
         return value;
     }
 
     public void setValue(String value) {
-        value = value;
+        registerModifiedProperty("value");
+        this.value = value;
     }
 
     public String getWebConfigId() {
+        checkSpecifiedProperty("webConfigId");
         return webConfigId;
     }
 
     public void setWebConfigId(String value) {
-        webConfigId = value;
+        registerModifiedProperty("webConfigId");
+        this.webConfigId = value;
     }
 
     @Override
@@ -128,8 +142,8 @@ public class BsRequestHeader extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (name != null) {
             sourceMap.put("name", name);

@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.FailureUrlCB;
 import org.codelibs.fess.es.exentity.FailureUrl;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsFailureUrlBhv extends AbstractBehavior<FailureUrl, Failu
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "failure_url";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "failure_url";
     }
 
     @Override
@@ -131,6 +144,14 @@ public abstract class BsFailureUrlBhv extends AbstractBehavior<FailureUrl, Failu
         return (PagingResultBean<FailureUrl>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<FailureUrlCB> cbLambda, EntityRowHandler<FailureUrl> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<FailureUrlCB> cbLambda, EntityRowHandler<List<FailureUrl>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(FailureUrl entity) {
         doInsert(entity, null);
     }
@@ -173,6 +194,34 @@ public abstract class BsFailureUrlBhv extends AbstractBehavior<FailureUrl, Failu
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<FailureUrlCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<FailureUrl> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<FailureUrl> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<FailureUrl> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<FailureUrl> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<FailureUrl> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<FailureUrl> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

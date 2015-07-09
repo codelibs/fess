@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.SuggestBadWordCB;
 import org.codelibs.fess.es.exentity.SuggestBadWord;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsSuggestBadWordBhv extends AbstractBehavior<SuggestBadWor
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "suggest_bad_word";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "suggest_bad_word";
     }
 
     @Override
@@ -131,6 +144,14 @@ public abstract class BsSuggestBadWordBhv extends AbstractBehavior<SuggestBadWor
         return (PagingResultBean<SuggestBadWord>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<SuggestBadWordCB> cbLambda, EntityRowHandler<SuggestBadWord> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<SuggestBadWordCB> cbLambda, EntityRowHandler<List<SuggestBadWord>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(SuggestBadWord entity) {
         doInsert(entity, null);
     }
@@ -173,6 +194,34 @@ public abstract class BsSuggestBadWordBhv extends AbstractBehavior<SuggestBadWor
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<SuggestBadWordCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<SuggestBadWord> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<SuggestBadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<SuggestBadWord> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<SuggestBadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<SuggestBadWord> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<SuggestBadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

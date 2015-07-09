@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +36,6 @@ public class BsSearchLog extends AbstractEntity {
     /** hitCount */
     protected Long hitCount;
 
-    /** id */
-    protected String id;
-
     /** queryOffset */
     protected Integer queryOffset;
 
@@ -59,8 +57,8 @@ public class BsSearchLog extends AbstractEntity {
     /** userAgent */
     protected String userAgent;
 
-    /** userId */
-    protected Long userId;
+    /** userInfoId */
+    protected String userInfoId;
 
     /** userSessionId */
     protected String userSessionId;
@@ -71,107 +69,133 @@ public class BsSearchLog extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getAccessType() {
+        checkSpecifiedProperty("accessType");
         return accessType;
     }
 
     public void setAccessType(String value) {
-        accessType = value;
+        registerModifiedProperty("accessType");
+        this.accessType = value;
     }
 
     public String getClientIp() {
+        checkSpecifiedProperty("clientIp");
         return clientIp;
     }
 
     public void setClientIp(String value) {
-        clientIp = value;
+        registerModifiedProperty("clientIp");
+        this.clientIp = value;
     }
 
     public Long getHitCount() {
+        checkSpecifiedProperty("hitCount");
         return hitCount;
     }
 
     public void setHitCount(Long value) {
-        hitCount = value;
+        registerModifiedProperty("hitCount");
+        this.hitCount = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Integer getQueryOffset() {
+        checkSpecifiedProperty("queryOffset");
         return queryOffset;
     }
 
     public void setQueryOffset(Integer value) {
-        queryOffset = value;
+        registerModifiedProperty("queryOffset");
+        this.queryOffset = value;
     }
 
     public Integer getQueryPageSize() {
+        checkSpecifiedProperty("queryPageSize");
         return queryPageSize;
     }
 
     public void setQueryPageSize(Integer value) {
-        queryPageSize = value;
+        registerModifiedProperty("queryPageSize");
+        this.queryPageSize = value;
     }
 
     public String getReferer() {
+        checkSpecifiedProperty("referer");
         return referer;
     }
 
     public void setReferer(String value) {
-        referer = value;
+        registerModifiedProperty("referer");
+        this.referer = value;
     }
 
     public Long getRequestedTime() {
+        checkSpecifiedProperty("requestedTime");
         return requestedTime;
     }
 
     public void setRequestedTime(Long value) {
-        requestedTime = value;
+        registerModifiedProperty("requestedTime");
+        this.requestedTime = value;
     }
 
     public Integer getResponseTime() {
+        checkSpecifiedProperty("responseTime");
         return responseTime;
     }
 
     public void setResponseTime(Integer value) {
-        responseTime = value;
+        registerModifiedProperty("responseTime");
+        this.responseTime = value;
     }
 
     public String getSearchWord() {
+        checkSpecifiedProperty("searchWord");
         return searchWord;
     }
 
     public void setSearchWord(String value) {
-        searchWord = value;
+        registerModifiedProperty("searchWord");
+        this.searchWord = value;
     }
 
     public String getUserAgent() {
+        checkSpecifiedProperty("userAgent");
         return userAgent;
     }
 
     public void setUserAgent(String value) {
-        userAgent = value;
+        registerModifiedProperty("userAgent");
+        this.userAgent = value;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUserInfoId() {
+        checkSpecifiedProperty("userInfoId");
+        return userInfoId;
     }
 
-    public void setUserId(Long value) {
-        userId = value;
+    public void setUserInfoId(String value) {
+        registerModifiedProperty("userInfoId");
+        this.userInfoId = value;
     }
 
     public String getUserSessionId() {
+        checkSpecifiedProperty("userSessionId");
         return userSessionId;
     }
 
     public void setUserSessionId(String value) {
-        userSessionId = value;
+        registerModifiedProperty("userSessionId");
+        this.userSessionId = value;
     }
 
     @Override
@@ -186,8 +210,8 @@ public class BsSearchLog extends AbstractEntity {
         if (hitCount != null) {
             sourceMap.put("hitCount", hitCount);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (queryOffset != null) {
             sourceMap.put("queryOffset", queryOffset);
@@ -210,8 +234,8 @@ public class BsSearchLog extends AbstractEntity {
         if (userAgent != null) {
             sourceMap.put("userAgent", userAgent);
         }
-        if (userId != null) {
-            sourceMap.put("userId", userId);
+        if (userInfoId != null) {
+            sourceMap.put("userInfoId", userInfoId);
         }
         if (userSessionId != null) {
             sourceMap.put("userSessionId", userSessionId);

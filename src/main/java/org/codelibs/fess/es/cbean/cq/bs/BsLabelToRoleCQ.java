@@ -62,6 +62,14 @@ public abstract class BsLabelToRoleCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -201,6 +209,14 @@ public abstract class BsLabelToRoleCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setLabelTypeId_Equal(String labelTypeId) {
+        setLabelTypeId_Term(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Equal(String labelTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setLabelTypeId_Term(labelTypeId, opLambda);
+    }
+
     public void setLabelTypeId_Term(String labelTypeId) {
         setLabelTypeId_Term(labelTypeId, null);
     }
@@ -338,6 +354,14 @@ public abstract class BsLabelToRoleCQ extends AbstractConditionQuery {
     public BsLabelToRoleCQ addOrderBy_LabelTypeId_Desc() {
         regOBD("labelTypeId");
         return this;
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId) {
+        setRoleTypeId_Term(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRoleTypeId_Term(roleTypeId, opLambda);
     }
 
     public void setRoleTypeId_Term(String roleTypeId) {

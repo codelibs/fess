@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,6 @@ public class BsCrawlingSession extends AbstractEntity {
     /** expiredTime */
     protected Long expiredTime;
 
-    /** id */
-    protected String id;
-
     /** name */
     protected String name;
 
@@ -47,43 +45,53 @@ public class BsCrawlingSession extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public Long getExpiredTime() {
+        checkSpecifiedProperty("expiredTime");
         return expiredTime;
     }
 
     public void setExpiredTime(Long value) {
-        expiredTime = value;
+        registerModifiedProperty("expiredTime");
+        this.expiredTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public String getSessionId() {
+        checkSpecifiedProperty("sessionId");
         return sessionId;
     }
 
     public void setSessionId(String value) {
-        sessionId = value;
+        registerModifiedProperty("sessionId");
+        this.sessionId = value;
     }
 
     @Override
@@ -95,8 +103,8 @@ public class BsCrawlingSession extends AbstractEntity {
         if (expiredTime != null) {
             sourceMap.put("expiredTime", expiredTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (name != null) {
             sourceMap.put("name", name);

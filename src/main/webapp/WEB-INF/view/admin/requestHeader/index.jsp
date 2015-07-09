@@ -36,7 +36,7 @@
 				</ul>
 				</c:if>
 				<c:if test="${!displayCreateLink}">
-					<s:link href="../webCrawlingConfig/index" styleClass="btn primary">
+					<s:link href="../webConfig/index" styleClass="btn primary">
 						<bean:message key="labels.request_header_create_web_config" />
 					</s:link>
 				</c:if>
@@ -61,7 +61,7 @@
 						<c:forEach var="data" varStatus="s" items="${requestHeaderItems}">
 							<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
 								<td>${f:h(data.name)}</td>
-								<td>${f:h(data.webCrawlingConfig.name)}</td>
+								<td>${f:h(data.webConfig.name)}</td>
 								<td style="text-align: center;"><s:link
 										href="confirmpage/4/${f:u(data.id)}">
 										<bean:message key="labels.request_header_link_details" />

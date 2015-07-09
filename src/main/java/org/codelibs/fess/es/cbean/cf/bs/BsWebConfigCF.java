@@ -106,6 +106,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setAvailable_NotEqual(Boolean available) {
+        setAvailable_NotEqual(available, null, null);
+    }
+
+    public void setAvailable_NotEqual(Boolean available, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setAvailable_Equal(available, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setAvailable_Equal(Boolean available) {
+        setAvailable_Term(available, null);
+    }
+
+    public void setAvailable_Equal(Boolean available, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setAvailable_Term(available, opLambda);
+    }
+
     public void setAvailable_Term(Boolean available) {
         setAvailable_Term(available, null);
     }
@@ -202,6 +221,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setBoost_NotEqual(Float boost) {
+        setBoost_NotEqual(boost, null, null);
+    }
+
+    public void setBoost_NotEqual(Float boost, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setBoost_Equal(boost, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setBoost_Equal(Float boost) {
+        setBoost_Term(boost, null);
+    }
+
+    public void setBoost_Equal(Float boost, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setBoost_Term(boost, opLambda);
+    }
+
     public void setBoost_Term(Float boost) {
         setBoost_Term(boost, null);
     }
@@ -296,6 +334,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setConfigParameter_NotEqual(String configParameter) {
+        setConfigParameter_NotEqual(configParameter, null, null);
+    }
+
+    public void setConfigParameter_NotEqual(String configParameter, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setConfigParameter_Equal(configParameter, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setConfigParameter_Equal(String configParameter) {
+        setConfigParameter_Term(configParameter, null);
+    }
+
+    public void setConfigParameter_Equal(String configParameter, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setConfigParameter_Term(configParameter, opLambda);
     }
 
     public void setConfigParameter_Term(String configParameter) {
@@ -405,6 +462,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedBy_NotEqual(String createdBy) {
+        setCreatedBy_NotEqual(createdBy, null, null);
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedBy_Equal(createdBy, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
+    }
+
     public void setCreatedBy_Term(String createdBy) {
         setCreatedBy_Term(createdBy, null);
     }
@@ -512,6 +588,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotEqual(createdTime, null, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedTime_Equal(createdTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -608,6 +703,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setDepth_NotEqual(Integer depth) {
+        setDepth_NotEqual(depth, null, null);
+    }
+
+    public void setDepth_NotEqual(Integer depth, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setDepth_Equal(depth, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setDepth_Equal(Integer depth) {
+        setDepth_Term(depth, null);
+    }
+
+    public void setDepth_Equal(Integer depth, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setDepth_Term(depth, opLambda);
+    }
+
     public void setDepth_Term(Integer depth) {
         setDepth_Term(depth, null);
     }
@@ -702,6 +816,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setExcludedDocUrls_NotEqual(String excludedDocUrls) {
+        setExcludedDocUrls_NotEqual(excludedDocUrls, null, null);
+    }
+
+    public void setExcludedDocUrls_NotEqual(String excludedDocUrls, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setExcludedDocUrls_Equal(excludedDocUrls, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setExcludedDocUrls_Equal(String excludedDocUrls) {
+        setExcludedDocUrls_Term(excludedDocUrls, null);
+    }
+
+    public void setExcludedDocUrls_Equal(String excludedDocUrls, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setExcludedDocUrls_Term(excludedDocUrls, opLambda);
     }
 
     public void setExcludedDocUrls_Term(String excludedDocUrls) {
@@ -811,6 +944,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setExcludedUrls_NotEqual(String excludedUrls) {
+        setExcludedUrls_NotEqual(excludedUrls, null, null);
+    }
+
+    public void setExcludedUrls_NotEqual(String excludedUrls, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setExcludedUrls_Equal(excludedUrls, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setExcludedUrls_Equal(String excludedUrls) {
+        setExcludedUrls_Term(excludedUrls, null);
+    }
+
+    public void setExcludedUrls_Equal(String excludedUrls, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setExcludedUrls_Term(excludedUrls, opLambda);
+    }
+
     public void setExcludedUrls_Term(String excludedUrls) {
         setExcludedUrls_Term(excludedUrls, null);
     }
@@ -916,6 +1068,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -1025,6 +1196,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setIncludedDocUrls_NotEqual(String includedDocUrls) {
+        setIncludedDocUrls_NotEqual(includedDocUrls, null, null);
+    }
+
+    public void setIncludedDocUrls_NotEqual(String includedDocUrls, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setIncludedDocUrls_Equal(includedDocUrls, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setIncludedDocUrls_Equal(String includedDocUrls) {
+        setIncludedDocUrls_Term(includedDocUrls, null);
+    }
+
+    public void setIncludedDocUrls_Equal(String includedDocUrls, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setIncludedDocUrls_Term(includedDocUrls, opLambda);
+    }
+
     public void setIncludedDocUrls_Term(String includedDocUrls) {
         setIncludedDocUrls_Term(includedDocUrls, null);
     }
@@ -1130,6 +1320,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setIncludedUrls_NotEqual(String includedUrls) {
+        setIncludedUrls_NotEqual(includedUrls, null, null);
+    }
+
+    public void setIncludedUrls_NotEqual(String includedUrls, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setIncludedUrls_Equal(includedUrls, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setIncludedUrls_Equal(String includedUrls) {
+        setIncludedUrls_Term(includedUrls, null);
+    }
+
+    public void setIncludedUrls_Equal(String includedUrls, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setIncludedUrls_Term(includedUrls, opLambda);
     }
 
     public void setIncludedUrls_Term(String includedUrls) {
@@ -1239,6 +1448,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setIntervalTime_NotEqual(Integer intervalTime) {
+        setIntervalTime_NotEqual(intervalTime, null, null);
+    }
+
+    public void setIntervalTime_NotEqual(Integer intervalTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setIntervalTime_Equal(intervalTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setIntervalTime_Equal(Integer intervalTime) {
+        setIntervalTime_Term(intervalTime, null);
+    }
+
+    public void setIntervalTime_Equal(Integer intervalTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setIntervalTime_Term(intervalTime, opLambda);
+    }
+
     public void setIntervalTime_Term(Integer intervalTime) {
         setIntervalTime_Term(intervalTime, null);
     }
@@ -1335,6 +1563,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setMaxAccessCount_NotEqual(Long maxAccessCount) {
+        setMaxAccessCount_NotEqual(maxAccessCount, null, null);
+    }
+
+    public void setMaxAccessCount_NotEqual(Long maxAccessCount, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setMaxAccessCount_Equal(maxAccessCount, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setMaxAccessCount_Equal(Long maxAccessCount) {
+        setMaxAccessCount_Term(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_Equal(Long maxAccessCount, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setMaxAccessCount_Term(maxAccessCount, opLambda);
+    }
+
     public void setMaxAccessCount_Term(Long maxAccessCount) {
         setMaxAccessCount_Term(maxAccessCount, null);
     }
@@ -1429,6 +1676,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setName_NotEqual(String name) {
+        setName_NotEqual(name, null, null);
+    }
+
+    public void setName_NotEqual(String name, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setName_Equal(name, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setName_Term(name, opLambda);
     }
 
     public void setName_Term(String name) {
@@ -1538,6 +1804,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setNumOfThread_NotEqual(Integer numOfThread) {
+        setNumOfThread_NotEqual(numOfThread, null, null);
+    }
+
+    public void setNumOfThread_NotEqual(Integer numOfThread, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setNumOfThread_Equal(numOfThread, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setNumOfThread_Equal(Integer numOfThread) {
+        setNumOfThread_Term(numOfThread, null);
+    }
+
+    public void setNumOfThread_Equal(Integer numOfThread, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setNumOfThread_Term(numOfThread, opLambda);
+    }
+
     public void setNumOfThread_Term(Integer numOfThread) {
         setNumOfThread_Term(numOfThread, null);
     }
@@ -1634,6 +1919,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setSortOrder_NotEqual(Integer sortOrder) {
+        setSortOrder_NotEqual(sortOrder, null, null);
+    }
+
+    public void setSortOrder_NotEqual(Integer sortOrder, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setSortOrder_Equal(sortOrder, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder) {
+        setSortOrder_Term(sortOrder, null);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setSortOrder_Term(sortOrder, opLambda);
+    }
+
     public void setSortOrder_Term(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }
@@ -1728,6 +2032,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy) {
+        setUpdatedBy_NotEqual(updatedBy, null, null);
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUpdatedBy_Equal(updatedBy, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
     }
 
     public void setUpdatedBy_Term(String updatedBy) {
@@ -1837,6 +2160,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         }
     }
 
+    public void setUpdatedTime_NotEqual(Long updatedTime) {
+        setUpdatedTime_NotEqual(updatedTime, null, null);
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUpdatedTime_Equal(updatedTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
+    }
+
     public void setUpdatedTime_Term(Long updatedTime) {
         setUpdatedTime_Term(updatedTime, null);
     }
@@ -1931,6 +2273,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUrls_NotEqual(String urls) {
+        setUrls_NotEqual(urls, null, null);
+    }
+
+    public void setUrls_NotEqual(String urls, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUrls_Equal(urls, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUrls_Equal(String urls) {
+        setUrls_Term(urls, null);
+    }
+
+    public void setUrls_Equal(String urls, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUrls_Term(urls, opLambda);
     }
 
     public void setUrls_Term(String urls) {
@@ -2038,6 +2399,25 @@ public abstract class BsWebConfigCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUserAgent_NotEqual(String userAgent) {
+        setUserAgent_NotEqual(userAgent, null, null);
+    }
+
+    public void setUserAgent_NotEqual(String userAgent, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUserAgent_Equal(userAgent, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUserAgent_Equal(String userAgent) {
+        setUserAgent_Term(userAgent, null);
+    }
+
+    public void setUserAgent_Equal(String userAgent, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUserAgent_Term(userAgent, opLambda);
     }
 
     public void setUserAgent_Term(String userAgent) {

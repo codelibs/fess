@@ -17,8 +17,8 @@
 package org.codelibs.fess.job;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.JobLog;
-import org.codelibs.fess.db.exentity.ScheduledJob;
+import org.codelibs.fess.es.exentity.JobLog;
+import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.service.JobLogService;
@@ -48,7 +48,7 @@ public class TriggeredJob implements Job {
         final JobLog jobLog = new JobLog(scheduledJob);
         final String scriptType = scheduledJob.getScriptType();
         final String script = scheduledJob.getScriptData();
-        final Long id = scheduledJob.getId();
+        final String id = scheduledJob.getId();
         final String jobId = Constants.JOB_ID_PREFIX + id;
         final JobExecutor jobExecutor = ComponentUtil.getJobExecutor(scriptType);
         if (jobExecutor == null) {
@@ -91,7 +91,7 @@ public class TriggeredJob implements Job {
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {
             jobHelper.finishJobExecutoer(id);
-            jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTime());
+            jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
             if (logger.isDebugEnabled()) {
                 logger.debug("jobLog: " + jobLog);
             }

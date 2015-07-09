@@ -9,10 +9,12 @@ public class KeyMatch extends BsKeyMatch {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
+    @Override
     public void setId(String id) {
         asDocMeta().id(id);
     }

@@ -106,6 +106,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setAccessType_NotEqual(String accessType) {
+        setAccessType_NotEqual(accessType, null, null);
+    }
+
+    public void setAccessType_NotEqual(String accessType, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setAccessType_Equal(accessType, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setAccessType_Equal(String accessType) {
+        setAccessType_Term(accessType, null);
+    }
+
+    public void setAccessType_Equal(String accessType, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setAccessType_Term(accessType, opLambda);
+    }
+
     public void setAccessType_Term(String accessType) {
         setAccessType_Term(accessType, null);
     }
@@ -211,6 +230,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setClientIp_NotEqual(String clientIp) {
+        setClientIp_NotEqual(clientIp, null, null);
+    }
+
+    public void setClientIp_NotEqual(String clientIp, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setClientIp_Equal(clientIp, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setClientIp_Equal(String clientIp) {
+        setClientIp_Term(clientIp, null);
+    }
+
+    public void setClientIp_Equal(String clientIp, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setClientIp_Term(clientIp, opLambda);
     }
 
     public void setClientIp_Term(String clientIp) {
@@ -320,6 +358,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setHitCount_NotEqual(Long hitCount) {
+        setHitCount_NotEqual(hitCount, null, null);
+    }
+
+    public void setHitCount_NotEqual(Long hitCount, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setHitCount_Equal(hitCount, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setHitCount_Equal(Long hitCount) {
+        setHitCount_Term(hitCount, null);
+    }
+
+    public void setHitCount_Equal(Long hitCount, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setHitCount_Term(hitCount, opLambda);
+    }
+
     public void setHitCount_Term(Long hitCount) {
         setHitCount_Term(hitCount, null);
     }
@@ -414,6 +471,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -523,6 +599,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setQueryOffset_NotEqual(Integer queryOffset) {
+        setQueryOffset_NotEqual(queryOffset, null, null);
+    }
+
+    public void setQueryOffset_NotEqual(Integer queryOffset, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setQueryOffset_Equal(queryOffset, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setQueryOffset_Equal(Integer queryOffset) {
+        setQueryOffset_Term(queryOffset, null);
+    }
+
+    public void setQueryOffset_Equal(Integer queryOffset, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setQueryOffset_Term(queryOffset, opLambda);
+    }
+
     public void setQueryOffset_Term(Integer queryOffset) {
         setQueryOffset_Term(queryOffset, null);
     }
@@ -619,6 +714,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setQueryPageSize_NotEqual(Integer queryPageSize) {
+        setQueryPageSize_NotEqual(queryPageSize, null, null);
+    }
+
+    public void setQueryPageSize_NotEqual(Integer queryPageSize, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setQueryPageSize_Equal(queryPageSize, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setQueryPageSize_Equal(Integer queryPageSize) {
+        setQueryPageSize_Term(queryPageSize, null);
+    }
+
+    public void setQueryPageSize_Equal(Integer queryPageSize, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setQueryPageSize_Term(queryPageSize, opLambda);
+    }
+
     public void setQueryPageSize_Term(Integer queryPageSize) {
         setQueryPageSize_Term(queryPageSize, null);
     }
@@ -713,6 +827,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setReferer_NotEqual(String referer) {
+        setReferer_NotEqual(referer, null, null);
+    }
+
+    public void setReferer_NotEqual(String referer, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setReferer_Equal(referer, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setReferer_Equal(String referer) {
+        setReferer_Term(referer, null);
+    }
+
+    public void setReferer_Equal(String referer, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setReferer_Term(referer, opLambda);
     }
 
     public void setReferer_Term(String referer) {
@@ -822,6 +955,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setRequestedTime_NotEqual(Long requestedTime) {
+        setRequestedTime_NotEqual(requestedTime, null, null);
+    }
+
+    public void setRequestedTime_NotEqual(Long requestedTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setRequestedTime_Equal(requestedTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setRequestedTime_Equal(Long requestedTime) {
+        setRequestedTime_Term(requestedTime, null);
+    }
+
+    public void setRequestedTime_Equal(Long requestedTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setRequestedTime_Term(requestedTime, opLambda);
+    }
+
     public void setRequestedTime_Term(Long requestedTime) {
         setRequestedTime_Term(requestedTime, null);
     }
@@ -918,6 +1070,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setResponseTime_NotEqual(Integer responseTime) {
+        setResponseTime_NotEqual(responseTime, null, null);
+    }
+
+    public void setResponseTime_NotEqual(Integer responseTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setResponseTime_Equal(responseTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setResponseTime_Equal(Integer responseTime) {
+        setResponseTime_Term(responseTime, null);
+    }
+
+    public void setResponseTime_Equal(Integer responseTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setResponseTime_Term(responseTime, opLambda);
+    }
+
     public void setResponseTime_Term(Integer responseTime) {
         setResponseTime_Term(responseTime, null);
     }
@@ -1012,6 +1183,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setSearchWord_NotEqual(String searchWord) {
+        setSearchWord_NotEqual(searchWord, null, null);
+    }
+
+    public void setSearchWord_NotEqual(String searchWord, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setSearchWord_Equal(searchWord, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setSearchWord_Equal(String searchWord) {
+        setSearchWord_Term(searchWord, null);
+    }
+
+    public void setSearchWord_Equal(String searchWord, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setSearchWord_Term(searchWord, opLambda);
     }
 
     public void setSearchWord_Term(String searchWord) {
@@ -1121,6 +1311,25 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setUserAgent_NotEqual(String userAgent) {
+        setUserAgent_NotEqual(userAgent, null, null);
+    }
+
+    public void setUserAgent_NotEqual(String userAgent, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUserAgent_Equal(userAgent, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUserAgent_Equal(String userAgent) {
+        setUserAgent_Term(userAgent, null);
+    }
+
+    public void setUserAgent_Equal(String userAgent, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUserAgent_Term(userAgent, opLambda);
+    }
+
     public void setUserAgent_Term(String userAgent) {
         setUserAgent_Term(userAgent, null);
     }
@@ -1228,100 +1437,149 @@ public abstract class BsSearchLogCF extends AbstractConditionFilter {
         }
     }
 
-    public void setUserId_Term(Long userId) {
-        setUserId_Term(userId, null);
+    public void setUserInfoId_NotEqual(String userInfoId) {
+        setUserInfoId_NotEqual(userInfoId, null, null);
     }
 
-    public void setUserId_Term(Long userId, ConditionOptionCall<TermFilterBuilder> opLambda) {
-        TermFilterBuilder builder = regTermF("userId", userId);
+    public void setUserInfoId_NotEqual(String userInfoId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUserInfoId_Equal(userInfoId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUserInfoId_Equal(String userInfoId) {
+        setUserInfoId_Term(userInfoId, null);
+    }
+
+    public void setUserInfoId_Equal(String userInfoId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUserInfoId_Term(userInfoId, opLambda);
+    }
+
+    public void setUserInfoId_Term(String userInfoId) {
+        setUserInfoId_Term(userInfoId, null);
+    }
+
+    public void setUserInfoId_Term(String userInfoId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_Terms(Collection<Long> userIdList) {
-        setUserId_Terms(userIdList, null);
+    public void setUserInfoId_Terms(Collection<String> userInfoIdList) {
+        setUserInfoId_Terms(userInfoIdList, null);
     }
 
-    public void setUserId_Terms(Collection<Long> userIdList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
-        TermsFilterBuilder builder = regTermsF("userId", userIdList);
+    public void setUserInfoId_Terms(Collection<String> userInfoIdList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("userInfoId", userInfoIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_InScope(Collection<Long> userIdList) {
-        setUserId_Terms(userIdList, null);
+    public void setUserInfoId_InScope(Collection<String> userInfoIdList) {
+        setUserInfoId_Terms(userInfoIdList, null);
     }
 
-    public void setUserId_InScope(Collection<Long> userIdList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
-        setUserId_Terms(userIdList, opLambda);
+    public void setUserInfoId_InScope(Collection<String> userInfoIdList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setUserInfoId_Terms(userInfoIdList, opLambda);
     }
 
-    public void setUserId_Exists() {
-        setUserId_Exists(null);
+    public void setUserInfoId_Prefix(String userInfoId) {
+        setUserInfoId_Prefix(userInfoId, null);
     }
 
-    public void setUserId_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
-        ExistsFilterBuilder builder = regExistsF("userId");
+    public void setUserInfoId_Prefix(String userInfoId, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_Missing() {
-        setUserId_Missing(null);
+    public void setUserInfoId_Exists() {
+        setUserInfoId_Exists(null);
     }
 
-    public void setUserId_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
-        MissingFilterBuilder builder = regMissingF("userId");
+    public void setUserInfoId_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("userInfoId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_GreaterThan(Long userId) {
-        setUserId_GreaterThan(userId, null);
+    public void setUserInfoId_Missing() {
+        setUserInfoId_Missing(null);
     }
 
-    public void setUserId_GreaterThan(Long userId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("userId", ConditionKey.CK_GREATER_THAN, userId);
+    public void setUserInfoId_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("userInfoId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_LessThan(Long userId) {
-        setUserId_LessThan(userId, null);
+    public void setUserInfoId_GreaterThan(String userInfoId) {
+        setUserInfoId_GreaterThan(userInfoId, null);
     }
 
-    public void setUserId_LessThan(Long userId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("userId", ConditionKey.CK_LESS_THAN, userId);
+    public void setUserInfoId_GreaterThan(String userInfoId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("userInfoId", ConditionKey.CK_GREATER_THAN, userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_GreaterEqual(Long userId) {
-        setUserId_GreaterEqual(userId, null);
+    public void setUserInfoId_LessThan(String userInfoId) {
+        setUserInfoId_LessThan(userInfoId, null);
     }
 
-    public void setUserId_GreaterEqual(Long userId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("userId", ConditionKey.CK_GREATER_EQUAL, userId);
+    public void setUserInfoId_LessThan(String userInfoId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("userInfoId", ConditionKey.CK_LESS_THAN, userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setUserId_LessEqual(Long userId) {
-        setUserId_LessEqual(userId, null);
+    public void setUserInfoId_GreaterEqual(String userInfoId) {
+        setUserInfoId_GreaterEqual(userInfoId, null);
     }
 
-    public void setUserId_LessEqual(Long userId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("userId", ConditionKey.CK_LESS_EQUAL, userId);
+    public void setUserInfoId_GreaterEqual(String userInfoId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("userInfoId", ConditionKey.CK_GREATER_EQUAL, userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUserInfoId_LessEqual(String userInfoId) {
+        setUserInfoId_LessEqual(userInfoId, null);
+    }
+
+    public void setUserInfoId_LessEqual(String userInfoId, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("userInfoId", ConditionKey.CK_LESS_EQUAL, userInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_NotEqual(String userSessionId) {
+        setUserSessionId_NotEqual(userSessionId, null, null);
+    }
+
+    public void setUserSessionId_NotEqual(String userSessionId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUserSessionId_Equal(userSessionId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUserSessionId_Equal(String userSessionId) {
+        setUserSessionId_Term(userSessionId, null);
+    }
+
+    public void setUserSessionId_Equal(String userSessionId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUserSessionId_Term(userSessionId, opLambda);
     }
 
     public void setUserSessionId_Term(String userSessionId) {

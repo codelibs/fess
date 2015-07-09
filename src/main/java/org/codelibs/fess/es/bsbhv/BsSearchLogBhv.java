@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.SearchLogCB;
 import org.codelibs.fess.es.exentity.SearchLog;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
         return "search_log";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsIndexType() {
+        return "search_log";
+    }
+
+    @Override
+    public String asEsSearchType() {
+        return "search_log";
     }
 
     @Override
@@ -52,7 +65,7 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
             result.setResponseTime(toInteger(source.get("responseTime")));
             result.setSearchWord(toString(source.get("searchWord")));
             result.setUserAgent(toString(source.get("userAgent")));
-            result.setUserId(toLong(source.get("userId")));
+            result.setUserInfoId(toString(source.get("userInfoId")));
             result.setUserSessionId(toString(source.get("userSessionId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
@@ -136,6 +149,14 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
         return (PagingResultBean<SearchLog>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<SearchLogCB> cbLambda, EntityRowHandler<SearchLog> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<SearchLogCB> cbLambda, EntityRowHandler<List<SearchLog>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(SearchLog entity) {
         doInsert(entity, null);
     }
@@ -178,6 +199,34 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<SearchLogCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<SearchLog> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<SearchLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<SearchLog> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<SearchLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<SearchLog> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<SearchLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

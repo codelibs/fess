@@ -23,7 +23,7 @@ import java.util.Map;
 import org.codelibs.fess.Constants;
 import org.seasar.struts.annotation.DateType;
 import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.LongType;
+import org.seasar.struts.annotation.Maxbytelength;
 import org.seasar.struts.annotation.Required;
 
 public class FailureUrlForm implements Serializable {
@@ -47,7 +47,7 @@ public class FailureUrlForm implements Serializable {
     }
 
     @Required(target = "confirmfromupdate,update,delete")
-    @LongType
+    @Maxbytelength(maxbytelength = 1000)
     public String id;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
@@ -68,6 +68,7 @@ public class FailureUrlForm implements Serializable {
     @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
     public String lastAccessTime;
 
+    @Maxbytelength(maxbytelength = 1000)
     public String configId;
 
     public void initialize() {

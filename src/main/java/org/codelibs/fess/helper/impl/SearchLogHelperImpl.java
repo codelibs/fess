@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.helper.impl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,16 +26,14 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.db.exbhv.ClickLogBhv;
-import org.codelibs.fess.db.exbhv.SearchLogBhv;
-import org.codelibs.fess.db.exbhv.UserInfoBhv;
-import org.codelibs.fess.db.exentity.ClickLog;
-import org.codelibs.fess.db.exentity.SearchLog;
-import org.codelibs.fess.db.exentity.UserInfo;
+import org.codelibs.fess.es.exbhv.ClickLogBhv;
+import org.codelibs.fess.es.exbhv.SearchLogBhv;
+import org.codelibs.fess.es.exbhv.UserInfoBhv;
+import org.codelibs.fess.es.exentity.ClickLog;
+import org.codelibs.fess.es.exentity.SearchLog;
+import org.codelibs.fess.es.exentity.UserInfo;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
-import org.codelibs.fess.service.SearchLogService;
-import org.codelibs.fess.service.UserInfoService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
@@ -51,16 +48,27 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         final long current = System.currentTimeMillis();
         final Long time = userInfoCache.get(userCode);
         if (time == null || current - time.longValue() > userCheckInterval) {
-            final UserInfoService userInfoService = SingletonS2Container.getComponent(UserInfoService.class);
-            UserInfo userInfo = userInfoService.getUserInfo(userCode);
-            if (userInfo == null) {
-                final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
+
+            final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
+
+            final List<UserInfo> list = userInfoBhv.selectList(cb -> {
+                cb.query().setCode_Equal(userCode);
+                cb.query().addOrderBy_UpdatedTime_Desc();
+            });
+
+            final UserInfo userInfo;
+            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+            if (list.isEmpty()) {
                 userInfo = new UserInfo();
                 userInfo.setCode(userCode);
                 userInfo.setCreatedTime(now);
-                userInfo.setUpdatedTime(now);
-                userInfoService.store(userInfo);
+            } else {
+                userInfo = list.get(0);
             }
+            userInfo.setUpdatedTime(now);
+            new Thread(() -> {
+                userInfoBhv.insertOrUpdate(userInfo);
+            }).start();
             userInfoCache.put(userCode, current);
         }
     }
@@ -139,14 +147,15 @@ public class SearchLogHelperImpl extends SearchLogHelper {
                 final UserInfo userInfo = searchLog.getUserInfo().orElse(null);//TODO
                 if (userInfo != null) {
                     final UserInfo entity = userInfoMap.get(userInfo.getCode());
-                    searchLog.setUserId(entity.getId());
+                    searchLog.setUserInfoId(entity.getId());
                 }
             }
         }
 
         if (!searchLogList.isEmpty()) {
-            final SearchLogService searchLogService = SingletonS2Container.getComponent(SearchLogService.class);
-            searchLogService.store(searchLogList);
+            final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
+            searchLogBhv.batchUpdate(searchLogList);
+            // TODO SearchLogValue
         }
     }
 
@@ -162,7 +171,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
                     cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
                 }).orElse(null);//TODO
                 if (entity != null) {
-                    clickLog.setSearchId(entity.getId());
+                    clickLog.setSearchLogId(entity.getId());
                     clickLogList.add(clickLog);
                 } else {
                     logger.warn("Not Found[ClickLog]: " + clickLog);

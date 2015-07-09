@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +27,6 @@ public class BsClickLog extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** id */
-    protected String id;
-
     /** requestedTime */
     protected Long requestedTime;
 
@@ -44,42 +42,50 @@ public class BsClickLog extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Long getRequestedTime() {
+        checkSpecifiedProperty("requestedTime");
         return requestedTime;
     }
 
     public void setRequestedTime(Long value) {
-        requestedTime = value;
+        registerModifiedProperty("requestedTime");
+        this.requestedTime = value;
     }
 
     public String getSearchLogId() {
+        checkSpecifiedProperty("searchLogId");
         return searchLogId;
     }
 
     public void setSearchLogId(String value) {
-        searchLogId = value;
+        registerModifiedProperty("searchLogId");
+        this.searchLogId = value;
     }
 
     public String getUrl() {
+        checkSpecifiedProperty("url");
         return url;
     }
 
     public void setUrl(String value) {
-        url = value;
+        registerModifiedProperty("url");
+        this.url = value;
     }
 
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (requestedTime != null) {
             sourceMap.put("requestedTime", requestedTime);

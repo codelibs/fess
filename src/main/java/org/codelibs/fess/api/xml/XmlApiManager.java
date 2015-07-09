@@ -36,7 +36,6 @@ import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.api.WebApiResponse;
 import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.db.allcommon.CDef;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
@@ -112,7 +111,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(1000);
         String query = null;
-        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, CDef.AccessType.Xml);
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_XML);
         final String queryId = request.getParameter("queryId");
         try {
             chain.doFilter(new WebApiRequest(request, SEARCH_API), new WebApiResponse(response));

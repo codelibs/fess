@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,6 @@ public class BsUserInfo extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** updatedTime */
     protected Long updatedTime;
 
@@ -44,35 +42,43 @@ public class BsUserInfo extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getCode() {
+        checkSpecifiedProperty("code");
         return code;
     }
 
     public void setCode(String value) {
-        code = value;
+        registerModifiedProperty("code");
+        this.code = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     @Override
@@ -84,8 +90,8 @@ public class BsUserInfo extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (updatedTime != null) {
             sourceMap.put("updatedTime", updatedTime);

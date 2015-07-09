@@ -40,9 +40,9 @@ public class Constants extends CoreLibConstants {
 
     public static final String FALSE = "false";
 
-    public static final String T = "T";
+    public static final Boolean T = true;
 
-    public static final String F = "F";
+    public static final Boolean F = false;
 
     public static final String ON = "on";
 
@@ -238,6 +238,14 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_LOG_ACCESS_TYPE = "searchLogAccessType";
 
+    public static final String SEARCH_LOG_ACCESS_TYPE_JSON = "json";
+
+    public static final String SEARCH_LOG_ACCESS_TYPE_XML = "xml";
+
+    public static final String SEARCH_LOG_ACCESS_TYPE_WEB = "web";
+
+    public static final String SEARCH_LOG_ACCESS_TYPE_OTHER = "other";
+
     public static final String RESULTS_PER_PAGE = "resultsPerPage";
 
     public static final String USER_CODE = "userCode";
@@ -314,5 +322,7 @@ public class Constants extends CoreLibConstants {
     public static final String PROCESS_TYPE_DISPLAYING = "D";
 
     public static final String PROCESS_TYPE_BOTH = "B";
+
+    public static final long ONE_DAY_IN_MILLIS = 24L * 60L * 60L * 1000L;
 
 }

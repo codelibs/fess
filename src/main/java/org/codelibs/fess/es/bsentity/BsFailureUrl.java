@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,9 +39,6 @@ public class BsFailureUrl extends AbstractEntity {
     /** errorName */
     protected String errorName;
 
-    /** id */
-    protected String id;
-
     /** lastAccessTime */
     protected Long lastAccessTime;
 
@@ -56,67 +54,83 @@ public class BsFailureUrl extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getConfigId() {
+        checkSpecifiedProperty("configId");
         return configId;
     }
 
     public void setConfigId(String value) {
-        configId = value;
+        registerModifiedProperty("configId");
+        this.configId = value;
     }
 
     public Integer getErrorCount() {
+        checkSpecifiedProperty("errorCount");
         return errorCount;
     }
 
     public void setErrorCount(Integer value) {
-        errorCount = value;
+        registerModifiedProperty("errorCount");
+        this.errorCount = value;
     }
 
     public String getErrorLog() {
+        checkSpecifiedProperty("errorLog");
         return errorLog;
     }
 
     public void setErrorLog(String value) {
-        errorLog = value;
+        registerModifiedProperty("errorLog");
+        this.errorLog = value;
     }
 
     public String getErrorName() {
+        checkSpecifiedProperty("errorName");
         return errorName;
     }
 
     public void setErrorName(String value) {
-        errorName = value;
+        registerModifiedProperty("errorName");
+        this.errorName = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Long getLastAccessTime() {
+        checkSpecifiedProperty("lastAccessTime");
         return lastAccessTime;
     }
 
     public void setLastAccessTime(Long value) {
-        lastAccessTime = value;
+        registerModifiedProperty("lastAccessTime");
+        this.lastAccessTime = value;
     }
 
     public String getThreadName() {
+        checkSpecifiedProperty("threadName");
         return threadName;
     }
 
     public void setThreadName(String value) {
-        threadName = value;
+        registerModifiedProperty("threadName");
+        this.threadName = value;
     }
 
     public String getUrl() {
+        checkSpecifiedProperty("url");
         return url;
     }
 
     public void setUrl(String value) {
-        url = value;
+        registerModifiedProperty("url");
+        this.url = value;
     }
 
     @Override
@@ -134,8 +148,8 @@ public class BsFailureUrl extends AbstractEntity {
         if (errorName != null) {
             sourceMap.put("errorName", errorName);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (lastAccessTime != null) {
             sourceMap.put("lastAccessTime", lastAccessTime);

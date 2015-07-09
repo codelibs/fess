@@ -63,6 +63,14 @@ public abstract class BsWebConfigToLabelCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -202,6 +210,14 @@ public abstract class BsWebConfigToLabelCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setLabelTypeId_Equal(String labelTypeId) {
+        setLabelTypeId_Term(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Equal(String labelTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setLabelTypeId_Term(labelTypeId, opLambda);
+    }
+
     public void setLabelTypeId_Term(String labelTypeId) {
         setLabelTypeId_Term(labelTypeId, null);
     }
@@ -339,6 +355,14 @@ public abstract class BsWebConfigToLabelCQ extends AbstractConditionQuery {
     public BsWebConfigToLabelCQ addOrderBy_LabelTypeId_Desc() {
         regOBD("labelTypeId");
         return this;
+    }
+
+    public void setWebConfigId_Equal(String webConfigId) {
+        setWebConfigId_Term(webConfigId, null);
+    }
+
+    public void setWebConfigId_Equal(String webConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setWebConfigId_Term(webConfigId, opLambda);
     }
 
     public void setWebConfigId_Term(String webConfigId) {

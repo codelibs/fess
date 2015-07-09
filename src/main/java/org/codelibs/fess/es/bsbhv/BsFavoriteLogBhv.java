@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.FavoriteLogCB;
 import org.codelibs.fess.es.exentity.FavoriteLog;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return "search_log";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "favorite_log";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "favorite_log";
     }
 
     @Override
@@ -127,6 +140,14 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
         return (PagingResultBean<FavoriteLog>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<FavoriteLogCB> cbLambda, EntityRowHandler<FavoriteLog> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<FavoriteLogCB> cbLambda, EntityRowHandler<List<FavoriteLog>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(FavoriteLog entity) {
         doInsert(entity, null);
     }
@@ -169,6 +190,34 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<FavoriteLogCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<FavoriteLog> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<FavoriteLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<FavoriteLog> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<FavoriteLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<FavoriteLog> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<FavoriteLog> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

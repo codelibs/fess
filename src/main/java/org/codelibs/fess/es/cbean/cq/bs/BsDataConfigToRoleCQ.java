@@ -63,6 +63,14 @@ public abstract class BsDataConfigToRoleCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setDataConfigId_Equal(String dataConfigId) {
+        setDataConfigId_Term(dataConfigId, null);
+    }
+
+    public void setDataConfigId_Equal(String dataConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setDataConfigId_Term(dataConfigId, opLambda);
+    }
+
     public void setDataConfigId_Term(String dataConfigId) {
         setDataConfigId_Term(dataConfigId, null);
     }
@@ -202,6 +210,14 @@ public abstract class BsDataConfigToRoleCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
     public void setId_Term(String id) {
         setId_Term(id, null);
     }
@@ -339,6 +355,14 @@ public abstract class BsDataConfigToRoleCQ extends AbstractConditionQuery {
     public BsDataConfigToRoleCQ addOrderBy_Id_Desc() {
         regOBD("id");
         return this;
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId) {
+        setRoleTypeId_Term(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_Equal(String roleTypeId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRoleTypeId_Term(roleTypeId, opLambda);
     }
 
     public void setRoleTypeId_Term(String roleTypeId) {

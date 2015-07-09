@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,9 +51,6 @@ public class BsFileConfig extends AbstractEntity {
     /** excludedPaths */
     protected String excludedPaths;
 
-    /** id */
-    protected String id;
-
     /** includedDocPaths */
     protected String includedDocPaths;
 
@@ -89,155 +87,193 @@ public class BsFileConfig extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Boolean getAvailable() {
+        checkSpecifiedProperty("available");
         return available;
     }
 
     public void setAvailable(Boolean value) {
-        available = value;
+        registerModifiedProperty("available");
+        this.available = value;
     }
 
     public Float getBoost() {
+        checkSpecifiedProperty("boost");
         return boost;
     }
 
     public void setBoost(Float value) {
-        boost = value;
+        registerModifiedProperty("boost");
+        this.boost = value;
     }
 
     public String getConfigParameter() {
+        checkSpecifiedProperty("configParameter");
         return configParameter;
     }
 
     public void setConfigParameter(String value) {
-        configParameter = value;
+        registerModifiedProperty("configParameter");
+        this.configParameter = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public Integer getDepth() {
+        checkSpecifiedProperty("depth");
         return depth;
     }
 
     public void setDepth(Integer value) {
-        depth = value;
+        registerModifiedProperty("depth");
+        this.depth = value;
     }
 
     public String getExcludedDocPaths() {
+        checkSpecifiedProperty("excludedDocPaths");
         return excludedDocPaths;
     }
 
     public void setExcludedDocPaths(String value) {
-        excludedDocPaths = value;
+        registerModifiedProperty("excludedDocPaths");
+        this.excludedDocPaths = value;
     }
 
     public String getExcludedPaths() {
+        checkSpecifiedProperty("excludedPaths");
         return excludedPaths;
     }
 
     public void setExcludedPaths(String value) {
-        excludedPaths = value;
+        registerModifiedProperty("excludedPaths");
+        this.excludedPaths = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getIncludedDocPaths() {
+        checkSpecifiedProperty("includedDocPaths");
         return includedDocPaths;
     }
 
     public void setIncludedDocPaths(String value) {
-        includedDocPaths = value;
+        registerModifiedProperty("includedDocPaths");
+        this.includedDocPaths = value;
     }
 
     public String getIncludedPaths() {
+        checkSpecifiedProperty("includedPaths");
         return includedPaths;
     }
 
     public void setIncludedPaths(String value) {
-        includedPaths = value;
+        registerModifiedProperty("includedPaths");
+        this.includedPaths = value;
     }
 
     public Integer getIntervalTime() {
+        checkSpecifiedProperty("intervalTime");
         return intervalTime;
     }
 
     public void setIntervalTime(Integer value) {
-        intervalTime = value;
+        registerModifiedProperty("intervalTime");
+        this.intervalTime = value;
     }
 
     public Long getMaxAccessCount() {
+        checkSpecifiedProperty("maxAccessCount");
         return maxAccessCount;
     }
 
     public void setMaxAccessCount(Long value) {
-        maxAccessCount = value;
+        registerModifiedProperty("maxAccessCount");
+        this.maxAccessCount = value;
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public Integer getNumOfThread() {
+        checkSpecifiedProperty("numOfThread");
         return numOfThread;
     }
 
     public void setNumOfThread(Integer value) {
-        numOfThread = value;
+        registerModifiedProperty("numOfThread");
+        this.numOfThread = value;
     }
 
     public String getPaths() {
+        checkSpecifiedProperty("paths");
         return paths;
     }
 
     public void setPaths(String value) {
-        paths = value;
+        registerModifiedProperty("paths");
+        this.paths = value;
     }
 
     public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
         return sortOrder;
     }
 
     public void setSortOrder(Integer value) {
-        sortOrder = value;
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     @Override
@@ -267,8 +303,8 @@ public class BsFileConfig extends AbstractEntity {
         if (excludedPaths != null) {
             sourceMap.put("excludedPaths", excludedPaths);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (includedDocPaths != null) {
             sourceMap.put("includedDocPaths", includedDocPaths);

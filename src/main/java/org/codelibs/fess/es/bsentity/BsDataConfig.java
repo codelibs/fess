@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,9 +48,6 @@ public class BsDataConfig extends AbstractEntity {
     /** handlerScript */
     protected String handlerScript;
 
-    /** id */
-    protected String id;
-
     /** name */
     protected String name;
 
@@ -68,99 +66,123 @@ public class BsDataConfig extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Boolean getAvailable() {
+        checkSpecifiedProperty("available");
         return available;
     }
 
     public void setAvailable(Boolean value) {
-        available = value;
+        registerModifiedProperty("available");
+        this.available = value;
     }
 
     public Float getBoost() {
+        checkSpecifiedProperty("boost");
         return boost;
     }
 
     public void setBoost(Float value) {
-        boost = value;
+        registerModifiedProperty("boost");
+        this.boost = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getHandlerName() {
+        checkSpecifiedProperty("handlerName");
         return handlerName;
     }
 
     public void setHandlerName(String value) {
-        handlerName = value;
+        registerModifiedProperty("handlerName");
+        this.handlerName = value;
     }
 
     public String getHandlerParameter() {
+        checkSpecifiedProperty("handlerParameter");
         return handlerParameter;
     }
 
     public void setHandlerParameter(String value) {
-        handlerParameter = value;
+        registerModifiedProperty("handlerParameter");
+        this.handlerParameter = value;
     }
 
     public String getHandlerScript() {
+        checkSpecifiedProperty("handlerScript");
         return handlerScript;
     }
 
     public void setHandlerScript(String value) {
-        handlerScript = value;
+        registerModifiedProperty("handlerScript");
+        this.handlerScript = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getName() {
+        checkSpecifiedProperty("name");
         return name;
     }
 
     public void setName(String value) {
-        name = value;
+        registerModifiedProperty("name");
+        this.name = value;
     }
 
     public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
         return sortOrder;
     }
 
     public void setSortOrder(Integer value) {
-        sortOrder = value;
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     @Override
@@ -187,8 +209,8 @@ public class BsDataConfig extends AbstractEntity {
         if (handlerScript != null) {
             sourceMap.put("handlerScript", handlerScript);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (name != null) {
             sourceMap.put("name", name);

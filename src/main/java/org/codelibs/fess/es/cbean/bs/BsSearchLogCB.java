@@ -167,8 +167,8 @@ public class BsSearchLogCB extends AbstractConditionBean {
             doColumn("userAgent");
         }
 
-        public void columnUserId() {
-            doColumn("userId");
+        public void columnUserInfoId() {
+            doColumn("userInfoId");
         }
 
         public void columnUserSessionId() {

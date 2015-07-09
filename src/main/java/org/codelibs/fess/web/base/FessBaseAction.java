@@ -308,7 +308,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
         RuntimeException translated = null;
         try {
             translateException(cause);
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             translated = e;
         }
         final RuntimeException handlingEx = translated != null ? translated : cause;
@@ -396,6 +396,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
      */
     protected AccessContextArranger createAccessContextArranger() {
         return new AccessContextArranger() {
+            @Override
             public AccessContext arrangePreparedAccessContext(final AccessContextResource resource) {
                 final AccessContext context = new AccessContext();
                 // uses provider to synchronize it with transaction time
@@ -469,12 +470,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
      */
     protected SqlStringFilter createSqlStringFilter(final ActionExecuteMeta executeMeta) {
         final Method actionMethod = executeMeta.getActionMethod();
-        return newRomanticTraceableSqlStringFilter(actionMethod, new TraceableSqlAdditionalInfoProvider() {
-            @Override
-            public String provide() { // lazy because it may be auto-login later
-                return buildSqlMarkingAdditionalInfo();
-            }
-        });
+        return newRomanticTraceableSqlStringFilter(actionMethod, () -> buildSqlMarkingAdditionalInfo());
     }
 
     protected RomanticTraceableSqlStringFilter newRomanticTraceableSqlStringFilter(Method actionMethod,
@@ -622,7 +618,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
             return;
         }
         int index = 0;
-        for (StackTraceElement element : stackTrace) {
+        for (final StackTraceElement element : stackTrace) {
             if (index > 10) { // not all because it's not error
                 break;
             }
@@ -759,7 +755,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
      */
     protected void assertTrueOrForcedRequest404NotFound(boolean condition) {
         if (!condition) {
-            String msg = "from Forced 404 NotFound assertion"; // debug message
+            final String msg = "from Forced 404 NotFound assertion"; // debug message
             throw new ForcedRequest404NotFoundException(msg);
         }
     }
@@ -813,7 +809,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
         if (dateExp == null || dateExp.isEmpty()) {
             return null;
         }
-        TimeZone userTimeZone = getConversionTimeZone();
+        final TimeZone userTimeZone = getConversionTimeZone();
         return new HandyDate(dateExp, userTimeZone).getLocalDate();
     }
 
@@ -821,7 +817,7 @@ public abstract class FessBaseAction extends RootAction implements ActionCallbac
         if (dateTimeExp == null || dateTimeExp.isEmpty()) {
             return null;
         }
-        TimeZone userTimeZone = getConversionTimeZone();
+        final TimeZone userTimeZone = getConversionTimeZone();
         return new HandyDate(dateTimeExp, userTimeZone).getLocalDateTime();
     }
 

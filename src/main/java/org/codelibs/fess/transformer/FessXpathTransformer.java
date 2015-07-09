@@ -22,8 +22,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.xpath.objects.XObject;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.CrawlingConfig;
-import org.codelibs.fess.db.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
+import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
@@ -196,7 +196,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
 
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
-        final LocalDateTime documentExpires = crawlingSessionHelper.getDocumentExpires();
+        final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
@@ -224,7 +224,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, fieldHelper.expiresField, FessFunctions.formatDate(documentExpires));
+            putResultDataBody(dataMap, fieldHelper.expiresField, new Date(documentExpires));
         }
         // lang
         final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, langXpath, true));

@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import org.codelibs.fess.es.cbean.FileConfigToLabelCB;
 import org.codelibs.fess.es.exentity.FileConfigToLabel;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class BsFileConfigToLabelBhv extends AbstractBehavior<FileConfig
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return ".fess_config";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "file_config_to_label";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return ".fess_config";
+    public String asEsSearchType() {
+        return "file_config_to_label";
     }
 
     @Override
@@ -127,6 +140,14 @@ public abstract class BsFileConfigToLabelBhv extends AbstractBehavior<FileConfig
         return (PagingResultBean<FileConfigToLabel>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<FileConfigToLabelCB> cbLambda, EntityRowHandler<FileConfigToLabel> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<FileConfigToLabelCB> cbLambda, EntityRowHandler<List<FileConfigToLabel>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+    }
+
     public void insert(FileConfigToLabel entity) {
         doInsert(entity, null);
     }
@@ -169,6 +190,34 @@ public abstract class BsFileConfigToLabelBhv extends AbstractBehavior<FileConfig
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<FileConfigToLabelCB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<FileConfigToLabel> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<FileConfigToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<FileConfigToLabel> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<FileConfigToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<FileConfigToLabel> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<FileConfigToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

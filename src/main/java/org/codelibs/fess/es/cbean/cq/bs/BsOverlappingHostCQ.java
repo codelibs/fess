@@ -63,6 +63,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_Equal(String createdBy) {
+        setCreatedBy_Term(createdBy, null);
+    }
+
+    public void setCreatedBy_Equal(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedBy_Term(createdBy, opLambda);
+    }
+
     public void setCreatedBy_Term(String createdBy) {
         setCreatedBy_Term(createdBy, null);
     }
@@ -202,6 +210,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -328,6 +344,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
     public BsOverlappingHostCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -469,6 +493,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setOverlappingName_Equal(String overlappingName) {
+        setOverlappingName_Term(overlappingName, null);
+    }
+
+    public void setOverlappingName_Equal(String overlappingName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setOverlappingName_Term(overlappingName, opLambda);
+    }
+
     public void setOverlappingName_Term(String overlappingName) {
         setOverlappingName_Term(overlappingName, null);
     }
@@ -606,6 +638,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
     public BsOverlappingHostCQ addOrderBy_OverlappingName_Desc() {
         regOBD("overlappingName");
         return this;
+    }
+
+    public void setRegularName_Equal(String regularName) {
+        setRegularName_Term(regularName, null);
+    }
+
+    public void setRegularName_Equal(String regularName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRegularName_Term(regularName, opLambda);
     }
 
     public void setRegularName_Term(String regularName) {
@@ -747,6 +787,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setSortOrder_Equal(Integer sortOrder) {
+        setSortOrder_Term(sortOrder, null);
+    }
+
+    public void setSortOrder_Equal(Integer sortOrder, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSortOrder_Term(sortOrder, opLambda);
+    }
+
     public void setSortOrder_Term(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }
@@ -873,6 +921,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
     public BsOverlappingHostCQ addOrderBy_SortOrder_Desc() {
         regOBD("sortOrder");
         return this;
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy) {
+        setUpdatedBy_Term(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Equal(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedBy_Term(updatedBy, opLambda);
     }
 
     public void setUpdatedBy_Term(String updatedBy) {
@@ -1012,6 +1068,14 @@ public abstract class BsOverlappingHostCQ extends AbstractConditionQuery {
     public BsOverlappingHostCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime) {
+        setUpdatedTime_Term(updatedTime, null);
+    }
+
+    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedTime_Term(updatedTime, opLambda);
     }
 
     public void setUpdatedTime_Term(Long updatedTime) {

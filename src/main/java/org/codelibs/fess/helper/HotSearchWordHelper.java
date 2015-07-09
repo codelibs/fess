@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.helper;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.db.exbhv.SearchLogBhv;
-import org.codelibs.fess.db.exbhv.pmbean.HotSearchWordPmb;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.exbhv.SearchLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 
@@ -44,42 +42,18 @@ public class HotSearchWordHelper {
 
     @InitMethod
     public void init() {
-        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
-        cacheMap.put(Range.ONE_DAY, getHotSearchWordListByFromDate(now.minusDays(1)));
-        cacheMap.put(Range.ONE_WEEK, getHotSearchWordListByFromDate(now.minusWeeks(1)));
-        cacheMap.put(Range.ONE_MONTH, getHotSearchWordListByFromDate(now.minusMonths(1)));
-        cacheMap.put(Range.ONE_YEAR, getHotSearchWordListByFromDate(now.minusYears(1)));
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        cacheMap.put(Range.ONE_DAY, getHotSearchWordListByFromDate(now - Constants.ONE_DAY_IN_MILLIS));
+        cacheMap.put(Range.ONE_WEEK, getHotSearchWordListByFromDate(now - Constants.ONE_DAY_IN_MILLIS * 7));
+        cacheMap.put(Range.ONE_MONTH, getHotSearchWordListByFromDate(now - Constants.ONE_DAY_IN_MILLIS * 30));
+        cacheMap.put(Range.ONE_YEAR, getHotSearchWordListByFromDate(now - Constants.ONE_DAY_IN_MILLIS * 365));
         cacheMap.put(Range.ENTIRE, getHotSearchWordListByFromDate(null));
     }
 
-    protected List<String> getHotSearchWordListByFromDate(final LocalDateTime fromDate) {
-        final HotSearchWordPmb pmb = new HotSearchWordPmb();
-
-        if (fromDate != null) {
-            pmb.setFromRequestedTime(fromDate);
-        }
-
+    protected List<String> getHotSearchWordListByFromDate(final Long fromDate) {
         final List<String> wordList = new ArrayList<String>();
 
-        searchLogBhv.outsideSql().selectCursor(pmb, rs -> {
-            while (rs.next()) {
-                final String word = rs.getString("name");
-                if (StringUtil.isBlank(word)) {
-                    continue;
-                }
-                if (excludedWordPattern != null) {
-                    if (!excludedWordPattern.matcher(word).matches()) {
-                        wordList.add(word);
-                    }
-                } else {
-                    wordList.add(word);
-                }
-                if (wordList.size() >= size) {
-                    break;
-                }
-            }
-            return null;
-        });
+        // TODO
 
         return wordList;
     }
@@ -97,7 +71,7 @@ public class HotSearchWordHelper {
         private final long time;
 
         private Range(final long t) {
-            time = t * 24L * 60L * 60L * 1000L;
+            time = t * Constants.ONE_DAY_IN_MILLIS;
         }
 
         public long getTime() {

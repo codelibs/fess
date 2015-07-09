@@ -29,13 +29,12 @@ import org.apache.commons.io.IOUtils;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.db.exentity.CrawlingConfig;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SambaHelper;
-import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2RobotThread;
 import org.codelibs.robot.builder.RequestDataBuilder;
@@ -122,24 +121,6 @@ public class FessS2RobotThread extends S2RobotThread {
                 final Date lastModified = (Date) solrDocument.get(fieldHelper.lastModifiedField);
                 if (lastModified == null) {
                     return true;
-                }
-
-                final Integer clickCount = (Integer) solrDocument.get(fieldHelper.clickCountField);
-                if (clickCount != null) {
-                    final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
-                    final int count = searchLogHelper.getClickCount(url);
-                    if (count != clickCount.intValue()) {
-                        return true;
-                    }
-                }
-
-                final Integer favoriteCount = (Integer) solrDocument.get(fieldHelper.favoriteCountField);
-                if (favoriteCount != null) {
-                    final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
-                    final long count = searchLogHelper.getFavoriteCount(url);
-                    if (count != favoriteCount.longValue()) {
-                        return true;
-                    }
                 }
 
                 if (responseData == null) {

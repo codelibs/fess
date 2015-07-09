@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,6 @@ public class BsFileConfigToLabel extends AbstractEntity {
     /** fileConfigId */
     protected String fileConfigId;
 
-    /** id */
-    protected String id;
-
     /** labelTypeId */
     protected String labelTypeId;
 
@@ -41,27 +39,33 @@ public class BsFileConfigToLabel extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getFileConfigId() {
+        checkSpecifiedProperty("fileConfigId");
         return fileConfigId;
     }
 
     public void setFileConfigId(String value) {
-        fileConfigId = value;
+        registerModifiedProperty("fileConfigId");
+        this.fileConfigId = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getLabelTypeId() {
+        checkSpecifiedProperty("labelTypeId");
         return labelTypeId;
     }
 
     public void setLabelTypeId(String value) {
-        labelTypeId = value;
+        registerModifiedProperty("labelTypeId");
+        this.labelTypeId = value;
     }
 
     @Override
@@ -70,8 +74,8 @@ public class BsFileConfigToLabel extends AbstractEntity {
         if (fileConfigId != null) {
             sourceMap.put("fileConfigId", fileConfigId);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (labelTypeId != null) {
             sourceMap.put("labelTypeId", labelTypeId);

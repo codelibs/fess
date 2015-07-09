@@ -17,7 +17,6 @@
 package org.codelibs.fess.helper;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,8 +28,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.db.exentity.CrawlingSession;
-import org.codelibs.fess.db.exentity.CrawlingSessionInfo;
+import org.codelibs.fess.es.exentity.CrawlingSession;
+import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.service.CrawlingSessionService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -52,7 +51,7 @@ public class CrawlingSessionHelper implements Serializable {
 
     protected Map<String, String> infoMap;
 
-    protected LocalDateTime documentExpires;
+    protected Long documentExpires;
 
     private final int maxSessionIdsInList = 100;
 
@@ -113,7 +112,7 @@ public class CrawlingSessionHelper implements Serializable {
             crawlingSession.setName(Constants.CRAWLING_SESSION_SYSTEM_NAME);
         }
         if (dayForCleanup >= 0) {
-            final LocalDateTime expires = getExpiredTime(dayForCleanup);
+            final long expires = getExpiredTime(dayForCleanup);
             crawlingSession.setExpiredTime(expires);
             documentExpires = expires;
         }
@@ -125,13 +124,13 @@ public class CrawlingSessionHelper implements Serializable {
 
     }
 
-    public LocalDateTime getDocumentExpires() {
+    public Long getDocumentExpires() {
         return documentExpires;
     }
 
-    protected LocalDateTime getExpiredTime(final int days) {
-        final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
-        return now.plusDays(days);
+    protected long getExpiredTime(final int days) {
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        return now + days * Constants.ONE_DAY_IN_MILLIS;
     }
 
     public Map<String, String> getInfoMap(final String sessionId) {

@@ -21,9 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.struts.upload.FormFile;
-import org.codelibs.fess.Constants;
-import org.seasar.struts.annotation.DateType;
-import org.seasar.struts.annotation.IntRange;
+import org.codelibs.fess.util.ComponentUtil;
+import org.seasar.struts.annotation.FloatType;
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.LongType;
 import org.seasar.struts.annotation.Maxbytelength;
@@ -49,7 +48,7 @@ public class SuggestElevateWordForm implements Serializable {
     }
 
     @Required(target = "confirmfromupdate,update,delete")
-    @LongType
+    @Maxbytelength(maxbytelength = 1000)
     public String id;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
@@ -62,7 +61,7 @@ public class SuggestElevateWordForm implements Serializable {
     public String targetLabel;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    @IntRange(min = 0, max = 2147483647)
+    @FloatType
     public String boost;
 
     @Required(target = "confirmfromupdate,update,delete")
@@ -70,19 +69,14 @@ public class SuggestElevateWordForm implements Serializable {
     public String createdBy;
 
     @Required(target = "confirmfromupdate,update,delete")
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    @LongType
     public String createdTime;
 
     @Maxbytelength(maxbytelength = 255)
     public String updatedBy;
 
-    @DateType
+    @LongType
     public String updatedTime;
-
-    public String deletedBy;
-
-    @DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
-    public String deletedTime;
 
     @Required(target = "confirmfromupdate,update,delete")
     @IntegerType
@@ -95,12 +89,10 @@ public class SuggestElevateWordForm implements Serializable {
         targetRole = null;
         targetLabel = null;
         boost = null;
-        createdBy = null;
-        createdTime = null;
+        createdBy = "system";
+        createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         updatedBy = null;
         updatedTime = null;
-        deletedBy = null;
-        deletedTime = null;
         versionNo = null;
         boost = "100";
     }

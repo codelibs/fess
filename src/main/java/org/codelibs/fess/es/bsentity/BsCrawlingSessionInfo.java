@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,6 @@ public class BsCrawlingSessionInfo extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** key */
     protected String key;
 
@@ -47,43 +45,53 @@ public class BsCrawlingSessionInfo extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public String getCrawlingSessionId() {
+        checkSpecifiedProperty("crawlingSessionId");
         return crawlingSessionId;
     }
 
     public void setCrawlingSessionId(String value) {
-        crawlingSessionId = value;
+        registerModifiedProperty("crawlingSessionId");
+        this.crawlingSessionId = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getKey() {
+        checkSpecifiedProperty("key");
         return key;
     }
 
     public void setKey(String value) {
-        key = value;
+        registerModifiedProperty("key");
+        this.key = value;
     }
 
     public String getValue() {
+        checkSpecifiedProperty("value");
         return value;
     }
 
     public void setValue(String value) {
-        value = value;
+        registerModifiedProperty("value");
+        this.value = value;
     }
 
     @Override
@@ -95,8 +103,8 @@ public class BsCrawlingSessionInfo extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (key != null) {
             sourceMap.put("key", key);

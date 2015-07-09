@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +36,6 @@ public class BsKeyMatch extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** maxSize */
     protected Integer maxSize;
 
@@ -59,75 +57,93 @@ public class BsKeyMatch extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Float getBoost() {
+        checkSpecifiedProperty("boost");
         return boost;
     }
 
     public void setBoost(Float value) {
-        boost = value;
+        registerModifiedProperty("boost");
+        this.boost = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public Integer getMaxSize() {
+        checkSpecifiedProperty("maxSize");
         return maxSize;
     }
 
     public void setMaxSize(Integer value) {
-        maxSize = value;
+        registerModifiedProperty("maxSize");
+        this.maxSize = value;
     }
 
     public String getQuery() {
+        checkSpecifiedProperty("query");
         return query;
     }
 
     public void setQuery(String value) {
-        query = value;
+        registerModifiedProperty("query");
+        this.query = value;
     }
 
     public String getTerm() {
+        checkSpecifiedProperty("term");
         return term;
     }
 
     public void setTerm(String value) {
-        term = value;
+        registerModifiedProperty("term");
+        this.term = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     @Override
@@ -142,8 +158,8 @@ public class BsKeyMatch extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (maxSize != null) {
             sourceMap.put("maxSize", maxSize);

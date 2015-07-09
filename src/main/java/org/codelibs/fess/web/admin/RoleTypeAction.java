@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.RoleType;
+import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.RoleTypePager;
 import org.codelibs.fess.service.RoleTypeService;
@@ -260,7 +259,7 @@ public class RoleTypeAction extends FessAdminAction {
     protected RoleType createRoleType() {
         RoleType roleType;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (roleTypeForm.crudMode == CommonConstants.EDIT_MODE) {
             roleType = roleTypeService.getRoleType(createKeyMap());
             if (roleType == null) {
@@ -295,12 +294,7 @@ public class RoleTypeAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { roleTypeForm.id });
             }
 
-            //           roleTypeService.delete(roleType);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            roleType.setDeletedBy(username);
-            roleType.setDeletedTime(currentTime);
-            roleTypeService.store(roleType);
+            roleTypeService.delete(roleType);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);

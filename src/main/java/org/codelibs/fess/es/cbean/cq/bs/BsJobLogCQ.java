@@ -62,6 +62,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setEndTime_Equal(Long endTime) {
+        setEndTime_Term(endTime, null);
+    }
+
+    public void setEndTime_Equal(Long endTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setEndTime_Term(endTime, opLambda);
+    }
+
     public void setEndTime_Term(Long endTime) {
         setEndTime_Term(endTime, null);
     }
@@ -188,6 +196,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
     public BsJobLogCQ addOrderBy_EndTime_Desc() {
         regOBD("endTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -329,6 +345,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setJobName_Equal(String jobName) {
+        setJobName_Term(jobName, null);
+    }
+
+    public void setJobName_Equal(String jobName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setJobName_Term(jobName, opLambda);
+    }
+
     public void setJobName_Term(String jobName) {
         setJobName_Term(jobName, null);
     }
@@ -466,6 +490,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
     public BsJobLogCQ addOrderBy_JobName_Desc() {
         regOBD("jobName");
         return this;
+    }
+
+    public void setJobStatus_Equal(String jobStatus) {
+        setJobStatus_Term(jobStatus, null);
+    }
+
+    public void setJobStatus_Equal(String jobStatus, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setJobStatus_Term(jobStatus, opLambda);
     }
 
     public void setJobStatus_Term(String jobStatus) {
@@ -607,6 +639,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setScriptData_Equal(String scriptData) {
+        setScriptData_Term(scriptData, null);
+    }
+
+    public void setScriptData_Equal(String scriptData, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setScriptData_Term(scriptData, opLambda);
+    }
+
     public void setScriptData_Term(String scriptData) {
         setScriptData_Term(scriptData, null);
     }
@@ -744,6 +784,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
     public BsJobLogCQ addOrderBy_ScriptData_Desc() {
         regOBD("scriptData");
         return this;
+    }
+
+    public void setScriptResult_Equal(String scriptResult) {
+        setScriptResult_Term(scriptResult, null);
+    }
+
+    public void setScriptResult_Equal(String scriptResult, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setScriptResult_Term(scriptResult, opLambda);
     }
 
     public void setScriptResult_Term(String scriptResult) {
@@ -885,6 +933,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setScriptType_Equal(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Equal(String scriptType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setScriptType_Term(scriptType, opLambda);
+    }
+
     public void setScriptType_Term(String scriptType) {
         setScriptType_Term(scriptType, null);
     }
@@ -1024,6 +1080,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setStartTime_Equal(Long startTime) {
+        setStartTime_Term(startTime, null);
+    }
+
+    public void setStartTime_Equal(Long startTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setStartTime_Term(startTime, opLambda);
+    }
+
     public void setStartTime_Term(Long startTime) {
         setStartTime_Term(startTime, null);
     }
@@ -1150,6 +1214,14 @@ public abstract class BsJobLogCQ extends AbstractConditionQuery {
     public BsJobLogCQ addOrderBy_StartTime_Desc() {
         regOBD("startTime");
         return this;
+    }
+
+    public void setTarget_Equal(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Equal(String target, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTarget_Term(target, opLambda);
     }
 
     public void setTarget_Term(String target) {

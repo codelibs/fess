@@ -106,6 +106,25 @@ public abstract class BsCrawlingSessionCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotEqual(createdTime, null, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedTime_Equal(createdTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -202,6 +221,25 @@ public abstract class BsCrawlingSessionCF extends AbstractConditionFilter {
         }
     }
 
+    public void setExpiredTime_NotEqual(Long expiredTime) {
+        setExpiredTime_NotEqual(expiredTime, null, null);
+    }
+
+    public void setExpiredTime_NotEqual(Long expiredTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setExpiredTime_Equal(expiredTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setExpiredTime_Equal(Long expiredTime) {
+        setExpiredTime_Term(expiredTime, null);
+    }
+
+    public void setExpiredTime_Equal(Long expiredTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setExpiredTime_Term(expiredTime, opLambda);
+    }
+
     public void setExpiredTime_Term(Long expiredTime) {
         setExpiredTime_Term(expiredTime, null);
     }
@@ -296,6 +334,25 @@ public abstract class BsCrawlingSessionCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -405,6 +462,25 @@ public abstract class BsCrawlingSessionCF extends AbstractConditionFilter {
         }
     }
 
+    public void setName_NotEqual(String name) {
+        setName_NotEqual(name, null, null);
+    }
+
+    public void setName_NotEqual(String name, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setName_Equal(name, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setName_Term(name, opLambda);
+    }
+
     public void setName_Term(String name) {
         setName_Term(name, null);
     }
@@ -510,6 +586,25 @@ public abstract class BsCrawlingSessionCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setSessionId_NotEqual(String sessionId) {
+        setSessionId_NotEqual(sessionId, null, null);
+    }
+
+    public void setSessionId_NotEqual(String sessionId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setSessionId_Equal(sessionId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setSessionId_Equal(String sessionId) {
+        setSessionId_Term(sessionId, null);
+    }
+
+    public void setSessionId_Equal(String sessionId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setSessionId_Term(sessionId, opLambda);
     }
 
     public void setSessionId_Term(String sessionId) {

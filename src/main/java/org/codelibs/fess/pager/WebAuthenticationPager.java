@@ -46,7 +46,7 @@ public class WebAuthenticationPager {
 
     public String username;
 
-    public String webCrawlingConfigId;
+    public String webConfigId;
 
     public String createdBy;
 
@@ -61,7 +61,7 @@ public class WebAuthenticationPager {
         id = null;
         port = null;
         username = null;
-        webCrawlingConfigId = null;
+        webConfigId = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;

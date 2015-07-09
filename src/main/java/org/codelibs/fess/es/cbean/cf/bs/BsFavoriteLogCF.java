@@ -106,6 +106,25 @@ public abstract class BsFavoriteLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotEqual(createdTime, null, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setCreatedTime_Equal(createdTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -200,6 +219,25 @@ public abstract class BsFavoriteLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -309,6 +347,25 @@ public abstract class BsFavoriteLogCF extends AbstractConditionFilter {
         }
     }
 
+    public void setUrl_NotEqual(String url) {
+        setUrl_NotEqual(url, null, null);
+    }
+
+    public void setUrl_NotEqual(String url, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUrl_Equal(url, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUrl_Equal(String url) {
+        setUrl_Term(url, null);
+    }
+
+    public void setUrl_Equal(String url, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUrl_Term(url, opLambda);
+    }
+
     public void setUrl_Term(String url) {
         setUrl_Term(url, null);
     }
@@ -414,6 +471,25 @@ public abstract class BsFavoriteLogCF extends AbstractConditionFilter {
         if (opLambda != null) {
             opLambda.callback(builder);
         }
+    }
+
+    public void setUserInfoId_NotEqual(String userInfoId) {
+        setUserInfoId_NotEqual(userInfoId, null, null);
+    }
+
+    public void setUserInfoId_NotEqual(String userInfoId, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setUserInfoId_Equal(userInfoId, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setUserInfoId_Equal(String userInfoId) {
+        setUserInfoId_Term(userInfoId, null);
+    }
+
+    public void setUserInfoId_Equal(String userInfoId, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setUserInfoId_Term(userInfoId, opLambda);
     }
 
     public void setUserInfoId_Term(String userInfoId) {

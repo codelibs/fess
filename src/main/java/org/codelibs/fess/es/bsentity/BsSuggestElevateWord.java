@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +36,6 @@ public class BsSuggestElevateWord extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** reading */
     protected String reading;
 
@@ -62,83 +60,103 @@ public class BsSuggestElevateWord extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Float getBoost() {
+        checkSpecifiedProperty("boost");
         return boost;
     }
 
     public void setBoost(Float value) {
-        boost = value;
+        registerModifiedProperty("boost");
+        this.boost = value;
     }
 
     public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
         return createdBy;
     }
 
     public void setCreatedBy(String value) {
-        createdBy = value;
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
     }
 
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getReading() {
+        checkSpecifiedProperty("reading");
         return reading;
     }
 
     public void setReading(String value) {
-        reading = value;
+        registerModifiedProperty("reading");
+        this.reading = value;
     }
 
     public String getSuggestWord() {
+        checkSpecifiedProperty("suggestWord");
         return suggestWord;
     }
 
     public void setSuggestWord(String value) {
-        suggestWord = value;
+        registerModifiedProperty("suggestWord");
+        this.suggestWord = value;
     }
 
     public String getTargetLabel() {
+        checkSpecifiedProperty("targetLabel");
         return targetLabel;
     }
 
     public void setTargetLabel(String value) {
-        targetLabel = value;
+        registerModifiedProperty("targetLabel");
+        this.targetLabel = value;
     }
 
     public String getTargetRole() {
+        checkSpecifiedProperty("targetRole");
         return targetRole;
     }
 
     public void setTargetRole(String value) {
-        targetRole = value;
+        registerModifiedProperty("targetRole");
+        this.targetRole = value;
     }
 
     public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
         return updatedBy;
     }
 
     public void setUpdatedBy(String value) {
-        updatedBy = value;
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
     }
 
     public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
         return updatedTime;
     }
 
     public void setUpdatedTime(Long value) {
-        updatedTime = value;
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 
     @Override
@@ -153,8 +171,8 @@ public class BsSuggestElevateWord extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (reading != null) {
             sourceMap.put("reading", reading);

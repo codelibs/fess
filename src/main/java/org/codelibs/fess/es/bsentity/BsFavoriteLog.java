@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,6 @@ public class BsFavoriteLog extends AbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
-    /** id */
-    protected String id;
-
     /** url */
     protected String url;
 
@@ -44,35 +42,43 @@ public class BsFavoriteLog extends AbstractEntity {
     //                                                                            Accessor
     //                                                                            ========
     public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
         return createdTime;
     }
 
     public void setCreatedTime(Long value) {
-        createdTime = value;
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
     }
 
     public String getId() {
-        return id;
+        checkSpecifiedProperty("id");
+        return asDocMeta().id();
     }
 
     public void setId(String value) {
-        id = value;
+        registerModifiedProperty("id");
+        asDocMeta().id(value);
     }
 
     public String getUrl() {
+        checkSpecifiedProperty("url");
         return url;
     }
 
     public void setUrl(String value) {
-        url = value;
+        registerModifiedProperty("url");
+        this.url = value;
     }
 
     public String getUserInfoId() {
+        checkSpecifiedProperty("userInfoId");
         return userInfoId;
     }
 
     public void setUserInfoId(String value) {
-        userInfoId = value;
+        registerModifiedProperty("userInfoId");
+        this.userInfoId = value;
     }
 
     @Override
@@ -81,8 +87,8 @@ public class BsFavoriteLog extends AbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (id != null) {
-            sourceMap.put("id", id);
+        if (asDocMeta().id() != null) {
+            sourceMap.put("id", asDocMeta().id());
         }
         if (url != null) {
             sourceMap.put("url", url);

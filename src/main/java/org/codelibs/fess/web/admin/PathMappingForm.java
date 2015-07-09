@@ -86,14 +86,11 @@ public class PathMappingForm implements Serializable {
         replacement = null;
         processType = null;
         sortOrder = null;
-        createdBy = null;
-        createdTime = null;
+        createdBy = "system";
+        createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         updatedBy = null;
         updatedTime = null;
         versionNo = null;
         sortOrder = "0";
-        // Temporary data
-        createdBy = "system";
-        createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
     }
 }

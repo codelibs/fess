@@ -63,6 +63,14 @@ public abstract class BsCrawlingSessionCQ extends AbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Equal(Long createdTime) {
+        setCreatedTime_Term(createdTime, null);
+    }
+
+    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedTime_Term(createdTime, opLambda);
+    }
+
     public void setCreatedTime_Term(Long createdTime) {
         setCreatedTime_Term(createdTime, null);
     }
@@ -191,6 +199,14 @@ public abstract class BsCrawlingSessionCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setExpiredTime_Equal(Long expiredTime) {
+        setExpiredTime_Term(expiredTime, null);
+    }
+
+    public void setExpiredTime_Equal(Long expiredTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setExpiredTime_Term(expiredTime, opLambda);
+    }
+
     public void setExpiredTime_Term(Long expiredTime) {
         setExpiredTime_Term(expiredTime, null);
     }
@@ -317,6 +333,14 @@ public abstract class BsCrawlingSessionCQ extends AbstractConditionQuery {
     public BsCrawlingSessionCQ addOrderBy_ExpiredTime_Desc() {
         regOBD("expiredTime");
         return this;
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
     }
 
     public void setId_Term(String id) {
@@ -458,6 +482,14 @@ public abstract class BsCrawlingSessionCQ extends AbstractConditionQuery {
         return this;
     }
 
+    public void setName_Equal(String name) {
+        setName_Term(name, null);
+    }
+
+    public void setName_Equal(String name, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setName_Term(name, opLambda);
+    }
+
     public void setName_Term(String name) {
         setName_Term(name, null);
     }
@@ -595,6 +627,14 @@ public abstract class BsCrawlingSessionCQ extends AbstractConditionQuery {
     public BsCrawlingSessionCQ addOrderBy_Name_Desc() {
         regOBD("name");
         return this;
+    }
+
+    public void setSessionId_Equal(String sessionId) {
+        setSessionId_Term(sessionId, null);
+    }
+
+    public void setSessionId_Equal(String sessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSessionId_Term(sessionId, opLambda);
     }
 
     public void setSessionId_Term(String sessionId) {

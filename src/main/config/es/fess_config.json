@@ -1,31 +1,6 @@
 {
   ".fess_config" : {
-    "aliases" : { },
     "mappings" : {
-      "user_info" : {
-        "_all" : {
-          "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
-        },
-        "properties" : {
-          "code" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "createdTime" : {
-            "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "updatedTime" : {
-            "type" : "long"
-          }
-        }
-      },
       "web_config_to_label" : {
         "_all" : {
           "enabled" : false
@@ -338,62 +313,6 @@
           }
         }
       },
-      "search_log" : {
-        "_all" : {
-          "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
-        },
-        "properties" : {
-          "accessType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "clientIp" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "hitCount" : {
-            "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "queryOffset" : {
-            "type" : "integer"
-          },
-          "queryPageSize" : {
-            "type" : "integer"
-          },
-          "referer" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "requestedTime" : {
-            "type" : "long"
-          },
-          "responseTime" : {
-            "type" : "integer"
-          },
-          "searchWord" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "userAgent" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "userId" : {
-            "type" : "long"
-          },
-          "userSessionId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          }
-        }
-      },
       "web_authentication" : {
         "_all" : {
           "enabled" : false
@@ -591,32 +510,6 @@
           },
           "updatedTime" : {
             "type" : "long"
-          }
-        }
-      },
-      "search_field_log" : {
-        "_all" : {
-          "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
-        },
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "searchLogId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "value" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           }
         }
       },
@@ -918,31 +811,6 @@
           }
         }
       },
-      "favorite_log" : {
-        "_all" : {
-          "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
-        },
-        "properties" : {
-          "createdTime" : {
-            "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "url" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "userInfoId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          }
-        }
-      },
       "file_config_to_label" : {
         "_all" : {
           "enabled" : false
@@ -1054,8 +922,7 @@
             "type" : "boolean"
           },
           "crawler" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type" : "boolean"
           },
           "createdBy" : {
             "type" : "string",
@@ -1189,45 +1056,14 @@
             "index" : "not_analyzed"
           }
         }
-      },
-      "click_log" : {
-        "_all" : {
-          "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
-        },
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "requestedTime" : {
-            "type" : "long"
-          },
-          "searchLogId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "url" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          }
-        }
       }
     },
     "settings" : {
       "index" : {
         "refresh_interval" : "1s",
-        "creation_date" : "1435803297459",
-        "number_of_shards" : "5",
-        "number_of_replicas" : "0",
-        "version" : {
-          "created" : "1060099"
-        },
-        "uuid" : "fv6Ry_sJQK6lc93JEXDm_A"
+        "number_of_shards" : "2",
+        "number_of_replicas" : "0"
       }
-    },
-    "warmers" : { }
+    }
   }
 }

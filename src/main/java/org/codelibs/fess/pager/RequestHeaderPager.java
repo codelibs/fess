@@ -46,7 +46,7 @@ public class RequestHeaderPager {
 
     public String value;
 
-    public String webCrawlingConfigId;
+    public String webConfigId;
 
     public String createdBy;
 
@@ -61,7 +61,7 @@ public class RequestHeaderPager {
         id = null;
         name = null;
         value = null;
-        webCrawlingConfigId = null;
+        webConfigId = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;

@@ -17,14 +17,10 @@
 package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.struts.annotation.DateType;
 import org.seasar.struts.annotation.IntRange;
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.LongType;
