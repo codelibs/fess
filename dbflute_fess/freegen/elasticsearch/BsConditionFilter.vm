@@ -111,6 +111,25 @@ public abstract class Bs${table.camelizedName}CF extends AbstractConditionFilter
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
 
+    public void set${column.capCamelName}_NotEqual($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_NotEqual(${column.uncapCamelName}, null, null);
+    }
+
+    public void set${column.capCamelName}_NotEqual($javaNative ${column.uncapCamelName}, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.set${column.capCamelName}_Equal(${column.uncapCamelName}, eqOpLambda);
+        } , notOpLambda);
+    }
+
+    public void set${column.capCamelName}_Equal($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_Equal($javaNative ${column.uncapCamelName}, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, opLambda);
+    }
+
     public void set${column.capCamelName}_Term($javaNative ${column.uncapCamelName}) {
         set${column.capCamelName}_Term(${column.uncapCamelName}, null);
     }

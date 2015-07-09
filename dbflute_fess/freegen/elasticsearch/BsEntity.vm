@@ -1,5 +1,9 @@
 package ${request.package}.bsentity;
+#if ($table.get("_id") && $table.get("_id").get("path"))
+#set ($idColumn = $table.get("_id").get("path"))
+#end
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +39,11 @@ public class Bs${table.camelizedName} extends AbstractEntity {
 #elseif ($column.isRefColumn)
 #set ($javaNative = ${column.camelizedName})
 #end
+#if ($column.name != $idColumn)
     /** ${column.name} */
     protected ${javaNative} ${column.uncapCamelName};
 
+#end
 #end
     // [Referrers] *comment only
 #foreach ($referrer in $table.referrerList)
@@ -53,14 +59,36 @@ public class Bs${table.camelizedName} extends AbstractEntity {
 #elseif ($column.isRefColumn)
 #set ($javaNative = ${column.camelizedName})
 #end
-    public ${javaNative} get${column.capCamelName}() {
+#if ($column.name != $idColumn)
+#if ($javaNative == "boolean")
+    public ${javaNative} is${column.capCamelName}() {
+        checkSpecifiedProperty("${column.uncapCamelName}");
         return ${column.uncapCamelName};
+    }
+#else
+    public ${javaNative} get${column.capCamelName}() {
+        checkSpecifiedProperty("${column.uncapCamelName}");
+        return ${column.uncapCamelName};
+    }
+#end
+
+    public void set${column.capCamelName}(${javaNative} value) {
+        registerModifiedProperty("${column.uncapCamelName}");
+        this.${column.uncapCamelName} = value;
+    }
+
+#else
+    public ${javaNative} get${column.capCamelName}() {
+        checkSpecifiedProperty("${column.uncapCamelName}");
+        return asDocMeta().id();
     }
 
     public void set${column.capCamelName}(${javaNative} value) {
-        ${column.uncapCamelName} = value;
+        registerModifiedProperty("${column.uncapCamelName}");
+        asDocMeta().id(value);
     }
 
+#end
 #end
 
     @Override
@@ -68,9 +96,15 @@ public class Bs${table.camelizedName} extends AbstractEntity {
         Map<String, Object> sourceMap = new HashMap<>();
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
+#if ($column.name != $idColumn)
         if (${column.uncapCamelName} != null) {
             sourceMap.put("${column.name}", ${column.uncapCamelName});
         }
+#else
+        if (asDocMeta().id() != null) {
+            sourceMap.put("${column.name}", asDocMeta().id());
+        }
+#end
 #end
 #end
         return sourceMap;

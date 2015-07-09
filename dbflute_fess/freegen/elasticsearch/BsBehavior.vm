@@ -1,5 +1,6 @@
 package ${request.package}.bsbhv;
 
+import java.util.List;
 import java.util.Map;
 
 import ${request.package}.bsentity.AbstractEntity;
@@ -9,11 +10,13 @@ import ${request.package}.cbean.${table.camelizedName}CB;
 import ${request.package}.exentity.${table.camelizedName};
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 
@@ -24,12 +27,22 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
 
     @Override
     public String asTableDbName() {
+        return asEsIndexType();
+    }
+
+    @Override
+    protected String asEsIndex() {
+        return "${table.indexSettings.index}";
+    }
+
+    @Override
+    public String asEsIndexType() {
         return "${table.name}";
     }
 
     @Override
-    protected String asIndexEsName() {
-        return "${table.indexSettings.index}";
+    public String asEsSearchType() {
+        return "${table.name}";
     }
 
     @Override
@@ -130,6 +143,14 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
         return (PagingResultBean<${table.camelizedName}>) facadeSelectList(createCB(cbLambda));
     }
 
+    public void selectCursor(CBCall<${table.camelizedName}CB> cbLambda, EntityRowHandler<${table.camelizedName}> entityLambda) {
+        facadeSelectCursor(createCB(cbLambda), entityLambda);
+    }
+
+    public void selectBulk(CBCall<${table.camelizedName}CB> cbLambda, EntityRowHandler<List<${table.camelizedName}>> entityLambda) {
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+    }
+
     public void insert(${table.camelizedName} entity) {
         doInsert(entity, null);
     }
@@ -172,6 +193,34 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
+    }
+
+    public int queryDelete(CBCall<${table.camelizedName}CB> cbLambda) {
+        return doQueryDelete(createCB(cbLambda), null);
+    }
+
+    public int[] batchInsert(List<${table.camelizedName}> list) {
+        return batchInsert(list, null);
+    }
+
+    public int[] batchInsert(List<${table.camelizedName}> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchInsert(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchUpdate(List<${table.camelizedName}> list) {
+        return batchUpdate(list, null);
+    }
+
+    public int[] batchUpdate(List<${table.camelizedName}> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchUpdate(new BulkList<>(list, call), null);
+    }
+
+    public int[] batchDelete(List<${table.camelizedName}> list) {
+        return batchDelete(list, null);
+    }
+
+    public int[] batchDelete(List<${table.camelizedName}> list, RequestOptionCall<BulkRequestBuilder> call) {
+        return doBatchDelete(new BulkList<>(list, call), null);
     }
 
     // TODO create, modify, remove

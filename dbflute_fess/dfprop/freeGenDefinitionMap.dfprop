@@ -1,5 +1,5 @@
 map:{
-    ; ElasticsearchBeanGen = map:{
+    ; ElasticsearchFessConfigGen = map:{
         ; resourceMap = map:{
             ; resourceType = ELASTICSEARCH
             ; resourceFile = ../src/main/config/es/fess_config.json
@@ -12,6 +12,32 @@ map:{
         }
         ; tableMap = map:{
             ; tablePath = .fess_config -> mappings -> map
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; string = String
+                    ; integer = Integer
+                    ; long = Long
+                    ; float = Float
+                    ; double = Double
+                    ; boolean = Boolean
+                    ; date = java.time.LocalDateTime
+                }
+            }
+        }
+    }
+    ; ElasticsearchSearchLogGen = map:{
+        ; resourceMap = map:{
+            ; resourceType = ELASTICSEARCH
+            ; resourceFile = ../src/main/config/es/search_log.json
+        }
+        ; outputMap = map:{
+            ; templateFile = unused
+            ; outputDirectory = ../src/main/java
+            ; package = org.codelibs.fess.es
+            ; className = unused
+        }
+        ; tableMap = map:{
+            ; tablePath = search_log -> mappings -> map
             ; mappingMap = map:{
                 ; type = map:{
                     ; string = String

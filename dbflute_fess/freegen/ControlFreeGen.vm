@@ -44,7 +44,7 @@ $manager.makeDirectory($request.generateDirPath)
   #end
 #end
 #elseif ($request.isResourceTypeElasticsearch())
-#if ($request.requestName == "ElasticsearchBeanGen")
+#if ($request.requestName.startsWith("Elasticsearch"))
   ##
   ## <<<  Elasticsearch Schema Gen  >>>
   ##
@@ -115,6 +115,7 @@ $manager.makeDirectory($request.generateDirPath)
     #end
   #end
 
+#if ($request.requestName == "ElasticsearchFessConfigGen")
   #set ($path = "${request.generateDirPath}/cbean/bs/AbstractConditionBean.java")
   $manager.makeDirectory($path)
   $request.info("parse('${path}')")
@@ -149,6 +150,7 @@ $manager.makeDirectory($request.generateDirPath)
   $manager.makeDirectory($path)
   $request.info("parse('${path}')")
   $generator.parse("./elasticsearch/SqlClauseEs.vm", $path, "", "")
+#end
 #end
 #else
   ##

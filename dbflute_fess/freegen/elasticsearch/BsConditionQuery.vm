@@ -66,6 +66,14 @@ public abstract class Bs${table.camelizedName}CQ extends AbstractConditionQuery 
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
+    public void set${column.capCamelName}_Equal($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_Equal($javaNative ${column.uncapCamelName}, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, opLambda);
+    }
+
     public void set${column.capCamelName}_Term($javaNative ${column.uncapCamelName}) {
         set${column.capCamelName}_Term(${column.uncapCamelName}, null);
     }
