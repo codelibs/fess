@@ -8,7 +8,7 @@
 	<component name="overlappingHostHelper" class="org.codelibs.fess.helper.OverlappingHostHelper">
 		<initMethod name="add">
 			<arg>
-				<component class="org.codelibs.fess.db.exentity.OverlappingHost">
+				<component class="org.codelibs.fess.es.exentity.OverlappingHost">
 					<property name="regularName">"www.hoge.com"</property>
 					<property name="overlappingName">"hoge.com"</property>
 				</component>
@@ -16,7 +16,7 @@
 		</initMethod>
 		<initMethod name="add">
 			<arg>
-				<component class="org.codelibs.fess.db.exentity.OverlappingHost">
+				<component class="org.codelibs.fess.es.exentity.OverlappingHost">
 					<property name="regularName">"www.fuga.com"</property>
 					<property name="overlappingName">"mail.fuga.com"</property>
 				</component>
