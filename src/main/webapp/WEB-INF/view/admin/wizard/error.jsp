@@ -43,9 +43,6 @@
 		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
 
 	</div>
-
-	<script src="${f:url('/js/admin2/jQuery-2.1.4.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin2/bootstrap.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin2/app.min.js')}" type="text/javascript"></script>
+	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
 </body>
 </html>

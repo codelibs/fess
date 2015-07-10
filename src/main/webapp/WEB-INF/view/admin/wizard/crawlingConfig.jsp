@@ -19,7 +19,9 @@
 					<bean:message key="labels.wizard_start_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="/admin/wizard/">Start</s:link></li>
+					<li><s:link href="/admin/wizard/">
+							<bean:message key="labels.wizard_start_title" />
+						</s:link></li>
 					<li class="active"><bean:message key="labels.wizard_crawling_config_title" /></li>
 				</ol>
 			</section>
@@ -35,40 +37,34 @@
 										<bean:message key="labels.wizard_crawling_config_title" />
 									</h3>
 								</div>
-								<!-- /.box-header -->
 								<div class="box-body">
-									<div class="row">
-										<div class="col-md-8">
 
-											<%-- Message: BEGIN --%>
-											<div>
-												<html:messages id="msg" message="true">
-													<div class="alert-message info">
-														<bean:write name="msg" ignore="true" />
-													</div>
-												</html:messages>
-												<html:errors />
+									<%-- Message: BEGIN --%>
+									<div>
+										<html:messages id="msg" message="true">
+											<div class="alert-message info">
+												<bean:write name="msg" ignore="true" />
 											</div>
-											<%-- Message: END --%>
+										</html:messages>
+										<html:errors />
+									</div>
+									<%-- Message: END --%>
 
-											<div class="form-group">
-												<label for="crawlingConfigName"><bean:message key="labels.wizard_crawling_config_name" /></label>
-												<html:text property="crawlingConfigName" styleClass="form-control" />
-											</div>
-											<div class="form-group">
-												<label for="crawlingConfigPath"><bean:message key="labels.wizard_crawling_config_path" /></label>
-												<html:text property="crawlingConfigPath" styleClass="form-control" />
-											</div>
-											<div class="form-group">
-												<label for="maxAccessCount"><bean:message key="labels.maxAccessCount" /></label>
-												<html:text property="maxAccessCount" styleClass="form-control" />
-											</div>
-											<div class="form-group">
-												<label for="depth"><bean:message key="labels.depth" /></label>
-												<html:text property="depth" styleClass="form-control" />
-											</div>
-										</div>
-
+									<div class="form-group">
+										<label for="crawlingConfigName"><bean:message key="labels.wizard_crawling_config_name" /></label>
+										<html:text property="crawlingConfigName" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="crawlingConfigPath"><bean:message key="labels.wizard_crawling_config_path" /></label>
+										<html:text property="crawlingConfigPath" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="maxAccessCount"><bean:message key="labels.maxAccessCount" /></label>
+										<html:text property="maxAccessCount" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="depth"><bean:message key="labels.depth" /></label>
+										<html:text property="depth" styleClass="form-control" />
 									</div>
 								</div>
 								<div class="box-footer">
@@ -91,9 +87,6 @@
 		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
 
 	</div>
-
-	<script src="${f:url('/js/admin2/jQuery-2.1.4.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin2/bootstrap.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin2/app.min.js')}" type="text/javascript"></script>
+	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
 </body>
 </html>

@@ -16,10 +16,12 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.wizard_start_title" />
+					<bean:message key="labels.wizard_title_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="/admin/wizard/">Start</s:link></li>
+					<li class="active"><s:link href="/admin/wizard/">
+							<bean:message key="labels.wizard_start_title" />
+						</s:link></li>
 				</ol>
 			</section>
 
@@ -30,26 +32,24 @@
 						<div class="col-md-12">
 							<div class="box">
 								<div class="box-header with-border">
-									<h3 class="box-title">Start Configuration Wizard</h3>
+									<h3 class="box-title">
+										<bean:message key="labels.wizard_start_title" />
+									</h3>
 								</div>
 								<div class="box-body">
-									<div class="row">
-										<div class="col-md-8">
-											<%-- Message: BEGIN --%>
-											<div>
-												<html:messages id="msg" message="true">
-													<div class="alert-message info">
-														<bean:write name="msg" ignore="true" />
-													</div>
-												</html:messages>
-												<html:errors />
+									<%-- Message: BEGIN --%>
+									<div>
+										<html:messages id="msg" message="true">
+											<div class="alert-message info">
+												<bean:write name="msg" ignore="true" />
 											</div>
-											<%-- Message: END --%>
-											<p>
-												<bean:message key="labels.wizard_start_desc" />
-											</p>
-										</div>
+										</html:messages>
+										<html:errors />
 									</div>
+									<%-- Message: END --%>
+									<p>
+										<bean:message key="labels.wizard_start_desc" />
+									</p>
 								</div>
 								<div class="box-footer">
 									<input type="submit" name="crawlingConfigForm" class="btn btn-primary"
@@ -67,9 +67,6 @@
 		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
 
 	</div>
-
-	<script src="${f:url('/js/admin2/jQuery-2.1.4.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin2/bootstrap.min.js')}" type="text/javascript"></script>
-	<script src="${f:url('/js/admin2/app.min.js')}" type="text/javascript"></script>
+	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
 </body>
 </html>

@@ -23,8 +23,8 @@
 			<li class="header">MENU</li>
 
 			<li class="treeview <c:if test="${param.menuCategoryType=='system'}">active</c:if>"><a href="#"><i
-					class='fa fa-server'></i> <span><bean:message key="labels.menu_system" /></span> <i
-					class="fa fa-angle-left pull-right"></i></a>
+					class='fa fa-server'
+				></i> <span><bean:message key="labels.menu_system" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
 					<li <c:if test="${param.menuType=='wizard'}">class="active"</c:if>><s:link href="/admin/wizard/index">
@@ -43,7 +43,8 @@
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='scheduledJob'}">class="active"</c:if>><s:link
-							href="/admin/scheduledJob/index">
+							href="/admin/scheduledJob/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.scheduled_job_config" /></span>
 						</s:link></li>
@@ -59,8 +60,9 @@
 						</s:link></li>
 
 				</ul></li>
-			<li class="treeview"><a href="#"><i class='fa fa-cogs'></i> <span><bean:message
-							key="labels.menu_crawl" /></span> <i class="fa fa-angle-left pull-right"></i></a>
+			<li class="treeview <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>"><a href="#"><i
+					class='fa fa-cogs'
+				></i> <span><bean:message key="labels.menu_crawl" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
 					<li <c:if test="${param.menuType=='webConfig'}">class="active"</c:if>><s:link href="/admin/webConfig/index">
@@ -89,37 +91,43 @@
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='boostDocumentRule'}">class="active"</c:if>><s:link
-							href="/admin/boostDocumentRule/index">
+							href="/admin/boostDocumentRule/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.boost_document_rule" /></span>
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='pathMapping'}">class="active"</c:if>><s:link
-							href="/admin/pathMapping/index">
+							href="/admin/pathMapping/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.path_mapping" /></span>
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='webAuthentication'}">class="active"</c:if>><s:link
-							href="/admin/webAuthentication/index">
+							href="/admin/webAuthentication/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.web_authentication" /></span>
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='fileAuthentication'}">class="active"</c:if>><s:link
-							href="/admin/fileAuthentication/index">
+							href="/admin/fileAuthentication/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.file_authentication" /></span>
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='requestHeader'}">class="active"</c:if>><s:link
-							href="/admin/requestHeader/index">
+							href="/admin/requestHeader/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.request_header" /></span>
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='overlappingHost'}">class="active"</c:if>><s:link
-							href="/admin/overlappingHost/index">
+							href="/admin/overlappingHost/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.overlapping_host" /></span>
 						</s:link></li>
@@ -130,25 +138,29 @@
 						</s:link></li>
 
 				</ul></li>
-			<li class="treeview"><a href="#"><i class='fa fa-list'></i> <span><bean:message
-							key="labels.menu_suggest" /></span> <i class="fa fa-angle-left pull-right"></i></a>
+			<li class="treeview <c:if test="${param.menuCategoryType=='suggest'}">active</c:if>"><a href="#"><i
+					class='fa fa-list'
+				></i> <span><bean:message key="labels.menu_suggest" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
 					<li <c:if test="${param.menuType=='suggestElevateWord'}">class="active"</c:if>><s:link
-							href="/admin/suggestElevateWord/index">
+							href="/admin/suggestElevateWord/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.suggest_elevate_word" /></span>
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><s:link
-							href="/admin/suggestBadWord/index">
+							href="/admin/suggestBadWord/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.suggest_bad_word" /></span>
 						</s:link></li>
 
 				</ul></li>
-			<li class="treeview"><a href="#"><i class='fa fa-files-o'></i> <span><bean:message
-							key="labels.menu_system_log" /></span> <i class="fa fa-angle-left pull-right"></i></a>
+			<li class="treeview <c:if test="${param.menuCategoryType=='log'}">active</c:if>"><a href="#"><i
+					class='fa fa-files-o'
+				></i> <span><bean:message key="labels.menu_system_log" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
 					<li <c:if test="${param.menuType=='systemInfo'}">class="active"</c:if>><s:link href="/admin/systemInfo/index">
@@ -162,7 +174,8 @@
 						</s:link></li>
 
 					<li <c:if test="${param.menuType=='crawlingSession'}">class="active"</c:if>><s:link
-							href="/admin/crawlingSession/index">
+							href="/admin/crawlingSession/index"
+						>
 							<i class='fa fa-angle-right'></i>
 							<span><bean:message key="labels.menu.session_info" /></span>
 						</s:link></li>
@@ -182,8 +195,9 @@
 							<span><bean:message key="labels.menu.search_list" /></span>
 						</s:link></li>
 
-				</ul>
-				<!-- /.sidebar-menu -->
+				</ul></li>
+		</ul>
+		<!-- /.sidebar-menu -->
 	</section>
 	<!-- /.sidebar -->
 </aside>
