@@ -13,20 +13,17 @@
 			<jsp:param name="menuType" value="wizard" />
 		</jsp:include>
 
-		<!-- Content Wrapper. Contains page content -->
 		<div class="content-wrapper">
-			<!-- Content Header (Page header) -->
 			<section class="content-header">
 				<h1>
 					<bean:message key="labels.wizard_start_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-					<li class="active">Here</li>
+					<li><s:link href="/admin/wizard/">Start</s:link></li>
+					<li class="active"><bean:message key="labels.wizard_crawling_config_title" /></li>
 				</ol>
 			</section>
 
-			<!-- Main content -->
 			<section class="content">
 
 				<s:form>
@@ -75,12 +72,13 @@
 									</div>
 								</div>
 								<div class="box-footer">
-									<input type="submit" class="btn" name="index" value="<bean:message key="labels.wizard_button_cancel"/>" />
-									<input type="submit" class="btn" name="startCrawlingForm"
-										value="<bean:message key="labels.wizard_button_skip"/>" /> <input type="submit" class="btn btn-primary"
-										name="crawlingConfig" value="<bean:message key="labels.wizard_button_register_again"/>" /> <input
-										type="submit" class="btn btn-primary" name="crawlingConfigNext"
-										value="<bean:message key="labels.wizard_button_register_next"/>" />
+									<input type="submit" class="btn" name="index" value="<bean:message key="labels.wizard_button_cancel"/>" /> <input
+										type="submit" class="btn" name="startCrawlingForm" value="<bean:message key="labels.wizard_button_skip"/>"
+									/> <input type="submit" class="btn btn-primary" name="crawlingConfig"
+										value="<bean:message key="labels.wizard_button_register_again"/>"
+									/> <input type="submit" class="btn btn-primary" name="crawlingConfigNext"
+										value="<bean:message key="labels.wizard_button_register_next"/>"
+									/>
 								</div>
 							</div>
 						</div>

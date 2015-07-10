@@ -13,59 +13,53 @@
 			<jsp:param name="menuType" value="wizard" />
 		</jsp:include>
 
-		<!-- Content Wrapper. Contains page content -->
 		<div class="content-wrapper">
-			<!-- Content Header (Page header) -->
 			<section class="content-header">
 				<h1>
 					<bean:message key="labels.wizard_start_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-					<li class="active">Here</li>
+					<li class="active"><s:link href="/admin/wizard/">Start</s:link></li>
 				</ol>
 			</section>
 
-			<!-- Main content -->
 			<section class="content">
 
-				<div class="row">
-					<div class="col-md-12">
-						<div class="box">
-							<div class="box-header with-border">
-								<h3 class="box-title">Start Configuration Wizard</h3>
-							</div>
-							<div class="box-body">
-								<div class="row">
-									<div class="col-md-8">
-										<%-- Message: BEGIN --%>
-										<div>
-											<html:messages id="msg" message="true">
-												<div class="alert-message info">
-													<bean:write name="msg" ignore="true" />
-												</div>
-											</html:messages>
-											<html:errors />
-										</div>
-										<%-- Message: END --%>
-										<s:form>
+				<s:form>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-header with-border">
+									<h3 class="box-title">Start Configuration Wizard</h3>
+								</div>
+								<div class="box-body">
+									<div class="row">
+										<div class="col-md-8">
+											<%-- Message: BEGIN --%>
 											<div>
-												<p class="span8">
-													<bean:message key="labels.wizard_start_desc" />
-												</p>
-												<div class="span8">
-													<input type="submit" name="crawlingConfigForm" class="btn small"
-														value="<bean:message key="labels.wizard_start_button"/>" />
-													</td>
-												</div>
+												<html:messages id="msg" message="true">
+													<div class="alert-message info">
+														<bean:write name="msg" ignore="true" />
+													</div>
+												</html:messages>
+												<html:errors />
 											</div>
-										</s:form>
+											<%-- Message: END --%>
+											<p>
+												<bean:message key="labels.wizard_start_desc" />
+											</p>
+										</div>
 									</div>
+								</div>
+								<div class="box-footer">
+									<input type="submit" name="crawlingConfigForm" class="btn btn-primary"
+										value="<bean:message key="labels.wizard_start_button"/>"
+									/>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				</s:form>
 
 			</section>
 		</div>
