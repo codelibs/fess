@@ -66,7 +66,7 @@
     <pdfbox.version>1.8.7</pdfbox.version>
     <saflute.version>1.0.0-SNAPSHOT</saflute.version>
     <elasticsearch.version>1.6.0</elasticsearch.version>
-    <cluster.runner.version>1.6.0.0-SNAPSHOT</cluster.runner.version>
+    <cluster.runner.version>1.6.0.0</cluster.runner.version>
     <!-- Tomcat -->
     <tomcat.delegate>true</tomcat.delegate>
     <tomcat.useSeparateTomcatClassLoader>true</tomcat.useSeparateTomcatClassLoader>
