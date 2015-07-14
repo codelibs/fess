@@ -25,7 +25,12 @@ import org.codelibs.fess.entity.SearchQuery.SortField;
 import org.codelibs.fess.solr.FessSolrQueryException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.Action;
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.ActionRequest;
+import org.elasticsearch.action.ActionRequestBuilder;
+import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -34,13 +39,78 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.count.CountRequest;
+import org.elasticsearch.action.count.CountRequestBuilder;
+import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequest;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
+import org.elasticsearch.action.exists.ExistsRequest;
+import org.elasticsearch.action.exists.ExistsRequestBuilder;
+import org.elasticsearch.action.exists.ExistsResponse;
+import org.elasticsearch.action.explain.ExplainRequest;
+import org.elasticsearch.action.explain.ExplainRequestBuilder;
+import org.elasticsearch.action.explain.ExplainResponse;
+import org.elasticsearch.action.fieldstats.FieldStatsRequest;
+import org.elasticsearch.action.fieldstats.FieldStatsRequestBuilder;
+import org.elasticsearch.action.fieldstats.FieldStatsResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetRequestBuilder;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.get.MultiGetRequest;
+import org.elasticsearch.action.get.MultiGetRequestBuilder;
+import org.elasticsearch.action.get.MultiGetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequest.OpType;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.indexedscripts.delete.DeleteIndexedScriptRequest;
+import org.elasticsearch.action.indexedscripts.delete.DeleteIndexedScriptRequestBuilder;
+import org.elasticsearch.action.indexedscripts.delete.DeleteIndexedScriptResponse;
+import org.elasticsearch.action.indexedscripts.get.GetIndexedScriptRequest;
+import org.elasticsearch.action.indexedscripts.get.GetIndexedScriptRequestBuilder;
+import org.elasticsearch.action.indexedscripts.get.GetIndexedScriptResponse;
+import org.elasticsearch.action.indexedscripts.put.PutIndexedScriptRequest;
+import org.elasticsearch.action.indexedscripts.put.PutIndexedScriptRequestBuilder;
+import org.elasticsearch.action.indexedscripts.put.PutIndexedScriptResponse;
+import org.elasticsearch.action.mlt.MoreLikeThisRequest;
+import org.elasticsearch.action.mlt.MoreLikeThisRequestBuilder;
+import org.elasticsearch.action.percolate.MultiPercolateRequest;
+import org.elasticsearch.action.percolate.MultiPercolateRequestBuilder;
+import org.elasticsearch.action.percolate.MultiPercolateResponse;
+import org.elasticsearch.action.percolate.PercolateRequest;
+import org.elasticsearch.action.percolate.PercolateRequestBuilder;
+import org.elasticsearch.action.percolate.PercolateResponse;
+import org.elasticsearch.action.search.ClearScrollRequest;
+import org.elasticsearch.action.search.ClearScrollRequestBuilder;
+import org.elasticsearch.action.search.ClearScrollResponse;
+import org.elasticsearch.action.search.MultiSearchRequest;
+import org.elasticsearch.action.search.MultiSearchRequestBuilder;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.search.SearchScrollRequestBuilder;
+import org.elasticsearch.action.suggest.SuggestRequest;
+import org.elasticsearch.action.suggest.SuggestRequestBuilder;
+import org.elasticsearch.action.suggest.SuggestResponse;
+import org.elasticsearch.action.termvector.MultiTermVectorsRequest;
+import org.elasticsearch.action.termvector.MultiTermVectorsRequestBuilder;
+import org.elasticsearch.action.termvector.MultiTermVectorsResponse;
+import org.elasticsearch.action.termvector.TermVectorRequest;
+import org.elasticsearch.action.termvector.TermVectorRequestBuilder;
+import org.elasticsearch.action.termvector.TermVectorResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateRequestBuilder;
+import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -64,6 +134,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.threadpool.ThreadPool;
 import org.seasar.framework.container.annotation.tiger.DestroyMethod;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
@@ -71,7 +142,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.BaseEncoding;
 
-public class FessEsClient {
+public class FessEsClient implements Client {
     private static final Logger logger = LoggerFactory.getLogger(FessEsClient.class);
 
     protected ElasticsearchClusterRunner runner;
@@ -246,6 +317,7 @@ public class FessEsClient {
         }
     }
 
+    @Override
     @DestroyMethod
     public void close() {
         try {
@@ -638,6 +710,448 @@ public class FessEsClient {
 
     public interface EntityCreator<T> {
         T build(SearchResponse response, SearchHit hit);
+    }
+
+    //
+    // Elasticsearch Client
+    //
+
+    @Override
+    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder, Client>> ActionFuture<Response> execute(
+            Action<Request, Response, RequestBuilder, Client> action, Request request) {
+        return client.execute(action, request);
+    }
+
+    @Override
+    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder, Client>> void execute(
+            Action<Request, Response, RequestBuilder, Client> action, Request request, ActionListener<Response> listener) {
+        client.execute(action, request, listener);
+    }
+
+    @Override
+    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder, Client>> RequestBuilder prepareExecute(
+            Action<Request, Response, RequestBuilder, Client> action) {
+        return client.prepareExecute(action);
+    }
+
+    @Override
+    public ThreadPool threadPool() {
+        return client.threadPool();
+    }
+
+    @Override
+    public AdminClient admin() {
+        return client.admin();
+    }
+
+    @Override
+    public ActionFuture<IndexResponse> index(IndexRequest request) {
+        return client.index(request);
+    }
+
+    @Override
+    public void index(IndexRequest request, ActionListener<IndexResponse> listener) {
+        client.index(request, listener);
+    }
+
+    @Override
+    public IndexRequestBuilder prepareIndex() {
+        return client.prepareIndex();
+    }
+
+    @Override
+    public ActionFuture<UpdateResponse> update(UpdateRequest request) {
+        return client.update(request);
+    }
+
+    @Override
+    public void update(UpdateRequest request, ActionListener<UpdateResponse> listener) {
+        client.update(request, listener);
+    }
+
+    @Override
+    public UpdateRequestBuilder prepareUpdate() {
+        return client.prepareUpdate();
+    }
+
+    @Override
+    public UpdateRequestBuilder prepareUpdate(String index, String type, String id) {
+        return client.prepareUpdate(index, type, id);
+    }
+
+    @Override
+    public IndexRequestBuilder prepareIndex(String index, String type) {
+        return client.prepareIndex(index, type);
+    }
+
+    @Override
+    public IndexRequestBuilder prepareIndex(String index, String type, String id) {
+        return client.prepareIndex(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<DeleteResponse> delete(DeleteRequest request) {
+        return client.delete(request);
+    }
+
+    @Override
+    public void delete(DeleteRequest request, ActionListener<DeleteResponse> listener) {
+        client.delete(request, listener);
+    }
+
+    @Override
+    public DeleteRequestBuilder prepareDelete() {
+        return client.prepareDelete();
+    }
+
+    @Override
+    public DeleteRequestBuilder prepareDelete(String index, String type, String id) {
+        return client.prepareDelete(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<BulkResponse> bulk(BulkRequest request) {
+        return client.bulk(request);
+    }
+
+    @Override
+    public void bulk(BulkRequest request, ActionListener<BulkResponse> listener) {
+        client.bulk(request, listener);
+    }
+
+    @Override
+    public BulkRequestBuilder prepareBulk() {
+        return client.prepareBulk();
+    }
+
+    @Override
+    public ActionFuture<DeleteByQueryResponse> deleteByQuery(DeleteByQueryRequest request) {
+        return client.deleteByQuery(request);
+    }
+
+    @Override
+    public void deleteByQuery(DeleteByQueryRequest request, ActionListener<DeleteByQueryResponse> listener) {
+        client.deleteByQuery(request, listener);
+    }
+
+    @Override
+    public DeleteByQueryRequestBuilder prepareDeleteByQuery(String... indices) {
+        return client.prepareDeleteByQuery(indices);
+    }
+
+    @Override
+    public ActionFuture<GetResponse> get(GetRequest request) {
+        return client.get(request);
+    }
+
+    @Override
+    public void get(GetRequest request, ActionListener<GetResponse> listener) {
+        client.get(request, listener);
+    }
+
+    @Override
+    public GetRequestBuilder prepareGet() {
+        return client.prepareGet();
+    }
+
+    @Override
+    public GetRequestBuilder prepareGet(String index, String type, String id) {
+        return client.prepareGet(index, type, id);
+    }
+
+    @Override
+    public PutIndexedScriptRequestBuilder preparePutIndexedScript() {
+        return client.preparePutIndexedScript();
+    }
+
+    @Override
+    public PutIndexedScriptRequestBuilder preparePutIndexedScript(String scriptLang, String id, String source) {
+        return client.preparePutIndexedScript(scriptLang, id, source);
+    }
+
+    @Override
+    public void deleteIndexedScript(DeleteIndexedScriptRequest request, ActionListener<DeleteIndexedScriptResponse> listener) {
+        client.deleteIndexedScript(request, listener);
+    }
+
+    @Override
+    public ActionFuture<DeleteIndexedScriptResponse> deleteIndexedScript(DeleteIndexedScriptRequest request) {
+        return client.deleteIndexedScript(request);
+    }
+
+    @Override
+    public DeleteIndexedScriptRequestBuilder prepareDeleteIndexedScript() {
+        return client.prepareDeleteIndexedScript();
+    }
+
+    @Override
+    public DeleteIndexedScriptRequestBuilder prepareDeleteIndexedScript(String scriptLang, String id) {
+        return client.prepareDeleteIndexedScript(scriptLang, id);
+    }
+
+    @Override
+    public void putIndexedScript(PutIndexedScriptRequest request, ActionListener<PutIndexedScriptResponse> listener) {
+        client.putIndexedScript(request, listener);
+    }
+
+    @Override
+    public ActionFuture<PutIndexedScriptResponse> putIndexedScript(PutIndexedScriptRequest request) {
+        return client.putIndexedScript(request);
+    }
+
+    @Override
+    public GetIndexedScriptRequestBuilder prepareGetIndexedScript() {
+        return client.prepareGetIndexedScript();
+    }
+
+    @Override
+    public GetIndexedScriptRequestBuilder prepareGetIndexedScript(String scriptLang, String id) {
+        return client.prepareGetIndexedScript(scriptLang, id);
+    }
+
+    @Override
+    public void getIndexedScript(GetIndexedScriptRequest request, ActionListener<GetIndexedScriptResponse> listener) {
+        client.getIndexedScript(request, listener);
+    }
+
+    @Override
+    public ActionFuture<GetIndexedScriptResponse> getIndexedScript(GetIndexedScriptRequest request) {
+        return client.getIndexedScript(request);
+    }
+
+    @Override
+    public ActionFuture<MultiGetResponse> multiGet(MultiGetRequest request) {
+        return client.multiGet(request);
+    }
+
+    @Override
+    public void multiGet(MultiGetRequest request, ActionListener<MultiGetResponse> listener) {
+        client.multiGet(request, listener);
+    }
+
+    @Override
+    public MultiGetRequestBuilder prepareMultiGet() {
+        return client.prepareMultiGet();
+    }
+
+    @Override
+    public ActionFuture<CountResponse> count(CountRequest request) {
+        return client.count(request);
+    }
+
+    @Override
+    public void count(CountRequest request, ActionListener<CountResponse> listener) {
+        client.count(request, listener);
+    }
+
+    @Override
+    public CountRequestBuilder prepareCount(String... indices) {
+        return client.prepareCount(indices);
+    }
+
+    @Override
+    public ActionFuture<ExistsResponse> exists(ExistsRequest request) {
+        return client.exists(request);
+    }
+
+    @Override
+    public void exists(ExistsRequest request, ActionListener<ExistsResponse> listener) {
+        client.exists(request, listener);
+    }
+
+    @Override
+    public ExistsRequestBuilder prepareExists(String... indices) {
+        return client.prepareExists(indices);
+    }
+
+    @Override
+    public ActionFuture<SuggestResponse> suggest(SuggestRequest request) {
+        return client.suggest(request);
+    }
+
+    @Override
+    public void suggest(SuggestRequest request, ActionListener<SuggestResponse> listener) {
+        client.suggest(request, listener);
+    }
+
+    @Override
+    public SuggestRequestBuilder prepareSuggest(String... indices) {
+        return client.prepareSuggest(indices);
+    }
+
+    @Override
+    public ActionFuture<SearchResponse> search(SearchRequest request) {
+        return client.search(request);
+    }
+
+    @Override
+    public void search(SearchRequest request, ActionListener<SearchResponse> listener) {
+        client.search(request, listener);
+    }
+
+    @Override
+    public SearchRequestBuilder prepareSearch(String... indices) {
+        return client.prepareSearch(indices);
+    }
+
+    @Override
+    public ActionFuture<SearchResponse> searchScroll(SearchScrollRequest request) {
+        return client.searchScroll(request);
+    }
+
+    @Override
+    public void searchScroll(SearchScrollRequest request, ActionListener<SearchResponse> listener) {
+        client.searchScroll(request, listener);
+    }
+
+    @Override
+    public SearchScrollRequestBuilder prepareSearchScroll(String scrollId) {
+        return client.prepareSearchScroll(scrollId);
+    }
+
+    @Override
+    public ActionFuture<MultiSearchResponse> multiSearch(MultiSearchRequest request) {
+        return client.multiSearch(request);
+    }
+
+    @Override
+    public void multiSearch(MultiSearchRequest request, ActionListener<MultiSearchResponse> listener) {
+        client.multiSearch(request, listener);
+    }
+
+    @Override
+    public MultiSearchRequestBuilder prepareMultiSearch() {
+        return client.prepareMultiSearch();
+    }
+
+    @Override
+    public ActionFuture<SearchResponse> moreLikeThis(MoreLikeThisRequest request) {
+        return client.moreLikeThis(request);
+    }
+
+    @Override
+    public void moreLikeThis(MoreLikeThisRequest request, ActionListener<SearchResponse> listener) {
+        client.moreLikeThis(request, listener);
+    }
+
+    @Override
+    public MoreLikeThisRequestBuilder prepareMoreLikeThis(String index, String type, String id) {
+        return client.prepareMoreLikeThis(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<TermVectorResponse> termVector(TermVectorRequest request) {
+        return client.termVector(request);
+    }
+
+    @Override
+    public void termVector(TermVectorRequest request, ActionListener<TermVectorResponse> listener) {
+        client.termVector(request, listener);
+    }
+
+    @Override
+    public TermVectorRequestBuilder prepareTermVector() {
+        return client.prepareTermVector();
+    }
+
+    @Override
+    public TermVectorRequestBuilder prepareTermVector(String index, String type, String id) {
+        return client.prepareTermVector(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<MultiTermVectorsResponse> multiTermVectors(MultiTermVectorsRequest request) {
+        return client.multiTermVectors(request);
+    }
+
+    @Override
+    public void multiTermVectors(MultiTermVectorsRequest request, ActionListener<MultiTermVectorsResponse> listener) {
+        client.multiTermVectors(request, listener);
+    }
+
+    @Override
+    public MultiTermVectorsRequestBuilder prepareMultiTermVectors() {
+        return client.prepareMultiTermVectors();
+    }
+
+    @Override
+    public ActionFuture<PercolateResponse> percolate(PercolateRequest request) {
+        return client.percolate(request);
+    }
+
+    @Override
+    public void percolate(PercolateRequest request, ActionListener<PercolateResponse> listener) {
+        client.percolate(request, listener);
+    }
+
+    @Override
+    public PercolateRequestBuilder preparePercolate() {
+        return client.preparePercolate();
+    }
+
+    @Override
+    public ActionFuture<MultiPercolateResponse> multiPercolate(MultiPercolateRequest request) {
+        return client.multiPercolate(request);
+    }
+
+    @Override
+    public void multiPercolate(MultiPercolateRequest request, ActionListener<MultiPercolateResponse> listener) {
+        client.multiPercolate(request, listener);
+    }
+
+    @Override
+    public MultiPercolateRequestBuilder prepareMultiPercolate() {
+        return client.prepareMultiPercolate();
+    }
+
+    @Override
+    public ExplainRequestBuilder prepareExplain(String index, String type, String id) {
+        return client.prepareExplain(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<ExplainResponse> explain(ExplainRequest request) {
+        return client.explain(request);
+    }
+
+    @Override
+    public void explain(ExplainRequest request, ActionListener<ExplainResponse> listener) {
+        client.explain(request, listener);
+    }
+
+    @Override
+    public ClearScrollRequestBuilder prepareClearScroll() {
+        return client.prepareClearScroll();
+    }
+
+    @Override
+    public ActionFuture<ClearScrollResponse> clearScroll(ClearScrollRequest request) {
+        return client.clearScroll(request);
+    }
+
+    @Override
+    public void clearScroll(ClearScrollRequest request, ActionListener<ClearScrollResponse> listener) {
+        client.clearScroll(request, listener);
+    }
+
+    @Override
+    public FieldStatsRequestBuilder prepareFieldStats() {
+        return client.prepareFieldStats();
+    }
+
+    @Override
+    public ActionFuture<FieldStatsResponse> fieldStats(FieldStatsRequest request) {
+        return client.fieldStats(request);
+    }
+
+    @Override
+    public void fieldStats(FieldStatsRequest request, ActionListener<FieldStatsResponse> listener) {
+        client.fieldStats(request, listener);
+    }
+
+    @Override
+    public Settings settings() {
+        return client.settings();
     }
 
 }

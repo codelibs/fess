@@ -26,8 +26,8 @@ import javax.annotation.Resource;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.CrawlingSession;
-import org.codelibs.fess.db.exentity.CrawlingSessionInfo;
+import org.codelibs.fess.es.exentity.CrawlingSession;
+import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.CrawlingSessionPager;
@@ -88,7 +88,7 @@ public class CrawlingSessionAction extends FessAdminAction {
 
     public List<CrawlingSessionInfo> getCrawlingSessionInfoItems() {
         if (crawlingSessionForm.id != null) {
-            return crawlingSessionService.getCrawlingSessionInfoList(Long.parseLong(crawlingSessionForm.id));
+            return crawlingSessionService.getCrawlingSessionInfoList(crawlingSessionForm.id);
         }
         return Collections.emptyList();
     }

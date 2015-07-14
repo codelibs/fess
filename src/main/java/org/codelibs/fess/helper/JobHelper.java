@@ -36,7 +36,7 @@ public class JobHelper {
 
     private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<>();
 
     @DestroyMethod
     public void destroy() {
@@ -113,15 +113,15 @@ public class JobHelper {
         return runningProcessMap.keySet();
     }
 
-    public JobExecutor startJobExecutoer(final Long id, final JobExecutor jobExecutor) {
+    public JobExecutor startJobExecutoer(final String id, final JobExecutor jobExecutor) {
         return runningJobExecutorMap.putIfAbsent(id, jobExecutor);
     }
 
-    public void finishJobExecutoer(final Long id) {
+    public void finishJobExecutoer(final String id) {
         runningJobExecutorMap.remove(id);
     }
 
-    public JobExecutor getJobExecutoer(final Long id) {
+    public JobExecutor getJobExecutoer(final String id) {
         return runningJobExecutorMap.get(id);
     }
 }

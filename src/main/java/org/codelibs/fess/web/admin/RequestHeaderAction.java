@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +27,12 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.RequestHeader;
-import org.codelibs.fess.db.exentity.WebCrawlingConfig;
+import org.codelibs.fess.es.exentity.RequestHeader;
+import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.RequestHeaderPager;
 import org.codelibs.fess.service.RequestHeaderService;
-import org.codelibs.fess.service.WebCrawlingConfigService;
+import org.codelibs.fess.service.WebConfigService;
 import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
@@ -68,7 +67,7 @@ public class RequestHeaderAction extends FessAdminAction {
     protected RequestHeaderPager requestHeaderPager;
 
     @Resource
-    protected WebCrawlingConfigService webCrawlingConfigService;
+    protected WebConfigService webConfigService;
 
     @Resource
     protected SystemHelper systemHelper;
@@ -285,7 +284,7 @@ public class RequestHeaderAction extends FessAdminAction {
     protected RequestHeader createRequestHeader() {
         RequestHeader requestHeader;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (requestHeaderForm.crudMode == CommonConstants.EDIT_MODE) {
             requestHeader = requestHeaderService.getRequestHeader(createKeyMap());
             if (requestHeader == null) {
@@ -318,12 +317,7 @@ public class RequestHeaderAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { requestHeaderForm.id });
             }
 
-            //           requestHeaderService.delete(requestHeader);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            requestHeader.setDeletedBy(username);
-            requestHeader.setDeletedTime(currentTime);
-            requestHeaderService.store(requestHeader);
+            requestHeaderService.delete(requestHeader);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);
@@ -339,12 +333,11 @@ public class RequestHeaderAction extends FessAdminAction {
         }
     }
 
-    public List<Map<String, String>> getWebCrawlingConfigItems() {
+    public List<Map<String, String>> getWebConfigItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        final List<WebCrawlingConfig> webCrawlingConfigList =
-                webCrawlingConfigService.getAllWebCrawlingConfigList(false, false, false, null);
-        for (final WebCrawlingConfig webCrawlingConfig : webCrawlingConfigList) {
-            items.add(createItem(webCrawlingConfig.getName(), webCrawlingConfig.getId().toString()));
+        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
+        for (final WebConfig webConfig : webConfigList) {
+            items.add(createItem(webConfig.getName(), webConfig.getId().toString()));
         }
         return items;
     }
@@ -366,6 +359,6 @@ public class RequestHeaderAction extends FessAdminAction {
     }
 
     public boolean isDisplayCreateLink() {
-        return !webCrawlingConfigService.getAllWebCrawlingConfigList(false, false, false, null).isEmpty();
+        return !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty();
     }
 }

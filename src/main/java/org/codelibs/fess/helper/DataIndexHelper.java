@@ -28,11 +28,11 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.ds.IndexUpdateCallback;
-import org.codelibs.fess.service.DataCrawlingConfigService;
+import org.codelibs.fess.es.exentity.DataConfig;
+import org.codelibs.fess.service.DataConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -52,7 +52,7 @@ public class DataIndexHelper implements Serializable {
     protected DynamicProperties crawlerProperties;
 
     @Resource
-    public DataCrawlingConfigService dataCrawlingConfigService;
+    public DataConfigService dataConfigService;
 
     @Resource
     protected CrawlingConfigHelper crawlingConfigHelper;
@@ -64,7 +64,7 @@ public class DataIndexHelper implements Serializable {
     private final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<DataCrawlingThread>());
 
     public void crawl(final String sessionId) {
-        final List<DataCrawlingConfig> configList = dataCrawlingConfigService.getAllDataCrawlingConfigList();
+        final List<DataConfig> configList = dataConfigService.getAllDataConfigList();
 
         if (configList.isEmpty()) {
             // nothing
@@ -77,8 +77,8 @@ public class DataIndexHelper implements Serializable {
         doCrawl(sessionId, configList);
     }
 
-    public void crawl(final String sessionId, final List<Long> configIdList) {
-        final List<DataCrawlingConfig> configList = dataCrawlingConfigService.getDataCrawlingConfigListByIds(configIdList);
+    public void crawl(final String sessionId, final List<String> configIdList) {
+        final List<DataConfig> configList = dataConfigService.getDataConfigListByIds(configIdList);
 
         if (configList.isEmpty()) {
             // nothing
@@ -91,7 +91,7 @@ public class DataIndexHelper implements Serializable {
         doCrawl(sessionId, configList);
     }
 
-    protected void doCrawl(final String sessionId, final List<DataCrawlingConfig> configList) {
+    protected void doCrawl(final String sessionId, final List<DataConfig> configList) {
         int multiprocessCrawlingCount = 5;
         final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
@@ -108,14 +108,14 @@ public class DataIndexHelper implements Serializable {
         final Map<String, String> initParamMap = new HashMap<String, String>();
         dataCrawlingThreadList.clear();
         final List<String> dataCrawlingThreadStatusList = new ArrayList<String>();
-        for (final DataCrawlingConfig dataCrawlingConfig : configList) {
-            final String sid = crawlingConfigHelper.store(sessionId, dataCrawlingConfig);
+        for (final DataConfig dataConfig : configList) {
+            final String sid = crawlingConfigHelper.store(sessionId, dataConfig);
             sessionIdList.add(sid);
 
             initParamMap.put(Constants.SESSION_ID, sessionId);
             initParamMap.put(Constants.CRAWLING_SESSION_ID, sid);
 
-            final DataCrawlingThread dataCrawlingThread = new DataCrawlingThread(dataCrawlingConfig, indexUpdateCallback, initParamMap);
+            final DataCrawlingThread dataCrawlingThread = new DataCrawlingThread(dataConfig, indexUpdateCallback, initParamMap);
             dataCrawlingThread.setPriority(crawlerPriority);
             dataCrawlingThread.setName(sid);
             dataCrawlingThread.setDaemon(true);
@@ -204,7 +204,7 @@ public class DataIndexHelper implements Serializable {
 
     protected static class DataCrawlingThread extends Thread {
 
-        private final DataCrawlingConfig dataCrawlingConfig;
+        private final DataConfig dataConfig;
 
         private final IndexUpdateCallback indexUpdateCallback;
 
@@ -216,9 +216,9 @@ public class DataIndexHelper implements Serializable {
 
         private DataStore dataStore;
 
-        protected DataCrawlingThread(final DataCrawlingConfig dataCrawlingConfig, final IndexUpdateCallback indexUpdateCallback,
+        protected DataCrawlingThread(final DataConfig dataConfig, final IndexUpdateCallback indexUpdateCallback,
                 final Map<String, String> initParamMap) {
-            this.dataCrawlingConfig = dataCrawlingConfig;
+            this.dataConfig = dataConfig;
             this.indexUpdateCallback = indexUpdateCallback;
             this.initParamMap = initParamMap;
         }
@@ -227,14 +227,14 @@ public class DataIndexHelper implements Serializable {
         public void run() {
             running = true;
             final DataStoreFactory dataStoreFactory = ComponentUtil.getDataStoreFactory();
-            dataStore = dataStoreFactory.getDataStore(dataCrawlingConfig.getHandlerName());
+            dataStore = dataStoreFactory.getDataStore(dataConfig.getHandlerName());
             if (dataStore == null) {
-                logger.error("DataStore(" + dataCrawlingConfig.getHandlerName() + ") is not found.");
+                logger.error("DataStore(" + dataConfig.getHandlerName() + ") is not found.");
             } else {
                 try {
-                    dataStore.store(dataCrawlingConfig, indexUpdateCallback, initParamMap);
+                    dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
                 } catch (final Exception e) {
-                    logger.error("Failed to process a data crawling: " + dataCrawlingConfig.getName(), e);
+                    logger.error("Failed to process a data crawling: " + dataConfig.getName(), e);
                 } finally {
                     indexUpdateCallback.commit();
                     deleteOldDocs();
@@ -250,17 +250,17 @@ public class DataIndexHelper implements Serializable {
             }
             final String sessionId = initParamMap.get(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
-                logger.warn("Invalid sessionId at " + dataCrawlingConfig);
+                logger.warn("Invalid sessionId at " + dataConfig);
                 return;
             }
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.configIdField, dataCrawlingConfig.getConfigId()))
+                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.configIdField, dataConfig.getConfigId()))
                             .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, sessionId));
             try {
                 ComponentUtil.getElasticsearchClient().deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, queryBuilder);
             } catch (final Exception e) {
-                logger.error("Could not delete old docs at " + dataCrawlingConfig, e);
+                logger.error("Could not delete old docs at " + dataConfig, e);
             }
         }
 

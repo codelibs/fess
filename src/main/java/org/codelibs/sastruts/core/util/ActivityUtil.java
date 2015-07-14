@@ -45,7 +45,7 @@ public class ActivityUtil {
     }
 
     protected static String getRemoteAddr(HttpServletRequest request) {
-        String clientIp = request.getHeader("x-forwarded-for");
+        final String clientIp = request.getHeader("x-forwarded-for");
         if (StringUtil.isNotBlank(clientIp)) {
             return clientIp;
         }

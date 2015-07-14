@@ -25,7 +25,7 @@ import javax.annotation.Resource;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.FailureUrl;
+import org.codelibs.fess.es.exentity.FailureUrl;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.FailureUrlPager;
 import org.codelibs.fess.service.FailureUrlService;

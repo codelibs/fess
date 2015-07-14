@@ -90,33 +90,33 @@
 		<bean:message key="labels.menu_crawl" />
 	</h3>
 	<p>
-		<c:if test="${menuType=='webCrawlingConfig'}">
+		<c:if test="${menuType=='webConfig'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="${contextPath}/admin/webCrawlingConfig/index">
+		<s:link href="${contextPath}/admin/webConfig/index">
 			<bean:message key="labels.menu.web" />
 		</s:link>
-		<c:if test="${menuType=='webCrawlingConfig'}">
+		<c:if test="${menuType=='webConfig'}">
 			</span>
 		</c:if>
 		<br />
-		<c:if test="${menuType=='fileCrawlingConfig'}">
+		<c:if test="${menuType=='fileConfig'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="${contextPath}/admin/fileCrawlingConfig/index">
+		<s:link href="${contextPath}/admin/fileConfig/index">
 			<bean:message key="labels.menu.file_system" />
 		</s:link>
-		<c:if test="${menuType=='fileCrawlingConfig'}">
+		<c:if test="${menuType=='fileConfig'}">
 			</span>
 		</c:if>
 		<br />
-		<c:if test="${menuType=='dataCrawlingConfig'}">
+		<c:if test="${menuType=='dataConfig'}">
 			<span class="selected">
 		</c:if>
-		<s:link href="${contextPath}/admin/dataCrawlingConfig/index">
+		<s:link href="${contextPath}/admin/dataConfig/index">
 			<bean:message key="labels.menu.data_store" />
 		</s:link>
-		<c:if test="${menuType=='dataCrawlingConfig'}">
+		<c:if test="${menuType=='dataConfig'}">
 			</span>
 		</c:if>
 		<br />
@@ -297,51 +297,6 @@
 			<bean:message key="labels.menu.search_list" />
 		</s:link>
 		<c:if test="${menuType=='searchList'}">
-			</span>
-		</c:if>
-		<br />
-	</p>
-	<h3>
-		<bean:message key="labels.menu_user_log" />
-	</h3>
-	<p>
-		<c:if test="${menuType=='searchLog'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="${contextPath}/admin/searchLog/index">
-			<bean:message key="labels.menu.search_log" />
-		</s:link>
-		<c:if test="${menuType=='searchLog'}">
-			</span>
-		</c:if>
-		<br />
-		<c:if test="${menuType=='stats'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="${contextPath}/admin/stats/index">
-			<bean:message key="labels.menu.stats" />
-		</s:link>
-		<c:if test="${menuType=='stats'}">
-			</span>
-		</c:if>
-		<br />
-		<c:if test="${menuType=='userInfo'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="${contextPath}/admin/userInfo/index">
-			<bean:message key="labels.menu.user" />
-		</s:link>
-		<c:if test="${menuType=='userInfo'}">
-			</span>
-		</c:if>
-		<br />
-		<c:if test="${menuType=='favoriteLog'}">
-			<span class="selected">
-		</c:if>
-		<s:link href="${contextPath}/admin/favoriteLog/index">
-			<bean:message key="labels.menu.favoriteLog" />
-		</s:link>
-		<c:if test="${menuType=='favoriteLog'}">
 			</span>
 		</c:if>
 		<br />

@@ -29,9 +29,9 @@ import java.util.Set;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.exentity.DataConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final DataCrawlingConfig config, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+    protected void storeData(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
 
         final long readInterval = getReadInterval(paramMap);

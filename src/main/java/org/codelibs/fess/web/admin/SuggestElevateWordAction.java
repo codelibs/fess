@@ -26,7 +26,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.exentity.SuggestElevateWord;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.SuggestElevateWordPager;
@@ -259,7 +258,7 @@ public class SuggestElevateWordAction extends FessAdminAction {
     protected SuggestElevateWord createSuggestElevateWord() {
         SuggestElevateWord suggestElevateWord;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (suggestElevateWordForm.crudMode == CommonConstants.EDIT_MODE) {
             suggestElevateWord = suggestElevateWordService.getSuggestElevateWord(createKeyMap());
             if (suggestElevateWord == null) {
@@ -336,12 +335,7 @@ public class SuggestElevateWordAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { suggestElevateWordForm.id });
             }
 
-            //           suggestElevateWordService.delete(suggestElevateWord);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            suggestElevateWord.setDeletedBy(username);
-            suggestElevateWord.setDeletedTime(currentTime);
-            suggestElevateWordService.store(suggestElevateWord);
+            suggestElevateWordService.delete(suggestElevateWord);
             suggestHelper.storeAllElevateWords();
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 

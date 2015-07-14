@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.OverlappingHost;
+import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.OverlappingHostPager;
 import org.codelibs.fess.service.OverlappingHostService;
@@ -277,7 +276,7 @@ public class OverlappingHostAction extends FessAdminAction {
     protected OverlappingHost createOverlappingHost() {
         OverlappingHost overlappingHost;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (overlappingHostForm.crudMode == CommonConstants.EDIT_MODE) {
             overlappingHost = overlappingHostService.getOverlappingHost(createKeyMap());
             if (overlappingHost == null) {
@@ -310,12 +309,8 @@ public class OverlappingHostAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { overlappingHostForm.id });
             }
 
-            //            overlappingHostService.delete(overlappingHost);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            overlappingHost.setDeletedBy(username);
-            overlappingHost.setDeletedTime(currentTime);
-            overlappingHostService.store(overlappingHost);
+            overlappingHostService.delete(overlappingHost);
+
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);

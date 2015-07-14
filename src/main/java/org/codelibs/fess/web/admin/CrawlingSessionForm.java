@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.seasar.struts.annotation.DateType;
 import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.LongType;
 import org.seasar.struts.annotation.Maxbytelength;
 import org.seasar.struts.annotation.Required;
 
@@ -43,7 +42,7 @@ public class CrawlingSessionForm implements Serializable {
     }
 
     @Required(target = "confirmfromupdate,update,delete")
-    @LongType
+    @Maxbytelength(maxbytelength = 1000)
     public String id;
 
     @Required(target = "confirmfromupdate,update,delete")

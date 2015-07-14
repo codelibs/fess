@@ -1,0 +1,28 @@
+# /---------------------------------------------------------------------------
+# optimisticLockDefinitionMap: (NotRequired - Default map:{})
+#
+# The definition for optimistic lock of DBFlute.
+#
+# o updateDateFieldName: (NotRequired - Default '')
+# o versionNoFieldName: (NotRequired - Default 'VERSION_NO')
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o updateDateFieldName: (NotRequired - Default '')
+    #  The column name of update date for optimistic lock. 
+    #
+    #; updateDateFieldName = UPDATE_DATE
+    # - - - - - - - - - -/
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o versionNoFieldName: (NotRequired - Default 'VERSION_NO')
+    #  The column name of version no for optimistic lock.
+    #  Basically you don't need this if your tables have the column 'VERSION_NO'.
+    #  because the default value is 'VERSION_NO'.
+    #
+    #; versionNoFieldName = VERSION_NO
+    # - - - - - - - - - -/
+}
+# ----------------/

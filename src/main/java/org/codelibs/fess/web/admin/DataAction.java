@@ -41,9 +41,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.ClickLogService;
 import org.codelibs.fess.service.CrawlingSessionService;
-import org.codelibs.fess.service.SearchLogService;
 import org.codelibs.robot.util.StreamUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.ActionForm;
@@ -65,12 +63,6 @@ public class DataAction implements Serializable {
 
     @Resource
     protected CrawlingSessionService crawlingSessionService;
-
-    @Resource
-    protected SearchLogService searchLogService;
-
-    @Resource
-    protected ClickLogService clickLogService;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -117,62 +109,6 @@ public class DataAction implements Serializable {
         }
     }
 
-    @Execute(validator = false)
-    public String downloadSearchLog() {
-        final DateFormat df = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_DIGIT_ONLY);
-        final StringBuilder buf = new StringBuilder();
-        buf.append("backup-sl-");
-        buf.append(df.format(new Date()));
-        buf.append(".csv");
-
-        final HttpServletResponse response = ResponseUtil.getResponse();
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + buf.toString() + "\"");
-
-        Writer writer = null;
-        try {
-            writer =
-                    new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), crawlerProperties.getProperty(
-                            Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)));
-            searchLogService.exportCsv(writer);
-            writer.flush();
-            return null;
-        } catch (final Exception e) {
-            logger.error("Failed to export data.", e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_export_data");
-        } finally {
-            IOUtils.closeQuietly(writer);
-        }
-    }
-
-    @Execute(validator = false)
-    public String downloadClickLog() {
-        final DateFormat df = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_DIGIT_ONLY);
-        final StringBuilder buf = new StringBuilder();
-        buf.append("backup-cl-");
-        buf.append(df.format(new Date()));
-        buf.append(".csv");
-
-        final HttpServletResponse response = ResponseUtil.getResponse();
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + buf.toString() + "\"");
-
-        Writer writer = null;
-        try {
-            writer =
-                    new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), crawlerProperties.getProperty(
-                            Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)));
-            clickLogService.exportCsv(writer);
-            writer.flush();
-            return null;
-        } catch (final Exception e) {
-            logger.error("Failed to export data.", e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_export_data");
-        } finally {
-            IOUtils.closeQuietly(writer);
-        }
-    }
-
     @Execute(validator = true, input = "index")
     public String upload() {
         final String fileName = dataForm.uploadedFile.getFileName();
@@ -205,7 +141,7 @@ public class DataAction implements Serializable {
             final File oFile = tempFile;
             try {
                 final String head = new String(b, Constants.UTF_8);
-                if (!head.startsWith("SessionId,") && !head.startsWith("SearchWord,") && !head.startsWith("SearchId,")) {
+                if (!head.startsWith("SessionId,")) {
                     logger.error("Unknown file: " + dataForm.uploadedFile);
                     throw new SSCActionMessagesException("errors.unknown_import_file");
                 }
@@ -217,12 +153,6 @@ public class DataAction implements Serializable {
                         if (head.startsWith("SessionId,")) {
                             // Crawling Session
                         crawlingSessionService.importCsv(reader);
-                    } else if (head.startsWith("SearchWord,")) {
-                        // Search Log
-                        searchLogService.importCsv(reader);
-                    } else if (head.startsWith("SearchId,")) {
-                        // Click Log
-                        clickLogService.importCsv(reader);
                     }
                 } catch (final Exception e) {
                     logger.error("Failed to import data.", e);

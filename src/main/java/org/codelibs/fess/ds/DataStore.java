@@ -18,11 +18,11 @@ package org.codelibs.fess.ds;
 
 import java.util.Map;
 
-import org.codelibs.fess.db.exentity.DataCrawlingConfig;
+import org.codelibs.fess.es.exentity.DataConfig;
 
 public interface DataStore {
 
-    void store(DataCrawlingConfig config, IndexUpdateCallback callback, Map<String, String> initParamMap);
+    void store(DataConfig config, IndexUpdateCallback callback, Map<String, String> initParamMap);
 
     void stop();
 

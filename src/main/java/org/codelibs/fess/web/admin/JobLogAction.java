@@ -27,7 +27,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.JobLog;
+import org.codelibs.fess.es.exentity.JobLog;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.JobLogPager;
 import org.codelibs.fess.service.JobLogService;

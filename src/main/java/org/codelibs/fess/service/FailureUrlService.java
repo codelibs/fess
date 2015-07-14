@@ -32,10 +32,10 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.FailureUrlCB;
-import org.codelibs.fess.db.exbhv.FailureUrlBhv;
-import org.codelibs.fess.db.exentity.CrawlingConfig;
-import org.codelibs.fess.db.exentity.FailureUrl;
+import org.codelibs.fess.es.cbean.FailureUrlCB;
+import org.codelibs.fess.es.exbhv.FailureUrlBhv;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
+import org.codelibs.fess.es.exentity.FailureUrl;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.FailureUrlPager;
 import org.codelibs.fess.util.ComponentUtil;
@@ -76,7 +76,7 @@ public class FailureUrlService implements Serializable {
 
     public FailureUrl getFailureUrl(final Map<String, String> keys) {
         final FailureUrl failureUrl = failureUrlBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);
         if (failureUrl == null) {
@@ -90,20 +90,24 @@ public class FailureUrlService implements Serializable {
     public void store(final FailureUrl failureUrl) throws CrudMessageException {
         setupStoreCondition(failureUrl);
 
-        failureUrlBhv.insertOrUpdate(failureUrl);
+        failureUrlBhv.insertOrUpdate(failureUrl, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final FailureUrl failureUrl) throws CrudMessageException {
         setupDeleteCondition(failureUrl);
 
-        failureUrlBhv.delete(failureUrl);
+        failureUrlBhv.delete(failureUrl, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final FailureUrlCB cb, final FailureUrlPager failureUrlPager) {
         if (failureUrlPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(failureUrlPager.id));
+            cb.query().docMeta().setId_Equal(failureUrlPager.id);
         }
         // TODO Long, Integer, String supported only.
 
@@ -132,17 +136,15 @@ public class FailureUrlService implements Serializable {
     }
 
     public void deleteAll(final FailureUrlPager failureUrlPager) {
-        failureUrlBhv.varyingQueryDelete(cb -> {
+        failureUrlBhv.queryDelete(cb -> {
             buildSearchCondition(failureUrlPager, cb);
-        }, op -> {
-            op.allowNonQueryDelete();
         });
     }
 
     private void buildSearchCondition(final FailureUrlPager failureUrlPager, final FailureUrlCB cb) {
         // search
         if (StringUtil.isNotBlank(failureUrlPager.url)) {
-            cb.query().setUrl_LikeSearch(failureUrlPager.url, op -> op.likeContain());
+            cb.query().setUrl_Match(failureUrlPager.url);
         }
 
         if (StringUtil.isNotBlank(failureUrlPager.errorCountMax)) {
@@ -153,7 +155,7 @@ public class FailureUrlService implements Serializable {
         }
 
         if (StringUtil.isNotBlank(failureUrlPager.errorName)) {
-            cb.query().setErrorName_LikeSearch(failureUrlPager.errorName, op -> op.likeContain());
+            cb.query().setErrorName_Match(failureUrlPager.errorName);
         }
 
     }
@@ -201,9 +203,9 @@ public class FailureUrlService implements Serializable {
     }
 
     public void deleteByConfigId(final String configId) {
-        failureUrlBhv.varyingQueryDelete(cb -> {
+        failureUrlBhv.queryDelete(cb -> {
             cb.query().setConfigId_Equal(configId);
-        }, op -> op.allowNonQueryDelete());
+        });
     }
 
     public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
@@ -229,7 +231,7 @@ public class FailureUrlService implements Serializable {
 
         failureUrl.setErrorName(errorName);
         failureUrl.setErrorLog(StringUtils.abbreviate(getStackTrace(e), 4000));
-        failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTime());
+        failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         failureUrl.setThreadName(Thread.currentThread().getName());
 
         failureUrlBhv.insertOrUpdate(failureUrl);

@@ -30,7 +30,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.LabelType;
+import org.codelibs.fess.es.exentity.LabelType;
 import org.codelibs.fess.service.LabelTypeService;
 import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;

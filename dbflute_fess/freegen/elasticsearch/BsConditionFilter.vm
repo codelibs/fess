@@ -1,0 +1,244 @@
+package ${request.package}.cbean.cf.bs;
+
+import java.util.Collection;
+
+import ${request.package}.cbean.cf.${table.camelizedName}CF;
+import ${request.package}.cbean.cq.${table.camelizedName}CQ;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
+import org.dbflute.cbean.ckey.ConditionKey;
+import org.elasticsearch.index.query.AndFilterBuilder;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.ExistsFilterBuilder;
+import org.elasticsearch.index.query.MissingFilterBuilder;
+import org.elasticsearch.index.query.NotFilterBuilder;
+import org.elasticsearch.index.query.OrFilterBuilder;
+import org.elasticsearch.index.query.PrefixFilterBuilder;
+import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.TermsFilterBuilder;
+
+/**
+ * @author FreeGen
+ */
+public abstract class Bs${table.camelizedName}CF extends AbstractConditionFilter {
+
+    public void bool(BoolCall<${table.camelizedName}CF> boolLambda) {
+        bool(boolLambda, null);
+    }
+
+    public void bool(BoolCall<${table.camelizedName}CF> boolLambda, ConditionOptionCall<BoolFilterBuilder> opLambda) {
+        ${table.camelizedName}CF mustFilter = new ${table.camelizedName}CF();
+        ${table.camelizedName}CF shouldFilter = new ${table.camelizedName}CF();
+        ${table.camelizedName}CF mustNotFilter = new ${table.camelizedName}CF();
+        boolLambda.callback(mustFilter, shouldFilter, mustNotFilter);
+        if (mustFilter.hasFilters() || shouldFilter.hasFilters() || mustNotFilter.hasFilters()) {
+            BoolFilterBuilder builder =
+                    regBoolF(mustFilter.filterBuilderList, shouldFilter.filterBuilderList, mustNotFilter.filterBuilderList);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void and(OperatorCall<${table.camelizedName}CF> andLambda) {
+        and(andLambda, null);
+    }
+
+    public void and(OperatorCall<${table.camelizedName}CF> andLambda, ConditionOptionCall<AndFilterBuilder> opLambda) {
+        ${table.camelizedName}CF andFilter = new ${table.camelizedName}CF();
+        andLambda.callback(andFilter);
+        if (andFilter.hasFilters()) {
+            AndFilterBuilder builder = regAndF(andFilter.filterBuilderList);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void or(OperatorCall<${table.camelizedName}CF> orLambda) {
+        or(orLambda, null);
+    }
+
+    public void or(OperatorCall<${table.camelizedName}CF> orLambda, ConditionOptionCall<OrFilterBuilder> opLambda) {
+        ${table.camelizedName}CF orFilter = new ${table.camelizedName}CF();
+        orLambda.callback(orFilter);
+        if (orFilter.hasFilters()) {
+            OrFilterBuilder builder = regOrF(orFilter.filterBuilderList);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void not(OperatorCall<${table.camelizedName}CF> notLambda) {
+        not(notLambda, null);
+    }
+
+    public void not(OperatorCall<${table.camelizedName}CF> notLambda, ConditionOptionCall<NotFilterBuilder> opLambda) {
+        ${table.camelizedName}CF notFilter = new ${table.camelizedName}CF();
+        notLambda.callback(notFilter);
+        if (notFilter.hasFilters()) {
+            if (notFilter.filterBuilderList.size() > 1) {
+                final String msg = "not filter must be one filter.";
+                throw new IllegalConditionBeanOperationException(msg);
+            }
+            NotFilterBuilder builder = regNotF(notFilter.filterBuilderList.get(0));
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void query(org.codelibs.fess.es.cbean.cq.bs.AbstractConditionQuery.OperatorCall<${table.camelizedName}CQ> queryLambda) {
+        query(queryLambda, null);
+    }
+
+    public void query(org.codelibs.fess.es.cbean.cq.bs.AbstractConditionQuery.OperatorCall<${table.camelizedName}CQ> queryLambda,
+            ConditionOptionCall<QueryFilterBuilder> opLambda) {
+        ${table.camelizedName}CQ query = new ${table.camelizedName}CQ();
+        queryLambda.callback(query);
+        if (query.hasQueries()) {
+            QueryFilterBuilder builder = regQueryF(query.getQuery());
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+
+#foreach ($column in $table.columnList)
+#if ($column.isNormalColumn)
+#set ($javaNative = ${column.type})
+
+    public void set${column.capCamelName}_NotEqual($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_NotEqual(${column.uncapCamelName}, null, null);
+    }
+
+    public void set${column.capCamelName}_NotEqual($javaNative ${column.uncapCamelName}, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.set${column.capCamelName}_Equal(${column.uncapCamelName}, eqOpLambda);
+        } , notOpLambda);
+    }
+
+    public void set${column.capCamelName}_Equal($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_Equal($javaNative ${column.uncapCamelName}, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, opLambda);
+    }
+
+    public void set${column.capCamelName}_Term($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_Term(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_Term($javaNative ${column.uncapCamelName}, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("${column.name}", ${column.uncapCamelName});
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Terms(Collection<$javaNative> ${column.uncapCamelName}List) {
+        set${column.capCamelName}_Terms(${column.uncapCamelName}List, null);
+    }
+
+    public void set${column.capCamelName}_Terms(Collection<$javaNative> ${column.uncapCamelName}List, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("${column.name}", ${column.uncapCamelName}List);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_InScope(Collection<$javaNative> ${column.uncapCamelName}List) {
+        set${column.capCamelName}_Terms(${column.uncapCamelName}List, null);
+    }
+
+    public void set${column.capCamelName}_InScope(Collection<$javaNative> ${column.uncapCamelName}List, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        set${column.capCamelName}_Terms(${column.uncapCamelName}List, opLambda);
+    }
+
+#if ($javaNative == "String")
+    public void set${column.capCamelName}_Prefix($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_Prefix(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_Prefix($javaNative ${column.uncapCamelName}, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("${column.name}", ${column.uncapCamelName});
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+#end
+    public void set${column.capCamelName}_Exists() {
+        set${column.capCamelName}_Exists(null);
+    }
+
+    public void set${column.capCamelName}_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Missing() {
+        set${column.capCamelName}_Missing(null);
+    }
+
+    public void set${column.capCamelName}_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_GreaterThan($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_GreaterThan(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_GreaterThan($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("${column.name}", ConditionKey.CK_GREATER_THAN, ${column.uncapCamelName});
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_LessThan($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_LessThan(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_LessThan($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("${column.name}", ConditionKey.CK_LESS_THAN, ${column.uncapCamelName});
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_GreaterEqual($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_GreaterEqual(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_GreaterEqual($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("${column.name}", ConditionKey.CK_GREATER_EQUAL, ${column.uncapCamelName});
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_LessEqual($javaNative ${column.uncapCamelName}) {
+        set${column.capCamelName}_LessEqual(${column.uncapCamelName}, null);
+    }
+
+    public void set${column.capCamelName}_LessEqual($javaNative ${column.uncapCamelName}, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("${column.name}", ConditionKey.CK_LESS_EQUAL, ${column.uncapCamelName});
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+#end
+#end
+}

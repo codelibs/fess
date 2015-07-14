@@ -19,8 +19,7 @@ package org.codelibs.fess.web.admin;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.Constants;
-import org.seasar.struts.annotation.DateType;
+import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.struts.annotation.IntRange;
 import org.seasar.struts.annotation.IntegerType;
 import org.seasar.struts.annotation.LongType;
@@ -41,7 +40,7 @@ public class BoostDocumentRuleForm {
     }
 
     @Required(target = "confirmfromupdate,update,delete")
-    @Maxbytelength(maxbytelength = 200)
+    @Maxbytelength(maxbytelength = 1000)
     public String id;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
@@ -72,8 +71,8 @@ public class BoostDocumentRuleForm {
     public String updatedTime;
 
     @Required(target = "confirmfromupdate,update,delete")
-    @LongType
-    public String version;
+    @IntegerType
+    public String versionNo;
 
     public void initialize() {
 
@@ -81,11 +80,11 @@ public class BoostDocumentRuleForm {
         urlExpr = null;
         boostExpr = null;
         sortOrder = null;
-        createdBy = null;
-        createdTime = null;
+        createdBy = "system";
+        createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         updatedBy = null;
         updatedTime = null;
-        version = null;
+        versionNo = null;
 
         sortOrder = "0";
     }

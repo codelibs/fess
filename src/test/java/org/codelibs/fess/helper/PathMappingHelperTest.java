@@ -19,7 +19,7 @@ package org.codelibs.fess.helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codelibs.fess.db.exentity.PathMapping;
+import org.codelibs.fess.es.exentity.PathMapping;
 import org.seasar.extension.unit.S2TestCase;
 
 public class PathMappingHelperTest extends S2TestCase {

@@ -78,6 +78,6 @@ public class FieldHelper {
 
     public String boostDocumentRuleType = "boost_document_rule";
 
-	public String pathMappingType = "path_mapping";
+    public String pathMappingType = "path_mapping";
 
 }

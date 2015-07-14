@@ -18,9 +18,7 @@ package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -30,15 +28,15 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.FileCrawlingConfig;
-import org.codelibs.fess.db.exentity.ScheduledJob;
-import org.codelibs.fess.db.exentity.WebCrawlingConfig;
+import org.codelibs.fess.es.exentity.FileConfig;
+import org.codelibs.fess.es.exentity.ScheduledJob;
+import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.TriggeredJob;
-import org.codelibs.fess.service.FileCrawlingConfigService;
+import org.codelibs.fess.service.FileConfigService;
 import org.codelibs.fess.service.ScheduledJobService;
-import org.codelibs.fess.service.WebCrawlingConfigService;
+import org.codelibs.fess.service.WebConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.codelibs.sastruts.core.annotation.Token;
@@ -61,10 +59,10 @@ public class WizardAction implements Serializable {
     protected DynamicProperties crawlerProperties;
 
     @Resource
-    protected WebCrawlingConfigService webCrawlingConfigService;
+    protected WebConfigService webConfigService;
 
     @Resource
-    protected FileCrawlingConfigService fileCrawlingConfigService;
+    protected FileConfigService fileConfigService;
 
     @Resource
     protected SystemHelper systemHelper;
@@ -133,14 +131,14 @@ public class WizardAction implements Serializable {
         configPath = convertCrawlingPath(buf.toString());
 
         final String username = systemHelper.getUsername();
-        final LocalDateTime now = systemHelper.getCurrentTime();
+        final long now = systemHelper.getCurrentTimeAsLong();
 
         try {
             if (isWebCrawlingPath(configPath)) {
                 // web
-                final WebCrawlingConfig wConfig = new WebCrawlingConfig();
+                final WebConfig wConfig = new WebConfig();
                 wConfig.setAvailable(Constants.T);
-                wConfig.setBoost(BigDecimal.ONE);
+                wConfig.setBoost(1.0f);
                 wConfig.setCreatedBy(username);
                 wConfig.setCreatedTime(now);
                 if (StringUtil.isNotBlank(wizardForm.depth)) {
@@ -162,13 +160,13 @@ public class WizardAction implements Serializable {
                 wConfig.setUrls(configPath);
                 wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", ComponentUtil.getUserAgentName()));
 
-                webCrawlingConfigService.store(wConfig);
+                webConfigService.store(wConfig);
 
             } else {
                 // file
-                final FileCrawlingConfig fConfig = new FileCrawlingConfig();
+                final FileConfig fConfig = new FileConfig();
                 fConfig.setAvailable(Constants.T);
-                fConfig.setBoost(BigDecimal.ONE);
+                fConfig.setBoost(1.0f);
                 fConfig.setCreatedBy(username);
                 fConfig.setCreatedTime(now);
                 if (StringUtil.isNotBlank(wizardForm.depth)) {
@@ -189,7 +187,7 @@ public class WizardAction implements Serializable {
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
 
-                fileCrawlingConfigService.store(fConfig);
+                fileConfigService.store(fConfig);
             }
             return configName;
         } catch (final Exception e) {

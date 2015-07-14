@@ -27,9 +27,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -58,11 +55,10 @@ import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.UnsupportedSearchException;
 import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
-import org.codelibs.fess.db.allcommon.CDef;
-import org.codelibs.fess.db.exentity.ClickLog;
-import org.codelibs.fess.db.exentity.SearchLog;
-import org.codelibs.fess.db.exentity.UserInfo;
 import org.codelibs.fess.entity.LoginInfo;
+import org.codelibs.fess.es.exentity.ClickLog;
+import org.codelibs.fess.es.exentity.SearchLog;
+import org.codelibs.fess.es.exentity.UserInfo;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
@@ -76,7 +72,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.screenshot.ScreenShotManager;
-import org.codelibs.fess.service.FavoriteLogService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.MoreLikeThisResponse;
@@ -86,7 +81,6 @@ import org.codelibs.robot.util.CharUtil;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.dbflute.optional.OptionalEntity;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.seasar.framework.beans.util.Beans;
@@ -132,9 +126,6 @@ public class IndexAction {
 
     @Resource
     protected FessEsClient fessEsClient;
-
-    @Resource
-    protected FavoriteLogService favoriteLogService;
 
     @Binding(bindingType = BindingType.MAY)
     @Resource
@@ -389,10 +380,9 @@ public class IndexAction {
                 final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
                 final ClickLog clickLog = new ClickLog();
                 clickLog.setUrl(url);
-                final LocalDateTime now = systemHelper.getCurrentTime();
+                final long now = systemHelper.getCurrentTimeAsLong();
                 clickLog.setRequestedTime(now);
-                clickLog.setQueryRequestedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(indexForm.rt)),
-                        ZoneId.systemDefault()));
+                clickLog.setQueryRequestedTime(Long.parseLong(indexForm.rt));
                 clickLog.setUserSessionId(userSessionId);
                 clickLog.setDocId(indexForm.docId);
                 long clickCount = 0;
@@ -697,7 +687,8 @@ public class IndexAction {
                 return null;
             }
 
-            if (!favoriteLogService.addUrl(userCode, favoriteUrl)) {
+            final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
+            if (!searchLogHelper.addfavoriteLog(userCode, favoriteUrl)) {
                 WebApiUtil.setError(4, "Failed to add url: " + favoriteUrl);
                 return null;
             }
@@ -711,67 +702,6 @@ public class IndexAction {
                 WebApiUtil.setError(7, "Failed to update count: " + favoriteUrl);
                 return null;
             }
-        } catch (final Exception e) {
-            WebApiUtil.setError(1, e);
-        }
-        return null;
-
-    }
-
-    @Execute(validator = false)
-    public String favoritesApi() {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
-            WebApiUtil.setError(9, "Unsupported operation.");
-            return null;
-        }
-
-        try {
-            final String userCode = userInfoHelper.getUserCode();
-
-            if (StringUtil.isBlank(userCode)) {
-                WebApiUtil.setError(2, "No user session.");
-                return null;
-            } else if (StringUtil.isBlank(indexForm.queryId)) {
-                WebApiUtil.setError(3, "Query ID is null.");
-                return null;
-            }
-
-            final String[] docIds = userInfoHelper.getResultDocIds(indexForm.queryId);
-            final List<Map<String, Object>> docList =
-                    fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, queryRequstBuilder -> {
-                        if (docIds == null || docIds.length == 0) {
-                            return false;
-                        }
-
-                        queryRequstBuilder.setFrom(0).setSize(getMaxPageSize());
-                        queryRequstBuilder.addFields(queryHelper.getResponseFields());
-                        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-                        for (int i = 0; i < docIds.length && i < getMaxPageSize(); i++) {
-                            boolQuery.should(QueryBuilders.termQuery(fieldHelper.docIdField, docIds[i]));
-                        }
-                        queryRequstBuilder.setQuery(boolQuery);
-                        return true;
-                    });
-            List<String> urlList = new ArrayList<String>(docList.size());
-            for (final Map<String, Object> doc : docList) {
-                final Object urlObj = doc.get(fieldHelper.urlField);
-                if (urlObj != null) {
-                    urlList.add(urlObj.toString());
-                }
-            }
-            urlList = favoriteLogService.getUrlList(userCode, urlList);
-            final List<String> docIdList = new ArrayList<String>(urlList.size());
-            for (final Map<String, Object> doc : docList) {
-                final Object urlObj = doc.get(fieldHelper.urlField);
-                if (urlObj != null && urlList.contains(urlObj.toString())) {
-                    final Object docIdObj = doc.get(fieldHelper.docIdField);
-                    if (docIdObj != null) {
-                        docIdList.add(docIdObj.toString());
-                    }
-                }
-            }
-
-            WebApiUtil.setObject("docIdList", docIdList);
         } catch (final Exception e) {
             WebApiUtil.setError(1, e);
         }
@@ -941,7 +871,7 @@ public class IndexAction {
 
         // search log
         if (searchLogSupport) {
-            final LocalDateTime now = systemHelper.getCurrentTime();
+            final long now = systemHelper.getCurrentTimeAsLong();
 
             final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
             final SearchLog searchLog = new SearchLog();
@@ -974,25 +904,14 @@ public class IndexAction {
                 searchLog.setUserSessionId(userCode);
             }
             final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
-            if (accessType instanceof CDef.AccessType) {
-                switch ((CDef.AccessType) accessType) {
-                case Json:
-                    searchLog.setAccessType_Json();
-                    searchLog.setAccessType_Others();
-                    searchLog.setAccessType_Xml();
-                    break;
-                case Xml:
-                    searchLog.setAccessType_Xml();
-                    break;
-                case Others:
-                    searchLog.setAccessType_Others();
-                    break;
-                default:
-                    searchLog.setAccessType_Web();
-                    break;
-                }
+            if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_XML.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_XML);
+            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
             } else {
-                searchLog.setAccessType_Web();
+                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
             }
 
             @SuppressWarnings("unchecked")

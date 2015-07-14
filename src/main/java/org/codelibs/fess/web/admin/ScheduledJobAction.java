@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.web.admin;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +27,8 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.RoleType;
-import org.codelibs.fess.db.exentity.ScheduledJob;
+import org.codelibs.fess.es.exentity.RoleType;
+import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
@@ -96,7 +95,7 @@ public class ScheduledJobAction extends FessAdminAction {
     protected ScheduledJob createScheduledJob() {
         ScheduledJob scheduledJob;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (scheduledJobForm.crudMode == CommonConstants.EDIT_MODE) {
             scheduledJob = scheduledJobService.getScheduledJob(createKeyMap());
             if (scheduledJob == null) {
@@ -128,11 +127,7 @@ public class ScheduledJobAction extends FessAdminAction {
         try {
             final ScheduledJob scheduledJob = getScheduledJob();
 
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            scheduledJob.setDeletedBy(username);
-            scheduledJob.setDeletedTime(currentTime);
-            scheduledJobService.store(scheduledJob);
+            scheduledJobService.delete(scheduledJob);
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");
 
             return displayList(true);

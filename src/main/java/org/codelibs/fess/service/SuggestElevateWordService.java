@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +31,9 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.SuggestElevateWordCB;
-import org.codelibs.fess.db.exbhv.SuggestElevateWordBhv;
-import org.codelibs.fess.db.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.cbean.SuggestElevateWordCB;
+import org.codelibs.fess.es.exbhv.SuggestElevateWordBhv;
+import org.codelibs.fess.es.exentity.SuggestElevateWord;
 import org.codelibs.fess.pager.SuggestElevateWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -77,7 +75,7 @@ public class SuggestElevateWordService implements Serializable {
 
     public SuggestElevateWord getSuggestElevateWord(final Map<String, String> keys) {
         final SuggestElevateWord suggestElevateWord = suggestElevateWordBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (suggestElevateWord == null) {
@@ -104,12 +102,11 @@ public class SuggestElevateWordService implements Serializable {
 
     protected void setupListCondition(final SuggestElevateWordCB cb, final SuggestElevateWordPager suggestElevateWordPager) {
         if (suggestElevateWordPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(suggestElevateWordPager.id));
+            cb.query().docMeta().setId_Equal(suggestElevateWordPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SuggestWord_Asc();
 
         // search
@@ -159,24 +156,22 @@ public class SuggestElevateWordService implements Serializable {
                     }).orElse(null);//TODO
                     final String reading = getValue(list, 1);
                     final String boost = getValue(list, 4);
-                    final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTime();
+                    final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
                     if (suggestElevateWord == null) {
                         suggestElevateWord = new SuggestElevateWord();
                         suggestElevateWord.setSuggestWord(suggestWord);
                         suggestElevateWord.setReading(reading);
                         suggestElevateWord.setTargetRole(role);
                         suggestElevateWord.setTargetLabel(label);
-                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE : new BigDecimal(boost));
+                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         suggestElevateWord.setCreatedBy("system");
                         suggestElevateWord.setCreatedTime(now);
                         suggestElevateWordBhv.insert(suggestElevateWord);
                     } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
-                        suggestElevateWord.setDeletedBy("system");
-                        suggestElevateWord.setDeletedTime(now);
-                        suggestElevateWordBhv.update(suggestElevateWord);
+                        suggestElevateWordBhv.delete(suggestElevateWord);
                     } else {
                         suggestElevateWord.setReading(reading);
-                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? BigDecimal.ONE : new BigDecimal(boost));
+                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         suggestElevateWord.setUpdatedBy("system");
                         suggestElevateWord.setUpdatedTime(now);
                         suggestElevateWordBhv.update(suggestElevateWord);
@@ -206,7 +201,7 @@ public class SuggestElevateWordService implements Serializable {
             csvWriter.writeValues(list);
 
             suggestElevateWordBhv.selectCursor(cb -> {
-                cb.query().setDeletedBy_IsNull();
+                cb.query().matchAll();
             }, new EntityRowHandler<SuggestElevateWord>() {
                 @Override
                 public void handle(final SuggestElevateWord entity) {

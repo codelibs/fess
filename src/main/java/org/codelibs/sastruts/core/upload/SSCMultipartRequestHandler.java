@@ -70,9 +70,7 @@ public class SSCMultipartRequestHandler extends S2MultipartRequestHandler {
                 final InputStream is = request.getInputStream();
                 try {
                     final byte[] buf = new byte[1024];
-                    @SuppressWarnings("unused")
-                    int len = 0;
-                    while ((len = is.read(buf)) != -1) { // NOPMD
+                    while ((is.read(buf)) != -1) { // NOPMD
                     }
                 } catch (final Exception ignore) {} finally {
                     try {

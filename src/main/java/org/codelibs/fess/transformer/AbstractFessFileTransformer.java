@@ -19,9 +19,9 @@ package org.codelibs.fess.transformer;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +35,8 @@ import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.CrawlingConfig;
-import org.codelibs.fess.db.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
+import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
@@ -162,7 +162,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
 
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
-        final LocalDateTime documentExpires = crawlingSessionHelper.getDocumentExpires();
+        final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
@@ -192,7 +192,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, fieldHelper.expiresField, FessFunctions.formatDate(documentExpires));
+            putResultDataBody(dataMap, fieldHelper.expiresField, new Date(documentExpires));
         }
         // segment
         putResultDataBody(dataMap, fieldHelper.segmentField, sessionId);

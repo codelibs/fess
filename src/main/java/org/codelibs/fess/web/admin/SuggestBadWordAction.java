@@ -26,7 +26,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ import org.codelibs.fess.beans.FessBeans;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.db.exentity.SuggestBadWord;
+import org.codelibs.fess.es.exentity.SuggestBadWord;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.SuggestBadWordPager;
@@ -259,7 +258,7 @@ public class SuggestBadWordAction extends FessAdminAction {
     protected SuggestBadWord createSuggestBadWord() {
         SuggestBadWord suggestBadWord;
         final String username = systemHelper.getUsername();
-        final LocalDateTime currentTime = systemHelper.getCurrentTime();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (suggestBadWordForm.crudMode == CommonConstants.EDIT_MODE) {
             suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap());
             if (suggestBadWord == null) {
@@ -292,12 +291,7 @@ public class SuggestBadWordAction extends FessAdminAction {
                 throw new SSCActionMessagesException("errors.crud_could_not_find_crud_table", new Object[] { suggestBadWordForm.id });
             }
 
-            //           suggestBadWordService.delete(suggestBadWord);
-            final String username = systemHelper.getUsername();
-            final LocalDateTime currentTime = systemHelper.getCurrentTime();
-            suggestBadWord.setDeletedBy(username);
-            suggestBadWord.setDeletedTime(currentTime);
-            suggestBadWordService.store(suggestBadWord);
+            suggestBadWordService.delete(suggestBadWord);
             suggestHelper.deleteAllBadWord();
             suggestHelper.updateSolrBadwordFile();
             SAStrutsUtil.addSessionMessage("success.crud_delete_crud_table");

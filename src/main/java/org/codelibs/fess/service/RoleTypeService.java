@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.RoleTypeCB;
-import org.codelibs.fess.db.exbhv.RoleTypeBhv;
-import org.codelibs.fess.db.exentity.RoleType;
+import org.codelibs.fess.es.cbean.RoleTypeCB;
+import org.codelibs.fess.es.exbhv.RoleTypeBhv;
+import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.pager.RoleTypePager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -60,7 +60,7 @@ public class RoleTypeService implements Serializable {
 
     public RoleType getRoleType(final Map<String, String> keys) {
         final RoleType roleType = roleTypeBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (roleType == null) {
@@ -74,25 +74,28 @@ public class RoleTypeService implements Serializable {
     public void store(final RoleType roleType) throws CrudMessageException {
         setupStoreCondition(roleType);
 
-        roleTypeBhv.insertOrUpdate(roleType);
+        roleTypeBhv.insertOrUpdate(roleType, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final RoleType roleType) throws CrudMessageException {
         setupDeleteCondition(roleType);
 
-        roleTypeBhv.delete(roleType);
+        roleTypeBhv.delete(roleType, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final RoleTypeCB cb, final RoleTypePager roleTypePager) {
         if (roleTypePager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(roleTypePager.id));
+            cb.query().docMeta().setId_Equal(roleTypePager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
         cb.query().addOrderBy_Name_Asc();
         // search
@@ -102,7 +105,6 @@ public class RoleTypeService implements Serializable {
     protected void setupEntityCondition(final RoleTypeCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 
@@ -120,7 +122,6 @@ public class RoleTypeService implements Serializable {
 
     public List<RoleType> getRoleTypeList() {
         return roleTypeBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
         });

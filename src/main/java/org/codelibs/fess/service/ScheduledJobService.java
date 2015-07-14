@@ -25,9 +25,9 @@ import javax.annotation.Resource;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.ScheduledJobCB;
-import org.codelibs.fess.db.exbhv.ScheduledJobBhv;
-import org.codelibs.fess.db.exentity.ScheduledJob;
+import org.codelibs.fess.es.cbean.ScheduledJobCB;
+import org.codelibs.fess.es.exbhv.ScheduledJobBhv;
+import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.job.JobScheduler;
 import org.codelibs.fess.pager.ScheduledJobPager;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -62,7 +62,7 @@ public class ScheduledJobService implements Serializable {
 
     public ScheduledJob getScheduledJob(final Map<String, String> keys) {
         final ScheduledJob scheduledJob = scheduledJobBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (scheduledJob == null) {
@@ -76,7 +76,9 @@ public class ScheduledJobService implements Serializable {
     public void delete(final ScheduledJob scheduledJob) throws CrudMessageException {
         setupDeleteCondition(scheduledJob);
 
-        scheduledJobBhv.delete(scheduledJob);
+        scheduledJobBhv.delete(scheduledJob, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
@@ -85,12 +87,11 @@ public class ScheduledJobService implements Serializable {
 
     protected void setupListCondition(final ScheduledJobCB cb, final ScheduledJobPager scheduledJobPager) {
         if (scheduledJobPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(scheduledJobPager.id));
+            cb.query().docMeta().setId_Equal(scheduledJobPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
         cb.query().addOrderBy_Name_Asc();
 
@@ -101,7 +102,6 @@ public class ScheduledJobService implements Serializable {
     protected void setupEntityCondition(final ScheduledJobCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 
@@ -119,7 +119,6 @@ public class ScheduledJobService implements Serializable {
 
     public List<ScheduledJob> getScheduledJobList() {
         return scheduledJobBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
         });
@@ -127,21 +126,19 @@ public class ScheduledJobService implements Serializable {
 
     public void store(final ScheduledJob scheduledJob) {
         final boolean isNew = scheduledJob.getId() == null;
-        final boolean isDelete = scheduledJob.getDeletedBy() != null;
         setupStoreCondition(scheduledJob);
 
-        scheduledJobBhv.insertOrUpdate(scheduledJob);
+        scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
+            op.setRefresh(true);
+        });
         if (!isNew) {
             jobScheduler.unregister(scheduledJob);
         }
-        if (!isDelete) {
-            jobScheduler.register(scheduledJob);
-        }
+        jobScheduler.register(scheduledJob);
     }
 
     public List<ScheduledJob> getCrawloerJobList() {
         return scheduledJobBhv.selectList(cb -> {
-            cb.query().setDeletedBy_IsNull();
             cb.query().setCrawler_Equal(Constants.T);
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();

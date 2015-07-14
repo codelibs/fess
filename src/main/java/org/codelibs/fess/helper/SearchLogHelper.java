@@ -23,15 +23,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Resource;
 
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.db.exbhv.ClickLogBhv;
-import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
-import org.codelibs.fess.db.exentity.ClickLog;
-import org.codelibs.fess.db.exentity.SearchLog;
-import org.codelibs.fess.db.exentity.customize.FavoriteUrlCount;
+import org.codelibs.fess.es.exentity.ClickLog;
+import org.codelibs.fess.es.exentity.SearchLog;
 import org.codelibs.robot.util.LruHashMap;
-import org.dbflute.cbean.result.ListResultBean;
-import org.seasar.framework.container.SingletonS2Container;
 import org.seasar.framework.container.annotation.tiger.InitMethod;
 
 public abstract class SearchLogHelper {
@@ -79,26 +73,21 @@ public abstract class SearchLogHelper {
     }
 
     public int getClickCount(final String url) {
-        final ClickLogBhv clickLogBhv = SingletonS2Container.getComponent(ClickLogBhv.class);
-        return clickLogBhv.selectCount(cb -> {
-            cb.query().setUrl_Equal(url);
-        });
+        // TODO
+        return 0;
     }
 
     public long getFavoriteCount(final String url) {
-        final FavoriteLogBhv favoriteLogBhv = SingletonS2Container.getComponent(FavoriteLogBhv.class);
-        final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
-        pmb.setUrl(url);
-        final ListResultBean<FavoriteUrlCount> list = favoriteLogBhv.outsideSql().selectList(pmb);
-
-        long count = 0;
-        if (!list.isEmpty()) {
-            count = list.get(0).getCnt().longValue();
-        }
-        return count;
+        // TODO
+        return 0;
     }
 
     protected abstract void processSearchLogQueue(Queue<SearchLog> queue);
 
     protected abstract void processClickLogQueue(Queue<ClickLog> queue);
+
+    public boolean addfavoriteLog(String userCode, String favoriteUrl) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

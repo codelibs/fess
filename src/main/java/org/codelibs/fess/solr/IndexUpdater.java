@@ -27,13 +27,12 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.db.exbhv.ClickLogBhv;
-import org.codelibs.fess.db.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.db.exbhv.pmbean.FavoriteUrlCountPmb;
-import org.codelibs.fess.db.exentity.customize.FavoriteUrlCount;
+import org.codelibs.fess.es.exbhv.ClickLogBhv;
+import org.codelibs.fess.es.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
+import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2Robot;
@@ -423,9 +422,8 @@ public class IndexUpdater extends Thread {
     protected void addClickCountField(final Map<String, Object> doc) {
         final String url = (String) doc.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
-            final int count = clickLogBhv.selectCount(cb -> {
-                cb.query().setUrl_Equal(url);
-            });
+            final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
+            final int count = searchLogHelper.getClickCount(url);
             doc.put(fieldHelper.clickCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Click Count: " + count + ", url: " + url);
@@ -436,15 +434,8 @@ public class IndexUpdater extends Thread {
     protected void addFavoriteCountField(final Map<String, Object> map) {
         final String url = (String) map.get(fieldHelper.urlField);
         if (StringUtil.isNotBlank(url)) {
-            final FavoriteUrlCountPmb pmb = new FavoriteUrlCountPmb();
-            pmb.setUrl(url);
-            final List<FavoriteUrlCount> list = favoriteLogBhv.outsideSql().selectList(pmb);
-
-            long count = 0;
-            if (!list.isEmpty()) {
-                count = list.get(0).getCnt().longValue();
-            }
-
+            final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
+            final long count = searchLogHelper.getFavoriteCount(url);
             map.put(fieldHelper.favoriteCountField, count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Favorite Count: " + count + ", url: " + url);

@@ -18,92 +18,92 @@ package org.codelibs.fess.entity;
 
 public class PathMapping {
 
-	private String id;
+    private String id;
 
-	/** URL_EXPR: {NotNull, VARCHAR(4000)} */
-	private String urlExpr;
+    /** URL_EXPR: {NotNull, VARCHAR(4000)} */
+    private String urlExpr;
 
-	/** BOOST_EXPR: {NotNull, VARCHAR(4000)} */
-	private String boostExpr;
+    /** BOOST_EXPR: {NotNull, VARCHAR(4000)} */
+    private String boostExpr;
 
-	/** SORT_ORDER: {NotNull, INTEGER(10)} */
-	private Integer sortOrder;
-	
-	/** CREATED_BY: {NotNull, VARCHAR(255)} */
-	private String createdBy;
+    /** SORT_ORDER: {NotNull, INTEGER(10)} */
+    private Integer sortOrder;
 
-	private Long createdTime;
+    /** CREATED_BY: {NotNull, VARCHAR(255)} */
+    private String createdBy;
 
-	/** UPDATED_BY: {VARCHAR(255)} */
-	private String updatedBy;
+    private Long createdTime;
 
-	private Long updatedTime;
+    /** UPDATED_BY: {VARCHAR(255)} */
+    private String updatedBy;
 
-	private Long version;
+    private Long updatedTime;
 
-	public String getId() {
-		return id;
-	}
+    private Long version;
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getUrlExpr() {
-		return urlExpr;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setUrlExpr(String urlExpr) {
-		this.urlExpr = urlExpr;
-	}
+    public String getUrlExpr() {
+        return urlExpr;
+    }
 
-	public String getBoostExpr() {
-		return boostExpr;
-	}
+    public void setUrlExpr(String urlExpr) {
+        this.urlExpr = urlExpr;
+    }
 
-	public void setBoostExpr(String boostExpr) {
-		this.boostExpr = boostExpr;
-	}
+    public String getBoostExpr() {
+        return boostExpr;
+    }
 
-	public Integer getSortOrder() {
-		return sortOrder;
-	}
+    public void setBoostExpr(String boostExpr) {
+        this.boostExpr = boostExpr;
+    }
 
-	public void setSortOrder(Integer sortOrder) {
-		this.sortOrder = sortOrder;
-	}
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
 
-	public String getCreatedBy() {
-		return createdBy;
-	}
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-	public Long getCreatedTime() {
-		return createdTime;
-	}
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	public void setCreatedTime(Long createdTime) {
-		this.createdTime = createdTime;
-	}
+    public Long getCreatedTime() {
+        return createdTime;
+    }
 
-	public String getUpdatedBy() {
-		return updatedBy;
-	}
+    public void setCreatedTime(Long createdTime) {
+        this.createdTime = createdTime;
+    }
 
-	public void setUpdatedBy(String updatedBy) {
-		this.updatedBy = updatedBy;
-	}
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
 
-	public Long getUpdatedTime() {
-		return updatedTime;
-	}
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-	public void setUpdatedTime(Long updatedTime) {
-		this.updatedTime = updatedTime;
-	}
+    public Long getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(Long updatedTime) {
+        this.updatedTime = updatedTime;
+    }
 
     public Long getVersion() {
         return version;

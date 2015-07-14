@@ -33,29 +33,6 @@
     <artifactId>oss-parent</artifactId>
     <version>9</version>
   </parent>
-  <profiles>
-    <profile>
-      <id>h2</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <database>h2</database>
-        <databaseGroupId>com.h2database</databaseGroupId>
-        <databaseArtifactId>h2</databaseArtifactId>
-        <databaseVersion>1.4.181</databaseVersion>
-      </properties>
-    </profile>
-    <profile>
-      <id>mysql</id>
-      <properties>
-        <database>mysql</database>
-        <databaseGroupId>mysql</databaseGroupId>
-        <databaseArtifactId>mysql-connector-java</databaseArtifactId>
-        <databaseVersion>5.1.32</databaseVersion>
-      </properties>
-    </profile>
-  </profiles>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <dbflute.version>1.1.0-sp1</dbflute.version>
@@ -66,7 +43,7 @@
     <pdfbox.version>1.8.7</pdfbox.version>
     <saflute.version>1.0.0-SNAPSHOT</saflute.version>
     <elasticsearch.version>1.6.0</elasticsearch.version>
-    <cluster.runner.version>1.6.0.0-SNAPSHOT</cluster.runner.version>
+    <cluster.runner.version>1.6.0.0</cluster.runner.version>
     <!-- Tomcat -->
     <tomcat.delegate>true</tomcat.delegate>
     <tomcat.useSeparateTomcatClassLoader>true</tomcat.useSeparateTomcatClassLoader>
@@ -76,9 +53,6 @@
   <build>
     <finalName>fess</finalName>
     <resources>
-      <resource>
-        <directory>src/main/${database}/resources</directory>
-      </resource>
       <resource>
         <directory>src/main/resources</directory>
       </resource>
@@ -113,9 +87,6 @@
           <webResources>
             <resource>
               <directory>${project.build.directory}/${project.build.finalName}-compress</directory>
-            </resource>
-            <resource>
-              <directory>${basedir}/src/main/${database}/webapp</directory>
             </resource>
           </webResources>
           <warSourceExcludes>WEB-INF/classes/**/*.*,WEB-INF/lib/*.jar</warSourceExcludes>
@@ -203,6 +174,17 @@
         <artifactId>tomcat8-maven-plugin</artifactId>
         <version>3.0-SNAPSHOT</version>
       </plugin>
+      <plugin>
+        <groupId>org.dbflute</groupId>
+        <artifactId>dbflute-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <dbfluteVersion>${dbflute.version}</dbfluteVersion>
+          <packageBase>org.codelibs.fess.db</packageBase>
+          <clientProject>fess</clientProject>
+          <dbfluteClientDir>${basedir}/dbflute_fess</dbfluteClientDir>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <pluginRepositories>
@@ -261,16 +243,6 @@
     </repository>
   </repositories>
   <dependencies>
-    <dependency>
-      <groupId>${databaseGroupId}</groupId>
-      <artifactId>${databaseArtifactId}</artifactId>
-      <version>${databaseVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codelibs.fess</groupId>
-      <artifactId>fess-db-${database}</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>jstl</groupId>
       <artifactId>jstl</artifactId>
@@ -451,7 +423,7 @@
     </dependency>
     <dependency>
       <groupId>org.codelibs.robot</groupId>
-      <artifactId>s2-robot-db-${database}</artifactId>
+      <artifactId>s2-robot-db-h2</artifactId>
       <version>${s2robot.version}</version>
       <exclusions>
         <exclusion>

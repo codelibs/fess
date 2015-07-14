@@ -92,9 +92,9 @@
 						<tr>
 							<th><bean:message
 									key="labels.file_authentication_file_crawling_config" /></th>
-							<td><c:forEach var="item" items="${fileCrawlingConfigItems}">
-									<c:if test="${fileCrawlingConfigId==item.value}">${f:h(item.label)}</c:if>
-								</c:forEach> <html:hidden property="fileCrawlingConfigId" /></td>
+							<td><c:forEach var="item" items="${fileConfigItems}">
+									<c:if test="${fileConfigId==item.value}">${f:h(item.label)}</c:if>
+								</c:forEach> <html:hidden property="fileConfigId" /></td>
 						</tr>
 					</tbody>
 					<tfoot>

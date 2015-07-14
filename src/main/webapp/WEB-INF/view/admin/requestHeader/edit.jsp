@@ -71,8 +71,8 @@
 						<tr>
 							<th><bean:message
 									key="labels.request_header_web_crawling_config" /></th>
-							<td><html:select property="webCrawlingConfigId">
-									<c:forEach var="item" items="${webCrawlingConfigItems}">
+							<td><html:select property="webConfigId">
+									<c:forEach var="item" items="${webConfigItems}">
 										<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
 									</c:forEach>
 								</html:select></td>

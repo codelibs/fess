@@ -1,0 +1,1069 @@
+{
+  ".fess_config" : {
+    "mappings" : {
+      "web_config_to_label" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "labelTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "webConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "data_config_to_role" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "dataConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "roleTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "path_mapping" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "processType" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "regex" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "replacement" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "boost_document_rule" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "boostExpr" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "urlExpr" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "file_config_to_role" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "fileConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "roleTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "job_log" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "endTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "jobName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "jobStatus" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "scriptData" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "scriptResult" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "scriptType" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "startTime" : {
+            "type" : "long"
+          },
+          "target" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "role_type" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "value" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "web_config" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "boost" : {
+            "type" : "float"
+          },
+          "configParameter" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "depth" : {
+            "type" : "integer"
+          },
+          "excludedDocUrls" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "excludedUrls" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "includedDocUrls" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "includedUrls" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "intervalTime" : {
+            "type" : "integer"
+          },
+          "maxAccessCount" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "numOfThread" : {
+            "type" : "integer"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "urls" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "userAgent" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "web_authentication" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "authRealm" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "hostname" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "parameters" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "password" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "port" : {
+            "type" : "integer"
+          },
+          "protocolScheme" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "username" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "webConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "data_config_to_label" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "dataConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "labelTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "overlapping_host" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "overlappingName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "regularName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "request_header" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "value" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "webConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "suggest_bad_word" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "suggestWord" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "targetLabel" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "targetRole" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "data_config" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "boost" : {
+            "type" : "float"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "handlerName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "handlerParameter" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "handlerScript" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "crawling_session_info" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "crawlingSessionId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "key" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "value" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "web_config_to_role" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "roleTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "webConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "file_authentication" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "fileConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "hostname" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "parameters" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "password" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "port" : {
+            "type" : "integer"
+          },
+          "protocolScheme" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "username" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "crawling_session" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdTime" : {
+            "type" : "long"
+          },
+          "expiredTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sessionId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "key_match" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "boost" : {
+            "type" : "float"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "maxSize" : {
+            "type" : "integer"
+          },
+          "query" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "term" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "label_to_role" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "labelTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "roleTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "suggest_elevate_word" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "boost" : {
+            "type" : "float"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "reading" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "suggestWord" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "targetLabel" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "targetRole" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "file_config_to_label" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "fileConfigId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "labelTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "file_config" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "boost" : {
+            "type" : "float"
+          },
+          "configParameter" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "depth" : {
+            "type" : "integer"
+          },
+          "excludedDocPaths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "excludedPaths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "includedDocPaths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "includedPaths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "intervalTime" : {
+            "type" : "integer"
+          },
+          "maxAccessCount" : {
+            "type" : "long"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "numOfThread" : {
+            "type" : "integer"
+          },
+          "paths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "scheduled_job" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "crawler" : {
+            "type" : "boolean"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "cronExpression" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "jobLogging" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "scriptData" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "scriptType" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "target" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      },
+      "failure_url" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "configId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "errorCount" : {
+            "type" : "integer"
+          },
+          "errorLog" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "errorName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "lastAccessTime" : {
+            "type" : "long"
+          },
+          "threadName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "url" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "label_type" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "excludedPaths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "includedPaths" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "sortOrder" : {
+            "type" : "integer"
+          },
+          "updatedBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          },
+          "value" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "refresh_interval" : "1s",
+        "number_of_shards" : "2",
+        "number_of_replicas" : "0"
+      }
+    }
+  }
+}

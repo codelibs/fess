@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
-import org.codelibs.fess.db.cbean.RequestHeaderCB;
-import org.codelibs.fess.db.exbhv.RequestHeaderBhv;
-import org.codelibs.fess.db.exentity.RequestHeader;
+import org.codelibs.fess.es.cbean.RequestHeaderCB;
+import org.codelibs.fess.es.exbhv.RequestHeaderBhv;
+import org.codelibs.fess.es.exentity.RequestHeader;
 import org.codelibs.fess.pager.RequestHeaderPager;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.seasar.framework.beans.util.Beans;
@@ -60,7 +60,7 @@ public class RequestHeaderService implements Serializable {
 
     public RequestHeader getRequestHeader(final Map<String, String> keys) {
         final RequestHeader requestHeader = requestHeaderBhv.selectEntity(cb -> {
-            cb.query().setId_Equal(Long.parseLong(keys.get("id")));
+            cb.query().docMeta().setId_Equal(keys.get("id"));
             setupEntityCondition(cb, keys);
         }).orElse(null);//TODO
         if (requestHeader == null) {
@@ -74,28 +74,29 @@ public class RequestHeaderService implements Serializable {
     public void store(final RequestHeader requestHeader) throws CrudMessageException {
         setupStoreCondition(requestHeader);
 
-        requestHeaderBhv.insertOrUpdate(requestHeader);
+        requestHeaderBhv.insertOrUpdate(requestHeader, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final RequestHeader requestHeader) throws CrudMessageException {
         setupDeleteCondition(requestHeader);
 
-        requestHeaderBhv.delete(requestHeader);
+        requestHeaderBhv.delete(requestHeader, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     protected void setupListCondition(final RequestHeaderCB cb, final RequestHeaderPager requestHeaderPager) {
         if (requestHeaderPager.id != null) {
-            cb.query().setId_Equal(Long.parseLong(requestHeaderPager.id));
+            cb.query().docMeta().setId_Equal(requestHeaderPager.id);
         }
         // TODO Long, Integer, String supported only.
 
         // setup condition
-        cb.setupSelect_WebCrawlingConfig();
-        cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_Name_Asc();
-        cb.query().addOrderBy_WebCrawlingConfigId_Asc();
 
         // search
 
@@ -104,7 +105,6 @@ public class RequestHeaderService implements Serializable {
     protected void setupEntityCondition(final RequestHeaderCB cb, final Map<String, String> keys) {
 
         // setup condition
-        cb.query().setDeletedBy_IsNull();
 
     }
 
@@ -120,10 +120,9 @@ public class RequestHeaderService implements Serializable {
 
     }
 
-    public List<RequestHeader> getRequestHeaderList(final Long webCrawlingConfigId) {
+    public List<RequestHeader> getRequestHeaderList(final String webConfigId) {
         return requestHeaderBhv.selectList(cb -> {
-            cb.query().setWebCrawlingConfigId_Equal(webCrawlingConfigId);
-            cb.query().setDeletedBy_IsNull();
+            cb.query().setWebConfigId_Equal(webConfigId);
         });
     }
 

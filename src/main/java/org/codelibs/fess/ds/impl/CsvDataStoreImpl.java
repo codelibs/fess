@@ -31,10 +31,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.db.exentity.DataCrawlingConfig;
 import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.service.FailureUrlService;
 import org.codelibs.robot.RobotCrawlAccessException;
 import org.codelibs.robot.RobotMultipleCrawlAccessException;
@@ -152,7 +152,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     @Override
-    protected void storeData(final DataCrawlingConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+    protected void storeData(final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
 
         final long readInterval = getReadInterval(paramMap);
@@ -173,7 +173,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    protected void processCsv(final DataCrawlingConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+    protected void processCsv(final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap, final CsvConfig csvConfig, final File csvFile,
             final long readInterval, final String csvFileEncoding, final boolean hasHeaderLine) {
         logger.info("Loading " + csvFile.getAbsolutePath());

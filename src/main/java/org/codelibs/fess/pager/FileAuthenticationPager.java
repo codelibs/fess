@@ -46,7 +46,7 @@ public class FileAuthenticationPager {
 
     public String username;
 
-    public String fileCrawlingConfigId;
+    public String fileConfigId;
 
     public String createdBy;
 
@@ -61,7 +61,7 @@ public class FileAuthenticationPager {
         id = null;
         port = null;
         username = null;
-        fileCrawlingConfigId = null;
+        fileConfigId = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;

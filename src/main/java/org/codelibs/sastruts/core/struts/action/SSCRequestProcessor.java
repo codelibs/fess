@@ -38,7 +38,7 @@ public class SSCRequestProcessor extends S2RequestProcessor {
     @Override
     public void init(ActionServlet servlet, ModuleConfig moduleConfig) throws ServletException {
         super.init(servlet, moduleConfig);
-        Object value = servlet.getServletContext().getAttribute("sastruts.MAX_REQUEST_PARAMETER_SIZE");
+        final Object value = servlet.getServletContext().getAttribute("sastruts.MAX_REQUEST_PARAMETER_SIZE");
         if (value != null) {
             maxReqParamSize = Integer.parseInt(value.toString());
         }
@@ -46,13 +46,13 @@ public class SSCRequestProcessor extends S2RequestProcessor {
 
     @Override
     protected IndexParsedResult parseIndex(String name) {
-        IndexParsedResult result = new SSCIndexParsedResult();
+        final IndexParsedResult result = new SSCIndexParsedResult();
         while (true) {
-            int index = name.indexOf(INDEXED_DELIM2);
+            final int index = name.indexOf(INDEXED_DELIM2);
             if (index < 0) {
                 throw new IllegalArgumentException(INDEXED_DELIM2 + " is not found in " + name);
             }
-            int size = Integer.valueOf(name.substring(0, index)).intValue();
+            final int size = Integer.valueOf(name.substring(0, index)).intValue();
             if (size > maxReqParamSize) {
                 throw new IllegalArgumentException("The array size exceeds " + maxReqParamSize);
             }

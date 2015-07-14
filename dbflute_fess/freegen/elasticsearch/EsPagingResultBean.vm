@@ -1,0 +1,50 @@
+package ${request.package}.cbean.result;
+
+import org.dbflute.cbean.result.PagingResultBean;
+
+public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
+
+    private static final long serialVersionUID = 1L;
+
+    protected long took;
+
+    private int totalShards;
+
+    private int successfulShards;
+
+    private int failedShards;
+
+    public long getTook() {
+        return took;
+    }
+
+    public void setTook(long took) {
+        this.took = took;
+    }
+
+    public int getTotalShards() {
+        return totalShards;
+    }
+
+    public void setTotalShards(int totalShards) {
+        this.totalShards = totalShards;
+    }
+
+    public int getSuccessfulShards() {
+        return successfulShards;
+    }
+
+    public void setSuccessfulShards(int successfulShards) {
+        this.successfulShards = successfulShards;
+    }
+
+    public int getFailedShards() {
+        return failedShards;
+    }
+
+    public void setFailedShards(int failedShards) {
+        this.failedShards = failedShards;
+    }
+
+}
+

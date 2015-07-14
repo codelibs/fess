@@ -25,7 +25,7 @@ import java.util.Map;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
-import org.codelibs.fess.db.exentity.KeyMatch;
+import org.codelibs.fess.es.exentity.KeyMatch;
 import org.codelibs.fess.service.KeyMatchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.seasar.framework.container.SingletonS2Container;
@@ -80,10 +80,11 @@ public class KeyMatchHelper {
         final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final List<Map<String, Object>> documentList =
-                fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, searchRequestBuilder -> {
-                    return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().size(keyMatch.getMaxSize())
-                            .responseFields(new String[] { fieldHelper.docIdField }).build();
-                });
+                fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType,
+                        searchRequestBuilder -> {
+                            return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().size(keyMatch.getMaxSize())
+                                    .query(keyMatch.getQuery()).responseFields(new String[] { fieldHelper.docIdField }).build();
+                        });
         return documentList;
     }
 
