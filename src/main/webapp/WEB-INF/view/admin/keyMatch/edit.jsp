@@ -87,7 +87,7 @@
 										<html:text property="term" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="term"><bean:message key="labels.key_match_query" /></label>
+										<label for="query"><bean:message key="labels.key_match_query" /></label>
 										<html:text property="query" styleClass="form-control" />
 									</div>
 									<div class="form-group">
