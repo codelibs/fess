@@ -164,6 +164,7 @@
 											</html:option>
 										</html:select>
 									</div>
+								</div>
 
 								<%-- Box Footer --%>
 								<div class="box-footer">

@@ -91,11 +91,11 @@
 									<table class="table table-bordered">
 										<tbody>
 											<c:if test="${id != null}"><tr>
-												<th class="col-xs-2"><bean:message key="labels.id" /></th>
+												<th class="col-xs-3"><bean:message key="labels.id" /></th>
 												<td>${f:h(id)}</td>
 											</tr></c:if>
 											<tr>
-												<th><bean:message key="labels.name" /></th>
+												<th class="col-xs-3"><bean:message key="labels.name" /></th>
 												<td>${f:h(name)}<html:hidden property="name" /></td>
 											</tr>
 											<tr>
@@ -140,7 +140,7 @@
 											</tr>
 											<tr>
 												<th><bean:message key="labels.interval_time" /></th>
-												<td>${f:h(intervalTime)}<html:hidden property="intervalTime" /></td>
+												<td>${f:h(intervalTime)}<html:hidden property="intervalTime" /><bean:message key="labels.millisec"/></td>
 											</tr>
 											<tr>
 												<th><bean:message key="labels.boost" /></th>
