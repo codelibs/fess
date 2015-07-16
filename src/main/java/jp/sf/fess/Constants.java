@@ -36,6 +36,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_VERSION = FESS_VERSION;
 
+    public static final String GSA_API_VERSION = "3.2";
+
     public static final String TRUE = "true";
 
     public static final String FALSE = "false";
