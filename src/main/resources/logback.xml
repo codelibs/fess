@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/ -->
+<!-- Harbor logging settings for Local Development  -->
+<!-- _/_/_/_/_/_/_/_/_/_/ -->
+<configuration>
+  <property name="domain.name" value="fess"/>
+  <property name="log.level" value="debug"/>
+  <property name="log.pattern" value="%d [%t] %-5p \\(%C{0}@%M\\(\\):%L\\) - %m%n"/>
+  <property name="log.file.basedir" value="/tmp/lastaflute/fess"/>
+  <property name="backup.date.suffix" value="_%d{yyyyMMdd}"/>
+  <property name="backup.max.history" value="180"/>
+
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder><pattern>${log.pattern}</pattern></encoder>
+  </appender>
+  <appender name="appfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <File>${log.file.basedir}/app_${domain.name}.log</File>
+    <Append>true</Append>
+    <encoder><pattern>${log.pattern}</pattern></encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${log.file.basedir}/backup/app_${domain.name}${backup.date.suffix}.log</fileNamePattern>
+      <maxHistory>${backup.max.history}</maxHistory>
+    </rollingPolicy>
+  </appender>
+  <appender name="errorfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <File>${log.file.basedir}/error_${domain.name}.log</File>
+    <Append>true</Append>
+    <encoder><pattern>${log.pattern}</pattern></encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter"><level>ERROR</level></filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${log.file.basedir}/backup/error_${domain.name}${backup.date.suffix}.log</fileNamePattern>
+      <maxHistory>${backup.max.history}</maxHistory>
+    </rollingPolicy>
+  </appender>
+  <appender name="mailfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <File>${log.file.basedir}/mail_${domain.name}.log</File>
+    <Append>true</Append>
+    <encoder><pattern>${log.pattern}</pattern></encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${log.file.basedir}/backup/mail_${domain.name}${backup.date.suffix}.log</fileNamePattern>
+      <maxHistory>${backup.max.history}</maxHistory>
+    </rollingPolicy>
+  </appender>
+
+  <logger name="org.dbflute" additivity="false" level="${log.level}">
+    <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
+  </logger>
+  <logger name="org.lastaflute" additivity="false" level="${log.level}">
+    <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
+  </logger>
+  <logger name="org.docksidestage" additivity="false" level="${log.level}">
+    <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
+  </logger>
+  <logger name="mailflute.sending" additivity="false" level="${log.level}">
+    <appender-ref ref="mailfile"/>
+  </logger>
+  <root level="error">
+    <appender-ref ref="console"/><appender-ref ref="errorfile"/>
+  </root>
+</configuration>

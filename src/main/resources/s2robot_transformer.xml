@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
-	"http://www.seasar.org/dtd/components24.dtd">
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
-	<include path="s2robot_transformer_basic.dicon"/>
+	<include path="s2robot_transformer_basic.xml"/>
 
 	<component name="fessXpathTransformer" class="org.codelibs.fess.transformer.FessXpathTransformer" instance="singleton">
 		<property name="name">"fessXpathTransformer"</property>
