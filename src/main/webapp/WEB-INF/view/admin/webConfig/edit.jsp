@@ -50,6 +50,7 @@
 					</c:if>
 					<html:hidden property="createdBy" />
 					<html:hidden property="createdTime" />
+					<html:hidden property="sortOrder"/>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -194,4 +195,3 @@
 	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
 </body>
 </html>
-
