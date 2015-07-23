@@ -37,8 +37,7 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.entity.UserInfo;
 import org.codelibs.sastruts.core.util.ActivityUtil;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.StringUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * A filter implementation to process a container based authentication.
@@ -167,7 +166,7 @@ public class AuthFilter implements Filter {
     }
 
     protected CachedCipher getCachedCipher() {
-        return SingletonS2Container.getComponent(cipherName);
+        return SingletonLaContainer.getComponent(cipherName);
     }
 
     protected static class AuthHttpServletRequest extends HttpServletRequestWrapper {

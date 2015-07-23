@@ -2,13 +2,11 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
 	"http://www.seasar.org/dtd/components24.dtd">
 <components>
-	<include path="convention.dicon" />
-	<include path="aop.dicon" />
-	<include path="saflute.dicon"/>
-	<include path="dbflute.dicon" />
-	<include path="fess.dicon" />
+	<include path="convention.xml" />
+	<include path="lastaflute.xml"/>
+	<include path="fess.xml" />
 
-	<include path="s2robot_db.dicon" />
+	<include path="s2robot_es.xml" />
 
 	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>
@@ -85,15 +83,6 @@
 			<arg>"application/pdf"</arg>
 			<arg>"pdf"</arg>
 		</initMethod>
-	</component>
-	<!-- for H2 -->
-	<component name="databaseHelper" class="org.codelibs.fess.helper.impl.H2DatabaseHelperImpl">
-		<!--
-		<component name="databaseHelper" class="org.codelibs.fess.helper.impl.DatabaseHelperImpl">
-		 -->
-		<aspect pointcut="optimize">
-			j2ee.requiresNewTx
-		</aspect>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">

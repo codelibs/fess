@@ -20,13 +20,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.struts.upload.FormFile;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.struts.annotation.FloatType;
-import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.LongType;
-import org.seasar.struts.annotation.Maxbytelength;
-import org.seasar.struts.annotation.Required;
 
 public class SuggestElevateWordForm implements Serializable {
 

@@ -16,9 +16,8 @@
 
 package org.codelibs.fess.interceptor;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.codelibs.fess.UnsupportedSearchException;
-import org.seasar.struts.interceptor.ActionMessagesThrowsInterceptor;
+import org.lastaflute.di.core.aop.frame.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

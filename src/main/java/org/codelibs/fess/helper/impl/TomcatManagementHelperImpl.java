@@ -30,11 +30,11 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.helper.WebManagementHelper;
-import org.seasar.framework.util.InputStreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

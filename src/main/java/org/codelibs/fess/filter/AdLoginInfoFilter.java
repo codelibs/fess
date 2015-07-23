@@ -31,11 +31,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.sastruts.core.SSCConstants;
-import org.seasar.framework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

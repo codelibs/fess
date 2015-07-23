@@ -3,28 +3,28 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
-		<initMethod name="addLocator">
+		<postConstruct name="addLocator">
 			<arg>userDictLocator</arg>
-		</initMethod>
-		<initMethod name="addLocator">
+		</postConstruct>
+		<postConstruct name="addLocator">
 			<arg>synonymLocator</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="synonymLocator" class="org.codelibs.fess.dict.synonym.SynonymLocator">
 		<property name="excludedSynonymList">{"data", "txlog",
 			"lib", "bin", "contrib"}</property>
-		<initMethod name="addSearchPath">
+		<postConstruct name="addSearchPath">
 			<arg>"${solr.solr.home}"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="userDictLocator" class="org.codelibs.fess.dict.userdict.UserDictLocator">
 		<property name="excludedUserDictList">{"data", "txlog",
 			"lib", "bin", "contrib"}</property>
-		<initMethod name="addSearchPath">
+		<postConstruct name="addSearchPath">
 			<arg>"${solr.solr.home}"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 </components>

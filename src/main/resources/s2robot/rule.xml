@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
-<components>
-    <include path="s2robot_transformer.xml"/>
-    
+<components namespace="s2robot">
+	<include path="s2robot/container.xml" />
+	<include path="s2robot/transformer.xml" />
+
 	<component name="ruleManager" class="org.codelibs.robot.rule.impl.RuleManagerImpl" instance="prototype">
-		<initMethod name="addRule">
+		<postConstruct name="addRule">
 			<arg>sitemapsRule</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>webHtmlRule</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>webFileRule</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>fsFileRule</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>defaultRule</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="sitemapsRule" class="org.codelibs.robot.rule.impl.RegexRule" >
@@ -28,10 +29,10 @@
 			<component class="org.codelibs.robot.processor.impl.SitemapsResponseProcessor">
 			</component>
 		</property>
-		<initMethod name="addRule">
+		<postConstruct name="addRule">
 			<arg>"url"</arg>
 			<arg>"http[s]?:.*sitemap[^/]*.xml$|http[s]?:.*sitemap[^/]*.gz$|http[s]?:.*sitemap[^/]*.txt$"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 	
 	<component name="webHtmlRule" class="org.codelibs.robot.rule.impl.RegexRule" >
@@ -39,20 +40,20 @@
 		<property name="responseProcessor">
 			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessXpathTransformer</property>
-				<property name="successfulHttpCodes">new int[] {200}</property>
-				<property name="notModifiedHttpCodes">new int[] {304}</property>
+				<property name="successfulHttpCodes">(int[])[200]</property>
+				<property name="notModifiedHttpCodes">(int[])[304]</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
-		<initMethod name="addRule">
+		<postConstruct name="addRule">
 			<arg>"url"</arg>
 			<arg>"http[s]?:.*"</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>"mimeType"</arg>
 			<!-- Supported MIME type -->
 			<arg>"text/html"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="webFileRule" class="org.codelibs.robot.rule.impl.RegexRule" >
@@ -60,16 +61,16 @@
 		<property name="responseProcessor">
 			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
-				<property name="successfulHttpCodes">new int[] {200}</property>
-				<property name="notModifiedHttpCodes">new int[] {304}</property>
+				<property name="successfulHttpCodes">(int[])[200]</property>
+				<property name="notModifiedHttpCodes">(int[])[304]</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
-		<initMethod name="addRule">
+		<postConstruct name="addRule">
 			<arg>"url"</arg>
 			<arg>"http[s]?:.*"</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>"mimeType"</arg>
 			<!-- Supported MIME type -->
 			<arg>
@@ -81,7 +82,7 @@
 + "|text/xml"
 + "|text/xml-external-parsed-entity)"
 			</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="fsFileRule" class="org.codelibs.robot.rule.impl.RegexRule" >
@@ -89,16 +90,16 @@
 		<property name="responseProcessor">
 			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
-				<property name="successfulHttpCodes">new int[] {200}</property>
-				<property name="notModifiedHttpCodes">new int[] {304}</property>
+				<property name="successfulHttpCodes">(int[])[200]</property>
+				<property name="notModifiedHttpCodes">(int[])[304]</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
-		<initMethod name="addRule">
+		<postConstruct name="addRule">
 			<arg>"url"</arg>
 			<arg>"file:.*"</arg>
-		</initMethod>
-		<initMethod name="addRule">
+		</postConstruct>
+		<postConstruct name="addRule">
 			<arg>"mimeType"</arg>
 			<!-- Supported MIME type -->
 			<arg>
@@ -111,7 +112,7 @@
 + "|text/xml-external-parsed-entity"
 + "|text/html)"
 			</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 
@@ -120,15 +121,15 @@
 		<property name="responseProcessor">
 			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessTikaTransformer</property>
-				<property name="successfulHttpCodes">new int[] {200}</property>
-				<property name="notModifiedHttpCodes">new int[] {304}</property>
+				<property name="successfulHttpCodes">(int[])[200]</property>
+				<property name="notModifiedHttpCodes">(int[])[304]</property>
 			</component>
 		</property>
 		<property name="allRequired">true</property>
-		<initMethod name="addRule">
+		<postConstruct name="addRule">
 			<arg>"url"</arg>
 			<arg>".*"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 </components>

@@ -20,8 +20,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.seasar.struts.annotation.Mask;
-import org.seasar.struts.annotation.Maxbytelength;
 
 public class GeoInfo {
     @Mask(mask = "-?([0-9]+|[0-9]+\\.[0-9]+)")

@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CopyUtil;
+import org.codelibs.core.misc.Base64Util;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.es.exentity.CrawlingConfig;
@@ -43,10 +45,8 @@ import org.codelibs.robot.builder.RequestDataBuilder;
 import org.codelibs.robot.client.S2RobotClient;
 import org.codelibs.robot.client.S2RobotClientFactory;
 import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.util.StreamUtil;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.Base64Util;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,13 +93,13 @@ public class CrawlingConfigHelper implements Serializable {
         }
         switch (configType) {
         case WEB:
-            final WebConfigService webConfigService = SingletonS2Container.getComponent(WebConfigService.class);
+            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
             return webConfigService.getWebConfig(id);
         case FILE:
-            final FileConfigService fileConfigService = SingletonS2Container.getComponent(FileConfigService.class);
+            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
             return fileConfigService.getFileConfig(id);
         case DATA:
-            final DataConfigService dataConfigService = SingletonS2Container.getComponent(DataConfigService.class);
+            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
             return dataConfigService.getDataConfig(id);
         default:
             return null;
@@ -140,27 +140,27 @@ public class CrawlingConfigHelper implements Serializable {
             logger.debug("configType: " + configType + ", configId: " + configId);
         }
         if (ConfigType.WEB == configType) {
-            final WebConfigService webConfigService = SingletonS2Container.getComponent(WebConfigService.class);
+            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
             config = webConfigService.getWebConfig(getId(configId));
         } else if (ConfigType.FILE == configType) {
-            final FileConfigService fileConfigService = SingletonS2Container.getComponent(FileConfigService.class);
+            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
             config = fileConfigService.getFileConfig(getId(configId));
         } else if (ConfigType.DATA == configType) {
-            final DataConfigService dataConfigService = SingletonS2Container.getComponent(DataConfigService.class);
+            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
             config = dataConfigService.getDataConfig(getId(configId));
         }
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);
         }
         final String url = (String) doc.get(fieldHelper.urlField);
-        final S2RobotClientFactory robotClientFactory = SingletonS2Container.getComponent(S2RobotClientFactory.class);
+        final S2RobotClientFactory robotClientFactory = SingletonLaContainer.getComponent(S2RobotClientFactory.class);
         config.initializeClientFactory(robotClientFactory);
         final S2RobotClient client = robotClientFactory.getClient(url);
         if (client == null) {
             throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
         }
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
-        final HttpServletResponse response = ResponseUtil.getResponse();
+        final HttpServletResponse response = LaResponseUtil.getResponse();
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
@@ -169,7 +169,7 @@ public class CrawlingConfigHelper implements Serializable {
         try {
             is = new BufferedInputStream(responseData.getResponseBody());
             os = new BufferedOutputStream(response.getOutputStream());
-            StreamUtil.drain(is, os);
+            CopyUtil.copy(is, os);
             os.flush();
         } catch (final IOException e) {
             if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {

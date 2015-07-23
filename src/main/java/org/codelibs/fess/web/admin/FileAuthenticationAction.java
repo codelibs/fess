@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.web.admin;
 
+import java.beans.Beans;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +39,8 @@ import org.codelibs.fess.service.FileConfigService;
 import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -355,7 +352,7 @@ public class FileAuthenticationAction extends FessAdminAction {
     public List<Map<String, String>> getProtocolSchemeItems() {
         final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
         items.add(createItem(
-                MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.file_authentication_scheme_samba"),
+                MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.file_authentication_scheme_samba"),
                 Constants.SAMBA));
         return items;
     }

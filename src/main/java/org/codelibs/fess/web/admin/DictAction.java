@@ -24,8 +24,7 @@ import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.helper.SystemHelper;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
+import org.lastaflute.web.Execute;
 
 public class DictAction implements Serializable {
     private static final long serialVersionUID = 1L;

@@ -31,13 +31,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -45,12 +47,9 @@ import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.robot.util.CharUtil;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.URLUtil;
-import org.seasar.struts.taglib.S2Functions;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ServletContextUtil;
+import org.lastaflute.taglib.function.LaFunctions;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,11 +112,11 @@ public class ViewHelper implements Serializable {
 
     private String escapedSolrHighlightPost = null;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (useSolrHighlight) {
-            escapedSolrHighlightPre = S2Functions.h(solrHighlightTagPre);
-            escapedSolrHighlightPost = S2Functions.h(solrHighlightTagPost);
+            escapedSolrHighlightPre = LaFunctions.h(solrHighlightTagPre);
+            escapedSolrHighlightPost = LaFunctions.h(solrHighlightTagPost);
         }
     }
 
@@ -142,7 +141,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String getContentDescription(final Map<String, Object> document) {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         final String[] queries = request == null ? StringUtil.EMPTY_STRINGS : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
         final int size = descriptionLength;
 
@@ -152,7 +151,7 @@ public class ViewHelper implements Serializable {
                 if (useSolrHighlight) {
                     return escapeHighlight(text);
                 } else {
-                    return highlight(S2Functions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
+                    return highlight(LaFunctions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
                 }
             }
         }
@@ -161,7 +160,7 @@ public class ViewHelper implements Serializable {
     }
 
     protected String escapeHighlight(final String text) {
-        return S2Functions.h(text).replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
+        return LaFunctions.h(text).replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
                 .replaceAll(escapedSolrHighlightPost, solrHighlightTagPost);
     }
 
@@ -297,7 +296,7 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendPDFSearchWord(final String url) {
-        final String[] queries = (String[]) RequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final String[] queries = (String[]) LaRequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (queries != null) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             buf.append(url).append("#search=%22");
@@ -314,7 +313,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String getPagePath(final String page) {
-        final Locale locale = RequestUtil.getRequest().getLocale();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
         final String lang = locale.getLanguage();
         final String country = locale.getCountry();
 
@@ -365,7 +364,7 @@ public class ViewHelper implements Serializable {
     }
 
     private boolean existsPage(final String path) {
-        final String realPath = ServletContextUtil.getServletContext().getRealPath(path);
+        final String realPath = LaServletContextUtil.getServletContext().getRealPath(path);
         final File file = new File(realPath);
         return file.isFile();
     }
@@ -375,7 +374,7 @@ public class ViewHelper implements Serializable {
         final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
         final Handlebars handlebars = new Handlebars(loader);
 
-        Locale locale = RequestUtil.getRequest().getLocale();
+        Locale locale = LaRequestUtil.getRequest().getLocale();
         if (locale == null) {
             locale = Locale.ENGLISH;
         }

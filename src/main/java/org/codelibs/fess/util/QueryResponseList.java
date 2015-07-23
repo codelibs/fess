@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.elasticsearch.action.search.SearchResponse;

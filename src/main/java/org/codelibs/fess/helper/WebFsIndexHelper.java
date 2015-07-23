@@ -42,7 +42,7 @@ import org.codelibs.robot.S2RobotContext;
 import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.service.UrlFilterService;
 import org.codelibs.robot.service.UrlQueueService;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +147,7 @@ public class WebFsIndexHelper implements Serializable {
             final String sid = crawlingConfigHelper.store(sessionId, webConfig);
 
             // create s2robot
-            final S2Robot s2Robot = SingletonS2Container.getComponent(S2Robot.class);
+            final S2Robot s2Robot = SingletonLaContainer.getComponent(S2Robot.class);
             s2Robot.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -253,7 +253,7 @@ public class WebFsIndexHelper implements Serializable {
             final String sid = crawlingConfigHelper.store(sessionId, fileConfig);
 
             // create s2robot
-            final S2Robot s2Robot = SingletonS2Container.getComponent(S2Robot.class);
+            final S2Robot s2Robot = SingletonLaContainer.getComponent(S2Robot.class);
             s2Robot.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -477,15 +477,15 @@ public class WebFsIndexHelper implements Serializable {
         }
 
         // clear url filter
-        final UrlFilterService urlFilterService = SingletonS2Container.getComponent(UrlFilterService.class);
+        final UrlFilterService urlFilterService = SingletonLaContainer.getComponent(UrlFilterService.class);
         urlFilterService.deleteAll();
 
         // clear queue
-        final UrlQueueService urlQueueService = SingletonS2Container.getComponent(UrlQueueService.class);
+        final UrlQueueService urlQueueService = SingletonLaContainer.getComponent(UrlQueueService.class);
         urlQueueService.deleteAll();
 
         // clear
-        final DataService dataService = SingletonS2Container.getComponent(DataService.class);
+        final DataService dataService = SingletonLaContainer.getComponent(DataService.class);
         dataService.deleteAll();
 
     }

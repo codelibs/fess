@@ -36,7 +36,7 @@ import org.codelibs.fess.service.DataConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class DataIndexHelper implements Serializable {
 
         final long startTime = System.currentTimeMillis();
 
-        final IndexUpdateCallback indexUpdateCallback = SingletonS2Container.getComponent(IndexUpdateCallback.class);
+        final IndexUpdateCallback indexUpdateCallback = SingletonLaContainer.getComponent(IndexUpdateCallback.class);
 
         final List<String> sessionIdList = new ArrayList<String>();
         final Map<String, String> initParamMap = new HashMap<String, String>();

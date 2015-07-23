@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.codelibs.core.lang.StringUtil;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.struts.util.ServletContextUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.util.LaServletContextUtil;
 
 public class ResourceUtil {
     protected ResourceUtil() {
@@ -60,7 +60,7 @@ public class ResourceUtil {
 
         String path = null;
         try {
-            final ServletContext servletContext = SingletonS2Container.getComponent(ServletContext.class);
+            final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
             if (servletContext != null) {
                 path = servletContext.getRealPath("/" + baseName + name);
             }
@@ -74,7 +74,7 @@ public class ResourceUtil {
     }
 
     public static File[] getJarFiles(final String namePrefix) {
-        final ServletContext context = ServletContextUtil.getServletContext();
+        final ServletContext context = LaServletContextUtil.getServletContext();
         if (context == null) {
             return new File[0];
         }

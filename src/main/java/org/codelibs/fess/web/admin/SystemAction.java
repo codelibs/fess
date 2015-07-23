@@ -31,9 +31,8 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.service.ScheduledJobService;
 import org.codelibs.sastruts.core.annotation.Token;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class SystemAction implements Serializable {
     private static final String STARTING_CRAWL_PROCESS = "startingCrawlProcess";
@@ -88,7 +87,7 @@ public class SystemAction implements Serializable {
                 scheduledJob.start();
             }
             SAStrutsUtil.addSessionMessage("success.start_crawl_process");
-            RequestUtil.getRequest().getSession().setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
+            LaRequestUtil.getRequest().getSession().setAttribute(STARTING_CRAWL_PROCESS, Boolean.TRUE);
         } else {
             SAStrutsUtil.addSessionMessage("success.failed_to_start_crawl_process");
         }
@@ -114,7 +113,7 @@ public class SystemAction implements Serializable {
     }
 
     public boolean isCrawlerRunning() {
-        final HttpSession session = RequestUtil.getRequest().getSession(false);
+        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
         if (session != null) {
             final Object obj = session.getAttribute(STARTING_CRAWL_PROCESS);
             if (obj != null) {

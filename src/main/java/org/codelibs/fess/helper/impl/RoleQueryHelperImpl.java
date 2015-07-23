@@ -34,7 +34,7 @@ import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.sastruts.core.SSCConstants;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
     @Override
     public Set<String> build() {
         final Set<String> roleList = new HashSet<>();
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
 
         // request parameter
         if (request != null && StringUtil.isNotBlank(parameterKey)) {

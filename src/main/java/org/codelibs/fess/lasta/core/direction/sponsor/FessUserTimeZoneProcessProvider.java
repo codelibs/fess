@@ -17,9 +17,8 @@ package org.codelibs.fess.lasta.core.direction.sponsor;
 
 import java.util.TimeZone;
 
-import org.dbflute.saflute.web.action.callback.ActionExecuteMeta;
-import org.dbflute.saflute.web.servlet.request.RequestManager;
-import org.dbflute.saflute.web.servlet.request.UserTimeZoneProcessProvider;
+import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.servlet.request.UserTimeZoneProcessProvider;
 
 /**
  * @author jflute

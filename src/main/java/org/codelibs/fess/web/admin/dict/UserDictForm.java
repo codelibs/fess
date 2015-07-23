@@ -19,12 +19,6 @@ package org.codelibs.fess.web.admin.dict;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.struts.upload.FormFile;
-import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.LongType;
-import org.seasar.struts.annotation.Maxbytelength;
-import org.seasar.struts.annotation.Required;
-
 public class UserDictForm {
     @IntegerType
     public String pageNumber;

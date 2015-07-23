@@ -16,11 +16,11 @@
 
 package org.codelibs.fess.crud.creator;
 
-import org.seasar.framework.container.ComponentCustomizer;
-import org.seasar.framework.container.assembler.AutoBindingDefFactory;
-import org.seasar.framework.container.creator.ComponentCreatorImpl;
-import org.seasar.framework.container.deployer.InstanceDefFactory;
-import org.seasar.framework.convention.NamingConvention;
+import org.lastaflute.di.core.assembler.AutoBindingDefFactory;
+import org.lastaflute.di.core.creator.ComponentCreatorImpl;
+import org.lastaflute.di.core.customizer.ComponentCustomizer;
+import org.lastaflute.di.core.meta.impl.InstanceDefFactory;
+import org.lastaflute.di.naming.NamingConvention;
 
 /**
  * @author shinsuke

@@ -21,16 +21,12 @@ import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.aopalliance.intercept.MethodInvocation;
+import org.codelibs.core.lang.FieldUtil;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.annotation.User;
-import org.seasar.framework.aop.S2MethodInvocation;
-import org.seasar.framework.aop.interceptors.AbstractInterceptor;
-import org.seasar.framework.beans.BeanDesc;
-import org.seasar.framework.beans.PropertyDesc;
-import org.seasar.framework.beans.factory.BeanDescFactory;
-import org.seasar.framework.util.FieldUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.di.core.aop.frame.MethodInvocation;
+import org.lastaflute.di.core.aop.interceptors.AbstractInterceptor;
+import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * 
@@ -50,7 +46,7 @@ public class UserInfoInterceptor extends AbstractInterceptor {
      */
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         final HttpSession session = request.getSession(false);
         if (session == null) {
             return invocation.proceed();

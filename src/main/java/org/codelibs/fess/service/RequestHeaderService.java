@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import org.codelibs.fess.es.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.exentity.RequestHeader;
 import org.codelibs.fess.pager.RequestHeaderPager;
 import org.dbflute.cbean.result.PagingResultBean;
-import org.seasar.framework.beans.util.Beans;
 
 public class RequestHeaderService implements Serializable {
 

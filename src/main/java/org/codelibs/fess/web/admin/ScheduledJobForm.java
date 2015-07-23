@@ -23,11 +23,6 @@ import java.util.Map;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.CronExpression;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.struts.annotation.IntRange;
-import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.LongType;
-import org.seasar.struts.annotation.Maxbytelength;
-import org.seasar.struts.annotation.Required;
 
 public class ScheduledJobForm implements Serializable {
 

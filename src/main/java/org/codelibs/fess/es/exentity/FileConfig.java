@@ -22,7 +22,7 @@ import org.codelibs.robot.client.S2RobotClientFactory;
 import org.codelibs.robot.client.smb.SmbAuthentication;
 import org.codelibs.robot.client.smb.SmbClient;
 import org.dbflute.cbean.result.ListResultBean;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * @author FreeGen
@@ -229,7 +229,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
-        final FileAuthenticationService fileAuthenticationService = SingletonS2Container.getComponent(FileAuthenticationService.class);
+        final FileAuthenticationService fileAuthenticationService = SingletonLaContainer.getComponent(FileAuthenticationService.class);
 
         //  Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();

@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.web.admin.dict;
 
+import java.beans.Beans;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -38,11 +39,8 @@ import org.codelibs.fess.pager.UserDictPager;
 import org.codelibs.fess.service.UserDictService;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaResponseUtil;
 
 public class UserDictAction {
 
@@ -309,7 +307,7 @@ public class UserDictAction {
             throw new SSCActionMessagesException("errors.userdict_file_is_not_found");
         }
         try (InputStream in = userdictFile.getInputStream()) {
-            ResponseUtil.download(userdictFile.getSimpleName(), in);
+            LaResponseUtil.download(userdictFile.getSimpleName(), in);
         } catch (final IOException e) {
             throw new SSCActionMessagesException("errors.failed_to_download_userdict_file");
         }

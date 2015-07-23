@@ -22,9 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.codelibs.core.lang.StringUtil;
-import org.seasar.struts.annotation.Arg;
-import org.seasar.struts.annotation.Msg;
-import org.seasar.struts.annotation.Validator;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

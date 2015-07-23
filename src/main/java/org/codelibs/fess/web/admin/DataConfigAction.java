@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.web.admin;
 
+import java.beans.Beans;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,11 +42,7 @@ import org.codelibs.fess.service.RoleTypeService;
 import org.codelibs.fess.web.base.FessAdminAction;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
+import org.lastaflute.web.Execute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

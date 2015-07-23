@@ -6,101 +6,101 @@
 		<property name="settings">
 			#{"http.cors.enabled" : "true"}
 		</property>
-		<initMethod name="addIndexConfig">
+		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/boost_document_rule"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/click_log"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/crawling_session"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/crawling_session_info"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/data_config"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/data_config_to_label"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/data_config_to_role"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/failure_url"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/favorite_log"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/file_authentication"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/file_config"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/file_config_to_label"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/file_config_to_role"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/job_log"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/key_match"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/label_to_role"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/label_type"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/overlapping_host"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/path_mapping"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/request_header"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/role_type"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/scheduled_job"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/search_field_log"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/search_log"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/suggest_bad_word"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/suggest_elevate_word"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/user_info"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_authentication"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_config"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_config_to_label"</arg>
-		</initMethod>
-		<initMethod name="addIndexConfig">
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_config_to_role"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 </components>

@@ -33,17 +33,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.LocaleUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.service.RoleTypeService;
 import org.codelibs.robot.util.CharUtil;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.util.LaRequestUtil;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -90,7 +89,7 @@ public class SystemHelper implements Serializable {
 
     protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         langItemsCache =
                 CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
@@ -120,7 +119,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String getUsername() {
-        String username = RequestUtil.getRequest().getRemoteUser();
+        String username = LaRequestUtil.getRequest().getRemoteUser();
         if (StringUtil.isBlank(username)) {
             username = "guest";
         }
@@ -165,7 +164,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String getHelpLink(final String name) {
-        final Locale locale = RequestUtil.getRequest().getLocale();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
         if (locale != null) {
             final String lang = locale.getLanguage();
             for (final String l : supportedHelpLangs) {
@@ -195,7 +194,7 @@ public class SystemHelper implements Serializable {
     }
 
     public Set<String> getAuthenticatedRoleSet() {
-        final RoleTypeService roleTypeService = SingletonS2Container.getComponent(RoleTypeService.class);
+        final RoleTypeService roleTypeService = SingletonLaContainer.getComponent(RoleTypeService.class);
         final List<RoleType> roleTypeList = roleTypeService.getRoleTypeList();
 
         final Set<String> roleList = new HashSet<>(roleTypeList.size() + adminRoleSet.size());

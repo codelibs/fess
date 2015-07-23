@@ -18,9 +18,6 @@ package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
 
-import org.apache.struts.upload.FormFile;
-import org.seasar.struts.annotation.Required;
-
 public class DesignForm implements Serializable {
 
     private static final long serialVersionUID = 1L;

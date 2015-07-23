@@ -22,7 +22,7 @@ import org.codelibs.robot.client.S2RobotClientFactory;
 import org.codelibs.robot.client.http.Authentication;
 import org.codelibs.robot.client.http.HcHttpClient;
 import org.dbflute.cbean.result.ListResultBean;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * @author FreeGen
@@ -233,8 +233,8 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
-        final WebAuthenticationService webAuthenticationService = SingletonS2Container.getComponent(WebAuthenticationService.class);
-        final RequestHeaderService requestHeaderService = SingletonS2Container.getComponent(RequestHeaderService.class);
+        final WebAuthenticationService webAuthenticationService = SingletonLaContainer.getComponent(WebAuthenticationService.class);
+        final RequestHeaderService requestHeaderService = SingletonLaContainer.getComponent(RequestHeaderService.class);
 
         // HttpClient Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();

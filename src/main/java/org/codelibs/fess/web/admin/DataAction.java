@@ -42,12 +42,9 @@ import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.service.CrawlingSessionService;
-import org.codelibs.robot.util.StreamUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +86,7 @@ public class DataAction implements Serializable {
         buf.append(df.format(new Date()));
         buf.append(".csv");
 
-        final HttpServletResponse response = ResponseUtil.getResponse();
+        final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + buf.toString() + "\"");
 

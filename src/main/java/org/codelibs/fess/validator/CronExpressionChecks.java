@@ -18,13 +18,9 @@ package org.codelibs.fess.validator;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.validator.Field;
-import org.apache.commons.validator.Validator;
-import org.apache.commons.validator.ValidatorAction;
-import org.apache.struts.action.ActionMessages;
 import org.codelibs.core.lang.StringUtil;
+import org.lastaflute.web.ruts.message.ActionMessages;
 import org.quartz.CronExpression;
-import org.seasar.struts.validator.S2FieldChecks;
 
 public class CronExpressionChecks extends S2FieldChecks {
 

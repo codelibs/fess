@@ -26,15 +26,15 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.util.LruHashMap;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 
 public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
@@ -58,7 +58,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
      */
     @Override
     public String getUserCode() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
 
         String userCode = (String) request.getAttribute(Constants.USER_CODE);
 
@@ -87,7 +87,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     protected void updateUserSessionId(final String userCode) {
         searchLogHelper.updateUserInfo(userCode);
 
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         request.setAttribute(Constants.USER_CODE, userCode);
 
         final Cookie cookie = new Cookie(cookieName, userCode);
@@ -101,7 +101,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
         if (cookieSecure != null) {
             cookie.setSecure(cookieSecure);
         }
-        ResponseUtil.getResponse().addCookie(cookie);
+        LaResponseUtil.getResponse().addCookie(cookie);
     }
 
     protected String getUserCodeFromCookie(final HttpServletRequest request) {
@@ -118,7 +118,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
     @Override
     public String generateQueryId(final String query, final List<Map<String, Object>> documentItems) {
-        final HttpSession session = RequestUtil.getRequest().getSession(false);
+        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
         if (session != null) {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
@@ -143,7 +143,7 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
 
     @Override
     public String[] getResultDocIds(final String queryId) {
-        final HttpSession session = RequestUtil.getRequest().getSession(false);
+        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
         if (session != null) {
             final Map<String, String[]> resultUrlCache = getResultDocIdsCache(session);
             final String[] urls = resultUrlCache.get(queryId);

@@ -25,18 +25,16 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.io.IOUtils;
-import org.seasar.framework.container.annotation.tiger.Binding;
-import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.container.annotation.tiger.DestroyMethod;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandGenerator extends BaseScreenShotGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CommandGenerator.class);
 
-    @Binding(bindingType = BindingType.MUST)
     public List<String> commandList;
 
     public long commandTimeout = 10 * 1000;// 10sec
@@ -45,7 +43,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
 
     private volatile Timer destoryTimer;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (baseDir == null) {
             baseDir = new File(application.getRealPath("/"));
@@ -53,7 +51,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
         destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
     }
 
-    @DestroyMethod
+    @PreDestroy
     public void destroy() {
         destoryTimer.cancel();
         destoryTimer = null;

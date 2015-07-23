@@ -3,18 +3,18 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="dataStoreFactory" class="org.codelibs.fess.ds.DataStoreFactory">
-		<initMethod name="add">
+		<postConstruct name="add">
 			<arg>"DatabaseDataStore"</arg>
 			<arg>databaseDataStore</arg>
-		</initMethod>
-		<initMethod name="add">
+		</postConstruct>
+		<postConstruct name="add">
 			<arg>"CsvDataStore"</arg>
 			<arg>csvDataStore</arg>
-		</initMethod>
-		<initMethod name="add">
+		</postConstruct>
+		<postConstruct name="add">
 			<arg>"FileListDataStore"</arg>
 			<arg>fileListDataStore</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="databaseDataStore" class="org.codelibs.fess.ds.impl.DatabaseDataStoreImpl">

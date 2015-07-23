@@ -24,6 +24,9 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.exbhv.ScheduledJobBhv;
@@ -38,8 +41,6 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
-import org.seasar.framework.container.annotation.tiger.DestroyMethod;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class JobScheduler {
 
     public List<String> targetList = new ArrayList<String>();
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         final SchedulerFactory sf = new StdSchedulerFactory();
         try {
@@ -71,7 +72,7 @@ public class JobScheduler {
         }, scheduledJob -> register(scheduledJob));
     }
 
-    @DestroyMethod
+    @PreDestroy
     public void destroy() {
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         for (final String sessionId : jobHelper.getRunningSessionIdSet()) {

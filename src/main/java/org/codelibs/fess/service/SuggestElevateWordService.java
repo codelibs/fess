@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
@@ -38,11 +39,10 @@ import org.codelibs.fess.pager.SuggestElevateWordPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
-import org.seasar.framework.beans.util.Beans;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
-import jp.sf.orangesignal.csv.CsvWriter;
+import com.orangesignal.csv.CsvConfig;
+import com.orangesignal.csv.CsvReader;
+import com.orangesignal.csv.CsvWriter;
 
 public class SuggestElevateWordService implements Serializable {
 

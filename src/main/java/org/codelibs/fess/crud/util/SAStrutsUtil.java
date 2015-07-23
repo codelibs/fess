@@ -18,10 +18,10 @@ package org.codelibs.fess.crud.util;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
-import org.seasar.struts.util.ActionMessagesUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.codelibs.sastruts.core.util.ActionMessagesUtil;
+import org.lastaflute.web.ruts.message.ActionMessage;
+import org.lastaflute.web.ruts.message.ActionMessages;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class SAStrutsUtil {
     protected SAStrutsUtil() {
@@ -29,7 +29,7 @@ public class SAStrutsUtil {
     }
 
     public static void addMessage(final String key) {
-        addMessage(RequestUtil.getRequest(), key);
+        addMessage(LaRequestUtil.getRequest(), key);
     }
 
     public static void addMessage(final HttpServletRequest request, final String key) {
@@ -39,7 +39,7 @@ public class SAStrutsUtil {
     }
 
     public static void addMessage(final String key, final Object... values) {
-        addMessage(RequestUtil.getRequest(), key, values);
+        addMessage(LaRequestUtil.getRequest(), key, values);
     }
 
     public static void addMessage(final HttpServletRequest request, final String key, final Object... values) {
@@ -49,7 +49,7 @@ public class SAStrutsUtil {
     }
 
     public static void addSessionMessage(final String key) {
-        addSessionMessage(RequestUtil.getRequest(), key);
+        addSessionMessage(LaRequestUtil.getRequest(), key);
     }
 
     public static void addSessionMessage(final HttpServletRequest request, final String key) {
@@ -59,7 +59,7 @@ public class SAStrutsUtil {
     }
 
     public static void addSessionMessage(final String key, final Object... values) {
-        addSessionMessage(RequestUtil.getRequest(), key, values);
+        addSessionMessage(LaRequestUtil.getRequest(), key, values);
     }
 
     public static void addSessionMessage(final HttpServletRequest request, final String key, final Object... values) {

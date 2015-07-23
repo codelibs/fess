@@ -28,7 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -44,8 +44,8 @@ import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.codelibs.fess.util.MoreLikeThisResponse;
 import org.codelibs.fess.util.WebApiUtil;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -519,7 +519,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
     }
 
     protected void writeJsonResponse(final int status, final String body, final String errMsg) {
-        final String callback = RequestUtil.getRequest().getParameter("callback");
+        final String callback = LaRequestUtil.getRequest().getParameter("callback");
         final boolean isJsonp = StringUtil.isNotBlank(callback);
 
         final StringBuilder buf = new StringBuilder(1000);
@@ -548,7 +548,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         if (isJsonp) {
             buf.append(')');
         }
-        ResponseUtil.write(buf.toString(), "text/javascript+json", Constants.UTF_8);
+        LaResponseUtil.write(buf.toString(), "text/javascript+json", Constants.UTF_8);
 
     }
 

@@ -18,8 +18,7 @@ package org.codelibs.fess.web;
 
 import javax.annotation.Resource;
 
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
+import org.lastaflute.web.Execute;
 
 public class ErrorAction {
 

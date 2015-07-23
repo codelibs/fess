@@ -26,16 +26,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.Globals;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.entity.UserInfo;
 import org.codelibs.sastruts.core.exception.LoginException;
 import org.codelibs.sastruts.core.form.AbstractLoginForm;
 import org.codelibs.sastruts.core.util.ActivityUtil;
-import org.seasar.framework.log.Logger;
-import org.seasar.framework.util.StringUtil;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 
 public abstract class AbstractLoginAction implements Serializable {
     private static final Logger logger = Logger.getLogger(AbstractLoginAction.class);
@@ -168,7 +165,7 @@ public abstract class AbstractLoginAction implements Serializable {
     }
 
     protected void redirect(final String returnPath) {
-        final HttpServletResponse response = ResponseUtil.getResponse();
+        final HttpServletResponse response = LaResponseUtil.getResponse();
         try {
             response.sendRedirect(response.encodeURL(returnPath));
         } catch (final IOException e) {

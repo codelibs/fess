@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,6 @@ import org.codelibs.fess.es.exentity.FileConfigToLabel;
 import org.codelibs.fess.es.exentity.FileConfigToRole;
 import org.codelibs.fess.pager.FileConfigPager;
 import org.dbflute.cbean.result.PagingResultBean;
-import org.seasar.framework.beans.util.Beans;
 
 public class FileConfigService implements Serializable {
 

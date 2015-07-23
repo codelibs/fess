@@ -37,11 +37,8 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.util.FileUtil;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.util.ResponseUtil;
-import org.seasar.struts.util.ServletContextUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,7 +215,7 @@ public class DesignAction implements Serializable {
         BufferedInputStream bis = null;
         try {
             bis = new BufferedInputStream(new FileInputStream(file));
-            ResponseUtil.download(file.getName(), bis);
+            LaResponseUtil.download(file.getName(), bis);
         } catch (final Exception e) {
             logger.error("Failed to download " + file.getAbsolutePath(), e);
             throw new SSCActionMessagesException(e, "errors.failed_to_download_file", designForm.fileName);

@@ -29,7 +29,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -37,8 +37,7 @@ import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.URLEncoderUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class FessFunctions {
 
@@ -52,7 +51,7 @@ public class FessFunctions {
 
     public static Boolean labelExists(final String value) {
         @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        final Map<String, String> labelValueMap = (Map<String, String>) LaRequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
             return labelValueMap.get(value) != null;
         }
@@ -61,7 +60,7 @@ public class FessFunctions {
 
     public static String label(final String value) {
         @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        final Map<String, String> labelValueMap = (Map<String, String>) LaRequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
             final String name = labelValueMap.get(value);
             if (name != null) {
@@ -177,7 +176,7 @@ public class FessFunctions {
     }
 
     private static String createQuery(final String key, final String prefix) {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         String query = (String) request.getAttribute(key);
         if (query == null) {
             final StringBuilder buf = new StringBuilder(100);
@@ -203,7 +202,7 @@ public class FessFunctions {
     }
 
     private static String createForm(final String key, final String prefix) {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         String query = (String) request.getAttribute(key);
         if (query == null) {
             final StringBuilder buf = new StringBuilder(100);

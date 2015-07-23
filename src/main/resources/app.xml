@@ -3,7 +3,6 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<include path="convention.xml"/>
-	<include path="aop.xml"/>
 	<include path="lastaflute.xml"/>
 
 	<include path="fess.xml"/>
@@ -11,8 +10,8 @@
 	<include path="fess_api.xml"/>
 	<include path="fess_dict.xml"/>
 
-	<include path="s2robot_client.xml" />
-	<include path="s2robot_mimetype.xml" />
+	<include path="s2robot/client.xml" />
+	<include path="s2robot/mimetype.xml" />
 
 	<component name="actionMessagesThrowsInterceptor" class="org.codelibs.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
 
@@ -48,37 +47,37 @@
 				}</property>
 			</component>
 		</property>
-		<initMethod name="addFieldLanguage">
+		<postConstruct name="addFieldLanguage">
 			<arg>"zh"</arg>
 			<arg>"cjk"</arg>
-		</initMethod>
-		<initMethod name="addFieldLanguage">
+		</postConstruct>
+		<postConstruct name="addFieldLanguage">
 			<arg>"zh_CN"</arg>
 			<arg>"cjk"</arg>
-		</initMethod>
-		<initMethod name="addFieldLanguage">
+		</postConstruct>
+		<postConstruct name="addFieldLanguage">
 			<arg>"zh_TW"</arg>
 			<arg>"cjk"</arg>
-		</initMethod>
-		<initMethod name="addFieldLanguage">
+		</postConstruct>
+		<postConstruct name="addFieldLanguage">
 			<arg>"ko"</arg>
 			<arg>"cjk"</arg>
-		</initMethod>
-		<initMethod name="setApiResponseFields">
+		</postConstruct>
+		<postConstruct name="setApiResponseFields">
 			<arg>new String[]{"id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
             "created", "title", "digest", "url", "urlLink", "contentDescription"}</arg>
-		</initMethod>
-		<initMethod name="addHighlightField">
+		</postConstruct>
+		<postConstruct name="addHighlightField">
 			<arg>"title"</arg>
-		</initMethod>
-		<initMethod name="addHighlightField">
+		</postConstruct>
+		<postConstruct name="addHighlightField">
 			<arg>"content"</arg>
-		</initMethod>
-		<initMethod name="addFieldBoost">
+		</postConstruct>
+		<postConstruct name="addFieldBoost">
 			<arg>"label"</arg>
 			<arg>"0.0"</arg>
-		</initMethod>
+		</postConstruct>
 		<!-- 
 		<property name="additionalGeoQuery">"location_i_i:1"</property>
 		<property name="responseFields">new String[]{ "id", "docId", "score",
@@ -105,102 +104,102 @@
 		<property name="additionalQuery">""</property>
 		<property name="maxFilterQueriesForRole">3</property>
 		<property name="timeAllowed">1000</property>
-		<initMethod name="addRequestParameter">
+		<postConstruct name="addRequestParameter">
 			<arg>"debug.explain.structured"</arg>
 			<arg>"true"</arg>
-		</initMethod>
-		<initMethod name="addDefaultSortField">
+		</postConstruct>
+		<postConstruct name="addDefaultSortField">
 			<arg>"score"</arg>
 			<arg>"desc"</arg>
-		</initMethod>
-		<initMethod name="addQueryParam">
+		</postConstruct>
+		<postConstruct name="addQueryParam">
 			<arg>"word"</arg>
 			<arg>new String[]{"$query"}</arg>
-		</initMethod>
+		</postConstruct>
 		-->
 	</component>
 	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
-		<initMethod name="addFacetQueryView">
+		<postConstruct name="addFacetQueryView">
 			<arg>
 				<component class="org.codelibs.fess.entity.FacetQueryView">
 					<property name="title">"label.facet_lastModified_title"</property>
-					<initMethod name="addQuery">
+					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1day"</arg>
 						<arg>"lastModified:[NOW/DAY-1DAY TO NOW]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1week"</arg>
 						<arg>"lastModified:[NOW/DAY-7DAYS TO NOW]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1month"</arg>
 						<arg>"lastModified:[NOW/DAY-1MONTH TO NOW]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1year"</arg>
 						<arg>"lastModified:[NOW/DAY-1YEAR TO NOW]"</arg>
-					</initMethod>
+					</postConstruct>
 				</component>
 			</arg>
-		</initMethod>
-		<initMethod name="addFacetQueryView">
+		</postConstruct>
+		<postConstruct name="addFacetQueryView">
 			<arg>
 				<component class="org.codelibs.fess.entity.FacetQueryView">
 					<property name="title">"label.facet_contentLength_title"</property>
-					<initMethod name="addQuery">
+					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_10k"</arg>
 						<arg>"contentLength:[0 TO 9999]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_10kto100k"</arg>
 						<arg>"contentLength:[10000 TO 99999]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_100kto500k"</arg>
 						<arg>"contentLength:[100000 TO 499999]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_500kto1m"</arg>
 						<arg>"contentLength:[500000 TO 999999]"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_1m"</arg>
 						<arg>"contentLength:[1000000 TO *]"</arg>
-					</initMethod>
+					</postConstruct>
 				</component>
 			</arg>
-		</initMethod>
-		<initMethod name="addFacetQueryView">
+		</postConstruct>
+		<postConstruct name="addFacetQueryView">
 			<arg>
 				<component class="org.codelibs.fess.entity.FacetQueryView">
 					<property name="title">"label.facet_filetype_title"</property>
-					<initMethod name="addQuery">
+					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_html"</arg>
 						<arg>"filetype_s:html"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_word"</arg>
 						<arg>"filetype_s:word"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_excel"</arg>
 						<arg>"filetype_s:excel"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_powerpoint"</arg>
 						<arg>"filetype_s:powerpoint"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_pdf"</arg>
 						<arg>"filetype_s:pdf"</arg>
-					</initMethod>
-					<initMethod name="addQuery">
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_others"</arg>
 						<arg>"filetype_s:others"</arg>
-					</initMethod>
+					</postConstruct>
 				</component>
 			</arg>
-		</initMethod>
+		</postConstruct>
 		<!-- 
 		<property name="encodeUrlLink">false</property>
 		<property name="useSolrHighlight">false</property>
@@ -208,16 +207,16 @@
 		<property name="titleLength">50</property>
 		<property name="urlLinkEncoding">"UTF-8"</property>
 		<property name="highlightingFields">new String[] { "hl_content", "digest" }</property>
-		<initMethod name="addInitFacetParam">
+		<postConstruct name="addInitFacetParam">
 			<arg>"facet.field"</arg>
 			<arg>"label"</arg>
-		</initMethod>
+		</postConstruct>
 		 -->
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
 	<component name="webManagementHelper" class="org.codelibs.fess.helper.impl.TomcatManagementHelperImpl">
-		<initMethod name="addSolrInstance">
+		<postConstruct name="addSolrInstance">
 			<arg>
 				<component class="org.codelibs.fess.helper.impl.TomcatManagementHelperImpl$SolrInstance">
 					<property name="name">"solrServer1"</property>
@@ -227,7 +226,7 @@
 					<property name="password">"manager"</property>
 				</component>
 			</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
 		<property name="excludedWordPattern">@java.util.regex.Pattern@compile(".*[a-zA-Z0-9_]+:.*")</property>
@@ -255,49 +254,49 @@
 	</component>
 
 	<component name="adProperties" class="java.util.Properties">
-		<initMethod name="put">
+		<postConstruct name="put">
 			<arg>@javax.naming.Context@INITIAL_CONTEXT_FACTORY</arg>
 			<arg>"com.sun.jndi.ldap.LdapCtxFactory"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>@javax.naming.directory.DirContext@PROVIDER_URL</arg>
 			<arg>"ldap://[host]:[port]"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>@javax.naming.directory.DirContext@SECURITY_PRINCIPAL</arg>
 			<arg>"[loginId]@[domain]"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>@javax.naming.directory.DirContext@SECURITY_CREDENTIALS</arg>
 			<arg>"password"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>"com.sun.jndi.ldap.connect.timeout"</arg>
 			<arg>"10000"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>"com.sun.jndi.ldap.connect.pool"</arg>
 			<arg>"true"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>"com.sun.jndi.connect.pool.timeout"</arg>
 			<arg>"30000"</arg>
-		</initMethod>
-		<initMethod name="put">
+		</postConstruct>
+		<postConstruct name="put">
 			<arg>"com.sun.jndi.connect.pool.debug"</arg>
 			<arg>"all"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="adRoleHelper" class="org.codelibs.fess.helper.AdRoleHelper">
-		<initMethod name="setAdProperties">
+		<postConstruct name="setAdProperties">
 			<arg>adProperties</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
-		<initMethod name="init">
-		</initMethod>
+		<postConstruct name="init">
+		</postConstruct>
 	</component>
 
 </components>

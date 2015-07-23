@@ -17,6 +17,7 @@
 package org.codelibs.fess.web;
 
 import java.awt.Desktop;
+import java.beans.Beans;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,16 +40,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.codelibs.core.io.InputStreamUtil;
+import org.codelibs.core.io.OutputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
@@ -83,20 +86,9 @@ import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.container.annotation.tiger.Binding;
-import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.InputStreamUtil;
-import org.seasar.framework.util.OutputStreamUtil;
-import org.seasar.framework.util.URLUtil;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.taglib.S2Functions;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ResponseUtil;
-import org.seasar.struts.util.URLEncoderUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,7 +206,7 @@ public class IndexAction {
 
     public String appendHighlightQueries;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
         favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
@@ -227,15 +219,15 @@ public class IndexAction {
                 final Set<String> fieldSet = new HashSet<String>();
                 for (final String additional : indexForm.additional) {
                     if (StringUtil.isNotBlank(additional) && additional.length() < 1000 && !hasFieldInQuery(fieldSet, additional)) {
-                        buf.append("&additional=").append(S2Functions.u(additional));
+                        buf.append("&additional=").append(LaFunctions.u(additional));
                     }
                 }
             }
             if (StringUtil.isNotBlank(indexForm.sort)) {
-                buf.append("&sort=").append(S2Functions.u(indexForm.sort));
+                buf.append("&sort=").append(LaFunctions.u(indexForm.sort));
             }
             if (StringUtil.isNotBlank(indexForm.op)) {
-                buf.append("&op=").append(S2Functions.u(indexForm.op));
+                buf.append("&op=").append(LaFunctions.u(indexForm.op));
             }
             if (indexForm.lang != null) {
                 final Set<String> langSet = new HashSet<String>();
@@ -253,7 +245,7 @@ public class IndexAction {
                 }
                 if (!langSet.isEmpty()) {
                     for (final String lang : langSet) {
-                        buf.append("&lang=").append(S2Functions.u(lang));
+                        buf.append("&lang=").append(LaFunctions.u(lang));
                     }
                 }
             }
@@ -263,7 +255,7 @@ public class IndexAction {
                     if (values != null) {
                         for (final String v : values) {
                             if (StringUtil.isNotBlank(v)) {
-                                buf.append("&fields.").append(S2Functions.u(entry.getKey())).append('=').append(S2Functions.u(v));
+                                buf.append("&fields.").append(LaFunctions.u(entry.getKey())).append('=').append(LaFunctions.u(v));
                             }
                         }
                     }
@@ -289,7 +281,7 @@ public class IndexAction {
         final String supportedSearch =
                 crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
         if (Constants.SUPPORTED_SEARCH_NONE.equals(supportedSearch)) {
-            throw new UnsupportedSearchException("A search is not supported: " + RequestUtil.getRequest().getRequestURL());
+            throw new UnsupportedSearchException("A search is not supported: " + LaRequestUtil.getRequest().getRequestURL());
         }
     }
 
@@ -335,16 +327,18 @@ public class IndexAction {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
         if (doc == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
+            errorMessage =
+                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
             return "error.jsp";
         }
 
         final String content = viewHelper.createCacheContent(doc, indexForm.hq);
         if (content == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
+            errorMessage =
+                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
             return "error.jsp";
         }
-        ResponseUtil.write(content, "text/html", Constants.UTF_8);
+        LaResponseUtil.write(content, "text/html", Constants.UTF_8);
 
         return null;
     }
@@ -363,13 +357,14 @@ public class IndexAction {
             logger.warn("Failed to request: " + indexForm.docId, e);
         }
         if (doc == null) {
-            errorMessage = MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
+            errorMessage =
+                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
             return "error.jsp";
         }
         final Object urlObj = doc.get(fieldHelper.urlField);
         if (urlObj == null) {
             errorMessage =
-                    MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.document_not_found", indexForm.docId);
+                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.document_not_found", indexForm.docId);
             return "error.jsp";
         }
         final String url = urlObj.toString();
@@ -424,7 +419,7 @@ public class IndexAction {
                 } catch (final Exception e) {
                     logger.error("Failed to load: " + doc, e);
                     errorMessage =
-                            MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.not_load_from_server", url);
+                            MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.not_load_from_server", url);
                     return "error.jsp";
                 }
             } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
@@ -432,7 +427,7 @@ public class IndexAction {
                 final File file = new File(path);
                 if (!file.exists()) {
                     errorMessage =
-                            MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.not_found_on_file_system", url);
+                            MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.not_found_on_file_system", url);
                     return "error.jsp";
                 }
                 final Desktop desktop = Desktop.getDesktop();
@@ -440,18 +435,18 @@ public class IndexAction {
                     desktop.open(file);
                 } catch (final Exception e) {
                     errorMessage =
-                            MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "errors.could_not_open_on_system", url);
+                            MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.could_not_open_on_system", url);
                     logger.warn("Could not open " + path, e);
                     return "error.jsp";
                 }
 
-                ResponseUtil.getResponse().setStatus(HttpServletResponse.SC_NO_CONTENT);
+                LaResponseUtil.getResponse().setStatus(HttpServletResponse.SC_NO_CONTENT);
                 return null;
             } else {
-                ResponseUtil.getResponse().sendRedirect(url + hash);
+                LaResponseUtil.getResponse().sendRedirect(url + hash);
             }
         } else {
-            ResponseUtil.getResponse().sendRedirect(url + hash);
+            LaResponseUtil.getResponse().sendRedirect(url + hash);
         }
         return null;
     }
@@ -711,7 +706,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String osdd() {
-        openSearchHelper.write(ResponseUtil.getResponse());
+        openSearchHelper.write(LaResponseUtil.getResponse());
         return null;
     }
 
@@ -848,7 +843,7 @@ public class IndexAction {
         final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
         facetResponse = queryResponseList.getFacetResponse();
         moreLikeThisResponse = queryResponseList.getMoreLikeThisResponse();
-        final NumberFormat nf = NumberFormat.getInstance(RequestUtil.getRequest().getLocale());
+        final NumberFormat nf = NumberFormat.getInstance(LaRequestUtil.getRequest().getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);
         try {

@@ -19,10 +19,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.dbflute.saflute.web.action.processor.ActionAdjustmentProvider;
-import org.dbflute.saflute.web.action.processor.ActionMappingWrapper;
 import org.dbflute.util.DfTypeUtil;
-import org.seasar.struts.config.S2ExecuteConfig;
+import org.lastaflute.web.path.ActionAdjustmentProvider;
 
 /**
  * @author jflute

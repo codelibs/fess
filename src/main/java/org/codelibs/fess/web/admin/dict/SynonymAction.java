@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.web.admin.dict;
 
+import java.beans.Beans;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -40,11 +41,8 @@ import org.codelibs.fess.pager.SynonymPager;
 import org.codelibs.fess.service.SynonymService;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaResponseUtil;
 
 public class SynonymAction {
 
@@ -311,7 +309,7 @@ public class SynonymAction {
             throw new SSCActionMessagesException("errors.synonym_file_is_not_found");
         }
         try (InputStream in = synonymFile.getInputStream()) {
-            ResponseUtil.download(synonymFile.getSimpleName(), in);
+            LaResponseUtil.download(synonymFile.getSimpleName(), in);
         } catch (final IOException e) {
             throw new SSCActionMessagesException("errors.failed_to_download_synonym_file");
         }

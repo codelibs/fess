@@ -38,9 +38,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ public class LogAction implements Serializable {
             final File logFile = new File(parentDir, fileName);
             if (logFile.isFile()) {
                 try {
-                    ResponseUtil.download(fileName, new FileInputStream(logFile));
+                    LaResponseUtil.download(fileName, new FileInputStream(logFile));
                     return null;
                 } catch (final FileNotFoundException e) {
                     logger.warn("Could not find " + logFile.getAbsolutePath(), e);

@@ -67,16 +67,6 @@
         <property name="unprocessedDocumentSize">100</property>
          -->
     </component>
-    <!-- for H2 -->
-    <component name="databaseHelper" class="org.codelibs.fess.helper.impl.H2DatabaseHelperImpl">
-    <!-- for MySQL -->
-<!--
-    <component name="databaseHelper" class="org.codelibs.fess.helper.impl.MySqlDatabaseHelperImpl">
--->
-        <aspect pointcut="optimize">
-            j2ee.requiresNewTx
-        </aspect>
-    </component>
     <component name="fessCrawler" class="org.codelibs.fess.exec.Crawler" instance="prototype">
     </component>
 

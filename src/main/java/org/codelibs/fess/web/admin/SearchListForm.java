@@ -18,10 +18,6 @@ package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
 
-import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.Maxbytelength;
-import org.seasar.struts.annotation.Required;
-
 public class SearchListForm implements Serializable {
 
     private static final long serialVersionUID = 1L;

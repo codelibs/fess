@@ -6,8 +6,7 @@ import org.codelibs.fess.es.bsentity.BsCrawlingSessionInfo;
 import org.codelibs.fess.es.exbhv.CrawlingSessionBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * @author FreeGen
@@ -47,7 +46,7 @@ public class CrawlingSessionInfo extends BsCrawlingSessionInfo {
     }
 
     public String getKeyMsg() {
-        final Locale locale = RequestUtil.getRequest().getLocale();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
         final String message = MessageResourcesUtil.getMessage(locale, "labels.crawling_session_" + getKey());
         if (message == null || message.startsWith("???")) {
             return getKey();

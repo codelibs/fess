@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.seasar.struts.annotation.Required;
-
 public class DocumentForm implements Serializable {
 
     private static final long serialVersionUID = 1L;

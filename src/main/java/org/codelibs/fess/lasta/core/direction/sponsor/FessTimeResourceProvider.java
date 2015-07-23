@@ -18,11 +18,11 @@ package org.codelibs.fess.lasta.core.direction.sponsor;
 import java.util.Date;
 
 import org.codelibs.fess.lasta.core.direction.FessConfig;
-import org.dbflute.saflute.core.time.BusinessTimeHandler;
-import org.dbflute.saflute.core.time.RelativeDateScript;
-import org.dbflute.saflute.core.time.TimeManager;
-import org.dbflute.saflute.core.time.TimeResourceProvider;
-import org.dbflute.saflute.core.time.TypicalBusinessTimeHandler;
+import org.lastaflute.core.time.BusinessTimeHandler;
+import org.lastaflute.core.time.RelativeDateScript;
+import org.lastaflute.core.time.TimeManager;
+import org.lastaflute.core.time.TimeResourceProvider;
+import org.lastaflute.core.time.TypicalBusinessTimeHandler;
 
 /**
  * @author jflute

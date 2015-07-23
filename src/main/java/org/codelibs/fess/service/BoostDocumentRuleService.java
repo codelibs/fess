@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import org.codelibs.fess.es.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.codelibs.fess.pager.BoostDocumentRulePager;
 import org.dbflute.cbean.result.PagingResultBean;
-import org.seasar.framework.beans.util.Beans;
 
 public class BoostDocumentRuleService implements Serializable {
 

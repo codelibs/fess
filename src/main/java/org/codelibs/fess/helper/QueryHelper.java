@@ -42,10 +42,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
@@ -55,10 +56,7 @@ import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
 import org.codelibs.fess.util.QueryUtil;
 import org.codelibs.fess.util.SearchParamMap;
-import org.seasar.framework.container.annotation.tiger.Binding;
-import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
 
@@ -84,7 +82,6 @@ public class QueryHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Binding(bindingType = BindingType.MAY)
     @Resource
     protected RoleQueryHelper roleQueryHelper;
 
@@ -94,7 +91,6 @@ public class QueryHelper implements Serializable {
     @Resource
     protected FieldHelper fieldHelper;
 
-    @Binding(bindingType = BindingType.MAY)
     @Resource
     protected KeyMatchHelper keyMatchHelper;
 
@@ -156,7 +152,7 @@ public class QueryHelper implements Serializable {
 
     protected Map<String, String> fieldBoostMap = new HashMap<String, String>();
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (responseFields == null) {
             responseFields =
@@ -312,7 +308,7 @@ public class QueryHelper implements Serializable {
             searchQuery.addSortField(entry.getKey(), entry.getValue());
         }
         // set queries to request for HighLight
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         if (request != null) {
             request.setAttribute(Constants.HIGHLIGHT_QUERIES, highLightQueryList.toArray(new String[highLightQueryList.size()]));
             request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
@@ -935,7 +931,7 @@ public class QueryHelper implements Serializable {
         if (defaultQueryLanguage != null) {
             return defaultQueryLanguage;
         }
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         if (request == null) {
             return null;
         }
@@ -1396,7 +1392,7 @@ public class QueryHelper implements Serializable {
             return additionalQueryParamMap;
         }
 
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         final Map<String, String[]> queryParamMap = new HashMap<String, String[]>();
         for (final Map.Entry<String, String[]> entry : additionalQueryParamMap.entrySet()) {
             final String[] values = entry.getValue();
@@ -1434,7 +1430,7 @@ public class QueryHelper implements Serializable {
     }
 
     protected String getDefaultOperator() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         if (request != null) {
             final String defaultOperator = (String) request.getAttribute(Constants.DEFAULT_OPERATOR);
             if (AND.equalsIgnoreCase(defaultOperator)) {

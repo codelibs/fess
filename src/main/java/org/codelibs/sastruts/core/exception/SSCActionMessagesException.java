@@ -15,8 +15,6 @@
  */
 package org.codelibs.sastruts.core.exception;
 
-import org.seasar.struts.exception.ActionMessagesException;
-
 /**
  * SSCActionMessagesException allows you to pass a root cause.
  * 

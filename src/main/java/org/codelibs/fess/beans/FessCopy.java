@@ -19,8 +19,6 @@ package org.codelibs.fess.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.seasar.framework.beans.util.Copy;
-
 public class FessCopy extends Copy {
 
     public FessCopy(final Object src, final Object dest) {

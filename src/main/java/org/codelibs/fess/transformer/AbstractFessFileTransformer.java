@@ -29,9 +29,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
+import org.codelibs.core.collection.LruHashMap;
+import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -46,21 +48,17 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.RobotCrawlAccessException;
-import org.codelibs.robot.RobotSystemException;
 import org.codelibs.robot.client.smb.SmbClient;
-import org.codelibs.robot.db.cbean.AccessResultDataCB;
-import org.codelibs.robot.db.exbhv.AccessResultDataBhv;
 import org.codelibs.robot.entity.AccessResultData;
 import org.codelibs.robot.entity.ExtractData;
 import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.entity.ResultData;
 import org.codelibs.robot.entity.UrlQueue;
+import org.codelibs.robot.exception.RobotCrawlAccessException;
+import org.codelibs.robot.exception.RobotSystemException;
 import org.codelibs.robot.extractor.Extractor;
 import org.codelibs.robot.util.CrawlingParameterUtil;
-import org.codelibs.robot.util.LruHashMap;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.SerializeUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -406,7 +404,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         cb.query().queryAccessResult().setSessionId_Equal(sessionId);
         cb.query().queryAccessResult().setUrl_Equal(parentUrl);
         cb.specify().columnEncoding();
-        final AccessResultData accessResultData = SingletonS2Container.getComponent(AccessResultDataBhv.class).selectEntity(cb);
+        final AccessResultData accessResultData = SingletonLaContainer.getComponent(AccessResultDataBhv.class).selectEntity(cb);
         if (accessResultData != null && accessResultData.getEncoding() != null) {
             enc = accessResultData.getEncoding();
             parentEncodingMap.put(key, enc);

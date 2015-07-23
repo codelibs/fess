@@ -36,19 +36,14 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2Robot;
-import org.codelibs.robot.db.cbean.AccessResultCB;
-import org.codelibs.robot.db.exbhv.AccessResultBhv;
-import org.codelibs.robot.db.exbhv.AccessResultDataBhv;
-import org.codelibs.robot.db.exentity.AccessResult;
-import org.codelibs.robot.dbflute.cbean.PagingResultBean;
+import org.codelibs.robot.entity.AccessResult;
 import org.codelibs.robot.entity.AccessResultData;
 import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.service.UrlFilterService;
 import org.codelibs.robot.service.UrlQueueService;
 import org.codelibs.robot.transformer.Transformer;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.Binding;
-import org.seasar.framework.container.annotation.tiger.BindingType;
+import org.dbflute.cbean.result.PagingResultBean;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -328,7 +323,7 @@ public class IndexUpdater extends Thread {
                 accessResult.setAccessResultData(null);
                 accessResultDataList.add((org.codelibs.robot.db.exentity.AccessResultData) accessResultData);
                 try {
-                    final Transformer transformer = SingletonS2Container.getComponent(accessResultData.getTransformerName());
+                    final Transformer transformer = SingletonLaContainer.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
                         logger.warn("No transformer: " + accessResultData.getTransformerName());

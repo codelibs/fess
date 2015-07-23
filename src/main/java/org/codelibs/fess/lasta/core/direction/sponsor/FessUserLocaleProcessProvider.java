@@ -17,9 +17,8 @@ package org.codelibs.fess.lasta.core.direction.sponsor;
 
 import java.util.Locale;
 
-import org.dbflute.saflute.web.action.callback.ActionExecuteMeta;
-import org.dbflute.saflute.web.servlet.request.RequestManager;
-import org.dbflute.saflute.web.servlet.request.UserLocaleProcessProvider;
+import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.servlet.request.UserLocaleProcessProvider;
 
 /**
  * @author jflute

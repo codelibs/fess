@@ -17,7 +17,7 @@
 package org.codelibs.fess.job.impl;
 
 import org.codelibs.fess.job.JobExecutor;
-import org.seasar.framework.container.factory.SingletonS2ContainerFactory;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -27,7 +27,7 @@ public class GroovyExecutor extends JobExecutor {
     @Override
     public Object execute(final String script) {
         final Binding binding = new Binding();
-        binding.setVariable("container", SingletonS2ContainerFactory.getContainer());
+        binding.setVariable("container", SingletonLaContainerFactory.getContainer());
         binding.setVariable("executor", this);
 
         final GroovyShell shell = new GroovyShell(binding);

@@ -20,10 +20,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.codelibs.fess.service.OverlappingHostService;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 public class OverlappingHostHelper implements Serializable {
 
@@ -31,12 +32,12 @@ public class OverlappingHostHelper implements Serializable {
 
     private List<OverlappingHost> overlappingHostList;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (overlappingHostList == null) {
             overlappingHostList = new ArrayList<OverlappingHost>();
         }
-        final OverlappingHostService overlappingHostService = SingletonS2Container.getComponent(OverlappingHostService.class);
+        final OverlappingHostService overlappingHostService = SingletonLaContainer.getComponent(OverlappingHostService.class);
         overlappingHostList.addAll(overlappingHostService.getOverlappingHostList());
     }
 

@@ -19,12 +19,12 @@ package org.codelibs.fess.transformer;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.extractor.Extractor;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 public class FessTikaTransformer extends AbstractFessFileTransformer {
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
-        final Extractor extractor = SingletonS2Container.getComponent("tikaExtractor");
+        final Extractor extractor = SingletonLaContainer.getComponent("tikaExtractor");
         if (extractor == null) {
             throw new FessSystemException("Could not find tikaExtractor.");
         }

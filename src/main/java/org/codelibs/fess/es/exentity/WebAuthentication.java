@@ -16,10 +16,10 @@ import org.codelibs.fess.es.bsentity.BsWebAuthentication;
 import org.codelibs.fess.service.WebConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.codelibs.robot.RobotSystemException;
 import org.codelibs.robot.client.http.Authentication;
 import org.codelibs.robot.client.http.impl.AuthenticationImpl;
 import org.codelibs.robot.client.http.ntlm.JcifsEngine;
+import org.codelibs.robot.exception.RobotSystemException;
 
 /**
  * @author FreeGen

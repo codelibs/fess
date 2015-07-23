@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN" 
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="s2robot">
+    <include path="s2robot/container.xml"/>
+    <include path="s2robot/client.xml"/>
+    <include path="s2robot/rule.xml"/>
+    <include path="s2robot/filter.xml"/>
+    <include path="s2robot/interval.xml"/>
+    <include path="s2robot/extractor.xml"/>
+    <include path="s2robot/mimetype.xml"/>
+    <include path="s2robot/encoding.xml"/>
+    <include path="s2robot/urlconverter.xml"/>
+    <include path="s2robot/log.xml"/>
+    <include path="s2robot/sitemaps.xml"/>
+
+    <include path="s2robot/es.xml"/>
+
+	<!-- S2Robot -->
+	<component name="s2Robot" class="org.codelibs.robot.S2Robot" instance="prototype" >
+	</component>
+
+	<!-- Robot Thread -->
+	<component name="robotThread" class="org.codelibs.fess.robot.FessS2RobotThread" instance="prototype" >
+	</component>
+
+	<!-- Entity -->
+	<component name="accessResult"
+		class="org.codelibs.robot.entity.EsAccessResult" instance="prototype">
+	</component>
+	<component name="urlQueue"
+		class="org.codelibs.robot.entity.EsUrlQueue" instance="prototype">
+	</component>
+
+	<!-- Service -->
+	<component name="urlQueueService"
+		class="org.codelibs.robot.service.impl.EsUrlQueueService">
+		<property name="index">".robot"</property>
+		<property name="type">"queue"</property>
+	</component>
+	<component name="dataService"
+		class="org.codelibs.robot.service.impl.EsDataService">
+		<property name="index">".robot"</property>
+		<property name="type">"data"</property>
+	</component>
+	<component name="urlFilterService"
+		class="org.codelibs.robot.service.impl.EsUrlFilterService">
+		<property name="index">".robot"</property>
+		<property name="type">"filter"</property>
+	</component>
+
+</components>

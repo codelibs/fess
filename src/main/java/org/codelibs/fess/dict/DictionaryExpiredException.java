@@ -16,8 +16,6 @@
 
 package org.codelibs.fess.dict;
 
-import org.seasar.struts.exception.ActionMessagesException;
-
 public class DictionaryExpiredException extends ActionMessagesException {
 
     private static final long serialVersionUID = 1L;

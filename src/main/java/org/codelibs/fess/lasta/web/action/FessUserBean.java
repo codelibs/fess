@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.lasta.web.action;
 
-import org.dbflute.saflute.web.action.login.TypicalUserBaseBean;
-
 /**
  * @author jflute
  */

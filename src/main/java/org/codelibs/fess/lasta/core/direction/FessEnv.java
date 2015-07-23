@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.lasta.core.direction;
 
-import org.dbflute.saflute.core.direction.ObjectiveConfig;
+import org.lastaflute.core.direction.ObjectiveConfig;
 
 /**
  * @author FreeGen

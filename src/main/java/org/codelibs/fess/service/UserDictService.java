@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,6 @@ import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.userdict.UserDictFile;
 import org.codelibs.fess.dict.userdict.UserDictItem;
 import org.codelibs.fess.pager.UserDictPager;
-import org.seasar.framework.beans.util.Beans;
 
 public class UserDictService {
     @Resource

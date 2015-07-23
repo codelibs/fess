@@ -23,18 +23,11 @@ import org.codelibs.fess.lasta.core.direction.sponsor.FessActionAdjustmentProvid
 import org.codelibs.fess.lasta.core.direction.sponsor.FessTimeResourceProvider;
 import org.codelibs.fess.lasta.core.direction.sponsor.FessUserLocaleProcessProvider;
 import org.codelibs.fess.lasta.core.direction.sponsor.FessUserTimeZoneProcessProvider;
-import org.dbflute.saflute.core.direction.CachedFwAssistantDirector;
-import org.dbflute.saflute.core.direction.OptionalAssistDirection;
-import org.dbflute.saflute.core.direction.OptionalCoreDirection;
-import org.dbflute.saflute.core.security.InvertibleCipher;
-import org.dbflute.saflute.db.dbflute.OptionalDBFluteDirection;
-import org.dbflute.saflute.web.action.OptionalActionDirection;
-import org.dbflute.saflute.web.servlet.OptionalServletDirection;
-import org.dbflute.saflute.web.servlet.cookie.CookieResourceProvider;
-import org.dbflute.saflute.web.task.OptionalTaskDirection;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.system.provider.DfFinalTimeZoneProvider;
 import org.dbflute.util.DfTypeUtil;
+import org.lastaflute.core.direction.CachedFwAssistantDirector;
+import org.lastaflute.web.servlet.cookie.CookieResourceProvider;
 
 /**
  * @author jflute

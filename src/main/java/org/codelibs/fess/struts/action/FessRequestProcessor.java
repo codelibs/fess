@@ -19,7 +19,6 @@ package org.codelibs.fess.struts.action;
 import java.util.Map;
 
 import org.codelibs.fess.util.SearchParamMap;
-import org.seasar.struts.action.S2RequestProcessor;
 
 public class FessRequestProcessor extends S2RequestProcessor/*ActionRequestProcessor*/{
     @Override

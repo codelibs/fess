@@ -56,16 +56,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.seasar.framework.container.ExternalContext;
-import org.seasar.framework.container.S2Container;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.Binding;
-import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.container.factory.SingletonS2ContainerFactory;
-import org.seasar.framework.container.servlet.SingletonS2ContainerInitializer;
-import org.seasar.framework.mock.servlet.MockHttpServletRequestImpl;
-import org.seasar.framework.mock.servlet.MockHttpServletResponseImpl;
-import org.seasar.framework.mock.servlet.MockServletContextImpl;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +65,8 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+
+import net.arnx.jsonic.web.extension.S2Container;
 
 public class Crawler implements Serializable {
 
@@ -89,7 +83,6 @@ public class Crawler implements Serializable {
     @Resource
     protected FessEsClient fessEsClient;
 
-    @Binding(bindingType = BindingType.MAY)
     @Resource
     protected ScreenShotManager screenShotManager;
 
@@ -193,12 +186,12 @@ public class Crawler implements Serializable {
             final ServletContext servletContext = new MockServletContextImpl("/fess");
             final HttpServletRequest request = new MockHttpServletRequestImpl(servletContext, "/crawler");
             final HttpServletResponse response = new MockHttpServletResponseImpl(request);
-            final SingletonS2ContainerInitializer initializer = new SingletonS2ContainerInitializer();
+            final SingletonLaContainerInitializer initializer = new SingletonLaContainerInitializer();
             initializer.setConfigPath("app.dicon");
             initializer.setApplication(servletContext);
             initializer.initialize();
 
-            final S2Container container = SingletonS2ContainerFactory.getContainer();
+            final S2Container container = SingletonLaContainerFactory.getContainer();
             final ExternalContext externalContext = container.getExternalContext();
             externalContext.setRequest(request);
             externalContext.setResponse(response);
@@ -209,7 +202,7 @@ public class Crawler implements Serializable {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Destroying S2Container..");
                     }
-                    SingletonS2ContainerFactory.destroy();
+                    SingletonLaContainerFactory.destroy();
                 }
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
@@ -219,7 +212,7 @@ public class Crawler implements Serializable {
             logger.error("Crawler does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
-            SingletonS2ContainerFactory.destroy();
+            SingletonLaContainerFactory.destroy();
         }
 
         if (exitCode != Constants.EXIT_OK) {
@@ -228,7 +221,7 @@ public class Crawler implements Serializable {
     }
 
     private static int process(final Options options) {
-        final Crawler crawler = SingletonS2Container.getComponent(Crawler.class);
+        final Crawler crawler = SingletonLaContainer.getComponent(Crawler.class);
 
         final DatabaseHelper databaseHelper = ComponentUtil.getDatabaseHelper();
         databaseHelper.optimize();

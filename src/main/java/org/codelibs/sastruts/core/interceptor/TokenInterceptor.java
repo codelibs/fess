@@ -17,12 +17,10 @@ package org.codelibs.sastruts.core.interceptor;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.aopalliance.intercept.MethodInvocation;
-import org.apache.struts.util.TokenProcessor;
 import org.codelibs.sastruts.core.annotation.Token;
-import org.seasar.framework.aop.interceptors.AbstractInterceptor;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.di.core.aop.frame.MethodInvocation;
+import org.lastaflute.di.core.aop.interceptors.AbstractInterceptor;
+import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * @author shinsuke
@@ -47,7 +45,7 @@ public class TokenInterceptor extends AbstractInterceptor {
         final Token token = invocation.getMethod().getAnnotation(Token.class);
         if (token != null) {
             final TokenProcessor processor = TokenProcessor.getInstance();
-            final HttpServletRequest request = RequestUtil.getRequest();
+            final HttpServletRequest request = LaRequestUtil.getRequest();
             if (token.save()) {
                 processor.saveToken(request);
             } else if (token.validate() && !processor.isTokenValid(request, !token.keep())) {

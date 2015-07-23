@@ -38,7 +38,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class CrawlingSessionHelper implements Serializable {
     private final int maxSessionIdsInList = 100;
 
     protected CrawlingSessionService getCrawlingSessionService() {
-        return SingletonS2Container.getComponent(CrawlingSessionService.class);
+        return SingletonLaContainer.getComponent(CrawlingSessionService.class);
     }
 
     public String getCanonicalSessionId(final String sessionId) {

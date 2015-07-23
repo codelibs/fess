@@ -18,11 +18,6 @@ package org.codelibs.fess.web.admin;
 
 import java.io.Serializable;
 
-import org.seasar.struts.annotation.IntRange;
-import org.seasar.struts.annotation.LongRange;
-import org.seasar.struts.annotation.Maxbytelength;
-import org.seasar.struts.annotation.Required;
-
 public class CrawlForm implements Serializable {
 
     private static final long serialVersionUID = 1L;

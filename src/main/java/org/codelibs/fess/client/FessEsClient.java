@@ -9,6 +9,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.codec.Charsets;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.io.FileUtil;
@@ -135,8 +138,6 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.threadpool.ThreadPool;
-import org.seasar.framework.container.annotation.tiger.DestroyMethod;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +184,7 @@ public class FessEsClient implements Client {
         transportAddressList.add(new InetSocketTransportAddress(host, port));
     }
 
-    @InitMethod
+    @PostConstruct
     public void open() {
         final String transportAddressesValue = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
         if (StringUtil.isNotBlank(transportAddressesValue)) {
@@ -318,7 +319,7 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    @DestroyMethod
+    @PreDestroy
     public void close() {
         try {
             client.close();

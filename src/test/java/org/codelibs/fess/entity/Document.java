@@ -68,7 +68,7 @@ public class Document implements Serializable {
     public String mimetype;
 
     //    public String getContentTitle() {
-    //        ViewHelper viewHelper = SingletonS2Container.getComponent("viewHelper");
+    //        ViewHelper viewHelper = SingletonLaContainer.getComponent("viewHelper");
     //        if (viewHelper != null) {
     //            return viewHelper.getContentTitle(this);
     //        }
@@ -76,7 +76,7 @@ public class Document implements Serializable {
     //    }
     //
     //    public String getContentDescription() {
-    //        ViewHelper viewHelper = SingletonS2Container.getComponent("viewHelper");
+    //        ViewHelper viewHelper = SingletonLaContainer.getComponent("viewHelper");
     //        if (viewHelper != null) {
     //            return viewHelper.getContentDescription(this);
     //        }
@@ -84,7 +84,7 @@ public class Document implements Serializable {
     //    }
     //
     //    public String getUrlLink() {
-    //        ViewHelper viewHelper = SingletonS2Container.getComponent("viewHelper");
+    //        ViewHelper viewHelper = SingletonLaContainer.getComponent("viewHelper");
     //        if (viewHelper != null) {
     //            return viewHelper.getUrlLink(this);
     //        }

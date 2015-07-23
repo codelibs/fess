@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.web.admin;
 
+import java.beans.Beans;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -47,15 +48,10 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.pager.SuggestBadWordPager;
 import org.codelibs.fess.service.SuggestBadWordService;
 import org.codelibs.fess.web.base.FessAdminAction;
-import org.codelibs.robot.util.StreamUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.util.StringUtil;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -365,7 +361,7 @@ public class SuggestBadWordAction extends FessAdminAction {
     @Execute(validator = false, input = "downloadpage")
     public String download() {
 
-        final HttpServletResponse response = ResponseUtil.getResponse();
+        final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + "badword.csv" + "\"");
 

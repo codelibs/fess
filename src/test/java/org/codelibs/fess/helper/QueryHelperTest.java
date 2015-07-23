@@ -28,7 +28,7 @@ import org.codelibs.fess.util.QueryUtil;
 import org.codelibs.fess.util.SearchParamMap;
 import org.seasar.extension.unit.S2TestCase;
 import org.seasar.framework.mock.servlet.MockHttpServletRequest;
-import org.seasar.struts.util.RequestUtil;
+import org.seasar.struts.util.LaRequestUtil;
 
 public class QueryHelperTest extends S2TestCase {
 
@@ -1300,7 +1300,7 @@ public class QueryHelperTest extends S2TestCase {
 
     public void test_getQueryLanguage() {
         assertNull(queryHelper.getQueryLanguage());
-        final MockHttpServletRequest request = (MockHttpServletRequest) RequestUtil.getRequest();
+        final MockHttpServletRequest request = (MockHttpServletRequest) LaRequestUtil.getRequest();
         request.setLocale(Locale.JAPAN);
         assertEquals("ja", queryHelper.getQueryLanguage());
         request.setLocale(Locale.SIMPLIFIED_CHINESE);
@@ -1316,7 +1316,7 @@ public class QueryHelperTest extends S2TestCase {
     }
 
     public void test_buildWithLang() {
-        final MockHttpServletRequest request = (MockHttpServletRequest) RequestUtil.getRequest();
+        final MockHttpServletRequest request = (MockHttpServletRequest) LaRequestUtil.getRequest();
         request.setLocale(Locale.JAPAN);
 
         for (final String op : new String[] { "AND", "OR" }) {

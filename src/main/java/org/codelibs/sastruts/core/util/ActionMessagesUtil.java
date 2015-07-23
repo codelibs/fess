@@ -18,9 +18,8 @@ package org.codelibs.sastruts.core.util;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.Globals;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
+import org.lastaflute.web.ruts.message.ActionMessage;
+import org.lastaflute.web.ruts.message.ActionMessages;
 
 /**
  * ActionMessages Utility.

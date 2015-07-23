@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
-<components>
-	<include path="s2robot_transformer_basic.xml"/>
+<components namespace="s2robot">
+	<include path="s2robot/transformer_basic.xml"/>
+
 
 	<component name="fessXpathTransformer" class="org.codelibs.fess.transformer.FessXpathTransformer" instance="singleton">
 		<property name="name">"fessXpathTransformer"</property>
@@ -24,36 +25,36 @@
 		<property name="replaceSiteEncodingWhenEnglish">true</property>
 		<property name="siteEncoding">"UTF-8"</property>
 		<!-- segment -->
-		<initMethod name="addFieldRule">
+		<postConstruct name="addFieldRule">
 			<arg>"title"</arg>
 			<arg>"//TITLE"</arg>
-		</initMethod>
-		<initMethod name="addPrunedTag">
+		</postConstruct>
+		<postConstruct name="addPrunedTag">
 			<arg>"noscript"</arg>
-		</initMethod>
-		<initMethod name="addPrunedTag">
+		</postConstruct>
+		<postConstruct name="addPrunedTag">
 			<arg>"script"</arg>
-		</initMethod>
+		</postConstruct>
 	</component>
 
 	<component name="fessFileTransformer" class="org.codelibs.fess.transformer.FessFileTransformer" instance="singleton">
 		<property name="name">"fessFileTransformer"</property>
 		<property name="replaceSiteEncodingWhenEnglish">true</property>
 		<property name="siteEncoding">"UTF-8"</property>
-		<initMethod name="addMetaContentMapping">
+		<postConstruct name="addMetaContentMapping">
 			<arg>"title"</arg>
 			<arg>"title"</arg>
-		</initMethod>
-		<initMethod name="addMetaContentMapping">
+		</postConstruct>
+		<postConstruct name="addMetaContentMapping">
 			<arg>"Title"</arg>
 			<arg>"title"</arg>
-		</initMethod>
+		</postConstruct>
 		<!-- 
 		<property name="ignoreEmptyContent">false</property>
-		<initMethod name="addMetaContentMapping">
+		<postConstruct name="addMetaContentMapping">
 			<arg>"Author"</arg>
 			<arg>"author_t"</arg>
-		</initMethod>
+		</postConstruct>
 		 -->
 	</component>
 
@@ -61,20 +62,20 @@
 		<property name="name">"fessTikaTransformer"</property>
 		<property name="replaceSiteEncodingWhenEnglish">true</property>
 		<property name="siteEncoding">"UTF-8"</property>
-		<initMethod name="addMetaContentMapping">
+		<postConstruct name="addMetaContentMapping">
 			<arg>"title"</arg>
 			<arg>"title"</arg>
-		</initMethod>
-		<initMethod name="addMetaContentMapping">
+		</postConstruct>
+		<postConstruct name="addMetaContentMapping">
 			<arg>"Title"</arg>
 			<arg>"title"</arg>
-		</initMethod>
+		</postConstruct>
 		<!-- 
 		<property name="ignoreEmptyContent">false</property>
-		<initMethod name="addMetaContentMapping">
+		<postConstruct name="addMetaContentMapping">
 			<arg>"Author"</arg>
 			<arg>"author_t"</arg>
-		</initMethod>
+		</postConstruct>
 		 -->
 	</component>
 </components>

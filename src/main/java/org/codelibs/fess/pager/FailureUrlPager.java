@@ -19,8 +19,6 @@ package org.codelibs.fess.pager;
 import java.util.List;
 
 import org.codelibs.fess.Constants;
-import org.seasar.struts.annotation.IntRange;
-import org.seasar.struts.annotation.Maxbytelength;
 
 public class FailureUrlPager {
 

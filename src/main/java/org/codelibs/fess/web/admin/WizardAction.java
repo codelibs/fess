@@ -23,7 +23,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -41,8 +40,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
+import org.lastaflute.web.Execute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

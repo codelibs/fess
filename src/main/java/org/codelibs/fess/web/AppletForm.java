@@ -16,8 +16,6 @@
 
 package org.codelibs.fess.web;
 
-import org.seasar.struts.annotation.Required;
-
 public class AppletForm {
     @Required
     public String uri;

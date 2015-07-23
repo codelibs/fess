@@ -18,9 +18,6 @@ package org.codelibs.fess.entity;
 
 import java.util.Arrays;
 
-import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.Maxbytelength;
-
 public class FacetInfo {
     @Maxbytelength(maxbytelength = 255)
     public String[] field;

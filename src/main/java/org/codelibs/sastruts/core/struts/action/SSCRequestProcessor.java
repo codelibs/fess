@@ -17,10 +17,8 @@ package org.codelibs.sastruts.core.struts.action;
 
 import javax.servlet.ServletException;
 
-import org.apache.struts.action.ActionServlet;
-import org.apache.struts.config.ModuleConfig;
-import org.seasar.framework.util.ArrayUtil;
-import org.seasar.struts.action.S2RequestProcessor;
+import org.lastaflute.web.ruts.config.ModuleConfig;
+import org.lastaflute.web.ruts.process.ActionFormMapper.IndexParsedResult;
 
 /**
  * @author shinsuke

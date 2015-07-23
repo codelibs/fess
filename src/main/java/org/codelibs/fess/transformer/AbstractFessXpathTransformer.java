@@ -21,12 +21,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.transformer.impl.XpathTransformer;
-import org.seasar.framework.util.OgnlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

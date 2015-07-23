@@ -38,7 +38,7 @@ map:{
 
     # settings for web applications
     ; appMap = map:{
-        ; harbor = map:{
+        ; fess = map:{
             ; path = ..
             ; freeGenList = list:{ env ; config ; label ; message ; mail ; template ; jsp ; doc }
             ; propertiesHtmlList = list:{ env ; config ; label ; message }
@@ -47,7 +47,7 @@ map:{
 
     # you can override (several) default settings like this:
     #; overrideMap = map:{
-    #    ; harbor.freeGen.mail.targetDir = ./playsql/data/mail
+    #    ; fess.freeGen.mail.targetDir = ./playsql/data/mail
     #}
 }
 # ----------------/

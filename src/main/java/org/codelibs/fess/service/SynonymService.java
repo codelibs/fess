@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,6 @@ import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.synonym.SynonymFile;
 import org.codelibs.fess.dict.synonym.SynonymItem;
 import org.codelibs.fess.pager.SynonymPager;
-import org.seasar.framework.beans.util.Beans;
 
 public class SynonymService {
     @Resource

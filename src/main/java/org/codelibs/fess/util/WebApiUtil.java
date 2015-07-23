@@ -17,7 +17,7 @@
 package org.codelibs.fess.util;
 
 import org.codelibs.fess.WebApiException;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public final class WebApiUtil {
 
@@ -27,25 +27,25 @@ public final class WebApiUtil {
     }
 
     public static void setObject(final String name, final Object value) {
-        RequestUtil.getRequest().setAttribute(name, value);
+        LaRequestUtil.getRequest().setAttribute(name, value);
     }
 
     public static <T> T getObject(final String name) {
         @SuppressWarnings("unchecked")
-        final T value = (T) RequestUtil.getRequest().getAttribute(name);
+        final T value = (T) LaRequestUtil.getRequest().getAttribute(name);
         return value;
     }
 
     public static void setError(final int statusCode, final String message) {
-        RequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, message));
+        LaRequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, message));
     }
 
     public static void setError(final int statusCode, final Exception e) {
-        RequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, e));
+        LaRequestUtil.getRequest().setAttribute(WEB_API_EXCEPTION, new WebApiException(statusCode, e));
     }
 
     public static void validate() {
-        final WebApiException e = (WebApiException) RequestUtil.getRequest().getAttribute(WEB_API_EXCEPTION);
+        final WebApiException e = (WebApiException) LaRequestUtil.getRequest().getAttribute(WEB_API_EXCEPTION);
         if (e != null) {
             throw e;
         }

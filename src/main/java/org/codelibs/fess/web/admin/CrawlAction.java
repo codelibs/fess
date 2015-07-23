@@ -31,10 +31,8 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,9 +158,9 @@ public class CrawlAction implements Serializable {
 
     public List<Map<String, String>> getSupportedSearchItems() {
         final List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.supported_search_web"),
+        list.add(createItem(MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_web"),
                 Constants.SUPPORTED_SEARCH_WEB));
-        list.add(createItem(MessageResourcesUtil.getMessage(RequestUtil.getRequest().getLocale(), "labels.supported_search_none"),
+        list.add(createItem(MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_none"),
                 Constants.SUPPORTED_SEARCH_NONE));
         return list;
     }

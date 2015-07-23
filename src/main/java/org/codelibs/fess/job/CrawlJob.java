@@ -25,8 +25,8 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
@@ -36,7 +36,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,7 +211,7 @@ public class CrawlJob {
     protected void executeCrawler() {
         final List<String> crawlerCmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = SingletonS2Container.getComponent(ServletContext.class);
+        final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
 

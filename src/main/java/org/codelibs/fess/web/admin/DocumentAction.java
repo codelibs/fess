@@ -40,9 +40,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.taglib.S2Functions;
+import org.lastaflute.web.Execute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +131,7 @@ public class DocumentAction implements Serializable {
     @Execute(validator = true, input = "index")
     public String confirmByUrl() {
         final String confirmQuery = fieldHelper.urlField + ":\"" + documentForm.deleteUrl + "\"";
-        return "/admin/searchList/search?query=" + S2Functions.u(confirmQuery) + "&redirect=true";
+        return "/admin/searchList/search?query=" + LaFunctions.u(confirmQuery) + "&redirect=true";
     }
 
     @Token(save = false, validate = true)

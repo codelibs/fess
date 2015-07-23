@@ -30,7 +30,6 @@ import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.framework.util.OgnlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

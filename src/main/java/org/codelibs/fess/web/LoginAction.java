@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.Globals;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -39,10 +38,9 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.sastruts.core.SSCConstants;
 import org.codelibs.sastruts.core.util.ActivityUtil;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ResponseUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +58,7 @@ public class LoginAction implements Serializable {
 
     @Execute(validator = false, input = "../index")
     public String index() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         final HttpSession session = request.getSession();
         // check login session
         final Object obj = session.getAttribute(SSCConstants.USER_INFO);
@@ -91,13 +89,13 @@ public class LoginAction implements Serializable {
             final int idx = value.indexOf('|');
             if (idx >= 0) {
                 returnPath = value.substring(idx + 1);
-                RequestUtil.getRequest().getSession().setAttribute(Constants.RETURN_PATH, returnPath);
+                LaRequestUtil.getRequest().getSession().setAttribute(Constants.RETURN_PATH, returnPath);
             } else {
                 // invalid returnPath
-                RequestUtil.getRequest().getSession().removeAttribute(Constants.RETURN_PATH);
+                LaRequestUtil.getRequest().getSession().removeAttribute(Constants.RETURN_PATH);
             }
         } else {
-            RequestUtil.getRequest().getSession().removeAttribute(Constants.RETURN_PATH);
+            LaRequestUtil.getRequest().getSession().removeAttribute(Constants.RETURN_PATH);
         }
 
         return "login?redirect=true";
@@ -105,7 +103,7 @@ public class LoginAction implements Serializable {
 
     @Execute(validator = false, input = "../index")
     public String login() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         final HttpSession oldSession = request.getSession();
 
         final Map<String, Object> sessionObjMap = new HashMap<String, Object>();
@@ -158,7 +156,7 @@ public class LoginAction implements Serializable {
                 // logout
                 session.invalidate();
             }
-            returnPath = RequestUtil.getRequest().getContextPath();
+            returnPath = LaRequestUtil.getRequest().getContextPath();
         }
 
         redirect(returnPath);
@@ -167,7 +165,7 @@ public class LoginAction implements Serializable {
     }
 
     private void redirect(final String returnPath) {
-        final HttpServletResponse response = ResponseUtil.getResponse();
+        final HttpServletResponse response = LaResponseUtil.getResponse();
         try {
             response.sendRedirect(response.encodeURL(returnPath));
         } catch (final IOException e) {
@@ -176,7 +174,7 @@ public class LoginAction implements Serializable {
     }
 
     private String getAdminRootPath() {
-        String returnPath = RequestUtil.getRequest().getContextPath();
+        String returnPath = LaRequestUtil.getRequest().getContextPath();
         if (StringUtil.isEmpty(returnPath) || "/".equals(returnPath)) {
             returnPath = "/admin";
         } else {
@@ -187,7 +185,7 @@ public class LoginAction implements Serializable {
 
     @Execute(validator = false, input = "../index")
     public String logout() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         ActivityUtil.logout(request.getRemoteUser(), request);
 
         final HttpSession session = request.getSession();

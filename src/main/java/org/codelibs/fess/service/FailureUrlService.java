@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.service;
 
+import java.beans.Beans;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -26,7 +27,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -41,8 +41,7 @@ import org.codelibs.fess.pager.FailureUrlPager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 public class FailureUrlService implements Serializable {
 
@@ -209,7 +208,7 @@ public class FailureUrlService implements Serializable {
     }
 
     public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
-        final FailureUrlBhv failureUrlBhv = SingletonS2Container.getComponent(FailureUrlBhv.class);
+        final FailureUrlBhv failureUrlBhv = SingletonLaContainer.getComponent(FailureUrlBhv.class);
         FailureUrl failureUrl = failureUrlBhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {

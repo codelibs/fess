@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.web.admin;
 
+import java.beans.Beans;
 import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.List;
@@ -41,11 +42,8 @@ import org.codelibs.sastruts.core.annotation.Token;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.taglib.S2Functions;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +168,7 @@ public class SearchListAction implements Serializable {
             throw new SSCActionMessagesException(e, "errors.result_size_exceeded");
         }
         final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
-        final NumberFormat nf = NumberFormat.getInstance(RequestUtil.getRequest().getLocale());
+        final NumberFormat nf = NumberFormat.getInstance(LaRequestUtil.getRequest().getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);
         try {
@@ -270,7 +268,7 @@ public class SearchListAction implements Serializable {
         });
         thread.start();
         SAStrutsUtil.addSessionMessage("success.delete_solr_index");
-        return "search?query=" + S2Functions.u(searchListForm.query) + "&redirect=true";
+        return "search?query=" + LaFunctions.u(searchListForm.query) + "&redirect=true";
     }
 
     public boolean isSolrProcessRunning() {

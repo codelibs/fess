@@ -21,8 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.sastruts.core.util.ActivityUtil;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class IndexAction {
 
@@ -40,7 +40,7 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String logout() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         ActivityUtil.logout(request.getRemoteUser(), request);
 
         request.getSession().invalidate();

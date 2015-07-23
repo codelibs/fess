@@ -19,16 +19,16 @@ package org.codelibs.fess.helper;
 import java.io.File;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.FileUtil;
-import org.seasar.struts.util.ServletContextUtil;
+import org.lastaflute.web.util.LaServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +50,10 @@ public class OpenSearchHelper {
 
     private File osddFile;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (StringUtil.isNotBlank(osddPath)) {
-            final String path = ServletContextUtil.getServletContext().getRealPath(osddPath);
+            final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
             osddFile = new File(path);
             if (!osddFile.isFile()) {
                 osddFile = null;
@@ -77,7 +77,7 @@ public class OpenSearchHelper {
         ServletOutputStream os = null;
         try {
             os = response.getOutputStream();
-            os.write(FileUtil.getBytes(osddFile));
+            os.write(FileUtil.readBytes(osddFile));
         } catch (final IOException e) {
             throw new FessSystemException("Failed to write OpenSearch response.", e);
         } finally {

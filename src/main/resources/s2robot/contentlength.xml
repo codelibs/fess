@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
-<components>
-	<component name="contentLengthHelper" class="org.codelibs.robot.helper.ContentLengthHelper" instance="singleton" >
+<components namespace="s2robot">
+	<include path="s2robot/container.xml" />
+
+	<component name="contentLengthHelper"
+		class="org.codelibs.robot.helper.ContentLengthHelper" instance="singleton">
 		<property name="defaultMaxLength">10485760L</property><!-- 10M -->
-		<initMethod name="addMaxLength">
+		<postConstruct name="addMaxLength">
 			<arg>"text/html"</arg>
 			<arg>2621440L</arg><!-- 2.5M -->
-		</initMethod>
+		</postConstruct>
 	</component>
 </components>

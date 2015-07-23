@@ -31,11 +31,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.FileCleanerCleanup;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileCleaningTracker;
-import org.apache.struts.Globals;
-import org.apache.struts.config.ModuleConfig;
-import org.apache.struts.upload.MultipartRequestHandler;
-import org.seasar.struts.upload.S2MultipartRequestHandler;
-import org.seasar.struts.util.ServletContextUtil;
+import org.lastaflute.web.ruts.config.ModuleConfig;
+import org.lastaflute.web.ruts.multipart.MultipartRequestHandler;
 
 /**
  * This class supports a multipart request handler to support commons-fileupload

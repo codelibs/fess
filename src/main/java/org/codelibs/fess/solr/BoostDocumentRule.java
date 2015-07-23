@@ -18,7 +18,6 @@ package org.codelibs.fess.solr;
 
 import java.util.Map;
 
-import org.seasar.framework.util.OgnlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
