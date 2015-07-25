@@ -22,7 +22,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.util.SearchParamMap;
 
-public class IndexForm implements Serializable {
+public class RootForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
