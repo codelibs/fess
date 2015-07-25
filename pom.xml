@@ -39,7 +39,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp7</dbflute.version>
-		<lastaflute.version>0.6.0-RCV</lastaflute.version>
+		<lastaflute.version>0.6.0-RCW</lastaflute.version>
 		<lasta.taglib.version>0.6.0-RCA</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
@@ -519,6 +519,12 @@
 			<artifactId>commons-httpclient</artifactId>
 			<version>3.1</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.dbflute.jetty</groupId>
+			<artifactId>jetty-boot</artifactId>
+			<version>${jetty.boot.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId> <!-- jetty-all does not contain JSP -->

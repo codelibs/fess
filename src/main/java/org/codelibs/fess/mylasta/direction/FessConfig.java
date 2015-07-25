@@ -20,8 +20,8 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. 315360000 */
     String COOKIE_ETERNAL_EXPIRE = "cookie.eternal.expire";
 
-    /** The key of the configuration. e.g. HRB */
-    String COOKIE_AUTO_LOGIN_HARBOR_KEY = "cookie.auto.login.harbor.key";
+    /** The key of the configuration. e.g. FES */
+    String COOKIE_REMEMBER_ME_HARBOR_KEY = "cookie.remember.me.harbor.key";
 
     /** The key of the configuration. e.g. 4 */
     String PAGING_PAGE_SIZE = "paging.page.size";
@@ -99,12 +99,12 @@ public interface FessConfig extends FessEnv {
     Integer getCookieEternalExpireAsInteger();
 
     /**
-     * Get the value for the key 'cookie.auto.login.harbor.key'. <br>
-     * The value is, e.g. HRB <br>
-     * comment: The cookie key of auto-login for Fess
+     * Get the value for the key 'cookie.remember.me.harbor.key'. <br>
+     * The value is, e.g. FES <br>
+     * comment: The cookie key of remember-me for Fess
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getCookieAutoLoginHarborKey();
+    String getCookieRememberMeHarborKey();
 
     /**
      * Get the value for the key 'paging.page.size'. <br>
@@ -189,8 +189,8 @@ public interface FessConfig extends FessEnv {
             return getAsInteger(FessConfig.COOKIE_ETERNAL_EXPIRE);
         }
 
-        public String getCookieAutoLoginHarborKey() {
-            return get(FessConfig.COOKIE_AUTO_LOGIN_HARBOR_KEY);
+        public String getCookieRememberMeHarborKey() {
+            return get(FessConfig.COOKIE_REMEMBER_ME_HARBOR_KEY);
         }
 
         public String getPagingPageSize() {

@@ -23,6 +23,18 @@ public interface FessEnv {
     /** The key of the configuration. e.g. 0 */
     String TIME_ADJUST_TIME_MILLIS = "time.adjust.time.millis";
 
+    /** The key of the configuration. e.g. true */
+    String MAIL_SEND_MOCK = "mail.send.mock";
+
+    /** The key of the configuration. e.g. localhost:25 */
+    String MAIL_SMTP_SERVER_MAIN_HOST_AND_PORT = "mail.smtp.server.main.host.and.port";
+
+    /** The key of the configuration. e.g. [Test] */
+    String MAIL_SUBJECT_TEST_PREFIX = "mail.subject.test.prefix";
+
+    /** The key of the configuration. e.g. returnpath@docksidestage.org */
+    String MAIL_RETURN_PATH = "mail.return.path";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -105,6 +117,46 @@ public interface FessEnv {
     Long getTimeAdjustTimeMillisAsLong();
 
     /**
+     * Get the value for the key 'mail.send.mock'. <br>
+     * The value is, e.g. true <br>
+     * comment: Does it send mock mail? (true: no send actually, logging only)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getMailSendMock();
+
+    /**
+     * Is the property for the key 'mail.send.mock' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Does it send mock mail? (true: no send actually, logging only)
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isMailSendMock();
+
+    /**
+     * Get the value for the key 'mail.smtp.server.main.host.and.port'. <br>
+     * The value is, e.g. localhost:25 <br>
+     * comment: SMTP server settings for main: host:port
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getMailSmtpServerMainHostAndPort();
+
+    /**
+     * Get the value for the key 'mail.subject.test.prefix'. <br>
+     * The value is, e.g. [Test] <br>
+     * comment: The prefix of subject to show test environment or not
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getMailSubjectTestPrefix();
+
+    /**
+     * Get the value for the key 'mail.return.path'. <br>
+     * The value is, e.g. returnpath@docksidestage.org <br>
+     * comment: The common return path of all mail
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getMailReturnPath();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -143,6 +195,26 @@ public interface FessEnv {
 
         public Long getTimeAdjustTimeMillisAsLong() {
             return getAsLong(FessEnv.TIME_ADJUST_TIME_MILLIS);
+        }
+
+        public String getMailSendMock() {
+            return get(FessEnv.MAIL_SEND_MOCK);
+        }
+
+        public boolean isMailSendMock() {
+            return is(FessEnv.MAIL_SEND_MOCK);
+        }
+
+        public String getMailSmtpServerMainHostAndPort() {
+            return get(FessEnv.MAIL_SMTP_SERVER_MAIN_HOST_AND_PORT);
+        }
+
+        public String getMailSubjectTestPrefix() {
+            return get(FessEnv.MAIL_SUBJECT_TEST_PREFIX);
+        }
+
+        public String getMailReturnPath() {
+            return get(FessEnv.MAIL_RETURN_PATH);
         }
     }
 }

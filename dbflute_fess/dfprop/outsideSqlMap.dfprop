@@ -1,5 +1,5 @@
 # /---------------------------------------------------------------------------
-# outsideSqlDefinitionMap: (NotRequired - Default map:{})
+# outsideSqlMap: (NotRequired - Default map:{})
 #
 # The various settings about outsideSql. 
 #
@@ -27,9 +27,6 @@ map:{
     #     The parameter beans for procedure are auto-generated.
     #     If you call the procedure from DBFlute, you should specify 'true'!
     #
-    #   [false]
-    #     Non.
-    #
     ; isGenerateProcedureParameterBean = false
     # - - - - - - - - - -/
 
@@ -42,9 +39,6 @@ map:{
     #     Target procedures are executed actually at Sql2Entity task.
     #     (because of getting from execution meta data (result set meta data))
     #     This property is valid only when isGenerateProcedureParameterBean is true.
-    #
-    #   [false]
-    #     Non.
     #
     ; isGenerateProcedureCustomizeEntity = false
     # - - - - - - - - - -/
@@ -104,9 +98,6 @@ map:{
     #     You should always write the title of outsideSql.
     #     If it doesn't exist, the OutsideSqlTest task fails.
     #
-    #   [false]
-    #     Non.
-    #
     #; isRequiredSqlTitle = true
     # - - - - - - - - - -/
 
@@ -115,9 +106,6 @@ map:{
     #   [true]
     #     You should always write the description of outsideSql.
     #     If it doesn't exist, the OutsideSqlTest task fails.
-    #
-    #   [false]
-    #     Non.
     #
     #; isRequiredSqlDescription = true
     # - - - - - - - - - -/

@@ -2490,8 +2490,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
     /** The key of the message: crawler.properties does not exist. Default values are applied. */
-    public static final String LABELS_system_info_crawler_properties_does_not_exist =
-            "{labels.system_info_crawler_properties_does_not_exist}";
+    public static final String LABELS_system_info_crawler_properties_does_not_exist = "{labels.system_info_crawler_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
     public static final String LABELS_file_authentication_configuration = "{labels.file_authentication_configuration}";
@@ -2530,8 +2529,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_file_authentication_list_hostname = "{labels.file_authentication_list_hostname}";
 
     /** The key of the message: Config Name */
-    public static final String LABELS_file_authentication_list_file_crawling_config =
-            "{labels.file_authentication_list_file_crawling_config}";
+    public static final String LABELS_file_authentication_list_file_crawling_config = "{labels.file_authentication_list_file_crawling_config}";
 
     /** The key of the message: Any */
     public static final String LABELS_file_authentication_any = "{labels.file_authentication_any}";

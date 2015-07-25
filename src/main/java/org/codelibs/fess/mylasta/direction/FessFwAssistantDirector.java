@@ -1,0 +1,143 @@
+/*
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.mylasta.direction;
+
+import javax.annotation.Resource;
+
+import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
+import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
+import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
+import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainBeforeListener;
+import org.codelibs.fess.mylasta.direction.sponsor.FessListedClassificationProvider;
+import org.codelibs.fess.mylasta.direction.sponsor.FessMailDeliveryDepartmentCreator;
+import org.codelibs.fess.mylasta.direction.sponsor.FessSecurityResourceProvider;
+import org.codelibs.fess.mylasta.direction.sponsor.FessTimeResourceProvider;
+import org.codelibs.fess.mylasta.direction.sponsor.FessUserLocaleProcessProvider;
+import org.codelibs.fess.mylasta.direction.sponsor.FessUserTimeZoneProcessProvider;
+import org.lastaflute.core.direction.CachedFwAssistantDirector;
+import org.lastaflute.core.direction.FwAssistDirection;
+import org.lastaflute.core.direction.FwCoreDirection;
+import org.lastaflute.core.security.InvertibleCryptographer;
+import org.lastaflute.core.security.OneWayCryptographer;
+import org.lastaflute.db.dbflute.classification.ListedClassificationProvider;
+import org.lastaflute.db.direction.FwDbDirection;
+import org.lastaflute.web.direction.FwWebDirection;
+
+/**
+ * @author jflute
+ */
+public class FessFwAssistantDirector extends CachedFwAssistantDirector {
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    @Resource
+    protected FessConfig fessConfig;
+
+    // ===================================================================================
+    //                                                                              Assist
+    //                                                                              ======
+    @Override
+    protected void prepareAssistDirection(FwAssistDirection direction) {
+        direction.directConfig(nameList -> nameList.add("fess_config.properties"), "fess_env.properties");
+    }
+
+    // ===================================================================================
+    //                                                                               Core
+    //                                                                              ======
+    @Override
+    protected void prepareCoreDirection(FwCoreDirection direction) {
+        // this configuration is on fess_env.properties because this is true only when development
+        direction.directDevelopmentHere(fessConfig.isDevelopmentHere());
+
+        // titles of the application for logging are from configurations
+        direction.directLoggingTitle(fessConfig.getDomainTitle(), fessConfig.getEnvironmentTitle());
+
+        // this configuration is on sea_env.properties because it has no influence to production
+        // even if you set true manually and forget to set false back
+        direction.directFrameworkDebug(fessConfig.isFrameworkDebug()); // basically false
+
+        // you can add your own process when your application is booting
+        direction.directCurtainBefore(createBootListener());
+
+        direction.directSecurity(createSecurityResourceProvider());
+        direction.directTime(createTimeResourceProvider());
+        direction.directMail(createFessMailDeliveryDepartmentCreator().create());
+    }
+
+    protected FessCurtainBeforeListener createBootListener() {
+        return new FessCurtainBeforeListener();
+    }
+
+    protected FessSecurityResourceProvider createSecurityResourceProvider() { // #change_it_first
+        final InvertibleCryptographer inver = InvertibleCryptographer.createAesCipher("*unused@");
+        final OneWayCryptographer oneWay = OneWayCryptographer.createSha256Cryptographer();
+        return new FessSecurityResourceProvider(inver, oneWay);
+    }
+
+    protected FessTimeResourceProvider createTimeResourceProvider() {
+        return new FessTimeResourceProvider(fessConfig);
+    }
+
+    protected FessMailDeliveryDepartmentCreator createFessMailDeliveryDepartmentCreator() {
+        return new FessMailDeliveryDepartmentCreator(fessConfig);
+    }
+
+    // ===================================================================================
+    //                                                                                 DB
+    //                                                                                ====
+    @Override
+    protected void prepareDbDirection(FwDbDirection direction) {
+        direction.directClassification(createListedClassificationProvider());
+    }
+
+    protected ListedClassificationProvider createListedClassificationProvider() {
+        return new FessListedClassificationProvider();
+    }
+
+    // ===================================================================================
+    //                                                                                Web
+    //                                                                               =====
+    @Override
+    protected void prepareWebDirection(FwWebDirection direction) {
+        direction.directRequest(createUserLocaleProcessProvider(), createUserTimeZoneProcessProvider());
+        direction.directCookie(createCookieResourceProvider());
+        direction.directAdjustment(createActionAdjustmentProvider());
+        direction.directMessage(nameList -> nameList.add("fess_message"), "fess_label");
+        direction.directApiCall(createApiFailureHook());
+    }
+
+    protected FessUserLocaleProcessProvider createUserLocaleProcessProvider() {
+        return new FessUserLocaleProcessProvider();
+    }
+
+    protected FessUserTimeZoneProcessProvider createUserTimeZoneProcessProvider() {
+        return new FessUserTimeZoneProcessProvider();
+    }
+
+    protected FessCookieResourceProvider createCookieResourceProvider() { // #change_it_first
+        final InvertibleCryptographer cr = InvertibleCryptographer.createAesCipher("*unused@");
+        return new FessCookieResourceProvider(fessConfig, cr);
+    }
+
+    protected FessActionAdjustmentProvider createActionAdjustmentProvider() {
+        return new FessActionAdjustmentProvider();
+    }
+
+    protected FessApiFailureHook createApiFailureHook() {
+        return new FessApiFailureHook();
+    }
+}
