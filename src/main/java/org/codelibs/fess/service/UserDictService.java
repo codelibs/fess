@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.dict.DictionaryExpiredException;
@@ -44,7 +45,7 @@ public class UserDictService {
                 userDictFile.selectList((userDictPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
         // update pager
-        Beans.copy(userDictList, userDictPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(userDictList, userDictPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         userDictList.setPageRangeSize(5);
         userDictPager.setPageNumberList(userDictList.createPageNumberList());
 

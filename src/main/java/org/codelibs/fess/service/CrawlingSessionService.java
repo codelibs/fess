@@ -37,6 +37,7 @@ import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.crud.CommonConstants;
@@ -80,7 +81,7 @@ public class CrawlingSessionService implements Serializable {
         });
 
         // update pager
-        Beans.copy(crawlingSessionList, crawlingSessionPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(crawlingSessionList, crawlingSessionPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         crawlingSessionPager.setPageNumberList(crawlingSessionList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

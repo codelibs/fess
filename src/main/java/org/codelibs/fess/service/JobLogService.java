@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.JobLogCB;
@@ -51,7 +52,7 @@ public class JobLogService implements Serializable {
         });
 
         // update pager
-        Beans.copy(jobLogList, jobLogPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(jobLogList, jobLogPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         jobLogPager.setPageNumberList(jobLogList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

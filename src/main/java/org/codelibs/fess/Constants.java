@@ -324,5 +324,4 @@ public class Constants extends CoreLibConstants {
     public static final String PROCESS_TYPE_BOTH = "B";
 
     public static final long ONE_DAY_IN_MILLIS = 24L * 60L * 60L * 1000L;
-
 }

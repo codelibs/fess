@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.LabelTypeCB;
@@ -59,7 +60,7 @@ public class LabelTypeService implements Serializable {
         });
 
         // update pager
-        Beans.copy(labelTypeList, labelTypePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(labelTypeList, labelTypePager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         labelTypePager.setPageNumberList(labelTypeList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

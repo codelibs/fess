@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.WebAuthenticationCB;
@@ -50,7 +51,8 @@ public class WebAuthenticationService implements Serializable {
         });
 
         // update pager
-        Beans.copy(webAuthenticationList, webAuthenticationPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(webAuthenticationList, webAuthenticationPager,
+                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         webAuthenticationPager.setPageNumberList(webAuthenticationList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

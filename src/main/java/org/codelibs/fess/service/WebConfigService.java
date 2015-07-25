@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
@@ -62,7 +63,7 @@ public class WebConfigService implements Serializable {
         });
 
         // update pager
-        Beans.copy(webConfigList, webConfigPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(webConfigList, webConfigPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         webConfigPager.setPageNumberList(webConfigList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

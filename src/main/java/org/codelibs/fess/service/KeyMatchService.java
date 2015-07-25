@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.KeyMatchCB;
@@ -50,7 +51,7 @@ public class KeyMatchService implements Serializable {
         });
 
         // update pager
-        Beans.copy(keyMatchList, keyMatchPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(keyMatchList, keyMatchPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         keyMatchPager.setPageNumberList(keyMatchList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

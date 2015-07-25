@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.BoostDocumentRuleCB;
@@ -50,7 +51,8 @@ public class BoostDocumentRuleService implements Serializable {
         });
 
         // update pager
-        Beans.copy(boostDocumentRuleList, boostDocumentRulePager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(boostDocumentRuleList, boostDocumentRulePager,
+                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

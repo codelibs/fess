@@ -214,9 +214,9 @@ public class FessFunctions {
                     if (values != null) {
                         for (final String value : values) {
                             buf.append("<input type=\"hidden\" name=\"");
-                            buf.append(StringEscapeUtils.escapeHtml(name));
+                            buf.append(StringEscapeUtils.escapeHtml4(name));
                             buf.append("\" value=\"");
-                            buf.append(StringEscapeUtils.escapeHtml(value));
+                            buf.append(StringEscapeUtils.escapeHtml4(value));
                             buf.append("\"/>");
                         }
                     }

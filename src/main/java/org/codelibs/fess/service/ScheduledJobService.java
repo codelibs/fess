@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
@@ -52,7 +53,7 @@ public class ScheduledJobService implements Serializable {
         });
 
         // update pager
-        Beans.copy(scheduledJobList, scheduledJobPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(scheduledJobList, scheduledJobPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         scheduledJobPager.setPageNumberList(scheduledJobList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

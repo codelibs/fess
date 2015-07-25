@@ -102,7 +102,7 @@ public interface FessEnv {
     /**
      * Get the value for the key 'time.adjust.time.millis'. <br>
      * The value is, e.g. 0 <br>
-     * comment: The milliseconds for (relative or absolute) adjust time (set only when test) @LongType *dynamic in development
+     * comment: The milliseconds for (relative or absolute) adjust time (set only when test) //@LongType *dynamic in development
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getTimeAdjustTimeMillis();
@@ -110,7 +110,7 @@ public interface FessEnv {
     /**
      * Get the value for the key 'time.adjust.time.millis' as {@link Long}. <br>
      * The value is, e.g. 0 <br>
-     * comment: The milliseconds for (relative or absolute) adjust time (set only when test) @LongType *dynamic in development
+     * comment: The milliseconds for (relative or absolute) adjust time (set only when test) //@LongType *dynamic in development
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not long.
      */

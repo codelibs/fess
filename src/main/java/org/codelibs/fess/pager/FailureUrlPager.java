@@ -22,16 +22,16 @@ import org.codelibs.fess.Constants;
 
 public class FailureUrlPager {
 
-    @Maxbytelength(maxbytelength = 1000)
+    //@Maxbytelength(maxbytelength = 1000)
     public String url;
 
-    @IntRange(min = 0, max = 2147483647)
+    //@IntRange(min = 0, max = 2147483647)
     public String errorCountMin;
 
-    @IntRange(min = 0, max = 2147483647)
+    //@IntRange(min = 0, max = 2147483647)
     public String errorCountMax;
 
-    @Maxbytelength(maxbytelength = 1000)
+    //@Maxbytelength(maxbytelength = 1000)
     public String errorName;
 
     public static final int DEFAULT_PAGE_SIZE = 20;

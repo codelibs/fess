@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.OverlappingHostCB;
@@ -50,7 +51,7 @@ public class OverlappingHostService implements Serializable {
         });
 
         // update pager
-        Beans.copy(overlappingHostList, overlappingHostPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(overlappingHostList, overlappingHostPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         overlappingHostPager.setPageNumberList(overlappingHostList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

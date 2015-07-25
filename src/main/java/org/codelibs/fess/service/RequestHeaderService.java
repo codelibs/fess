@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.RequestHeaderCB;
@@ -50,7 +51,7 @@ public class RequestHeaderService implements Serializable {
         });
 
         // update pager
-        Beans.copy(requestHeaderList, requestHeaderPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(requestHeaderList, requestHeaderPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         requestHeaderPager.setPageNumberList(requestHeaderList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

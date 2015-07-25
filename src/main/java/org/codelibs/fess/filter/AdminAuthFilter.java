@@ -19,10 +19,9 @@ package org.codelibs.fess.filter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.codelibs.fess.SSCConstants;
 import org.codelibs.fess.entity.LoginInfo;
-import org.codelibs.sastruts.core.SSCConstants;
-import org.codelibs.sastruts.core.entity.UserInfo;
-import org.codelibs.sastruts.core.filter.AuthFilter;
+import org.codelibs.fess.entity.UserInfo;
 
 public class AdminAuthFilter extends AuthFilter {
     @Override

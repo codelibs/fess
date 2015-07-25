@@ -18,7 +18,7 @@ package org.codelibs.fess.crud.util;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.codelibs.sastruts.core.util.ActionMessagesUtil;
+import org.codelibs.fess.util.ActionMessagesUtil;
 import org.lastaflute.web.ruts.message.ActionMessage;
 import org.lastaflute.web.ruts.message.ActionMessages;
 import org.lastaflute.web.util.LaRequestUtil;

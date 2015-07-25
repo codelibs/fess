@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.crud.CrudMessageException;
@@ -65,7 +66,8 @@ public class SuggestElevateWordService implements Serializable {
         });
 
         // update pager
-        Beans.copy(suggestElevateWordList, suggestElevateWordPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(suggestElevateWordList, suggestElevateWordPager,
+                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         suggestElevateWordPager.setPageNumberList(suggestElevateWordList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

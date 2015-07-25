@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.beans.FessBeans;
@@ -137,7 +138,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
             for (final UserInfo userInfo : list) {
                 final String code = userInfo.getCode();
                 final UserInfo entity = userInfoMap.get(code);
-                FessBeans.copy(userInfo, entity).includes("id", "createdTime").execute();
+                BeanUtil.copyBeanToBean(userInfo, entity, option -> option.include("id", "createdTime"));
                 updateList.add(entity);
                 insertList.remove(entity);
             }

@@ -234,7 +234,7 @@
 
   <servlet>
     <servlet-name>action</servlet-name>
-    <servlet-class>org.codelibs.sastruts.core.servlet.SSCActionServlet</servlet-class>
+    <servlet-class>org.codelibs.fess.struts.servlet.SSCActionServlet</servlet-class>
     <init-param>
       <param-name>config</param-name>
       <param-value>/WEB-INF/struts-config.xml</param-value>

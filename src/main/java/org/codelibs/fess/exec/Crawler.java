@@ -29,9 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
@@ -40,7 +37,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
-import org.codelibs.fess.helper.DatabaseHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.MailHelper;
 import org.codelibs.fess.helper.OverlappingHostHelper;
@@ -56,6 +52,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.lastaflute.di.core.LaContainer;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
@@ -65,8 +62,6 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
-
-import net.arnx.jsonic.web.extension.S2Container;
 
 public class Crawler implements Serializable {
 
@@ -183,24 +178,16 @@ public class Crawler implements Serializable {
 
         int exitCode;
         try {
-            final ServletContext servletContext = new MockServletContextImpl("/fess");
-            final HttpServletRequest request = new MockHttpServletRequestImpl(servletContext, "/crawler");
-            final HttpServletResponse response = new MockHttpServletResponseImpl(request);
-            final SingletonLaContainerInitializer initializer = new SingletonLaContainerInitializer();
-            initializer.setConfigPath("app.dicon");
-            initializer.setApplication(servletContext);
-            initializer.initialize();
+            SingletonLaContainerFactory.setConfigPath("app.xml");
+            SingletonLaContainerFactory.init();
 
-            final S2Container container = SingletonLaContainerFactory.getContainer();
-            final ExternalContext externalContext = container.getExternalContext();
-            externalContext.setRequest(request);
-            externalContext.setResponse(response);
+            final LaContainer container = SingletonLaContainerFactory.getContainer();
 
             final Thread shutdownCallback = new Thread("ShutdownHook") {
                 @Override
                 public void run() {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Destroying S2Container..");
+                        logger.debug("Destroying LaContainer..");
                     }
                     SingletonLaContainerFactory.destroy();
                 }
@@ -222,9 +209,6 @@ public class Crawler implements Serializable {
 
     private static int process(final Options options) {
         final Crawler crawler = SingletonLaContainer.getComponent(Crawler.class);
-
-        final DatabaseHelper databaseHelper = ComponentUtil.getDatabaseHelper();
-        databaseHelper.optimize();
 
         if (StringUtil.isBlank(options.sessionId)) {
             // use a default session id
@@ -275,7 +259,6 @@ public class Crawler implements Serializable {
             } catch (final Exception e) {
                 logger.warn("Failed to store crawling information.", e);
             }
-            databaseHelper.optimize();
 
             final Map<String, String> infoMap = crawlingSessionHelper.getInfoMap(options.sessionId);
 

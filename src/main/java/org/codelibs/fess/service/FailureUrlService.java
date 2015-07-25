@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -65,7 +67,7 @@ public class FailureUrlService implements Serializable {
         });
 
         // update pager
-        Beans.copy(failureUrlList, failureUrlPager).includes(CommonConstants.PAGER_CONVERSION_RULE).execute();
+        BeanUtil.copyBeanToBean(failureUrlList, failureUrlPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
         failureUrlPager.setPageNumberList(failureUrlList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());

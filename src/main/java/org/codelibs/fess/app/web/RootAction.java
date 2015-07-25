@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.io.OutputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -55,6 +56,7 @@ import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
+import org.codelibs.fess.SSCConstants;
 import org.codelibs.fess.UnsupportedSearchException;
 import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
@@ -62,6 +64,7 @@ import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.es.exentity.ClickLog;
 import org.codelibs.fess.es.exentity.SearchLog;
 import org.codelibs.fess.es.exentity.UserInfo;
+import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
@@ -81,13 +84,10 @@ import org.codelibs.fess.util.MoreLikeThisResponse;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.fess.util.WebApiUtil;
 import org.codelibs.robot.util.CharUtil;
-import org.codelibs.sastruts.core.SSCConstants;
-import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.taglib.function.LaFunctions;
-import org.lastaflute.web.Execute;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
@@ -113,7 +113,7 @@ public class RootAction {
 
     protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern.compile("^([a-zA-Z0-9_]+):.*");
 
-    @ActionForm
+    //@ActionForm
     @Resource
     protected IndexForm indexForm;
 
@@ -268,7 +268,7 @@ public class RootAction {
         return pagingQuery;
     }
 
-    @Execute(validator = false, input = "index.jsp")
+    //@Execute(validator = false, input = "index.jsp")
     public String index() {
         searchAvailable();
 
@@ -314,7 +314,7 @@ public class RootAction {
         return "search.jsp";
     }
 
-    @Execute(validator = true, input = "index")
+    //@Execute(validator = true, input = "index")
     public String cache() {
         Map<String, Object> doc = null;
         try {
@@ -344,7 +344,7 @@ public class RootAction {
         return null;
     }
 
-    @Execute(validator = true, input = "index")
+    //@Execute(validator = true, input = "index")
     public String go() throws IOException {
         Map<String, Object> doc = null;
         try {
@@ -452,7 +452,7 @@ public class RootAction {
         return null;
     }
 
-    @Execute(validator = false, input = "index")
+    //@Execute(validator = false, input = "index")
     public String search() {
         if (viewHelper.isUseSession() && StringUtil.isNotBlank(indexForm.num)) {
             normalizePageNum();
@@ -465,22 +465,22 @@ public class RootAction {
         return doSearch();
     }
 
-    @Execute(validator = false, input = "index")
+    //@Execute(validator = false, input = "index")
     public String prev() {
         return doMove(-1);
     }
 
-    @Execute(validator = false, input = "index")
+    //@Execute(validator = false, input = "index")
     public String next() {
         return doMove(1);
     }
 
-    @Execute(validator = false, input = "index")
+    //@Execute(validator = false, input = "index")
     public String move() {
         return doMove(0);
     }
 
-    @Execute(validator = false)
+    //@Execute(validator = false)
     public String screenshot() {
         OutputStream out = null;
         BufferedInputStream in = null;
@@ -522,7 +522,7 @@ public class RootAction {
         return null;
     }
 
-    @Execute(validator = false)
+    //@Execute(validator = false)
     public String searchApi() {
         try {
             WebApiUtil.setObject("searchQuery", doSearchInternal());
@@ -542,7 +542,7 @@ public class RootAction {
         return null;
     }
 
-    @Execute(validator = false)
+    //@Execute(validator = false)
     public String suggestApi() {
         if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
@@ -605,7 +605,7 @@ public class RootAction {
         return null;
     }
 
-    @Execute(validator = false)
+    //@Execute(validator = false)
     public String hotSearchWordApi() {
         if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
@@ -638,7 +638,7 @@ public class RootAction {
 
     }
 
-    @Execute(validator = false)
+    //@Execute(validator = false)
     public String favoriteApi() {
         if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
             WebApiUtil.setError(9, "Unsupported operation.");
@@ -705,13 +705,13 @@ public class RootAction {
 
     }
 
-    @Execute(validator = false)
+    //@Execute(validator = false)
     public String osdd() {
         openSearchHelper.write(LaResponseUtil.getResponse());
         return null;
     }
 
-    @Execute(validator = false, input = "index")
+    //@Execute(validator = false, input = "index")
     public String help() {
         buildViewParams();
         buildInitParams();
@@ -932,10 +932,9 @@ public class RootAction {
             appendHighlightQueries = buf.toString();
         }
 
-        Beans.copy(documentItems, this)
-                .includes("pageSize", "currentPageNumber", "allRecordCount", "allPageCount", "existNextPage", "existPrevPage",
-                        "currentStartRecordNumber", "currentEndRecordNumber", "pageNumberList", "partialResults", "queryTime", "searchTime")
-                .execute();
+        BeanUtil.copyBeanToBean(documentItems, this, option -> option.include("pageSize", "currentPageNumber", "allRecordCount",
+                "allPageCount", "existNextPage", "existPrevPage", "currentStartRecordNumber", "currentEndRecordNumber", "pageNumberList",
+                "partialResults", "queryTime", "searchTime"));
 
         return query;
     }
