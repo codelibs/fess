@@ -2,5 +2,5 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
-    <component class="org.codelibs.fess.crud.creator.PagerCreator"/>
+    <component name="pagerCreator" class="org.codelibs.fess.crud.creator.PagerCreator"/>
 </components>

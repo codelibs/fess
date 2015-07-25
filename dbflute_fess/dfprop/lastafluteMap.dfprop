@@ -31,7 +31,7 @@ map:{
     ; domainPackage = org.codelibs.fess
 
     # keywords for environment properties, same as directory name
-    ; environmentList = list:{ integration ; production }
+    ; environmentList = list:{}
 
     # environment dispatch by lasta.env of system property?
     ; isUseLastaEnv = false

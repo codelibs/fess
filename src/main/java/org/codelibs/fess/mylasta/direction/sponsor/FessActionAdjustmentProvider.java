@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the CodeLibs Project and the Others.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,23 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.lasta.web.action;
+package org.codelibs.fess.mylasta.direction.sponsor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.dbflute.util.DfTypeUtil;
+import org.lastaflute.web.path.ActionAdjustmentProvider;
 
 /**
  * @author jflute
  */
-// needs inheritance when type because action is enhanced
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface FessLoginRequired {
+public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
+
+    // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+    // you can adjust your actions by overriding
+    // default methods defined at the interface
+    // _/_/_/_/_/_/_/_/_/_/
+
+    @Override
+    public String toString() {
+        return DfTypeUtil.toClassTitle(this) + ":{}";
+    }
 }

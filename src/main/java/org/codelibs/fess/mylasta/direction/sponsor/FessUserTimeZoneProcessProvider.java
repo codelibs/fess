@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the CodeLibs Project and the Others.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,14 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.lasta.core.direction.sponsor;
+package org.codelibs.fess.mylasta.direction.sponsor;
 
 import java.util.TimeZone;
 
+import org.dbflute.optional.OptionalObject;
+import org.dbflute.optional.OptionalThing;
+import org.dbflute.util.DfTypeUtil;
+import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.UserTimeZoneProcessProvider;
 
@@ -25,55 +29,35 @@ import org.lastaflute.web.servlet.request.UserTimeZoneProcessProvider;
  */
 public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvider {
 
-    public static final TimeZone centralTimeZone = TimeZone.getDefault(); // you can change it if you like
+    public static final TimeZone centralTimeZone = TimeZone.getDefault();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isUseTimeZoneHandling() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isAcceptCookieTimeZone() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public TimeZone findBusinessTimeZone(ActionExecuteMeta executeMeta, RequestManager requestManager) {
-        return null;
+    public OptionalThing<TimeZone> findBusinessTimeZone(ActionRuntime runtimeMeta, RequestManager requestManager) {
+        return OptionalObject.empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public TimeZone getRequestedTimeZone(RequestManager requestManager) {
-        return centralTimeZone; // same as fall-back
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public TimeZone getFallbackTimeZone() {
-        return centralTimeZone;
+    public TimeZone getRequestedTimeZone(RequestManager requestManager) { // not null
+        return centralTimeZone; // you can change it if you like
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("{useTimeZoneHandling=").append(isUseTimeZoneHandling());
+        sb.append(DfTypeUtil.toClassTitle(this));
+        sb.append(":{useTimeZoneHandling=").append(isUseTimeZoneHandling());
         sb.append(", acceptCookieTimeZone=").append(isAcceptCookieTimeZone());
-        sb.append(", fallbackTimeZone=").append(getFallbackTimeZone());
-        sb.append("}");
+        sb.append("}@").append(Integer.toHexString(hashCode()));
         return sb.toString();
     }
 }

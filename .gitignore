@@ -6,6 +6,7 @@
 /src/main/webapp/WEB-INF/classes/
 /src/main/webapp/WEB-INF/lib/
 /src/main/webapp/jar/
+/dbflute_fess/log/*.log
 /dbflute_h2/log/*.log
 /dbflute_mysql/log/*.log
 /dbflute_oracle/log/*.log

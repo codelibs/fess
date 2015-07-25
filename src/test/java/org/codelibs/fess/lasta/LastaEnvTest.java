@@ -18,13 +18,13 @@ package org.codelibs.fess.lasta;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.lasta.core.direction.FessConfig;
-import org.codelibs.fess.unit.UnitFessContainerTestCase;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.UnitFessTestCase;
 
 /**
  * @author jflute
  */
-public class LastaEnvTest extends UnitFessContainerTestCase {
+public class LastaEnvTest extends UnitFessTestCase {
 
     @Resource
     protected FessConfig fessConfig;
