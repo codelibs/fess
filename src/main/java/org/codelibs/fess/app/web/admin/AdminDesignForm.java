@@ -18,15 +18,18 @@ package org.codelibs.fess.app.web.admin;
 
 import java.io.Serializable;
 
-public class DesignForm implements Serializable {
+import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+
+public class AdminDesignForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     //@Required(target = "upload")
-    //public FormFile designFile;
+    public MultipartFormFile designFile;
 
     public String designFileName;
 
+    // TODO jflute unneeded? no validator at the method (2015/07/25)
     //@Required(target = "edit,editAsUseDefault,download,delete")
     public String fileName;
 

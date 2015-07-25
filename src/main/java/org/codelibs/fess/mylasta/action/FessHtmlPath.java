@@ -47,11 +47,11 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dataConfig/index.jsp */
     HtmlNext path_AdminDataConfig_IndexJsp = new HtmlNext("/admin/dataConfig/index.jsp");
 
-    /** The path of the HTML: /admin/design/edit.jsp */
-    HtmlNext path_AdminDesign_EditJsp = new HtmlNext("/admin/design/edit.jsp");
+    /** The path of the HTML: /admin/design/admin_design.jsp */
+    HtmlNext path_AdminDesign_AdminDesignJsp = new HtmlNext("/admin/design/admin_design.jsp");
 
-    /** The path of the HTML: /admin/design/index.jsp */
-    HtmlNext path_AdminDesign_IndexJsp = new HtmlNext("/admin/design/index.jsp");
+    /** The path of the HTML: /admin/design/admin_design_edit.jsp */
+    HtmlNext path_AdminDesign_AdminDesignEditJsp = new HtmlNext("/admin/design/admin_design_edit.jsp");
 
     /** The path of the HTML: /admin/dict/error.jsp */
     HtmlNext path_AdminDict_ErrorJsp = new HtmlNext("/admin/dict/error.jsp");

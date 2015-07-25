@@ -115,7 +115,7 @@ public class RootAction {
 
     //@ActionForm
     @Resource
-    protected IndexForm indexForm;
+    protected RootForm indexForm;
 
     @Resource
     protected FessEsClient fessEsClient;
