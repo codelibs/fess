@@ -1,6 +1,8 @@
 package org.codelibs.fess.es.exentity;
 
 import org.codelibs.fess.es.bsentity.BsRequestHeader;
+import org.codelibs.fess.service.WebConfigService;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
@@ -8,6 +10,7 @@ import org.codelibs.fess.es.bsentity.BsRequestHeader;
 public class RequestHeader extends BsRequestHeader {
 
     private static final long serialVersionUID = 1L;
+    private WebConfig webConfig;
 
     @Override
     public String getId() {
@@ -29,5 +32,13 @@ public class RequestHeader extends BsRequestHeader {
 
     public org.codelibs.robot.client.http.RequestHeader getS2RobotRequestHeader() {
         return new org.codelibs.robot.client.http.RequestHeader(getName(), getValue());
+    }
+
+    public WebConfig getWebConfig() {
+        if (webConfig == null) {
+            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
+            webConfig = webConfigService.getWebConfig(getWebConfigId());
+        }
+        return webConfig;
     }
 }
