@@ -9,6 +9,18 @@
 		<initMethod name="addIndexConfig">
 			<arg>"fess/doc"</arg>
 		</initMethod>
+		<initMethod name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/mapping.txt"</arg>
+		</initMethod>
+		<initMethod name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/synonym.txt"</arg>
+		</initMethod>
+		<initMethod name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/kuromoji.txt"</arg>
+		</initMethod>
 		<initMethod name="addIndexConfig">
 			<arg>".fess_config/boost_document_rule"</arg>
 		</initMethod>
