@@ -1,6 +1,8 @@
 package org.codelibs.fess.es.exentity;
 
 import org.codelibs.fess.es.bsentity.BsFileAuthentication;
+import org.codelibs.fess.service.FileConfigService;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author FreeGen
@@ -8,6 +10,7 @@ import org.codelibs.fess.es.bsentity.BsFileAuthentication;
 public class FileAuthentication extends BsFileAuthentication {
 
     private static final long serialVersionUID = 1L;
+    private FileConfig fileConfig;
 
     @Override
     public String getId() {
@@ -25,5 +28,13 @@ public class FileAuthentication extends BsFileAuthentication {
 
     public void setVersionNo(Long version) {
         asDocMeta().version(version);
+    }
+
+    public FileConfig getFileConfig() {
+        if (fileConfig == null) {
+            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
+            fileConfig = fileConfigService.getFileConfig(getFileConfigId());
+        }
+        return fileConfig;
     }
 }
