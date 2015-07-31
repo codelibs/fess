@@ -38,14 +38,17 @@
 									<bean:message key="labels.suggest_bad_word_link_list" />
 								</h3>
 								<div class="box-tools pull-right">
+									<span class="label label-default"><s:link href="index">
+										<bean:message key="labels.suggest_bad_word_link_list" />
+										</s:link></span>
 									<span class="label label-default"><s:link href="createpage">
-											<bean:message key="labels.suggest_bad_word_link_create_new" />
+										<bean:message key="labels.suggest_bad_word_link_create_new" />
 										</s:link></span>
 									<span class="label label-default"><s:link href="downloadpage">
-											<bean:message key="labels.suggest_bad_word_link_download" />
+										<bean:message key="labels.suggest_bad_word_link_download" />
 										</s:link></span>
 									<span class="label label-default"><s:link href="uploadpage">
-											<bean:message key="labels.suggest_bad_word_link_upload" />
+										<bean:message key="labels.suggest_bad_word_link_upload" />
 										</s:link></span>
 								</div>
 							</div>
