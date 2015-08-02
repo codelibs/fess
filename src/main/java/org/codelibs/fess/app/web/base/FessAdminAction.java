@@ -15,12 +15,16 @@
  */
 package org.codelibs.fess.app.web.base;
 
-import javax.annotation.Resource;
+import java.util.function.Consumer;
 
-import org.codelibs.fess.mylasta.action.FessMessages;
+import javax.annotation.Resource;
+import javax.servlet.ServletContext;
+
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.beans.util.CopyOptions;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.servlet.session.SessionManager;
-import org.lastaflute.web.validation.VaMessenger;
+import org.lastaflute.web.util.LaServletContextUtil;
 
 /**
  * @author codelibs
@@ -28,16 +32,24 @@ import org.lastaflute.web.validation.VaMessenger;
  */
 public abstract class FessAdminAction extends FessBaseAction {
 
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
     @Resource
     private SessionManager sessionManager;
 
+    // ===================================================================================
+    //                                                                        Small Helper
+    //                                                                        ============
     protected void write(String path, byte[] data) {
         LdiFileUtil.write(path, data);
     }
 
-    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
-        FessMessages messages = createMessages();
-        validationMessagesLambda.message(messages);
-        sessionManager.info().save(messages);
+    protected void copyBeanToBean(Object src, Object dest, Consumer<CopyOptions> option) {
+        BeanUtil.copyBeanToBean(src, dest, option);
+    }
+
+    protected ServletContext getServletContext() {
+        return LaServletContextUtil.getServletContext();
     }
 }

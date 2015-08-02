@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
 import org.codelibs.core.io.FileUtil;
@@ -43,7 +42,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,12 +79,15 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     @Override
-    public void hookFinally(ActionRuntime runtime) {
-        super.hookFinally(runtime);
-        if (runtime.isForwardToHtml()) {
-            runtime.registerData("fileNameItems", loadFileNameItems());
-            runtime.registerData("editable", cannotEdit());
-        }
+    protected void setupHtmlData(ActionRuntime runtime) {
+        super.setupHtmlData(runtime);
+        runtime.registerData("editable", cannotEdit());
+        runtime.registerData("fileNameItems", loadFileNameItems());
+        runtime.registerData("helpLink", systemHelper.getHelpLink("design"));
+    }
+
+    private boolean cannotEdit() {
+        return Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
     }
 
     private List<String> loadFileNameItems() {
@@ -304,22 +305,12 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         return jspFile;
     }
 
+    // ===================================================================================
+    //                                                                        Small Helper
+    //                                                                        ============
     private VaErrorHook toMainHtml() {
         return () -> {
             return asHtml(path_AdminDesign_AdminDesignJsp);
         };
-    }
-
-    private boolean cannotEdit() {
-        return Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
-    }
-
-    private ServletContext getServletContext() {
-        return LaServletContextUtil.getServletContext();
-    }
-
-    // TODO fess needed? public? by jflute (2015/07/25)
-    public String getHelpLink() {
-        return systemHelper.getHelpLink("design");
     }
 }

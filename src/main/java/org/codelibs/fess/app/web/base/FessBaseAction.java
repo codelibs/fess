@@ -31,16 +31,11 @@
  */
 package org.codelibs.fess.app.web.base;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.TimeZone;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.dbflute.helper.HandyDate;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalObject;
 import org.dbflute.optional.OptionalThing;
@@ -52,8 +47,10 @@ import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.login.UserBean;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
+import org.lastaflute.web.validation.VaMessenger;
 
 /**
  * @author jflute
@@ -72,6 +69,8 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                           =========
     @Resource
     private RequestManager requestManager;
+    @Resource
+    private SessionManager sessionManager;
     @Resource
     private FessConfig fessConfig;
 
@@ -108,10 +107,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
             setupHtmlData(runtime);
         }
     }
-    
+
     protected void setupHtmlData(ActionRuntime runtime) {
     }
-
 
     // ===================================================================================
     //                                                                      Access Context
@@ -174,79 +172,10 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         return new FessMessages(); // overriding to change return type to concrete-class
     }
 
-    // ===================================================================================
-    //                                                                   Conversion Helper
-    //                                                                   =================
-    // #app_customize you can customize the conversion logic
-    // -----------------------------------------------------
-    //                                         to Local Date
-    //                                         -------------
-    protected OptionalThing<LocalDate> toDate(String exp) { // application may call
-        if (isNotEmpty(exp)) {
-            return OptionalThing.of(new HandyDate(exp, myConvZone()).getLocalDate());
-        } else {
-            return OptionalThing.ofNullable(null, () -> {
-                throw new IllegalStateException("The specified expression for local date was null or empty: " + exp);
-            });
-        }
-    }
-
-    protected OptionalThing<LocalDateTime> toDateTime(String exp) { // application may call
-        if (isNotEmpty(exp)) {
-            return OptionalThing.of(new HandyDate(exp, myConvZone()).getLocalDateTime());
-        } else {
-            return OptionalThing.ofNullable(null, () -> {
-                throw new IllegalStateException("The specified expression for local date was null or empty: " + exp);
-            });
-        }
-    }
-
-    // -----------------------------------------------------
-    //                                       to Display Date
-    //                                       ---------------
-    protected OptionalThing<String> toDispDate(LocalDate date) { // application may call
-        if (date != null) {
-            return OptionalThing.of(new HandyDate(date, myConvZone()).toDisp(myDatePattern()));
-        } else {
-            return OptionalThing.ofNullable(null, () -> {
-                throw new IllegalStateException("The specified local date was null.");
-            });
-        }
-    }
-
-    protected OptionalThing<String> toDispDate(LocalDateTime dateTime) { // application may call
-        if (dateTime != null) {
-            return OptionalThing.of(new HandyDate(dateTime, myConvZone()).toDisp(myDatePattern()));
-        } else {
-            return OptionalThing.ofNullable(null, () -> {
-                throw new IllegalStateException("The specified local date-time was null.");
-            });
-        }
-    }
-
-    protected OptionalThing<String> toDispDateTime(LocalDateTime dateTime) { // application may call
-        if (dateTime != null) {
-            return OptionalThing.of(new HandyDate(dateTime, myConvZone()).toDisp(myDateTimePattern()));
-        } else {
-            return OptionalThing.ofNullable(null, () -> {
-                throw new IllegalStateException("The specified local date-time was null.");
-            });
-        }
-    }
-
-    // -----------------------------------------------------
-    //                                   Conversion Resource
-    //                                   -------------------
-    protected String myDatePattern() {
-        return "yyyy/MM/dd";
-    }
-
-    protected String myDateTimePattern() {
-        return "yyyy/MM/dd HH:mm:ss";
-    }
-
-    protected TimeZone myConvZone() {
-        return requestManager.getUserTimeZone();
+    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
+        FessMessages messages = createMessages();
+        validationMessagesLambda.message(messages);
+        sessionManager.info().save(messages);
     }
 
     // ===================================================================================
@@ -256,6 +185,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
      * {@inheritDoc} <br>
      * Application Origin Methods:
      * <pre>
+     * <span style="font-size: 130%; color: #553000">[Information Message]</span>
+     * o saveInfo() <span style="color: #3F7E5E">// save messages to session</span>
+     * 
      * <span style="font-size: 130%; color: #553000">[Conversion Helper]</span>
      * o toDate(exp) <span style="color: #3F7E5E">// convert expression to local date</span>
      * o toDateTime(exp) <span style="color: #3F7E5E">// convert expression to local date-time</span>
