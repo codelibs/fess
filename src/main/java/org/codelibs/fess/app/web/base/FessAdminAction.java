@@ -15,6 +15,29 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import javax.annotation.Resource;
+
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.lastaflute.di.util.LdiFileUtil;
+import org.lastaflute.web.servlet.session.SessionManager;
+import org.lastaflute.web.validation.VaMessenger;
+
+/**
+ * @author codelibs
+ * @author jflute
+ */
 public abstract class FessAdminAction extends FessBaseAction {
 
+    @Resource
+    private SessionManager sessionManager;
+
+    protected void write(String path, byte[] data) {
+        LdiFileUtil.write(path, data);
+    }
+
+    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
+        FessMessages messages = createMessages();
+        validationMessagesLambda.message(messages);
+        sessionManager.info().save(messages);
+    }
 }

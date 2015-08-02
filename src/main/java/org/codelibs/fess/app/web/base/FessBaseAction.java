@@ -104,7 +104,14 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @Override
     public void hookFinally(ActionRuntime runtime) {
         super.hookFinally(runtime);
+        if (runtime.isForwardToHtml()) {
+            setupHtmlData(runtime);
+        }
     }
+    
+    protected void setupHtmlData(ActionRuntime runtime) {
+    }
+
 
     // ===================================================================================
     //                                                                      Access Context

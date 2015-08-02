@@ -14,25 +14,14 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.design;
 
-import java.io.Serializable;
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class DesignEditForm {
 
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
-
-public class AdminDesignForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    //@Required(target = "upload")
-    public MultipartFormFile designFile;
-
-    public String designFileName;
-
-    // TODO jflute unneeded? no validator at the method (2015/07/25)
-    //@Required(target = "edit,editAsUseDefault,download,delete")
     public String fileName;
-
     public String content;
-
 }
