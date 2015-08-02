@@ -1,103 +1,103 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
-	flush="true">
-	<tiles:put name="title">
-		<bean:message key="labels.system_info_configuration" />
-	</tiles:put>
-	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
-	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
-	<tiles:put name="menu" value="/WEB-INF/view/common/admin/menu.jsp" />
-	<tiles:put name="menuType" value="systemInfo" />
-	<tiles:put name="headerScript" type="string"></tiles:put>
-	<tiles:put name="body" type="string">
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fess | <bean:message key="labels.system_info_configuration" /></title>
+<jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
+</head>
+<body class="skin-blue sidebar-mini">
+	<div class="wrapper">
+		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
+		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
+			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuType" value="systemInfo" />
+		</jsp:include>
 
-		<div id="main">
+		<div class="content-wrapper">
 
-		<%-- Message: BEGIN --%>
-		<div>
-			<html:messages id="msg" message="true">
-				<div class="alert-message info"><bean:write name="msg" ignore="true" /></div>
-			</html:messages>
-			<html:errors />
-		</div>
-		<%-- Message: END --%>
+			<%-- Content Header --%>
+			<section class="content-header">
+				<h1>
+					<bean:message key="labels.system_info_configuration" />
+				</h1>
+			</section>
 
-			<div>
-				<h4>
-					<bean:message key="labels.system_info_env_title" />
-				</h4>
-				<table>
-					<tbody>
-						<tr>
-							<td><textarea id="envData"
-									style="height: 300px;" class="xxlarge">
-<c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}
-</c:forEach>
-								</textarea></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			<section class="content">
 
-			<div style="margin-top: 5px;">
-				<h4>
-					<bean:message key="labels.system_info_prop_title" />
-				</h4>
-				<table>
-					<tbody>
-						<tr>
-							<td><textarea id="propData"
-									style="height: 300px;" class="xxlarge">
-<c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}
-</c:forEach>
-								</textarea></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<%-- Box Header --%>
+							<div class="box-header with-border">
+								<h3 class="box-title">
+									<bean:message key="labels.system_info_env_title" />
+								</h3>
+							</div>
+							<%-- Box Body --%>
+							<div class="box-body">
+								<textarea id="envData" style="height: 300px;" class="form-control">
+									<c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+								</textarea>
+							</div>
+						</div>
+						<div class="box">
+							<%-- Box Header --%>
+							<div class="box-header with-border">
+								<h3 class="box-title">
+									<bean:message key="labels.system_info_prop_title" />
+								</h3>
+							</div>
+							<%-- Box Body --%>
+							<div class="box-body">
+								<textarea id="propData" style="height: 300px;" class="form-control">
+									<c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+								</textarea>
+							</div>
+						</div>
+						<div class="box">
+							<%-- Box Header --%>
+							<div class="box-header with-border">
+								<h3 class="box-title">
+									<bean:message key="labels.system_info_fess_prop_title" />
+								</h3>
+							</div>
+							<%-- Box Body --%>
+							<div class="box-body">
+								<c:if test="${empty fessPropItems}">
+									<textarea id="fessPropData" style="height: 300px;" class="form-control">
+										<bean:message key="labels.system_info_crawler_properties_does_not_exist" />
+									</textarea>
+								</c:if>
+								<c:if test="${!empty fessPropItems}">
+									<textarea id="fessPropData" style="height: 300px;" class="form-control">
+										<c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+									</textarea>
+								</c:if>
+							</div>
+						</div>
+						<div class="box">
+							<%-- Box Header --%>
+							<div class="box-header with-border">
+								<h3 class="box-title">
+									<bean:message key="labels.system_info_bug_report_title" />
+								</h3>
+							</div>
+							<%-- Box Body --%>
+							<div class="box-body">
+								<textarea id="bugReportData" style="height: 300px;" class="form-control">
+									<c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+								</textarea>
+							</div>
+						</div>
+					</div>
+				</div>
 
-			<div style="margin-top: 5px;">
-				<h4>
-					<bean:message key="labels.system_info_fess_prop_title" />
-				</h4>
-				<table>
-					<tbody>
-						<tr>
-<c:if test="${empty fessPropItems}">
-							<td><textarea id="fessPropData"
-									style="height: 300px;" class="xxlarge">
-<bean:message key="labels.system_info_crawler_properties_does_not_exist" />
-							    </textarea></td>
-</c:if>
-<c:if test="${!empty fessPropItems}">
-							<td><textarea id="fessPropData"
-									style="height: 300px;" class="xxlarge">
-<c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}
-</c:forEach>
-								</textarea></td>
-</c:if>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-
-			<div style="margin-top: 5px;">
-				<h4>
-					<bean:message key="labels.system_info_bug_report_title" />
-				</h4>
-				<table>
-					<tbody>
-						<tr>
-							<td><textarea id="bugReportData"
-									style="height: 300px;" class="xxlarge">
-<c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}
-</c:forEach>
-								</textarea></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-
+			</section>
 		</div>
 
-	</tiles:put>
-</tiles:insert>
+		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
+	</div>
+	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
+</body>
+</html>
+
