@@ -22,9 +22,11 @@ import javax.servlet.ServletContext;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.lastaflute.web.validation.VaMessenger;
 
 /**
  * @author codelibs
@@ -41,6 +43,12 @@ public abstract class FessAdminAction extends FessBaseAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
+        FessMessages messages = createMessages();
+        validationMessagesLambda.message(messages);
+        sessionManager.info().save(messages);
+    }
+
     protected void write(String path, byte[] data) {
         LdiFileUtil.write(path, data);
     }
@@ -51,5 +59,24 @@ public abstract class FessAdminAction extends FessBaseAction {
 
     protected ServletContext getServletContext() {
         return LaServletContextUtil.getServletContext();
+    }
+
+    // ===================================================================================
+    //                                                                            Document
+    //                                                                            ========
+    /**
+     * {@inheritDoc} <br>
+     * Application Origin Methods:
+     * <pre>
+     * <span style="font-size: 130%; color: #553000">[Small Helper]</span>
+     * o saveInfo() <span style="color: #3F7E5E">// save messages to session</span>
+     * o write() <span style="color: #3F7E5E">// write text to specified file</span>
+     * o copyBeanToBean() <span style="color: #3F7E5E">// copy bean to bean by BeanUtil</span>
+     * o getServletContext() <span style="color: #3F7E5E">// get servlet context</span>
+     * </pre>
+     */
+    @Override
+    public void document1_CallableSuperMethod() {
+        super.document1_CallableSuperMethod();
     }
 }

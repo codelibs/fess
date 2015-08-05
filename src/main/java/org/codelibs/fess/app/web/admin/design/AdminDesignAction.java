@@ -206,7 +206,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             logger.error("Failed to delete {}", file.getAbsolutePath());
             throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), toMainHtml());
         }
-        SAStrutsUtil.addSessionMessage("success.delete_file", form.fileName);
+        saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, form.fileName));
         return redirect(getClass());
     }
 

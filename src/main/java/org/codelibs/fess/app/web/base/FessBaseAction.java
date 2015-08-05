@@ -31,11 +31,8 @@
  */
 package org.codelibs.fess.app.web.base;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalObject;
 import org.dbflute.optional.OptionalThing;
@@ -46,11 +43,8 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.login.UserBean;
 import org.lastaflute.web.response.ActionResponse;
-import org.lastaflute.web.servlet.request.RequestManager;
-import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
-import org.lastaflute.web.validation.VaMessenger;
 
 /**
  * @author jflute
@@ -63,16 +57,6 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                          ==========
     /** The application type for FESs, e.g. used by access context. */
     protected static final String APP_TYPE = "FES"; // #change_it_first
-
-    // ===================================================================================
-    //                                                                           Attribute
-    //                                                                           =========
-    @Resource
-    private RequestManager requestManager;
-    @Resource
-    private SessionManager sessionManager;
-    @Resource
-    private FessConfig fessConfig;
 
     // ===================================================================================
     //                                                                               Hook
@@ -170,33 +154,5 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @Override
     public FessMessages createMessages() { // application may call
         return new FessMessages(); // overriding to change return type to concrete-class
-    }
-
-    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
-        FessMessages messages = createMessages();
-        validationMessagesLambda.message(messages);
-        sessionManager.info().save(messages);
-    }
-
-    // ===================================================================================
-    //                                                                            Document
-    //                                                                            ========
-    /**
-     * {@inheritDoc} <br>
-     * Application Origin Methods:
-     * <pre>
-     * <span style="font-size: 130%; color: #553000">[Information Message]</span>
-     * o saveInfo() <span style="color: #3F7E5E">// save messages to session</span>
-     * 
-     * <span style="font-size: 130%; color: #553000">[Conversion Helper]</span>
-     * o toDate(exp) <span style="color: #3F7E5E">// convert expression to local date</span>
-     * o toDateTime(exp) <span style="color: #3F7E5E">// convert expression to local date-time</span>
-     * o toDispDate(date) <span style="color: #3F7E5E">// convert local date to display expression</span>
-     * o toDispDateTime(date) <span style="color: #3F7E5E">// convert local date-time to display expression</span>
-     * </pre>
-     */
-    @Override
-    public void document1_CallableSuperMethod() {
-        super.document1_CallableSuperMethod();
     }
 }
