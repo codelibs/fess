@@ -39,7 +39,7 @@ import org.lastaflute.web.validation.VaErrorHook;
  * @author codelibs
  * @author jflute
  */
-public class AdminKeymatchTmpAction extends FessAdminAction {
+public class AdminKeymatchAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
