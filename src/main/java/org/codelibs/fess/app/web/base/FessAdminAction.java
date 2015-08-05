@@ -15,6 +15,68 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import java.util.function.Consumer;
+
+import javax.annotation.Resource;
+import javax.servlet.ServletContext;
+
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.lastaflute.di.util.LdiFileUtil;
+import org.lastaflute.web.servlet.session.SessionManager;
+import org.lastaflute.web.util.LaServletContextUtil;
+import org.lastaflute.web.validation.VaMessenger;
+
+/**
+ * @author codelibs
+ * @author jflute
+ */
 public abstract class FessAdminAction extends FessBaseAction {
 
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    @Resource
+    private SessionManager sessionManager;
+
+    // ===================================================================================
+    //                                                                        Small Helper
+    //                                                                        ============
+    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
+        FessMessages messages = createMessages();
+        validationMessagesLambda.message(messages);
+        sessionManager.info().save(messages);
+    }
+
+    protected void write(String path, byte[] data) {
+        LdiFileUtil.write(path, data);
+    }
+
+    protected void copyBeanToBean(Object src, Object dest, Consumer<CopyOptions> option) {
+        BeanUtil.copyBeanToBean(src, dest, option);
+    }
+
+    protected ServletContext getServletContext() {
+        return LaServletContextUtil.getServletContext();
+    }
+
+    // ===================================================================================
+    //                                                                            Document
+    //                                                                            ========
+    /**
+     * {@inheritDoc} <br>
+     * Application Origin Methods:
+     * <pre>
+     * <span style="font-size: 130%; color: #553000">[Small Helper]</span>
+     * o saveInfo() <span style="color: #3F7E5E">// save messages to session</span>
+     * o write() <span style="color: #3F7E5E">// write text to specified file</span>
+     * o copyBeanToBean() <span style="color: #3F7E5E">// copy bean to bean by BeanUtil</span>
+     * o getServletContext() <span style="color: #3F7E5E">// get servlet context</span>
+     * </pre>
+     */
+    @Override
+    public void document1_CallableSuperMethod() {
+        super.document1_CallableSuperMethod();
+    }
 }
