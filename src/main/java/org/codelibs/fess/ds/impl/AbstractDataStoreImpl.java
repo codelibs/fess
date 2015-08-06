@@ -33,6 +33,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
 public abstract class AbstractDataStoreImpl implements DataStore {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractDataStoreImpl.class);
@@ -111,8 +114,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
 
         try {
-            final Object exp = OgnlUtil.parseExpression(template);
-            final Object value = OgnlUtil.getValue(exp, paramMap);
+            final Object value = new GroovyShell(new Binding(paramMap)).evaluate(template);
             if (value == null) {
                 return null;
             }

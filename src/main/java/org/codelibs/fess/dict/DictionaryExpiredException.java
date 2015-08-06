@@ -16,11 +16,11 @@
 
 package org.codelibs.fess.dict;
 
-public class DictionaryExpiredException extends ActionMessagesException {
+public class DictionaryExpiredException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public DictionaryExpiredException() {
-        super("errors.expired_dict_id");
-    }
+    //    public DictionaryExpiredException() {
+    //        super("errors.expired_dict_id");
+    //    }
 }

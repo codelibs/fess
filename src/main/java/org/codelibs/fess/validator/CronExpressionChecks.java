@@ -22,18 +22,19 @@ import org.codelibs.core.lang.StringUtil;
 import org.lastaflute.web.ruts.message.ActionMessages;
 import org.quartz.CronExpression;
 
-public class CronExpressionChecks extends S2FieldChecks {
+//TODO replace with hibernate validator
+public class CronExpressionChecks /*extends S2FieldChecks*/{
 
     private static final long serialVersionUID = 1L;
-
-    public static boolean validateCronExpression(final Object bean, final ValidatorAction validatorAction, final Field field,
-            final ActionMessages errors, final Validator validator, final HttpServletRequest request) {
-        final String value = getValueAsString(bean, field);
-        if (StringUtil.isNotBlank(value) && !CronExpression.isValidExpression(value)) {
-            addError(errors, field, validator, validatorAction, request);
-            return false;
+    /*
+        public static boolean validateCronExpression(final Object bean, final ValidatorAction validatorAction, final Field field,
+                final ActionMessages errors, final Validator validator, final HttpServletRequest request) {
+            final String value = getValueAsString(bean, field);
+            if (StringUtil.isNotBlank(value) && !CronExpression.isValidExpression(value)) {
+                addError(errors, field, validator, validatorAction, request);
+                return false;
+            }
+            return true;
         }
-        return true;
-    }
-
+    */
 }

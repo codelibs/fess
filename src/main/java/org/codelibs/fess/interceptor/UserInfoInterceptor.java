@@ -33,6 +33,7 @@ import org.lastaflute.web.util.LaRequestUtil;
  * @author shinsuke
  * 
  */
+// TODO update?
 public class UserInfoInterceptor extends AbstractInterceptor {
 
     private static final long serialVersionUID = 1L;
@@ -46,6 +47,7 @@ public class UserInfoInterceptor extends AbstractInterceptor {
      */
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
+        /*
         final HttpServletRequest request = LaRequestUtil.getRequest();
         final HttpSession session = request.getSession(false);
         if (session == null) {
@@ -73,6 +75,7 @@ public class UserInfoInterceptor extends AbstractInterceptor {
                 break;
             }
         }
+        */
         return invocation.proceed();
     }
 

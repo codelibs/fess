@@ -36,10 +36,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.service.RoleTypeService;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -99,7 +101,7 @@ public class SystemHelper implements Serializable {
                                 final ULocale uLocale = new ULocale(key);
                                 final Locale displayLocale = uLocale.toLocale();
                                 final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-                                final String msg = MessageResourcesUtil.getMessage(displayLocale, "labels.allLanguages");
+                                final String msg = ComponentUtil.getMessageManager().getMessage(displayLocale, "labels.allLanguages");
                                 final Map<String, String> defaultMap = new HashMap<>(2);
                                 defaultMap.put(Constants.ITEM_LABEL, msg);
                                 defaultMap.put(Constants.ITEM_VALUE, "all");
@@ -349,7 +351,7 @@ public class SystemHelper implements Serializable {
             return langItemsCache.get(localeStr);
         } catch (final ExecutionException e) {
             final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-            final String msg = MessageResourcesUtil.getMessage(locale, "labels.allLanguages");
+            final String msg = ComponentUtil.getMessageManager().getMessage(locale, "labels.allLanguages");
             final Map<String, String> defaultMap = new HashMap<>(2);
             defaultMap.put(Constants.ITEM_LABEL, msg);
             defaultMap.put(Constants.ITEM_VALUE, "all");

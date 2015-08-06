@@ -537,13 +537,11 @@ public class IndexUpdater extends Thread {
         return documentSize;
     }
 
-    @Binding(bindingType = BindingType.MAY)
     @Override
     public void setUncaughtExceptionHandler(final UncaughtExceptionHandler eh) {
         super.setUncaughtExceptionHandler(eh);
     }
 
-    @Binding(bindingType = BindingType.MAY)
     public static void setDefaultUncaughtExceptionHandler(final UncaughtExceptionHandler eh) {
         Thread.setDefaultUncaughtExceptionHandler(eh);
     }

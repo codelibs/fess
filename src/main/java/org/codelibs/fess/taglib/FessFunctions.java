@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -37,6 +38,7 @@ import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class FessFunctions {
@@ -188,9 +190,9 @@ public class FessFunctions {
                     if (values != null) {
                         for (final String value : values) {
                             buf.append('&');
-                            buf.append(URLEncoderUtil.encode(name));
+                            buf.append(LdiURLUtil.encode(name, Constants.UTF_8));
                             buf.append('=');
-                            buf.append(URLEncoderUtil.encode(value));
+                            buf.append(LdiURLUtil.encode(value, Constants.UTF_8));
                         }
                     }
                 }

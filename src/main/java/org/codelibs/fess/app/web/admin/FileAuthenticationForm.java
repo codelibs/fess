@@ -62,7 +62,7 @@ public class FileAuthenticationForm implements Serializable {
     public String parameters;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@LongType
+    //@Maxbytelength(maxbytelength = 1000)
     public String fileConfigId;
 
     //@Required(target = "confirmfromupdate,update,delete")

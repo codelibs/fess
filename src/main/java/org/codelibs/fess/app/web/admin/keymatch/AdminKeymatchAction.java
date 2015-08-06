@@ -172,14 +172,14 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(KeyMatchEditForm form) {
-        validate(form, messages -> {} , toEditHtml());
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminKeyMatch_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(KeyMatchEditForm form) {
-        validate(form, messages -> {} , toEditHtml());
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminKeyMatch_ConfirmJsp);
     }
 
@@ -189,7 +189,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Token(save = false, validate = true)
     @Execute
     public HtmlResponse create(KeyMatchEditForm form) {
-        validate(form, messages -> {} , toEditHtml());
+        validate(form, messages -> {}, toEditHtml());
         keyMatchService.store(createKeyMatch(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         ComponentUtil.getKeyMatchHelper().update();
@@ -199,7 +199,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Token(save = false, validate = true)
     @Execute
     public HtmlResponse update(KeyMatchEditForm form) {
-        validate(form, messages -> {} , toEditHtml());
+        validate(form, messages -> {}, toEditHtml());
         keyMatchService.store(createKeyMatch(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         ComponentUtil.getKeyMatchHelper().update();
@@ -260,7 +260,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
-            } , toEditHtml());
+            }, toEditHtml());
         }
     }
 

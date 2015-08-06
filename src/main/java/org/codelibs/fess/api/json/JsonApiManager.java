@@ -548,7 +548,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         if (isJsonp) {
             buf.append(')');
         }
-        LaResponseUtil.write(buf.toString(), "text/javascript+json", Constants.UTF_8);
+        write(buf.toString(), "text/javascript+json", Constants.UTF_8);
 
     }
 

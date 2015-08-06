@@ -124,7 +124,8 @@ public class FessMessages extends FessLabels {
     public static final String ERRORS_failed_to_delete_solr_index = "{errors.failed_to_delete_solr_index}";
 
     /** The key of the message: Failed to start a process because of running solr process. */
-    public static final String ERRORS_failed_to_start_solr_process_because_of_running = "{errors.failed_to_start_solr_process_because_of_running}";
+    public static final String ERRORS_failed_to_start_solr_process_because_of_running =
+            "{errors.failed_to_start_solr_process_because_of_running}";
 
     /** The key of the message: Failed to restore data. */
     public static final String ERRORS_failed_to_import_data = "{errors.failed_to_import_data}";

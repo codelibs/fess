@@ -375,7 +375,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("</message>");
         }
         buf.append("</response>");
-        LaResponseUtil.write(buf.toString(), "text/xml", Constants.UTF_8);
+        write(buf.toString(), "text/xml", Constants.UTF_8);
 
     }
 

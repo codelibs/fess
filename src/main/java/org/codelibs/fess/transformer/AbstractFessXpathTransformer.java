@@ -29,6 +29,9 @@ import org.codelibs.robot.transformer.impl.XpathTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
 public abstract class AbstractFessXpathTransformer extends XpathTransformer {
     private static final Logger logger = LoggerFactory.getLogger(AbstractFessXpathTransformer.class);
 
@@ -177,8 +180,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         }
 
         try {
-            final Object exp = OgnlUtil.parseExpression(template);
-            final Object value = OgnlUtil.getValue(exp, paramMap);
+            final Object value = new GroovyShell(new Binding(paramMap)).evaluate(template);
             if (value == null) {
                 return null;
             }

@@ -1,111 +1,143 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
-	flush="true">
-	<tiles:put name="title">
-		<bean:message key="labels.suggest_elevate_word_configuration" />
-	</tiles:put>
-	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
-	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
-	<tiles:put name="menu" value="/WEB-INF/view/common/admin/menu.jsp" />
-	<tiles:put name="menuType" value="suggestElevateWord" />
-	<tiles:put name="headerScript" type="string"></tiles:put>
-	<tiles:put name="body" type="string">
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fess | <bean:message key="labels.suggest_elevate_word_configuration" /></title>
+<jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
+</head>
+<body class="skin-blue sidebar-mini">
+	<div class="wrapper">
+		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
+		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
+			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuType" value="suggestElevateWord" />
+		</jsp:include>
 
-		<h3>
-			<bean:message key="labels.suggest_elevate_word_title_details" />
-		</h3>
+		<div class="content-wrapper">
 
-		<%-- Message: BEGIN --%>
-		<div>
-			<html:messages id="msg" message="true">
-				<div class="alert-message info"><bean:write name="msg" ignore="true" /></div>
-			</html:messages>
-			<html:errors />
-		</div>
-		<%-- Message: END --%>
-
-			<div>
-				<ul class="pills">
+			<%-- Content Header --%>
+			<section class="content-header">
+				<h1>
+					<bean:message key="labels.suggest_elevate_word_title_details" />
+				</h1>
+				<ol class="breadcrumb">
 					<li><s:link href="index">
 							<bean:message key="labels.suggest_elevate_word_link_list" />
 						</s:link></li>
 					<c:if test="${crudMode == 1}">
-					<li class="active"><a href="#"><bean:message
-								key="labels.suggest_elevate_word_link_create" /></a></li>
+						<li class="active"><a href="#"><bean:message key="labels.suggest_elevate_word_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-					<li class="active"><a href="#"><bean:message
-								key="labels.suggest_elevate_word_link_update" /></a></li>
+						<li class="active"><a href="#"><bean:message key="labels.suggest_elevate_word_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-					<li class="active"><a href="#"><bean:message
-								key="labels.suggest_elevate_word_link_delete" /></a></li>
+						<li class="active"><a href="#"><bean:message key="labels.suggest_elevate_word_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-					<li class="active"><a href="#"><bean:message
-								key="labels.suggest_elevate_word_link_confirm" /></a></li>
+						<li class="active"><a href="#"><bean:message key="labels.suggest_elevate_word_link_confirm" /></a></li>
 					</c:if>
-					<li><s:link href="downloadpage">
-							<bean:message key="labels.suggest_elevate_word_link_download" />
-						</s:link></li>
-					<li><s:link href="uploadpage">
-							<bean:message key="labels.suggest_elevate_word_link_upload" />
-						</s:link></li>
-				</ul>
-			</div>
+				</ol>
+			</section>
 
-		<%-- Edit Form: BEGIN --%>
-		<s:form>
-			<html:hidden property="crudMode" />
-			<div>
-				<c:if test="${crudMode==2}">
-					<html:hidden property="id" />
-					<html:hidden property="versionNo" />
-				</c:if>
-				<html:hidden property="createdBy" />
-				<html:hidden property="createdTime" />
-				<table class="bordered-table zebra-striped" style="width: 500px;">
-					<tbody>
-						<tr>
-							<th style="width: 150px;"><bean:message
-									key="labels.suggest_elevate_word_suggest_word" /></th>
-							<td><html:text property="suggestWord" style="width:98%;" /></td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_elevate_word_reading" /></th>
-							<td><html:text property="reading" style="width:98%;" /></td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_elevate_word_target_role" /></th>
-							<td><html:text property="targetRole" style="width:98%;" /></td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_elevate_word_target_label" /></th>
-							<td><html:text property="targetLabel" style="width:98%;" /></td>
-						</tr>
-						<tr>
-							<th><bean:message key="labels.suggest_elevate_word_boost" /></th>
-							<td><html:text property="boost" size="4" /></td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr>
-							<td colspan="2"><c:if test="${crudMode == 1}">
-									<input type="submit" class="btn small" name="confirmfromcreate"
-										value="<bean:message key="labels.suggest_elevate_word_button_create"/>" />
-									<input type="submit" class="btn small" name="back"
-										value="<bean:message key="labels.suggest_elevate_word_button_back"/>" />
-								</c:if> <c:if test="${crudMode == 2}">
-									<input type="submit" class="btn small" name="confirmfromupdate"
-										value="<bean:message key="labels.suggest_elevate_word_button_confirm"/>" />
-									<input type="submit" class="btn small" name="back"
-										value="<bean:message key="labels.suggest_elevate_word_button_back"/>" />
-								</c:if></td>
-						</tr>
-					</tfoot>
-				</table>
-			</div>
-		</s:form>
-		<%-- Edit Form: BEGIN --%>
+			<section class="content">
 
-	</tiles:put>
-</tiles:insert>
+				<%-- Form --%>
+				<s:form>
+					<html:hidden property="crudMode" />
+					<c:if test="${crudMode==2}">
+						<html:hidden property="id" />
+						<html:hidden property="versionNo" />
+					</c:if>
+					<html:hidden property="createdBy" />
+					<html:hidden property="createdTime" />
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<%-- Box Header --%>
+								<div class="box-header with-border">
+									<h3 class="box-title">
+										<c:if test="${crudMode == 1}">
+											<bean:message key="labels.suggest_elevate_word_link_create" />
+										</c:if>
+										<c:if test="${crudMode == 2}">
+											<bean:message key="labels.suggest_elevate_word_link_update" />
+										</c:if>
+									</h3>
+									<div class="box-tools pull-right">
+										<span class="label label-default"><s:link href="index">
+												<bean:message key="labels.suggest_elevate_word_link_list" />
+											</s:link></span>
+										<span class="label label-default"><s:link href="createpage">
+											<bean:message key="labels.suggest_elevate_word_link_create_new" />
+											</s:link></span>
+										<span class="label label-default"><s:link href="downloadpage">
+											<bean:message key="labels.suggest_elevate_word_link_download" />
+											</s:link></span>
+										<span class="label label-default"><s:link href="uploadpage">
+											<bean:message key="labels.suggest_elevate_word_link_upload" />
+											</s:link></span>
+									</div>
+								</div>
+								<%-- Box Body --%>
+								<div class="box-body">
+									<%-- Message --%>
+									<div>
+										<html:messages id="msg" message="true">
+											<div class="alert-message info">
+												<bean:write name="msg" ignore="true" />
+											</div>
+										</html:messages>
+										<html:errors />
+									</div>
+
+									<%-- Form Fields --%>
+									<div class="form-group">
+										<label for="word"><bean:message key="labels.suggest_elevate_word_suggest_word" /></label>
+										<html:text property="suggestWord" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="reading"><bean:message key="labels.suggest_elevate_word_reading" /></label>
+										<html:text property="reading" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="targetRole"><bean:message key="labels.suggest_elevate_word_target_role" /></label>
+										<html:text property="targetRole" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="targetLabel"><bean:message key="labels.suggest_elevate_word_target_label" /></label>
+										<html:text property="targetLabel" styleClass="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="boost"><bean:message key="labels.suggest_elevate_word_boost" /></label>
+										<html:text property="boost" styleClass="form-control" />
+									</div>
+								</div>
+								<%-- Box Footer --%>
+								<div class="box-footer">
+									<c:if test="${crudMode == 1}">
+										<input type="submit" class="btn" name="back" value="<bean:message key="labels.suggest_elevate_word_button_back"/>" />
+										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
+											value="<bean:message key="labels.suggest_elevate_word_button_create"/>"
+										/>
+									</c:if>
+									<c:if test="${crudMode == 2}">
+										<input type="submit" class="btn" name="back" value="<bean:message key="labels.suggest_elevate_word_button_back"/>" />
+										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
+											value="<bean:message key="labels.suggest_elevate_word_button_confirm"/>"
+										/>
+									</c:if>
+								</div>
+							</div>
+						</div>
+					</div>
+				</s:form>
+
+			</section>
+		</div>
+
+		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
+	</div>
+	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
+</body>
+</html>
+

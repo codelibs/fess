@@ -42,17 +42,18 @@ public class TokenInterceptor extends AbstractInterceptor {
      */
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        final Token token = invocation.getMethod().getAnnotation(Token.class);
-        if (token != null) {
-            final TokenProcessor processor = TokenProcessor.getInstance();
-            final HttpServletRequest request = LaRequestUtil.getRequest();
-            if (token.save()) {
-                processor.saveToken(request);
-            } else if (token.validate() && !processor.isTokenValid(request, !token.keep())) {
-                processor.resetToken(request);
-                throw new ActionMessagesException("errors.token", new Object[0]);
-            }
-        }
+        // TODO replace with lastaflute?
+        //        final Token token = invocation.getMethod().getAnnotation(Token.class);
+        //        if (token != null) {
+        //            final TokenProcessor processor = TokenProcessor.getInstance();
+        //            final HttpServletRequest request = LaRequestUtil.getRequest();
+        //            if (token.save()) {
+        //                processor.saveToken(request);
+        //            } else if (token.validate() && !processor.isTokenValid(request, !token.keep())) {
+        //                processor.resetToken(request);
+        //                throw new ActionMessagesException("errors.token", new Object[0]);
+        //            }
+        //        }
 
         return invocation.proceed();
     }

@@ -36,8 +36,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.codelibs.core.lang.StringUtil;
+import org.lastaflute.web.LastaFilter;
 
-public class FessEncodingFilter extends EncodingFilter {
+// TODO parent filter
+public class FessEncodingFilter extends LastaFilter {
     public static String ENCODING_MAP = "encodingRules";
 
     protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
@@ -53,7 +55,7 @@ public class FessEncodingFilter extends EncodingFilter {
         super.init(config);
         servletContext = config.getServletContext();
 
-        encoding = config.getInitParameter(ENCODING);
+        encoding = config.getInitParameter(ENCODING_KEY);
         if (encoding == null) {
             encoding = DEFAULT_ENCODING;
         }

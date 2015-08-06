@@ -21,6 +21,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
 public class BoostDocumentRule {
     private static final Logger logger = LoggerFactory.getLogger(BoostDocumentRule.class);
 
@@ -44,8 +47,7 @@ public class BoostDocumentRule {
         }
 
         try {
-            final Object exp = OgnlUtil.parseExpression(matchExpression);
-            final Object value = OgnlUtil.getValue(exp, map);
+            final Object value = new GroovyShell(new Binding(map)).evaluate(matchExpression);
 
             if (value instanceof Boolean) {
                 return ((Boolean) value).booleanValue();
@@ -63,8 +65,7 @@ public class BoostDocumentRule {
         }
 
         try {
-            final Object exp = OgnlUtil.parseExpression(boostExpression);
-            final Object value = OgnlUtil.getValue(exp, map);
+            final Object value = new GroovyShell(new Binding(map)).evaluate(boostExpression);
 
             if (value instanceof Integer) {
                 return ((Integer) value).floatValue();

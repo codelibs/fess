@@ -329,14 +329,16 @@ public class RootAction {
         }
         if (doc == null) {
             errorMessage =
-                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
+                    ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found",
+                            new Object[] { indexForm.docId });
             return "error.jsp";
         }
 
         final String content = viewHelper.createCacheContent(doc, indexForm.hq);
         if (content == null) {
             errorMessage =
-                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
+                    ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found",
+                            new Object[] { indexForm.docId });
             return "error.jsp";
         }
         LaResponseUtil.write(content, "text/html", Constants.UTF_8);
@@ -359,13 +361,15 @@ public class RootAction {
         }
         if (doc == null) {
             errorMessage =
-                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found", indexForm.docId);
+                    ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "errors.docid_not_found",
+                            new Object[] { indexForm.docId });
             return "error.jsp";
         }
         final Object urlObj = doc.get(fieldHelper.urlField);
         if (urlObj == null) {
             errorMessage =
-                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.document_not_found", indexForm.docId);
+                    ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "errors.document_not_found",
+                            new Object[] { indexForm.docId });
             return "error.jsp";
         }
         final String url = urlObj.toString();
@@ -420,7 +424,8 @@ public class RootAction {
                 } catch (final Exception e) {
                     logger.error("Failed to load: " + doc, e);
                     errorMessage =
-                            MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.not_load_from_server", url);
+                            ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
+                                    "errors.not_load_from_server", new Object[] { url });
                     return "error.jsp";
                 }
             } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
@@ -428,7 +433,8 @@ public class RootAction {
                 final File file = new File(path);
                 if (!file.exists()) {
                     errorMessage =
-                            MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.not_found_on_file_system", url);
+                            ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
+                                    "errors.not_found_on_file_system", new Object[] { url });
                     return "error.jsp";
                 }
                 final Desktop desktop = Desktop.getDesktop();
@@ -436,7 +442,8 @@ public class RootAction {
                     desktop.open(file);
                 } catch (final Exception e) {
                     errorMessage =
-                            MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "errors.could_not_open_on_system", url);
+                            ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
+                                    "errors.could_not_open_on_system", new Object[] { url });
                     logger.warn("Could not open " + path, e);
                     return "error.jsp";
                 }

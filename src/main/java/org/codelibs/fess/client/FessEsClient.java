@@ -2,7 +2,10 @@ package org.codelibs.fess.client;
 
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +21,8 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
+import org.codelibs.elasticsearch.runner.net.Curl;
+import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.entity.FacetInfo;
@@ -160,8 +165,19 @@ public class FessEsClient implements Client {
 
     protected List<String> indexConfigList = new ArrayList<>();
 
+    protected Map<String, List<String>> configListMap = new HashMap<>();
+
     public void addIndexConfig(String path) {
         indexConfigList.add(path);
+    }
+
+    public void addConfigFile(String index, String path) {
+        List<String> list = configListMap.get(index);
+        if (list == null) {
+            list = new ArrayList<>();
+            configListMap.put(index, list);
+        }
+        list.add(path);
     }
 
     public void setSettings(Map<String, String> settings) {
@@ -215,6 +231,7 @@ public class FessEsClient implements Client {
                     if (settings != null) {
                         settingsBuilder.put(settings);
                     }
+                    settingsBuilder.put("path.plugins", System.getProperty("user.dir") + "/plugins");
                 });
                 runner.build(config);
             }
@@ -264,6 +281,27 @@ public class FessEsClient implements Client {
                     // ignore
             }
             if (!exists) {
+                if (runner != null) {// TODO replace with url
+                    configListMap.getOrDefault(configIndex, Collections.emptyList()).forEach(
+                            path -> {
+                                String source = null;
+                                final String filePath = indexConfigPath + "/" + configIndex + "/" + path;
+                                try {
+                                    source = FileUtil.readUTF8(filePath);
+                                    try (CurlResponse response =
+                                            Curl.post(runner.node(), "_configsync/file").param("path", path).body(source).execute()) {
+                                        if (response.getHttpStatusCode() == 200) {
+                                            logger.info("Register " + path + " to " + configIndex);
+                                        } else {
+                                            logger.warn("Invalid request for " + path);
+                                        }
+                                    }
+                                } catch (final Exception e) {
+                                    logger.warn("Failed to register " + filePath, e);
+                                }
+                            });
+                }
+
                 try {
                     String source = null;
                     final String indexConfigFile = indexConfigPath + "/" + configIndex + ".json";

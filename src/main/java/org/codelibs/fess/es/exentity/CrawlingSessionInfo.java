@@ -47,7 +47,7 @@ public class CrawlingSessionInfo extends BsCrawlingSessionInfo {
 
     public String getKeyMsg() {
         final Locale locale = LaRequestUtil.getRequest().getLocale();
-        final String message = MessageResourcesUtil.getMessage(locale, "labels.crawling_session_" + getKey());
+        final String message = ComponentUtil.getMessageManager().getMessage(locale, "labels.crawling_session_" + getKey());
         if (message == null || message.startsWith("???")) {
             return getKey();
         }

@@ -112,7 +112,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Execute
     public HtmlResponse upload(DesignForm form) {
-        validate(form, messages -> {} , toMainHtml());
+        validate(form, messages -> {}, toMainHtml());
         final String uploadedFileName = form.designFile.getFileName();
         String fileName = form.designFileName;
         if (StringUtil.isBlank(fileName)) {

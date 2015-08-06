@@ -380,16 +380,16 @@ public class ViewHelper implements Serializable {
         }
         String url = (String) doc.get("urlLink");
         if (url == null) {
-            url = MessageResourcesUtil.getMessage(locale, "labels.search_unknown");
+            url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
         Object created = doc.get(fieldHelper.createdField);
         if (created instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             created = sdf.format((Date) created);
         } else {
-            created = MessageResourcesUtil.getMessage(locale, "labels.search_unknown");
+            created = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        doc.put("cacheMsg", MessageResourcesUtil.getMessage(locale, "labels.search_cache_msg", url, created));
+        doc.put("cacheMsg", ComponentUtil.getMessageManager().getMessage(locale, "labels.search_cache_msg", new Object[] { url, created }));
 
         doc.put("queries", queries);
 

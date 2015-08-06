@@ -61,16 +61,19 @@
 		<tika.version>1.6</tika.version>
 		<poi.version>3.11-beta2</poi.version>
 		<pdfbox.version>1.8.7</pdfbox.version>
-		<!-- Elasticsearch -->
 
-		<elasticsearch.version>1.7.0</elasticsearch.version>
-		<cluster.runner.version>1.7.0.0-SNAPSHOT</cluster.runner.version>
+		<!-- Elasticsearch -->
+		<elasticsearch.version>1.7.1</elasticsearch.version>
+		<cluster.runner.version>1.7.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.delegate>true</tomcat.delegate>
 		<tomcat.useSeparateTomcatClassLoader>true</tomcat.useSeparateTomcatClassLoader>
 		<maven.tomcat.uriEncoding>UTF-8</maven.tomcat.uriEncoding>
 		<maven.tomcat.tomcatUsers.file>${basedir}/src/test/resources/tomcat-users.xml</maven.tomcat.tomcatUsers.file>
+
+		<maven.snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</maven.snapshot.repo.url>
+		<maven.release.repo.url>http://central.maven.org/maven2</maven.release.repo.url>
 	</properties>
 	<build>
 		<finalName>fess</finalName>
@@ -196,6 +199,37 @@
 					<clientProject>fess</clientProject>
 					<dbfluteClientDir>${basedir}/dbflute_fess</dbfluteClientDir>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant</artifactId>
+						<version>1.9.6</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<tasks>
+						<mkdir dir="${basedir}/target/plugins" />
+						<get dest="${basedir}/target/plugins">
+							<url
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/1.6.0-SNAPSHOT/elasticsearch-configsync-1.6.0-20150716.075532-2.zip" />
+							<url
+								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-kuromoji-neologd/1.6.0/elasticsearch-analysis-kuromoji-neologd-1.6.0.zip" />
+						</get>
+						<delete dir="${basedir}/plugins" />
+						<mkdir dir="${basedir}/plugins" />
+						<unzip dest="${basedir}/plugins/analysis-kuromoji-neologd"
+							src="${basedir}/target/plugins/elasticsearch-analysis-kuromoji-neologd-1.6.0.zip" />
+						<unzip dest="${basedir}/plugins/configsync"
+							src="${basedir}/target/plugins/elasticsearch-configsync-1.6.0-20150716.075532-2.zip" />
+					</tasks>
+				</configuration>
+				<goals>
+					<goal>run</goal>
+				</goals>
 			</plugin>
 		</plugins>
 	</build>
@@ -362,7 +396,7 @@
 		<!-- s2robot -->
 		<dependency>
 			<groupId>org.codelibs.robot</groupId>
-			<artifactId>s2robot-lasta</artifactId>
+			<artifactId>s2robot-es</artifactId>
 			<version>${s2robot.version}</version>
 		</dependency>
 		<dependency>
