@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 
@@ -38,11 +39,19 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2Robot;
 import org.codelibs.robot.entity.AccessResult;
 import org.codelibs.robot.entity.AccessResultData;
+import org.codelibs.robot.entity.EsAccessResult;
+import org.codelibs.robot.entity.EsUrlQueue;
 import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.service.UrlFilterService;
 import org.codelibs.robot.service.UrlQueueService;
+import org.codelibs.robot.service.impl.EsDataService;
 import org.codelibs.robot.transformer.Transformer;
+import org.codelibs.robot.util.EsResultList;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,19 +64,13 @@ public class IndexUpdater extends Thread {
     protected FessEsClient fessEsClient;
 
     @Resource
-    protected DataService dataService;
+    protected DataService<EsAccessResult> dataService;
 
     @Resource
-    protected UrlQueueService urlQueueService;
+    protected UrlQueueService<EsUrlQueue> urlQueueService;
 
     @Resource
     protected UrlFilterService urlFilterService;
-
-    @Resource
-    protected AccessResultBhv accessResultBhv;
-
-    @Resource
-    protected AccessResultDataBhv accessResultDataBhv;
 
     @Resource
     protected ClickLogBhv clickLogBhv;
@@ -163,21 +166,24 @@ public class IndexUpdater extends Thread {
 
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
-            final AccessResultCB cb = new AccessResultCB();
-            cb.setupSelect_AccessResultDataAsOne();
-            cb.query().setSessionId_InScope(sessionIdList);
-            cb.query().addOrderBy_CreateTime_Asc();
-            cb.query().setStatus_Equal(org.codelibs.robot.Constants.OK_STATUS);
-            if (maxDocumentCacheSize <= 0) {
-                maxDocumentCacheSize = 1;
-            }
-            cb.fetchFirst(maxDocumentCacheSize);
-            cb.fetchPage(1);
+            Consumer<SearchRequestBuilder> cb = new Consumer<SearchRequestBuilder>() {
+                @Override
+                public void accept(SearchRequestBuilder builder) {
+                    QueryBuilders.filteredQuery(
+                            QueryBuilders.matchAllQuery(),
+                            FilterBuilders.boolFilter().must(FilterBuilders.termsFilter(EsAccessResult.SESSION_ID, sessionIdList))
+                                    .must(FilterBuilders.termFilter(EsAccessResult.STATUS, org.codelibs.robot.Constants.OK_STATUS)));
+                    builder.setFrom(0);
+                    if (maxDocumentCacheSize <= 0) {
+                        maxDocumentCacheSize = 1;
+                    }
+                    builder.setSize(maxDocumentCacheSize);
+                    builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
+                }
+            };
 
             final List<Map<String, Object>> docList = new ArrayList<>();
-            final List<org.codelibs.robot.entity.AccessResult> accessResultList = new ArrayList<org.codelibs.robot.entity.AccessResult>();
-            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList =
-                    new ArrayList<org.codelibs.robot.db.exentity.AccessResultData>();
+            final List<EsAccessResult> accessResultList = new ArrayList<>();
 
             long updateTime = System.currentTimeMillis();
             int errorCount = 0;
@@ -201,7 +207,6 @@ public class IndexUpdater extends Thread {
 
                     docList.clear();
                     accessResultList.clear();
-                    accessResultDataList.clear();
 
                     intervalControlHelper.delayByRules();
 
@@ -211,16 +216,16 @@ public class IndexUpdater extends Thread {
 
                     updateTime = System.currentTimeMillis();
 
-                    PagingResultBean<AccessResult> arList = getAccessResultList(cb);
+                    List<EsAccessResult> arList = getAccessResultList(cb);
                     if (arList.isEmpty()) {
                         emptyListCount++;
                     } else {
                         emptyListCount = 0; // reset
                     }
                     while (!arList.isEmpty()) {
-                        processAccessResults(docList, accessResultList, accessResultDataList, arList);
+                        processAccessResults(docList, accessResultList, arList);
 
-                        cleanupAccessResults(accessResultList, accessResultDataList);
+                        cleanupAccessResults(accessResultList);
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("Getting documents in IndexUpdater queue.");
@@ -300,10 +305,9 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void processAccessResults(final List<Map<String, Object>> docList,
-            final List<org.codelibs.robot.entity.AccessResult> accessResultList,
-            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList, final PagingResultBean<AccessResult> arList) {
-        for (final AccessResult accessResult : arList) {
+    private void processAccessResults(final List<Map<String, Object>> docList, final List<EsAccessResult> accessResultList,
+            final List<EsAccessResult> arList) {
+        for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing " + accessResult.getUrl());
             }
@@ -321,7 +325,6 @@ public class IndexUpdater extends Thread {
             final AccessResultData accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
-                accessResultDataList.add((org.codelibs.robot.db.exentity.AccessResultData) accessResultData);
                 try {
                     final Transformer transformer = SingletonLaContainer.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
@@ -438,8 +441,7 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void cleanupAccessResults(final List<org.codelibs.robot.entity.AccessResult> accessResultList,
-            final List<org.codelibs.robot.db.exentity.AccessResultData> accessResultDataList) {
+    private void cleanupAccessResults(final List<EsAccessResult> accessResultList) {
         if (!accessResultList.isEmpty()) {
             final long execTime = System.currentTimeMillis();
             final int size = accessResultList.size();
@@ -451,37 +453,26 @@ public class IndexUpdater extends Thread {
             }
         }
 
-        if (!accessResultDataList.isEmpty()) {
-            final long execTime = System.currentTimeMillis();
-            final int size = accessResultDataList.size();
-            // clean up content
-            accessResultDataBhv.batchDelete(accessResultDataList);
-            accessResultDataList.clear();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + size + " access result data. The execution time is " + (System.currentTimeMillis() - execTime)
-                        + "ms.");
-            }
-        }
     }
 
-    private PagingResultBean<AccessResult> getAccessResultList(final AccessResultCB cb) {
+    private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb) {
         final long execTime = System.currentTimeMillis();
-        final PagingResultBean<AccessResult> arList = accessResultBhv.selectPage(cb);
+        List<EsAccessResult> arList = ((EsDataService) dataService).getAccessResultList(cb);
         if (!arList.isEmpty()) {
             for (final AccessResult ar : arList.toArray(new AccessResult[arList.size()])) {
-                if (ar.getCreateTime().getTime() > execTime - commitMarginTime) {
+                if (ar.getCreateTime().longValue() > execTime - commitMarginTime) {
                     arList.remove(ar);
                 }
             }
         }
+        long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
         if (logger.isInfoEnabled()) {
-            logger.info("Processing " + arList.size() + "/" + arList.getAllRecordCount() + " docs (DB: "
-                    + (System.currentTimeMillis() - execTime) + "ms)");
+            logger.info("Processing " + arList.size() + "/" + totalHits + " docs (DB: " + (System.currentTimeMillis() - execTime) + "ms)");
         }
-        if (arList.getAllRecordCount() > unprocessedDocumentSize) {
+        if (totalHits > unprocessedDocumentSize) {
             if (logger.isInfoEnabled()) {
-                logger.info("Stopped all crawler threads. " + " You have " + arList.getAllRecordCount() + " (>" + unprocessedDocumentSize
-                        + ") " + " unprocessed docs.");
+                logger.info("Stopped all crawler threads. " + " You have " + totalHits + " (>" + unprocessedDocumentSize + ") "
+                        + " unprocessed docs.");
             }
             final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.setCrawlerRunning(false);

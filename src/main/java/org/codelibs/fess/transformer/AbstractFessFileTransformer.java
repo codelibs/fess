@@ -49,6 +49,7 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.client.smb.SmbClient;
+import org.codelibs.robot.entity.AccessResult;
 import org.codelibs.robot.entity.AccessResultData;
 import org.codelibs.robot.entity.ExtractData;
 import org.codelibs.robot.entity.ResponseData;
@@ -57,6 +58,7 @@ import org.codelibs.robot.entity.UrlQueue;
 import org.codelibs.robot.exception.RobotCrawlAccessException;
 import org.codelibs.robot.exception.RobotSystemException;
 import org.codelibs.robot.extractor.Extractor;
+import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.util.CrawlingParameterUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
@@ -400,15 +402,14 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
             return enc;
         }
 
-        final AccessResultDataCB cb = new AccessResultDataCB();
-        cb.query().queryAccessResult().setSessionId_Equal(sessionId);
-        cb.query().queryAccessResult().setUrl_Equal(parentUrl);
-        cb.specify().columnEncoding();
-        final AccessResultData accessResultData = SingletonLaContainer.getComponent(AccessResultDataBhv.class).selectEntity(cb);
-        if (accessResultData != null && accessResultData.getEncoding() != null) {
-            enc = accessResultData.getEncoding();
-            parentEncodingMap.put(key, enc);
-            return enc;
+        AccessResult accessResult = ComponentUtil.getDataService().getAccessResult(sessionId, parentUrl);
+        if (accessResult != null) {
+            AccessResultData accessResultData = accessResult.getAccessResultData();
+            if (accessResultData != null && accessResultData.getEncoding() != null) {
+                enc = accessResultData.getEncoding();
+                parentEncodingMap.put(key, enc);
+                return enc;
+            }
         }
         return null;
     }

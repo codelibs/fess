@@ -44,10 +44,13 @@ import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.solr.IndexUpdater;
 import org.codelibs.robot.extractor.ExtractorFactory;
+import org.codelibs.robot.service.DataService;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 
 public final class ComponentUtil {
+    private static final String DATA_SERVICE = "dataService";
+
     private static final String MESSAGE_MANAGER = "messageManager";
 
     private static final String USER_AGENT_NAME = "userAgentName";
@@ -239,6 +242,10 @@ public final class ComponentUtil {
 
     public static MessageManager getMessageManager() {
         return SingletonLaContainer.getComponent(MESSAGE_MANAGER);
+    }
+
+    public static DataService getDataService() {
+        return SingletonLaContainer.getComponent(DATA_SERVICE);
     }
 
     public static <T> T getComponent(Class<T> clazz) {
