@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN"
-	"http://www.seasar.org/dtd/components24.dtd">
-<components>
-	<include path="aop.dicon"/>
-	<include path="dbflute.dicon"/>
-	<component name="intervalControlHelper" class="org.codelibs.fess.helper.IntervalControlHelper">
-	</component>
-</components>
