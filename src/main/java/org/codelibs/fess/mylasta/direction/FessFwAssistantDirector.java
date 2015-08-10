@@ -20,7 +20,8 @@ import javax.annotation.Resource;
 import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
-import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainBeforeListener;
+import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainBeforeHook;
+import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainFinallyHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessListedClassificationProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMailDeliveryDepartmentCreator;
 import org.codelibs.fess.mylasta.direction.sponsor.FessSecurityResourceProvider;
@@ -70,16 +71,21 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         // even if you set true manually and forget to set false back
         direction.directFrameworkDebug(fessConfig.isFrameworkDebug()); // basically false
 
-        // you can add your own process when your application is booting
-        direction.directCurtainBefore(createBootListener());
+        // you can add your own process when your application is booting or closing
+        direction.directCurtainBefore(createCurtainBeforeHook());
+        direction.directCurtainFinally(createCurtainFinallyHook()); // when destroy
 
         direction.directSecurity(createSecurityResourceProvider());
         direction.directTime(createTimeResourceProvider());
         direction.directMail(createFessMailDeliveryDepartmentCreator().create());
     }
 
-    protected FessCurtainBeforeListener createBootListener() {
-        return new FessCurtainBeforeListener();
+    protected FessCurtainBeforeHook createCurtainBeforeHook() {
+        return new FessCurtainBeforeHook();
+    }
+
+    protected FessCurtainFinallyHook createCurtainFinallyHook() {
+        return new FessCurtainFinallyHook();
     }
 
     protected FessSecurityResourceProvider createSecurityResourceProvider() { // #change_it_first

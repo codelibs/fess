@@ -33,6 +33,7 @@ import org.codelibs.fess.entity.UserInfo;
 import org.codelibs.fess.exception.LoginException;
 import org.codelibs.fess.struts.form.AbstractLoginForm;
 import org.codelibs.fess.util.ActivityUtil;
+import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +97,7 @@ public abstract class AbstractLoginAction implements Serializable {
 
         final HttpSession session = invalidateSession(oldSession);
 
-        session.removeAttribute(Globals.MESSAGE_KEY);
+        session.removeAttribute(LastaWebKey.ACTION_INFO_KEY);
 
         // create user info
         final UserInfo loginInfo = new UserInfo();
