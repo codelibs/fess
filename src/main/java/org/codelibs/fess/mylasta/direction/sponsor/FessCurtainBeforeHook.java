@@ -20,15 +20,15 @@ import java.util.TimeZone;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.system.provider.DfFinalTimeZoneProvider;
 import org.dbflute.util.DfTypeUtil;
-import org.lastaflute.core.direction.CurtainBeforeListener;
+import org.lastaflute.core.direction.CurtainBeforeHook;
 import org.lastaflute.core.direction.FwAssistantDirector;
 
 /**
  * @author jflute
  */
-public class FessCurtainBeforeListener implements CurtainBeforeListener {
+public class FessCurtainBeforeHook implements CurtainBeforeHook {
 
-    public void listen(FwAssistantDirector assistantDirector) {
+    public void hook(FwAssistantDirector assistantDirector) {
         processDBFluteSystem();
     }
 

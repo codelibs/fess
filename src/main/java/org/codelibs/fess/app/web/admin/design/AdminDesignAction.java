@@ -35,7 +35,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;

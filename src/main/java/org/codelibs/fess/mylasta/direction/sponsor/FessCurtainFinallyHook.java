@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the CodeLibs Project and the Others.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,27 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-package org.codelibs.fess.servlet;
+package org.codelibs.fess.mylasta.direction.sponsor;
 
 import java.lang.reflect.Method;
 
-import javax.servlet.http.HttpServlet;
-
+import org.lastaflute.core.direction.CurtainFinallyHook;
+import org.lastaflute.core.direction.FwAssistantDirector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Tomcat7ConfigServlet extends HttpServlet {
+/**
+ * @author jflute
+ */
+public class FessCurtainFinallyHook implements CurtainFinallyHook {
 
-    private static final Logger logger = LoggerFactory.getLogger(Tomcat7ConfigServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(FessCurtainFinallyHook.class);
 
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public void destroy() {
-        if (logger.isInfoEnabled()) {
-            logger.info("Removing HTTP connection manager...");
-        }
+    public void hook(FwAssistantDirector assistantDirector) {
         shutdownCommonsHttpClient();
     }
 
-    private void shutdownCommonsHttpClient() {
+    private void shutdownCommonsHttpClient() { // from Tomcat7ConfigServlet (old class)
         try {
             final Class<?> clazz = Class.forName("org.apache.commons.httpclient.MultiThreadedHttpConnectionManager");
             final Method method = clazz.getMethod("shutdownAll", (Class<?>[]) null);
