@@ -39,7 +39,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp7</dbflute.version>
-		<lastaflute.version>0.6.1-D-SNAPSHOT</lastaflute.version>
+		<lastaflute.version>0.6.1-RC2</lastaflute.version>
 		<lasta.taglib.version>0.6.0</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
@@ -53,7 +53,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.8.2</junit.version>
-		<utflute.version>0.5.0-sp8-A-SNAPSHOT</utflute.version>
+		<utflute.version>0.5.0-sp8-RC1</utflute.version>
 		<jetty.boot.version>0.3.2</jetty.boot.version>
 
 		<!-- S2Robot -->
