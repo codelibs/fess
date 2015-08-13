@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.system_info_configuration" /></title>
+<title>Fess | <la:message key="labels.system_info_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,7 +18,7 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.system_info_configuration" />
+					<la:message key="labels.system_info_configuration" />
 				</h1>
 			</section>
 
@@ -30,7 +30,7 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.system_info_env_title" />
+									<la:message key="labels.system_info_env_title" />
 								</h3>
 							</div>
 							<%-- Box Body --%>
@@ -44,7 +44,7 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.system_info_prop_title" />
+									<la:message key="labels.system_info_prop_title" />
 								</h3>
 							</div>
 							<%-- Box Body --%>
@@ -58,14 +58,14 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.system_info_fess_prop_title" />
+									<la:message key="labels.system_info_fess_prop_title" />
 								</h3>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
 								<c:if test="${empty fessPropItems}">
 									<textarea id="fessPropData" style="height: 300px;" class="form-control">
-										<bean:message key="labels.system_info_crawler_properties_does_not_exist" />
+										<la:message key="labels.system_info_crawler_properties_does_not_exist" />
 									</textarea>
 								</c:if>
 								<c:if test="${!empty fessPropItems}">
@@ -79,7 +79,7 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.system_info_bug_report_title" />
+									<la:message key="labels.system_info_bug_report_title" />
 								</h3>
 							</div>
 							<%-- Box Body --%>

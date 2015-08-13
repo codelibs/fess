@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.scheduledjob_configuration" /></title>
+<title>Fess | <la:message key="labels.scheduledjob_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.scheduledjob_title_details" />
+					<la:message key="labels.scheduledjob_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.scheduledjob_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.scheduledjob_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.scheduledjob_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.scheduledjob_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.scheduledjob_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.scheduledjob_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -57,22 +57,22 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.scheduledjob_link_create" />
+											<la:message key="labels.scheduledjob_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.scheduledjob_link_update" />
+											<la:message key="labels.scheduledjob_link_update" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
-											<bean:message key="labels.scheduledjob_link_delete" />
+											<la:message key="labels.scheduledjob_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<bean:message key="labels.scheduledjob_link_confirm" />
+											<la:message key="labels.scheduledjob_link_confirm" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-											<bean:message key="labels.scheduledjob_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+											<la:message key="labels.scheduledjob_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -91,51 +91,51 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><bean:message key="labels.scheduledjob_name" /></th>
+												<th class="col-xs-2"><la:message key="labels.scheduledjob_name" /></th>
 												<td>${f:h(name)}<html:hidden property="name" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_target" /></th>
+												<th><la:message key="labels.scheduledjob_target" /></th>
 												<td>${f:h(target)}<html:hidden property="target" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_cronExpression" /></th>
+												<th><la:message key="labels.scheduledjob_cronExpression" /></th>
 												<td>${f:h(cronExpression)}<html:hidden property="cronExpression" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_scriptType" /></th>
+												<th><la:message key="labels.scheduledjob_scriptType" /></th>
 												<td>${f:h(scriptType)}<html:hidden property="scriptType" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_scriptData" /></th>
+												<th><la:message key="labels.scheduledjob_scriptData" /></th>
 												<td>${f:br(f:h(scriptData))}<html:hidden property="scriptData" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_jobLogging" /></th>
+												<th><la:message key="labels.scheduledjob_jobLogging" /></th>
 												<td>
-													<c:if test="${jobLogging=='on'}"><bean:message key="labels.enabled"/></c:if>
-													<c:if test="${jobLogging!='on'}"><bean:message key="labels.disabled"/></c:if>
+													<c:if test="${jobLogging=='on'}"><la:message key="labels.enabled"/></c:if>
+													<c:if test="${jobLogging!='on'}"><la:message key="labels.disabled"/></c:if>
 													<html:hidden property="jobLogging" />
 												</td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_crawler" /></th>
+												<th><la:message key="labels.scheduledjob_crawler" /></th>
 												<td>
-													<c:if test="${crawler=='on'}"><bean:message key="labels.enabled"/></c:if>
-													<c:if test="${crawler!='on'}"><bean:message key="labels.disabled"/></c:if>
+													<c:if test="${crawler=='on'}"><la:message key="labels.enabled"/></c:if>
+													<c:if test="${crawler!='on'}"><la:message key="labels.disabled"/></c:if>
 													<html:hidden property="crawler" />
 												</td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.scheduledjob_status" /></th>
+												<th><la:message key="labels.scheduledjob_status" /></th>
 												<td>
-													<c:if test="${available=='on'}"><bean:message key="labels.enabled"/></c:if>
-													<c:if test="${available!='on'}"><bean:message key="labels.disabled"/></c:if>
+													<c:if test="${available=='on'}"><la:message key="labels.enabled"/></c:if>
+													<c:if test="${available!='on'}"><la:message key="labels.disabled"/></c:if>
 													<html:hidden property="available" />
 												</td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.sortOrder" /></th>
+												<th><la:message key="labels.sortOrder" /></th>
 												<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
@@ -145,30 +145,30 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.scheduledjob_button_back"/>" />
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.scheduledjob_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="create"
-											value="<bean:message key="labels.scheduledjob_button_create"/>"
+											value="<la:message key="labels.scheduledjob_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.scheduledjob_button_back"/>" />
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.scheduledjob_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="update"
-											value="<bean:message key="labels.scheduledjob_button_update"/>"
+											value="<la:message key="labels.scheduledjob_button_update"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.scheduledjob_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.scheduledjob_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="delete"
-											value="<bean:message key="labels.scheduledjob_button_delete"/>"
+											value="<la:message key="labels.scheduledjob_button_delete"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.scheduledjob_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.scheduledjob_button_back"/>" />
 										<input type="submit" class="btn" name="editfromconfirm"
-											value="<bean:message key="labels.scheduledjob_button_edit"/>"
+											value="<la:message key="labels.scheduledjob_button_edit"/>"
 										/>
 										<input type="submit" class="btn" name="deletefromconfirm"
-											value="<bean:message key="labels.scheduledjob_button_delete"/>"
+											value="<la:message key="labels.scheduledjob_button_delete"/>"
 										/>
 									</c:if>
 								</div>

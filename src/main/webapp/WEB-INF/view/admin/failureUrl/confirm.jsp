@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.failure_url_configuration" /></title>
+<title>Fess | <la:message key="labels.failure_url_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.failure_url_title_details" />
+					<la:message key="labels.failure_url_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.failure_url_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.failure_url_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.failure_url_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.failure_url_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.failure_url_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.failure_url_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.failure_url_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.failure_url_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.failure_url_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.failure_url_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -57,22 +57,22 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.failure_url_link_create" />
+											<la:message key="labels.failure_url_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.failure_url_link_update" />
+											<la:message key="labels.failure_url_link_update" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
-											<bean:message key="labels.failure_url_link_delete" />
+											<la:message key="labels.failure_url_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<bean:message key="labels.failure_url_link_confirm" />
+											<la:message key="labels.failure_url_link_confirm" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.failure_url_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.failure_url_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -92,49 +92,49 @@
 										<tbody>
 											<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
 												<tr>
-													<th style="width: 150px;"><bean:message
+													<th style="width: 150px;"><la:message
 															key="labels.failure_url_id" /></th>
 													<td style="width: 350px;">${f:h(id)}<html:hidden
 															property="id" /></td>
 												</tr>
 											</c:if>
 											<tr>
-												<th><bean:message key="labels.failure_url_url" /></th>
+												<th><la:message key="labels.failure_url_url" /></th>
 												<td><div style="width: 350px; overflow-x: auto;">
 														${f:h(url)}
 														<html:hidden property="url" />
 													</div></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_thread_name" /></th>
+												<th><la:message key="labels.failure_url_thread_name" /></th>
 												<td>${f:h(threadName)}<html:hidden property="threadName" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_error_name" /></th>
+												<th><la:message key="labels.failure_url_error_name" /></th>
 												<td>${f:h(errorName)}<html:hidden property="errorName" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_error_log" /></th>
+												<th><la:message key="labels.failure_url_error_log" /></th>
 												<td><div style="width: 350px; overflow-x: auto;">
 														${f:br(f:nbsp(f:h(errorLog)))}
 														<html:hidden property="errorLog" />
 													</div></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_error_count" /></th>
+												<th><la:message key="labels.failure_url_error_count" /></th>
 												<td>${f:h(errorCount)}<html:hidden property="errorCount" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_last_access_time" /></th>
+												<th><la:message key="labels.failure_url_last_access_time" /></th>
 												<td>${f:h(lastAccessTime)}<html:hidden
 														property="lastAccessTime" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_web_config_name" /></th>
+												<th><la:message key="labels.failure_url_web_config_name" /></th>
 												<td>${f:h(webConfigName)}</td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.failure_url_file_config_name" /></th>
+												<th><la:message key="labels.failure_url_file_config_name" /></th>
 												<td>${f:h(fileConfigName)}</td>
 											</tr>
 										</tbody>
@@ -144,12 +144,12 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn small" name="delete" value="<bean:message key="labels.crud_button_delete"/>" />
-										<input type="submit" class="btn small" name="back" value="<bean:message key="labels.crud_button_back"/>" />
+										<input type="submit" class="btn small" name="delete" value="<la:message key="labels.crud_button_delete"/>" />
+										<input type="submit" class="btn small" name="back" value="<la:message key="labels.crud_button_back"/>" />
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn small" name="back" value="<bean:message key="labels.crud_button_back"/>" />
-										<input type="submit" class="btn small" name="deletefromconfirm" value="<bean:message key="labels.crud_button_delete"/>" />
+										<input type="submit" class="btn small" name="back" value="<la:message key="labels.crud_button_back"/>" />
+										<input type="submit" class="btn small" name="deletefromconfirm" value="<la:message key="labels.crud_button_delete"/>" />
 									</c:if>
 								</div>
 							</div>

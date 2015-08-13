@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
 	flush="true">
 	<tiles:put name="title">
-		<bean:message key="labels.dict_synonym_configuration" />
+		<la:message key="labels.dict_synonym_configuration" />
 	</tiles:put>
 	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
@@ -11,7 +11,7 @@
 	<tiles:put name="body" type="string">
 
 		<h3>
-			<bean:message key="labels.dict_synonym_title" />
+			<la:message key="labels.dict_synonym_title" />
 		</h3>
 
 		<%-- Message: BEGIN --%>
@@ -25,20 +25,20 @@
 
 			<div>
 				<ul class="pills">
-					<li><s:link href="../index">
-							<bean:message key="labels.dict_list_link" />
-						</s:link></li>
-					<li><s:link href="index?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_synonym_list_link" />
-						</s:link></li>
-					<li><s:link href="createpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_synonym_link_create" />
-						</s:link></li>
-					<li><s:link href="downloadpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_synonym_link_download" />
-						</s:link></li>
+					<li><la:link href="../index">
+							<la:message key="labels.dict_list_link" />
+						</la:link></li>
+					<li><la:link href="index?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_synonym_list_link" />
+						</la:link></li>
+					<li><la:link href="createpage?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_synonym_link_create" />
+						</la:link></li>
+					<li><la:link href="downloadpage?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_synonym_link_download" />
+						</la:link></li>
 					<li class="active"><a href="#">
-							<bean:message key="labels.dict_synonym_link_upload" />
+							<la:message key="labels.dict_synonym_link_upload" />
 						</a></li>
 				</ul>
 			</div>
@@ -53,7 +53,7 @@
 							<th colspan="2">${f:h(filename)}</th>
 						</tr>
 						<tr>
-							<th style="width: 150px;"><bean:message
+							<th style="width: 150px;"><la:message
 									key="labels.dict_synonym_file" /></th>
 							<td><input type="file"
 										name="synonymFile" style="width: 98%;" /></td>
@@ -63,7 +63,7 @@
 						<tr>
 							<td colspan="2">
 									<input type="submit" class="btn small" name="upload"
-										value="<bean:message key="labels.dict_synonym_button_upload"/>" />
+										value="<la:message key="labels.dict_synonym_button_upload"/>" />
 							</td>
 						</tr>
 					</tfoot>

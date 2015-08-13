@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.suggest_elevate_word_configuration" /></title>
+<title>Fess | <la:message key="labels.suggest_elevate_word_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,12 +18,12 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.suggest_elevate_word_configuration" />
+					<la:message key="labels.suggest_elevate_word_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="index">
-							<bean:message key="labels.suggest_elevate_word_link_list" />
-						</s:link></li>
+					<li class="active"><la:link href="index">
+							<la:message key="labels.suggest_elevate_word_link_list" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -35,21 +35,21 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.suggest_elevate_word_link_list" />
+									<la:message key="labels.suggest_elevate_word_link_list" />
 								</h3>
 								<div class="box-tools pull-right">
-									<span class="label label-default"><s:link href="index">
-										<bean:message key="labels.suggest_elevate_word_link_list" />
-										</s:link></span>
-									<span class="label label-default"><s:link href="createpage">
-										<bean:message key="labels.suggest_elevate_word_link_create_new" />
-										</s:link></span>
-									<span class="label label-default"><s:link href="downloadpage">
-										<bean:message key="labels.suggest_elevate_word_link_download" />
-										</s:link></span>
-									<span class="label label-default"><s:link href="uploadpage">
-										<bean:message key="labels.suggest_elevate_word_link_upload" />
-										</s:link></span>
+									<span class="label label-default"><la:link href="index">
+										<la:message key="labels.suggest_elevate_word_link_list" />
+										</la:link></span>
+									<span class="label label-default"><la:link href="createpage">
+										<la:message key="labels.suggest_elevate_word_link_create_new" />
+										</la:link></span>
+									<span class="label label-default"><la:link href="downloadpage">
+										<la:message key="labels.suggest_elevate_word_link_download" />
+										</la:link></span>
+									<span class="label label-default"><la:link href="uploadpage">
+										<la:message key="labels.suggest_elevate_word_link_upload" />
+										</la:link></span>
 								</div>
 							</div>
 							<%-- Box Body --%>
@@ -67,14 +67,14 @@
 								<%-- List --%>
 								<c:if test="${suggestElevateWordPager.allRecordCount == 0}">
 									<p class="alert-message warning">
-										<bean:message key="labels.list_could_not_find_crud_table" />
+										<la:message key="labels.list_could_not_find_crud_table" />
 									</p>
 								</c:if>
 								<c:if test="${suggestElevateWordPager.allRecordCount > 0}">
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><bean:message key="labels.suggest_elevate_word_list_suggest_word" /></th>
+												<th><la:message key="labels.suggest_elevate_word_list_suggest_word" /></th>
 											</tr>
 										</thead>
 										<tbody>
@@ -91,31 +91,31 @@
 							<%-- Box Footer --%>
 							<div class="box-footer">
 								<%-- Paging Info --%>
-								<span><bean:message key="labels.pagination_page_guide_msg" arg0="${f:h(suggestElevateWordPager.currentPageNumber)}"
+								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(suggestElevateWordPager.currentPageNumber)}"
 										arg1="${f:h(suggestElevateWordPager.allPageCount)}" arg2="${f:h(suggestElevateWordPager.allRecordCount)}"
 									/></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${suggestElevateWordPager.existPrePage}">
-										<li class="prev"><s:link href="list/${suggestElevateWordPager.currentPageNumber - 1}">
-												<bean:message key="labels.suggest_elevate_word_link_prev_page" />
-											</s:link></li>
+										<li class="prev"><la:link href="list/${suggestElevateWordPager.currentPageNumber - 1}">
+												<la:message key="labels.suggest_elevate_word_link_prev_page" />
+											</la:link></li>
 									</c:if>
 									<c:if test="${!suggestElevateWordPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><bean:message key="labels.suggest_elevate_word_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message key="labels.suggest_elevate_word_link_prev_page" /></a></li>
 									</c:if>
 									<c:forEach var="p" varStatus="s" items="${suggestElevateWordPager.pageNumberList}">
-										<li <c:if test="${p == suggestElevateWordPager.currentPageNumber}">class="active"</c:if>><s:link href="list/${p}">${p}</s:link>
+										<li <c:if test="${p == suggestElevateWordPager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
 										</li>
 									</c:forEach>
 									<c:if test="${suggestElevateWordPager.existNextPage}">
-										<li class="next"><s:link href="list/${suggestElevateWordPager.currentPageNumber + 1}">
-												<bean:message key="labels.suggest_elevate_word_link_next_page" />
-											</s:link></li>
+										<li class="next"><la:link href="list/${suggestElevateWordPager.currentPageNumber + 1}">
+												<la:message key="labels.suggest_elevate_word_link_next_page" />
+											</la:link></li>
 									</c:if>
 									<c:if test="${!suggestElevateWordPager.existNextPage}">
-										<li class="next disabled"><a href="#"><bean:message key="labels.suggest_elevate_word_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message key="labels.suggest_elevate_word_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 

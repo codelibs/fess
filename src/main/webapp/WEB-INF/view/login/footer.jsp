@@ -3,7 +3,7 @@
 	<div id="footer" class="row center">
 		<p class="left"></p>
 		<p class="right">
-			<bean:message key="labels.footer.copyright" />
+			<la:message key="labels.footer.copyright" />
 		</p>
 	</div>
 </footer>

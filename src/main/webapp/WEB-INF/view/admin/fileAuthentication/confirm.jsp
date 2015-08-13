@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.file_authentication_configuration" /></title>
+<title>Fess | <la:message key="labels.file_authentication_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.file_authentication_title_details" />
+					<la:message key="labels.file_authentication_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.file_authentication_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.file_authentication_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.file_authentication_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_authentication_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.file_authentication_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_authentication_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.file_authentication_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_authentication_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.file_authentication_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_authentication_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -57,22 +57,22 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.file_authentication_link_create" />
+											<la:message key="labels.file_authentication_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.file_authentication_link_update" />
+											<la:message key="labels.file_authentication_link_update" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
-											<bean:message key="labels.file_authentication_link_delete" />
+											<la:message key="labels.file_authentication_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<bean:message key="labels.file_authentication_link_confirm" />
+											<la:message key="labels.file_authentication_link_confirm" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.file_authentication_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.file_authentication_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -91,34 +91,34 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><bean:message key="labels.file_authentication_hostname" /></th>
+												<th class="col-xs-2"><la:message key="labels.file_authentication_hostname" /></th>
 												<td>${f:h(hostname)}<html:hidden property="hostname" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.file_authentication_port" /></th>
+												<th><la:message key="labels.file_authentication_port" /></th>
 												<td>${f:h(port)}<html:hidden property="port" /></td>
 											</tr>
 											<tr>
-													<th><bean:message key="labels.file_authentication_scheme" /></th>
+													<th><la:message key="labels.file_authentication_scheme" /></th>
 													<td><c:forEach var="item" items="${protocolSchemeItems}">
 															<c:if test="${protocolScheme==item.value}">${f:h(item.label)}</c:if>
 													</c:forEach> <html:hidden property="protocolScheme" /></td>
 											</tr>
 											<tr>
-													<th><bean:message key="labels.file_authentication_username" /></th>
+													<th><la:message key="labels.file_authentication_username" /></th>
 													<td>${f:h(username)}<html:hidden property="username" /></td>
 											</tr>
 											<tr>
-													<th><bean:message key="labels.file_authentication_password" /></th>
+													<th><la:message key="labels.file_authentication_password" /></th>
 													<td><c:if test="${password!=''}">******</c:if>
 															<html:hidden property="password" /></td>
 											</tr>
 											<tr>
-													<th><bean:message key="labels.file_authentication_parameters" /></th>
+													<th><la:message key="labels.file_authentication_parameters" /></th>
 													<td>${f:br(f:h(parameters))}<html:hidden property="parameters" /></td>
 											</tr>
 											<tr>
-													<th><bean:message key="labels.file_authentication_file_crawling_config" /></th>
+													<th><la:message key="labels.file_authentication_file_crawling_config" /></th>
 													<td><c:forEach var="item" items="${fileConfigItems}">
 															<c:if test="${fileConfigId==item.value}">${f:h(item.label)}</c:if>
 													</c:forEach> <html:hidden property="fileConfigId" /></td>
@@ -130,30 +130,30 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.file_authentication_button_back"/>" />
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.file_authentication_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="create"
-											value="<bean:message key="labels.file_authentication_button_create"/>"
+											value="<la:message key="labels.file_authentication_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.file_authentication_button_back"/>" />
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.file_authentication_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="update"
-											value="<bean:message key="labels.file_authentication_button_update"/>"
+											value="<la:message key="labels.file_authentication_button_update"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.file_authentication_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.file_authentication_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="delete"
-											value="<bean:message key="labels.file_authentication_button_delete"/>"
+											value="<la:message key="labels.file_authentication_button_delete"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.file_authentication_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.file_authentication_button_back"/>" />
 										<input type="submit" class="btn" name="editfromconfirm"
-											value="<bean:message key="labels.file_authentication_button_edit"/>"
+											value="<la:message key="labels.file_authentication_button_edit"/>"
 										/>
 										<input type="submit" class="btn" name="deletefromconfirm"
-											value="<bean:message key="labels.file_authentication_button_delete"/>"
+											value="<la:message key="labels.file_authentication_button_delete"/>"
 										/>
 									</c:if>
 								</div>

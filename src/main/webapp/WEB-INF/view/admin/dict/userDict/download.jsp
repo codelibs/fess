@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
 	flush="true">
 	<tiles:put name="title">
-		<bean:message key="labels.dict_userdict_configuration" />
+		<la:message key="labels.dict_userdict_configuration" />
 	</tiles:put>
 	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
@@ -11,7 +11,7 @@
 	<tiles:put name="body" type="string">
 
 		<h3>
-			<bean:message key="labels.dict_userdict_title" />
+			<la:message key="labels.dict_userdict_title" />
 		</h3>
 
 		<%-- Message: BEGIN --%>
@@ -25,21 +25,21 @@
 
 			<div>
 				<ul class="pills">
-					<li><s:link href="../index">
-							<bean:message key="labels.dict_list_link" />
-						</s:link></li>
-					<li><s:link href="index?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_list_link" />
-						</s:link></li>
-					<li><s:link href="createpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_link_create" />
-						</s:link></li>
+					<li><la:link href="../index">
+							<la:message key="labels.dict_list_link" />
+						</la:link></li>
+					<li><la:link href="index?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_userdict_list_link" />
+						</la:link></li>
+					<li><la:link href="createpage?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_userdict_link_create" />
+						</la:link></li>
 					<li class="active"><a href="#">
-							<bean:message key="labels.dict_userdict_link_download" />
+							<la:message key="labels.dict_userdict_link_download" />
 						</a></li>
-					<li><s:link href="uploadpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_link_upload" />
-						</s:link></li>
+					<li><la:link href="uploadpage?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_userdict_link_upload" />
+						</la:link></li>
 				</ul>
 			</div>
 
@@ -53,7 +53,7 @@
 							<th style="vertical-align: middle;">${f:h(filename)}</th>
 							<td style="width: 150px;text-align: center;"><input type="submit"
 								class="btn small" name="download"
-								value="<bean:message key="labels.dict_userdict_button_download"/>" />
+								value="<la:message key="labels.dict_userdict_button_download"/>" />
 							</td>
 						</tr>
 					</tbody>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.wizard_title_configuration" /></title>
+<title>Fess | <la:message key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,12 +16,12 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.wizard_title_configuration" />
+					<la:message key="labels.wizard_title_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="/admin/wizard/">
-							<bean:message key="labels.wizard_start_title" />
-						</s:link></li>
+					<li class="active"><la:link href="/admin/wizard/">
+							<la:message key="labels.wizard_start_title" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -33,7 +33,7 @@
 							<div class="box">
 								<div class="box-header with-border">
 									<h3 class="box-title">
-										<bean:message key="labels.wizard_start_title" />
+										<la:message key="labels.wizard_start_title" />
 									</h3>
 								</div>
 								<div class="box-body">
@@ -48,12 +48,12 @@
 									</div>
 									<%-- Message: END --%>
 									<p>
-										<bean:message key="labels.wizard_start_desc" />
+										<la:message key="labels.wizard_start_desc" />
 									</p>
 								</div>
 								<div class="box-footer">
 									<input type="submit" name="crawlingConfigForm" class="btn btn-primary"
-										value="<bean:message key="labels.wizard_start_button"/>"
+										value="<la:message key="labels.wizard_start_button"/>"
 									/>
 								</div>
 							</div>

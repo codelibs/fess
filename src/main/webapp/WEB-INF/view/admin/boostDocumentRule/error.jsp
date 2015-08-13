@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.boost_document_rule_configuration" /></title>
+<title>Fess | <la:message key="labels.boost_document_rule_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -15,12 +15,12 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.wizard_start_title" />
+					<la:message key="labels.wizard_start_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="/admin/boostDocumentRule/">
-							<bean:message key="labels.boost_document_rule_link_list" />
-						</s:link></li>
+					<li class="active"><la:link href="/admin/boostDocumentRule/">
+							<la:message key="labels.boost_document_rule_link_list" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -32,9 +32,9 @@
 						<html:errors />
 					</p>
 					<p>
-						<s:link href="index">
-							<bean:message key="labels.boost_document_rule_button_back" />
-						</s:link>
+						<la:link href="index">
+							<la:message key="labels.boost_document_rule_button_back" />
+						</la:link>
 					</p>
 				</div>
 

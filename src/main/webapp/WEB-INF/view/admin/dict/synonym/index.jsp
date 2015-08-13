@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.dict_synonym_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_synonym_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,12 +18,12 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.dict_synonym_title" />
+					<la:message key="labels.dict_synonym_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="index">
-							<bean:message key="labels.dict_synonym_list_link" />
-						</s:link></li>
+					<li class="active"><la:link href="index">
+							<la:message key="labels.dict_synonym_list_link" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -35,33 +35,33 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.dict_synonym_list_link" />
+									<la:message key="labels.dict_synonym_list_link" />
 								</h3>
 								<div class="box-tools pull-right">
 										<span class="label label-default">
-												<s:link href="../index">
-														<bean:message key="labels.dict_list_link" />
-												</s:link>
+												<la:link href="../index">
+														<la:message key="labels.dict_list_link" />
+												</la:link>
 										</span>
 										<span class="label label-default">
-												<s:link href="#">
-														<bean:message key="labels.dict_synonym_list_link" />
-												</s:link>
+												<la:link href="#">
+														<la:message key="labels.dict_synonym_list_link" />
+												</la:link>
 										</span>
 										<span class="label label-default">
-												<s:link href="createpage?dictId=${f:u(dictId)}">
-														<bean:message key="labels.dict_synonym_link_create" />
-												</s:link>
+												<la:link href="createpage?dictId=${f:u(dictId)}">
+														<la:message key="labels.dict_synonym_link_create" />
+												</la:link>
 										</span>
 										<span class="label label-default">
-												<s:link href="downloadpage?dictId=${f:u(dictId)}">
-														<bean:message key="labels.dict_synonym_link_download" />
-												</s:link>
+												<la:link href="downloadpage?dictId=${f:u(dictId)}">
+														<la:message key="labels.dict_synonym_link_download" />
+												</la:link>
 										</span>
 										<span class="label label-default">
-												<s:link href="uploadpage?dictId=${f:u(dictId)}">
-														<bean:message key="labels.dict_synonym_link_upload" />
-												</s:link>
+												<la:link href="uploadpage?dictId=${f:u(dictId)}">
+														<la:message key="labels.dict_synonym_link_upload" />
+												</la:link>
 										</span>
 								</div>
 							</div>
@@ -79,15 +79,15 @@
 								<%-- List --%>
 								<c:if test="${synonymPager.allRecordCount == 0}">
 									<p class="alert-message warning">
-										<bean:message key="labels.list_could_not_find_crud_table" />
+										<la:message key="labels.list_could_not_find_crud_table" />
 									</p>
 								</c:if>
 								<c:if test="${synonymPager.allRecordCount > 0}">
 									<table class="table table-bordered table-striped">
 										<thead>
 												<tr>
-														<th> <bean:message key="labels.dict_synonym_source" /> </th>
-														<th> <bean:message key="labels.dict_synonym_target" /> </th>
+														<th> <la:message key="labels.dict_synonym_source" /> </th>
+														<th> <la:message key="labels.dict_synonym_target" /> </th>
 												</tr>
 										</thead>
 										<tbody>
@@ -104,31 +104,31 @@
 							<%-- Box Footer --%>
 							<div class="box-footer">
 								<%-- Paging Info --%>
-								<span><bean:message key="labels.pagination_page_guide_msg" arg0="${f:h(synonymPager.currentPageNumber)}"
+								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(synonymPager.currentPageNumber)}"
 										arg1="${f:h(synonymPager.allPageCount)}" arg2="${f:h(synonymPager.allRecordCount)}"
 									/></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${synonymPager.existPrePage}">
-										<li class="prev"><s:link href="list/${synonymPager.currentPageNumber - 1}">
-												<bean:message key="labels.dict_link_prev_page" />
-											</s:link></li>
+										<li class="prev"><la:link href="list/${synonymPager.currentPageNumber - 1}">
+												<la:message key="labels.dict_link_prev_page" />
+											</la:link></li>
 									</c:if>
 									<c:if test="${!synonymPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><bean:message key="labels.dict_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message key="labels.dict_link_prev_page" /></a></li>
 									</c:if>
 									<c:forEach var="p" varStatus="s" items="${synonymPager.pageNumberList}">
-										<li <c:if test="${p == synonymPager.currentPageNumber}">class="active"</c:if>><s:link href="list/${p}">${p}</s:link>
+										<li <c:if test="${p == synonymPager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
 										</li>
 									</c:forEach>
 									<c:if test="${synonymPager.existNextPage}">
-										<li class="next"><s:link href="list/${synonymPager.currentPageNumber + 1}">
-												<bean:message key="labels.dict_link_next_page" />
-											</s:link></li>
+										<li class="next"><la:link href="list/${synonymPager.currentPageNumber + 1}">
+												<la:message key="labels.dict_link_next_page" />
+											</la:link></li>
 									</c:if>
 									<c:if test="${!synonymPager.existNextPage}">
-										<li class="next disabled"><a href="#"><bean:message key="labels.dict_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message key="labels.dict_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 

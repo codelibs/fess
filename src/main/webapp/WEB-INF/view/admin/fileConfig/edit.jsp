@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.file_crawling_configuration" /></title>
+<title>Fess | <la:message key="labels.file_crawling_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.file_crawling_title_details" />
+					<la:message key="labels.file_crawling_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.file_crawling_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.file_crawling_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.file_crawling_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.file_crawling_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.file_crawling_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.file_crawling_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -58,16 +58,16 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.file_crawling_link_create" />
+											<la:message key="labels.file_crawling_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.file_crawling_link_update" />
+											<la:message key="labels.file_crawling_link_update" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.file_crawling_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.file_crawling_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -86,58 +86,58 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><bean:message key="labels.name" /></label>
+										<label for="name"><la:message key="labels.name" /></label>
 										<html:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="paths"><bean:message key="labels.paths" /></label>
+										<label for="paths"><la:message key="labels.paths" /></label>
 										<html:textarea property="paths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="includedPaths"><bean:message key="labels.included_paths" /></label>
+										<label for="includedPaths"><la:message key="labels.included_paths" /></label>
 										<html:textarea property="includedPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="excludedPaths"><bean:message key="labels.excluded_paths" /></label>
+										<label for="excludedPaths"><la:message key="labels.excluded_paths" /></label>
 										<html:textarea property="excludedPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="includedDocPaths"><bean:message key="labels.included_doc_paths" /></label>
+										<label for="includedDocPaths"><la:message key="labels.included_doc_paths" /></label>
 										<html:textarea property="includedDocPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="excludedDocPaths"><bean:message key="labels.excluded_doc_paths" /></label>
+										<label for="excludedDocPaths"><la:message key="labels.excluded_doc_paths" /></label>
 										<html:textarea property="excludedDocPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="configParameter"><bean:message key="labels.config_parameter" /></label>
+										<label for="configParameter"><la:message key="labels.config_parameter" /></label>
 										<html:text property="configParameter" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="depth"><bean:message key="labels.depth" /></label>
+										<label for="depth"><la:message key="labels.depth" /></label>
 										<html:text property="depth" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="maxAccessCount"><bean:message key="labels.max_access_count" /></label>
+										<label for="maxAccessCount"><la:message key="labels.max_access_count" /></label>
 										<html:text property="maxAccessCount" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="numOfThread"><bean:message key="labels.number_of_thread" /></label>
+										<label for="numOfThread"><la:message key="labels.number_of_thread" /></label>
 										<html:text property="numOfThread" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="intervalTime"><bean:message key="labels.interval_time" /></label>
+										<label for="intervalTime"><la:message key="labels.interval_time" /></label>
 										<div class="form-inline">
 											<html:text property="intervalTime" styleClass="form-control" />
-											<bean:message key="labels.millisec" />
+											<la:message key="labels.millisec" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="boost"><bean:message key="labels.boost" /></label>
+										<label for="boost"><la:message key="labels.boost" /></label>
 										<html:text property="boost" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><bean:message key="labels.role_type" /></label>
+										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
 										<html:select property="roleTypeIds" multiple="true" styleClass="form-control">
 											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
 												<html:option value="${f:u(rt.id)}">${f:h(rt.name)}</html:option>
@@ -145,7 +145,7 @@
 										</html:select>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><bean:message key="labels.label_type" /></label>
+										<label for="roleTypeIds"><la:message key="labels.label_type" /></label>
 										<html:select property="labelTypeIds" multiple="true" styleClass="form-control">
 											<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 												<html:option value="${f:u(l.id)}">${f:h(l.name)}</html:option>
@@ -153,13 +153,13 @@
 										</html:select>
 									</div>
 									<div class="form-group">
-										<label for="available"><bean:message key="labels.available" /></label>
+										<label for="available"><la:message key="labels.available" /></label>
 										<html:select property="available" styleClass="form-control">
 											<html:option value="true">
-												<bean:message key="labels.enabled" />
+												<la:message key="labels.enabled" />
 											</html:option>
 											<html:option value="false">
-												<bean:message key="labels.disabled" />
+												<la:message key="labels.disabled" />
 											</html:option>
 										</html:select>
 									</div>
@@ -168,15 +168,15 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.file_crawling_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.file_crawling_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-											value="<bean:message key="labels.file_crawling_button_create"/>"
+											value="<la:message key="labels.file_crawling_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.file_crawling_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.file_crawling_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<bean:message key="labels.file_crawling_button_confirm"/>"
+											value="<la:message key="labels.file_crawling_button_confirm"/>"
 										/>
 									</c:if>
 								</div>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.search_list_configuration" /></title>
+<title>Fess | <la:message key="labels.search_list_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,12 +18,12 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.search_list_title_confirm_delete" />
+					<la:message key="labels.search_list_title_confirm_delete" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.search_list_title_confirm_delete" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.search_list_title_confirm_delete" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -46,7 +46,7 @@
 											<table class="bordered-table zebra-striped">
 												<tbody>
 													<tr>
-														<th style="width: 100px;"><bean:message
+														<th style="width: 100px;"><la:message
 																key="labels.search_list_url" /></th>
 														<td style="width: 400px;">${f:h(url)}<html:hidden
 																property="docId" /></td>
@@ -55,9 +55,9 @@
 												<tfoot>
 													<tr>
 														<td colspan="2"><input type="submit" class="btn small" name="delete"
-															value="<bean:message key="labels.crud_button_delete"/>" /> <input
+															value="<la:message key="labels.crud_button_delete"/>" /> <input
 															type="submit" class="btn small" name="search"
-															value="<bean:message key="labels.crud_button_back"/>" /></td>
+															value="<la:message key="labels.crud_button_back"/>" /></td>
 													</tr>
 												</tfoot>
 											</table>

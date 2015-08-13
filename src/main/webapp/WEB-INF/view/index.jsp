@@ -6,11 +6,11 @@
 <meta http-equiv="content-style-type" content="text/css" />
 <meta http-equiv="content-script-type" content="text/javascript" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><bean:message key="labels.search_title" /></title>
+<title><la:message key="labels.search_title" /></title>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
 		href="${f:url('/osdd')}"
-		title="<bean:message key="labels.index_osdd_title" />" />
+		title="<la:message key="labels.index_osdd_title" />" />
 </c:if>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
@@ -22,13 +22,13 @@
 			<div class="container">
 				<p class="navbar-text pull-right">
 					<c:if test="${!empty username}">
-					<s:link href="/login/logout" styleClass="logout-link">
-						<bean:message key="labels.logout" />
-					</s:link>
+					<la:link href="/login/logout" styleClass="logout-link">
+						<la:message key="labels.logout" />
+					</la:link>
 					</c:if>
-					<s:link href="/help" styleClass="help-link">
-						<bean:message key="labels.index_help" />
-					</s:link>
+					<la:link href="/help" styleClass="help-link">
+						<la:message key="labels.index_help" />
+					</la:link>
 				</p>
 			</div>
 		</div>
@@ -38,7 +38,7 @@
 			<div class="center searchFormBox">
 				<h1 class="mainLogo">
 					<img src="${f:url('/images/logo.gif')}"
-						alt="<bean:message key="labels.index_title" />" />
+						alt="<la:message key="labels.index_title" />" />
 				</h1>
 				<div>
 					<html:messages id="msg" message="true">
@@ -63,7 +63,7 @@
 						<c:if test="${fe:hswsize(null) != 0}">
 							<div>
 								<p class="hotSearchWordBody ellipsis">
-									<bean:message key="labels.search_hot_search_word" />
+									<la:message key="labels.search_hot_search_word" />
 									<c:forEach var="item" items="${fe:hsw(null, 5)}">
 										<html:link href="search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</html:link>
 									</c:forEach>
@@ -73,10 +73,10 @@
 						<div class="clearfix searchButtonBox">
 							<button type="submit" name="search" id="searchButton"
 								class="btn btn-primary">
-								<bean:message key="labels.index_form_search_btn" />
+								<la:message key="labels.index_form_search_btn" />
 							</button>
 							<a href="#searchOptions" role="button" class="btn"
-								data-toggle="modal"><bean:message
+								data-toggle="modal"><la:message
 									key="labels.index_form_option_btn" /></a>
 						</div>
 					</fieldset>
@@ -85,19 +85,19 @@
 							<button type="button" class="close" data-dismiss="modal"
 								aria-hidden="true">&times;</button>
 							<h3>
-								<bean:message key="labels.search_options" />
+								<la:message key="labels.search_options" />
 							</h3>
 						</div>
 						<div class="modal-body">
 							<fieldset>
 								<div class="clearfix">
-									<label for="contentNum"><bean:message
+									<label for="contentNum"><la:message
 											key="labels.index_num" /></label>
 									<div class="input">
 										<html:select property="num" styleId="numSearchOption"
 											styleClass="span4" style="display:block;">
 											<option value="">
-												<bean:message key="labels.search_result_select_num" />
+												<la:message key="labels.search_result_select_num" />
 											</option>
 											<html:option value="10">10</html:option>
 											<html:option value="20">20</html:option>
@@ -109,52 +109,52 @@
 									</div>
 								</div>
 								<div class="clearfix">
-									<label for="contentSort"><bean:message
+									<label for="contentSort"><la:message
 											key="labels.index_sort" /></label>
 									<div class="input">
 										<html:select property="sort" styleId="sortSearchOption"
 											styleClass="span4" style="display:block;">
 											<option value="">
-												<bean:message key="labels.search_result_select_sort" />
+												<la:message key="labels.search_result_select_sort" />
 											</option>
 											<html:option value="created.asc">
-												<bean:message key="labels.search_result_sort_created_asc" />
+												<la:message key="labels.search_result_sort_created_asc" />
 											</html:option>
 											<html:option value="created.desc">
-												<bean:message key="labels.search_result_sort_created_desc" />
+												<la:message key="labels.search_result_sort_created_desc" />
 											</html:option>
 											<html:option value="contentLength.asc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_contentLength_asc" />
 											</html:option>
 											<html:option value="contentLength.desc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_contentLength_desc" />
 											</html:option>
 											<html:option value="lastModified.asc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_lastModified_asc" />
 											</html:option>
 											<html:option value="lastModified.desc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_lastModified_desc" />
 											</html:option>
 											<c:if test="${searchLogSupport}">
 											<html:option value="clickCount_l_x_dv.asc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_clickCount_asc" />
 											</html:option>
 											<html:option value="clickCount_l_x_dv.desc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_clickCount_desc" />
 											</html:option>
 											</c:if><c:if test="${favoriteSupport}">
 											<html:option value="favoriteCount_l_x_dv.asc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_favoriteCount_asc" />
 											</html:option>
 											<html:option value="favoriteCount_l_x_dv.desc">
-												<bean:message
+												<la:message
 													key="labels.search_result_sort_favoriteCount_desc" />
 											</html:option>
 											</c:if>
@@ -162,7 +162,7 @@
 									</div>
 								</div>
 								<div class="clearfix">
-									<label for="contentLang"><bean:message
+									<label for="contentLang"><la:message
 											key="labels.index_lang" /></label>
 									<div class="input">
 										<html:select property="lang"
@@ -178,7 +178,7 @@
 								</div>
 								<c:if test="${displayLabelTypeItems}">
 									<div class="clearfix">
-										<label for="contentLabelType"><bean:message
+										<label for="contentLabelType"><la:message
 												key="labels.index_label" /></label>
 										<div class="input">
 											<html:select property="fields.label"
@@ -197,10 +197,10 @@
 						</div>
 						<div class="modal-footer">
 							<button class="btn" id="searchOptionsClearButton">
-								<bean:message key="labels.search_options_clear" />
+								<la:message key="labels.search_options_clear" />
 							</button>
 							<button class="btn" data-dismiss="modal" aria-hidden="true">
-								<bean:message key="labels.search_options_close" />
+								<la:message key="labels.search_options_close" />
 							</button>
 						</div>
 					</div>

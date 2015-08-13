@@ -2,7 +2,7 @@
 <%-- query did not match any document --%>
 <div id="result" class="row">
 	<div class="span8 alert">
-			<bean:message key="labels.did_not_match" arg0="${f:h(displayQuery)}" />
+			<la:message key="labels.did_not_match" arg0="${f:h(displayQuery)}" />
 	</div>
 	<div class="span4"><%-- Side Content --%></div>
 </div>

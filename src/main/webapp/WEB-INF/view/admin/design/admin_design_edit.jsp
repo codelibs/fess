@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
 	flush="true">
 	<tiles:put name="title">
-		<bean:message key="labels.design_configuration" />
+		<la:message key="labels.design_configuration" />
 	</tiles:put>
 	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
@@ -22,7 +22,7 @@
 			<s:form>
 				<div>
 					<h3>
-						<bean:message key="labels.design_title_edit_content" />
+						<la:message key="labels.design_title_edit_content" />
 					</h3>
 					<h4>${f:h(fileName)}</h4>
 					<div>
@@ -31,9 +31,9 @@
 					</div>
 					<div style="margin-top:5px;">
 						<input type="submit" class="btn small" name="update"
-							value="<bean:message key="labels.design_button_update"/>" />
+							value="<la:message key="labels.design_button_update"/>" />
 						<input type="submit" class="btn small" name="back"
-							value="<bean:message key="labels.design_button_back"/>" />
+							value="<la:message key="labels.design_button_back"/>" />
 					</div>
 				</div>
 				<html:hidden property="fileName" />

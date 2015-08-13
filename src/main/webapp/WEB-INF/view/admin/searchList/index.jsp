@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.search_list_configuration" /></title>
+<title>Fess | <la:message key="labels.search_list_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,12 +18,12 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.search_list_configuration" />
+					<la:message key="labels.search_list_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="index">
-							<bean:message key="labels.search_list_configuration" />
-						</s:link></li>
+					<li class="active"><la:link href="index">
+							<la:message key="labels.search_list_configuration" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -35,12 +35,12 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.search_list_configuration" />
+									<la:message key="labels.search_list_configuration" />
 								</h3>
 								<s:form action="search" method="get">
 									<div class="input">
 										<html:text styleClass="query" property="query" title="Search" size="50" maxlength="1000" />
-										<input class="btn" type="submit" value="<bean:message key="labels.search"/>" name="search" />
+										<input class="btn" type="submit" value="<la:message key="labels.search"/>" name="search" />
 									</div>
 								</s:form>
 							</div>
@@ -62,19 +62,19 @@
 										<div id="subheader"></div>
 										<div id="result">
 											<p>
-												<bean:message key="labels.search_list_index_page" />
+												<la:message key="labels.search_list_index_page" />
 											</p>
 										</div>
 									</c:when>
 									<c:when test="${f:h(allRecordCount) != 0}">
 										<div id="subheader">
 											<p>
-												<bean:message key="labels.search_result_status"
+												<la:message key="labels.search_result_status"
 													arg0="${f:h(query)}" arg1="${f:h(allRecordCount)}"
 													arg2="${f:h(currentStartRecordNumber)}"
 													arg3="${f:h(currentEndRecordNumber)}" />
 												<c:if test="${execTime!=null}">
-													<bean:message key="labels.search_result_time"
+													<la:message key="labels.search_result_time"
 														arg0="${f:h(execTime)}" />
 												</c:if>
 											</p>
@@ -94,11 +94,11 @@
 																	<c:if test="${!solrProcessRunning}">
 																		<html:link
 																			href="confirmDelete?query=${f:u(query)}&docId=${f:u(doc.docId)}&url=${f:u(doc.url)}">
-																			<bean:message key="labels.search_list_delete_link" />
+																			<la:message key="labels.search_list_delete_link" />
 																		</html:link>
 																	</c:if>
 																	<c:if test="${solrProcessRunning}">
-																		<bean:message key="labels.search_list_delete_link" />
+																		<la:message key="labels.search_list_delete_link" />
 																	</c:if>
 																</div>
 															</div>
@@ -112,33 +112,33 @@
 											<div class="pagination">
 												<ul>
 													<c:if test="${existPrePage}">
-														<li class="prev"><s:link
-																href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}"><bean:message
+														<li class="prev"><la:link
+																href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}"><la:message
 																	key="labels.prev_page" />
-															</s:link></li>
+															</la:link></li>
 													</c:if>
 													<c:if test="${!existPrePage}">
-														<li class="prev disabled"><a href="#"><bean:message
+														<li class="prev disabled"><a href="#"><la:message
 																	key="labels.prev_page" /></a></li>
 													</c:if>
 													<c:forEach var="pageNumber" varStatus="s"
 														items="${pageNumberList}">
 														<li
 															<c:if test="${pageNumber == currentPageNumber}">class="active"</c:if>>
-															<s:link
-																href="move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">${f:h(pageNumber)}</s:link>
+															<la:link
+																href="move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">${f:h(pageNumber)}</la:link>
 														</li>
 													</c:forEach>
 													<c:if test="${existNextPage}">
 														<li class="next<c:if test="${!existNextPage}"> disabled</c:if>">
-															<s:link
+															<la:link
 																href="next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
-																<bean:message key="labels.next_page" />
-														</s:link>
+																<la:message key="labels.next_page" />
+														</la:link>
 														</li>
 													</c:if>
 													<c:if test="${!existNextPage}">
-														<li class="next disabled"><a href="#"><bean:message
+														<li class="next disabled"><a href="#"><la:message
 																	key="labels.next_page" /></a></li>
 													</c:if>
 												</ul>
@@ -153,7 +153,7 @@
 										<div id="subheader"></div>
 										<div id="result">
 											<p>
-												<bean:message key="labels.did_not_match"
+												<la:message key="labels.did_not_match"
 													arg0="${f:h(query)}" />
 											</p>
 										</div>

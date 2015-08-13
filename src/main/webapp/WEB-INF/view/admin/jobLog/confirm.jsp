@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.joblog_configuration" /></title>
+<title>Fess | <la:message key="labels.joblog_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.joblog_title_details" />
+					<la:message key="labels.joblog_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.joblog_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.joblog_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.joblog_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.joblog_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.joblog_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.joblog_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.joblog_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.joblog_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.joblog_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.joblog_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -57,22 +57,22 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.joblog_link_create" />
+											<la:message key="labels.joblog_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.joblog_link_update" />
+											<la:message key="labels.joblog_link_update" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
-											<bean:message key="labels.joblog_link_delete" />
+											<la:message key="labels.joblog_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<bean:message key="labels.joblog_link_confirm" />
+											<la:message key="labels.joblog_link_confirm" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.joblog_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.joblog_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -91,35 +91,35 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><bean:message key="labels.joblog_jobName" /></th>
+												<th class="col-xs-2"><la:message key="labels.joblog_jobName" /></th>
 												<td>${f:h(jobName)}<html:hidden property="jobName" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_jobStatus" /></th>
+												<th><la:message key="labels.joblog_jobStatus" /></th>
 												<td>${f:h(jobStatus)}<html:hidden property="jobStatus" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_target" /></th>
+												<th><la:message key="labels.joblog_target" /></th>
 												<td>${f:h(target)}<html:hidden property="target" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_startTime" /></th>
+												<th><la:message key="labels.joblog_startTime" /></th>
 												<td>${f:h(startTime)}<html:hidden property="startTime" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_endTime" /></th>
+												<th><la:message key="labels.joblog_endTime" /></th>
 												<td>${f:h(endTime)}<html:hidden property="endTime" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_scriptType" /></th>
+												<th><la:message key="labels.joblog_scriptType" /></th>
 												<td>${f:h(scriptType)}<html:hidden property="scriptType" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_scriptData" /></th>
+												<th><la:message key="labels.joblog_scriptData" /></th>
 												<td>${f:br(f:h(scriptData))}<html:hidden property="scriptData" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.joblog_scriptResult" /></th>
+												<th><la:message key="labels.joblog_scriptResult" /></th>
 												<td>${f:br(f:h(scriptResult))}<html:hidden property="scriptResult" /></td>
 											</tr>
 										</tbody>
@@ -129,12 +129,12 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="delete" value="<bean:message key="labels.joblog_button_delete"/>" />
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.joblog_button_back"/>" />
+										<input type="submit" class="btn" name="delete" value="<la:message key="labels.joblog_button_delete"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.joblog_button_back"/>" />
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.joblog_button_back"/>" />
-										<input type="submit" class="btn" name="deletefromconfirm" value="<bean:message key="labels.joblog_button_delete"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.joblog_button_back"/>" />
+										<input type="submit" class="btn" name="deletefromconfirm" value="<la:message key="labels.joblog_button_delete"/>" />
 									</c:if>
 								</div>
 							</div>

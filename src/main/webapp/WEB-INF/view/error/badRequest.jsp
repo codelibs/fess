@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta http-equiv="content-style-type" content="text/css" />
 <meta http-equiv="content-script-type" content="text/javascript" />
-<title><bean:message key="labels.system_error_title" /></title>
+<title><la:message key="labels.system_error_title" /></title>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet"
@@ -19,9 +19,9 @@
 			<div class="center row">
 				<div class="span10">
 					<h2>
-						<bean:message key="labels.request_error_title" />
+						<la:message key="labels.request_error_title" />
 					</h2>
-					<div class="errormessage"><bean:message key="labels.bad_request" /></div>
+					<div class="errormessage"><la:message key="labels.bad_request" /></div>
 				</div>
 			</div>
 		</div>

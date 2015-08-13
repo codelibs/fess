@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.joblog_configuration" /></title>
+<title>Fess | <la:message key="labels.joblog_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,12 +18,12 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.joblog_configuration" />
+					<la:message key="labels.joblog_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="index">
-							<bean:message key="labels.joblog_link_list" />
-						</s:link></li>
+					<li class="active"><la:link href="index">
+							<la:message key="labels.joblog_link_list" />
+						</la:link></li>
 				</ol>
 			</section>
 
@@ -35,7 +35,7 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.joblog_link_list" />
+									<la:message key="labels.joblog_link_list" />
 								</h3>
 							</div>
 							<%-- Box Body --%>
@@ -53,17 +53,17 @@
 								<%-- List --%>
 								<c:if test="${jobLogPager.allRecordCount == 0}">
 									<p class="alert-message warning">
-										<bean:message key="labels.list_could_not_find_crud_table" />
+										<la:message key="labels.list_could_not_find_crud_table" />
 									</p>
 								</c:if>
 								<c:if test="${jobLogPager.allRecordCount > 0}">
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><bean:message key="labels.joblog_jobName" /></th>
-												<th><bean:message key="labels.joblog_jobStatus" /></th>
-												<th><bean:message key="labels.joblog_startTime" /></th>
-												<th><bean:message key="labels.joblog_endTime" /></th>
+												<th><la:message key="labels.joblog_jobName" /></th>
+												<th><la:message key="labels.joblog_jobStatus" /></th>
+												<th><la:message key="labels.joblog_startTime" /></th>
+												<th><la:message key="labels.joblog_endTime" /></th>
 											</tr>
 										</thead>
 										<tbody>
@@ -74,15 +74,15 @@
 													<td><fmt:formatDate value="${data.startTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
 													<td>
 														<c:if test="${data.endTime!=null}"><fmt:formatDate value="${data.endTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></c:if>
-														<c:if test="${data.endTime==null}"><bean:message key="labels.none" /></c:if>
+														<c:if test="${data.endTime==null}"><la:message key="labels.none" /></c:if>
 													</td>
 													<td style="overflow-x: auto;>
-														<s:link href="confirmpage/4/${f:u(data.id)}">
-															<bean:message key="labels.joblog_link_details" />
-														</s:link>
-														<s:link href="deletepage/3/${f:u(data.id)}">
-															<bean:message key="labels.joblog_link_delete" />
-														</s:link>
+														<la:link href="confirmpage/4/${f:u(data.id)}">
+															<la:message key="labels.joblog_link_details" />
+														</la:link>
+														<la:link href="deletepage/3/${f:u(data.id)}">
+															<la:message key="labels.joblog_link_delete" />
+														</la:link>
 													</td>
 												</tr>
 											</c:forEach>
@@ -94,31 +94,31 @@
 							<%-- Box Footer --%>
 							<div class="box-footer">
 								<%-- Paging Info --%>
-								<span><bean:message key="labels.pagination_page_guide_msg" arg0="${f:h(jobLogPager.currentPageNumber)}"
+								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(jobLogPager.currentPageNumber)}"
 										arg1="${f:h(jobLogPager.allPageCount)}" arg2="${f:h(jobLogPager.allRecordCount)}"
 									/></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${jobLogPager.existPrePage}">
-										<li class="prev"><s:link href="list/${jobLogPager.currentPageNumber - 1}">
-												<bean:message key="labels.joblog_link_prev_page" />
-											</s:link></li>
+										<li class="prev"><la:link href="list/${jobLogPager.currentPageNumber - 1}">
+												<la:message key="labels.joblog_link_prev_page" />
+											</la:link></li>
 									</c:if>
 									<c:if test="${!jobLogPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><bean:message key="labels.joblog_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message key="labels.joblog_link_prev_page" /></a></li>
 									</c:if>
 									<c:forEach var="p" varStatus="s" items="${jobLogPager.pageNumberList}">
-										<li <c:if test="${p == jobLogPager.currentPageNumber}">class="active"</c:if>><s:link href="list/${p}">${p}</s:link>
+										<li <c:if test="${p == jobLogPager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
 										</li>
 									</c:forEach>
 									<c:if test="${jobLogPager.existNextPage}">
-										<li class="next"><s:link href="list/${jobLogPager.currentPageNumber + 1}">
-												<bean:message key="labels.joblog_link_next_page" />
-											</s:link></li>
+										<li class="next"><la:link href="list/${jobLogPager.currentPageNumber + 1}">
+												<la:message key="labels.joblog_link_next_page" />
+											</la:link></li>
 									</c:if>
 									<c:if test="${!jobLogPager.existNextPage}">
-										<li class="next disabled"><a href="#"><bean:message key="labels.joblog_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message key="labels.joblog_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 

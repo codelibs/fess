@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.dict_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,7 +18,7 @@
 				<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.dict_list_title" />
+					<la:message key="labels.dict_list_title" />
 				</h1>
 			</section>
 
@@ -30,7 +30,7 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.dict_list_link" />
+									<la:message key="labels.dict_list_link" />
 								</h3>
 							</div>
 							<%-- Box Body --%>
@@ -48,22 +48,22 @@
 								<%-- List --%>
 								<c:if test="${fn:length(dictFiles) == 0}">
 									<p class="alert-message warning">
-										<bean:message key="labels.list_could_not_find_crud_table" />
+										<la:message key="labels.list_could_not_find_crud_table" />
 									</p>
 								</c:if>
 								<c:if test="${fn:length(dictFiles) > 0}">
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><bean:message key="labels.dictionary_type" /></th>
-												<th><bean:message key="labels.dictionary_name" /></th>
+												<th><la:message key="labels.dictionary_type" /></th>
+												<th><la:message key="labels.dictionary_name" /></th>
 											</tr>
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${dictFiles}">
 												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
 														<td>${f:h(data.type)}</td>
-														<td><s:link href="${f:h(data.type)}/index?dictId=${f:h(data.id)}">${f:h(data.name)}</s:link></td>
+														<td><la:link href="${f:h(data.type)}/index?dictId=${f:h(data.id)}">${f:h(data.name)}</la:link></td>
 												</tr>
 											</c:forEach>
 										</tbody>

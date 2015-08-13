@@ -2,7 +2,7 @@
 <div class="topbar">
 	<div class="fill">
 		<div class="container">
-			<s:link styleClass="brand" href="/index"><bean:message key="labels.header_brand_name"/></s:link>
+			<la:link styleClass="brand" href="/index"><la:message key="labels.header_brand_name"/></la:link>
 		</div>
 	</div>
 </div>

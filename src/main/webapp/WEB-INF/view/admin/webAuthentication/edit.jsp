@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.web_authentication_configuration" /></title>
+<title>Fess | <la:message key="labels.web_authentication_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.web_authentication_title_details" />
+					<la:message key="labels.web_authentication_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.web_authentication_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.web_authentication_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.web_authentication_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.web_authentication_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.web_authentication_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.web_authentication_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.web_authentication_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.web_authentication_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.web_authentication_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.web_authentication_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -58,16 +58,16 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.web_authentication_link_create" />
+											<la:message key="labels.web_authentication_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.web_authentication_link_update" />
+											<la:message key="labels.web_authentication_link_update" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.web_authentication_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.web_authentication_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -84,19 +84,19 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="hostname"><bean:message key="labels.web_authentication_hostname" /></label>
+										<label for="hostname"><la:message key="labels.web_authentication_hostname" /></label>
 										<html:text property="hostname" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="port"><bean:message key="labels.web_authentication_port" /></label>
+										<label for="port"><la:message key="labels.web_authentication_port" /></label>
 										<html:text property="port" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="authRealm"><bean:message key="labels.web_authentication_realm" /></label>
+										<label for="authRealm"><la:message key="labels.web_authentication_realm" /></label>
 										<html:text property="authRealm" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="protocolScheme"><bean:message key="labels.web_authentication_scheme" /></label>
+										<label for="protocolScheme"><la:message key="labels.web_authentication_scheme" /></label>
 										<html:select property="protocolScheme" styleClass="form-control">
 												<c:forEach var="item" items="${protocolSchemeItems}">
 														<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
@@ -104,19 +104,19 @@
 										</html:select>
 									</div>
 									<div class="form-group">
-										<label for="username"><bean:message key="labels.web_authentication_username" /></label>
+										<label for="username"><la:message key="labels.web_authentication_username" /></label>
 										<html:text property="username" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="password"><bean:message key="labels.web_authentication_password" /></label>
+										<label for="password"><la:message key="labels.web_authentication_password" /></label>
 										<html:password property="password" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="parameters"><bean:message key="labels.web_authentication_parameters" /></label>
+										<label for="parameters"><la:message key="labels.web_authentication_parameters" /></label>
 										<html:textarea property="parameters" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="webConfigId"><bean:message key="labels.web_authentication_web_crawling_config" /></label>
+										<label for="webConfigId"><la:message key="labels.web_authentication_web_crawling_config" /></label>
 										<html:select property="webConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${webConfigItems}">
 														<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
@@ -128,15 +128,15 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.web_authentication_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.web_authentication_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-											value="<bean:message key="labels.web_authentication_button_create"/>"
+											value="<la:message key="labels.web_authentication_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.web_authentication_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.web_authentication_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<bean:message key="labels.web_authentication_button_confirm"/>"
+											value="<la:message key="labels.web_authentication_button_confirm"/>"
 										/>
 									</c:if>
 								</div>

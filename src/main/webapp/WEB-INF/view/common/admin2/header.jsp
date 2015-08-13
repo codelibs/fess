@@ -4,7 +4,7 @@
 
         <!-- Logo -->
         <a href="/admin/index" class="logo">
-          <span class="logo-mini"><bean:message key="labels.header.logo_alt" /></span>
+          <span class="logo-mini"><la:message key="labels.header.logo_alt" /></span>
           <span class="logo-lg">Fess Dashboard</span>
         </a>
 
@@ -18,11 +18,13 @@
           <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
               <li>
-                <s:link href="${helpLink}" target="_olh"><i class="fa fa-question-circle"></i></s:link>
+                <a href="${helpLink}" target="_olh"><i class="fa fa-question-circle"></i></a>
               </li>
+              <%-- TODO
               <li>
-                <s:link href="${contextPath}/admin/logout"><i class="fa fa-sign-out"></i></s:link>
+                <la:link href="${contextPath}/admin/logout"><i class="fa fa-sign-out"></i></la:link>
               </li>
+              --%>
             </ul>
           </div>
         </nav>

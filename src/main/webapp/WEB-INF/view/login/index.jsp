@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="content-style-type" content="text/css" />
 <meta http-equiv="content-script-type" content="text/javascript" />
-<title><bean:message key="labels.login_title" /></title>
+<title><la:message key="labels.login_title" /></title>
 <link href="${f:url('/css/admin/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/admin/style.css')}" rel="stylesheet"
@@ -21,7 +21,7 @@
 					<div class="modal" style="top:320px;">
 						<div class="modal-header">
 							<h3>
-								<bean:message key="labels.login" />
+								<la:message key="labels.login" />
 							</h3>
 						</div>
 						<div class="modal-body">
@@ -31,14 +31,14 @@
 								%>
 								<div class="alert-message error">
 									<p>
-										<bean:message key="error.login_error" />
+										<la:message key="error.login_error" />
 									</p>
 								</div>
 								<%
 									}
 								%>
 								<div class="clearfix">
-									<label for="j_username"> <bean:message
+									<label for="j_username"> <la:message
 											key="labels.user_name" />
 									</label>
 									<div class="input">
@@ -46,7 +46,7 @@
 									</div>
 								</div>
 								<div class="clearfix">
-									<label for="j_username"> <bean:message
+									<label for="j_username"> <la:message
 											key="labels.password" />
 									</label>
 									<div class="input">
@@ -58,7 +58,7 @@
 						<div class="modal-footer">
 							<div class="clearfix">
 								<input type="submit" name="loginButton"
-										value="<bean:message key="labels.login"/>"
+										value="<la:message key="labels.login"/>"
 										class="btn small primary" />
 							</div>
 						</div>

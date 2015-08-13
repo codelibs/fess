@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.suggest_bad_word_configuration" /></title>
+<title>Fess | <la:message key="labels.suggest_bad_word_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,13 +18,13 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.suggest_bad_word_configuration" />
+					<la:message key="labels.suggest_bad_word_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><s:link href="index">
-							<bean:message key="labels.suggest_bad_word_link_list" />
-						</s:link></li>
-					<li class="active"><a href="#"><bean:message key="labels.suggest_bad_word_link_upload" /></a></li>
+					<li class="active"><la:link href="index">
+							<la:message key="labels.suggest_bad_word_link_list" />
+						</la:link></li>
+					<li class="active"><a href="#"><la:message key="labels.suggest_bad_word_link_upload" /></a></li>
 				</ol>
 			</section>
 
@@ -36,21 +36,21 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<bean:message key="labels.suggest_bad_word_link_upload" />
+									<la:message key="labels.suggest_bad_word_link_upload" />
 								</h3>
 								<div class="box-tools pull-right">
-									<span class="label label-default"><s:link href="index">
-										<bean:message key="labels.suggest_bad_word_link_list" />
-										</s:link></span>
-									<span class="label label-default"><s:link href="createpage">
-										<bean:message key="labels.suggest_bad_word_link_create_new" />
-										</s:link></span>
-									<span class="label label-default"><s:link href="downloadpage">
-										<bean:message key="labels.suggest_bad_word_link_download" />
-										</s:link></span>
-									<span class="label label-default"><s:link href="uploadpage">
-										<bean:message key="labels.suggest_bad_word_link_upload" />
-										</s:link></span>
+									<span class="label label-default"><la:link href="index">
+										<la:message key="labels.suggest_bad_word_link_list" />
+										</la:link></span>
+									<span class="label label-default"><la:link href="createpage">
+										<la:message key="labels.suggest_bad_word_link_create_new" />
+										</la:link></span>
+									<span class="label label-default"><la:link href="downloadpage">
+										<la:message key="labels.suggest_bad_word_link_download" />
+										</la:link></span>
+									<span class="label label-default"><la:link href="uploadpage">
+										<la:message key="labels.suggest_bad_word_link_upload" />
+										</la:link></span>
 								</div>
 							</div>
 							<%-- Box Body --%>
@@ -59,14 +59,14 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><bean:message key="labels.suggest_bad_word_file" /></th>
+												<th class="col-xs-2"><la:message key="labels.suggest_bad_word_file" /></th>
 												<td><input type="file" name="suggestBadWordFile" /></td>
 											</tr>
 										</tbody>
 										<tfoot>
 											<tr>
 												<td colspan="2">
-													<input type="submit" name="upload" value="<bean:message key="labels.suggest_bad_word_button_upload"/>" />
+													<input type="submit" name="upload" value="<la:message key="labels.suggest_bad_word_button_upload"/>" />
 												</td>
 											</tr>
 										</tfoot>

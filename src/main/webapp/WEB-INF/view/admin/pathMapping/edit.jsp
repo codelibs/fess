@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.path_mapping_configuration" /></title>
+<title>Fess | <la:message key="labels.path_mapping_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -17,24 +17,24 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.path_mapping_title_details" />
+					<la:message key="labels.path_mapping_title_details" />
 				</h1>
 				<ol class="breadcrumb">
 			
-					<li><s:link href="index">
-							<bean:message key="labels.path_mapping_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.path_mapping_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.path_mapping_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.path_mapping_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.path_mapping_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.path_mapping_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -56,16 +56,16 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.path_mapping_link_create" />
+											<la:message key="labels.path_mapping_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.path_mapping_link_update" />
+											<la:message key="labels.path_mapping_link_update" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.path_mapping_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.path_mapping_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -81,44 +81,44 @@
 									</div>
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="regex"><bean:message key="labels.regex" /></label>
+										<label for="regex"><la:message key="labels.regex" /></label>
 										<html:text property="regex" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="replacement"><bean:message key="labels.replacement" /></label>
+										<label for="replacement"><la:message key="labels.replacement" /></label>
 										<html:text property="replacement" styleClass="form-control" />
 									</div>
 									<div class="form-group">
- 										<label for="processType"><bean:message key="labels.processType" /></label>
+ 										<label for="processType"><la:message key="labels.processType" /></label>
  										<html:select property="processType" styleClass="form-control">
  											<html:option value="C">
- 												<bean:message key="labels.path_mapping_pt_crawling" />
+ 												<la:message key="labels.path_mapping_pt_crawling" />
  											</html:option>
  											<html:option value="D">
- 												<bean:message key="labels.path_mapping_pt_displaying" />
+ 												<la:message key="labels.path_mapping_pt_displaying" />
  											</html:option>
  											<html:option value="B">
- 												<bean:message key="labels.path_mapping_pt_both" />
+ 												<la:message key="labels.path_mapping_pt_both" />
  											</html:option>
  										</html:select>
  									</div>
 									<div class="form-group">
-										<label for="sortOrder"><bean:message key="labels.sortOrder" /></label>
+										<label for="sortOrder"><la:message key="labels.sortOrder" /></label>
 										<html:text property="sortOrder" styleClass="form-control" />
 									</div>
 								</div>
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.path_mapping_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.path_mapping_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-											value="<bean:message key="labels.path_mapping_button_create"/>"
+											value="<la:message key="labels.path_mapping_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.path_mapping_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.path_mapping_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<bean:message key="labels.path_mapping_button_confirm"/>"
+											value="<la:message key="labels.path_mapping_button_confirm"/>"
 										/>
 									</c:if>
 								</div>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.labeltype_configuration" /></title>
+<title>Fess | <la:message key="labels.labeltype_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.labeltype_title_details" />
+					<la:message key="labels.labeltype_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.labeltype_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.labeltype_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.labeltype_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.labeltype_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.labeltype_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.labeltype_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.labeltype_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.labeltype_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.labeltype_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.labeltype_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -57,22 +57,22 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.labeltype_link_create" />
+											<la:message key="labels.labeltype_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.labeltype_link_update" />
+											<la:message key="labels.labeltype_link_update" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
-											<bean:message key="labels.labeltype_link_delete" />
+											<la:message key="labels.labeltype_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<bean:message key="labels.labeltype_link_confirm" />
+											<la:message key="labels.labeltype_link_confirm" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.labeltype_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.labeltype_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -91,23 +91,23 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-3"><bean:message key="labels.labeltype_name" /></th>
+												<th class="col-xs-3"><la:message key="labels.labeltype_name" /></th>
 												<td>${f:h(name)}<html:hidden property="name" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.labeltype_value" /></th>
+												<th><la:message key="labels.labeltype_value" /></th>
 												<td>${f:h(value)}<html:hidden property="value" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.labeltype_included_paths" /></th>
+												<th><la:message key="labels.labeltype_included_paths" /></th>
 												<td>${f:br(f:h(includedPaths))}<html:hidden property="includedPaths" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.labeltype_excluded_paths" /></th>
+												<th><la:message key="labels.labeltype_excluded_paths" /></th>
 												<td>${f:br(f:h(excludedPaths))}<html:hidden property="excludedPaths" /></td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.role_type" /></th>
+												<th><la:message key="labels.role_type" /></th>
 													<td>
 														<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
 															<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
@@ -124,7 +124,7 @@
 													</td>
 											</tr>
 											<tr>
-												<th><bean:message key="labels.sortOrder" /></th>
+												<th><la:message key="labels.sortOrder" /></th>
 												<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
@@ -134,30 +134,30 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.labeltype_button_back"/>" />
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.labeltype_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="create"
-											value="<bean:message key="labels.labeltype_button_create"/>"
+											value="<la:message key="labels.labeltype_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.labeltype_button_back"/>" />
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.labeltype_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="update"
-											value="<bean:message key="labels.labeltype_button_update"/>"
+											value="<la:message key="labels.labeltype_button_update"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.labeltype_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.labeltype_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="delete"
-											value="<bean:message key="labels.labeltype_button_delete"/>"
+											value="<la:message key="labels.labeltype_button_delete"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.labeltype_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.labeltype_button_back"/>" />
 										<input type="submit" class="btn" name="editfromconfirm"
-											value="<bean:message key="labels.labeltype_button_edit"/>"
+											value="<la:message key="labels.labeltype_button_edit"/>"
 										/>
 										<input type="submit" class="btn" name="deletefromconfirm"
-											value="<bean:message key="labels.labeltype_button_delete"/>"
+											value="<la:message key="labels.labeltype_button_delete"/>"
 										/>
 									</c:if>
 								</div>

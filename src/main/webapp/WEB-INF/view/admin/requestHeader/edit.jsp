@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.request_header_configuration" /></title>
+<title>Fess | <la:message key="labels.request_header_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.request_header_title_details" />
+					<la:message key="labels.request_header_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="index">
-							<bean:message key="labels.request_header_link_list" />
-						</s:link></li>
+					<li><la:link href="index">
+							<la:message key="labels.request_header_link_list" />
+						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><bean:message key="labels.request_header_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.request_header_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><bean:message key="labels.request_header_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.request_header_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><bean:message key="labels.request_header_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.request_header_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><bean:message key="labels.request_header_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.request_header_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -58,16 +58,16 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<bean:message key="labels.request_header_link_create" />
+											<la:message key="labels.request_header_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<bean:message key="labels.request_header_link_update" />
+											<la:message key="labels.request_header_link_update" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><s:link href="index">
-												<bean:message key="labels.request_header_link_list" />
-											</s:link></span>
+										<span class="label label-default"><la:link href="index">
+												<la:message key="labels.request_header_link_list" />
+											</la:link></span>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -84,15 +84,15 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><bean:message key="labels.request_header_name" /></label>
+										<label for="name"><la:message key="labels.request_header_name" /></label>
 										<html:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="value"><bean:message key="labels.request_header_value" /></label>
+										<label for="value"><la:message key="labels.request_header_value" /></label>
 										<html:text property="value" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="webConfigId"><bean:message key="labels.request_header_web_crawling_config" /></label>
+										<label for="webConfigId"><la:message key="labels.request_header_web_crawling_config" /></label>
 										<html:select property="webConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${webConfigItems}">
 														<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
@@ -104,15 +104,15 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.request_header_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.request_header_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-											value="<bean:message key="labels.request_header_button_create"/>"
+											value="<la:message key="labels.request_header_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="back" value="<bean:message key="labels.request_header_button_back"/>" />
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.request_header_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<bean:message key="labels.request_header_button_confirm"/>"
+											value="<la:message key="labels.request_header_button_confirm"/>"
 										/>
 									</c:if>
 								</div>

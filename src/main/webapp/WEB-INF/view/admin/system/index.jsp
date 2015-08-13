@@ -2,7 +2,7 @@
 <html>
 		<head>
 				<meta charset="UTF-8">
-				<title>Fess | <bean:message key="labels.system_title_configuration" /></title>
+				<title>Fess | <la:message key="labels.system_title_configuration" /></title>
 				<jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 		</head>
 		<body class="skin-blue sidebar-mini">
@@ -33,7 +33,7 @@
 																<%-- Box Header --%>
 																<div class="box-header">
 																		<h3 class="box-title">
-																				<bean:message key="labels.system_title_system_status" />
+																				<la:message key="labels.system_title_system_status" />
 																		</h3>
 																</div>
 																<%-- Box Body --%>
@@ -41,13 +41,13 @@
 																		<table class="table table-bordered table-hover table-striped">
 																				<tbody>
 																						<tr>
-																								<th class="col-xs-3"><bean:message key="labels.es_cluster_name" />
+																								<th class="col-xs-3"><la:message key="labels.es_cluster_name" />
 																								</th>
 																								<td>${f:h(clusterName)}
 																										(<c:if test="${clusterStatus=='ACTIVE'}">
-																										<bean:message key="labels.es_active" />
+																										<la:message key="labels.es_active" />
 																										</c:if> <c:if test="${clusterStatus!='ACTIVE'}">
-																												<bean:message key="labels.es_inactive" />
+																												<la:message key="labels.es_inactive" />
 																										</c:if>)
 																								</td>
 																						</tr>
@@ -61,7 +61,7 @@
 																		<%-- Box Header --%>
 																		<div class="box-header">
 																				<h3 class="box-title">
-																						<bean:message key="labels.crawler_status_title" />
+																						<la:message key="labels.crawler_status_title" />
 																				</h3>
 																		</div>
 																		<%-- Box Body --%>
@@ -71,34 +71,34 @@
 																						<tbody>
 																								<tr>
 																										<th class="col-xs-3">
-																												<bean:message key="labels.crawler_process_running" /></th>
+																												<la:message key="labels.crawler_process_running" /></th>
 																										<td>
 																												<c:if test="${crawlerRunning}">
-																														<bean:message key="labels.crawler_running" />
+																														<la:message key="labels.crawler_running" />
 																												</c:if><c:if test="${!crawlerRunning}">
-																														<bean:message key="labels.crawler_stopped" />
+																														<la:message key="labels.crawler_stopped" />
 																												</c:if>
 																										</td>
 																								</tr>
 																								<tr>
 																										<th>
-																												<bean:message key="labels.crawler_process_action" />
+																												<la:message key="labels.crawler_process_action" />
 																										</th>
 																										<td>
 																												<c:if test="${!crawlerRunning}">
 																														<input type="submit" class="btn" name="start"
-																																	 value="<bean:message key="labels.crawler_button_start"/>" />
+																																	 value="<la:message key="labels.crawler_button_start"/>" />
 																												</c:if>
 																												<c:if test="${crawlerRunning}">
 																														<div class="form-inline">
 																																<html:select property="sessionId" styleClass="form-control">
-																																		<option value=""><bean:message key="labels.crawler_sessionid_all"/></option>
+																																		<option value=""><la:message key="labels.crawler_sessionid_all"/></option>
 																																		<c:forEach var="runningSessionId" items="${runningSessionIds}">
 																																				<option value="${f:h(runningSessionId)}">${f:h(runningSessionId)}</option>
 																																		</c:forEach>
 																																</html:select>
 																																<input type="submit" class="btn" name="stop"
-																																			 value="<bean:message key="labels.crawler_button_stop"/>" />
+																																			 value="<la:message key="labels.crawler_button_stop"/>" />
 																														</div>
 																												</c:if>
 																										</td>
