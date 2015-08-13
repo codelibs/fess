@@ -50,7 +50,7 @@ import org.lastaflute.web.validation.LaValidatable;
  * @author jflute
  */
 public abstract class FessBaseAction extends TypicalAction // has several interfaces for direct use
-        implements LaValidatable<FessMessages>, FessMessages.LabelKey, FessHtmlPath {
+        implements LaValidatable<FessMessages>, FessHtmlPath {
 
     // ===================================================================================
     //                                                                          Definition
@@ -87,9 +87,6 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @Override
     public void hookFinally(ActionRuntime runtime) {
         super.hookFinally(runtime);
-        if (runtime.isForwardToHtml()) {
-            setupHtmlData(runtime);
-        }
     }
 
     // ===================================================================================
