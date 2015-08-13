@@ -38,8 +38,8 @@ import org.codelibs.fess.dict.userdict.UserDictFile;
 import org.codelibs.fess.dict.userdict.UserDictItem;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.UserDictPager;
-import org.codelibs.fess.service.UserDictService;
+import org.codelibs.fess.app.pager.UserDictPager;
+import org.codelibs.fess.app.service.UserDictService;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public class UserDictAction {

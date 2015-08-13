@@ -58,9 +58,7 @@ import org.codelibs.robot.entity.UrlQueue;
 import org.codelibs.robot.exception.RobotCrawlAccessException;
 import org.codelibs.robot.exception.RobotSystemException;
 import org.codelibs.robot.extractor.Extractor;
-import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.util.CrawlingParameterUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -22,8 +22,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.fess.app.service.OverlappingHostService;
 import org.codelibs.fess.es.exentity.OverlappingHost;
-import org.codelibs.fess.service.OverlappingHostService;
 import org.lastaflute.di.core.SingletonLaContainer;
 
 public class OverlappingHostHelper implements Serializable {

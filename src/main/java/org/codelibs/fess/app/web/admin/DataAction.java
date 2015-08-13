@@ -43,7 +43,7 @@ import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.CrawlingSessionService;
+import org.codelibs.fess.app.service.CrawlingSessionService;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

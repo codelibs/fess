@@ -16,12 +16,6 @@
 
 package org.codelibs.fess.validator;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.codelibs.core.lang.StringUtil;
-import org.lastaflute.web.ruts.message.ActionMessages;
-import org.quartz.CronExpression;
-
 //TODO replace with hibernate validator
 public class CronExpressionChecks /*extends S2FieldChecks*/{
 

@@ -34,8 +34,8 @@ import org.codelibs.fess.es.exentity.PathMapping;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.PathMappingPager;
-import org.codelibs.fess.service.PathMappingService;
+import org.codelibs.fess.app.pager.PathMappingPager;
+import org.codelibs.fess.app.service.PathMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

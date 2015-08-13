@@ -33,8 +33,8 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.RoleTypePager;
-import org.codelibs.fess.service.RoleTypeService;
+import org.codelibs.fess.app.pager.RoleTypePager;
+import org.codelibs.fess.app.service.RoleTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

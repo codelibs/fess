@@ -34,8 +34,8 @@ import org.codelibs.fess.es.exentity.CrawlingSession;
 import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.CrawlingSessionPager;
-import org.codelibs.fess.service.CrawlingSessionService;
+import org.codelibs.fess.app.pager.CrawlingSessionPager;
+import org.codelibs.fess.app.service.CrawlingSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

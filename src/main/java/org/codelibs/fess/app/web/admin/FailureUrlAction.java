@@ -31,8 +31,8 @@ import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.es.exentity.FailureUrl;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.FailureUrlPager;
-import org.codelibs.fess.service.FailureUrlService;
+import org.codelibs.fess.app.pager.FailureUrlPager;
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

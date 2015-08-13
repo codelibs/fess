@@ -13,8 +13,6 @@
 	<include path="s2robot/client.xml" />
 	<include path="s2robot/mimetype.xml" />
 
-	<component name="actionMessagesThrowsInterceptor" class="org.codelibs.fess.interceptor.FessActionMessagesThrowsInterceptor"/>
-
 	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
         <!-- CHANGE THE FOLLOWING KEY -->
 		<property name="key">"1234567890123456"</property>
@@ -27,8 +25,8 @@
 		<property name="defaultFacetInfo">
 			<component class="org.codelibs.fess.entity.FacetInfo">
 				<property name="minCount">1</property>
-				<property name="field">new String[] {"label"}</property>
-				<property name="query">new String[] {
+				<property name="field">["label"]</property>
+				<property name="query">[
 					"lastModified:[NOW/DAY-1DAY TO NOW]",
 					"lastModified:[NOW/DAY-7DAYS TO NOW]",
 					"lastModified:[NOW/DAY-1MONTH TO NOW]",
@@ -44,7 +42,7 @@
 					"filetype_s:powerpoint",
 					"filetype_s:pdf",
 					"filetype_s:others"
-				}</property>
+				]</property>
 			</component>
 		</property>
 		<postConstruct name="addFieldLanguage">
@@ -64,9 +62,9 @@
 			<arg>"cjk"</arg>
 		</postConstruct>
 		<postConstruct name="setApiResponseFields">
-			<arg>new String[]{"id", "docId", "score", "boost",
+			<arg>(String[])["id", "docId", "score", "boost",
             "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
-            "created", "title", "digest", "url", "urlLink", "contentDescription"}</arg>
+            "created", "title", "digest", "url", "urlLink", "contentDescription"]</arg>
 		</postConstruct>
 		<postConstruct name="addHighlightField">
 			<arg>"title"</arg>
@@ -229,7 +227,7 @@
 		</postConstruct>
 	</component>
 	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
-		<property name="excludedWordPattern">@java.util.regex.Pattern@compile(".*[a-zA-Z0-9_]+:.*")</property>
+		<property name="excludedWordPattern">java.util.regex.Pattern.compile(".*[a-zA-Z0-9_]+:.*")</property>
 		<!-- 
 		<property name="size">10</property>
 		 -->
@@ -250,24 +248,24 @@
 	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
 	</component>
 	<component name="userAgentName" class="java.lang.String">
-		<arg>"Mozilla/5.0 (compatible; Fess/" + @org.codelibs.fess.Constants@FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
+		<arg>"Mozilla/5.0 (compatible; Fess/" + org.codelibs.fess.Constants.FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
 	</component>
 
 	<component name="adProperties" class="java.util.Properties">
 		<postConstruct name="put">
-			<arg>@javax.naming.Context@INITIAL_CONTEXT_FACTORY</arg>
+			<arg>"java.naming.factory.initial"</arg>
 			<arg>"com.sun.jndi.ldap.LdapCtxFactory"</arg>
 		</postConstruct>
 		<postConstruct name="put">
-			<arg>@javax.naming.directory.DirContext@PROVIDER_URL</arg>
+			<arg>"java.naming.provider.url"</arg>
 			<arg>"ldap://[host]:[port]"</arg>
 		</postConstruct>
 		<postConstruct name="put">
-			<arg>@javax.naming.directory.DirContext@SECURITY_PRINCIPAL</arg>
+			<arg>"java.naming.security.principal"</arg>
 			<arg>"[loginId]@[domain]"</arg>
 		</postConstruct>
 		<postConstruct name="put">
-			<arg>@javax.naming.directory.DirContext@SECURITY_CREDENTIALS</arg>
+			<arg>"java.naming.security.credentials"</arg>
 			<arg>"password"</arg>
 		</postConstruct>
 		<postConstruct name="put">

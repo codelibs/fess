@@ -2,8 +2,8 @@ package org.codelibs.fess.es.cbean.cq.bs;
 
 import java.util.Collection;
 
-import org.codelibs.fess.es.cbean.cq.SuggestElevateWordCQ;
 import org.codelibs.fess.es.cbean.cf.SuggestElevateWordCF;
+import org.codelibs.fess.es.cbean.cq.SuggestElevateWordCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;

@@ -47,7 +47,6 @@ import org.codelibs.robot.service.UrlQueueService;
 import org.codelibs.robot.service.impl.EsDataService;
 import org.codelibs.robot.transformer.Transformer;
 import org.codelibs.robot.util.EsResultList;
-import org.dbflute.cbean.result.PagingResultBean;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;

@@ -3,24 +3,26 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="fessEsClient" class="org.codelibs.fess.client.FessEsClient">
+		<!-- 
 		<property name="settings">
-			#{"http.cors.enabled" : "true"}
+			{"http.cors.enabled":"true"}
 		</property>
+		 -->
 		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>
 		</postConstruct>
-		<initMethod name="addConfigFile">
+		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"ja/mapping.txt"</arg>
-		</initMethod>
-		<initMethod name="addConfigFile">
+		</postConstruct>
+		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"ja/synonym.txt"</arg>
-		</initMethod>
-		<initMethod name="addConfigFile">
+		</postConstruct>
+		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"ja/kuromoji.txt"</arg>
-		</initMethod>
+		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/boost_document_rule"</arg>
 		</postConstruct>

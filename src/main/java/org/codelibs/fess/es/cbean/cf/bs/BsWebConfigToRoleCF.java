@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import org.codelibs.fess.es.cbean.cf.WebConfigToRoleCF;
 import org.codelibs.fess.es.cbean.cq.WebConfigToRoleCQ;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.dbflute.cbean.ckey.ConditionKey;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.ExistsFilterBuilder;

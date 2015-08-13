@@ -12,16 +12,16 @@
 	</component>
 
 	<component name="synonymLocator" class="org.codelibs.fess.dict.synonym.SynonymLocator">
-		<property name="excludedSynonymList">{"data", "txlog",
-			"lib", "bin", "contrib"}</property>
+		<property name="excludedSynonymList">["data", "txlog",
+			"lib", "bin", "contrib"]</property>
 		<postConstruct name="addSearchPath">
 			<arg>"${solr.solr.home}"</arg>
 		</postConstruct>
 	</component>
 
 	<component name="userDictLocator" class="org.codelibs.fess.dict.userdict.UserDictLocator">
-		<property name="excludedUserDictList">{"data", "txlog",
-			"lib", "bin", "contrib"}</property>
+		<property name="excludedUserDictList">["data", "txlog",
+			"lib", "bin", "contrib"]</property>
 		<postConstruct name="addSearchPath">
 			<arg>"${solr.solr.home}"</arg>
 		</postConstruct>

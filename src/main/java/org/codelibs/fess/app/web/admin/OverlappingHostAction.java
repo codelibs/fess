@@ -33,8 +33,8 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.OverlappingHostPager;
-import org.codelibs.fess.service.OverlappingHostService;
+import org.codelibs.fess.app.pager.OverlappingHostPager;
+import org.codelibs.fess.app.service.OverlappingHostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

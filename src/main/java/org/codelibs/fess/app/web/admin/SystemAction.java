@@ -30,7 +30,7 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.ScheduledJobService;
+import org.codelibs.fess.app.service.ScheduledJobService;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class SystemAction implements Serializable {

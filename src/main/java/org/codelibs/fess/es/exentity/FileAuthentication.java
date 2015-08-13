@@ -1,7 +1,7 @@
 package org.codelibs.fess.es.exentity;
 
+import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.es.bsentity.BsFileAuthentication;
-import org.codelibs.fess.service.FileConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**

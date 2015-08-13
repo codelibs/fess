@@ -17,8 +17,6 @@
 package org.codelibs.fess.app.web.admin.keymatch;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.codelibs.fess.util.ComponentUtil;
 

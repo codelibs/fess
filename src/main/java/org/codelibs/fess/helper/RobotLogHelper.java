@@ -16,8 +16,8 @@
 
 package org.codelibs.fess.helper;
 
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.es.exentity.CrawlingConfig;
-import org.codelibs.fess.service.FailureUrlService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2RobotContext;
 import org.codelibs.robot.entity.UrlQueue;

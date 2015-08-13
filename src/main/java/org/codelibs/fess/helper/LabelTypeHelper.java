@@ -31,8 +31,8 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.es.exentity.LabelType;
-import org.codelibs.fess.service.LabelTypeService;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

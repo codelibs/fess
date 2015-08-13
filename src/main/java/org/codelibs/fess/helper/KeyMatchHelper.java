@@ -25,10 +25,10 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.exentity.KeyMatch;
-import org.codelibs.fess.service.KeyMatchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 

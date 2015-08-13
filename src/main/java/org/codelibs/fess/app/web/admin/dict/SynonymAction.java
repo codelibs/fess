@@ -40,8 +40,8 @@ import org.codelibs.fess.dict.synonym.SynonymFile;
 import org.codelibs.fess.dict.synonym.SynonymItem;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.SynonymPager;
-import org.codelibs.fess.service.SynonymService;
+import org.codelibs.fess.app.pager.SynonymPager;
+import org.codelibs.fess.app.service.SynonymService;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public class SynonymAction {

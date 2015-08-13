@@ -34,8 +34,8 @@ import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.BoostDocumentRulePager;
-import org.codelibs.fess.service.BoostDocumentRuleService;
+import org.codelibs.fess.app.pager.BoostDocumentRulePager;
+import org.codelibs.fess.app.service.BoostDocumentRuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -23,7 +23,7 @@
   <!--                                                                    Servlet Filter -->
   <!--                                                                    ============== -->
   <filter>
-    <filter-name>encodingfilter</filter-name>
+    <filter-name>encodingFilter</filter-name>
     <filter-class>org.codelibs.fess.filter.EncodingFilter</filter-class>
     <init-param>
       <param-name>encoding</param-name>
@@ -153,7 +153,7 @@
   <!--                                                                    Filter Mapping -->
   <!--                                                                    ============== -->
   <filter-mapping>
-    <filter-name>encodingfilter</filter-name>
+    <filter-name>encodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
     <dispatcher>FORWARD</dispatcher><!-- TODO -->
@@ -165,10 +165,12 @@
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
 
+<!-- TODO
   <filter-mapping>
     <filter-name>authenticationFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+ -->
 
   <filter-mapping>
     <filter-name>webApiFilter</filter-name>
@@ -198,11 +200,6 @@
   <!-- ================================================================================= -->
   <!--                                                                           Servlet -->
   <!--                                                                           ======= -->
-  <servlet>
-    <servlet-name>tomcat7ConfigServlet</servlet-name>
-    <servlet-class>org.codelibs.fess.servlet.Tomcat7ConfigServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
 
   <!-- ================================================================================= -->
   <!--                                                                   Servlet Mapping -->

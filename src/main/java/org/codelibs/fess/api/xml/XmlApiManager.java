@@ -42,7 +42,6 @@ import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.codelibs.fess.util.MoreLikeThisResponse;
 import org.codelibs.fess.util.WebApiUtil;
-import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

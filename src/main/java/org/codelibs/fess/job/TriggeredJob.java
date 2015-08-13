@@ -17,11 +17,11 @@
 package org.codelibs.fess.job;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.es.exentity.JobLog;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.JobLogService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.quartz.Job;

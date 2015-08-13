@@ -35,11 +35,11 @@ import org.codelibs.fess.es.exentity.LabelType;
 import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.FileConfigPager;
-import org.codelibs.fess.service.FailureUrlService;
-import org.codelibs.fess.service.FileConfigService;
-import org.codelibs.fess.service.LabelTypeService;
-import org.codelibs.fess.service.RoleTypeService;
+import org.codelibs.fess.app.pager.FileConfigPager;
+import org.codelibs.fess.app.service.FailureUrlService;
+import org.codelibs.fess.app.service.FileConfigService;
+import org.codelibs.fess.app.service.LabelTypeService;
+import org.codelibs.fess.app.service.RoleTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

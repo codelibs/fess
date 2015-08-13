@@ -9,13 +9,13 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.es.bsentity.BsFileConfig;
 import org.codelibs.fess.es.exbhv.FileConfigToLabelBhv;
 import org.codelibs.fess.es.exbhv.FileConfigToRoleBhv;
 import org.codelibs.fess.es.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.exbhv.RoleTypeBhv;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.FileAuthenticationService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.robot.client.S2RobotClientFactory;

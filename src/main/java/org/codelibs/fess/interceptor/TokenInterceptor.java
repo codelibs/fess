@@ -15,12 +15,8 @@
  */
 package org.codelibs.fess.interceptor;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.codelibs.fess.annotation.Token;
 import org.lastaflute.di.core.aop.frame.MethodInvocation;
 import org.lastaflute.di.core.aop.interceptors.AbstractInterceptor;
-import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * @author shinsuke

@@ -33,8 +33,8 @@ import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.es.exentity.JobLog;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.JobLogPager;
-import org.codelibs.fess.service.JobLogService;
+import org.codelibs.fess.app.pager.JobLogPager;
+import org.codelibs.fess.app.service.JobLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

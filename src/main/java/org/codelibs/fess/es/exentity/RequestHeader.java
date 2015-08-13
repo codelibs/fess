@@ -1,7 +1,7 @@
 package org.codelibs.fess.es.exentity;
 
+import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.es.bsentity.BsRequestHeader;
-import org.codelibs.fess.service.WebConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**

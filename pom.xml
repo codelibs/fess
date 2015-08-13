@@ -412,7 +412,9 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version> <!-- contains taglibs.standard -->
+			<!-- 
 			<scope>provided</scope>
+			 -->
 		</dependency>
 
 		<!-- elasticsearch -->

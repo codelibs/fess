@@ -37,9 +37,9 @@ import org.codelibs.fess.exception.SSCActionMessagesException;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
-import org.codelibs.fess.pager.ScheduledJobPager;
-import org.codelibs.fess.service.RoleTypeService;
-import org.codelibs.fess.service.ScheduledJobService;
+import org.codelibs.fess.app.pager.ScheduledJobPager;
+import org.codelibs.fess.app.service.RoleTypeService;
+import org.codelibs.fess.app.service.ScheduledJobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

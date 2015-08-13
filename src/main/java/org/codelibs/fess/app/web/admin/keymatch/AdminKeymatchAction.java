@@ -22,12 +22,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.annotation.Token;
+import org.codelibs.fess.app.pager.KeyMatchPager;
+import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.KeyMatch;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.pager.KeyMatchPager;
-import org.codelibs.fess.service.KeyMatchService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;

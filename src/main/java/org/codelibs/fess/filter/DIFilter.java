@@ -22,7 +22,7 @@ public class DIFilter extends LastaFilter {
     @Override
     protected void viaInsideHookDeque(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Deque<FilterHook> deque)
             throws IOException, ServletException {
-        if (!deque.isEmpty()) {
+        if (deque != null && !deque.isEmpty()) {
             super.viaInsideHookDeque(request, response, chain, deque);
         } else {
             routingFilter.doFilter(request, response, prepareFinalChain(chain)); /* #to_action */
