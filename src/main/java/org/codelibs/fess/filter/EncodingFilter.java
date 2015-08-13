@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -38,8 +39,7 @@ import org.apache.commons.codec.net.URLCodec;
 import org.codelibs.core.lang.StringUtil;
 import org.lastaflute.web.LastaFilter;
 
-// TODO parent filter
-public class FessEncodingFilter extends LastaFilter {
+public class EncodingFilter implements Filter {
     public static String ENCODING_MAP = "encodingRules";
 
     protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
@@ -52,12 +52,11 @@ public class FessEncodingFilter extends LastaFilter {
 
     @Override
     public void init(final FilterConfig config) throws ServletException {
-        super.init(config);
         servletContext = config.getServletContext();
 
-        encoding = config.getInitParameter(ENCODING_KEY);
+        encoding = config.getInitParameter(LastaFilter.ENCODING_KEY);
         if (encoding == null) {
-            encoding = DEFAULT_ENCODING;
+            encoding = LastaFilter.DEFAULT_ENCODING;
         }
 
         // ex. sjis:Shift_JIS,eucjp:EUC-JP
@@ -118,7 +117,7 @@ public class FessEncodingFilter extends LastaFilter {
             }
         }
 
-        super.doFilter(request, response, chain);
+        chain.doFilter(request, response);
     }
 
     protected Map<String, String[]> getParameterMapFromQueryString(final HttpServletRequest request, final String enc) throws IOException {
@@ -168,5 +167,10 @@ public class FessEncodingFilter extends LastaFilter {
             paramMap.put(entry.getKey(), list.toArray(new String[list.size()]));
         }
         return paramMap;
+    }
+
+    @Override
+    public void destroy() {
+        // nothing
     }
 }
