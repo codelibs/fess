@@ -57,24 +57,24 @@
 			</div>
 
 		<%-- Edit Form: BEGIN --%>
-		<s:form>
-			<html:hidden property="crudMode" />
+		<la:form>
+			<la:hidden property="crudMode" />
 			<div>
-				<html:hidden property="dictId" />
+				<la:hidden property="dictId" />
 				<c:if test="${crudMode==2}">
-					<html:hidden property="id" />
+					<la:hidden property="id" />
 				</c:if>
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
 							<th style="width: 150px;"><la:message
 									key="labels.dict_synonym_source" /></th>
-							<td><html:textarea property="inputs" rows="5" style="width:98%;" /></td>
+							<td><la:textarea property="inputs" rows="5" style="width:98%;" /></td>
 						</tr>
 						<tr>
 							<th><la:message
 									key="labels.dict_synonym_target" /></th>
-							<td><html:textarea property="outputs" rows="5" style="width:98%;" /></td>
+							<td><la:textarea property="outputs" rows="5" style="width:98%;" /></td>
 						</tr>
 					</tbody>
 					<tfoot>
@@ -94,7 +94,7 @@
 					</tfoot>
 				</table>
 			</div>
-		</s:form>
+		</la:form>
 		<%-- Edit Form: BEGIN --%>
 
 	</tiles:put>

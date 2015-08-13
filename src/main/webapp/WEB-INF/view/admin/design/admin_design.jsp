@@ -37,7 +37,7 @@
 						}
 					// -->
 					</script>
-					<s:form>
+					<la:form>
 						<table class="bordered-table zebra-striped">
 							<tbody>
 								<tr>
@@ -57,14 +57,14 @@
 									</td>
 								</tr>
 						</table>
-					</s:form>
+					</la:form>
 				</div>
 
 				<div style="margin-top: 5px;">
 					<h3>
 						<la:message key="labels.design_title_file_upload" />
 					</h3>
-					<s:form action="upload" enctype="multipart/form-data">
+					<la:form action="upload" enctype="multipart/form-data">
 						<table class="bordered-table zebra-striped">
 							<tbody>
 							<tr>
@@ -75,7 +75,7 @@
 								</tr>
 								<tr>
 									<th><la:message key="labels.design_file_name" /></th>
-									<td style="text-align: center;"><html:text
+									<td style="text-align: center;"><la:text
 											property="designFileName" style="width:98%;" /></td>
 								</tr>
 							</tbody>
@@ -87,14 +87,14 @@
 								</tr>
 							</tfoot>
 						</table>
-					</s:form>
+					</la:form>
 				</div>
 
 				<div style="margin-top: 5px;">
 					<h3>
 						<la:message key="labels.design_file_title_edit" />
 					</h3>
-					<s:form>
+					<la:form>
 					<table class="bordered-table zebra-striped">
 						<tbody>
 							<tr>
@@ -129,7 +129,7 @@
 								</td>
 							</tr>
 					</table>
-					</s:form>
+					</la:form>
 				</div>
 			</c:if>
 		</div>

@@ -30,7 +30,7 @@
 			<!-- Main content -->
 			<section class="content">
 
-				<s:form>
+				<la:form>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -61,7 +61,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

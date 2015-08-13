@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,40 +92,40 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.web_authentication_hostname" /></th>
-												<td>${f:h(hostname)}<html:hidden property="hostname" /></td>
+												<td>${f:h(hostname)}<la:hidden property="hostname" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.web_authentication_port" /></th>
-												<td>${f:h(port)}<html:hidden property="port" /></td>
+												<td>${f:h(port)}<la:hidden property="port" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.web_authentication_realm" /></th>
-												<td>${f:h(authRealm)}<html:hidden property="authRealm" /></td>
+												<td>${f:h(authRealm)}<la:hidden property="authRealm" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.web_authentication_scheme" /></th>
 													<td><c:forEach var="item" items="${protocolSchemeItems}">
 															<c:if test="${protocolScheme==item.value}">${f:h(item.label)}</c:if>
-													</c:forEach> <html:hidden property="protocolScheme" /></td>
+													</c:forEach> <la:hidden property="protocolScheme" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.web_authentication_username" /></th>
-													<td>${f:h(username)}<html:hidden property="username" /></td>
+													<td>${f:h(username)}<la:hidden property="username" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.web_authentication_password" /></th>
 													<td><c:if test="${password!=''}">******</c:if>
-															<html:hidden property="password" /></td>
+															<la:hidden property="password" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.web_authentication_parameters" /></th>
-													<td>${f:br(f:h(parameters))}<html:hidden property="parameters" /></td>
+													<td>${f:br(f:h(parameters))}<la:hidden property="parameters" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.web_authentication_web_crawling_config" /></th>
 													<td><c:forEach var="item" items="${webConfigItems}">
 															<c:if test="${webConfigId==item.value}">${f:h(item.label)}</c:if>
-													</c:forEach> <html:hidden property="webConfigId" /></td>
+													</c:forEach> <la:hidden property="webConfigId" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -164,7 +164,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

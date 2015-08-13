@@ -57,34 +57,34 @@
 			</div>
 
 		<%-- Edit Form: BEGIN --%>
-		<s:form>
-			<html:hidden property="crudMode" />
+		<la:form>
+			<la:hidden property="crudMode" />
 			<div>
-				<html:hidden property="dictId" />
+				<la:hidden property="dictId" />
 				<c:if test="${crudMode==2}">
-					<html:hidden property="id" />
+					<la:hidden property="id" />
 				</c:if>
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
 							<th style="width: 150px;"><la:message
 									key="labels.dict_userdict_token" /></th>
-							<td><html:text property="token" style="width:98%;" /></td>
+							<td><la:text property="token" style="width:98%;" /></td>
 						</tr>
 						<tr>
 							<th><la:message
 									key="labels.dict_userdict_segmentation" /></th>
-							<td><html:text property="segmentation" style="width:98%;" /></td>
+							<td><la:text property="segmentation" style="width:98%;" /></td>
 						</tr>
 						<tr>
 							<th><la:message
 									key="labels.dict_userdict_reading" /></th>
-							<td><html:text property="reading" style="width:98%;" /></td>
+							<td><la:text property="reading" style="width:98%;" /></td>
 						</tr>
 						<tr>
 							<th><la:message
 									key="labels.dict_userdict_pos" /></th>
-							<td><html:text property="pos" style="width:98%;" /></td>
+							<td><la:text property="pos" style="width:98%;" /></td>
 						</tr>
 					</tbody>
 					<tfoot>
@@ -104,7 +104,7 @@
 					</tfoot>
 				</table>
 			</div>
-		</s:form>
+		</la:form>
 		<%-- Edit Form: BEGIN --%>
 
 	</tiles:put>

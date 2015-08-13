@@ -55,7 +55,7 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-								<s:form>
+								<la:form>
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
@@ -64,7 +64,7 @@
 											</tr>
 										</tbody>
 									</table>
-								</s:form>
+								</la:form>
 
 							</div>
 							<%-- Box Footer --%>

@@ -82,7 +82,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
     @Override
     public Set<String> build() {
         final Set<String> roleList = new HashSet<>();
-        final HttpServletRequest request = LaRequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
 
         // request parameter
         if (request != null && StringUtil.isNotBlank(parameterKey)) {

@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<s:form action="search" method="get" styleId="searchForm" styleClass="searchResultForm">
+<la:form action="search" method="get" styleId="searchForm" styleClass="searchResultForm">
 ${fe:facetForm()}${fe:geoForm()}
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
@@ -9,7 +9,7 @@ ${fe:facetForm()}${fe:geoForm()}
 						alt="<la:message key="labels.header_brand_name" />" />
 				</la:link>
 				<div class="navbar-form pull-right">
-					<html:text property="query" maxlength="1000" styleId="query" autocomplete="off"/>
+					<la:text property="query" maxlength="1000" styleId="query" autocomplete="off"/>
 					<button class="btn medium btn-primary" type="submit" name="search"
 						id="searchButton">
 						<i class="icon-search icon-white"></i><span class="hidden-phone"><la:message
@@ -144,5 +144,5 @@ ${fe:facetForm()}${fe:geoForm()}
 			</button>
 		</div>
 	</div>
-</s:form>
+</la:form>
 

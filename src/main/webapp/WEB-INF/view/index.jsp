@@ -50,13 +50,13 @@
 						footer="errors.front_footer" prefix="errors.front_prefix"
 						suffix="errors.front_suffix" />
 				</div>
-				<s:form styleClass="form-stacked" action="search" method="get"
+				<la:form styleClass="form-stacked" action="search" method="get"
 					styleId="searchForm">
 					${fe:facetForm()}${fe:geoForm()}
 					<fieldset>
 						<div class="clearfix">
 							<div class="input">
-								<html:text styleClass="query" property="query" size="50"
+								<la:text styleClass="query" property="query" size="50"
 									maxlength="1000" styleId="contentQuery" autocomplete="off" />
 							</div>
 						</div>
@@ -204,7 +204,7 @@
 							</button>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 			</div>
 		</div>
 		<jsp:include page="footer.jsp" />

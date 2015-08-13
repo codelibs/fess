@@ -44,9 +44,9 @@
 			</div>
 
 		<%-- Edit Form: BEGIN --%>
-		<s:form action="upload" enctype="multipart/form-data">
+		<la:form action="upload" enctype="multipart/form-data">
 			<div>
-				<html:hidden property="dictId" />
+				<la:hidden property="dictId" />
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
@@ -69,7 +69,7 @@
 					</tfoot>
 				</table>
 			</div>
-		</s:form>
+		</la:form>
 		<%-- Edit Form: BEGIN --%>
 
 	</tiles:put>

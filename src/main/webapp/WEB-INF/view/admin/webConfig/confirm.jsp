@@ -42,15 +42,15 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
-					<html:hidden property="sortOrder"/>
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
+					<la:hidden property="sortOrder"/>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -97,55 +97,55 @@
 											</tr></c:if>
 											<tr>
 												<th class="col-xs-3"><la:message key="labels.name" /></th>
-												<td>${f:h(name)}<html:hidden property="name" /></td>
+												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.urls" /></th>
-												<td>${f:br(f:h(urls))}<html:hidden property="urls" /></td>
+												<td>${f:br(f:h(urls))}<la:hidden property="urls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.included_urls" /></th>
-												<td>${f:br(f:h(includedUrls))}<html:hidden property="includedUrls" /></td>
+												<td>${f:br(f:h(includedUrls))}<la:hidden property="includedUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.excluded_urls" /></th>
-												<td>${f:br(f:h(excludedUrls))}<html:hidden property="excludedUrls" /></td>
+												<td>${f:br(f:h(excludedUrls))}<la:hidden property="excludedUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.included_doc_urls" /></th>
-												<td>${f:br(f:h(includedDocUrls))}<html:hidden property="includedDocUrls" /></td>
+												<td>${f:br(f:h(includedDocUrls))}<la:hidden property="includedDocUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.excluded_doc_urls" /></th>
-												<td>${f:br(f:h(excludedDocUrls))}<html:hidden property="excludedDocUrls" /></td>
+												<td>${f:br(f:h(excludedDocUrls))}<la:hidden property="excludedDocUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.config_parameter" /></th>
-												<td>${f:br(f:h(configParameter))}<html:hidden property="configParameter" /></td>
+												<td>${f:br(f:h(configParameter))}<la:hidden property="configParameter" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.depth" /></th>
-												<td>${f:h(depth)}<html:hidden property="depth" /></td>
+												<td>${f:h(depth)}<la:hidden property="depth" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.max_access_count" /></th>
-												<td>${f:h(maxAccessCount)}<html:hidden property="maxAccessCount" /></td>
+												<td>${f:h(maxAccessCount)}<la:hidden property="maxAccessCount" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.user_agent" /></th>
-												<td>${f:h(userAgent)}<html:hidden property="userAgent" /></td>
+												<td>${f:h(userAgent)}<la:hidden property="userAgent" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.number_of_thread" /></th>
-												<td>${f:h(numOfThread)}<html:hidden property="numOfThread" /></td>
+												<td>${f:h(numOfThread)}<la:hidden property="numOfThread" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.interval_time" /></th>
-												<td>${f:h(intervalTime)}<html:hidden property="intervalTime" /><la:message key="labels.millisec"/></td>
+												<td>${f:h(intervalTime)}<la:hidden property="intervalTime" /><la:message key="labels.millisec"/></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.boost" /></th>
-												<td>${f:h(boost)}<html:hidden property="boost" /></td>
+												<td>${f:h(boost)}<la:hidden property="boost" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.role_type" /></th>
@@ -183,7 +183,7 @@
 											</tr>
 											<tr>
 													<th><la:message key="labels.available"/></th>
-													<td><html:hidden property="available"/>
+													<td><la:hidden property="available"/>
 															<c:if test="${available=='true'}"><la:message key="labels.enabled"/></c:if>
 															<c:if test="${available=='false'}"><la:message key="labels.disabled"/></c:if>
 													</td>
@@ -225,7 +225,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

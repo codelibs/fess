@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,7 +92,7 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.suggest_bad_word_suggest_word" /></th>
-												<td>${f:h(suggestWord)}<html:hidden property="suggestWord" /></td>
+												<td>${f:h(suggestWord)}<la:hidden property="suggestWord" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -131,7 +131,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

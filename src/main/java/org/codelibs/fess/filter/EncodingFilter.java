@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.codelibs.core.lang.StringUtil;
-import org.lastaflute.web.LastaFilter;
+import org.lastaflute.web.servlet.filter.LastaPrepareFilter;
 
 public class EncodingFilter implements Filter {
     public static String ENCODING_MAP = "encodingRules";
@@ -54,9 +54,9 @@ public class EncodingFilter implements Filter {
     public void init(final FilterConfig config) throws ServletException {
         servletContext = config.getServletContext();
 
-        encoding = config.getInitParameter(LastaFilter.ENCODING_KEY);
+        encoding = config.getInitParameter(LastaPrepareFilter.ENCODING_KEY);
         if (encoding == null) {
-            encoding = LastaFilter.DEFAULT_ENCODING;
+            encoding = LastaPrepareFilter.DEFAULT_ENCODING;
         }
 
         // ex. sjis:Shift_JIS,eucjp:EUC-JP

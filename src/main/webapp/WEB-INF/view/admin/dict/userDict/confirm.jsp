@@ -57,31 +57,31 @@
 			</div>
 
 		<%-- Confirm Form: BEGIN --%>
-		<s:form>
-			<html:hidden property="crudMode" />
+		<la:form>
+			<la:hidden property="crudMode" />
 			<div>
-				<html:hidden property="dictId" />
+				<la:hidden property="dictId" />
 				<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-					<html:hidden property="id" />
+					<la:hidden property="id" />
 				</c:if>
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
 							<th style="width: 150px;"><la:message
 									key="labels.dict_userdict_token" /></th>
-							<td>${f:h(token)}<html:hidden property="token" /></td>
+							<td>${f:h(token)}<la:hidden property="token" /></td>
 						</tr>
 						<tr>
 							<th><la:message key="labels.dict_userdict_segmentation" /></th>
-							<td>${f:h(segmentation)}<html:hidden property="segmentation" /></td>
+							<td>${f:h(segmentation)}<la:hidden property="segmentation" /></td>
 						</tr>
 						<tr>
 							<th><la:message key="labels.dict_userdict_reading" /></th>
-							<td>${f:h(reading)}<html:hidden property="reading" /></td>
+							<td>${f:h(reading)}<la:hidden property="reading" /></td>
 						</tr>
 						<tr>
 							<th><la:message key="labels.dict_userdict_pos" /></th>
-							<td>${f:h(pos)}<html:hidden property="pos" /></td>
+							<td>${f:h(pos)}<la:hidden property="pos" /></td>
 						</tr>
 					</tbody>
 					<tfoot>
@@ -113,7 +113,7 @@
 					</tfoot>
 				</table>
 			</div>
-		</s:form>
+		</la:form>
 		<%-- Confirm Form: BEGIN --%>
 
 	</tiles:put>

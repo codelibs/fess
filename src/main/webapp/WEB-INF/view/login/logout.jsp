@@ -23,10 +23,10 @@
 						<la:message key="labels.do_you_want_to_logout" />
 					</div>
 					<div class="action">
-						<s:form>
+						<la:form>
 						<input type="submit" name="logout"
 							value="<la:message key="labels.logout_button"/>" />
-						</s:form>
+						</la:form>
 					</div>
 				</div>
 			</div>

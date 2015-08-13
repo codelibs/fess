@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,35 +92,35 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.joblog_jobName" /></th>
-												<td>${f:h(jobName)}<html:hidden property="jobName" /></td>
+												<td>${f:h(jobName)}<la:hidden property="jobName" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_jobStatus" /></th>
-												<td>${f:h(jobStatus)}<html:hidden property="jobStatus" /></td>
+												<td>${f:h(jobStatus)}<la:hidden property="jobStatus" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_target" /></th>
-												<td>${f:h(target)}<html:hidden property="target" /></td>
+												<td>${f:h(target)}<la:hidden property="target" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_startTime" /></th>
-												<td>${f:h(startTime)}<html:hidden property="startTime" /></td>
+												<td>${f:h(startTime)}<la:hidden property="startTime" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_endTime" /></th>
-												<td>${f:h(endTime)}<html:hidden property="endTime" /></td>
+												<td>${f:h(endTime)}<la:hidden property="endTime" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_scriptType" /></th>
-												<td>${f:h(scriptType)}<html:hidden property="scriptType" /></td>
+												<td>${f:h(scriptType)}<la:hidden property="scriptType" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_scriptData" /></th>
-												<td>${f:br(f:h(scriptData))}<html:hidden property="scriptData" /></td>
+												<td>${f:br(f:h(scriptData))}<la:hidden property="scriptData" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_scriptResult" /></th>
-												<td>${f:br(f:h(scriptResult))}<html:hidden property="scriptResult" /></td>
+												<td>${f:br(f:h(scriptResult))}<la:hidden property="scriptResult" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -140,7 +140,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

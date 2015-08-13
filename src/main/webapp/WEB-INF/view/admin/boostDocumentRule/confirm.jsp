@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,15 +92,15 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.boost_document_rule_url_expr" /></th>
-												<td>${f:h(urlExpr)}<html:hidden property="urlExpr" /></td>
+												<td>${f:h(urlExpr)}<la:hidden property="urlExpr" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.boost_document_rule_boost_expr" /></th>
-												<td>${f:h(boostExpr)}<html:hidden property="boostExpr" /></td>
+												<td>${f:h(boostExpr)}<la:hidden property="boostExpr" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.boost_document_rule_sort_order" /></th>
-												<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
+												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -139,7 +139,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

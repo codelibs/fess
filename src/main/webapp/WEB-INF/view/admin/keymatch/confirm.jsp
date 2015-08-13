@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
-					<c:if test="${crudMode==2}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+				<la:form>
+					<la:hidden property="crudMode" />
+					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -61,6 +61,12 @@
 										</c:if>
 										<c:if test="${crudMode == 2}">
 											<la:message key="labels.key_match_link_update" />
+										</c:if>
+										<c:if test="${crudMode == 3}">
+											<la:message key="labels.key_match_link_delete" />
+										</c:if>
+										<c:if test="${crudMode == 4}">
+											<la:message key="labels.key_match_link_confirm" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
@@ -82,43 +88,62 @@
 									</div>
 
 									<%-- Form Fields --%>
-									<div class="form-group">
-										<label for="term"><la:message key="labels.key_match_term" /></label>
-										<html:text property="term" styleClass="form-control" />
-									</div>
-									<div class="form-group">
-										<label for="query"><la:message key="labels.key_match_query" /></label>
-										<html:text property="query" styleClass="form-control" />
-									</div>
-									<div class="form-group">
-										<label for="maxSize"><la:message key="labels.key_match_size" /></label>
-										<html:text property="maxSize" styleClass="form-control" />
-									</div>
-									<div class="form-group">
-										<label for="boost"><la:message key="labels.key_match_boost" /></label>
-										<html:text property="boost" styleClass="form-control" />
-									</div>
+									<table class="table table-bordered">
+										<tbody>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.key_match_term" /></th>
+												<td>${f:h(term)}<la:hidden property="term" /></td>
+											</tr>
+											<tr>
+												<th><la:message key="labels.key_match_query" /></th>
+												<td>${f:h(query)}<la:hidden property="query" /></td>
+											</tr>
+											<tr>
+												<th><la:message key="labels.key_match_size" /></th>
+												<td>${f:h(maxSize)}<la:hidden property="maxSize" /></td>
+											</tr>
+											<tr>
+												<th><la:message key="labels.key_match_boost" /></th>
+												<td>${f:h(boost)}<la:hidden property="boost" /></td>
+											</tr>
+										</tbody>
+									</table>
 
 								</div>
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.key_match_button_back"/>" />
+										<input type="submit" class="btn btn-primary" name="create"
 											value="<la:message key="labels.key_match_button_create"/>"
 										/>
 									</c:if>
 									<c:if test="${crudMode == 2}">
+										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.key_match_button_back"/>" />
+										<input type="submit" class="btn btn-primary" name="update"
+											value="<la:message key="labels.key_match_button_update"/>"
+										/>
+									</c:if>
+									<c:if test="${crudMode == 3}">
 										<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<la:message key="labels.key_match_button_confirm"/>"
+										<input type="submit" class="btn btn-primary" name="delete"
+											value="<la:message key="labels.key_match_button_delete"/>"
+										/>
+									</c:if>
+									<c:if test="${crudMode == 4}">
+										<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
+										<input type="submit" class="btn" name="editfromconfirm"
+											value="<la:message key="labels.key_match_button_edit"/>"
+										/>
+										<input type="submit" class="btn" name="deletefromconfirm"
+											value="<la:message key="labels.key_match_button_delete"/>"
 										/>
 									</c:if>
 								</div>
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

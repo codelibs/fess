@@ -141,7 +141,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String getContentDescription(final Map<String, Object> document) {
-        final HttpServletRequest request = LaRequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         final String[] queries = request == null ? StringUtil.EMPTY_STRINGS : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
         final int size = descriptionLength;
 

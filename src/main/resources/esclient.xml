@@ -3,11 +3,9 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="fessEsClient" class="org.codelibs.fess.client.FessEsClient">
-		<!-- 
 		<property name="settings">
 			{"http.cors.enabled":"true"}
 		</property>
-		 -->
 		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>
 		</postConstruct>

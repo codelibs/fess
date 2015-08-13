@@ -19,15 +19,15 @@
 		</div>
 		<%-- Message: END --%>
 		<c:if test="${editable}">
-			<s:form>
+			<la:form>
 				<div>
 					<h3>
 						<la:message key="labels.design_title_edit_content" />
 					</h3>
 					<h4>${f:h(fileName)}</h4>
 					<div>
-						<html:textarea
-								property="content" style="width:98%" rows="20"></html:textarea>
+						<la:textarea
+								property="content" style="width:98%" rows="20"></la:textarea>
 					</div>
 					<div style="margin-top:5px;">
 						<input type="submit" class="btn small" name="update"
@@ -36,8 +36,8 @@
 							value="<la:message key="labels.design_button_back"/>" />
 					</div>
 				</div>
-				<html:hidden property="fileName" />
-			</s:form>
+				<la:hidden property="fileName" />
+			</la:form>
 		</c:if>
 
 	</tiles:put>

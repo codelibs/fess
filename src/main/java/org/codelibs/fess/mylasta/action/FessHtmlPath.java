@@ -140,17 +140,17 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/jobLog/index.jsp */
     HtmlNext path_AdminJobLog_IndexJsp = new HtmlNext("/admin/jobLog/index.jsp");
 
-    /** The path of the HTML: /admin/keyMatch/confirm.jsp */
-    HtmlNext path_AdminKeyMatch_ConfirmJsp = new HtmlNext("/admin/keyMatch/confirm.jsp");
+    /** The path of the HTML: /admin/keymatch/confirm.jsp */
+    HtmlNext path_AdminKeymatch_ConfirmJsp = new HtmlNext("/admin/keymatch/confirm.jsp");
 
-    /** The path of the HTML: /admin/keyMatch/edit.jsp */
-    HtmlNext path_AdminKeyMatch_EditJsp = new HtmlNext("/admin/keyMatch/edit.jsp");
+    /** The path of the HTML: /admin/keymatch/edit.jsp */
+    HtmlNext path_AdminKeymatch_EditJsp = new HtmlNext("/admin/keymatch/edit.jsp");
 
-    /** The path of the HTML: /admin/keyMatch/error.jsp */
-    HtmlNext path_AdminKeyMatch_ErrorJsp = new HtmlNext("/admin/keyMatch/error.jsp");
+    /** The path of the HTML: /admin/keymatch/error.jsp */
+    HtmlNext path_AdminKeymatch_ErrorJsp = new HtmlNext("/admin/keymatch/error.jsp");
 
-    /** The path of the HTML: /admin/keyMatch/index.jsp */
-    HtmlNext path_AdminKeyMatch_IndexJsp = new HtmlNext("/admin/keyMatch/index.jsp");
+    /** The path of the HTML: /admin/keymatch/index.jsp */
+    HtmlNext path_AdminKeymatch_IndexJsp = new HtmlNext("/admin/keymatch/index.jsp");
 
     /** The path of the HTML: /admin/labelType/confirm.jsp */
     HtmlNext path_AdminLabelType_ConfirmJsp = new HtmlNext("/admin/labelType/confirm.jsp");

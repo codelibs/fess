@@ -42,15 +42,15 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
-					<html:hidden property="sortOrder"/>
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
+					<la:hidden property="sortOrder"/>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -96,7 +96,7 @@
 											</tr></c:if>
 											<tr>
 												<th class="col-xs-3"><la:message key="labels.name" /></th>
-												<td>${f:h(name)}<html:hidden property="name" /></td>
+												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.handler_name" /></th>
@@ -106,20 +106,20 @@
 															${f:h(hn.label)}<br/>
 														</c:if>
 													</c:forEach>
-													<html:hidden property="handlerName"/>
+													<la:hidden property="handlerName"/>
 												</td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.handler_parameter" /></th>
-												<td>${f:br(f:h(handlerParameter))}<html:hidden property="handlerParameter" /></td>
+												<td>${f:br(f:h(handlerParameter))}<la:hidden property="handlerParameter" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.handler_script" /></th>
-												<td>${f:br(f:h(handlerScript))}<html:hidden property="handlerScript" /></td>
+												<td>${f:br(f:h(handlerScript))}<la:hidden property="handlerScript" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.boost" /></th>
-												<td>${f:h(boost)}<html:hidden property="boost" /></td>
+												<td>${f:h(boost)}<la:hidden property="boost" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.role_type" /></th>
@@ -157,7 +157,7 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.available"/></th>
-												<td><html:hidden property="available"/>
+												<td><la:hidden property="available"/>
 													<c:if test="${available=='true'}"><la:message key="labels.enabled"/></c:if>
 													<c:if test="${available=='false'}"><la:message key="labels.disabled"/></c:if>
 												</td>
@@ -199,7 +199,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

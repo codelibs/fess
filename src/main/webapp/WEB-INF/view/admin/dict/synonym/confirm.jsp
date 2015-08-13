@@ -57,23 +57,23 @@
 			</div>
 
 		<%-- Confirm Form: BEGIN --%>
-		<s:form>
-			<html:hidden property="crudMode" />
+		<la:form>
+			<la:hidden property="crudMode" />
 			<div>
-				<html:hidden property="dictId" />
+				<la:hidden property="dictId" />
 				<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-					<html:hidden property="id" />
+					<la:hidden property="id" />
 				</c:if>
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
 							<th style="width: 150px;"><la:message
 									key="labels.dict_synonym_source" /></th>
-							<td>${f:br(f:h(inputs))}<html:hidden property="inputs" /></td>
+							<td>${f:br(f:h(inputs))}<la:hidden property="inputs" /></td>
 						</tr>
 						<tr>
 							<th><la:message key="labels.dict_synonym_target" /></th>
-							<td>${f:br(f:h(outputs))}<html:hidden property="outputs" /></td>
+							<td>${f:br(f:h(outputs))}<la:hidden property="outputs" /></td>
 						</tr>
 					</tbody>
 					<tfoot>
@@ -105,7 +105,7 @@
 					</tfoot>
 				</table>
 			</div>
-		</s:form>
+		</la:form>
 		<%-- Confirm Form: BEGIN --%>
 
 	</tiles:put>

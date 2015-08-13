@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,17 +92,17 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.request_header_name" /></th>
-												<td>${f:h(name)}<html:hidden property="name" /></td>
+												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.request_header_value" /></th>
-												<td>${f:h(value)}<html:hidden property="value" /></td>
+												<td>${f:h(value)}<la:hidden property="value" /></td>
 											</tr>
 											<tr>
 													<th><la:message key="labels.request_header_web_crawling_config" /></th>
 													<td><c:forEach var="item" items="${webConfigItems}">
 															<c:if test="${webConfigId==item.value}">${f:h(item.label)}</c:if>
-													</c:forEach> <html:hidden property="webConfigId" /></td>
+													</c:forEach> <la:hidden property="webConfigId" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -141,7 +141,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

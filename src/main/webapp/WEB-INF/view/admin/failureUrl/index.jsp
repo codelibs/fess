@@ -37,23 +37,23 @@
 								<h3 class="box-title">
 									<la:message key="labels.failure_url_configuration" />
 								</h3>
-								<s:form>
+								<la:form>
 									<table class="bordered-table zebra-striped">
 										<tbody>
 											<tr>
 												<th><la:message key="labels.failure_url_search_url" /></th>
-												<td><html:text property="searchParams.url"></html:text></td>
+												<td><la:text property="searchParams.url"></la:text></td>
 											</tr>
 											<tr>
 												<th><la:message
 														key="labels.failure_url_search_error_count" /></th>
-												<td><html:text property="searchParams.errorCountMin"
-														size="2" styleClass="mini"></html:text> - <html:text
+												<td><la:text property="searchParams.errorCountMin"
+														size="2" styleClass="mini"></la:text> - <la:text
 														property="searchParams.errorCountMax" size="2"
-														styleClass="mini"></html:text></td>
+														styleClass="mini"></la:text></td>
 											<tr>
 												<th><la:message key="labels.failure_url_search_error_name" /></th>
-												<td><html:text property="searchParams.errorName"></html:text></td>
+												<td><la:text property="searchParams.errorName"></la:text></td>
 											</tr>
 										</tbody>
 									</table>
@@ -65,7 +65,7 @@
 												value="<la:message key="labels.crud_button_reset"/>" />
 										</div>
 									</div>
-								</s:form>
+								</la:form>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">

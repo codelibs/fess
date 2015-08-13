@@ -37,16 +37,16 @@
 								<h3 class="box-title">
 									<la:message key="labels.crawling_session_title" />
 								</h3>
-								<s:form>
+								<la:form>
 										<label for="sessionIdSearchBtn"><la:message
 												key="labels.crawling_session_session_id_search" /></label>
-										<html:text styleId="sessionIdSearchBtn"
-											property="searchParams.sessionId"></html:text>
+										<la:text styleId="sessionIdSearchBtn"
+											property="searchParams.sessionId"></la:text>
 										<input type="submit" class="btn small primary" name="search"
 											value="<la:message key="labels.crawling_session_search"/>" /> <input
 											type="submit" class="btn small" name="reset"
 											value="<la:message key="labels.crawling_session_reset"/>" />
-								</s:form>
+								</la:form>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">

@@ -28,7 +28,7 @@
 
 			<section class="content">
 
-				<s:form>
+				<la:form>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -52,19 +52,19 @@
 
 									<div class="form-group">
 										<label for="crawlingConfigName"><la:message key="labels.wizard_crawling_config_name" /></label>
-										<html:text property="crawlingConfigName" styleClass="form-control" />
+										<la:text property="crawlingConfigName" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="crawlingConfigPath"><la:message key="labels.wizard_crawling_config_path" /></label>
-										<html:text property="crawlingConfigPath" styleClass="form-control" />
+										<la:text property="crawlingConfigPath" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="maxAccessCount"><la:message key="labels.maxAccessCount" /></label>
-										<html:text property="maxAccessCount" styleClass="form-control" />
+										<la:text property="maxAccessCount" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="depth"><la:message key="labels.depth" /></label>
-										<html:text property="depth" styleClass="form-control" />
+										<la:text property="depth" styleClass="form-control" />
 									</div>
 								</div>
 								<div class="box-footer">
@@ -79,7 +79,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

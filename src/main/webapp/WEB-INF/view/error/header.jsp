@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<s:form action="/search" method="get">
+<la:form action="/search" method="get">
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container">
@@ -8,7 +8,7 @@
 						alt="<la:message key="labels.header_brand_name" />" />
 				</la:link>
 				<div class="navbar-form pull-right">
-					<html:text property="query" maxlength="1000" styleId="query" />
+					<la:text property="query" maxlength="1000" styleId="query" />
 					<button class="btn medium btn-primary" type="submit" name="search"
 						id="searchButton">
 						<la:message key="labels.search" />
@@ -120,5 +120,5 @@
 			</button>
 		</div>
 	</div>
-</s:form>
+</la:form>
 

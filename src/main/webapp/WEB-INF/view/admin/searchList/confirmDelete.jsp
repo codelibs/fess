@@ -30,7 +30,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
+				<la:form>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -40,15 +40,15 @@
 								</div>
 								<%-- Box Body --%>
 								<div class="box-body">
-									<s:form>
-										<html:hidden property="query" />
+									<la:form>
+										<la:hidden property="query" />
 										<div>
 											<table class="bordered-table zebra-striped">
 												<tbody>
 													<tr>
 														<th style="width: 100px;"><la:message
 																key="labels.search_list_url" /></th>
-														<td style="width: 400px;">${f:h(url)}<html:hidden
+														<td style="width: 400px;">${f:h(url)}<la:hidden
 																property="docId" /></td>
 													</tr>
 												</tbody>
@@ -62,7 +62,7 @@
 												</tfoot>
 											</table>
 										</div>
-									</s:form>
+									</la:form>
 								</div>
 								<%-- Box Footer --%>
 								<div class="box-footer">
@@ -71,7 +71,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

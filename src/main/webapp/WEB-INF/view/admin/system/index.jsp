@@ -56,7 +56,7 @@
 																</div>
 														</div>
 
-														<s:form>
+														<la:form>
 																<div class="box">
 																		<%-- Box Header --%>
 																		<div class="box-header">
@@ -107,7 +107,7 @@
 																				</table>
 																		</div>
 																</div>
-														</s:form>
+														</la:form>
 												</div>
 										</div>
 								</section>

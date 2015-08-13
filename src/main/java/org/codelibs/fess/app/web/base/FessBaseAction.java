@@ -92,9 +92,6 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         }
     }
 
-    protected void setupHtmlData(ActionRuntime runtime) {
-    }
-
     // ===================================================================================
     //                                                                      Access Context
     //                                                                      ==============

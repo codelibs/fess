@@ -55,7 +55,7 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-								<s:form action="upload" enctype="multipart/form-data">
+								<la:form action="upload" enctype="multipart/form-data">
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
@@ -71,7 +71,7 @@
 											</tr>
 										</tfoot>
 									</table>
-								</s:form>
+								</la:form>
 
 							</div>
 							<%-- Box Footer --%>

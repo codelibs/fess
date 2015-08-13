@@ -44,9 +44,9 @@
 			</div>
 
 		<%-- Edit Form: BEGIN --%>
-		<s:form>
+		<la:form>
 			<div>
-				<html:hidden property="dictId" />
+				<la:hidden property="dictId" />
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
@@ -59,7 +59,7 @@
 					</tbody>
 				</table>
 			</div>
-		</s:form>
+		</la:form>
 		<%-- Edit Form: BEGIN --%>
 
 	</tiles:put>

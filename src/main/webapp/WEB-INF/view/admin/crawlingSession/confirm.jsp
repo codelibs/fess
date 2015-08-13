@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -93,7 +93,7 @@
 											<tr>
 												<th><la:message key="labels.crawling_session_session_id" /></th>
 												<td><html:link href="${f:url('/admin/searchList/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</html:link>
-													<html:hidden property="sessionId" /></td>
+													<la:hidden property="sessionId" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.crawling_session_name" /></th>
@@ -129,7 +129,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

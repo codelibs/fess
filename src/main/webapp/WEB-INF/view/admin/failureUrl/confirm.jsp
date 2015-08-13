@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -94,7 +94,7 @@
 												<tr>
 													<th style="width: 150px;"><la:message
 															key="labels.failure_url_id" /></th>
-													<td style="width: 350px;">${f:h(id)}<html:hidden
+													<td style="width: 350px;">${f:h(id)}<la:hidden
 															property="id" /></td>
 												</tr>
 											</c:if>
@@ -102,31 +102,31 @@
 												<th><la:message key="labels.failure_url_url" /></th>
 												<td><div style="width: 350px; overflow-x: auto;">
 														${f:h(url)}
-														<html:hidden property="url" />
+														<la:hidden property="url" />
 													</div></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.failure_url_thread_name" /></th>
-												<td>${f:h(threadName)}<html:hidden property="threadName" /></td>
+												<td>${f:h(threadName)}<la:hidden property="threadName" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.failure_url_error_name" /></th>
-												<td>${f:h(errorName)}<html:hidden property="errorName" /></td>
+												<td>${f:h(errorName)}<la:hidden property="errorName" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.failure_url_error_log" /></th>
 												<td><div style="width: 350px; overflow-x: auto;">
 														${f:br(f:nbsp(f:h(errorLog)))}
-														<html:hidden property="errorLog" />
+														<la:hidden property="errorLog" />
 													</div></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.failure_url_error_count" /></th>
-												<td>${f:h(errorCount)}<html:hidden property="errorCount" /></td>
+												<td>${f:h(errorCount)}<la:hidden property="errorCount" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.failure_url_last_access_time" /></th>
-												<td>${f:h(lastAccessTime)}<html:hidden
+												<td>${f:h(lastAccessTime)}<la:hidden
 														property="lastAccessTime" /></td>
 											</tr>
 											<tr>
@@ -155,7 +155,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

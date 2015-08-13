@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
  					</c:if>
- 					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+ 					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -91,11 +91,11 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.regex" /></th>
-												<td>${f:h(regex)}<html:hidden property="regex" /></td>
+												<td>${f:h(regex)}<la:hidden property="regex" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.replacement" /></th>
-												<td>${f:h(replacement)}<html:hidden property="replacement" /></td>
+												<td>${f:h(replacement)}<la:hidden property="replacement" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.processType" /></th>
@@ -109,12 +109,12 @@
 													<c:if test="${processType=='B'}">
 														<la:message key="labels.path_mapping_pt_both" />
 													</c:if> 
-													<html:hidden property="processType" />
+													<la:hidden property="processType" />
 												</td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.sortOrder" /></th>
-												<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
+												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -152,7 +152,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

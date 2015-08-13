@@ -31,11 +31,11 @@
 				<table class="bordered-table zebra-striped">
 					<tbody>
 						<c:forEach var="groupAction" items="${groupActionItems}">
-							<s:form>
+							<la:form>
 							<tr>
 								<th style="width:200px;">${f:h(groupAction.groupName)}</th>
 								<td>
-									<html:hidden property="groupName"
+									<la:hidden property="groupName"
 										value="${f:u(groupAction.groupName)}" />
 									<html:submit
 										property="commit" disabled="${solrProcessRunning}"
@@ -48,7 +48,7 @@
 									</html:submit>
 								</td>
 							</tr>
-							</s:form>
+							</la:form>
 						</c:forEach>
 					</tbody>
 				</table>
@@ -61,7 +61,7 @@
 				<table class="bordered-table zebra-striped">
 					<tbody>
 						<c:forEach var="groupAction" items="${groupActionItems}">
-							<s:form>
+							<la:form>
 							<tr>
 								<th style="width:200px;" rowspan="2">${f:h(groupAction.groupName)}</th>
 								<td>
@@ -81,15 +81,15 @@
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_delete" />
 									</html:submit>
-									<html:hidden property="groupName"
+									<la:hidden property="groupName"
 										value="${f:u(groupAction.groupName)}" />
 								</td>
 							</tr>
 							<tr>
 								<td style="vertical-align: middle;">
 									<la:message key="labels.es_action_url_delete" />
-									<html:text property="deleteUrl" style="width:150px;"
-										disabled="${solrProcessRunning}"></html:text> <html:submit
+									<la:text property="deleteUrl" style="width:150px;"
+										disabled="${solrProcessRunning}"></la:text> <html:submit
 										property="confirmByUrl" styleClass="btn"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_confirm_list" />
@@ -100,7 +100,7 @@
 									</html:submit>
 								</td>
 							</tr>
-							</s:form>
+							</la:form>
 						</c:forEach>
 					</tbody>
 				</table>
@@ -164,28 +164,28 @@
 							<td style="vertical-align: middle;"><la:message key="labels.suggest_type_content" /></td>
 							<td align="center" style="vertical-align: middle;">${suggestDocumentNums.content}</td>
 							<td align="center">
-								<s:form style="margin-bottom:0;">
-									<html:hidden property="deleteSuggestType"
+								<la:form style="margin-bottom:0;">
+									<la:hidden property="deleteSuggestType"
 										value="content" />
 									<html:submit styleClass="btn" property="deleteSuggest"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_delete" />
 									</html:submit>
-								</s:form>
+								</la:form>
 							</td>
 						</tr>
 						<tr>
 							<td style="vertical-align: middle;"><la:message key="labels.suggest_type_searchlog" /></td>
 							<td align="center" style="vertical-align: middle;">${suggestDocumentNums.searchLog}</td>
 							<td align="center">
-								<s:form style="margin-bottom:0;">
-									<html:hidden property="deleteSuggestType"
+								<la:form style="margin-bottom:0;">
+									<la:hidden property="deleteSuggestType"
 										value="searchLog" />
 									<html:submit styleClass="btn" property="deleteSuggest"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_delete" />
 									</html:submit>
-								</s:form>
+								</la:form>
 							</td>
 						</tr>
 					</tbody>

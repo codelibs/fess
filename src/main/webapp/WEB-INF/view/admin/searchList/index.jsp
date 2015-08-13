@@ -37,12 +37,12 @@
 								<h3 class="box-title">
 									<la:message key="labels.search_list_configuration" />
 								</h3>
-								<s:form action="search" method="get">
+								<la:form action="search" method="get">
 									<div class="input">
-										<html:text styleClass="query" property="query" title="Search" size="50" maxlength="1000" />
+										<la:text styleClass="query" property="query" title="Search" size="50" maxlength="1000" />
 										<input class="btn" type="submit" value="<la:message key="labels.search"/>" name="search" />
 									</div>
-								</s:form>
+								</la:form>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">

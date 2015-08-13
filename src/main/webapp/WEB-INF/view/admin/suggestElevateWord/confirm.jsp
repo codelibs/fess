@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,23 +92,23 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.suggest_elevate_word_suggest_word" /></th>
-												<td>${f:h(suggestWord)}<html:hidden property="suggestWord" /></td>
+												<td>${f:h(suggestWord)}<la:hidden property="suggestWord" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.suggest_elevate_word_reading" /></th>
-												<td>${f:h(reading)}<html:hidden property="reading" /></td>
+												<td>${f:h(reading)}<la:hidden property="reading" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.suggest_elevate_word_target_role" /></th>
-												<td>${f:h(targetRole)}<html:hidden property="targetRole" /></td>
+												<td>${f:h(targetRole)}<la:hidden property="targetRole" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.suggest_elevate_word_target_label" /></th>
-												<td>${f:h(targetLabel)}<html:hidden property="targetLabel" /></td>
+												<td>${f:h(targetLabel)}<la:hidden property="targetLabel" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.suggest_elevate_word_boost" /></th>
-												<td>${f:h(boost)}<html:hidden property="boost" /></td>
+												<td>${f:h(boost)}<la:hidden property="boost" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -147,7 +147,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

@@ -42,15 +42,15 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
-					<html:hidden property="sortOrder" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
+					<la:hidden property="sortOrder" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -85,11 +85,11 @@
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name"><la:message key="labels.roletype_name" /></label>
-										<html:text property="name" styleClass="form-control" />
+										<la:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="value"><la:message key="labels.roletype_value" /></label>
-										<html:text property="value" styleClass="form-control" />
+										<la:text property="value" styleClass="form-control" />
 									</div>
 
 								<%-- Box Footer --%>
@@ -110,7 +110,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

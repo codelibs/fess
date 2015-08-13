@@ -42,15 +42,15 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
-					<html:hidden property="sortOrder"/>
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
+					<la:hidden property="sortOrder"/>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -84,7 +84,7 @@
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name"><la:message key="labels.name" /></label>
-										<html:text property="name" styleClass="form-control" />
+										<la:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 											<label for="handlerName"><la:message key="labels.handler_name" /></label>
@@ -96,15 +96,15 @@
 									</div>
 									<div class="form-group">
 										<label for="handlerParameter"><la:message key="labels.handler_parameter" /></label>
-										<html:textarea property="handlerParameter" styleClass="form-control" rows="5" />
+										<la:textarea property="handlerParameter" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="handlerScript"><la:message key="labels.handler_script" /></label>
-										<html:textarea property="handlerScript" styleClass="form-control" rows="5" />
+										<la:textarea property="handlerScript" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="boost"><la:message key="labels.boost" /></label>
-										<html:text property="boost" styleClass="form-control" />
+										<la:text property="boost" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
@@ -153,7 +153,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

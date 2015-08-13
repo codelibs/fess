@@ -42,15 +42,15 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
-					<html:hidden property="sortOrder"/>
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
+					<la:hidden property="sortOrder"/>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -87,54 +87,54 @@
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name"><la:message key="labels.name" /></label>
-										<html:text property="name" styleClass="form-control" />
+										<la:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="paths"><la:message key="labels.paths" /></label>
-										<html:textarea property="paths" styleClass="form-control" rows="5" />
+										<la:textarea property="paths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="includedPaths"><la:message key="labels.included_paths" /></label>
-										<html:textarea property="includedPaths" styleClass="form-control" rows="5" />
+										<la:textarea property="includedPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="excludedPaths"><la:message key="labels.excluded_paths" /></label>
-										<html:textarea property="excludedPaths" styleClass="form-control" rows="5" />
+										<la:textarea property="excludedPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="includedDocPaths"><la:message key="labels.included_doc_paths" /></label>
-										<html:textarea property="includedDocPaths" styleClass="form-control" rows="5" />
+										<la:textarea property="includedDocPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="excludedDocPaths"><la:message key="labels.excluded_doc_paths" /></label>
-										<html:textarea property="excludedDocPaths" styleClass="form-control" rows="5" />
+										<la:textarea property="excludedDocPaths" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="configParameter"><la:message key="labels.config_parameter" /></label>
-										<html:text property="configParameter" styleClass="form-control" />
+										<la:text property="configParameter" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="depth"><la:message key="labels.depth" /></label>
-										<html:text property="depth" styleClass="form-control" />
+										<la:text property="depth" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="maxAccessCount"><la:message key="labels.max_access_count" /></label>
-										<html:text property="maxAccessCount" styleClass="form-control" />
+										<la:text property="maxAccessCount" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="numOfThread"><la:message key="labels.number_of_thread" /></label>
-										<html:text property="numOfThread" styleClass="form-control" />
+										<la:text property="numOfThread" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="intervalTime"><la:message key="labels.interval_time" /></label>
 										<div class="form-inline">
-											<html:text property="intervalTime" styleClass="form-control" />
+											<la:text property="intervalTime" styleClass="form-control" />
 											<la:message key="labels.millisec" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="boost"><la:message key="labels.boost" /></label>
-										<html:text property="boost" styleClass="form-control" />
+										<la:text property="boost" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
@@ -183,7 +183,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

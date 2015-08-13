@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 
 					<div class="row">
 						<div class="col-md-12">
@@ -85,11 +85,11 @@
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="hostname"><la:message key="labels.file_authentication_hostname" /></label>
-										<html:text property="hostname" styleClass="form-control" />
+										<la:text property="hostname" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="port"><la:message key="labels.file_authentication_port" /></label>
-										<html:text property="port" styleClass="form-control" />
+										<la:text property="port" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="protocolScheme"><la:message key="labels.file_authentication_scheme" /></label>
@@ -101,7 +101,7 @@
 									</div>
 									<div class="form-group">
 										<label for="username"><la:message key="labels.file_authentication_username" /></label>
-										<html:text property="username" styleClass="form-control" />
+										<la:text property="username" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="password"><la:message key="labels.file_authentication_password" /></label>
@@ -109,7 +109,7 @@
 									</div>
 									<div class="form-group">
 										<label for="parameters"><la:message key="labels.file_authentication_parameters" /></label>
-										<html:textarea property="parameters" styleClass="form-control" rows="5" />
+										<la:textarea property="parameters" styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
 										<label for="fileConfigId"><la:message key="labels.file_authentication_file_crawling_config" /></label>
@@ -139,7 +139,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

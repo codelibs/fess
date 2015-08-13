@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,19 +92,19 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-3"><la:message key="labels.labeltype_name" /></th>
-												<td>${f:h(name)}<html:hidden property="name" /></td>
+												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.labeltype_value" /></th>
-												<td>${f:h(value)}<html:hidden property="value" /></td>
+												<td>${f:h(value)}<la:hidden property="value" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.labeltype_included_paths" /></th>
-												<td>${f:br(f:h(includedPaths))}<html:hidden property="includedPaths" /></td>
+												<td>${f:br(f:h(includedPaths))}<la:hidden property="includedPaths" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.labeltype_excluded_paths" /></th>
-												<td>${f:br(f:h(excludedPaths))}<html:hidden property="excludedPaths" /></td>
+												<td>${f:br(f:h(excludedPaths))}<la:hidden property="excludedPaths" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.role_type" /></th>
@@ -125,7 +125,7 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.sortOrder" /></th>
-												<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
+												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -164,7 +164,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

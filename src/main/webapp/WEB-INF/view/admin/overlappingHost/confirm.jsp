@@ -42,15 +42,15 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
-					<html:hidden property="sortOrder" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
+					<la:hidden property="sortOrder" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -93,11 +93,11 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-3"><la:message key="labels.regular_name" /></th>
-												<td>${f:h(regularName)}<html:hidden property="regularName" /></td>
+												<td>${f:h(regularName)}<la:hidden property="regularName" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.overlapping_name" /></th>
-												<td>${f:h(overlappingName)}<html:hidden property="overlappingName" /></td>
+												<td>${f:h(overlappingName)}<la:hidden property="overlappingName" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -136,7 +136,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

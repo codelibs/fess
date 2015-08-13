@@ -25,7 +25,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
+				<la:form>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -87,7 +87,7 @@
 									</div>
 									<div class="form-group">
 											<label for="defaultLabelValue"><la:message key="labels.default_label_value" /></label>
-											<html:textarea property="defaultLabelValue" styleClass="form-control" />
+											<la:textarea property="defaultLabelValue" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 											<label for="supportedSearch"><la:message key="labels.supported_search_feature" /></label>
@@ -109,33 +109,33 @@
 									<div class="form-group">
 											<label for="purgeSearchLogDay"><la:message key="labels.purge_search_log_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeSearchLogDay" styleClass="form-control" />
+													<la:text property="purgeSearchLogDay" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="purgeJobLogDay"><la:message key="labels.purge_job_log_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeJobLogDay" styleClass="form-control" />
+													<la:text property="purgeJobLogDay" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="purgeUserInfoDay"><la:message key="labels.purge_user_info_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeUserInfoDay" styleClass="form-control" />
+													<la:text property="purgeUserInfoDay" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="purgeByBots"><la:message key="labels.purge_by_bots" /></label>
-											<html:text property="purgeByBots" styleClass="form-control" />
+											<la:text property="purgeByBots" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 											<label for="notificationTo"><la:message key="labels.notification_to" /></label>
-											<html:text property="notificationTo" styleClass="form-control" />
+											<la:text property="notificationTo" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 											<label for="csvFileEncoding"><la:message key="labels.csv_file_encoding" /></label>
 											<div class="form-inline">
-													<html:text property="csvFileEncoding" styleClass="form-control" />
+													<la:text property="csvFileEncoding" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
@@ -162,7 +162,7 @@
 									<div class="form-group">
 											<label for="crawlingThreadCount"><la:message key="labels.crawling_thread_count" /></label>
 											<div class="form-inline">
-													<html:text property="crawlingThreadCount" styleClass="form-control" />
+													<la:text property="crawlingThreadCount" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
@@ -179,12 +179,12 @@
 									</div>
 									<div class="form-group">
 											<label for="ignoreFailureType"><la:message key="labels.ignore_failure_type" /></label>
-											<html:text property="ignoreFailureType" styleClass="form-control" />
+											<la:text property="ignoreFailureType" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 											<label for="failureCountThreshold"><la:message key="labels.failure_count_threshold" /></label>
 											<div class="form-inline">
-													<html:text property="failureCountThreshold" styleClass="form-control" />
+													<la:text property="failureCountThreshold" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
@@ -197,7 +197,7 @@
 									<div class="form-group">
 											<label for="purgeSuggestSearchLogDay"><la:message key="labels.purge_suggest_search_log_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeSuggestSearchLogDay" styleClass="form-control" />
+													<la:text property="purgeSuggestSearchLogDay" styleClass="form-control" />
 											</div>
 									</div>
 
@@ -211,7 +211,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

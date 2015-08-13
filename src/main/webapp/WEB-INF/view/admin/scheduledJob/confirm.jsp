@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -92,30 +92,30 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.scheduledjob_name" /></th>
-												<td>${f:h(name)}<html:hidden property="name" /></td>
+												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.scheduledjob_target" /></th>
-												<td>${f:h(target)}<html:hidden property="target" /></td>
+												<td>${f:h(target)}<la:hidden property="target" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.scheduledjob_cronExpression" /></th>
-												<td>${f:h(cronExpression)}<html:hidden property="cronExpression" /></td>
+												<td>${f:h(cronExpression)}<la:hidden property="cronExpression" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.scheduledjob_scriptType" /></th>
-												<td>${f:h(scriptType)}<html:hidden property="scriptType" /></td>
+												<td>${f:h(scriptType)}<la:hidden property="scriptType" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.scheduledjob_scriptData" /></th>
-												<td>${f:br(f:h(scriptData))}<html:hidden property="scriptData" /></td>
+												<td>${f:br(f:h(scriptData))}<la:hidden property="scriptData" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.scheduledjob_jobLogging" /></th>
 												<td>
 													<c:if test="${jobLogging=='on'}"><la:message key="labels.enabled"/></c:if>
 													<c:if test="${jobLogging!='on'}"><la:message key="labels.disabled"/></c:if>
-													<html:hidden property="jobLogging" />
+													<la:hidden property="jobLogging" />
 												</td>
 											</tr>
 											<tr>
@@ -123,7 +123,7 @@
 												<td>
 													<c:if test="${crawler=='on'}"><la:message key="labels.enabled"/></c:if>
 													<c:if test="${crawler!='on'}"><la:message key="labels.disabled"/></c:if>
-													<html:hidden property="crawler" />
+													<la:hidden property="crawler" />
 												</td>
 											</tr>
 											<tr>
@@ -131,12 +131,12 @@
 												<td>
 													<c:if test="${available=='on'}"><la:message key="labels.enabled"/></c:if>
 													<c:if test="${available!='on'}"><la:message key="labels.disabled"/></c:if>
-													<html:hidden property="available" />
+													<la:hidden property="available" />
 												</td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.sortOrder" /></th>
-												<td>${f:h(sortOrder)}<html:hidden property="sortOrder" /></td>
+												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -175,7 +175,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

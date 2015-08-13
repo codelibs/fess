@@ -42,14 +42,14 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
-					<html:hidden property="crudMode" />
+				<la:form>
+					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
-						<html:hidden property="id" />
-						<html:hidden property="versionNo" />
+						<la:hidden property="id" />
+						<la:hidden property="versionNo" />
 					</c:if>
-					<html:hidden property="createdBy" />
-					<html:hidden property="createdTime" />
+					<la:hidden property="createdBy" />
+					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -93,23 +93,23 @@
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="word"><la:message key="labels.suggest_elevate_word_suggest_word" /></label>
-										<html:text property="suggestWord" styleClass="form-control" />
+										<la:text property="suggestWord" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="reading"><la:message key="labels.suggest_elevate_word_reading" /></label>
-										<html:text property="reading" styleClass="form-control" />
+										<la:text property="reading" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="targetRole"><la:message key="labels.suggest_elevate_word_target_role" /></label>
-										<html:text property="targetRole" styleClass="form-control" />
+										<la:text property="targetRole" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="targetLabel"><la:message key="labels.suggest_elevate_word_target_label" /></label>
-										<html:text property="targetLabel" styleClass="form-control" />
+										<la:text property="targetLabel" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="boost"><la:message key="labels.suggest_elevate_word_boost" /></label>
-										<html:text property="boost" styleClass="form-control" />
+										<la:text property="boost" styleClass="form-control" />
 									</div>
 								</div>
 								<%-- Box Footer --%>
@@ -130,7 +130,7 @@
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

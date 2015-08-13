@@ -65,7 +65,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(KeyMatchSearchForm form) {
-        return asHtml(path_AdminKeyMatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -73,7 +73,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(Integer pageNumber, KeyMatchSearchForm form) {
         keyMatchPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminKeyMatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -81,7 +81,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(KeyMatchSearchForm form) {
         copyBeanToBean(form.searchParams, keyMatchPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminKeyMatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -89,14 +89,14 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(KeyMatchSearchForm form) {
         keyMatchPager.clear();
-        return asHtml(path_AdminKeyMatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse back(KeyMatchSearchForm form) {
-        return asHtml(path_AdminKeyMatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -118,21 +118,23 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(KeyMatchEditForm form) {
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminKeyMatch_EditJsp);
+        return asHtml(path_AdminKeymatch_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editpage(int crudMode, String id, KeyMatchEditForm form) {
+        form.crudMode = crudMode;
+        form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadKeyMatch(form);
-        return asHtml(path_AdminKeyMatch_EditJsp);
+        return asHtml(path_AdminKeymatch_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(KeyMatchEditForm form) {
-        return asHtml(path_AdminKeyMatch_EditJsp);
+        return asHtml(path_AdminKeymatch_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -140,15 +142,17 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(KeyMatchEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadKeyMatch(form);
-        return asHtml(path_AdminKeyMatch_EditJsp);
+        return asHtml(path_AdminKeymatch_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletepage(int crudMode, String id, KeyMatchEditForm form) {
+        form.crudMode = crudMode;
+        form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadKeyMatch(form);
-        return asHtml(path_AdminKeyMatch_ConfirmJsp);
+        return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
     @Token(save = true, validate = false)
@@ -156,7 +160,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(KeyMatchEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadKeyMatch(form);
-        return asHtml(path_AdminKeyMatch_ConfirmJsp);
+        return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -164,23 +168,25 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                               -------
     @Execute
     public HtmlResponse confirmpage(int crudMode, String id, KeyMatchEditForm form) {
+        form.crudMode = crudMode;
+        form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
         loadKeyMatch(form);
-        return asHtml(path_AdminKeyMatch_ConfirmJsp);
+        return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(KeyMatchEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminKeyMatch_ConfirmJsp);
+        return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(KeyMatchEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminKeyMatch_ConfirmJsp);
+        return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -266,7 +272,7 @@ public class AdminKeymatchAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminKeyMatch_EditJsp);
+            return asHtml(path_AdminKeymatch_EditJsp);
         };
     }
 }

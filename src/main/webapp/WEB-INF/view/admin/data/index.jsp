@@ -18,7 +18,7 @@
 		</div>
 		<%-- Message: END --%>
 
-	<s:form>
+	<la:form>
 	<div>
         <h3><la:message key="labels.backup_title_edit"/></h3>
 		<table class="bordered-table zebra-striped">
@@ -58,8 +58,8 @@
 			</tbody>
 		</table>
 	</div>
-	</s:form>
-	<s:form action="upload" enctype="multipart/form-data" style="margin-top:10px;">
+	</la:form>
+	<la:form action="upload" enctype="multipart/form-data" style="margin-top:10px;">
 	<div>
         <h3><la:message key="labels.restore_title_edit"/></h3>
 		<table >
@@ -90,7 +90,7 @@
 			</tfoot>
 		</table>
 	</div>
-	</s:form>
+	</la:form>
 
 </div>
 
