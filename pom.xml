@@ -146,9 +146,7 @@
 						<exclude>org/codelibs/fess/app/web/admin/LabelTypeForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FileConfigForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/BoostDocumentRuleAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/BoostDocumentRuleForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FileAuthenticationForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/RequestHeaderAction.java</exclude>

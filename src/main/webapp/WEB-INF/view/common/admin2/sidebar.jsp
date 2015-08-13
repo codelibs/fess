@@ -90,12 +90,12 @@
 							<span><la:message key="labels.menu.key_match" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='boostDocumentRule'}">class="active"</c:if>><todo:link
-							href="/admin/boostDocumentRule/index"
+					<li <c:if test="${param.menuType=='boostDocumentRule'}">class="active"</c:if>><la:link
+							href="/admin/boostdocumentrule/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.boost_document_rule" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='pathMapping'}">class="active"</c:if>><todo:link
 							href="/admin/pathMapping/index"

@@ -14,25 +14,22 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.boostdocumentrule;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 
 import org.codelibs.fess.util.ComponentUtil;
 
-public class BoostDocumentRuleForm {
-    //@IntegerType
-    public String pageNumber;
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class BoostDocumentRuleEditForm implements Serializable {
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    private static final long serialVersionUID = 1L;
 
     //@IntegerType
     public int crudMode;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 1000)
@@ -70,7 +67,6 @@ public class BoostDocumentRuleForm {
     public String versionNo;
 
     public void initialize() {
-
         id = null;
         urlExpr = null;
         boostExpr = null;
@@ -83,5 +79,4 @@ public class BoostDocumentRuleForm {
 
         sortOrder = "0";
     }
-
 }
