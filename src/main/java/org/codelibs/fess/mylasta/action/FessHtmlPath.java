@@ -8,44 +8,44 @@ import org.lastaflute.web.response.next.HtmlNext;
  */
 public interface FessHtmlPath {
 
-    /** The path of the HTML: /admin/boostDocumentRule/confirm.jsp */
-    HtmlNext path_AdminBoostDocumentRule_ConfirmJsp = new HtmlNext("/admin/boostDocumentRule/confirm.jsp");
+    /** The path of the HTML: /admin/boostdocumentrule/confirm.jsp */
+    HtmlNext path_AdminBoostdocumentrule_ConfirmJsp = new HtmlNext("/admin/boostdocumentrule/confirm.jsp");
 
-    /** The path of the HTML: /admin/boostDocumentRule/edit.jsp */
-    HtmlNext path_AdminBoostDocumentRule_EditJsp = new HtmlNext("/admin/boostDocumentRule/edit.jsp");
+    /** The path of the HTML: /admin/boostdocumentrule/edit.jsp */
+    HtmlNext path_AdminBoostdocumentrule_EditJsp = new HtmlNext("/admin/boostdocumentrule/edit.jsp");
 
-    /** The path of the HTML: /admin/boostDocumentRule/error.jsp */
-    HtmlNext path_AdminBoostDocumentRule_ErrorJsp = new HtmlNext("/admin/boostDocumentRule/error.jsp");
+    /** The path of the HTML: /admin/boostdocumentrule/error.jsp */
+    HtmlNext path_AdminBoostdocumentrule_ErrorJsp = new HtmlNext("/admin/boostdocumentrule/error.jsp");
 
-    /** The path of the HTML: /admin/boostDocumentRule/index.jsp */
-    HtmlNext path_AdminBoostDocumentRule_IndexJsp = new HtmlNext("/admin/boostDocumentRule/index.jsp");
+    /** The path of the HTML: /admin/boostdocumentrule/index.jsp */
+    HtmlNext path_AdminBoostdocumentrule_IndexJsp = new HtmlNext("/admin/boostdocumentrule/index.jsp");
 
     /** The path of the HTML: /admin/crawl/index.jsp */
     HtmlNext path_AdminCrawl_IndexJsp = new HtmlNext("/admin/crawl/index.jsp");
 
-    /** The path of the HTML: /admin/crawlingSession/confirm.jsp */
-    HtmlNext path_AdminCrawlingSession_ConfirmJsp = new HtmlNext("/admin/crawlingSession/confirm.jsp");
+    /** The path of the HTML: /admin/crawlingsession/confirm.jsp */
+    HtmlNext path_AdminCrawlingsession_ConfirmJsp = new HtmlNext("/admin/crawlingsession/confirm.jsp");
 
-    /** The path of the HTML: /admin/crawlingSession/error.jsp */
-    HtmlNext path_AdminCrawlingSession_ErrorJsp = new HtmlNext("/admin/crawlingSession/error.jsp");
+    /** The path of the HTML: /admin/crawlingsession/error.jsp */
+    HtmlNext path_AdminCrawlingsession_ErrorJsp = new HtmlNext("/admin/crawlingsession/error.jsp");
 
-    /** The path of the HTML: /admin/crawlingSession/index.jsp */
-    HtmlNext path_AdminCrawlingSession_IndexJsp = new HtmlNext("/admin/crawlingSession/index.jsp");
+    /** The path of the HTML: /admin/crawlingsession/index.jsp */
+    HtmlNext path_AdminCrawlingsession_IndexJsp = new HtmlNext("/admin/crawlingsession/index.jsp");
 
     /** The path of the HTML: /admin/data/index.jsp */
     HtmlNext path_AdminData_IndexJsp = new HtmlNext("/admin/data/index.jsp");
 
-    /** The path of the HTML: /admin/dataConfig/confirm.jsp */
-    HtmlNext path_AdminDataConfig_ConfirmJsp = new HtmlNext("/admin/dataConfig/confirm.jsp");
+    /** The path of the HTML: /admin/dataconfig/confirm.jsp */
+    HtmlNext path_AdminDataconfig_ConfirmJsp = new HtmlNext("/admin/dataconfig/confirm.jsp");
 
-    /** The path of the HTML: /admin/dataConfig/edit.jsp */
-    HtmlNext path_AdminDataConfig_EditJsp = new HtmlNext("/admin/dataConfig/edit.jsp");
+    /** The path of the HTML: /admin/dataconfig/edit.jsp */
+    HtmlNext path_AdminDataconfig_EditJsp = new HtmlNext("/admin/dataconfig/edit.jsp");
 
-    /** The path of the HTML: /admin/dataConfig/error.jsp */
-    HtmlNext path_AdminDataConfig_ErrorJsp = new HtmlNext("/admin/dataConfig/error.jsp");
+    /** The path of the HTML: /admin/dataconfig/error.jsp */
+    HtmlNext path_AdminDataconfig_ErrorJsp = new HtmlNext("/admin/dataconfig/error.jsp");
 
-    /** The path of the HTML: /admin/dataConfig/index.jsp */
-    HtmlNext path_AdminDataConfig_IndexJsp = new HtmlNext("/admin/dataConfig/index.jsp");
+    /** The path of the HTML: /admin/dataconfig/index.jsp */
+    HtmlNext path_AdminDataconfig_IndexJsp = new HtmlNext("/admin/dataconfig/index.jsp");
 
     /** The path of the HTML: /admin/design/admin_design.jsp */
     HtmlNext path_AdminDesign_AdminDesignJsp = new HtmlNext("/admin/design/admin_design.jsp");
@@ -98,47 +98,47 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/document/index.jsp */
     HtmlNext path_AdminDocument_IndexJsp = new HtmlNext("/admin/document/index.jsp");
 
-    /** The path of the HTML: /admin/failureUrl/confirm.jsp */
-    HtmlNext path_AdminFailureUrl_ConfirmJsp = new HtmlNext("/admin/failureUrl/confirm.jsp");
+    /** The path of the HTML: /admin/failureurl/confirm.jsp */
+    HtmlNext path_AdminFailureurl_ConfirmJsp = new HtmlNext("/admin/failureurl/confirm.jsp");
 
-    /** The path of the HTML: /admin/failureUrl/error.jsp */
-    HtmlNext path_AdminFailureUrl_ErrorJsp = new HtmlNext("/admin/failureUrl/error.jsp");
+    /** The path of the HTML: /admin/failureurl/error.jsp */
+    HtmlNext path_AdminFailureurl_ErrorJsp = new HtmlNext("/admin/failureurl/error.jsp");
 
-    /** The path of the HTML: /admin/failureUrl/index.jsp */
-    HtmlNext path_AdminFailureUrl_IndexJsp = new HtmlNext("/admin/failureUrl/index.jsp");
+    /** The path of the HTML: /admin/failureurl/index.jsp */
+    HtmlNext path_AdminFailureurl_IndexJsp = new HtmlNext("/admin/failureurl/index.jsp");
 
-    /** The path of the HTML: /admin/fileAuthentication/confirm.jsp */
-    HtmlNext path_AdminFileAuthentication_ConfirmJsp = new HtmlNext("/admin/fileAuthentication/confirm.jsp");
+    /** The path of the HTML: /admin/fileauthentication/confirm.jsp */
+    HtmlNext path_AdminFileauthentication_ConfirmJsp = new HtmlNext("/admin/fileauthentication/confirm.jsp");
 
-    /** The path of the HTML: /admin/fileAuthentication/edit.jsp */
-    HtmlNext path_AdminFileAuthentication_EditJsp = new HtmlNext("/admin/fileAuthentication/edit.jsp");
+    /** The path of the HTML: /admin/fileauthentication/edit.jsp */
+    HtmlNext path_AdminFileauthentication_EditJsp = new HtmlNext("/admin/fileauthentication/edit.jsp");
 
-    /** The path of the HTML: /admin/fileAuthentication/error.jsp */
-    HtmlNext path_AdminFileAuthentication_ErrorJsp = new HtmlNext("/admin/fileAuthentication/error.jsp");
+    /** The path of the HTML: /admin/fileauthentication/error.jsp */
+    HtmlNext path_AdminFileauthentication_ErrorJsp = new HtmlNext("/admin/fileauthentication/error.jsp");
 
-    /** The path of the HTML: /admin/fileAuthentication/index.jsp */
-    HtmlNext path_AdminFileAuthentication_IndexJsp = new HtmlNext("/admin/fileAuthentication/index.jsp");
+    /** The path of the HTML: /admin/fileauthentication/index.jsp */
+    HtmlNext path_AdminFileauthentication_IndexJsp = new HtmlNext("/admin/fileauthentication/index.jsp");
 
-    /** The path of the HTML: /admin/fileConfig/confirm.jsp */
-    HtmlNext path_AdminFileConfig_ConfirmJsp = new HtmlNext("/admin/fileConfig/confirm.jsp");
+    /** The path of the HTML: /admin/fileconfig/confirm.jsp */
+    HtmlNext path_AdminFileconfig_ConfirmJsp = new HtmlNext("/admin/fileconfig/confirm.jsp");
 
-    /** The path of the HTML: /admin/fileConfig/edit.jsp */
-    HtmlNext path_AdminFileConfig_EditJsp = new HtmlNext("/admin/fileConfig/edit.jsp");
+    /** The path of the HTML: /admin/fileconfig/edit.jsp */
+    HtmlNext path_AdminFileconfig_EditJsp = new HtmlNext("/admin/fileconfig/edit.jsp");
 
-    /** The path of the HTML: /admin/fileConfig/error.jsp */
-    HtmlNext path_AdminFileConfig_ErrorJsp = new HtmlNext("/admin/fileConfig/error.jsp");
+    /** The path of the HTML: /admin/fileconfig/error.jsp */
+    HtmlNext path_AdminFileconfig_ErrorJsp = new HtmlNext("/admin/fileconfig/error.jsp");
 
-    /** The path of the HTML: /admin/fileConfig/index.jsp */
-    HtmlNext path_AdminFileConfig_IndexJsp = new HtmlNext("/admin/fileConfig/index.jsp");
+    /** The path of the HTML: /admin/fileconfig/index.jsp */
+    HtmlNext path_AdminFileconfig_IndexJsp = new HtmlNext("/admin/fileconfig/index.jsp");
 
-    /** The path of the HTML: /admin/jobLog/confirm.jsp */
-    HtmlNext path_AdminJobLog_ConfirmJsp = new HtmlNext("/admin/jobLog/confirm.jsp");
+    /** The path of the HTML: /admin/joblog/confirm.jsp */
+    HtmlNext path_AdminJoblog_ConfirmJsp = new HtmlNext("/admin/joblog/confirm.jsp");
 
-    /** The path of the HTML: /admin/jobLog/error.jsp */
-    HtmlNext path_AdminJobLog_ErrorJsp = new HtmlNext("/admin/jobLog/error.jsp");
+    /** The path of the HTML: /admin/joblog/error.jsp */
+    HtmlNext path_AdminJoblog_ErrorJsp = new HtmlNext("/admin/joblog/error.jsp");
 
-    /** The path of the HTML: /admin/jobLog/index.jsp */
-    HtmlNext path_AdminJobLog_IndexJsp = new HtmlNext("/admin/jobLog/index.jsp");
+    /** The path of the HTML: /admin/joblog/index.jsp */
+    HtmlNext path_AdminJoblog_IndexJsp = new HtmlNext("/admin/joblog/index.jsp");
 
     /** The path of the HTML: /admin/keymatch/confirm.jsp */
     HtmlNext path_AdminKeymatch_ConfirmJsp = new HtmlNext("/admin/keymatch/confirm.jsp");
@@ -152,152 +152,152 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/keymatch/index.jsp */
     HtmlNext path_AdminKeymatch_IndexJsp = new HtmlNext("/admin/keymatch/index.jsp");
 
-    /** The path of the HTML: /admin/labelType/confirm.jsp */
-    HtmlNext path_AdminLabelType_ConfirmJsp = new HtmlNext("/admin/labelType/confirm.jsp");
+    /** The path of the HTML: /admin/labeltype/confirm.jsp */
+    HtmlNext path_AdminLabeltype_ConfirmJsp = new HtmlNext("/admin/labeltype/confirm.jsp");
 
-    /** The path of the HTML: /admin/labelType/edit.jsp */
-    HtmlNext path_AdminLabelType_EditJsp = new HtmlNext("/admin/labelType/edit.jsp");
+    /** The path of the HTML: /admin/labeltype/edit.jsp */
+    HtmlNext path_AdminLabeltype_EditJsp = new HtmlNext("/admin/labeltype/edit.jsp");
 
-    /** The path of the HTML: /admin/labelType/error.jsp */
-    HtmlNext path_AdminLabelType_ErrorJsp = new HtmlNext("/admin/labelType/error.jsp");
+    /** The path of the HTML: /admin/labeltype/error.jsp */
+    HtmlNext path_AdminLabeltype_ErrorJsp = new HtmlNext("/admin/labeltype/error.jsp");
 
-    /** The path of the HTML: /admin/labelType/index.jsp */
-    HtmlNext path_AdminLabelType_IndexJsp = new HtmlNext("/admin/labelType/index.jsp");
+    /** The path of the HTML: /admin/labeltype/index.jsp */
+    HtmlNext path_AdminLabeltype_IndexJsp = new HtmlNext("/admin/labeltype/index.jsp");
 
     /** The path of the HTML: /admin/log/index.jsp */
     HtmlNext path_AdminLog_IndexJsp = new HtmlNext("/admin/log/index.jsp");
 
-    /** The path of the HTML: /admin/overlappingHost/confirm.jsp */
-    HtmlNext path_AdminOverlappingHost_ConfirmJsp = new HtmlNext("/admin/overlappingHost/confirm.jsp");
+    /** The path of the HTML: /admin/overlappinghost/confirm.jsp */
+    HtmlNext path_AdminOverlappinghost_ConfirmJsp = new HtmlNext("/admin/overlappinghost/confirm.jsp");
 
-    /** The path of the HTML: /admin/overlappingHost/edit.jsp */
-    HtmlNext path_AdminOverlappingHost_EditJsp = new HtmlNext("/admin/overlappingHost/edit.jsp");
+    /** The path of the HTML: /admin/overlappinghost/edit.jsp */
+    HtmlNext path_AdminOverlappinghost_EditJsp = new HtmlNext("/admin/overlappinghost/edit.jsp");
 
-    /** The path of the HTML: /admin/overlappingHost/error.jsp */
-    HtmlNext path_AdminOverlappingHost_ErrorJsp = new HtmlNext("/admin/overlappingHost/error.jsp");
+    /** The path of the HTML: /admin/overlappinghost/error.jsp */
+    HtmlNext path_AdminOverlappinghost_ErrorJsp = new HtmlNext("/admin/overlappinghost/error.jsp");
 
-    /** The path of the HTML: /admin/overlappingHost/index.jsp */
-    HtmlNext path_AdminOverlappingHost_IndexJsp = new HtmlNext("/admin/overlappingHost/index.jsp");
+    /** The path of the HTML: /admin/overlappinghost/index.jsp */
+    HtmlNext path_AdminOverlappinghost_IndexJsp = new HtmlNext("/admin/overlappinghost/index.jsp");
 
-    /** The path of the HTML: /admin/pathMapping/confirm.jsp */
-    HtmlNext path_AdminPathMapping_ConfirmJsp = new HtmlNext("/admin/pathMapping/confirm.jsp");
+    /** The path of the HTML: /admin/pathmapping/confirm.jsp */
+    HtmlNext path_AdminPathmapping_ConfirmJsp = new HtmlNext("/admin/pathmapping/confirm.jsp");
 
-    /** The path of the HTML: /admin/pathMapping/edit.jsp */
-    HtmlNext path_AdminPathMapping_EditJsp = new HtmlNext("/admin/pathMapping/edit.jsp");
+    /** The path of the HTML: /admin/pathmapping/edit.jsp */
+    HtmlNext path_AdminPathmapping_EditJsp = new HtmlNext("/admin/pathmapping/edit.jsp");
 
-    /** The path of the HTML: /admin/pathMapping/error.jsp */
-    HtmlNext path_AdminPathMapping_ErrorJsp = new HtmlNext("/admin/pathMapping/error.jsp");
+    /** The path of the HTML: /admin/pathmapping/error.jsp */
+    HtmlNext path_AdminPathmapping_ErrorJsp = new HtmlNext("/admin/pathmapping/error.jsp");
 
-    /** The path of the HTML: /admin/pathMapping/index.jsp */
-    HtmlNext path_AdminPathMapping_IndexJsp = new HtmlNext("/admin/pathMapping/index.jsp");
+    /** The path of the HTML: /admin/pathmapping/index.jsp */
+    HtmlNext path_AdminPathmapping_IndexJsp = new HtmlNext("/admin/pathmapping/index.jsp");
 
-    /** The path of the HTML: /admin/requestHeader/confirm.jsp */
-    HtmlNext path_AdminRequestHeader_ConfirmJsp = new HtmlNext("/admin/requestHeader/confirm.jsp");
+    /** The path of the HTML: /admin/requestheader/confirm.jsp */
+    HtmlNext path_AdminRequestheader_ConfirmJsp = new HtmlNext("/admin/requestheader/confirm.jsp");
 
-    /** The path of the HTML: /admin/requestHeader/edit.jsp */
-    HtmlNext path_AdminRequestHeader_EditJsp = new HtmlNext("/admin/requestHeader/edit.jsp");
+    /** The path of the HTML: /admin/requestheader/edit.jsp */
+    HtmlNext path_AdminRequestheader_EditJsp = new HtmlNext("/admin/requestheader/edit.jsp");
 
-    /** The path of the HTML: /admin/requestHeader/error.jsp */
-    HtmlNext path_AdminRequestHeader_ErrorJsp = new HtmlNext("/admin/requestHeader/error.jsp");
+    /** The path of the HTML: /admin/requestheader/error.jsp */
+    HtmlNext path_AdminRequestheader_ErrorJsp = new HtmlNext("/admin/requestheader/error.jsp");
 
-    /** The path of the HTML: /admin/requestHeader/index.jsp */
-    HtmlNext path_AdminRequestHeader_IndexJsp = new HtmlNext("/admin/requestHeader/index.jsp");
+    /** The path of the HTML: /admin/requestheader/index.jsp */
+    HtmlNext path_AdminRequestheader_IndexJsp = new HtmlNext("/admin/requestheader/index.jsp");
 
-    /** The path of the HTML: /admin/roleType/confirm.jsp */
-    HtmlNext path_AdminRoleType_ConfirmJsp = new HtmlNext("/admin/roleType/confirm.jsp");
+    /** The path of the HTML: /admin/roletype/confirm.jsp */
+    HtmlNext path_AdminRoletype_ConfirmJsp = new HtmlNext("/admin/roletype/confirm.jsp");
 
-    /** The path of the HTML: /admin/roleType/edit.jsp */
-    HtmlNext path_AdminRoleType_EditJsp = new HtmlNext("/admin/roleType/edit.jsp");
+    /** The path of the HTML: /admin/roletype/edit.jsp */
+    HtmlNext path_AdminRoletype_EditJsp = new HtmlNext("/admin/roletype/edit.jsp");
 
-    /** The path of the HTML: /admin/roleType/error.jsp */
-    HtmlNext path_AdminRoleType_ErrorJsp = new HtmlNext("/admin/roleType/error.jsp");
+    /** The path of the HTML: /admin/roletype/error.jsp */
+    HtmlNext path_AdminRoletype_ErrorJsp = new HtmlNext("/admin/roletype/error.jsp");
 
-    /** The path of the HTML: /admin/roleType/index.jsp */
-    HtmlNext path_AdminRoleType_IndexJsp = new HtmlNext("/admin/roleType/index.jsp");
+    /** The path of the HTML: /admin/roletype/index.jsp */
+    HtmlNext path_AdminRoletype_IndexJsp = new HtmlNext("/admin/roletype/index.jsp");
 
-    /** The path of the HTML: /admin/scheduledJob/confirm.jsp */
-    HtmlNext path_AdminScheduledJob_ConfirmJsp = new HtmlNext("/admin/scheduledJob/confirm.jsp");
+    /** The path of the HTML: /admin/scheduledjob/confirm.jsp */
+    HtmlNext path_AdminScheduledjob_ConfirmJsp = new HtmlNext("/admin/scheduledjob/confirm.jsp");
 
-    /** The path of the HTML: /admin/scheduledJob/edit.jsp */
-    HtmlNext path_AdminScheduledJob_EditJsp = new HtmlNext("/admin/scheduledJob/edit.jsp");
+    /** The path of the HTML: /admin/scheduledjob/edit.jsp */
+    HtmlNext path_AdminScheduledjob_EditJsp = new HtmlNext("/admin/scheduledjob/edit.jsp");
 
-    /** The path of the HTML: /admin/scheduledJob/error.jsp */
-    HtmlNext path_AdminScheduledJob_ErrorJsp = new HtmlNext("/admin/scheduledJob/error.jsp");
+    /** The path of the HTML: /admin/scheduledjob/error.jsp */
+    HtmlNext path_AdminScheduledjob_ErrorJsp = new HtmlNext("/admin/scheduledjob/error.jsp");
 
-    /** The path of the HTML: /admin/scheduledJob/index.jsp */
-    HtmlNext path_AdminScheduledJob_IndexJsp = new HtmlNext("/admin/scheduledJob/index.jsp");
+    /** The path of the HTML: /admin/scheduledjob/index.jsp */
+    HtmlNext path_AdminScheduledjob_IndexJsp = new HtmlNext("/admin/scheduledjob/index.jsp");
 
-    /** The path of the HTML: /admin/searchList/confirmDelete.jsp */
-    HtmlNext path_AdminSearchList_ConfirmDeleteJsp = new HtmlNext("/admin/searchList/confirmDelete.jsp");
+    /** The path of the HTML: /admin/searchlist/confirmDelete.jsp */
+    HtmlNext path_AdminSearchlist_ConfirmDeleteJsp = new HtmlNext("/admin/searchlist/confirmDelete.jsp");
 
-    /** The path of the HTML: /admin/searchList/index.jsp */
-    HtmlNext path_AdminSearchList_IndexJsp = new HtmlNext("/admin/searchList/index.jsp");
+    /** The path of the HTML: /admin/searchlist/index.jsp */
+    HtmlNext path_AdminSearchlist_IndexJsp = new HtmlNext("/admin/searchlist/index.jsp");
 
-    /** The path of the HTML: /admin/suggestBadWord/confirm.jsp */
-    HtmlNext path_AdminSuggestBadWord_ConfirmJsp = new HtmlNext("/admin/suggestBadWord/confirm.jsp");
+    /** The path of the HTML: /admin/suggestbadword/confirm.jsp */
+    HtmlNext path_AdminSuggestbadword_ConfirmJsp = new HtmlNext("/admin/suggestbadword/confirm.jsp");
 
-    /** The path of the HTML: /admin/suggestBadWord/download.jsp */
-    HtmlNext path_AdminSuggestBadWord_DownloadJsp = new HtmlNext("/admin/suggestBadWord/download.jsp");
+    /** The path of the HTML: /admin/suggestbadword/download.jsp */
+    HtmlNext path_AdminSuggestbadword_DownloadJsp = new HtmlNext("/admin/suggestbadword/download.jsp");
 
-    /** The path of the HTML: /admin/suggestBadWord/edit.jsp */
-    HtmlNext path_AdminSuggestBadWord_EditJsp = new HtmlNext("/admin/suggestBadWord/edit.jsp");
+    /** The path of the HTML: /admin/suggestbadword/edit.jsp */
+    HtmlNext path_AdminSuggestbadword_EditJsp = new HtmlNext("/admin/suggestbadword/edit.jsp");
 
-    /** The path of the HTML: /admin/suggestBadWord/error.jsp */
-    HtmlNext path_AdminSuggestBadWord_ErrorJsp = new HtmlNext("/admin/suggestBadWord/error.jsp");
+    /** The path of the HTML: /admin/suggestbadword/error.jsp */
+    HtmlNext path_AdminSuggestbadword_ErrorJsp = new HtmlNext("/admin/suggestbadword/error.jsp");
 
-    /** The path of the HTML: /admin/suggestBadWord/index.jsp */
-    HtmlNext path_AdminSuggestBadWord_IndexJsp = new HtmlNext("/admin/suggestBadWord/index.jsp");
+    /** The path of the HTML: /admin/suggestbadword/index.jsp */
+    HtmlNext path_AdminSuggestbadword_IndexJsp = new HtmlNext("/admin/suggestbadword/index.jsp");
 
-    /** The path of the HTML: /admin/suggestBadWord/upload.jsp */
-    HtmlNext path_AdminSuggestBadWord_UploadJsp = new HtmlNext("/admin/suggestBadWord/upload.jsp");
+    /** The path of the HTML: /admin/suggestbadword/upload.jsp */
+    HtmlNext path_AdminSuggestbadword_UploadJsp = new HtmlNext("/admin/suggestbadword/upload.jsp");
 
-    /** The path of the HTML: /admin/suggestElevateWord/confirm.jsp */
-    HtmlNext path_AdminSuggestElevateWord_ConfirmJsp = new HtmlNext("/admin/suggestElevateWord/confirm.jsp");
+    /** The path of the HTML: /admin/suggestelevateword/confirm.jsp */
+    HtmlNext path_AdminSuggestelevateword_ConfirmJsp = new HtmlNext("/admin/suggestelevateword/confirm.jsp");
 
-    /** The path of the HTML: /admin/suggestElevateWord/download.jsp */
-    HtmlNext path_AdminSuggestElevateWord_DownloadJsp = new HtmlNext("/admin/suggestElevateWord/download.jsp");
+    /** The path of the HTML: /admin/suggestelevateword/download.jsp */
+    HtmlNext path_AdminSuggestelevateword_DownloadJsp = new HtmlNext("/admin/suggestelevateword/download.jsp");
 
-    /** The path of the HTML: /admin/suggestElevateWord/edit.jsp */
-    HtmlNext path_AdminSuggestElevateWord_EditJsp = new HtmlNext("/admin/suggestElevateWord/edit.jsp");
+    /** The path of the HTML: /admin/suggestelevateword/edit.jsp */
+    HtmlNext path_AdminSuggestelevateword_EditJsp = new HtmlNext("/admin/suggestelevateword/edit.jsp");
 
-    /** The path of the HTML: /admin/suggestElevateWord/error.jsp */
-    HtmlNext path_AdminSuggestElevateWord_ErrorJsp = new HtmlNext("/admin/suggestElevateWord/error.jsp");
+    /** The path of the HTML: /admin/suggestelevateword/error.jsp */
+    HtmlNext path_AdminSuggestelevateword_ErrorJsp = new HtmlNext("/admin/suggestelevateword/error.jsp");
 
-    /** The path of the HTML: /admin/suggestElevateWord/index.jsp */
-    HtmlNext path_AdminSuggestElevateWord_IndexJsp = new HtmlNext("/admin/suggestElevateWord/index.jsp");
+    /** The path of the HTML: /admin/suggestelevateword/index.jsp */
+    HtmlNext path_AdminSuggestelevateword_IndexJsp = new HtmlNext("/admin/suggestelevateword/index.jsp");
 
-    /** The path of the HTML: /admin/suggestElevateWord/upload.jsp */
-    HtmlNext path_AdminSuggestElevateWord_UploadJsp = new HtmlNext("/admin/suggestElevateWord/upload.jsp");
+    /** The path of the HTML: /admin/suggestelevateword/upload.jsp */
+    HtmlNext path_AdminSuggestelevateword_UploadJsp = new HtmlNext("/admin/suggestelevateword/upload.jsp");
 
     /** The path of the HTML: /admin/system/index.jsp */
     HtmlNext path_AdminSystem_IndexJsp = new HtmlNext("/admin/system/index.jsp");
 
-    /** The path of the HTML: /admin/systemInfo/index.jsp */
-    HtmlNext path_AdminSystemInfo_IndexJsp = new HtmlNext("/admin/systemInfo/index.jsp");
+    /** The path of the HTML: /admin/systeminfo/index.jsp */
+    HtmlNext path_AdminSysteminfo_IndexJsp = new HtmlNext("/admin/systeminfo/index.jsp");
 
-    /** The path of the HTML: /admin/webAuthentication/confirm.jsp */
-    HtmlNext path_AdminWebAuthentication_ConfirmJsp = new HtmlNext("/admin/webAuthentication/confirm.jsp");
+    /** The path of the HTML: /admin/webauthentication/confirm.jsp */
+    HtmlNext path_AdminWebauthentication_ConfirmJsp = new HtmlNext("/admin/webauthentication/confirm.jsp");
 
-    /** The path of the HTML: /admin/webAuthentication/edit.jsp */
-    HtmlNext path_AdminWebAuthentication_EditJsp = new HtmlNext("/admin/webAuthentication/edit.jsp");
+    /** The path of the HTML: /admin/webauthentication/edit.jsp */
+    HtmlNext path_AdminWebauthentication_EditJsp = new HtmlNext("/admin/webauthentication/edit.jsp");
 
-    /** The path of the HTML: /admin/webAuthentication/error.jsp */
-    HtmlNext path_AdminWebAuthentication_ErrorJsp = new HtmlNext("/admin/webAuthentication/error.jsp");
+    /** The path of the HTML: /admin/webauthentication/error.jsp */
+    HtmlNext path_AdminWebauthentication_ErrorJsp = new HtmlNext("/admin/webauthentication/error.jsp");
 
-    /** The path of the HTML: /admin/webAuthentication/index.jsp */
-    HtmlNext path_AdminWebAuthentication_IndexJsp = new HtmlNext("/admin/webAuthentication/index.jsp");
+    /** The path of the HTML: /admin/webauthentication/index.jsp */
+    HtmlNext path_AdminWebauthentication_IndexJsp = new HtmlNext("/admin/webauthentication/index.jsp");
 
-    /** The path of the HTML: /admin/webConfig/confirm.jsp */
-    HtmlNext path_AdminWebConfig_ConfirmJsp = new HtmlNext("/admin/webConfig/confirm.jsp");
+    /** The path of the HTML: /admin/webconfig/confirm.jsp */
+    HtmlNext path_AdminWebconfig_ConfirmJsp = new HtmlNext("/admin/webconfig/confirm.jsp");
 
-    /** The path of the HTML: /admin/webConfig/edit.jsp */
-    HtmlNext path_AdminWebConfig_EditJsp = new HtmlNext("/admin/webConfig/edit.jsp");
+    /** The path of the HTML: /admin/webconfig/edit.jsp */
+    HtmlNext path_AdminWebconfig_EditJsp = new HtmlNext("/admin/webconfig/edit.jsp");
 
-    /** The path of the HTML: /admin/webConfig/error.jsp */
-    HtmlNext path_AdminWebConfig_ErrorJsp = new HtmlNext("/admin/webConfig/error.jsp");
+    /** The path of the HTML: /admin/webconfig/error.jsp */
+    HtmlNext path_AdminWebconfig_ErrorJsp = new HtmlNext("/admin/webconfig/error.jsp");
 
-    /** The path of the HTML: /admin/webConfig/index.jsp */
-    HtmlNext path_AdminWebConfig_IndexJsp = new HtmlNext("/admin/webConfig/index.jsp");
+    /** The path of the HTML: /admin/webconfig/index.jsp */
+    HtmlNext path_AdminWebconfig_IndexJsp = new HtmlNext("/admin/webconfig/index.jsp");
 
     /** The path of the HTML: /admin/wizard/crawlingConfig.jsp */
     HtmlNext path_AdminWizard_CrawlingConfigJsp = new HtmlNext("/admin/wizard/crawlingConfig.jsp");
