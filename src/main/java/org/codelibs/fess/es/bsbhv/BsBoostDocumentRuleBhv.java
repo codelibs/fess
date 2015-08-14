@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,14 +55,14 @@ public abstract class BsBoostDocumentRuleBhv extends AbstractBehavior<BoostDocum
     protected <RESULT extends BoostDocumentRule> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setBoostExpr(toString(source.get("boostExpr")));
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setId(toString(source.get("id")));
-            result.setSortOrder(toInteger(source.get("sortOrder")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
-            result.setUrlExpr(toString(source.get("urlExpr")));
+            result.setBoostExpr(DfTypeUtil.toString(source.get("boostExpr")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setUrlExpr(DfTypeUtil.toString(source.get("urlExpr")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

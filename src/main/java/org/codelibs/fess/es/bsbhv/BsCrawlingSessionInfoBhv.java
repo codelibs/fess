@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,11 +55,11 @@ public abstract class BsCrawlingSessionInfoBhv extends AbstractBehavior<Crawling
     protected <RESULT extends CrawlingSessionInfo> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCrawlingSessionId(toString(source.get("crawlingSessionId")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setId(toString(source.get("id")));
-            result.setKey(toString(source.get("key")));
-            result.setValue(toString(source.get("value")));
+            result.setCrawlingSessionId(DfTypeUtil.toString(source.get("crawlingSessionId")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setKey(DfTypeUtil.toString(source.get("key")));
+            result.setValue(DfTypeUtil.toString(source.get("value")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,15 +55,15 @@ public abstract class BsJobLogBhv extends AbstractBehavior<JobLog, JobLogCB> {
     protected <RESULT extends JobLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setEndTime(toLong(source.get("endTime")));
-            result.setId(toString(source.get("id")));
-            result.setJobName(toString(source.get("jobName")));
-            result.setJobStatus(toString(source.get("jobStatus")));
-            result.setScriptData(toString(source.get("scriptData")));
-            result.setScriptResult(toString(source.get("scriptResult")));
-            result.setScriptType(toString(source.get("scriptType")));
-            result.setStartTime(toLong(source.get("startTime")));
-            result.setTarget(toString(source.get("target")));
+            result.setEndTime(DfTypeUtil.toLong(source.get("endTime")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setJobName(DfTypeUtil.toString(source.get("jobName")));
+            result.setJobStatus(DfTypeUtil.toString(source.get("jobStatus")));
+            result.setScriptData(DfTypeUtil.toString(source.get("scriptData")));
+            result.setScriptResult(DfTypeUtil.toString(source.get("scriptResult")));
+            result.setScriptType(DfTypeUtil.toString(source.get("scriptType")));
+            result.setStartTime(DfTypeUtil.toLong(source.get("startTime")));
+            result.setTarget(DfTypeUtil.toString(source.get("target")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

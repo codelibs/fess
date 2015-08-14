@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,18 +55,18 @@ public abstract class BsDataConfigBhv extends AbstractBehavior<DataConfig, DataC
     protected <RESULT extends DataConfig> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable(toBoolean(source.get("available")));
-            result.setBoost(toFloat(source.get("boost")));
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setHandlerName(toString(source.get("handlerName")));
-            result.setHandlerParameter(toString(source.get("handlerParameter")));
-            result.setHandlerScript(toString(source.get("handlerScript")));
-            result.setId(toString(source.get("id")));
-            result.setName(toString(source.get("name")));
-            result.setSortOrder(toInteger(source.get("sortOrder")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setAvailable(DfTypeUtil.toBoolean(source.get("available")));
+            result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setHandlerName(DfTypeUtil.toString(source.get("handlerName")));
+            result.setHandlerParameter(DfTypeUtil.toString(source.get("handlerParameter")));
+            result.setHandlerScript(DfTypeUtil.toString(source.get("handlerScript")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

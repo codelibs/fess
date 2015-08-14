@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,9 +55,9 @@ public abstract class BsLabelToRoleBhv extends AbstractBehavior<LabelToRole, Lab
     protected <RESULT extends LabelToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(toString(source.get("id")));
-            result.setLabelTypeId(toString(source.get("labelTypeId")));
-            result.setRoleTypeId(toString(source.get("roleTypeId")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
+            result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

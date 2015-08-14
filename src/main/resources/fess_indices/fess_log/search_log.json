@@ -53,8 +53,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "userId": {
-        "type": "long"
+      "userInfoId": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }

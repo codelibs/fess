@@ -1,5 +1,6 @@
 package ${request.package}.cbean.cf.bs;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 import ${request.package}.cbean.cf.${table.camelizedName}CF;

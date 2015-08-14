@@ -1,0 +1,79 @@
+{
+  ".fess_user" : {
+    "mappings" : {
+      "role" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "user" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "group" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "password" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "role" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "group" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "refresh_interval" : "1s",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "0"
+      }
+    }
+  }
+}

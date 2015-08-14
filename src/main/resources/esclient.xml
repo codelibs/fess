@@ -6,9 +6,7 @@
 		<property name="settings">
 			{"http.cors.enabled":"true"}
 		</property>
-		<postConstruct name="addIndexConfig">
-			<arg>"fess/doc"</arg>
-		</postConstruct>
+		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
 			<arg>"ja/mapping.txt"</arg>
@@ -21,11 +19,13 @@
 			<arg>"fess"</arg>
 			<arg>"ja/kuromoji.txt"</arg>
 		</postConstruct>
+		<!-- fess index -->
+		<postConstruct name="addIndexConfig">
+			<arg>"fess/doc"</arg>
+		</postConstruct>
+		<!-- .fess_config index -->
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/boost_document_rule"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/click_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/crawling_session"</arg>
@@ -44,9 +44,6 @@
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/failure_url"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/favorite_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/file_authentication"</arg>
@@ -88,19 +85,10 @@
 			<arg>".fess_config/scheduled_job"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/search_field_log"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/search_log"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/suggest_bad_word"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/suggest_elevate_word"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/user_info"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_authentication"</arg>
@@ -113,6 +101,35 @@
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_config_to_role"</arg>
+		</postConstruct>
+		<!-- .fess_user index -->
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user/user"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user/role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user/group"</arg>
+		</postConstruct>
+		<!-- fess_log index -->
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/event_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/click_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/favorite_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/search_field_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/search_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/user_info"</arg>
 		</postConstruct>
 	</component>
 </components>

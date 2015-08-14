@@ -1,5 +1,6 @@
 package ${request.package}.cbean.cq.bs;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 import ${request.package}.cbean.cq.${table.camelizedName}CQ;

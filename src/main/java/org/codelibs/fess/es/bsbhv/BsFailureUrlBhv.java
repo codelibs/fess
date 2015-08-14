@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,14 +55,14 @@ public abstract class BsFailureUrlBhv extends AbstractBehavior<FailureUrl, Failu
     protected <RESULT extends FailureUrl> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setConfigId(toString(source.get("configId")));
-            result.setErrorCount(toInteger(source.get("errorCount")));
-            result.setErrorLog(toString(source.get("errorLog")));
-            result.setErrorName(toString(source.get("errorName")));
-            result.setId(toString(source.get("id")));
-            result.setLastAccessTime(toLong(source.get("lastAccessTime")));
-            result.setThreadName(toString(source.get("threadName")));
-            result.setUrl(toString(source.get("url")));
+            result.setConfigId(DfTypeUtil.toString(source.get("configId")));
+            result.setErrorCount(DfTypeUtil.toInteger(source.get("errorCount")));
+            result.setErrorLog(DfTypeUtil.toString(source.get("errorLog")));
+            result.setErrorName(DfTypeUtil.toString(source.get("errorName")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setLastAccessTime(DfTypeUtil.toLong(source.get("lastAccessTime")));
+            result.setThreadName(DfTypeUtil.toString(source.get("threadName")));
+            result.setUrl(DfTypeUtil.toString(source.get("url")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

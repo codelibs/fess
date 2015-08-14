@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,18 +55,18 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehavior<FileAuthe
     protected <RESULT extends FileAuthentication> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setFileConfigId(toString(source.get("fileConfigId")));
-            result.setHostname(toString(source.get("hostname")));
-            result.setId(toString(source.get("id")));
-            result.setParameters(toString(source.get("parameters")));
-            result.setPassword(toString(source.get("password")));
-            result.setPort(toInteger(source.get("port")));
-            result.setProtocolScheme(toString(source.get("protocolScheme")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
-            result.setUsername(toString(source.get("username")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setFileConfigId(DfTypeUtil.toString(source.get("fileConfigId")));
+            result.setHostname(DfTypeUtil.toString(source.get("hostname")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setParameters(DfTypeUtil.toString(source.get("parameters")));
+            result.setPassword(DfTypeUtil.toString(source.get("password")));
+            result.setPort(DfTypeUtil.toInteger(source.get("port")));
+            result.setProtocolScheme(DfTypeUtil.toString(source.get("protocolScheme")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setUsername(DfTypeUtil.toString(source.get("username")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
