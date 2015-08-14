@@ -129,15 +129,6 @@ public class IndexAction {
     protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern
             .compile("^([a-zA-Z0-9_]+):.*");
 
-    // GSA
-    private static final String GSA_QUERY = "q";
-
-    private static final String GSA_SITE = "site";
-
-    private static final String GSA_REQUIRED_FIELDS = "requiredfields";
-
-    private static final String GSA_GET_FIELDS = "getfields";
-
     @ActionForm
     @Resource
     protected IndexForm indexForm;
@@ -603,60 +594,6 @@ public class IndexAction {
     }
 
     @Execute(validator = false)
-    public String gsaSearchApi() {
-        try {
-            // query words
-            indexForm.query = (String) request.getParameter(GSA_QUERY);
-            WebApiUtil.setObject("searchQueryOriginal", indexForm.query);
-            // collections
-            List<String> additional = new ArrayList<String>();
-            final String site = (String) request.getParameter(GSA_SITE);
-            if (StringUtil.isNotBlank(site)) {
-                additional.add(" (label:"
-                        + site.replace(".", " AND label:").replace("|",
-                                " OR label:") + ")");
-            }
-            // dynmic fields
-            final String requiredFields = (String) request
-                    .getParameter(GSA_REQUIRED_FIELDS);
-            if (StringUtil.isNotBlank(requiredFields)) {
-                additional.add(" (MT_"
-                        + requiredFields.replace(":", "_s:")
-                                .replace(".", " AND MT_")
-                                .replace("|", " OR MT_") + ")");
-            }
-            if (additional.size() > 0) {
-                indexForm.additional = (String[]) additional
-                        .toArray(new String[additional.size()]);
-            }
-            // meta tags should be returned
-            final String getFields = (String) request
-                    .getParameter(GSA_GET_FIELDS);
-            if (StringUtil.isNotBlank(getFields)) {
-                WebApiUtil.setObject("getFields",
-                        Arrays.asList(getFields.split("\\.")));
-            } else {
-                WebApiUtil.setObject("getFields", new ArrayList<String>());
-            }
-
-            WebApiUtil.setObject("searchQuery", doSearchInternal());
-            WebApiUtil.setObject("searchTime", searchTime);
-            WebApiUtil.setObject("queryTime", queryTime);
-            WebApiUtil.setObject("execTime", execTime);
-            WebApiUtil.setObject("pageSize", pageSize);
-            WebApiUtil.setObject("currentPageNumber", currentPageNumber);
-            WebApiUtil.setObject("allRecordCount", allRecordCount);
-            WebApiUtil.setObject("allPageCount", allPageCount);
-            WebApiUtil.setObject("documentItems", documentItems);
-            WebApiUtil.setObject("facetResponse", facetResponse);
-            WebApiUtil.setObject("moreLikeThisResponse", moreLikeThisResponse);
-        } catch (final Exception e) {
-            WebApiUtil.setError(1, e);
-        }
-        return null;
-    }
-
-    @Execute(validator = false)
     public String suggestApi() {
         if (Constants.FALSE.equals(crawlerProperties.getProperty(
                 Constants.WEB_API_SUGGEST_PROPERTY, Constants.TRUE))) {
@@ -684,7 +621,7 @@ public class IndexAction {
         }
 
         final String[] fieldNames = indexForm.fn;
-        final String[] labels = indexForm.fields.get(LABEL_FIELD);
+        final String[] labels = indexForm.fields.get("label");
 
         final List<SuggestResponse> suggestResultList = new ArrayList<SuggestResponse>();
         WebApiUtil.setObject("suggestResultList", suggestResultList);
@@ -750,7 +687,7 @@ public class IndexAction {
         }
 
         final String[] fieldNames = indexForm.fn;
-        final String[] labels = indexForm.fields.get(LABEL_FIELD);
+        final String[] labels = indexForm.fields.get("label");
 
         final List<SpellCheckResponse> spellCheckResultList = new ArrayList<SpellCheckResponse>();
         WebApiUtil.setObject("spellCheckResultList", spellCheckResultList);

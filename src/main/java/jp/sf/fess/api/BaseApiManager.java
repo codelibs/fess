@@ -31,8 +31,6 @@ public class BaseApiManager {
 
     protected static final String SEARCH_API = "/searchApi";
 
-    protected static final String GSA_SEARCH_API = "/gsaSearchApi";
-
     protected static enum FormatType {
         SEARCH, LABEL, SUGGEST, SPELLCHECK, ANALYSIS, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
