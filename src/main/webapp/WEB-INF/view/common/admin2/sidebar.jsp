@@ -49,10 +49,10 @@
 							<span><la:message key="labels.menu.scheduled_job_config" /></span>
 						</todo:link></li>
 
-					<li <c:if test="${param.menuType=='design'}">class="active"</c:if>><todo:link href="/admin/design/index">
+					<li <c:if test="${param.menuType=='design'}">class="active"</c:if>><la:link href="/admin/design/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.design" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='dict'}">class="active"</c:if>><todo:link href="/admin/dict/index">
 							<i class='fa fa-angle-right'></i>

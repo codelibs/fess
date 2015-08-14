@@ -133,9 +133,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/OverlappingHostAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemInfoAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WebAuthenticationAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/design/DesignForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/design/AdminDesignAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/design/DesignEditForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FileConfigAction.java</exclude>

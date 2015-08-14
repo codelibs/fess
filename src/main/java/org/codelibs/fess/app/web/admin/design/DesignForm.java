@@ -18,8 +18,8 @@ package org.codelibs.fess.app.web.admin.design;
 
 import java.io.Serializable;
 
-import org.codelibs.fess.mylasta.tentative.Required;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+import org.lastaflute.web.validation.Required;
 
 public class DesignForm implements Serializable {
 
