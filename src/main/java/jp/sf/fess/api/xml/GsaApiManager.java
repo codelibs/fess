@@ -20,14 +20,21 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+
 import javax.servlet.http.HttpServletResponse;
 
 import jp.sf.fess.Constants;
@@ -63,7 +70,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     protected String gsaPathPrefix = "/gsa";
 
-    private static final String GSA_META_PREFIX = "MT_";
+    public String gsaMetaPrefix = "_MT_";
 
     private static final String GSA_META_SUFFIX = "_s";
 
@@ -154,10 +161,43 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
                 CDef.AccessType.Xml);
         try {
-            chain.doFilter(new WebApiRequest(request, GSA_SEARCH_API),
+            Map<String, String[]> extraParams = new TreeMap<String, String[]>();
+            List<String> additional = new ArrayList<String>();
+            final List<String> getFields = new ArrayList<String>();
+            // keywords
+            query = request.getParameter("q");
+            extraParams.put("query", new String[]{request.getParameter("q")});
+            // collections
+            final String site = (String) request.getParameter("site");
+            if (StringUtil.isNotBlank(site)) {
+                additional.add(" (label:"
+                        + site.replace(".", " AND label:").replace("|",
+                                " OR label:") + ")");
+            }
+            // dynmic fields
+            final String requiredFields = (String) request
+                    .getParameter("requiredfields");
+            if (StringUtil.isNotBlank(requiredFields)) {
+                additional.add(" (" + gsaMetaPrefix
+                        + requiredFields.replace(":", "_s:")
+                                .replace(".", " AND " + gsaMetaPrefix)
+                                .replace("|", " OR " + gsaMetaPrefix) + ")");
+            }
+            if (additional.size() > 0) {
+                extraParams.put("additional", (String[]) additional
+                        .toArray(new String[additional.size()]));
+            }
+            // meta tags should be returned
+            final String getFieldsParam = (String) request
+                    .getParameter("getfields");
+            if (StringUtil.isNotBlank(getFieldsParam)) {
+                getFields.addAll(Arrays.asList(getFieldsParam.split("\\.")));
+            }
+
+            chain.doFilter(new WrappedWebApiRequest(request, SEARCH_API, extraParams),
                     new WebApiResponse(response));
+
             WebApiUtil.validate();
-            query = WebApiUtil.getObject("searchQueryOriginal");
             final String execTime = WebApiUtil.getObject("execTime");
             final int pageSize = Integer.parseInt((String) WebApiUtil.getObject("pageSize"));
             final int allRecordCount = Integer.parseInt((String) WebApiUtil
@@ -177,7 +217,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     .getObject("facetResponse");
             final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil
                     .getObject("moreLikeThisResponse");
-            List<String> getFields = WebApiUtil.getObject("getFields");
 
             buf.append("<Q>");
             buf.append(escapeXml(query));
@@ -197,7 +236,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("\" value=\"");
                     buf.append(value);
                     buf.append("\" original_value=\"");
-                    // TODO: should be saved original input value
                     buf.append(URLEncoder.encode(value, Constants.UTF_8));
                     buf.append("\"/>");
                 }
@@ -231,11 +269,12 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                                 && entry.getValue() != null
                                 && ComponentUtil.getQueryHelper()
                                         .isApiResponseField(name)) {
-                            if (name.startsWith(GSA_META_PREFIX)) {
+                            if (name.startsWith(gsaMetaPrefix)) {
                                 final String tagName = name.replaceAll(
-                                        "^" + GSA_META_PREFIX, "").replaceAll(
+                                        "^" + gsaMetaPrefix, "").replaceAll(
                                         GSA_META_SUFFIX + "\\z", "");
-                                if (getFields.contains(tagName)) {
+                                if (getFields != null
+                                        && getFields.contains(tagName)) {
                                     buf.append("<MT N=\"");
                                     buf.append(tagName);
                                     buf.append("\" V=\"");
@@ -666,5 +705,46 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     public void setXmlPathPrefix(final String xmlPathPrefix) {
         this.gsaPathPrefix = xmlPathPrefix;
+    }
+
+    static class WrappedWebApiRequest extends WebApiRequest {
+        private Map<String, String[]> parameters;
+        private Map<String, String[]> extraParameters;
+
+        public WrappedWebApiRequest(final HttpServletRequest request,
+                final String servletPath,
+                final Map<String, String[]> extraParams) {
+            super(request, servletPath);
+            extraParameters = extraParams;
+       }
+
+        @Override
+        public String getParameter(final String name) {
+            String[] values = getParameterMap().get(name);
+            if (values != null) {
+                return values[0];
+            }
+            return super.getParameter(name);
+        }
+
+        @Override
+        public Map<String, String[]> getParameterMap() {
+            if (parameters == null) {
+                parameters = new HashMap<String, String[]>();
+                parameters.putAll(super.getParameterMap());
+                parameters.putAll(extraParameters);
+            }
+            return Collections.unmodifiableMap(parameters);
+        }
+
+        @Override
+        public Enumeration<String> getParameterNames() {
+            return Collections.enumeration(getParameterMap().keySet());
+        }
+
+        @Override
+        public String[] getParameterValues(final String name) {
+            return getParameterMap().get(name);
+        }
     }
 }

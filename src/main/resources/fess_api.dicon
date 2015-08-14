@@ -7,13 +7,24 @@
  			<arg>xmlApiManager</arg>
 		</initMethod>
 		<initMethod name="add">
- 			<arg>jsonApiManager</arg>
+			<arg>jsonApiManager</arg>
 		</initMethod>
+		<!-- GSA API -->
+		<!--
+		<initMethod name="add">
+			<arg>gsaApiManager</arg>
+		</initMethod>
+		-->
 	</component>
 
 	<component name="xmlApiManager" class="jp.sf.fess.api.xml.XmlApiManager">
 	</component>
 	<component name="jsonApiManager" class="jp.sf.fess.api.json.JsonApiManager">
 	</component>
+	<!-- GSA API -->
+	<!--
+	<component name="gsaApiManager" class="jp.sf.fess.api.xml.GsaApiManager">
+	</component>
+	-->
 
 </components>
