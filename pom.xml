@@ -149,9 +149,7 @@
 						<exclude>org/codelibs/fess/app/web/admin/RequestHeaderAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/base/AbstractLoginAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/ErrorAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/RootForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/LoginAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/RootAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/ErrorForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/LoginForm.java</exclude>
 					</excludes>

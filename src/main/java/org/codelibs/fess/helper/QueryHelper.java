@@ -16,21 +16,6 @@
 
 package org.codelibs.fess.helper;
 
-/*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +41,7 @@ import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
 import org.codelibs.fess.util.QueryUtil;
 import org.codelibs.fess.util.SearchParamMap;
+import org.lastaflute.web.ruts.message.ActionMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
@@ -624,7 +610,8 @@ public class QueryHelper implements Serializable {
             final String value1 = split[0].trim();
             final String value2 = split[1].trim();
             if ("*".equals(value1) && "*".equals(value2)) {
-                throw new InvalidQueryException("errors.invalid_query_str_range", "Invalid range: " + value);
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryStrRange(ActionMessages.GLOBAL_PROPERTY_KEY),
+                        "Invalid range: " + value);
             }
             buf.append(prefix);
             buf.append(QueryUtil.escapeRangeValue(value1));
@@ -632,7 +619,8 @@ public class QueryHelper implements Serializable {
             buf.append(QueryUtil.escapeRangeValue(value2));
             buf.append(suffix);
         } else {
-            throw new InvalidQueryException("errors.invalid_query_str_range", "Invalid range: " + value);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryStrRange(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid range: " + value);
         }
     }
 
@@ -730,13 +718,17 @@ public class QueryHelper implements Serializable {
             buf.append('\\');
         }
         if (quoted) {
-            throw new InvalidQueryException("errors.invalid_query_quoted", "Invalid quoted: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryQuoted(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid quoted: " + query);
         } else if (curlyBracket > 0) {
-            throw new InvalidQueryException("errors.invalid_query_curly_bracket", "Invalid curly bracket: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCurlyBracket(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid curly bracket: " + query);
         } else if (squareBracket > 0) {
-            throw new InvalidQueryException("errors.invalid_query_square_bracket", "Invalid square bracket: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySquareBracket(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid square bracket: " + query);
         } else if (parenthesis > 0) {
-            throw new InvalidQueryException("errors.invalid_query_parenthesis", "Invalid parenthesis: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParenthesis(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid parenthesis: " + query);
         }
         if (buf.length() > 0) {
             addQueryPart(buf.toString(), valueList, sortFieldMap, highLightQueryList, fieldLogMap);

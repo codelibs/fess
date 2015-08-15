@@ -16,18 +16,21 @@
 
 package org.codelibs.fess;
 
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.lastaflute.web.validation.VaMessenger;
+
 public class InvalidQueryException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    private final String messageCode;
+    private final VaMessenger<FessMessages> messageCode;
 
-    public InvalidQueryException(final String messageCode, final String message, final Throwable cause) {
+    public InvalidQueryException(final VaMessenger<FessMessages> messageCode, final String message, final Throwable cause) {
         super(message, cause);
         this.messageCode = messageCode;
     }
 
-    public InvalidQueryException(final String messageCode, final String message) {
+    public InvalidQueryException(final VaMessenger<FessMessages> messageCode, final String message) {
         super(message);
         this.messageCode = messageCode;
     }
@@ -35,7 +38,7 @@ public class InvalidQueryException extends FessSystemException {
     /**
      * @return the messageCode
      */
-    public String getMessageCode() {
+    public VaMessenger<FessMessages> getMessageCode() {
         return messageCode;
     }
 

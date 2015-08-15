@@ -80,9 +80,9 @@
 				<p class="username">
 					<la:message key="labels.searchheader_username" arg0="${f:h(username)}" />
 					|
-					<la:link href="/login/logout" styleClass="logout-link">
+					<todo:link href="/login/logout" styleClass="logout-link">
 						<la:message key="labels.logout" />
-					</la:link>
+					</todo:link>
 				</p>
 				</c:if>
 			</div>

@@ -29,11 +29,4 @@ public class BoostDocumentRuleSearchForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public Map<String, String> searchParams = new HashMap<String, String>();
-
-    //@IntegerType
-    public String pageNumber;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
 }

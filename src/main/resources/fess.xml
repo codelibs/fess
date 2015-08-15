@@ -156,12 +156,14 @@
 		<property name="roleSeparator">","</property>
 		 -->
 	</component>
-<!--
 	<component name="screenShotManager" class="org.codelibs.fess.screenshot.ScreenShotManager">
+		<!-- 
 		<postConstruct name="add">
 			<arg>htmlScreenShotGenerator</arg>
 		</postConstruct>
+		 -->
 	</component>
+<!--
 	<component name="webDriver" class="org.openqa.selenium.phantomjs.PhantomJSDriver">
 		<arg>
 			<component class="org.openqa.selenium.remote.DesiredCapabilities">

@@ -14,13 +14,13 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web;
+package org.codelibs.fess.app.web.help;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
-public class RootAction extends FessSearchAction {
+public class HelpAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
@@ -31,13 +31,16 @@ public class RootAction extends FessSearchAction {
     //     
 
     // ===================================================================================
+    //                                                                               Hook
+    //                                                                              ======
+
+    // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
-    @Execute
-    public HtmlResponse index(final RootForm form) {
-        searchAvailable();
 
-        return asHtml(path_IndexJsp).renderWith(data -> {
+    @Execute
+    public HtmlResponse help(HelpForm form) {
+        return asHtml(path_HelpJsp).renderWith(data -> {
             buildLabelParams(data, form.fields);
             buildUserParams(data);
             buildInitParams();
