@@ -31,17 +31,18 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import javax.annotation.Resource;
+
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.dbflute.hook.AccessContext;
-import org.dbflute.optional.OptionalObject;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextArranger;
-import org.lastaflute.db.dbflute.accesscontext.AccessContextResource;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.login.LoginManager;
-import org.lastaflute.web.login.UserBean;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
@@ -57,6 +58,15 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                          ==========
     /** The application type for FESs, e.g. used by access context. */
     protected static final String APP_TYPE = "FES"; // #change_it_first
+
+    /** The user type for Admin, e.g. used by access context. */
+    protected static final String USER_TYPE = "A";
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    @Resource
+    private FessLoginAssist fessLoginAssist;
 
     // ===================================================================================
     //                                                                               Hook
@@ -94,30 +104,22 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                      ==============
     @Override
     protected AccessContextArranger newAccessContextArranger() { // for framework
+        // fess does not use DBFlute, and this is unneeded so dummy 
         return resource -> {
             final AccessContext context = new AccessContext();
             context.setAccessLocalDateTimeProvider(() -> currentDateTime());
-            context.setAccessUserProvider(() -> buildAccessUserTrace(resource));
+            context.setAccessUserProvider(() -> "unused");
             return context;
         };
-    }
-
-    private String buildAccessUserTrace(AccessContextResource resource) {
-        // #app_customize you can customize the user trace for common column
-        final StringBuilder sb = new StringBuilder();
-        sb.append(myUserType().map(userType -> userType + ":").orElse(""));
-        sb.append(getUserBean().map(bean -> bean.getUserId()).orElseGet(() -> -1L));
-        sb.append(",").append(myAppType()).append(",").append(resource.getModuleName());
-        final String trace = sb.toString();
-        final int columnSize = 200;
-        return trace.length() > columnSize ? trace.substring(0, columnSize) : trace;
     }
 
     // ===================================================================================
     //                                                                           User Info
     //                                                                           =========
     @Override
-    protected OptionalThing<UserBean> getUserBean() { // to return as concrete class
+    protected OptionalThing<FessUserBean> getUserBean() { // to return as concrete class
+        // #login waiting
+        //return fessLoginAssist.getSessionUserBean();
         return OptionalThing.empty();// uses application server authentication so empty here
     }
 
@@ -128,11 +130,13 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Override
     protected OptionalThing<String> myUserType() { // for framework
-        return OptionalObject.empty(); // same reason as getUserBean()
+        return OptionalThing.of(USER_TYPE); // same reason as getUserBean()
     }
 
     @Override
     protected OptionalThing<LoginManager> myLoginManager() {
+        // #login waiting
+        //return OptionalThing.of(fessLoginAssist);
         return OptionalThing.empty(); // same reason as getUserBean()
     }
 
