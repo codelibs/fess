@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.dict_configuration" /></title>
+<title>Fess | <bean:message key="labels.dict_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,7 +18,7 @@
 				<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.dict_list_title" />
+					<bean:message key="labels.dict_list_title" />
 				</h1>
 			</section>
 
@@ -30,33 +30,33 @@
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<la:message key="labels.dict_list_link" />
+									<bean:message key="labels.dict_list_link" />
 								</h3>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
-									<html:messages id="msg" message="true">
+									<la:messages id="msg" message="true">
 										<div class="alert-message info">
 											<bean:write name="msg" ignore="true" />
 										</div>
-									</html:messages>
-									<html:errors />
+									</la:messages>
+									<la:errors />
 								</div>
 
 								<%-- List --%>
 								<c:if test="${fn:length(dictFiles) == 0}">
 									<p class="alert-message warning">
-										<la:message key="labels.list_could_not_find_crud_table" />
+										<bean:message key="labels.list_could_not_find_crud_table" />
 									</p>
 								</c:if>
 								<c:if test="${fn:length(dictFiles) > 0}">
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><la:message key="labels.dictionary_type" /></th>
-												<th><la:message key="labels.dictionary_name" /></th>
+												<th><bean:message key="labels.dictionary_type" /></th>
+												<th><bean:message key="labels.dictionary_name" /></th>
 											</tr>
 										</thead>
 										<tbody>
