@@ -1,44 +1,69 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
-	flush="true">
-	<tiles:put name="title">
-		<bean:message key="labels.design_configuration" />
-	</tiles:put>
-	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
-	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
-	<tiles:put name="menu" value="/WEB-INF/view/common/admin/menu.jsp" />
-	<tiles:put name="menuType" value="design" />
-	<tiles:put name="headerScript" type="string"></tiles:put>
-	<tiles:put name="body" type="string">
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fess | <bean:message key="labels.design_configuration" /></title>
+<jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
+</head>
+<body class="skin-blue sidebar-mini">
+	<div class="wrapper">
+		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
+		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
+			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuType" value="design" />
+		</jsp:include>
 
-		<%-- Message: BEGIN --%>
-		<div>
-			<html:messages id="msg" message="true">
-				<div class="alert-message info"><bean:write name="msg" ignore="true" /></div>
-			</html:messages>
-			<html:errors />
-		</div>
-		<%-- Message: END --%>
-		<c:if test="${editable}">
-			<s:form>
-				<div>
-					<h3>
-						<bean:message key="labels.design_title_edit_content" />
-					</h3>
-					<h4>${f:h(fileName)}</h4>
-					<div>
-						<html:textarea
-								property="content" style="width:98%" rows="20"></html:textarea>
-					</div>
-					<div style="margin-top:5px;">
-						<input type="submit" class="btn small" name="update"
-							value="<bean:message key="labels.design_button_update"/>" />
-						<input type="submit" class="btn small" name="back"
-							value="<bean:message key="labels.design_button_back"/>" />
+		<div class="content-wrapper">
+		
+			<%-- Content Header --%>
+			<section class="content-header">
+				<h1>
+					<bean:message key="labels.design_configuration" />
+				</h1>
+			</section>
+			
+			<section class="content">
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div>
+							<html:messages id="msg" message="true">
+								<div class="alert-message info"><bean:write name="msg" ignore="true" /></div>
+							</html:messages>
+							<html:errors />
+						</div>
+						<div class="box">
+							<c:if test="${editable}">
+								<s:form>
+									<%-- Box Header --%>
+									<div class="box-header with-border">
+										<h3>
+											<bean:message key="labels.design_title_edit_content" />
+										</h3>
+									</div>
+									<%-- Box Body --%>
+									<div class="box-body">
+										<h4>${f:h(fileName)}</h4>
+										<div>
+											<html:textarea property="content" style="width:98%" rows="20"></html:textarea>
+										</div>
+									</div>
+									<%-- Box Footer --%>
+									<div class="box-footer">
+										<input type="submit" class="btn small" name="update" value="<bean:message key="labels.design_button_update"/>" />
+										<input type="submit" class="btn small" name="back" value="<bean:message key="labels.design_button_back"/>" />
+									</div>
+									<html:hidden property="fileName" />
+								</s:form>
+							</c:if>
+						</div>
 					</div>
 				</div>
-				<html:hidden property="fileName" />
-			</s:form>
-		</c:if>
-
-	</tiles:put>
-</tiles:insert>
+				
+			</section>
+		</div>
+		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
+	</div>
+	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
+</body>
+</html>
