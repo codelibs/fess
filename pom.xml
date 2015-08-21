@@ -69,7 +69,7 @@
         <database>h2</database>
         <databaseGroupId>com.h2database</databaseGroupId>
         <databaseArtifactId>h2</databaseArtifactId>
-        <databaseVersion>1.4.181</databaseVersion>
+        <databaseVersion>1.4.188</databaseVersion>
         <databaseDriver>org.h2.Driver</databaseDriver>
         <databaseUrl>jdbc:h2:file:${basedir}/src/main/webapp/WEB-INF/db/fess</databaseUrl>
         <databaseTestUrl>jdbc:h2:file:${basedir}/target/test-classes/db/fess</databaseTestUrl>
