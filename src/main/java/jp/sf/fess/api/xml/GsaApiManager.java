@@ -70,7 +70,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     protected String gsaPathPrefix = "/gsa";
 
-    public String gsaMetaPrefix = "_MT_";
+    public String gsaMetaPrefix = "MT_";
 
     private static final String GSA_META_SUFFIX = "_s";
 
