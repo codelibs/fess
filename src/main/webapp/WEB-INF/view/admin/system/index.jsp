@@ -17,12 +17,12 @@
 								<%-- Content Header --%>
 								<%-- Message --%>
 								<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 												<div class="alert-message info">
 														<bean:write name="msg" ignore="true" />
 												</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 								</div>
 
 								<section class="content">
@@ -91,12 +91,12 @@
 																												</c:if>
 																												<c:if test="${crawlerRunning}">
 																														<div class="form-inline">
-																																<html:select property="sessionId" styleClass="form-control">
+																																<la:select property="sessionId" styleClass="form-control">
 																																		<option value=""><la:message key="labels.crawler_sessionid_all"/></option>
 																																		<c:forEach var="runningSessionId" items="${runningSessionIds}">
 																																				<option value="${f:h(runningSessionId)}">${f:h(runningSessionId)}</option>
 																																		</c:forEach>
-																																</html:select>
+																																</la:select>
 																																<input type="submit" class="btn" name="stop"
 																																			 value="<la:message key="labels.crawler_button_stop"/>" />
 																														</div>

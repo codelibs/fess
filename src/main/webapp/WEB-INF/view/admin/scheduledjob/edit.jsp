@@ -73,12 +73,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -105,21 +105,21 @@
 									<div class="form-group">
 											<label for="jobLogging"><la:message key="labels.scheduledjob_jobLogging"/></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="jobLogging" />
+													<la:checkbox property="jobLogging" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="crawler"><la:message key="labels.scheduledjob_crawler" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="crawler" />
+													<la:checkbox property="crawler" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="available"><la:message key="labels.scheduledjob_status" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="available" />
+													<la:checkbox property="available" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>

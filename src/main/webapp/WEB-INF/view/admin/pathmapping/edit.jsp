@@ -72,12 +72,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 									<%-- Form Fields --%>
 									<div class="form-group">
@@ -90,17 +90,17 @@
 									</div>
 									<div class="form-group">
  										<label for="processType"><la:message key="labels.processType" /></label>
- 										<html:select property="processType" styleClass="form-control">
- 											<html:option value="C">
+ 										<la:select property="processType" styleClass="form-control">
+ 											<la:option value="C">
  												<la:message key="labels.path_mapping_pt_crawling" />
- 											</html:option>
- 											<html:option value="D">
+ 											</la:option>
+ 											<la:option value="D">
  												<la:message key="labels.path_mapping_pt_displaying" />
- 											</html:option>
- 											<html:option value="B">
+ 											</la:option>
+ 											<la:option value="B">
  												<la:message key="labels.path_mapping_pt_both" />
- 											</html:option>
- 										</html:select>
+ 											</la:option>
+ 										</la:select>
  									</div>
 									<div class="form-group">
 										<label for="sortOrder"><la:message key="labels.sortOrder" /></label>

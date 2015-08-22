@@ -34,54 +34,54 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
 									<div class="form-group">
 											<label for="searchLog"><la:message key="labels.search_log_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="searchLog" />
+													<la:checkbox property="searchLog" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="userInfo"><la:message key="labels.user_info_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="userInfo" />
+													<la:checkbox property="userInfo" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="userFavorite"><la:message key="labels.user_favorite_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="userFavorite" />
+													<la:checkbox property="userFavorite" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="appendQueryParameter"><la:message key="labels.append_query_param_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="appendQueryParameter" />
+													<la:checkbox property="appendQueryParameter" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="webApiXml"><la:message key="labels.web_api_xml_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="webApiXml" />
+													<la:checkbox property="webApiXml" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="webApiJson"><la:message key="labels.web_api_json_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="webApiJson" />
+													<la:checkbox property="webApiJson" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
@@ -92,17 +92,17 @@
 									<div class="form-group">
 											<label for="supportedSearch"><la:message key="labels.supported_search_feature" /></label>
 											<div class="form-inline">
-													<html:select property="supportedSearch" styleClass="form-control">
+													<la:select property="supportedSearch" styleClass="form-control">
 															<c:forEach var="item" items="${supportedSearchItems}">
-																	<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
+																	<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 															</c:forEach>
-													</html:select>
+													</la:select>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="hotSearchWord"><la:message key="labels.hot_search_word_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="hotSearchWord" />
+													<la:checkbox property="hotSearchWord" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
@@ -141,21 +141,21 @@
 									<div class="form-group">
 											<label for="diffCrawling"><la:message key="labels.diff_crawling" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="diffCrawling" />
+													<la:checkbox property="diffCrawling" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="useAclAsRole"><la:message key="labels.use_acl_as_role" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="useAclAsRole" />
+													<la:checkbox property="useAclAsRole" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
 											<label for="serverRotation"><la:message key="labels.server_rotation" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="serverRotation" />
+													<la:checkbox property="serverRotation" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>
@@ -168,12 +168,12 @@
 									<div class="form-group">
 											<label for="dayForCleanup"><la:message key="labels.day_for_cleanup" /></label>
 											<div class="form-inline">
-													<html:select property="dayForCleanup" styleClass="form-control">
-															<html:option value="-1"><la:message key="labels.none"/></html:option>
+													<la:select property="dayForCleanup" styleClass="form-control">
+															<la:option value="-1"><la:message key="labels.none"/></la:option>
 															<c:forEach var="d" items="${dayItems}">
-																	<html:option value="${f:h(d)}">${f:h(d)}</html:option>
+																	<la:option value="${f:h(d)}">${f:h(d)}</la:option>
 															</c:forEach>
-													</html:select>
+													</la:select>
 													<la:message key="labels.day"/>
 											</div>
 									</div>
@@ -190,7 +190,7 @@
 									<div class="form-group">
 											<label for="suggestSearchLog"><la:message key="labels.suggest_search_log_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="suggestSearchLog" />
+													<la:checkbox property="suggestSearchLog" />
 													<la:message key="labels.enabled"/>
 											</div>
 									</div>

@@ -74,12 +74,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -93,11 +93,11 @@
 									</div>
 									<div class="form-group">
 										<label for="protocolScheme"><la:message key="labels.file_authentication_scheme" /></label>
-										<html:select property="protocolScheme" styleClass="form-control">
+										<la:select property="protocolScheme" styleClass="form-control">
 												<c:forEach var="item" items="${protocolSchemeItems}">
-														<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
+														<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 												</c:forEach>
-										</html:select>
+										</la:select>
 									</div>
 									<div class="form-group">
 										<label for="username"><la:message key="labels.file_authentication_username" /></label>
@@ -105,7 +105,7 @@
 									</div>
 									<div class="form-group">
 										<label for="password"><la:message key="labels.file_authentication_password" /></label>
-										<html:password property="password" styleClass="form-control" />
+										<la:password property="password" styleClass="form-control" />
 									</div>
 									<div class="form-group">
 										<label for="parameters"><la:message key="labels.file_authentication_parameters" /></label>
@@ -113,11 +113,11 @@
 									</div>
 									<div class="form-group">
 										<label for="fileConfigId"><la:message key="labels.file_authentication_file_crawling_config" /></label>
-										<html:select property="fileConfigId" styleClass="form-control">
+										<la:select property="fileConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${fileConfigItems}">
-														<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
+														<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 												</c:forEach>
-										</html:select>
+										</la:select>
 									</div>
 								</div>
 

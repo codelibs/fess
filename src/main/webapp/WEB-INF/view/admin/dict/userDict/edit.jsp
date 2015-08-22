@@ -98,11 +98,11 @@
 				<div class="box-body">
 				    <%-- Message --%>
 				    <div>
-					<la:messages id="msg" message="true">
+					<la:info id="msg" message="true">
 					    <div class="alert-message info">
 						<bean:write name="msg" ignore="true" />
 					    </div>
-					</la:messages>
+					</la:info>
 					<la:errors />
 				    </div>
 

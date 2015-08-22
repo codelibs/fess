@@ -30,7 +30,7 @@
 				<div class="callout callout-danger lead">
 					<h4>Error</h4>
 					<p>
-						<html:errors />
+						<la:errors />
 					</p>
 					<p>
 						<la:link href="index">

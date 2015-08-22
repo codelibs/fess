@@ -79,12 +79,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -92,7 +92,7 @@
 										<tbody>
 											<tr>
 												<th><la:message key="labels.crawling_session_session_id" /></th>
-												<td><html:link href="${f:url('/admin/searchList/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</html:link>
+												<td><la:link href="${f:url('/admin/searchList/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</la:link>
 													<la:hidden property="sessionId" /></td>
 											</tr>
 											<tr>

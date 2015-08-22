@@ -48,12 +48,12 @@
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
-									<html:messages id="msg" message="true">
+									<la:info id="msg" message="true">
 										<div class="alert-message info">
 											<bean:write name="msg" ignore="true" />
 										</div>
-									</html:messages>
-									<html:errors />
+									</la:info>
+									<la:errors />
 								</div>
 
 								<%-- List --%>
@@ -92,10 +92,10 @@
 																${doc.contentDescription}
 																<div style="text-align: right;">
 																	<c:if test="${!solrProcessRunning}">
-																		<html:link
+																		<la:link
 																			href="confirmDelete?query=${f:u(query)}&docId=${f:u(doc.docId)}&url=${f:u(doc.url)}">
 																			<la:message key="labels.search_list_delete_link" />
-																		</html:link>
+																		</la:link>
 																	</c:if>
 																	<c:if test="${solrProcessRunning}">
 																		<la:message key="labels.search_list_delete_link" />

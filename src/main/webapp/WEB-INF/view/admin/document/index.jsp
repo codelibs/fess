@@ -13,10 +13,10 @@
 		<div id="main">
 		<%-- Message: BEGIN --%>
 		<div>
-			<html:messages id="msg" message="true">
+			<la:info id="msg" message="true">
 				<div class="alert-message info"><bean:write name="msg" ignore="true" /></div>
-			</html:messages>
-			<html:errors />
+			</la:info>
+			<la:errors />
 		</div>
 		<%-- Message: END --%>
 
@@ -37,15 +37,15 @@
 								<td>
 									<la:hidden property="groupName"
 										value="${f:u(groupAction.groupName)}" />
-									<html:submit
+									<la:submit
 										property="commit" disabled="${solrProcessRunning}"
 										styleClass="btn">
 										<la:message key="labels.es_action_commit" />
-									</html:submit>
-									<html:submit property="optimize"
+									</la:submit>
+									<la:submit property="optimize"
 										disabled="${solrProcessRunning}" styleClass="btn">
 										<la:message key="labels.es_action_optimize" />
-									</html:submit>
+									</la:submit>
 								</td>
 							</tr>
 							</la:form>
@@ -65,22 +65,22 @@
 							<tr>
 								<th style="width:200px;" rowspan="2">${f:h(groupAction.groupName)}</th>
 								<td>
-									<html:select property="sessionId"
+									<la:select property="sessionId"
 										disabled="${solrProcessRunning}">
-										<html:option value="">
+										<la:option value="">
 											<la:message key="labels.es_action_none" />
-										</html:option>
+										</la:option>
 										<c:forEach var="sessionIdItem"
 											items="${groupAction.sessionIdItems}">
-											<html:option value="${f:u(sessionIdItem.value)}">${f:h(sessionIdItem.label)}</html:option>
+											<la:option value="${f:u(sessionIdItem.value)}">${f:h(sessionIdItem.label)}</la:option>
 										</c:forEach>
-										<html:option value="*">
-											<la:message key="labels.es_action_all" /> (${f:h(groupAction.totalCount)})</html:option>
-									</html:select>
-									<html:submit styleClass="btn" property="delete"
+										<la:option value="*">
+											<la:message key="labels.es_action_all" /> (${f:h(groupAction.totalCount)})</la:option>
+									</la:select>
+									<la:submit styleClass="btn" property="delete"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_delete" />
-									</html:submit>
+									</la:submit>
 									<la:hidden property="groupName"
 										value="${f:u(groupAction.groupName)}" />
 								</td>
@@ -89,15 +89,15 @@
 								<td style="vertical-align: middle;">
 									<la:message key="labels.es_action_url_delete" />
 									<la:text property="deleteUrl" style="width:150px;"
-										disabled="${solrProcessRunning}"></la:text> <html:submit
+										disabled="${solrProcessRunning}"></la:text> <la:submit
 										property="confirmByUrl" styleClass="btn"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_confirm_list" />
-									</html:submit>
-									<html:submit property="deleteByUrl"
+									</la:submit>
+									<la:submit property="deleteByUrl"
 										disabled="${solrProcessRunning}" styleClass="btn">
 										<la:message key="labels.es_action_delete" />
-									</html:submit>
+									</la:submit>
 								</td>
 							</tr>
 							</la:form>
@@ -132,8 +132,8 @@
 								items="${groupAction.sessionIdItems}">
 								<tr>
 									<td>${f:h(groupAction.groupName)}</td>
-									<td align="center"><html:link
-											href="${f:url('/admin/searchList/search')}?query=segment:${f:u(sessionIdItem.value)}">${f:h(sessionIdItem.value)}</html:link></td>
+									<td align="center"><la:link
+											href="${f:url('/admin/searchList/search')}?query=segment:${f:u(sessionIdItem.value)}">${f:h(sessionIdItem.value)}</la:link></td>
 									<td align="center">${f:h(sessionIdItem.count)}</td>
 								</tr>
 							</c:forEach>
@@ -167,10 +167,10 @@
 								<la:form style="margin-bottom:0;">
 									<la:hidden property="deleteSuggestType"
 										value="content" />
-									<html:submit styleClass="btn" property="deleteSuggest"
+									<la:submit styleClass="btn" property="deleteSuggest"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_delete" />
-									</html:submit>
+									</la:submit>
 								</la:form>
 							</td>
 						</tr>
@@ -181,10 +181,10 @@
 								<la:form style="margin-bottom:0;">
 									<la:hidden property="deleteSuggestType"
 										value="searchLog" />
-									<html:submit styleClass="btn" property="deleteSuggest"
+									<la:submit styleClass="btn" property="deleteSuggest"
 										disabled="${solrProcessRunning}">
 										<la:message key="labels.es_action_delete" />
-									</html:submit>
+									</la:submit>
 								</la:form>
 							</td>
 						</tr>

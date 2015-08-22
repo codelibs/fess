@@ -73,12 +73,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -100,11 +100,11 @@
 									</div>
 									<div class="form-group">
 										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
-										<html:select property="roleTypeIds" multiple="true" styleClass="form-control">
+										<la:select property="roleTypeIds" multiple="true" styleClass="form-control">
 											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-												<html:option value="${f:u(rt.id)}">${f:h(rt.name)}</html:option>
+												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
 											</c:forEach>
-										</html:select>
+										</la:select>
 									</div>
 									<div class="form-group">
 										<label for="sortOrder"><la:message key="labels.sortOrder" /></label>

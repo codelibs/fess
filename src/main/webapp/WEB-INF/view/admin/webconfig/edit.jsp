@@ -74,12 +74,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -140,30 +140,30 @@
 									</div>
 									<div class="form-group">
 										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
-										<html:select property="roleTypeIds" multiple="true" styleClass="form-control">
+										<la:select property="roleTypeIds" multiple="true" styleClass="form-control">
 											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-												<html:option value="${f:u(rt.id)}">${f:h(rt.name)}</html:option>
+												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
 											</c:forEach>
-										</html:select>
+										</la:select>
 									</div>
 									<div class="form-group">
 										<label for="roleTypeIds"><la:message key="labels.label_type" /></label>
-										<html:select property="labelTypeIds" multiple="true" styleClass="form-control">
+										<la:select property="labelTypeIds" multiple="true" styleClass="form-control">
 											<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-												<html:option value="${f:u(l.id)}">${f:h(l.name)}</html:option>
+												<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
 											</c:forEach>
-										</html:select>
+										</la:select>
 									</div>
 									<div class="form-group">
 										<label for="available"><la:message key="labels.available" /></label>
-										<html:select property="available" styleClass="form-control">
-											<html:option value="true">
+										<la:select property="available" styleClass="form-control">
+											<la:option value="true">
 												<la:message key="labels.enabled" />
-											</html:option>
-											<html:option value="false">
+											</la:option>
+											<la:option value="false">
 												<la:message key="labels.disabled" />
-											</html:option>
-										</html:select>
+											</la:option>
+										</la:select>
 									</div>
 								</div>
 

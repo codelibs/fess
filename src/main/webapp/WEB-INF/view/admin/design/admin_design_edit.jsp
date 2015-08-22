@@ -27,11 +27,9 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div>
-                            <%--
-							<la:messages id="msg" message="true">
+							<la:info id="msg" message="true">
 								<div class="alert-message info"><la:write name="msg" ignore="true" /></div>
-							</la:messages>
-                            --%>
+							</la:info>
 							<la:errors />
 						</div>
 						<div class="box">

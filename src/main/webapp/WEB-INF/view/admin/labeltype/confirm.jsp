@@ -79,12 +79,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -116,11 +116,11 @@
 																</c:if>
 															</c:forEach>
 														</c:forEach>
-														<html:select property="roleTypeIds" multiple="true" style="display:none;">
+														<la:select property="roleTypeIds" multiple="true" style="display:none;">
 															<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-																<html:option value="${f:u(rt.id)}">${f:h(rt.name)}</html:option>
+																<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
 															</c:forEach>
-														</html:select>
+														</la:select>
 													</td>
 											</tr>
 											<tr>

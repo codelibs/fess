@@ -74,12 +74,12 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
 												<bean:write name="msg" ignore="true" />
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
@@ -93,11 +93,11 @@
 									</div>
 									<div class="form-group">
 										<label for="webConfigId"><la:message key="labels.request_header_web_crawling_config" /></label>
-										<html:select property="webConfigId" styleClass="form-control">
+										<la:select property="webConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${webConfigItems}">
-														<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
+														<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 												</c:forEach>
-										</html:select>
+										</la:select>
 									</div>
 								</div>
 
