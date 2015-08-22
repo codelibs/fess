@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.design;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -184,14 +183,11 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
         }
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
-            logger.error("Not found the file: {}", file.getAbsolutePath(), e);
-            throwValidationError(messages -> messages.addErrorsFailedToDownloadFile(GLOBAL, form.fileName), toMainHtml());
-        }
-        return asStream(file.getName()).stream(fis);
+        return asStream(file.getName()).stream(out -> {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                out.write(fis);
+            }
+        });
     }
 
     @Token(save = false, validate = true)

@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.base.login;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.app.web.LoginAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
@@ -102,7 +101,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     protected void checkPermission(LoginHandlingResource resource) throws LoginRequiredException {
         super.checkPermission(resource);
     }
-    
+
     // ===================================================================================
     //                                                                      Login Resource
     //                                                                      ==============
@@ -113,6 +112,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
 
     @Override
     protected Class<?> getLoginActionType() {
-        return LoginAction.class;
+        // TODO
+        //        return LoginAction.class;
+        throw new UnsupportedOperationException("TODO");
     }
 }
