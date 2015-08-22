@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.dict_userdict_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_userdict_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,23 +18,23 @@
 		<%-- Content Header --%>
 		<section class="content-header">
 		<h1>
-			<bean:message key="labels.dict_userdict_title" />
+			<la:message key="labels.dict_userdict_title" />
 		</h1>
 		<ol class="breadcrumb">
 			<li><la:link href="index">
-			<bean:message key="labels.dict_userdict_list_link" />
+			<la:message key="labels.dict_userdict_list_link" />
 			</la:link></li>
 			<c:if test="${crudMode == 1}">
-			<li class="active"><a href="#"><bean:message key="labels.dict_userdict_link_create" /></a></li>
+			<li class="active"><a href="#"><la:message key="labels.dict_userdict_link_create" /></a></li>
 			</c:if>
 			<c:if test="${crudMode == 2}">
-			<li class="active"><a href="#"><bean:message key="labels.dict_userdict_link_update" /></a></li>
+			<li class="active"><a href="#"><la:message key="labels.dict_userdict_link_update" /></a></li>
 			</c:if>
 			<c:if test="${crudMode == 3}">
-			<li class="active"><a href="#"><bean:message key="labels.dict_userdict_link_delete" /></a></li>
+			<li class="active"><a href="#"><la:message key="labels.dict_userdict_link_delete" /></a></li>
 			</c:if>
 			<c:if test="${crudMode == 4}">
-			<li class="active"><a href="#"><bean:message key="labels.dict_userdict_link_confirm" /></a></li>
+			<li class="active"><a href="#"><la:message key="labels.dict_userdict_link_confirm" /></a></li>
 			</c:if>
 		</ol>
 		</section>
@@ -51,65 +51,65 @@
 				<div class="box-header with-border">
 					<h3 class="box-title">
 					<c:if test="${crudMode == 1}">
-						<bean:message key="labels.dict_userdict_link_create" />
+						<la:message key="labels.dict_userdict_link_create" />
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<bean:message key="labels.dict_userdict_link_update" />
+						<la:message key="labels.dict_userdict_link_update" />
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<bean:message key="labels.dict_userdict_link_delete" />
+						<la:message key="labels.dict_userdict_link_delete" />
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<bean:message key="labels.dict_userdict_link_confirm" />
+						<la:message key="labels.dict_userdict_link_confirm" />
 					</c:if>
 					</h3>
 					<div class="box-tools pull-right">
 					<span class="label label-default">
 						<la:link href="../index">
-						<bean:message key="labels.dict_list_link" />
+						<la:message key="labels.dict_list_link" />
 						</la:link>
 					</span>
 					<span class="label label-default">
 						<la:link href="index?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_userdict_list_link" />
+						<la:message key="labels.dict_userdict_list_link" />
 						</la:link>
 					</span>
 					<c:if test="${crudMode == 1}">
 						<span class="label label-default">
 						<a href="#">
-							<bean:message key="labels.dict_userdict_link_create" />
+							<la:message key="labels.dict_userdict_link_create" />
 						</a>
 						</span>
 					</c:if>
 					<c:if test="${crudMode == 2}">
 						<span class="label label-default">
 						<a href="#">
-							<bean:message key="labels.dict_userdict_link_update" />
+							<la:message key="labels.dict_userdict_link_update" />
 						</a>
 						</span>
 					</c:if>
 					<c:if test="${crudMode == 3}">
 						<span class="label label-default">
 						<a href="#">
-							<bean:message key="labels.dict_userdict_link_delete" />
+							<la:message key="labels.dict_userdict_link_delete" />
 						</a>
 						</span>
 					</c:if>
 					<c:if test="${crudMode == 4}">
 						<span class="label label-default">
 						<a href="#">
-							<bean:message key="labels.dict_userdict_link_confirm" />
+							<la:message key="labels.dict_userdict_link_confirm" />
 						</a>
 						</span>
 					</c:if>
 					<span class="label label-default">
 						<la:link href="downloadpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_userdict_link_download" />
+						<la:message key="labels.dict_userdict_link_download" />
 						</la:link>
 					</span>
 					<span class="label label-default">
 						<la:link href="uploadpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_userdict_link_upload" />
+						<la:message key="labels.dict_userdict_link_upload" />
 						</la:link>
 					</span>
 					</div>
@@ -120,7 +120,7 @@
 					<div>
 					<la:info id="msg" message="true">
 						<div class="alert-message info">
-						<bean:write name="msg" ignore="true" />
+						${msg}
 						</div>
 					</la:info>
 					<la:errors />
@@ -130,20 +130,20 @@
 					<table class="table table-bordered">
 					    <tbody>
 						<tr>
-							<th style="width: 150px;"><bean:message
+							<th style="width: 150px;"><la:message
 									key="labels.dict_userdict_token" /></th>
 							<td>${f:h(token)}<la:hidden property="token" /></td>
 						</tr>
 						<tr>
-							<th><bean:message key="labels.dict_userdict_segmentation" /></th>
+							<th><la:message key="labels.dict_userdict_segmentation" /></th>
 							<td>${f:h(segmentation)}<la:hidden property="segmentation" /></td>
 						</tr>
 						<tr>
-							<th><bean:message key="labels.dict_userdict_reading" /></th>
+							<th><la:message key="labels.dict_userdict_reading" /></th>
 							<td>${f:h(reading)}<la:hidden property="reading" /></td>
 						</tr>
 						<tr>
-							<th><bean:message key="labels.dict_userdict_pos" /></th>
+							<th><la:message key="labels.dict_userdict_pos" /></th>
 							<td>${f:h(pos)}<la:hidden property="pos" /></td>
 						</tr>
 					    </tbody>
@@ -153,30 +153,30 @@
 				<%-- Box Footer --%>
 				<div class="box-footer">
 					<c:if test="${crudMode == 1}">
-					<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.dict_userdict_button_back"/>" />
+					<input type="submit" class="btn" name="editagain" value="<la:message key="labels.dict_userdict_button_back"/>" />
 					<input type="submit" class="btn btn-primary" name="create"
-					       value="<bean:message key="labels.dict_userdict_button_create"/>"
+					       value="<la:message key="labels.dict_userdict_button_create"/>"
 					/>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-					<input type="submit" class="btn" name="editagain" value="<bean:message key="labels.dict_userdict_button_back"/>" />
+					<input type="submit" class="btn" name="editagain" value="<la:message key="labels.dict_userdict_button_back"/>" />
 					<input type="submit" class="btn btn-primary" name="update"
-					       value="<bean:message key="labels.dict_userdict_button_update"/>"
+					       value="<la:message key="labels.dict_userdict_button_update"/>"
 					/>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-					<input type="submit" class="btn" name="back" value="<bean:message key="labels.dict_userdict_button_back"/>" />
+					<input type="submit" class="btn" name="back" value="<la:message key="labels.dict_userdict_button_back"/>" />
 					<input type="submit" class="btn btn-primary" name="delete"
-					       value="<bean:message key="labels.dict_userdict_button_delete"/>"
+					       value="<la:message key="labels.dict_userdict_button_delete"/>"
 					/>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-					<input type="submit" class="btn" name="back" value="<bean:message key="labels.dict_userdict_button_back"/>" />
+					<input type="submit" class="btn" name="back" value="<la:message key="labels.dict_userdict_button_back"/>" />
 					<input type="submit" class="btn" name="editfromconfirm"
-					       value="<bean:message key="labels.dict_userdict_button_edit"/>"
+					       value="<la:message key="labels.dict_userdict_button_edit"/>"
 					/>
 					<input type="submit" class="btn" name="deletefromconfirm"
-					       value="<bean:message key="labels.dict_userdict_button_delete"/>"
+					       value="<la:message key="labels.dict_userdict_button_delete"/>"
 					/>
 					</c:if>
 				</div>

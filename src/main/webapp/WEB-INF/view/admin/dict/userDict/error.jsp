@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.dict_userdict_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_userdict_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,11 +16,11 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.wizard_start_title" />
+					<la:message key="labels.wizard_start_title" />
 				</h1>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="/admin/dict/">
-							<bean:message key="labels.dict_userdict_link_list" />
+							<la:message key="labels.dict_userdict_link_list" />
 						</la:link></li>
 				</ol>
 			</section>
@@ -34,7 +34,7 @@
 					</p>
 					<p>
 						<la:link href="index">
-							<bean:message key="labels.dict_userdict_button_back" />
+							<la:message key="labels.dict_userdict_button_back" />
 						</la:link>
 					</p>
 				</div>
@@ -49,7 +49,7 @@
 </body>
 </html>
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tilela:insert template="/WEB-INF/view/common/admin/layout.jsp" flush="true">
-	<tilela:put name="title"><bean:message key="labels.dict_userdict_configuration" /></tilela:put>
+	<tilela:put name="title"><la:message key="labels.dict_userdict_configuration" /></tilela:put>
 	<tilela:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tilela:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
 	<tilela:put name="menu" value="/WEB-INF/view/common/admin/menu.jsp" />
@@ -61,7 +61,7 @@
 
 <la:errors/>
 <br/>
-<la:link href="../index"><bean:message key="labels.dict_button_back"/></la:link>
+<la:link href="../index"><la:message key="labels.dict_button_back"/></la:link>
 
       </div>
 

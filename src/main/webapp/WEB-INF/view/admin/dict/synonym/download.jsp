@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.dict_synonym_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_synonym_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,11 +18,11 @@
 		<%-- Content Header --%>
 		<section class="content-header">
 		<h1>
-			<bean:message key="labels.dict_synonym_title" />
+			<la:message key="labels.dict_synonym_title" />
 		</h1>
 		<ol class="breadcrumb">
 			<li class="active"><la:link href="index">
-			<bean:message key="labels.dict_synonym_link_download" />
+			<la:message key="labels.dict_synonym_link_download" />
 			</la:link></li>
 		</ol>
 		</section>
@@ -35,32 +35,32 @@
 				<%-- Box Header --%>
 				<div class="box-header with-border">
 				<h3 class="box-title">
-					<bean:message key="labels.dict_synonym_link_download" />
+					<la:message key="labels.dict_synonym_link_download" />
 				</h3>
 				<div class="box-tools pull-right">
 					<span class="label label-default">
 					<la:link href="../index">
-						<bean:message key="labels.dict_list_link" />
+						<la:message key="labels.dict_list_link" />
 					</la:link>
 					</span>
 					<span class="label label-default">
 					<a href="#">
-						<bean:message key="labels.dict_synonym_list_link" />
+						<la:message key="labels.dict_synonym_list_link" />
 					</a>
 					</span>
 					<span class="label label-default">
 					<la:link href="createpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_synonym_link_create" />
+						<la:message key="labels.dict_synonym_link_create" />
 					</la:link>
 					</span>
 					<span class="label label-default">
 					<la:link href="downloadpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_synonym_link_download" />
+						<la:message key="labels.dict_synonym_link_download" />
 					</la:link>
 					</span>
 					<span class="label label-default">
 					<la:link href="uploadpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_synonym_link_upload" />
+						<la:message key="labels.dict_synonym_link_upload" />
 					</la:link>
 					</span>
 				</div>
@@ -71,7 +71,7 @@
 				<div>
 					<la:info id="msg" message="true">
 					<div class="alert-message info">
-						<bean:write name="msg" ignore="true" />
+						${msg}
 					</div>
 					</la:info>
 					<la:errors />
@@ -88,7 +88,7 @@
 							<td style="form-control">
 							<input type="submit"
 								   class="btn small" name="download"
-								   value="<bean:message key="labels.dict_synonym_button_download"/>" />
+								   value="<la:message key="labels.dict_synonym_button_download"/>" />
 							</td>
 						</tr>
 						</tbody>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.dict_synonym_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_synonym_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -17,7 +17,7 @@
 	    <%-- Content Header --%>
 	    <section class="content-header">
 		<h1>
-		    <bean:message key="labels.dict_synonym_title" />
+		    <la:message key="labels.dict_synonym_title" />
 		</h1>
 	    </section>
 
@@ -37,59 +37,59 @@
 				<div class="box-header with-border">
 				    <h3 class="box-title">
 					<c:if test="${crudMode == 1}">
-					    <bean:message key="labels.dict_synonym_link_create" />
+					    <la:message key="labels.dict_synonym_link_create" />
 					</c:if>
 					<c:if test="${crudMode == 2}">
-					    <bean:message key="labels.dict_synonym_link_update" />
+					    <la:message key="labels.dict_synonym_link_update" />
 					</c:if>
 				    </h3>
 				    <div class="box-tools pull-right">
 					<span class="label label-default">
 					    <la:link href="../index">
-						<bean:message key="labels.dict_list_link" />
+						<la:message key="labels.dict_list_link" />
 					    </la:link>
 					</span>
 					<span class="label label-default">
 					    <la:link href="index?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_synonym_list_link" />
+						<la:message key="labels.dict_synonym_list_link" />
 					    </la:link>
 					</span>
 					<c:if test="${crudMode == 1}">
 					    <span class="label label-default">
 						<a href="#">
-						    <bean:message key="labels.dict_synonym_link_create" />
+						    <la:message key="labels.dict_synonym_link_create" />
 						</a>
 					    </span>
 					</c:if>
 					<c:if test="${crudMode == 2}">
 					    <span class="label label-default">
 						<a href="#">
-						    <bean:message key="labels.dict_synonym_link_update" />
+						    <la:message key="labels.dict_synonym_link_update" />
 						</a>
 					    </span>
 					</c:if>
 					<c:if test="${crudMode == 3}">
 					    <span class="label label-default">
 						<a href="#">
-						    <bean:message key="labels.dict_synonym_link_delete" />
+						    <la:message key="labels.dict_synonym_link_delete" />
 						</a>
 					    </span>
 					</c:if>
 					<c:if test="${crudMode == 4}">
 					    <span class="label label-default">
 						<a href="#">
-						    <bean:message key="labels.dict_synonym_link_confirm" />
+						    <la:message key="labels.dict_synonym_link_confirm" />
 						</a>
 					    </span>
 					</c:if>
 					<span class="label label-default">
 					    <la:link href="downloadpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_synonym_link_download" />
+						<la:message key="labels.dict_synonym_link_download" />
 					    </la:link>
 					</span>
 					<span class="label label-default">
 					    <la:link href="uploadpage?dictId=${f:u(dictId)}">
-						<bean:message key="labels.dict_synonym_link_upload" />
+						<la:message key="labels.dict_synonym_link_upload" />
 					    </la:link>
 					</span>
 				    </div>
@@ -100,7 +100,7 @@
 				    <div>
 					<la:info id="msg" message="true">
 					    <div class="alert-message info">
-						<bean:write name="msg" ignore="true" />
+						${msg}
 					    </div>
 					</la:info>
 					<la:errors />
@@ -108,26 +108,26 @@
 
 				    <%-- Form Fields --%>
 				    <div class="form-group">
-					<label for="term"><bean:message key="labels.dict_synonym_source" /></label>
+					<label for="term"><la:message key="labels.dict_synonym_source" /></label>
 					<la:textarea property="inputs" rows="5" styleClass="form-control" />
 				    </div>
 				    <div class="form-group">
-					<label for="outputs"><bean:message key="labels.dict_synonym_target" /></label>
+					<label for="outputs"><la:message key="labels.dict_synonym_target" /></label>
 					<la:textarea property="outputs" rows="5" styleClass="form-control" />
 				    </div>
 				</div>
 				<%-- Box Footer --%>
 				<div class="box-footer">
 				    <c:if test="${crudMode == 1}">
-					<input type="submit" class="btn" name="back" value="<bean:message key="labels.key_match_button_back"/>" />
+					<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
 					<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-					       value="<bean:message key="labels.key_match_button_create"/>"
+					       value="<la:message key="labels.key_match_button_create"/>"
 										/>
 				    </c:if>
 				    <c:if test="${crudMode == 2}">
-					<input type="submit" class="btn" name="back" value="<bean:message key="labels.key_match_button_back"/>" />
+					<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
 					<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-					       value="<bean:message key="labels.key_match_button_confirm"/>"
+					       value="<la:message key="labels.key_match_button_confirm"/>"
 					/>
 				    </c:if>
 				</div>

@@ -41,13 +41,11 @@
 						alt="<la:message key="labels.index_title" />" />
 				</h1>
 				<div>
-				<%-- TODO
-					<la:messages id="msg" message="true">
+					<la:info id="msg" message="true">
 						<div class="alert-message info">
-							<bean:write name="msg" ignore="true" />
+							${msg}
 						</div>
-					</la:messages>
-				 --%>
+					</la:info>
 					<la:errors header="errors.front_header"
 						footer="errors.front_footer" prefix="errors.front_prefix"
 						suffix="errors.front_suffix" />

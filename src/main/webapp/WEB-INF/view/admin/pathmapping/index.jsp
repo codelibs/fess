@@ -47,7 +47,7 @@
 								<div>
 									<la:info id="msg" message="true">
 										<div class="alert-message info">
-											<bean:write name="msg" ignore="true" />
+											${msg}
 										</div>
 									</la:info>
 									<la:errors />

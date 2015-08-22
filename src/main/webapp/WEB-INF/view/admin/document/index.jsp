@@ -14,7 +14,7 @@
 		<%-- Message: BEGIN --%>
 		<div>
 			<la:info id="msg" message="true">
-				<div class="alert-message info"><bean:write name="msg" ignore="true" /></div>
+				<div class="alert-message info">${msg}</div>
 			</la:info>
 			<la:errors />
 		</div>
