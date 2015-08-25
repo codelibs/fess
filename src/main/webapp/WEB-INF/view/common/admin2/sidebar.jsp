@@ -80,10 +80,10 @@
 							<span><la:message key="labels.menu.data_store" /></span>
 						</todo:link></li>
 
-					<li <c:if test="${param.menuType=='labelType'}">class="active"</c:if>><todo:link href="/admin/labelType/index">
+					<li <c:if test="${param.menuType=='labelType'}">class="active"</c:if>><la:link href="/admin/labeltype/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.label_type" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='keyMatch'}">class="active"</c:if>><la:link href="/admin/keymatch/">
 							<i class='fa fa-angle-right'></i>
