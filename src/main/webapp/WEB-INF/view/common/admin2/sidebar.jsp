@@ -97,12 +97,12 @@
 							<span><la:message key="labels.menu.boost_document_rule" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='pathMapping'}">class="active"</c:if>><todo:link
-							href="/admin/pathMapping/index"
+					<li <c:if test="${param.menuType=='pathMapping'}">class="active"</c:if>><la:link
+							href="/admin/pathmapping/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.path_mapping" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='webAuthentication'}">class="active"</c:if>><todo:link
 							href="/admin/webAuthentication/index"
