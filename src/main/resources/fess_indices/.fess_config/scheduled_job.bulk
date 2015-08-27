@@ -1,0 +1,8 @@
+{"index":{"_index":".fess_config","_type":"scheduled_job","_id":"1"}}
+{"name":"Crawler","target":"all","cronExpression":"0 0 0 * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"crawlJob\").execute(executor);","jobLogging":true,"crawler":true,"available":true,"sortOrder":0,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"index":{"_index":".fess_config","_type":"scheduled_job","_id":"2"}}
+{"name":"Minutely Tasks","target":"all","cronExpression":"0 * * * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"aggregateLogJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":0,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"index":{"_index":".fess_config","_type":"scheduled_job","_id":"3"}}
+{"name":"Hourly Tasks","target":"all","cronExpression":"0 0 * * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"updateStatsJob\").execute() + container.getComponent(\"updateHotWordJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":0,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"index":{"_index":".fess_config","_type":"scheduled_job","_id":"4"}}
+{"name":"Daily Tasks","target":"all","cronExpression":"0 0 0 * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"purgeLogJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":0,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}

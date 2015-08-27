@@ -2,7 +2,9 @@ package org.codelibs.fess.client;
 
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,7 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.codec.Charsets;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.Configs;
@@ -338,6 +341,34 @@ public class FessEsClient implements Client {
                     logger.info("Created " + configIndex + "/" + configType + " mapping.");
                 } else {
                     logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.");
+                }
+
+                String dataPath = indexConfigPath + "/" + configIndex + "/" + configType + ".bulk";
+                if (ResourceUtil.isExist(dataPath)) {
+                    try {
+                        final BulkRequestBuilder builder = client.prepareBulk();
+                        Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).reduce((prev, line) -> {
+                            if (StringUtil.isBlank(prev)) {
+                                if (line.startsWith("{\"index\":{")) {
+                                    return line;
+                                } else if (line.startsWith("{\"update\":{")) {
+                                    return line;
+                                } else if (line.startsWith("{\"delete\":{")) {
+                                    return StringUtil.EMPTY;
+                                }
+                            } else if (prev.startsWith("{\"index\":{")) {
+                                IndexRequestBuilder requestBuilder = client.prepareIndex(configIndex, configType).setSource(line);
+                                builder.add(requestBuilder);
+                            }
+                            return StringUtil.EMPTY;
+                        });
+                        BulkResponse response = builder.execute().actionGet();
+                        if (response.hasFailures()) {
+                            logger.warn("Failed to register " + dataPath.toString() + ": " + response.buildFailureMessage());
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.");
+                    }
                 }
             } else if (logger.isDebugEnabled()) {
                 logger.debug(configIndex + "/" + configType + " mapping exists.");
