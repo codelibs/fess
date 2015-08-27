@@ -170,6 +170,16 @@
 										<input type="submit" class="btn" name="deletefromconfirm"
 											value="<la:message key="labels.scheduledjob_button_delete"/>"
 										/>
+										<c:if test="${running}">
+											<input type="submit" class="btn small" name="stop"
+												value="<la:message key="labels.scheduledjob_button_stop"/>"
+											/>
+										</c:if>
+										<c:if test="${!running}">
+											<input type="submit" class="btn small" name="start"
+												value="<la:message key="labels.scheduledjob_button_start"/>"
+											/>
+										</c:if>
 									</c:if>
 								</div>
 							</div>

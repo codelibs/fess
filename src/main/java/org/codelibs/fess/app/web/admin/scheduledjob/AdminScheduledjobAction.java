@@ -24,14 +24,13 @@ import javax.annotation.Resource;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.ScheduledJobPager;
-import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.job.JobExecutor;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -53,13 +52,12 @@ public class AdminScheduledjobAction extends FessAdminAction {
     private ScheduledJobPager scheduledJobPager;
 
     @Resource
-    protected RoleTypeService roleTypeService;
-
-    @Resource
     protected SystemHelper systemHelper;
 
     @Resource
     protected JobHelper jobHelper;
+
+    private boolean running = false;
 
     // ===================================================================================
     //                                                                               Hook
@@ -183,21 +181,27 @@ public class AdminScheduledjobAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
         loadScheduledJob(form);
-        return asHtml(path_AdminScheduledjob_ConfirmJsp);
+        return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
+            data.register("running", running);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminScheduledjob_ConfirmJsp);
+        return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
+            data.register("running", running);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminScheduledjob_ConfirmJsp);
+        return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
+            data.register("running", running);
+        });
     }
 
     // -----------------------------------------------------
@@ -229,6 +233,37 @@ public class AdminScheduledjobAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    @Execute
+    public HtmlResponse start(ScheduledjobEditForm form) {
+        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        ScheduledJob scheduledJob = getScheduledJob(form);
+        try {
+            scheduledJob.start();
+            saveInfo(messages -> messages.addSuccessJobStarted(GLOBAL, scheduledJob.getName()));
+        } catch (Exception e) {
+            throwValidationError(messages -> {
+                messages.addErrorsFailedToStartJob(GLOBAL, scheduledJob.getName());
+            }, toEditHtml());
+        }
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse stop(ScheduledjobEditForm form) {
+        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        ScheduledJob scheduledJob = getScheduledJob(form);
+        try {
+            final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
+            jobExecutoer.shutdown();
+            saveInfo(messages -> messages.addSuccessJobStopped(GLOBAL, scheduledJob.getName()));
+        } catch (Exception e) {
+            throwValidationError(messages -> {
+                messages.addErrorsFailedToStopJob(GLOBAL, scheduledJob.getName());
+            }, toEditHtml());
+        }
+        return redirect(getClass());
+    }
+
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
@@ -238,6 +273,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         form.jobLogging = scheduledJob.isLoggingEnabled() ? Constants.ON : null;
         form.crawler = scheduledJob.isCrawlerJob() ? Constants.ON : null;
         form.available = scheduledJob.isEnabled() ? Constants.ON : null;
+        running = scheduledJob.isRunning();
     }
 
     protected ScheduledJob getScheduledJob(ScheduledjobEditForm form) {
