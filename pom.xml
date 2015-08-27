@@ -101,7 +101,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/OverlappingHostForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/LabelTypeAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemInfoForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/RoleTypeAction.java</exclude>
@@ -137,7 +136,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/SuggestBadWordForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FileAuthenticationAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/LabelTypeForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FileConfigForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
