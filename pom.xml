@@ -95,7 +95,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/JobLogAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SearchListForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/WebConfigForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictAction.java</exclude>
@@ -111,7 +110,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/SystemAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataConfigAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/WebConfigAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SearchListAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WebAuthenticationForm.java</exclude>
