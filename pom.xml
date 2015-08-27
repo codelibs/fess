@@ -123,7 +123,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/IndexAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/RoleTypeForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/LogAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/RequestHeaderForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SuggestElevateWordAction.java</exclude>
@@ -143,7 +142,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FileAuthenticationForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/RequestHeaderAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/base/AbstractLoginAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/ErrorAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/LoginAction.java</exclude>
