@@ -4,4 +4,4 @@
  --%><%@taglib prefix="la" uri="http://lastaflute.org/latags" %><%--
  --%><%@taglib prefix="f" uri="http://lastaflute.org/functions" %><%--
  --%><%@taglib prefix="fe" uri="http://fess.codelibs.org/functions" %><%--
- --%><c:set var="contextPath" value="${request.contextPath}"/>
+ --%><c:set var="contextPath" value="${pageContext.request.contextPath}"/>
