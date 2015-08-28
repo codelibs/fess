@@ -107,6 +107,25 @@ public abstract class FessSearchAction extends FessBaseAction {
         super.setupHtmlData(runtime);
         runtime.registerData("osddLink", openSearchHelper.hasOpenSearchFile());
         runtime.registerData("helpPage", viewHelper.getPagePath("common/help"));
+
+        List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
+        runtime.registerData("labelTypeItems", labelTypeItems);
+        runtime.registerData("displayLabelTypeItems", labelTypeItems != null && !labelTypeItems.isEmpty());
+
+        Locale locale = request.getLocale();
+        if (locale == null) {
+            locale = Locale.ENGLISH;
+        }
+        runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
+
+        final HttpSession session = request.getSession(false);
+        if (session != null) {
+            final Object obj = session.getAttribute(SSCConstants.USER_INFO);
+            if (obj instanceof LoginInfo) {
+                final LoginInfo loginInfo = (LoginInfo) obj;
+                runtime.registerData("username", loginInfo.getUsername());
+            }
+        }
     }
 
     protected void searchAvailable() {
@@ -117,11 +136,9 @@ public abstract class FessSearchAction extends FessBaseAction {
         }
     }
 
-    protected List<Map<String, String>> buildLabelParams(RenderData data, SearchParamMap fields) {
+    protected void buildLabelParams(SearchParamMap fields) {
         // label
         List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
-        data.register("labelTypeItems", labelTypeItems);
-        data.register("displayLabelTypeItems", labelTypeItems != null && !labelTypeItems.isEmpty());
 
         if (!labelTypeItems.isEmpty() && !fields.containsKey(FessSearchAction.LABEL_FIELD)) {
             final String defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
@@ -148,27 +165,6 @@ public abstract class FessSearchAction extends FessBaseAction {
             }
         }
         request.setAttribute(Constants.LABEL_VALUE_MAP, labelMap);
-
-        return labelTypeItems;
-    }
-
-    protected void buildUserParams(RenderData data) {
-
-        Locale locale = request.getLocale();
-        if (locale == null) {
-            locale = Locale.ENGLISH;
-        }
-        data.register("langItems", systemHelper.getLanguageItems(locale));
-
-        final HttpSession session = request.getSession(false);
-        if (session != null) {
-            final Object obj = session.getAttribute(SSCConstants.USER_INFO);
-            if (obj instanceof LoginInfo) {
-                final LoginInfo loginInfo = (LoginInfo) obj;
-                data.register("username", loginInfo.getUsername());
-            }
-        }
-
     }
 
     protected void buildInitParams() {

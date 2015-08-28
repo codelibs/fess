@@ -41,8 +41,7 @@ public class HelpAction extends FessSearchAction {
     @Execute
     public HtmlResponse help(HelpForm form) {
         return asHtml(path_HelpJsp).renderWith(data -> {
-            buildLabelParams(data, form.fields);
-            buildUserParams(data);
+            buildLabelParams(form.fields);
             buildInitParams();
         });
     }

@@ -144,10 +144,9 @@ public class SearchAction extends FessSearchAction {
 
         return asHtml(path_SearchJsp).renderWith(data -> {
             updateSearchParams(form);
-            List<Map<String, String>> labelTypeItems = buildLabelParams(data, form.fields);
-            buildUserParams(data);
+            buildLabelParams(form.fields);
             doSearchInternal(data, form);
-            data.register("displayQuery", getDisplayQuery(form, labelTypeItems));
+            data.register("displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
             data.register("pagingQuery", getPagingQuery(form));
         });
     }

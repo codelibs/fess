@@ -1,14 +1,14 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="/search" method="get">
+<form action="${contextPath}/search" method="get">
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container">
-				<la:link styleClass="brand" href="/">
+				<a class="brand" href="${contextPath}/">
 					<img src="${f:url('/images/logo-head.gif')}"
 						alt="<la:message key="labels.header_brand_name" />" />
-				</la:link>
+				</a>
 				<div class="navbar-form pull-right">
-					<la:text property="query" maxlength="1000" styleId="query" />
+					<input type="text" name="query" maxlength="1000" id="query" />
 					<button class="btn medium btn-primary" type="submit" name="search"
 						id="searchButton">
 						<la:message key="labels.search" />
@@ -34,63 +34,63 @@
 					<label for="contentNum"><la:message
 							key="labels.index_num" /></label>
 					<div class="input">
-						<html:select property="num" styleId="contentNum"
-							styleClass="span4" style="display:block;">
+						<select name="num" id="contentNum"
+							class="span4" style="display:block;">
 							<option value="">
 								<la:message key="labels.search_result_select_num" />
 							</option>
-							<html:option value="10">10</html:option>
-							<html:option value="20">20</html:option>
-							<html:option value="30">30</html:option>
-							<html:option value="40">40</html:option>
-							<html:option value="50">50</html:option>
-							<html:option value="100">100</html:option>
-						</html:select>
+							<option value="10">10</option>
+							<option value="20">20</option>
+							<option value="30">30</option>
+							<option value="40">40</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+						</select>
 					</div>
 				</div>
 				<div class="clearfix">
 					<label for="contentSort"><la:message
 							key="labels.index_sort" /></label>
 					<div class="input">
-						<html:select property="sort" styleId="contentSort"
-							styleClass="span4" style="display:block;">
+						<select name="sort" id="contentSort"
+							class="span4" style="display:block;">
 							<option value="">
 								<la:message key="labels.search_result_select_sort" />
 							</option>
-							<html:option value="created.asc">
+							<option value="created.asc">
 								<la:message key="labels.search_result_sort_created_asc" />
-							</html:option>
-							<html:option value="created.desc">
+							</option>
+							<option value="created.desc">
 								<la:message key="labels.search_result_sort_created_desc" />
-							</html:option>
-							<html:option value="contentLength.asc">
+							</option>
+							<option value="contentLength.asc">
 								<la:message key="labels.search_result_sort_contentLength_asc" />
-							</html:option>
-							<html:option value="contentLength.desc">
+							</option>
+							<option value="contentLength.desc">
 								<la:message key="labels.search_result_sort_contentLength_desc" />
-							</html:option>
-							<html:option value="lastModified.asc">
+							</option>
+							<option value="lastModified.asc">
 								<la:message key="labels.search_result_sort_lastModified_asc" />
-							</html:option>
-							<html:option value="lastModified.desc">
+							</option>
+							<option value="lastModified.desc">
 								<la:message key="labels.search_result_sort_lastModified_desc" />
-							</html:option>
-						</html:select>
+							</option>
+						</select>
 					</div>
 				</div>
 				<div class="clearfix">
 					<label for="contentLang"><la:message
 							key="labels.index_lang" /></label>
 					<div class="input">
-						<html:select property="lang"
-							styleId="langSearchOption" multiple="true"
-							styleClass="span4">
+						<select name="lang"
+							id="langSearchOption" multiple="true"
+							class="span4">
 							<c:forEach var="item" items="${langItems}">
-								<html:option value="${f:u(item.value)}">
+								<option value="${f:u(item.value)}">
 													${f:h(item.label)}
-												</html:option>
+												</option>
 							</c:forEach>
-						</html:select>
+						</select>
 					</div>
 				</div>
 				<c:if test="${displayLabelTypeItems}">
@@ -98,14 +98,14 @@
 						<label for="contentLabelType"><la:message
 								key="labels.index_label" /></label>
 						<div class="input">
-							<html:select property="fields.label" styleId="contentLabelType"
-								multiple="true" styleClass="span4">
+							<select name="fields.label" id="contentLabelType"
+								multiple="true" class="span4">
 								<c:forEach var="item" items="${labelTypeItems}">
-									<html:option value="${f:u(item.value)}">
+									<option value="${f:u(item.value)}">
 														${f:h(item.label)}
-													</html:option>
+													</option>
 								</c:forEach>
-							</html:select>
+							</select>
 						</div>
 					</div>
 				</c:if>
@@ -120,5 +120,5 @@
 			</button>
 		</div>
 	</div>
-</la:form>
+</form>
 
