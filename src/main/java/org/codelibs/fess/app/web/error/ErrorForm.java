@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web;
+package org.codelibs.fess.app.web.error;
 
 import java.io.Serializable;
 
@@ -23,4 +23,5 @@ public class ErrorForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public String url;
+
 }
