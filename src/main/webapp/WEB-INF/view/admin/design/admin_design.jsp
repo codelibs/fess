@@ -9,7 +9,7 @@
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="design" />
 		</jsp:include>
 
@@ -28,7 +28,7 @@
 					<div class="col-md-12">
 						<div>
 							<la:info id="msg" message="true">
-								<div class="alert-message info"><la:write name="msg" ignore="true" /></div>
+								<div class="alert-message info">${msg}</div>
 							</la:info>
 							<la:errors />
 						</div>
