@@ -117,6 +117,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse createpage(KeyMatchEditForm form) {
+        form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminKeymatch_EditJsp);
     }

@@ -115,6 +115,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse createpage(PathMappingEditForm form) {
+        form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminPathmapping_EditJsp);
     }

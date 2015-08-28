@@ -115,6 +115,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse createpage(LabelTypeEditForm form) {
+        form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminLabeltype_EditJsp);
     }
