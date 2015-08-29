@@ -297,4 +297,46 @@
 		</postConstruct>
 	</component>
 
+	<component name="screenShotManager" class="org.codelibs.fess.screenshot.ScreenShotManager">
+		<!-- 
+		<postConstruct name="add">
+			<arg>htmlScreenShotGenerator</arg>
+		</postConstruct>
+		 -->
+	</component>
+<!--
+	<component name="webDriver" class="org.openqa.selenium.phantomjs.PhantomJSDriver">
+		<arg>
+			<component class="org.openqa.selenium.remote.DesiredCapabilities">
+				<postConstruct name="setCapability">
+					<arg>"phantomjs.binary.path"</arg>
+					<arg>"/usr/bin/phantomjs"</arg>
+				</postConstruct>
+			</component>
+		</arg>
+		<preDestroy name="quit"></preDestroy>
+	</component>
+	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.WebDriverGenerator">
+		<property name="webDriver">webDriver</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</postConstruct>
+	</component>
+-->
+<!--
+	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.CommandGenerator">
+		<property name="commandList">
+			{"bash", 
+			"/opt/fess/bin/html-screenshot.sh",
+			"${url}",
+			"${outputFile}"}
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</postConstruct>
+	</component>
+-->
+
 </components>

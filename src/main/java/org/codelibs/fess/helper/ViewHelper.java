@@ -16,7 +16,12 @@
 
 package org.codelibs.fess.helper;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -34,21 +39,36 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.app.service.DataConfigService;
+import org.codelibs.fess.app.service.FileConfigService;
+import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
+import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.robot.builder.RequestDataBuilder;
+import org.codelibs.robot.client.S2RobotClient;
+import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.util.CharUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -454,6 +474,138 @@ public class ViewHelper implements Serializable {
             return StringUtils.abbreviate(urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""), sitePathLength);
         }
         return null;
+    }
+
+    public void writeContent(final Map<String, Object> doc) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("writing the content of: " + doc);
+        }
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final Object configIdObj = doc.get(fieldHelper.configIdField);
+        if (configIdObj == null) {
+            throw new FessSystemException("configId is null.");
+        }
+        final String configId = configIdObj.toString();
+        if (configId.length() < 2) {
+            throw new FessSystemException("Invalid configId: " + configIdObj);
+        }
+        final ConfigType configType = crawlingConfigHelper.getConfigType(configId);
+        CrawlingConfig config = null;
+        if (logger.isDebugEnabled()) {
+            logger.debug("configType: " + configType + ", configId: " + configId);
+        }
+        if (ConfigType.WEB == configType) {
+            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
+            config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId));
+        } else if (ConfigType.FILE == configType) {
+            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
+            config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId));
+        } else if (ConfigType.DATA == configType) {
+            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
+            config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId));
+        }
+        if (config == null) {
+            throw new FessSystemException("No crawlingConfig: " + configIdObj);
+        }
+        final String url = (String) doc.get(fieldHelper.urlField);
+        final S2RobotClientFactory robotClientFactory = SingletonLaContainer.getComponent(S2RobotClientFactory.class);
+        config.initializeClientFactory(robotClientFactory);
+        final S2RobotClient client = robotClientFactory.getClient(url);
+        if (client == null) {
+            throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
+        }
+        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
+        final HttpServletResponse response = LaResponseUtil.getResponse();
+        writeFileName(response, responseData);
+        writeContentType(response, responseData);
+        writeNoCache(response, responseData);
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            is = new BufferedInputStream(responseData.getResponseBody());
+            os = new BufferedOutputStream(response.getOutputStream());
+            CopyUtil.copy(is, os);
+            os.flush();
+        } catch (final IOException e) {
+            if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
+                throw new FessSystemException("Failed to write a content. configId: " + configIdObj + ", url: " + url, e);
+            }
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(os);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Finished to write " + url);
+        }
+    }
+
+    protected void writeNoCache(final HttpServletResponse response, final ResponseData responseData) {
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+    }
+
+    protected void writeFileName(final HttpServletResponse response, final ResponseData responseData) {
+        final UserAgentHelper userAgentHelper = ComponentUtil.getUserAgentHelper();
+        final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
+        String charset = responseData.getCharSet();
+        if (charset == null) {
+            charset = Constants.UTF_8;
+        }
+        final String name;
+        final String url = responseData.getUrl();
+        final int pos = url.lastIndexOf('/');
+        try {
+            if (pos >= 0 && pos + 1 < url.length()) {
+                name = URLDecoder.decode(url.substring(pos + 1), charset);
+            } else {
+                name = URLDecoder.decode(url, charset);
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("userAgentType: " + userAgentType + ", charset: " + charset + ", name: " + name);
+            }
+
+            switch (userAgentType) {
+            case IE:
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
+                break;
+            case OPERA:
+                response.setHeader("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
+                break;
+            case SAFARI:
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + name + "\"");
+                break;
+            case CHROME:
+            case FIREFOX:
+            case OTHER:
+            default:
+                response.setHeader("Content-Disposition",
+                        "attachment; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
+                break;
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to write a filename: " + responseData, e);
+        }
+    }
+
+    protected void writeContentType(final HttpServletResponse response, final ResponseData responseData) {
+        final String mimeType = responseData.getMimeType();
+        if (logger.isDebugEnabled()) {
+            logger.debug("mimeType: " + mimeType);
+        }
+        if (mimeType == null) {
+            return;
+        }
+        if (mimeType.startsWith("text/")) {
+            final String charset = response.getCharacterEncoding();
+            if (charset != null) {
+                response.setContentType(mimeType + "; charset=" + charset);
+                return;
+            }
+        }
+        response.setContentType(mimeType);
     }
 
     public boolean isUseSession() {

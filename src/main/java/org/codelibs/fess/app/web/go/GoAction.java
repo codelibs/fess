@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.es.exentity.ClickLog;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
+import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -131,9 +132,9 @@ public class GoAction extends FessSearchAction {
 
         if (isFileSystemPath(url)) {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
-                final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+                final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 try {
-                    crawlingConfigHelper.writeContent(doc);
+                    viewHelper.writeContent(doc);
                     return null;
                 } catch (final Exception e) {
                     logger.error("Failed to load: " + doc, e);

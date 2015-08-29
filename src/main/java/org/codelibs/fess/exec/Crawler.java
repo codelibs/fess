@@ -79,9 +79,6 @@ public class Crawler implements Serializable {
     protected FessEsClient fessEsClient;
 
     @Resource
-    protected ScreenShotManager screenShotManager;
-
-    @Resource
     protected WebFsIndexHelper webFsIndexHelper;
 
     @Resource

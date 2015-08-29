@@ -6,10 +6,10 @@
 
 	<component name="contentLengthHelper"
 		class="org.codelibs.robot.helper.ContentLengthHelper" instance="singleton">
-		<property name="defaultMaxLength">10485760L</property><!-- 10M -->
+		<property name="defaultMaxLength">10485760</property><!-- 10M -->
 		<postConstruct name="addMaxLength">
 			<arg>"text/html"</arg>
-			<arg>2621440L</arg><!-- 2.5M -->
+			<arg>2621440</arg><!-- 2.5M -->
 		</postConstruct>
 	</component>
 </components>

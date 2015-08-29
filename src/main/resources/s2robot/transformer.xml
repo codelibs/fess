@@ -14,7 +14,7 @@
 		<property name="invalidUrlPattern">@java.util.regex.Pattern@compile("^\\s*javascript:|^\\s*mailto:|^\\s*irc:|^\\s*skype:|^\\s*callto:",@java.util.regex.Pattern@CASE_INSENSITIVE)</property>
 		 -->
 		<property name="convertUrlMap">
-			#{"feed:" : "http:"}
+			{"feed:" : "http:"}
 		</property>
 		<!-- 
 		<property name="cacheXpath">"//BODY"</property>

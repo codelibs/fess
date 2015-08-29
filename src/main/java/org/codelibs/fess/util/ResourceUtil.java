@@ -64,7 +64,7 @@ public class ResourceUtil {
             if (servletContext != null) {
                 path = servletContext.getRealPath("/" + baseName + name);
             }
-        } catch (final Exception e) { // NOSONAR
+        } catch (final Throwable e) { // NOSONAR
             // ignore
         }
         if (path == null) {
