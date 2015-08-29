@@ -77,7 +77,7 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${crawlingSessionItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/4/${f:u(data.id)}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.sessionId)}</td>
 													<td>${f:h(data.createdTime)}</td>
 													<td>

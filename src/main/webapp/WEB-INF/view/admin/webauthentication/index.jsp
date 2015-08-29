@@ -77,7 +77,7 @@
 											</thead>
 											<tbody>
 												<c:forEach var="data" varStatus="s" items="${webAuthenticationItems}">
-													<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/4/${f:u(data.id)}">
+													<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/webauthentication/confirmpage/4/${f:u(data.id)}">
 														<td><c:if test="${data.hostname==null||data.hostname==''}">
 																<la:message key="labels.web_authentication_any" />
 															</c:if>

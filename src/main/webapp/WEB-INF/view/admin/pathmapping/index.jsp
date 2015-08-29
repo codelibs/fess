@@ -68,7 +68,7 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${pathMappingItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/4/${f:u(data.id)}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/pathmapping/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.regex)}</td>
 													<td>${f:h(data.replacement)}</td>
 												</tr>

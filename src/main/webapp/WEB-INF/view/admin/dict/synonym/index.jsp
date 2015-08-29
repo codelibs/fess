@@ -92,7 +92,7 @@
 					</thead>
 					<tbody>
 						<c:forEach var="data" varStatus="s" items="${synonymItemItems}">
-						<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/${f:u(dictId)}/4/${f:u(data.id)}">
+						<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/dict/synonym/confirmpage/${f:u(dictId)}/4/${f:u(data.id)}">
 							<td>${f:h(data.inputs)}</td>
 							<td>${f:h(data.outputs)}</td>
 						</tr>

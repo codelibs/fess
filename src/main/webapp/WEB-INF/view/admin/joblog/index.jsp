@@ -68,7 +68,7 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${jobLogItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/4/${f:u(data.id)}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/joblog/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.jobName)}</td>
 													<td>${f:h(data.jobStatus)}</td>
 													<td><fmt:formatDate value="${data.startTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>

@@ -71,7 +71,7 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${keyMatchItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/4/${f:u(data.id)}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/keymatch/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.term)}</td>
 													<td style="overflow-x: auto;">${f:h(data.query)}</td>
 												</tr>

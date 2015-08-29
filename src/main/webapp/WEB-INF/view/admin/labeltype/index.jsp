@@ -70,7 +70,7 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${labelTypeItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="confirmpage/4/${f:u(data.id)}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/labeltype/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.name)}</td>
 												</tr>
 											</c:forEach>
