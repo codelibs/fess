@@ -24,6 +24,85 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
         return _instance;
     }
 
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+    protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float",
+            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
+            false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnReading = cci("reading", "reading", null, null, String.class, "reading", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnBoost() {
+        return _columnBoost;
+    }
+
+    public ColumnInfo columnCreatedBy() {
+        return _columnCreatedBy;
+    }
+
+    public ColumnInfo columnCreatedTime() {
+        return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnId() {
+        return _columnId;
+    }
+
+    public ColumnInfo columnReading() {
+        return _columnReading;
+    }
+
+    public ColumnInfo columnSuggestWord() {
+        return _columnSuggestWord;
+    }
+
+    public ColumnInfo columnTargetLabel() {
+        return _columnTargetLabel;
+    }
+
+    public ColumnInfo columnTargetRole() {
+        return _columnTargetRole;
+    }
+
+    public ColumnInfo columnUpdatedBy() {
+        return _columnUpdatedBy;
+    }
+
+    public ColumnInfo columnUpdatedTime() {
+        return _columnUpdatedTime;
+    }
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+        ls.add(columnBoost());
+        ls.add(columnCreatedBy());
+        ls.add(columnCreatedTime());
+        ls.add(columnId());
+        ls.add(columnReading());
+        ls.add(columnSuggestWord());
+        ls.add(columnTargetLabel());
+        ls.add(columnTargetRole());
+        ls.add(columnUpdatedBy());
+        ls.add(columnUpdatedTime());
+        return ls;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -134,12 +213,6 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }

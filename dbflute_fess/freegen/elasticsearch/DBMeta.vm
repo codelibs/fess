@@ -2,6 +2,7 @@ package ${request.package}.bsentity.dbmeta;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
@@ -22,6 +23,30 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 
     public static ${table.camelizedName}Dbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+#foreach ($col in $table.columnList)
+#if ($col.isNormalColumn)
+#set ($javaNative = ${col.type})
+#elseif ($col.isRefColumn)
+#set ($javaNative = ${col.camelizedName})
+#end
+    protected final ColumnInfo _column${col.camelizedName} = cci("${col.name}", "${col.name}", null, null, ${javaNative}.class, "${col.uncapCamelName}", null, false, false, false, "${col.type}", 0, 0, null, false, null, null, null, null, null, false);
+#end
+
+#foreach ($col in $table.columnList)
+    public ColumnInfo column${col.camelizedName}() { return _column${col.camelizedName}; }
+#end
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+#foreach ($col in $table.columnList)
+        ls.add(column${col.camelizedName}());
+#end
+        return ls;
     }
 
     @Override
@@ -134,12 +159,6 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }

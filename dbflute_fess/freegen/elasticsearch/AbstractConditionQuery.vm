@@ -164,12 +164,14 @@ public abstract class AbstractConditionQuery implements ConditionQuery {
     }
 
     protected RangeQueryBuilder regRangeQ(String name, ConditionKey ck, Object value) {
-        for (QueryBuilder builder : queryBuilderList) {
-            if (builder instanceof RangeQueryBuilder) {
-                RangeQueryBuilder rangeQueryBuilder = (RangeQueryBuilder) builder;
-                if (rangeQueryBuilder.toString().replaceAll("\\s", "").startsWith("{\"range\":{\"" + name + "\"")) {
-                    addRangeC(rangeQueryBuilder, ck, value);
-                    return rangeQueryBuilder;
+        if (queryBuilderList != null) {
+            for (QueryBuilder builder : queryBuilderList) {
+                if (builder instanceof RangeQueryBuilder) {
+                    RangeQueryBuilder rangeQueryBuilder = (RangeQueryBuilder) builder;
+                    if (rangeQueryBuilder.toString().replaceAll("\\s", "").startsWith("{\"range\":{\"" + name + "\"")) {
+                        addRangeC(rangeQueryBuilder, ck, value);
+                        return rangeQueryBuilder;
+                    }
                 }
             }
         }

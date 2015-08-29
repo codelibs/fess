@@ -24,6 +24,78 @@ public class JobLogDbm extends AbstractDBMeta {
         return _instance;
     }
 
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+    protected final ColumnInfo _columnEndTime = cci("endTime", "endTime", null, null, Long.class, "endTime", null, false, false, false,
+            "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
+            false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnJobName = cci("jobName", "jobName", null, null, String.class, "jobName", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnJobStatus = cci("jobStatus", "jobStatus", null, null, String.class, "jobStatus", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptData = cci("scriptData", "scriptData", null, null, String.class, "scriptData", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptResult = cci("scriptResult", "scriptResult", null, null, String.class, "scriptResult", null,
+            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptType = cci("scriptType", "scriptType", null, null, String.class, "scriptType", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnStartTime = cci("startTime", "startTime", null, null, Long.class, "startTime", null, false, false,
+            false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnEndTime() {
+        return _columnEndTime;
+    }
+
+    public ColumnInfo columnId() {
+        return _columnId;
+    }
+
+    public ColumnInfo columnJobName() {
+        return _columnJobName;
+    }
+
+    public ColumnInfo columnJobStatus() {
+        return _columnJobStatus;
+    }
+
+    public ColumnInfo columnScriptData() {
+        return _columnScriptData;
+    }
+
+    public ColumnInfo columnScriptResult() {
+        return _columnScriptResult;
+    }
+
+    public ColumnInfo columnScriptType() {
+        return _columnScriptType;
+    }
+
+    public ColumnInfo columnStartTime() {
+        return _columnStartTime;
+    }
+
+    public ColumnInfo columnTarget() {
+        return _columnTarget;
+    }
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+        ls.add(columnEndTime());
+        ls.add(columnId());
+        ls.add(columnJobName());
+        ls.add(columnJobStatus());
+        ls.add(columnScriptData());
+        ls.add(columnScriptResult());
+        ls.add(columnScriptType());
+        ls.add(columnStartTime());
+        ls.add(columnTarget());
+        return ls;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -134,12 +206,6 @@ public class JobLogDbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }

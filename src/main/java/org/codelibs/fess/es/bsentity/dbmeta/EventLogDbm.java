@@ -1,5 +1,6 @@
 package org.codelibs.fess.es.bsentity.dbmeta;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,57 @@ public class EventLogDbm extends AbstractDBMeta {
 
     public static EventLogDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
+            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnEventType = cci("eventType", "eventType", null, null, String.class, "eventType", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
+            false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnMessage = cci("message", "message", null, null, String.class, "message", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "String", 0,
+            0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnCreatedAt() {
+        return _columnCreatedAt;
+    }
+
+    public ColumnInfo columnCreatedBy() {
+        return _columnCreatedBy;
+    }
+
+    public ColumnInfo columnEventType() {
+        return _columnEventType;
+    }
+
+    public ColumnInfo columnId() {
+        return _columnId;
+    }
+
+    public ColumnInfo columnMessage() {
+        return _columnMessage;
+    }
+
+    public ColumnInfo columnPath() {
+        return _columnPath;
+    }
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+        ls.add(columnCreatedAt());
+        ls.add(columnCreatedBy());
+        ls.add(columnEventType());
+        ls.add(columnId());
+        ls.add(columnMessage());
+        ls.add(columnPath());
+        return ls;
     }
 
     @Override
@@ -134,12 +186,6 @@ public class EventLogDbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }

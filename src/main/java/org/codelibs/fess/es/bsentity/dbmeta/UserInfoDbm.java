@@ -24,6 +24,43 @@ public class UserInfoDbm extends AbstractDBMeta {
         return _instance;
     }
 
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+    protected final ColumnInfo _columnCode = cci("code", "code", null, null, String.class, "code", null, false, false, false, "String", 0,
+            0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
+            false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnCode() {
+        return _columnCode;
+    }
+
+    public ColumnInfo columnCreatedTime() {
+        return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnId() {
+        return _columnId;
+    }
+
+    public ColumnInfo columnUpdatedTime() {
+        return _columnUpdatedTime;
+    }
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+        ls.add(columnCode());
+        ls.add(columnCreatedTime());
+        ls.add(columnId());
+        ls.add(columnUpdatedTime());
+        return ls;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -134,12 +171,6 @@ public class UserInfoDbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }

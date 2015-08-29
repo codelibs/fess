@@ -24,6 +24,50 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
         return _instance;
     }
 
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+    protected final ColumnInfo _columnCrawlingSessionId = cci("crawlingSessionId", "crawlingSessionId", null, null, String.class,
+            "crawlingSessionId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
+            false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "String", 0, 0,
+            null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String",
+            0, 0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnCrawlingSessionId() {
+        return _columnCrawlingSessionId;
+    }
+
+    public ColumnInfo columnCreatedTime() {
+        return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnId() {
+        return _columnId;
+    }
+
+    public ColumnInfo columnKey() {
+        return _columnKey;
+    }
+
+    public ColumnInfo columnValue() {
+        return _columnValue;
+    }
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+        ls.add(columnCrawlingSessionId());
+        ls.add(columnCreatedTime());
+        ls.add(columnId());
+        ls.add(columnKey());
+        ls.add(columnValue());
+        return ls;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -134,12 +178,6 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }

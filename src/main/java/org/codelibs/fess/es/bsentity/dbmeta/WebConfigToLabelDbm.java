@@ -24,6 +24,36 @@ public class WebConfigToLabelDbm extends AbstractDBMeta {
         return _instance;
     }
 
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
+            false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnLabelTypeId = cci("labelTypeId", "labelTypeId", null, null, String.class, "labelTypeId", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnId() {
+        return _columnId;
+    }
+
+    public ColumnInfo columnLabelTypeId() {
+        return _columnLabelTypeId;
+    }
+
+    public ColumnInfo columnWebConfigId() {
+        return _columnWebConfigId;
+    }
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+        ls.add(columnId());
+        ls.add(columnLabelTypeId());
+        ls.add(columnWebConfigId());
+        return ls;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -134,12 +164,6 @@ public class WebConfigToLabelDbm extends AbstractDBMeta {
 
     @Override
     public Map<String, Object> extractAllColumnMap(Entity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected List<ColumnInfo> ccil() {
         // TODO Auto-generated method stub
         return null;
     }
