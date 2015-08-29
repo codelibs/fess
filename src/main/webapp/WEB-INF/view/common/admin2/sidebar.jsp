@@ -65,10 +65,10 @@
 				></i> <span><la:message key="labels.menu_crawl" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
-					<li <c:if test="${param.menuType=='webConfig'}">class="active"</c:if>><todo:link href="/admin/webConfig/index">
+					<li <c:if test="${param.menuType=='webConfig'}">class="active"</c:if>><la:link href="/admin/webconfig/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.web" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='fileConfig'}">class="active"</c:if>><todo:link href="/admin/fileConfig/index">
 							<i class='fa fa-angle-right'></i>
@@ -118,12 +118,12 @@
 							<span><la:message key="labels.menu.file_authentication" /></span>
 						</todo:link></li>
 
-					<li <c:if test="${param.menuType=='requestHeader'}">class="active"</c:if>><todo:link
-							href="/admin/requestHeader/index"
+					<li <c:if test="${param.menuType=='requestHeader'}">class="active"</c:if>><la:link
+							href="/admin/requestheader/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.request_header" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='overlappingHost'}">class="active"</c:if>><todo:link
 							href="/admin/overlappingHost/index"
