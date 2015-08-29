@@ -115,6 +115,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse createpage(WebConfigEditForm form) {
+        form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminWebconfig_EditJsp);
     }
