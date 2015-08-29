@@ -44,7 +44,6 @@ import org.codelibs.fess.helper.MailHelper;
 import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
-import org.codelibs.fess.screenshot.ScreenShotManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.elasticsearch.index.query.QueryBuilder;

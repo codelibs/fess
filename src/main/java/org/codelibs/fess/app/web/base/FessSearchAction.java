@@ -46,7 +46,6 @@ import org.codelibs.fess.screenshot.ScreenShotManager;
 import org.codelibs.fess.util.SearchParamMap;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
-import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public abstract class FessSearchAction extends FessBaseAction {

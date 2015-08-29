@@ -30,7 +30,6 @@ import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.es.exentity.ClickLog;
-import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
