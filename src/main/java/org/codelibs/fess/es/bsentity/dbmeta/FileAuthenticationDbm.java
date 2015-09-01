@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class FileAuthenticationDbm extends AbstractDBMeta {
 
@@ -22,6 +25,45 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
 
     public static FileAuthenticationDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getCreatedBy(),
+                (et, vl) -> ((FileAuthentication) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getCreatedTime(),
+                (et, vl) -> ((FileAuthentication) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getFileConfigId(),
+                (et, vl) -> ((FileAuthentication) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getHostname(),
+                (et, vl) -> ((FileAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getId(), (et, vl) -> ((FileAuthentication) et).setId(DfTypeUtil.toString(vl)),
+                "id");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getParameters(),
+                (et, vl) -> ((FileAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getPassword(),
+                (et, vl) -> ((FileAuthentication) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getPort(),
+                (et, vl) -> ((FileAuthentication) et).setPort(DfTypeUtil.toInteger(vl)), "port");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getProtocolScheme(),
+                (et, vl) -> ((FileAuthentication) et).setProtocolScheme(DfTypeUtil.toString(vl)), "protocolScheme");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getUpdatedBy(),
+                (et, vl) -> ((FileAuthentication) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getUpdatedTime(),
+                (et, vl) -> ((FileAuthentication) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((FileAuthentication) et).getUsername(),
+                (et, vl) -> ((FileAuthentication) et).setUsername(DfTypeUtil.toString(vl)), "username");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -117,6 +159,32 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "file_authentication";
+    protected final String _tableDispName = "file_authentication";
+    protected final String _tablePropertyName = "FileAuthentication";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -142,30 +210,6 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -179,32 +223,27 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.FileAuthentication";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.FileAuthenticationCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.FileAuthenticationBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return FileAuthentication.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileAuthentication();
     }
 
     @Override

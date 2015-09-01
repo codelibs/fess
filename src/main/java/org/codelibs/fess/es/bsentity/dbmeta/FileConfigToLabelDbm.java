@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.FileConfigToLabel;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class FileConfigToLabelDbm extends AbstractDBMeta {
 
@@ -22,6 +25,26 @@ public class FileConfigToLabelDbm extends AbstractDBMeta {
 
     public static FileConfigToLabelDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((FileConfigToLabel) et).getFileConfigId(),
+                (et, vl) -> ((FileConfigToLabel) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
+        setupEpg(_epgMap, et -> ((FileConfigToLabel) et).getId(), (et, vl) -> ((FileConfigToLabel) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((FileConfigToLabel) et).getLabelTypeId(),
+                (et, vl) -> ((FileConfigToLabel) et).setLabelTypeId(DfTypeUtil.toString(vl)), "labelTypeId");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -54,6 +77,32 @@ public class FileConfigToLabelDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "file_config_to_label";
+    protected final String _tableDispName = "file_config_to_label";
+    protected final String _tablePropertyName = "FileConfigToLabel";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -79,30 +128,6 @@ public class FileConfigToLabelDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -116,32 +141,27 @@ public class FileConfigToLabelDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.FileConfigToLabel";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.FileConfigToLabelCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.FileConfigToLabelBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return FileConfigToLabel.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileConfigToLabel();
     }
 
     @Override

@@ -4,12 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 
+import ${request.package}.exentity.${table.camelizedName};
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
+
 
 public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 
@@ -23,6 +28,29 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 
     public static ${table.camelizedName}Dbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+#foreach ($col in $table.columnList)
+#if ($col.isNormalColumn)
+#set ($javaNative = ${col.type})
+#elseif ($col.isRefColumn)
+#set ($javaNative = ${col.camelizedName})
+#end
+        setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}(DfTypeUtil.to${javaNative}(vl)), "${col.uncapCamelName}");
+#end
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -49,6 +77,20 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "${table.name}";
+    protected final String _tableDispName = "${table.name}";
+    protected final String _tablePropertyName = "${table.camelizedName}";
+    public String getTableDbName() { return _tableDbName; }
+    @Override
+    public String getTableDispName() { return _tableDispName; }
+    @Override
+    public String getTablePropertyName() { return _tablePropertyName; }
+    @Override
+    public TableSqlName getTableSqlName() { return null; }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -74,30 +116,6 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -111,32 +129,27 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "${request.package}.exentity.${table.camelizedName}";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "${request.package}.cbean.${table.camelizedName}CB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "${request.package}.exbhv.${table.camelizedName}Bhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return ${table.camelizedName}.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ${table.camelizedName}();
     }
 
     @Override

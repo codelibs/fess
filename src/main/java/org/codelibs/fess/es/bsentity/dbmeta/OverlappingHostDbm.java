@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class OverlappingHostDbm extends AbstractDBMeta {
 
@@ -22,6 +25,36 @@ public class OverlappingHostDbm extends AbstractDBMeta {
 
     public static OverlappingHostDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getCreatedBy(),
+                (et, vl) -> ((OverlappingHost) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getCreatedTime(),
+                (et, vl) -> ((OverlappingHost) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getId(), (et, vl) -> ((OverlappingHost) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getOverlappingName(),
+                (et, vl) -> ((OverlappingHost) et).setOverlappingName(DfTypeUtil.toString(vl)), "overlappingName");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getRegularName(),
+                (et, vl) -> ((OverlappingHost) et).setRegularName(DfTypeUtil.toString(vl)), "regularName");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getSortOrder(),
+                (et, vl) -> ((OverlappingHost) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getUpdatedBy(),
+                (et, vl) -> ((OverlappingHost) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((OverlappingHost) et).getUpdatedTime(),
+                (et, vl) -> ((OverlappingHost) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -89,6 +122,32 @@ public class OverlappingHostDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "overlapping_host";
+    protected final String _tableDispName = "overlapping_host";
+    protected final String _tablePropertyName = "OverlappingHost";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -114,30 +173,6 @@ public class OverlappingHostDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -151,32 +186,27 @@ public class OverlappingHostDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.OverlappingHost";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.OverlappingHostCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.OverlappingHostBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return OverlappingHost.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new OverlappingHost();
     }
 
     @Override

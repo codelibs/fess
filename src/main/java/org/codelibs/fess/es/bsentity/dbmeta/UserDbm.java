@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.User;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class UserDbm extends AbstractDBMeta {
 
@@ -22,6 +25,26 @@ public class UserDbm extends AbstractDBMeta {
 
     public static UserDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((User) et).getGroup(), (et, vl) -> ((User) et).setGroup(DfTypeUtil.toString(vl)), "group");
+        setupEpg(_epgMap, et -> ((User) et).getId(), (et, vl) -> ((User) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((User) et).getName(), (et, vl) -> ((User) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((User) et).getPassword(), (et, vl) -> ((User) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et -> ((User) et).getRole(), (et, vl) -> ((User) et).setRole(DfTypeUtil.toString(vl)), "role");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -68,6 +91,32 @@ public class UserDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "user";
+    protected final String _tableDispName = "user";
+    protected final String _tablePropertyName = "User";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -93,30 +142,6 @@ public class UserDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -130,32 +155,27 @@ public class UserDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.User";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.UserCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.UserBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return User.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new User();
     }
 
     @Override

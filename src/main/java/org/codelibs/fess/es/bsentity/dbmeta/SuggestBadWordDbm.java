@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.SuggestBadWord;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class SuggestBadWordDbm extends AbstractDBMeta {
 
@@ -22,6 +25,36 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
 
     public static SuggestBadWordDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getCreatedBy(),
+                (et, vl) -> ((SuggestBadWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getCreatedTime(),
+                (et, vl) -> ((SuggestBadWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getId(), (et, vl) -> ((SuggestBadWord) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getSuggestWord(),
+                (et, vl) -> ((SuggestBadWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getTargetLabel(),
+                (et, vl) -> ((SuggestBadWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getTargetRole(),
+                (et, vl) -> ((SuggestBadWord) et).setTargetRole(DfTypeUtil.toString(vl)), "targetRole");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getUpdatedBy(),
+                (et, vl) -> ((SuggestBadWord) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getUpdatedTime(),
+                (et, vl) -> ((SuggestBadWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -89,6 +122,32 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "suggest_bad_word";
+    protected final String _tableDispName = "suggest_bad_word";
+    protected final String _tablePropertyName = "SuggestBadWord";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -114,30 +173,6 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -151,32 +186,27 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.SuggestBadWord";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.SuggestBadWordCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.SuggestBadWordBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return SuggestBadWord.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new SuggestBadWord();
     }
 
     @Override

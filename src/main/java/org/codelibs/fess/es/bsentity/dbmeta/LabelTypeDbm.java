@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.LabelType;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class LabelTypeDbm extends AbstractDBMeta {
 
@@ -22,6 +25,38 @@ public class LabelTypeDbm extends AbstractDBMeta {
 
     public static LabelTypeDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((LabelType) et).getCreatedBy(), (et, vl) -> ((LabelType) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((LabelType) et).getCreatedTime(), (et, vl) -> ((LabelType) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((LabelType) et).getExcludedPaths(),
+                (et, vl) -> ((LabelType) et).setExcludedPaths(DfTypeUtil.toString(vl)), "excludedPaths");
+        setupEpg(_epgMap, et -> ((LabelType) et).getId(), (et, vl) -> ((LabelType) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((LabelType) et).getIncludedPaths(),
+                (et, vl) -> ((LabelType) et).setIncludedPaths(DfTypeUtil.toString(vl)), "includedPaths");
+        setupEpg(_epgMap, et -> ((LabelType) et).getName(), (et, vl) -> ((LabelType) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((LabelType) et).getSortOrder(), (et, vl) -> ((LabelType) et).setSortOrder(DfTypeUtil.toInteger(vl)),
+                "sortOrder");
+        setupEpg(_epgMap, et -> ((LabelType) et).getUpdatedBy(), (et, vl) -> ((LabelType) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((LabelType) et).getUpdatedTime(), (et, vl) -> ((LabelType) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
+        setupEpg(_epgMap, et -> ((LabelType) et).getValue(), (et, vl) -> ((LabelType) et).setValue(DfTypeUtil.toString(vl)), "value");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -103,6 +138,32 @@ public class LabelTypeDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "label_type";
+    protected final String _tableDispName = "label_type";
+    protected final String _tablePropertyName = "LabelType";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -128,30 +189,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -165,32 +202,27 @@ public class LabelTypeDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.LabelType";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.LabelTypeCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.LabelTypeBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return LabelType.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new LabelType();
     }
 
     @Override

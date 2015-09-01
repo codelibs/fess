@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class CrawlingSessionInfoDbm extends AbstractDBMeta {
 
@@ -22,6 +25,31 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
 
     public static CrawlingSessionInfoDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getCrawlingSessionId(),
+                (et, vl) -> ((CrawlingSessionInfo) et).setCrawlingSessionId(DfTypeUtil.toString(vl)), "crawlingSessionId");
+        setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getCreatedTime(),
+                (et, vl) -> ((CrawlingSessionInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getId(), (et, vl) -> ((CrawlingSessionInfo) et).setId(DfTypeUtil.toString(vl)),
+                "id");
+        setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getKey(),
+                (et, vl) -> ((CrawlingSessionInfo) et).setKey(DfTypeUtil.toString(vl)), "key");
+        setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getValue(),
+                (et, vl) -> ((CrawlingSessionInfo) et).setValue(DfTypeUtil.toString(vl)), "value");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -68,6 +96,32 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "crawling_session_info";
+    protected final String _tableDispName = "crawling_session_info";
+    protected final String _tablePropertyName = "CrawlingSessionInfo";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -93,30 +147,6 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -130,32 +160,27 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.CrawlingSessionInfo";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.CrawlingSessionInfoCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.CrawlingSessionInfoBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return CrawlingSessionInfo.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new CrawlingSessionInfo();
     }
 
     @Override

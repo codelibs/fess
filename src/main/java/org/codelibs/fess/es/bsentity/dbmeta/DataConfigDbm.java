@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.DataConfig;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class DataConfigDbm extends AbstractDBMeta {
 
@@ -22,6 +25,42 @@ public class DataConfigDbm extends AbstractDBMeta {
 
     public static DataConfigDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((DataConfig) et).getAvailable(), (et, vl) -> ((DataConfig) et).setAvailable(DfTypeUtil.toBoolean(vl)),
+                "available");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getBoost(), (et, vl) -> ((DataConfig) et).setBoost(DfTypeUtil.toFloat(vl)), "boost");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getCreatedBy(), (et, vl) -> ((DataConfig) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getCreatedTime(), (et, vl) -> ((DataConfig) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerName(), (et, vl) -> ((DataConfig) et).setHandlerName(DfTypeUtil.toString(vl)),
+                "handlerName");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerParameter(),
+                (et, vl) -> ((DataConfig) et).setHandlerParameter(DfTypeUtil.toString(vl)), "handlerParameter");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerScript(),
+                (et, vl) -> ((DataConfig) et).setHandlerScript(DfTypeUtil.toString(vl)), "handlerScript");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getId(), (et, vl) -> ((DataConfig) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getName(), (et, vl) -> ((DataConfig) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getSortOrder(), (et, vl) -> ((DataConfig) et).setSortOrder(DfTypeUtil.toInteger(vl)),
+                "sortOrder");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getUpdatedBy(), (et, vl) -> ((DataConfig) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getUpdatedTime(), (et, vl) -> ((DataConfig) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -117,6 +156,32 @@ public class DataConfigDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "data_config";
+    protected final String _tableDispName = "data_config";
+    protected final String _tablePropertyName = "DataConfig";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -142,30 +207,6 @@ public class DataConfigDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -179,32 +220,27 @@ public class DataConfigDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.DataConfig";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.DataConfigCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.DataConfigBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return DataConfig.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new DataConfig();
     }
 
     @Override

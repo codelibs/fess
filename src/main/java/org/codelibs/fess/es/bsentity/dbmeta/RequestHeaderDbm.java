@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.RequestHeader;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class RequestHeaderDbm extends AbstractDBMeta {
 
@@ -22,6 +25,35 @@ public class RequestHeaderDbm extends AbstractDBMeta {
 
     public static RequestHeaderDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedBy(),
+                (et, vl) -> ((RequestHeader) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedTime(),
+                (et, vl) -> ((RequestHeader) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getId(), (et, vl) -> ((RequestHeader) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getName(), (et, vl) -> ((RequestHeader) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedBy(),
+                (et, vl) -> ((RequestHeader) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedTime(),
+                (et, vl) -> ((RequestHeader) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getValue(), (et, vl) -> ((RequestHeader) et).setValue(DfTypeUtil.toString(vl)),
+                "value");
+        setupEpg(_epgMap, et -> ((RequestHeader) et).getWebConfigId(),
+                (et, vl) -> ((RequestHeader) et).setWebConfigId(DfTypeUtil.toString(vl)), "webConfigId");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -89,6 +121,32 @@ public class RequestHeaderDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "request_header";
+    protected final String _tableDispName = "request_header";
+    protected final String _tablePropertyName = "RequestHeader";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -114,30 +172,6 @@ public class RequestHeaderDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -151,32 +185,27 @@ public class RequestHeaderDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.RequestHeader";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.RequestHeaderCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.RequestHeaderBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return RequestHeader.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new RequestHeader();
     }
 
     @Override

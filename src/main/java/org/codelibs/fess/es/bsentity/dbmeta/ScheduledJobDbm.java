@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class ScheduledJobDbm extends AbstractDBMeta {
 
@@ -22,6 +25,47 @@ public class ScheduledJobDbm extends AbstractDBMeta {
 
     public static ScheduledJobDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getAvailable(), (et, vl) -> ((ScheduledJob) et).setAvailable(DfTypeUtil.toBoolean(vl)),
+                "available");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getCrawler(), (et, vl) -> ((ScheduledJob) et).setCrawler(DfTypeUtil.toBoolean(vl)),
+                "crawler");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getCreatedBy(), (et, vl) -> ((ScheduledJob) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getCreatedTime(),
+                (et, vl) -> ((ScheduledJob) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getCronExpression(),
+                (et, vl) -> ((ScheduledJob) et).setCronExpression(DfTypeUtil.toString(vl)), "cronExpression");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getId(), (et, vl) -> ((ScheduledJob) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getJobLogging(),
+                (et, vl) -> ((ScheduledJob) et).setJobLogging(DfTypeUtil.toBoolean(vl)), "jobLogging");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getName(), (et, vl) -> ((ScheduledJob) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getScriptData(),
+                (et, vl) -> ((ScheduledJob) et).setScriptData(DfTypeUtil.toString(vl)), "scriptData");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getScriptType(),
+                (et, vl) -> ((ScheduledJob) et).setScriptType(DfTypeUtil.toString(vl)), "scriptType");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getSortOrder(), (et, vl) -> ((ScheduledJob) et).setSortOrder(DfTypeUtil.toInteger(vl)),
+                "sortOrder");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getTarget(), (et, vl) -> ((ScheduledJob) et).setTarget(DfTypeUtil.toString(vl)),
+                "target");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getUpdatedBy(), (et, vl) -> ((ScheduledJob) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((ScheduledJob) et).getUpdatedTime(),
+                (et, vl) -> ((ScheduledJob) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -131,6 +175,32 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "scheduled_job";
+    protected final String _tableDispName = "scheduled_job";
+    protected final String _tablePropertyName = "ScheduledJob";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -156,30 +226,6 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -193,32 +239,27 @@ public class ScheduledJobDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.ScheduledJob";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.ScheduledJobCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.ScheduledJobBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return ScheduledJob.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ScheduledJob();
     }
 
     @Override

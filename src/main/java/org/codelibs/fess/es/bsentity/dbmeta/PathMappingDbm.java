@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.PathMapping;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class PathMappingDbm extends AbstractDBMeta {
 
@@ -22,6 +25,37 @@ public class PathMappingDbm extends AbstractDBMeta {
 
     public static PathMappingDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((PathMapping) et).getCreatedBy(), (et, vl) -> ((PathMapping) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getCreatedTime(), (et, vl) -> ((PathMapping) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getId(), (et, vl) -> ((PathMapping) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getProcessType(),
+                (et, vl) -> ((PathMapping) et).setProcessType(DfTypeUtil.toString(vl)), "processType");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getRegex(), (et, vl) -> ((PathMapping) et).setRegex(DfTypeUtil.toString(vl)), "regex");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getReplacement(),
+                (et, vl) -> ((PathMapping) et).setReplacement(DfTypeUtil.toString(vl)), "replacement");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getSortOrder(), (et, vl) -> ((PathMapping) et).setSortOrder(DfTypeUtil.toInteger(vl)),
+                "sortOrder");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getUpdatedBy(), (et, vl) -> ((PathMapping) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((PathMapping) et).getUpdatedTime(), (et, vl) -> ((PathMapping) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -96,6 +130,32 @@ public class PathMappingDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "path_mapping";
+    protected final String _tableDispName = "path_mapping";
+    protected final String _tablePropertyName = "PathMapping";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -121,30 +181,6 @@ public class PathMappingDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -158,32 +194,27 @@ public class PathMappingDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.PathMapping";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.PathMappingCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.PathMappingBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return PathMapping.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new PathMapping();
     }
 
     @Override

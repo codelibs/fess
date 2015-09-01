@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class BoostDocumentRuleDbm extends AbstractDBMeta {
 
@@ -22,6 +25,36 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
 
     public static BoostDocumentRuleDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getBoostExpr(),
+                (et, vl) -> ((BoostDocumentRule) et).setBoostExpr(DfTypeUtil.toString(vl)), "boostExpr");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getCreatedBy(),
+                (et, vl) -> ((BoostDocumentRule) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getCreatedTime(),
+                (et, vl) -> ((BoostDocumentRule) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getId(), (et, vl) -> ((BoostDocumentRule) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getSortOrder(),
+                (et, vl) -> ((BoostDocumentRule) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getUpdatedBy(),
+                (et, vl) -> ((BoostDocumentRule) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getUpdatedTime(),
+                (et, vl) -> ((BoostDocumentRule) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getUrlExpr(),
+                (et, vl) -> ((BoostDocumentRule) et).setUrlExpr(DfTypeUtil.toString(vl)), "urlExpr");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -89,6 +122,32 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "boost_document_rule";
+    protected final String _tableDispName = "boost_document_rule";
+    protected final String _tablePropertyName = "BoostDocumentRule";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -114,30 +173,6 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -151,32 +186,27 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.BoostDocumentRule";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.BoostDocumentRuleCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.BoostDocumentRuleBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return BoostDocumentRule.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new BoostDocumentRule();
     }
 
     @Override

@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.RoleType;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class RoleTypeDbm extends AbstractDBMeta {
 
@@ -22,6 +25,34 @@ public class RoleTypeDbm extends AbstractDBMeta {
 
     public static RoleTypeDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((RoleType) et).getCreatedBy(), (et, vl) -> ((RoleType) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((RoleType) et).getCreatedTime(), (et, vl) -> ((RoleType) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((RoleType) et).getId(), (et, vl) -> ((RoleType) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((RoleType) et).getName(), (et, vl) -> ((RoleType) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((RoleType) et).getSortOrder(), (et, vl) -> ((RoleType) et).setSortOrder(DfTypeUtil.toInteger(vl)),
+                "sortOrder");
+        setupEpg(_epgMap, et -> ((RoleType) et).getUpdatedBy(), (et, vl) -> ((RoleType) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((RoleType) et).getUpdatedTime(), (et, vl) -> ((RoleType) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
+        setupEpg(_epgMap, et -> ((RoleType) et).getValue(), (et, vl) -> ((RoleType) et).setValue(DfTypeUtil.toString(vl)), "value");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -89,6 +120,32 @@ public class RoleTypeDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "role_type";
+    protected final String _tableDispName = "role_type";
+    protected final String _tablePropertyName = "RoleType";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -114,30 +171,6 @@ public class RoleTypeDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -151,32 +184,27 @@ public class RoleTypeDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.RoleType";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.RoleTypeCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.RoleTypeBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return RoleType.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new RoleType();
     }
 
     @Override

@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.WebConfig;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class WebConfigDbm extends AbstractDBMeta {
 
@@ -22,6 +25,56 @@ public class WebConfigDbm extends AbstractDBMeta {
 
     public static WebConfigDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((WebConfig) et).getAvailable(), (et, vl) -> ((WebConfig) et).setAvailable(DfTypeUtil.toBoolean(vl)),
+                "available");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getBoost(), (et, vl) -> ((WebConfig) et).setBoost(DfTypeUtil.toFloat(vl)), "boost");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getConfigParameter(),
+                (et, vl) -> ((WebConfig) et).setConfigParameter(DfTypeUtil.toString(vl)), "configParameter");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getCreatedBy(), (et, vl) -> ((WebConfig) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getCreatedTime(), (et, vl) -> ((WebConfig) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getDepth(), (et, vl) -> ((WebConfig) et).setDepth(DfTypeUtil.toInteger(vl)), "depth");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getExcludedDocUrls(),
+                (et, vl) -> ((WebConfig) et).setExcludedDocUrls(DfTypeUtil.toString(vl)), "excludedDocUrls");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getExcludedUrls(), (et, vl) -> ((WebConfig) et).setExcludedUrls(DfTypeUtil.toString(vl)),
+                "excludedUrls");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getId(), (et, vl) -> ((WebConfig) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getIncludedDocUrls(),
+                (et, vl) -> ((WebConfig) et).setIncludedDocUrls(DfTypeUtil.toString(vl)), "includedDocUrls");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getIncludedUrls(), (et, vl) -> ((WebConfig) et).setIncludedUrls(DfTypeUtil.toString(vl)),
+                "includedUrls");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getIntervalTime(), (et, vl) -> ((WebConfig) et).setIntervalTime(DfTypeUtil.toInteger(vl)),
+                "intervalTime");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getMaxAccessCount(),
+                (et, vl) -> ((WebConfig) et).setMaxAccessCount(DfTypeUtil.toLong(vl)), "maxAccessCount");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getName(), (et, vl) -> ((WebConfig) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getNumOfThread(), (et, vl) -> ((WebConfig) et).setNumOfThread(DfTypeUtil.toInteger(vl)),
+                "numOfThread");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getSortOrder(), (et, vl) -> ((WebConfig) et).setSortOrder(DfTypeUtil.toInteger(vl)),
+                "sortOrder");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getUpdatedBy(), (et, vl) -> ((WebConfig) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getUpdatedTime(), (et, vl) -> ((WebConfig) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getUrls(), (et, vl) -> ((WebConfig) et).setUrls(DfTypeUtil.toString(vl)), "urls");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getUserAgent(), (et, vl) -> ((WebConfig) et).setUserAgent(DfTypeUtil.toString(vl)),
+                "userAgent");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -173,6 +226,32 @@ public class WebConfigDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "web_config";
+    protected final String _tableDispName = "web_config";
+    protected final String _tablePropertyName = "WebConfig";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -198,30 +277,6 @@ public class WebConfigDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -235,32 +290,27 @@ public class WebConfigDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.WebConfig";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.WebConfigCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.WebConfigBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return WebConfig.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new WebConfig();
     }
 
     @Override

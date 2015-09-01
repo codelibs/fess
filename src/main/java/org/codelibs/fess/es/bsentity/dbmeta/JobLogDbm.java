@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.JobLog;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class JobLogDbm extends AbstractDBMeta {
 
@@ -22,6 +25,33 @@ public class JobLogDbm extends AbstractDBMeta {
 
     public static JobLogDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((JobLog) et).getEndTime(), (et, vl) -> ((JobLog) et).setEndTime(DfTypeUtil.toLong(vl)), "endTime");
+        setupEpg(_epgMap, et -> ((JobLog) et).getId(), (et, vl) -> ((JobLog) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((JobLog) et).getJobName(), (et, vl) -> ((JobLog) et).setJobName(DfTypeUtil.toString(vl)), "jobName");
+        setupEpg(_epgMap, et -> ((JobLog) et).getJobStatus(), (et, vl) -> ((JobLog) et).setJobStatus(DfTypeUtil.toString(vl)), "jobStatus");
+        setupEpg(_epgMap, et -> ((JobLog) et).getScriptData(), (et, vl) -> ((JobLog) et).setScriptData(DfTypeUtil.toString(vl)),
+                "scriptData");
+        setupEpg(_epgMap, et -> ((JobLog) et).getScriptResult(), (et, vl) -> ((JobLog) et).setScriptResult(DfTypeUtil.toString(vl)),
+                "scriptResult");
+        setupEpg(_epgMap, et -> ((JobLog) et).getScriptType(), (et, vl) -> ((JobLog) et).setScriptType(DfTypeUtil.toString(vl)),
+                "scriptType");
+        setupEpg(_epgMap, et -> ((JobLog) et).getStartTime(), (et, vl) -> ((JobLog) et).setStartTime(DfTypeUtil.toLong(vl)), "startTime");
+        setupEpg(_epgMap, et -> ((JobLog) et).getTarget(), (et, vl) -> ((JobLog) et).setTarget(DfTypeUtil.toString(vl)), "target");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -96,6 +126,32 @@ public class JobLogDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "job_log";
+    protected final String _tableDispName = "job_log";
+    protected final String _tablePropertyName = "JobLog";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -121,30 +177,6 @@ public class JobLogDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -158,32 +190,27 @@ public class JobLogDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.JobLog";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.JobLogCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.JobLogBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return JobLog.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new JobLog();
     }
 
     @Override

@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.KeyMatch;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class KeyMatchDbm extends AbstractDBMeta {
 
@@ -22,6 +25,34 @@ public class KeyMatchDbm extends AbstractDBMeta {
 
     public static KeyMatchDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getBoost(), (et, vl) -> ((KeyMatch) et).setBoost(DfTypeUtil.toFloat(vl)), "boost");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getCreatedBy(), (et, vl) -> ((KeyMatch) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getCreatedTime(), (et, vl) -> ((KeyMatch) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getId(), (et, vl) -> ((KeyMatch) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getMaxSize(), (et, vl) -> ((KeyMatch) et).setMaxSize(DfTypeUtil.toInteger(vl)), "maxSize");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getQuery(), (et, vl) -> ((KeyMatch) et).setQuery(DfTypeUtil.toString(vl)), "query");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getTerm(), (et, vl) -> ((KeyMatch) et).setTerm(DfTypeUtil.toString(vl)), "term");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getUpdatedBy(), (et, vl) -> ((KeyMatch) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((KeyMatch) et).getUpdatedTime(), (et, vl) -> ((KeyMatch) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -96,6 +127,32 @@ public class KeyMatchDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "key_match";
+    protected final String _tableDispName = "key_match";
+    protected final String _tablePropertyName = "KeyMatch";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -121,30 +178,6 @@ public class KeyMatchDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -158,32 +191,27 @@ public class KeyMatchDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.KeyMatch";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.KeyMatchCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.KeyMatchBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return KeyMatch.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new KeyMatch();
     }
 
     @Override

@@ -3,12 +3,15 @@ package org.codelibs.fess.es.bsentity.dbmeta;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.es.exentity.WebAuthentication;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
 import org.dbflute.dbmeta.info.UniqueInfo;
 import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
 import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
 
 public class WebAuthenticationDbm extends AbstractDBMeta {
 
@@ -22,6 +25,46 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
 
     public static WebAuthenticationDbm getInstance() {
         return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getAuthRealm(),
+                (et, vl) -> ((WebAuthentication) et).setAuthRealm(DfTypeUtil.toString(vl)), "authRealm");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getCreatedBy(),
+                (et, vl) -> ((WebAuthentication) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getCreatedTime(),
+                (et, vl) -> ((WebAuthentication) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getHostname(),
+                (et, vl) -> ((WebAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getId(), (et, vl) -> ((WebAuthentication) et).setId(DfTypeUtil.toString(vl)), "id");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getParameters(),
+                (et, vl) -> ((WebAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getPassword(),
+                (et, vl) -> ((WebAuthentication) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getPort(), (et, vl) -> ((WebAuthentication) et).setPort(DfTypeUtil.toInteger(vl)),
+                "port");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getProtocolScheme(),
+                (et, vl) -> ((WebAuthentication) et).setProtocolScheme(DfTypeUtil.toString(vl)), "protocolScheme");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getUpdatedBy(),
+                (et, vl) -> ((WebAuthentication) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getUpdatedTime(),
+                (et, vl) -> ((WebAuthentication) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getUsername(),
+                (et, vl) -> ((WebAuthentication) et).setUsername(DfTypeUtil.toString(vl)), "username");
+        setupEpg(_epgMap, et -> ((WebAuthentication) et).getWebConfigId(),
+                (et, vl) -> ((WebAuthentication) et).setWebConfigId(DfTypeUtil.toString(vl)), "webConfigId");
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
     }
 
     // ===================================================================================
@@ -124,6 +167,32 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
         return ls;
     }
 
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "web_authentication";
+    protected final String _tableDispName = "web_authentication";
+    protected final String _tablePropertyName = "WebAuthentication";
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
+    @Override
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
+    @Override
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
+    @Override
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
+
     @Override
     public String getProjectName() {
         // TODO Auto-generated method stub
@@ -149,30 +218,6 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     }
 
     @Override
-    public String getTableDbName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTableDispName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTablePropertyName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TableSqlName getTableSqlName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasPrimaryKey() {
         // TODO Auto-generated method stub
         return false;
@@ -186,32 +231,27 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
 
     @Override
     public String getEntityTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exentity.WebAuthentication";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.cbean.WebAuthenticationCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "org.codelibs.fess.es.exbhv.WebAuthenticationBhv";
     }
 
     @Override
     public Class<? extends Entity> getEntityType() {
-        // TODO Auto-generated method stub
-        return null;
+        return WebAuthentication.class;
     }
 
     @Override
     public Entity newEntity() {
-        // TODO Auto-generated method stub
-        return null;
+        return new WebAuthentication();
     }
 
     @Override
