@@ -102,9 +102,8 @@ $.fn.suggestor = function(setting) {
 				type:"get",
 				dataType: "jsonp",
 				cache : false,
-				data:{	query: $textArea.val(),
-						type: "suggest",
-						fn: settingAjaxInfo.fn,
+				data:{	q: $textArea.val(),
+						fields: settingAjaxInfo.fn,
 						num: settingAjaxInfo.num * 2
 				}
 			}).done(function(obj) { suggestor.createAutoCompleteList(obj); }).fail(function(a,obj,b) { suggestingSts=false; return; });
@@ -113,19 +112,16 @@ $.fn.suggestor = function(setting) {
 		
 		
 		createAutoCompleteList: function(obj) {
-			var response = obj.response;
+			var hits = obj.hits;
 			var suggestor = this;
 			var addCount = 0;
 			
 			
 			listNum = 0;
-			if(typeof response.result !== "undefined") {
+			if(typeof hits !== "undefined") {
 				var reslist = new Array();
-				for(var i=0;i<response.result.length;i++) {
-					var tmpList = response.result[i].result;
-					for(var j=0;j<tmpList.length;j++) {
-						reslist.push(tmpList[j]);
-					}
+				for(var i=0;i<hits.length;i++) {
+					reslist.push(hits[i].text);
 				}
 				var $olEle = $("<ol/>");
 				$olEle.css("list-style","none");
