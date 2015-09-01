@@ -132,10 +132,10 @@
 							<span><la:message key="labels.menu.overlapping_host" /></span>
 						</todo:link></li>
 
-					<li <c:if test="${param.menuType=='roleType'}">class="active"</c:if>><todo:link href="/admin/roleType/index">
+					<li <c:if test="${param.menuType=='roleType'}">class="active"</c:if>><la:link href="/admin/roletype/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.role_type" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 				</ul></li>
 			<li class="treeview <c:if test="${param.menuCategoryType=='suggest'}">active</c:if>"><a href="#"><i
@@ -201,5 +201,3 @@
 	</section>
 	<!-- /.sidebar -->
 </aside>
-
-

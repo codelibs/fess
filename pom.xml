@@ -101,7 +101,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/OverlappingHostForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemInfoForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/RoleTypeAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/JobLogForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataConfigForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemAction.java</exclude>
@@ -116,7 +115,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/DataForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SuggestBadWordAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/IndexAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/RoleTypeForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/LogAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictAction.java</exclude>
@@ -385,7 +383,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version> <!-- contains taglibs.standard -->
-			<!-- 
+			<!--
 			<scope>provided</scope>
 			 -->
 		</dependency>
