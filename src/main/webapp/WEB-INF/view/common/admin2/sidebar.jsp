@@ -125,12 +125,12 @@
 							<span><la:message key="labels.menu.request_header" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='overlappingHost'}">class="active"</c:if>><todo:link
-							href="/admin/overlappingHost/index"
+					<li <c:if test="${param.menuType=='overlappingHost'}">class="active"</c:if>><la:link
+							href="/admin/overlappinghost/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.overlapping_host" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='roleType'}">class="active"</c:if>><la:link href="/admin/roletype/index">
 							<i class='fa fa-angle-right'></i>
