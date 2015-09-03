@@ -227,4 +227,9 @@ public abstract class BsPathMappingBhv extends AbstractBehavior<PathMapping, Pat
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

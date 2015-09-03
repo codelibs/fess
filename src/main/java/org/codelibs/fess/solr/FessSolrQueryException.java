@@ -22,15 +22,15 @@ public class FessSolrQueryException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public FessSolrQueryException(String message, Throwable cause) {
+    public FessSolrQueryException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public FessSolrQueryException(String message) {
+    public FessSolrQueryException(final String message) {
         super(message);
     }
 
-    public FessSolrQueryException(Throwable cause) {
+    public FessSolrQueryException(final Throwable cause) {
         super(cause);
     }
 

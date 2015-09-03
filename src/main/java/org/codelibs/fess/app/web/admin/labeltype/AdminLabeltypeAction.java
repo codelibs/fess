@@ -53,7 +53,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                               Hook
     //                                                                              ======
     @Override
-    protected void setupHtmlData(ActionRuntime runtime) {
+    protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink("labelType"));
     }
@@ -62,14 +62,14 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(LabelTypeSearchForm form) {
+    public HtmlResponse index(final LabelTypeSearchForm form) {
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(Integer pageNumber, LabelTypeSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final LabelTypeSearchForm form) {
         labelTypePager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -77,7 +77,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(LabelTypeSearchForm form) {
+    public HtmlResponse search(final LabelTypeSearchForm form) {
         copyBeanToBean(form.searchParams, labelTypePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -85,7 +85,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse reset(LabelTypeSearchForm form) {
+    public HtmlResponse reset(final LabelTypeSearchForm form) {
         labelTypePager.clear();
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -93,13 +93,13 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(LabelTypeSearchForm form) {
+    public HtmlResponse back(final LabelTypeSearchForm form) {
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(RenderData data, LabelTypeSearchForm form) {
+    protected void searchPaging(final RenderData data, final LabelTypeSearchForm form) {
         data.register("labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
 
         // restore from pager
@@ -114,7 +114,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(LabelTypeEditForm form) {
+    public HtmlResponse createpage(final LabelTypeEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminLabeltype_EditJsp);
@@ -122,7 +122,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(int crudMode, String id, LabelTypeEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final LabelTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
@@ -132,13 +132,13 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(LabelTypeEditForm form) {
+    public HtmlResponse editagain(final LabelTypeEditForm form) {
         return asHtml(path_AdminLabeltype_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(LabelTypeEditForm form) {
+    public HtmlResponse editfromconfirm(final LabelTypeEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_EditJsp);
@@ -146,7 +146,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(int crudMode, String id, LabelTypeEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final LabelTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
@@ -156,7 +156,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(LabelTypeEditForm form) {
+    public HtmlResponse deletefromconfirm(final LabelTypeEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_ConfirmJsp);
@@ -166,7 +166,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(int crudMode, String id, LabelTypeEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final LabelTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
@@ -176,14 +176,14 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(LabelTypeEditForm form) {
+    public HtmlResponse confirmfromcreate(final LabelTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminLabeltype_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(LabelTypeEditForm form) {
+    public HtmlResponse confirmfromupdate(final LabelTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminLabeltype_ConfirmJsp);
     }
@@ -193,7 +193,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(LabelTypeEditForm form) {
+    public HtmlResponse create(final LabelTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         labelTypeService.store(createLabelType(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -202,7 +202,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(LabelTypeEditForm form) {
+    public HtmlResponse update(final LabelTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         labelTypeService.store(createLabelType(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -210,7 +210,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse delete(LabelTypeEditForm form) {
+    public HtmlResponse delete(final LabelTypeEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         labelTypeService.delete(getLabelType(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
@@ -220,11 +220,11 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadLabelType(LabelTypeEditForm form) {
+    protected void loadLabelType(final LabelTypeEditForm form) {
         copyBeanToBean(getLabelType(form), form, op -> op.exclude("crudMode"));
     }
 
-    protected LabelType getLabelType(LabelTypeEditForm form) {
+    protected LabelType getLabelType(final LabelTypeEditForm form) {
         final LabelType labelType = labelTypeService.getLabelType(createKeyMap(form));
         if (labelType == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
@@ -232,7 +232,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return labelType;
     }
 
-    protected LabelType createLabelType(LabelTypeEditForm form) {
+    protected LabelType createLabelType(final LabelTypeEditForm form) {
         LabelType labelType;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
@@ -249,7 +249,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return labelType;
     }
 
-    protected Map<String, String> createKeyMap(LabelTypeEditForm form) {
+    protected Map<String, String> createKeyMap(final LabelTypeEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -258,7 +258,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(LabelTypeEditForm form, int expectedMode) {
+    protected void verifyCrudMode(final LabelTypeEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));

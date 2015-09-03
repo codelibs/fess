@@ -84,7 +84,7 @@ public class SearchAction extends FessSearchAction {
     }
 
     @Execute
-    public HtmlResponse search(SearchForm form) {
+    public HtmlResponse search(final SearchForm form) {
         if (viewHelper.isUseSession() && StringUtil.isNotBlank(form.num)) {
             normalizePageNum(form);
             final HttpSession session = request.getSession();
@@ -97,21 +97,21 @@ public class SearchAction extends FessSearchAction {
     }
 
     @Execute
-    public HtmlResponse prev(SearchForm form) {
+    public HtmlResponse prev(final SearchForm form) {
         return doMove(form, -1);
     }
 
     @Execute
-    public HtmlResponse next(SearchForm form) {
+    public HtmlResponse next(final SearchForm form) {
         return doMove(form, 1);
     }
 
     @Execute
-    public HtmlResponse move(SearchForm form) {
+    public HtmlResponse move(final SearchForm form) {
         return doMove(form, 0);
     }
 
-    protected HtmlResponse doSearch(SearchForm form) {
+    protected HtmlResponse doSearch(final SearchForm form) {
         searchAvailable();
 
         if (viewHelper.isUseSession()) {
@@ -151,7 +151,7 @@ public class SearchAction extends FessSearchAction {
         });
     }
 
-    protected HtmlResponse doMove(SearchForm form, final int move) {
+    protected HtmlResponse doMove(final SearchForm form, final int move) {
         int pageNum = getDefaultPageSize();
         if (StringUtil.isBlank(form.num)) {
             form.num = String.valueOf(getDefaultPageSize());
@@ -181,7 +181,7 @@ public class SearchAction extends FessSearchAction {
         return doSearch(form);
     }
 
-    protected String doSearchInternal(RenderData data, SearchForm form) {
+    protected String doSearchInternal(final RenderData data, final SearchForm form) {
         final StringBuilder queryBuf = new StringBuilder(255);
         if (StringUtil.isNotBlank(form.query)) {
             queryBuf.append(form.query);
@@ -436,7 +436,7 @@ public class SearchAction extends FessSearchAction {
         }
     }
 
-    protected void updateSearchParams(SearchForm form) {
+    protected void updateSearchParams(final SearchForm form) {
         if (form.facet == null) {
             form.facet = queryHelper.getDefaultFacetInfo();
         }
@@ -446,7 +446,7 @@ public class SearchAction extends FessSearchAction {
         }
     }
 
-    protected String getDisplayQuery(RootForm form, List<Map<String, String>> labelTypeItems) {
+    protected String getDisplayQuery(final RootForm form, final List<Map<String, String>> labelTypeItems) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(form.query);
         if (!form.fields.isEmpty() && form.fields.containsKey(LABEL_FIELD)) {
@@ -470,7 +470,7 @@ public class SearchAction extends FessSearchAction {
         return buf.toString();
     }
 
-    protected void normalizePageNum(RootForm form) {
+    protected void normalizePageNum(final RootForm form) {
         try {
             final int num = Integer.parseInt(form.num);
             if (num > getMaxPageSize()) {
@@ -512,7 +512,7 @@ public class SearchAction extends FessSearchAction {
         return false;
     }
 
-    protected String getPagingQuery(SearchForm form) {
+    protected String getPagingQuery(final SearchForm form) {
         final StringBuilder buf = new StringBuilder(200);
         if (form.additional != null) {
             final Set<String> fieldSet = new HashSet<String>();

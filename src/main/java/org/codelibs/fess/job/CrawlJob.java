@@ -65,6 +65,8 @@ public class CrawlJob {
 
     protected long retryIntervalToDeleteTempDir = 5000;
 
+    protected boolean useLocaleElasticsearch = true;
+
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
         return this;
@@ -110,9 +112,15 @@ public class CrawlJob {
         return this;
     }
 
-    public void retryToDeleteTempDir(final int retryCount, final long retryInterval) {
+    public CrawlJob retryToDeleteTempDir(final int retryCount, final long retryInterval) {
         retryCountToDeleteTempDir = retryCount;
         retryIntervalToDeleteTempDir = retryInterval;
+        return this;
+    }
+
+    public CrawlJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
+        this.useLocaleElasticsearch = useLocaleElasticsearch;
+        return this;
     }
 
     public String execute(final JobExecutor jobExecutor) {
@@ -250,9 +258,15 @@ public class CrawlJob {
         }
         crawlerCmdList.add(buf.toString());
 
-        final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-        if (StringUtil.isNotBlank(transportAddresses)) {
-            crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+        if (useLocaleElasticsearch) {
+            final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
+            if (StringUtil.isNotBlank(transportAddresses)) {
+                crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+            }
+            final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
+            if (StringUtil.isNotBlank(clusterName)) {
+                crawlerCmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
+            }
         }
 
         crawlerCmdList.add("-Dfess.crawler.process=true");

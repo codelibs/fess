@@ -231,4 +231,9 @@ public abstract class BsFileAuthenticationBhv extends AbstractBehavior<FileAuthe
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

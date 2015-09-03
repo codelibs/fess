@@ -222,4 +222,9 @@ public abstract class BsUserInfoBhv extends AbstractBehavior<UserInfo, UserInfoC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

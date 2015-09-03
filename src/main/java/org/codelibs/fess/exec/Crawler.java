@@ -46,12 +46,12 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.robot.client.EsClient;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.lastaflute.di.core.LaContainer;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
@@ -172,12 +172,19 @@ public class Crawler implements Serializable {
             return;
         }
 
+        final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
+        if (StringUtil.isNotBlank(transportAddresses)) {
+            System.setProperty(EsClient.TRANSPORT_ADDRESSES, transportAddresses);
+        }
+        final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
+        if (StringUtil.isNotBlank(clusterName)) {
+            System.setProperty(EsClient.CLUSTER_NAME, clusterName);
+        }
+
         int exitCode;
         try {
             SingletonLaContainerFactory.setConfigPath("app.xml");
             SingletonLaContainerFactory.init();
-
-            final LaContainer container = SingletonLaContainerFactory.getContainer();
 
             final Thread shutdownCallback = new Thread("ShutdownHook") {
                 @Override

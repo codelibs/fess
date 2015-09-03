@@ -33,7 +33,7 @@ public class FessTimeResourceProvider extends TypicalTimeResourceProvider {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FessTimeResourceProvider(FessConfig fessConfig) {
+    public FessTimeResourceProvider(final FessConfig fessConfig) {
         this.fessConfig = fessConfig;
     }
 

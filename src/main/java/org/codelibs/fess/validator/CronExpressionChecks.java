@@ -18,17 +18,4 @@ package org.codelibs.fess.validator;
 
 //TODO replace with hibernate validator
 public class CronExpressionChecks /*extends S2FieldChecks*/{
-
-    private static final long serialVersionUID = 1L;
-    /*
-        public static boolean validateCronExpression(final Object bean, final ValidatorAction validatorAction, final Field field,
-                final ActionMessages errors, final Validator validator, final HttpServletRequest request) {
-            final String value = getValueAsString(bean, field);
-            if (StringUtil.isNotBlank(value) && !CronExpression.isValidExpression(value)) {
-                addError(errors, field, validator, validatorAction, request);
-                return false;
-            }
-            return true;
-        }
-    */
 }

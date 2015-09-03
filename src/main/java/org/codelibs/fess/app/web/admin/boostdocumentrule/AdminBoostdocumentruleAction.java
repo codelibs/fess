@@ -53,7 +53,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                                                               Hook
     //                                                                              ======
     @Override
-    protected void setupHtmlData(ActionRuntime runtime) {
+    protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink("boostDocumentRule"));
     }
@@ -62,14 +62,14 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(BoostDocumentRuleSearchForm form) {
+    public HtmlResponse index(final BoostDocumentRuleSearchForm form) {
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(Integer pageNumber, BoostDocumentRuleSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final BoostDocumentRuleSearchForm form) {
         boostDocumentRulePager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -77,7 +77,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(BoostDocumentRuleSearchForm form) {
+    public HtmlResponse search(final BoostDocumentRuleSearchForm form) {
         copyBeanToBean(form.searchParams, boostDocumentRulePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -85,7 +85,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse reset(BoostDocumentRuleSearchForm form) {
+    public HtmlResponse reset(final BoostDocumentRuleSearchForm form) {
         boostDocumentRulePager.clear();
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -93,13 +93,13 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(BoostDocumentRuleSearchForm form) {
+    public HtmlResponse back(final BoostDocumentRuleSearchForm form) {
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(RenderData data, BoostDocumentRuleSearchForm form) {
+    protected void searchPaging(final RenderData data, final BoostDocumentRuleSearchForm form) {
         data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocumentRulePager)); // page navi
 
         // restore from pager
@@ -114,7 +114,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(BoostDocumentRuleEditForm form) {
+    public HtmlResponse createpage(final BoostDocumentRuleEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminBoostdocumentrule_EditJsp);
@@ -122,7 +122,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(int crudMode, String id, BoostDocumentRuleEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final BoostDocumentRuleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
@@ -132,13 +132,13 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(BoostDocumentRuleEditForm form) {
+    public HtmlResponse editagain(final BoostDocumentRuleEditForm form) {
         return asHtml(path_AdminBoostdocumentrule_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(BoostDocumentRuleEditForm form) {
+    public HtmlResponse editfromconfirm(final BoostDocumentRuleEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadBoostDocumentRule(form);
         return asHtml(path_AdminBoostdocumentrule_EditJsp);
@@ -146,7 +146,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(int crudMode, String id, BoostDocumentRuleEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final BoostDocumentRuleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
@@ -156,7 +156,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(BoostDocumentRuleEditForm form) {
+    public HtmlResponse deletefromconfirm(final BoostDocumentRuleEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadBoostDocumentRule(form);
         return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
@@ -166,7 +166,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(int crudMode, String id, BoostDocumentRuleEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final BoostDocumentRuleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
@@ -176,14 +176,14 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(BoostDocumentRuleEditForm form) {
+    public HtmlResponse confirmfromcreate(final BoostDocumentRuleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(BoostDocumentRuleEditForm form) {
+    public HtmlResponse confirmfromupdate(final BoostDocumentRuleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
     }
@@ -193,7 +193,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(BoostDocumentRuleEditForm form) {
+    public HtmlResponse create(final BoostDocumentRuleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         boostDocumentRuleService.store(createBoostDocumentRule(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -202,7 +202,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(BoostDocumentRuleEditForm form) {
+    public HtmlResponse update(final BoostDocumentRuleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         boostDocumentRuleService.store(createBoostDocumentRule(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -210,7 +210,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse delete(BoostDocumentRuleEditForm form) {
+    public HtmlResponse delete(final BoostDocumentRuleEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         boostDocumentRuleService.delete(getBoostDocumentRule(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
@@ -220,11 +220,11 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadBoostDocumentRule(BoostDocumentRuleEditForm form) {
+    protected void loadBoostDocumentRule(final BoostDocumentRuleEditForm form) {
         copyBeanToBean(getBoostDocumentRule(form), form, op -> op.exclude("crudMode"));
     }
 
-    protected BoostDocumentRule getBoostDocumentRule(BoostDocumentRuleEditForm form) {
+    protected BoostDocumentRule getBoostDocumentRule(final BoostDocumentRuleEditForm form) {
         final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap(form));
         if (boostDocumentRule == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
@@ -232,7 +232,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
         return boostDocumentRule;
     }
 
-    protected BoostDocumentRule createBoostDocumentRule(BoostDocumentRuleEditForm form) {
+    protected BoostDocumentRule createBoostDocumentRule(final BoostDocumentRuleEditForm form) {
         BoostDocumentRule boostDocumentRule;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
@@ -249,7 +249,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
         return boostDocumentRule;
     }
 
-    protected Map<String, String> createKeyMap(BoostDocumentRuleEditForm form) {
+    protected Map<String, String> createKeyMap(final BoostDocumentRuleEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -258,7 +258,7 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(BoostDocumentRuleEditForm form, int expectedMode) {
+    protected void verifyCrudMode(final BoostDocumentRuleEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));

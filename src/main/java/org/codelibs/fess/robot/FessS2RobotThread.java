@@ -101,7 +101,7 @@ public class FessS2RobotThread extends S2RobotThread {
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
                 final Map<String, Object> solrDocument =
-                        indexingHelper.getSolrDocument(fessEsClient, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
+                        indexingHelper.getDocument(fessEsClient, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
                                 fieldHelper.anchorField, fieldHelper.segmentField, fieldHelper.expiresField, fieldHelper.clickCountField,
                                 fieldHelper.favoriteCountField });
                 if (solrDocument == null) {
@@ -197,7 +197,7 @@ public class FessS2RobotThread extends S2RobotThread {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final List<Map<String, Object>> docList =
-                indexingHelper.getChildSolrDocumentList(fessEsClient, id, new String[] { fieldHelper.urlField });
+                indexingHelper.getChildDocumentList(fessEsClient, id, new String[] { fieldHelper.urlField });
         if (docList.isEmpty()) {
             return null;
         }

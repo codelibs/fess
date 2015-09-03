@@ -15,7 +15,7 @@ public class RoleType extends BsRoleType {
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 
@@ -23,7 +23,7 @@ public class RoleType extends BsRoleType {
         return asDocMeta().version();
     }
 
-    public void setVersionNo(Long version) {
+    public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
 }

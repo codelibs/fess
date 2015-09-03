@@ -52,7 +52,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     //                                                                              Assist
     //                                                                              ======
     @Override
-    protected void prepareAssistDirection(FwAssistDirection direction) {
+    protected void prepareAssistDirection(final FwAssistDirection direction) {
         direction.directConfig(nameList -> nameList.add("fess_config.properties"), "fess_env.properties");
     }
 
@@ -60,7 +60,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     //                                                                               Core
     //                                                                              ======
     @Override
-    protected void prepareCoreDirection(FwCoreDirection direction) {
+    protected void prepareCoreDirection(final FwCoreDirection direction) {
         // this configuration is on fess_env.properties because this is true only when development
         direction.directDevelopmentHere(fessConfig.isDevelopmentHere());
 
@@ -106,7 +106,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     //                                                                                 DB
     //                                                                                ====
     @Override
-    protected void prepareDbDirection(FwDbDirection direction) {
+    protected void prepareDbDirection(final FwDbDirection direction) {
         direction.directClassification(createListedClassificationProvider());
     }
 
@@ -118,7 +118,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     //                                                                                Web
     //                                                                               =====
     @Override
-    protected void prepareWebDirection(FwWebDirection direction) {
+    protected void prepareWebDirection(final FwWebDirection direction) {
         direction.directRequest(createUserLocaleProcessProvider(), createUserTimeZoneProcessProvider());
         direction.directCookie(createCookieResourceProvider());
         direction.directAdjustment(createActionAdjustmentProvider());

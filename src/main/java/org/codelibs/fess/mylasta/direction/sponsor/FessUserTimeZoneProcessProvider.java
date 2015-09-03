@@ -42,12 +42,12 @@ public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvi
     }
 
     @Override
-    public OptionalThing<TimeZone> findBusinessTimeZone(ActionRuntime runtimeMeta, RequestManager requestManager) {
+    public OptionalThing<TimeZone> findBusinessTimeZone(final ActionRuntime runtimeMeta, final RequestManager requestManager) {
         return OptionalObject.empty();
     }
 
     @Override
-    public TimeZone getRequestedTimeZone(RequestManager requestManager) { // not null
+    public TimeZone getRequestedTimeZone(final RequestManager requestManager) { // not null
         return centralTimeZone; // you can change it if you like
     }
 

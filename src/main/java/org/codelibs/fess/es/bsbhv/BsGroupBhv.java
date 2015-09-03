@@ -220,4 +220,9 @@ public abstract class BsGroupBhv extends AbstractBehavior<Group, GroupCB> {
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

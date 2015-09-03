@@ -29,7 +29,8 @@ public class FessCurtainFinallyHook implements CurtainFinallyHook {
 
     private static final Logger logger = LoggerFactory.getLogger(FessCurtainFinallyHook.class);
 
-    public void hook(FwAssistantDirector assistantDirector) {
+    @Override
+    public void hook(final FwAssistantDirector assistantDirector) {
         shutdownCommonsHttpClient();
     }
 

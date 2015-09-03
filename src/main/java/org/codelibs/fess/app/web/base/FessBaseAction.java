@@ -74,28 +74,28 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     // to suppress unexpected override by sub-class
     // you should remove the 'final' if you need to override this
     @Override
-    public final ActionResponse godHandPrologue(ActionRuntime runtime) {
+    public final ActionResponse godHandPrologue(final ActionRuntime runtime) {
         return super.godHandPrologue(runtime);
     }
 
     @Override
-    public final ActionResponse godHandMonologue(ActionRuntime runtime) {
+    public final ActionResponse godHandMonologue(final ActionRuntime runtime) {
         return super.godHandMonologue(runtime);
     }
 
     @Override
-    public final void godHandEpilogue(ActionRuntime runtime) {
+    public final void godHandEpilogue(final ActionRuntime runtime) {
         super.godHandEpilogue(runtime);
     }
 
     // #app_customize you can customize the action hook
     @Override
-    public ActionResponse hookBefore(ActionRuntime runtime) { // application may override
+    public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
         return super.hookBefore(runtime);
     }
 
     @Override
-    public void hookFinally(ActionRuntime runtime) {
+    public void hookFinally(final ActionRuntime runtime) {
         super.hookFinally(runtime);
     }
 

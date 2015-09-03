@@ -222,4 +222,9 @@ public abstract class BsFileConfigToLabelBhv extends AbstractBehavior<FileConfig
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

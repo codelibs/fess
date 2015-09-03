@@ -69,7 +69,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                      Handle Request
     //                                                                      ==============
     @Override
-    public void handleRequest(HttpServletRequest request) throws ServletException {
+    public void handleRequest(final HttpServletRequest request) throws ServletException {
         // /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         // copied from super's method and extends it
         // basically for JVN#14876762
@@ -80,21 +80,21 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         try {
             final List<FileItem> items = parseRequest(request, upload);
             mappingParameter(request, items);
-        } catch (SizeLimitExceededException e) {
+        } catch (final SizeLimitExceededException e) {
             handleSizeLimitExceededException(request, e);
-        } catch (FileUploadException e) {
+        } catch (final FileUploadException e) {
             handleFileUploadException(e);
         }
     }
 
-    protected ModuleConfig getModuleConfig(HttpServletRequest request) {
+    protected ModuleConfig getModuleConfig(final HttpServletRequest request) {
         return (ModuleConfig) request.getAttribute(LastaWebKey.MODULE_CONFIG_KEY);
     }
 
     // ===================================================================================
     //                                                            Create ServletFileUpload
     //                                                            ========================
-    protected ServletFileUpload createServletFileUpload(HttpServletRequest request) {
+    protected ServletFileUpload createServletFileUpload(final HttpServletRequest request) {
         final DiskFileItemFactory fileItemFactory = createDiskFileItemFactory();
         final ServletFileUpload upload = newServletFileUpload(fileItemFactory);
         upload.setHeaderEncoding(request.getCharacterEncoding());
@@ -102,10 +102,10 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         return upload;
     }
 
-    protected ServletFileUpload newServletFileUpload(DiskFileItemFactory fileItemFactory) {
+    protected ServletFileUpload newServletFileUpload(final DiskFileItemFactory fileItemFactory) {
         return new ServletFileUpload(fileItemFactory) {
             @Override
-            protected byte[] getBoundary(String contentType) { // for security
+            protected byte[] getBoundary(final String contentType) { // for security
                 final byte[] boundary = super.getBoundary(contentType);
                 checkBoundarySize(contentType, boundary);
                 return boundary;
@@ -113,7 +113,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         };
     }
 
-    protected void checkBoundarySize(String contentType, byte[] boundary) {
+    protected void checkBoundarySize(final String contentType, final byte[] boundary) {
         final int boundarySize = boundary.length;
         final int limitSize = getBoundaryLimitSize();
         if (boundarySize > getBoundaryLimitSize()) {
@@ -127,7 +127,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         return 2000; // you can override as you like it
     }
 
-    protected void throwTooLongBoundarySizeException(String contentType, int boundarySize, int limitSize) {
+    protected void throwTooLongBoundarySizeException(final String contentType, final int boundarySize, final int limitSize) {
         final ExceptionMessageBuilder br = new ExceptionMessageBuilder();
         br.addNotice("Too long boundary size so treats it as 404.");
         br.addItem("Advice");
@@ -165,11 +165,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         elementsAll = new Hashtable<String, Object>();
     }
 
-    protected List<FileItem> parseRequest(HttpServletRequest request, ServletFileUpload upload) throws FileUploadException {
+    protected List<FileItem> parseRequest(final HttpServletRequest request, final ServletFileUpload upload) throws FileUploadException {
         return upload.parseRequest(request);
     }
 
-    protected void mappingParameter(HttpServletRequest request, List<FileItem> items) {
+    protected void mappingParameter(final HttpServletRequest request, final List<FileItem> items) {
         showFieldLoggingTitle();
         final Iterator<FileItem> iter = items.iterator();
         while (iter.hasNext()) {
@@ -191,39 +191,37 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         }
     }
 
-    protected void showFormFieldParameter(FileItem item) {
+    protected void showFormFieldParameter(final FileItem item) {
         if (logger.isDebugEnabled()) {
             logger.debug("[param] {}={}", item.getFieldName(), item.getString());
         }
     }
 
-    protected void showFileFieldParameter(FileItem item) {
+    protected void showFileFieldParameter(final FileItem item) {
         if (logger.isDebugEnabled()) {
             logger.debug("[param] {}:{name={}, size={}}", item.getFieldName(), item.getName(), item.getSize());
         }
     }
 
-    protected void handleSizeLimitExceededException(HttpServletRequest request, SizeLimitExceededException e) {
+    protected void handleSizeLimitExceededException(final HttpServletRequest request, final SizeLimitExceededException e) {
         final long actual = e.getActualSize();
         final long permitted = e.getPermittedSize();
-        String msg = "Exceeded size of the multipart request: actual=" + actual + " permitted=" + permitted;
+        final String msg = "Exceeded size of the multipart request: actual=" + actual + " permitted=" + permitted;
         request.setAttribute(MAX_LENGTH_EXCEEDED_KEY, new MultipartExceededException(msg, actual, permitted, e));
         try {
             final InputStream is = request.getInputStream();
             try {
                 final byte[] buf = new byte[1024];
-                @SuppressWarnings("unused")
-                int len = 0;
-                while ((len = is.read(buf)) != -1) {}
-            } catch (Exception ignored) {} finally {
+                while ((is.read(buf)) != -1) {}
+            } catch (final Exception ignored) {} finally {
                 try {
                     is.close();
-                } catch (Exception ignored) {}
+                } catch (final Exception ignored) {}
             }
-        } catch (Exception ignored) {}
+        } catch (final Exception ignored) {}
     }
 
-    protected void handleFileUploadException(FileUploadException e) throws ServletException {
+    protected void handleFileUploadException(final FileUploadException e) throws ServletException {
         // suppress logging because it can be caught by logging filter 
         //log.error("Failed to parse multipart request", e);
         throw new ServletException("Failed to upload the file.", e);
@@ -244,7 +242,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // ===================================================================================
     //                                                                            Add Text
     //                                                                            ========
-    protected void addTextParameter(HttpServletRequest request, FileItem item) {
+    protected void addTextParameter(final HttpServletRequest request, final FileItem item) {
         final String name = item.getFieldName();
         final String encoding = request.getCharacterEncoding();
         String value = null;
@@ -253,12 +251,12 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             try {
                 value = item.getString(encoding);
                 haveValue = true;
-            } catch (Exception e) {}
+            } catch (final Exception e) {}
         }
         if (!haveValue) {
             try {
                 value = item.getString("ISO-8859-1");
-            } catch (java.io.UnsupportedEncodingException uee) {
+            } catch (final java.io.UnsupportedEncodingException uee) {
                 value = item.getString();
             }
             haveValue = true;
@@ -280,13 +278,13 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         elementsAll.put(name, newArray);
     }
 
-    protected void addFileParameter(FileItem item) {
+    protected void addFileParameter(final FileItem item) {
         final MultipartFormFile formFile = newActionMultipartFormFile(item);
         elementsFile.put(item.getFieldName(), formFile);
         elementsAll.put(item.getFieldName(), formFile);
     }
 
-    protected ActionMultipartFormFile newActionMultipartFormFile(FileItem item) {
+    protected ActionMultipartFormFile newActionMultipartFormFile(final FileItem item) {
         return new ActionMultipartFormFile(item);
     }
 
@@ -330,31 +328,36 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
         protected final FileItem fileItem;
 
-        public ActionMultipartFormFile(FileItem fileItem) {
+        public ActionMultipartFormFile(final FileItem fileItem) {
             this.fileItem = fileItem;
         }
 
+        @Override
         public byte[] getFileData() throws IOException {
             return fileItem.get();
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             return fileItem.getInputStream();
         }
 
+        @Override
         public String getContentType() {
             return fileItem.getContentType();
         }
 
+        @Override
         public int getFileSize() {
             return (int) fileItem.getSize();
         }
 
+        @Override
         public String getFileName() {
             return getBaseFileName(fileItem.getName());
         }
 
-        protected String getBaseFileName(String filePath) {
+        protected String getBaseFileName(final String filePath) {
             final String fileName = new File(filePath).getName();
             int colonIndex = fileName.indexOf(":");
             if (colonIndex == -1) {
@@ -368,6 +371,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             }
         }
 
+        @Override
         public void destroy() {
             fileItem.delete();
         }

@@ -210,7 +210,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
 
         String urlEncoding;
-        final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
+        final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
             urlEncoding = urlQueue.getEncoding();
         } else {
@@ -259,7 +259,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // url
         putResultDataBody(dataMap, fieldHelper.urlField, url);
         // created
-        putResultDataBody(dataMap, fieldHelper.createdField, Constants.NOW);
+        putResultDataBody(dataMap, fieldHelper.createdField, systemHelper.getCurrentTimeAsLong());
         // anchor
         putResultDataBody(dataMap, fieldHelper.anchorField, getAnchorList(document, responseData));
         // mimetype
@@ -495,7 +495,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     }
 
     @Override
-    public Object getData(final AccessResultData accessResultData) {
+    public Object getData(final AccessResultData<?> accessResultData) {
         final byte[] data = accessResultData.getData();
         if (data != null) {
             try {

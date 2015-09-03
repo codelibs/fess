@@ -221,4 +221,9 @@ public abstract class BsLabelToRoleBhv extends AbstractBehavior<LabelToRole, Lab
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

@@ -49,6 +49,7 @@ import org.codelibs.robot.transformer.Transformer;
 import org.codelibs.robot.util.EsResultList;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.di.core.SingletonLaContainer;
@@ -60,6 +61,7 @@ public class IndexUpdater extends Thread {
 
     protected List<String> sessionIdList;
 
+    @Resource
     protected FessEsClient fessEsClient;
 
     @Resource
@@ -165,21 +167,24 @@ public class IndexUpdater extends Thread {
 
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
-            Consumer<SearchRequestBuilder> cb = new Consumer<SearchRequestBuilder>() {
-                @Override
-                public void accept(SearchRequestBuilder builder) {
-                    QueryBuilders.filteredQuery(
-                            QueryBuilders.matchAllQuery(),
-                            FilterBuilders.boolFilter().must(FilterBuilders.termsFilter(EsAccessResult.SESSION_ID, sessionIdList))
-                                    .must(FilterBuilders.termFilter(EsAccessResult.STATUS, org.codelibs.robot.Constants.OK_STATUS)));
-                    builder.setFrom(0);
-                    if (maxDocumentCacheSize <= 0) {
-                        maxDocumentCacheSize = 1;
-                    }
-                    builder.setSize(maxDocumentCacheSize);
-                    builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
-                }
-            };
+            final Consumer<SearchRequestBuilder> cb =
+                    builder -> {
+                        final QueryBuilder queryBuilder =
+                                QueryBuilders.filteredQuery(
+                                        QueryBuilders.matchAllQuery(),
+                                        FilterBuilders
+                                                .boolFilter()
+                                                .must(FilterBuilders.termsFilter(EsAccessResult.SESSION_ID, sessionIdList))
+                                                .must(FilterBuilders.termFilter(EsAccessResult.STATUS,
+                                                        org.codelibs.robot.Constants.OK_STATUS)));
+                        builder.setQuery(queryBuilder);
+                        builder.setFrom(0);
+                        if (maxDocumentCacheSize <= 0) {
+                            maxDocumentCacheSize = 1;
+                        }
+                        builder.setSize(maxDocumentCacheSize);
+                        builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
+                    };
 
             final List<Map<String, Object>> docList = new ArrayList<>();
             final List<EsAccessResult> accessResultList = new ArrayList<>();
@@ -323,7 +328,7 @@ public class IndexUpdater extends Thread {
 
             final AccessResultData accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null) {
-                accessResult.setAccessResultData(null);
+                accessResult.setAccessResultData((AccessResultData) null);
                 try {
                     final Transformer transformer = SingletonLaContainer.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
@@ -456,7 +461,7 @@ public class IndexUpdater extends Thread {
 
     private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb) {
         final long execTime = System.currentTimeMillis();
-        List<EsAccessResult> arList = ((EsDataService) dataService).getAccessResultList(cb);
+        final List<EsAccessResult> arList = ((EsDataService) dataService).getAccessResultList(cb);
         if (!arList.isEmpty()) {
             for (final AccessResult ar : arList.toArray(new AccessResult[arList.size()])) {
                 if (ar.getCreateTime().longValue() > execTime - commitMarginTime) {
@@ -464,7 +469,7 @@ public class IndexUpdater extends Thread {
                 }
             }
         }
-        long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
+        final long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
         if (logger.isInfoEnabled()) {
             logger.info("Processing " + arList.size() + "/" + totalHits + " docs (DB: " + (System.currentTimeMillis() - execTime) + "ms)");
         }

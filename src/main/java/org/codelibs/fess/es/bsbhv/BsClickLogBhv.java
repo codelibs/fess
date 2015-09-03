@@ -222,4 +222,9 @@ public abstract class BsClickLogBhv extends AbstractBehavior<ClickLog, ClickLogC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

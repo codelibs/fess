@@ -42,19 +42,16 @@
     </rollingPolicy>
   </appender>
 
+  <logger name="org.codelibs.fess" additivity="false" level="${log.level}">
+    <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
+  </logger>
   <logger name="org.dbflute" additivity="false" level="${log.level}">
     <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
   </logger>
   <logger name="org.lastaflute" additivity="false" level="${log.level}">
     <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
   </logger>
-  <logger name="org.docksidestage" additivity="false" level="${log.level}">
-    <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
-  </logger>
-  <logger name="mailflute.sending" additivity="false" level="${log.level}">
-    <appender-ref ref="mailfile"/>
-  </logger>
-  <root level="error">
+  <root level="debug">
     <appender-ref ref="console"/><appender-ref ref="errorfile"/>
   </root>
 </configuration>

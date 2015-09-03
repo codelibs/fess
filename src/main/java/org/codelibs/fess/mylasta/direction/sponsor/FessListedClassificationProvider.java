@@ -28,16 +28,17 @@ import org.lastaflute.db.dbflute.exception.ProvidedClassificationNotFoundExcepti
  */
 public class FessListedClassificationProvider implements ListedClassificationProvider {
 
-    public ClassificationMeta provide(String classificationName) throws ProvidedClassificationNotFoundException {
+    @Override
+    public ClassificationMeta provide(final String classificationName) throws ProvidedClassificationNotFoundException {
         final ClassificationMeta onMainSchema = findOnMainSchema(classificationName);
         if (onMainSchema == null) {
-            String msg = "Not found the classification: " + classificationName;
+            final String msg = "Not found the classification: " + classificationName;
             throw new ProvidedClassificationNotFoundException(msg);
         }
         return onMainSchema;
     }
 
-    protected ClassificationMeta findOnMainSchema(String classificationName) throws ProvidedClassificationNotFoundException {
+    protected ClassificationMeta findOnMainSchema(final String classificationName) throws ProvidedClassificationNotFoundException {
         // *no use DBFlute classification
         return null;
         //String searchName = classificationName;
@@ -57,7 +58,7 @@ public class FessListedClassificationProvider implements ListedClassificationPro
     }
 
     @Override
-    public OptionalThing<String> determineAlias(Locale locale) {
+    public OptionalThing<String> determineAlias(final Locale locale) {
         return OptionalObject.empty();
     }
 }

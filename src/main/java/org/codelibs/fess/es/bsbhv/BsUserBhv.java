@@ -223,4 +223,9 @@ public abstract class BsUserBhv extends AbstractBehavior<User, UserCB> {
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

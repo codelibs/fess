@@ -46,6 +46,7 @@ import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SambaHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.client.smb.SmbClient;
@@ -168,6 +169,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
@@ -176,7 +178,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
 
         String urlEncoding;
-        final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
+        final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
         if (urlQueue != null && urlQueue.getEncoding() != null) {
             urlEncoding = urlQueue.getEncoding();
         } else {
@@ -245,7 +247,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         // url
         putResultDataBody(dataMap, fieldHelper.urlField, url);
         // created
-        putResultDataBody(dataMap, fieldHelper.createdField, Constants.NOW);
+        putResultDataBody(dataMap, fieldHelper.createdField, systemHelper.getCurrentTimeAsLong());
         // TODO anchor
         putResultDataBody(dataMap, fieldHelper.anchorField, StringUtil.EMPTY);
         // mimetype
@@ -368,7 +370,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
 
         String enc = Constants.UTF_8;
         if (encoding == null) {
-            final UrlQueue urlQueue = CrawlingParameterUtil.getUrlQueue();
+            final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
             if (urlQueue != null) {
                 final String parentUrl = urlQueue.getParentUrl();
                 if (StringUtil.isNotEmpty(parentUrl)) {
@@ -400,9 +402,9 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
             return enc;
         }
 
-        AccessResult accessResult = ComponentUtil.getDataService().getAccessResult(sessionId, parentUrl);
+        final AccessResult<?> accessResult = ComponentUtil.getDataService().getAccessResult(sessionId, parentUrl);
         if (accessResult != null) {
-            AccessResultData accessResultData = accessResult.getAccessResultData();
+            final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null && accessResultData.getEncoding() != null) {
                 enc = accessResultData.getEncoding();
                 parentEncodingMap.put(key, enc);
@@ -459,7 +461,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
     }
 
     @Override
-    public Object getData(final AccessResultData accessResultData) {
+    public Object getData(final AccessResultData<?> accessResultData) {
         final byte[] data = accessResultData.getData();
         if (data != null) {
             try {

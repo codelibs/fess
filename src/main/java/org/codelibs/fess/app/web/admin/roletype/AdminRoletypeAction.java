@@ -54,7 +54,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                                                               Hook
     //                                                                              ======
     @Override
-    protected void setupHtmlData(ActionRuntime runtime) {
+    protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink("roleType"));
     }
@@ -63,14 +63,14 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(RoleTypeSearchForm form) {
+    public HtmlResponse index(final RoleTypeSearchForm form) {
         return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(Integer pageNumber, RoleTypeSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final RoleTypeSearchForm form) {
         roleTypePager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -78,7 +78,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(RoleTypeSearchForm form) {
+    public HtmlResponse search(final RoleTypeSearchForm form) {
         copyBeanToBean(form.searchParams, roleTypePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -86,7 +86,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse reset(RoleTypeSearchForm form) {
+    public HtmlResponse reset(final RoleTypeSearchForm form) {
         roleTypePager.clear();
         return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -94,13 +94,13 @@ public class AdminRoletypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(RoleTypeSearchForm form) {
+    public HtmlResponse back(final RoleTypeSearchForm form) {
         return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(RenderData data, RoleTypeSearchForm form) {
+    protected void searchPaging(final RenderData data, final RoleTypeSearchForm form) {
         data.register("roleTypeItems", roleTypeService.getRoleTypeList(roleTypePager)); // page navi
 
         // restore from pager
@@ -115,14 +115,14 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(RoleTypeEditForm form) {
+    public HtmlResponse createpage(final RoleTypeEditForm form) {
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminRoletype_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(int crudMode, String id, RoleTypeEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final RoleTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
@@ -132,13 +132,13 @@ public class AdminRoletypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(RoleTypeEditForm form) {
+    public HtmlResponse editagain(final RoleTypeEditForm form) {
         return asHtml(path_AdminRoletype_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(RoleTypeEditForm form) {
+    public HtmlResponse editfromconfirm(final RoleTypeEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadRoleType(form);
         return asHtml(path_AdminRoletype_EditJsp);
@@ -146,7 +146,7 @@ public class AdminRoletypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(int crudMode, String id, RoleTypeEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final RoleTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
@@ -156,7 +156,7 @@ public class AdminRoletypeAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(RoleTypeEditForm form) {
+    public HtmlResponse deletefromconfirm(final RoleTypeEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadRoleType(form);
         return asHtml(path_AdminRoletype_ConfirmJsp);
@@ -166,7 +166,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(int crudMode, String id, RoleTypeEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final RoleTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
@@ -176,14 +176,14 @@ public class AdminRoletypeAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(RoleTypeEditForm form) {
+    public HtmlResponse confirmfromcreate(final RoleTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminRoletype_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(RoleTypeEditForm form) {
+    public HtmlResponse confirmfromupdate(final RoleTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminRoletype_ConfirmJsp);
     }
@@ -193,7 +193,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(RoleTypeEditForm form) {
+    public HtmlResponse create(final RoleTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         roleTypeService.store(createRoleType(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -202,7 +202,7 @@ public class AdminRoletypeAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(RoleTypeEditForm form) {
+    public HtmlResponse update(final RoleTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         roleTypeService.store(createRoleType(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -210,7 +210,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse delete(RoleTypeEditForm form) {
+    public HtmlResponse delete(final RoleTypeEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         roleTypeService.delete(getRoleType(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
@@ -220,11 +220,11 @@ public class AdminRoletypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadRoleType(RoleTypeEditForm form) {
+    protected void loadRoleType(final RoleTypeEditForm form) {
         copyBeanToBean(getRoleType(form), form, op -> op.exclude("crudMode"));
     }
 
-    protected RoleType getRoleType(RoleTypeEditForm form) {
+    protected RoleType getRoleType(final RoleTypeEditForm form) {
         final RoleType roleType = roleTypeService.getRoleType(createKeyMap(form));
         if (roleType == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
@@ -232,7 +232,7 @@ public class AdminRoletypeAction extends FessAdminAction {
         return roleType;
     }
 
-    protected RoleType createRoleType(RoleTypeEditForm form) {
+    protected RoleType createRoleType(final RoleTypeEditForm form) {
         RoleType roleType;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
@@ -249,7 +249,7 @@ public class AdminRoletypeAction extends FessAdminAction {
         return roleType;
     }
 
-    protected Map<String, String> createKeyMap(RoleTypeEditForm form) {
+    protected Map<String, String> createKeyMap(final RoleTypeEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -258,7 +258,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(RoleTypeEditForm form, int expectedMode) {
+    protected void verifyCrudMode(final RoleTypeEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));

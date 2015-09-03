@@ -231,4 +231,9 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

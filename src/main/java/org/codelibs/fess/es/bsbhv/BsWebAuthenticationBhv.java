@@ -232,4 +232,9 @@ public abstract class BsWebAuthenticationBhv extends AbstractBehavior<WebAuthent
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

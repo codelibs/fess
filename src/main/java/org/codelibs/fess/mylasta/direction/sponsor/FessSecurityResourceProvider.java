@@ -27,16 +27,18 @@ public class FessSecurityResourceProvider implements SecurityResourceProvider {
     protected final InvertibleCryptographer primaryInvertibleCryptographer;
     protected final OneWayCryptographer primaryOneWayCryptographer;
 
-    public FessSecurityResourceProvider(InvertibleCryptographer primaryInvertibleCryptographer,
-            OneWayCryptographer primaryOneWayCryptographer) {
+    public FessSecurityResourceProvider(final InvertibleCryptographer primaryInvertibleCryptographer,
+            final OneWayCryptographer primaryOneWayCryptographer) {
         this.primaryInvertibleCryptographer = primaryInvertibleCryptographer;
         this.primaryOneWayCryptographer = primaryOneWayCryptographer;
     }
 
+    @Override
     public InvertibleCryptographer providePrimaryInvertibleCryptographer() {
         return primaryInvertibleCryptographer;
     }
 
+    @Override
     public OneWayCryptographer providePrimaryOneWayCryptographer() {
         return primaryOneWayCryptographer;
     }

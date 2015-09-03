@@ -48,7 +48,7 @@ public class FessMailDeliveryDepartmentCreator {
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FessMailDeliveryDepartmentCreator(FessConfig fessConfig) {
+    public FessMailDeliveryDepartmentCreator(final FessConfig fessConfig) {
         this.fessConfig = fessConfig;
     }
 
@@ -116,7 +116,7 @@ public class FessMailDeliveryDepartmentCreator {
     // ===================================================================================
     //                                                                        Asynchronous
     //                                                                        ============
-    protected void async(AsyncManager asyncManager, Runnable runnable) {
+    protected void async(final AsyncManager asyncManager, final Runnable runnable) {
         asyncManager.async(new ConcurrentAsyncCall() {
             @Override
             public void callback() {
@@ -133,7 +133,7 @@ public class FessMailDeliveryDepartmentCreator {
     // ===================================================================================
     //                                                                       Resolve Label
     //                                                                       =============
-    protected String resolveLabelIfNeeds(MessageManager messageManager, Locale locale, String label) {
+    protected String resolveLabelIfNeeds(final MessageManager messageManager, final Locale locale, final String label) {
         return label.startsWith("labels.") ? messageManager.getMessage(locale, label) : label;
     }
 

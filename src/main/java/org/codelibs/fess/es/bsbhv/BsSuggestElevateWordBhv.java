@@ -229,4 +229,9 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

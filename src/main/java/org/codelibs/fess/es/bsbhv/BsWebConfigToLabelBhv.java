@@ -222,4 +222,9 @@ public abstract class BsWebConfigToLabelBhv extends AbstractBehavior<WebConfigTo
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

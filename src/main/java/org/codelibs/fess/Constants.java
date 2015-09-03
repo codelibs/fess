@@ -305,13 +305,13 @@ public class Constants extends CoreLibConstants {
 
     public static final String INVALID_NUMERIC_PARAMETER = "-1";
 
-    public static final String NOW = "NOW";
-
     public static final String FACET_FIELD_PREFIX = "field:";
 
     public static final String FACET_QUERY_PREFIX = "query:";
 
     public static final String FESS_ES_TRANSPORT_ADDRESSES = "fess.es.transport_addresses";
+
+    public static final String FESS_ES_CLUSTER_NAME = "fess.es.cluster_name";
 
     public static final int DEFAULT_PAGE_SIZE = 20;
 

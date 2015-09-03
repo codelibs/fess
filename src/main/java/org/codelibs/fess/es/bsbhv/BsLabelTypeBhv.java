@@ -228,4 +228,9 @@ public abstract class BsLabelTypeBhv extends AbstractBehavior<LabelType, LabelTy
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

@@ -35,12 +35,12 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
     }
 
     @Override
-    public OptionalThing<Locale> findBusinessLocale(ActionRuntime runtimeMeta, RequestManager requestManager) {
+    public OptionalThing<Locale> findBusinessLocale(final ActionRuntime runtimeMeta, final RequestManager requestManager) {
         return OptionalObject.empty(); // to next determination
     }
 
     @Override
-    public OptionalThing<Locale> getRequestedLocale(RequestManager requestManager) {
+    public OptionalThing<Locale> getRequestedLocale(final RequestManager requestManager) {
         return OptionalObject.empty(); // means browser default
     }
 

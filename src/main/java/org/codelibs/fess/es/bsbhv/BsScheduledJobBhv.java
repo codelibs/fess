@@ -232,4 +232,9 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

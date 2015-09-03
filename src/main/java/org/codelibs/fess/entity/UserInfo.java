@@ -30,7 +30,7 @@ public class UserInfo implements Serializable {
         return roleSet;
     }
 
-    public void setRoleSet(Set<String> roleSet) {
+    public void setRoleSet(final Set<String> roleSet) {
         this.roleSet = roleSet;
     }
 
@@ -42,7 +42,7 @@ public class UserInfo implements Serializable {
         this.username = username;
     }
 
-    public boolean isUserInRole(String role) {
+    public boolean isUserInRole(final String role) {
         if (roleSet != null) {
             return roleSet.contains(role);
         }

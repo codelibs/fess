@@ -43,17 +43,17 @@ public abstract class FessAdminAction extends FessBaseAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void saveInfo(VaMessenger<FessMessages> validationMessagesLambda) {
-        FessMessages messages = createMessages();
+    protected void saveInfo(final VaMessenger<FessMessages> validationMessagesLambda) {
+        final FessMessages messages = createMessages();
         validationMessagesLambda.message(messages);
         sessionManager.info().save(messages);
     }
 
-    protected void write(String path, byte[] data) {
+    protected void write(final String path, final byte[] data) {
         LdiFileUtil.write(path, data);
     }
 
-    protected void copyBeanToBean(Object src, Object dest, Consumer<CopyOptions> option) {
+    protected void copyBeanToBean(final Object src, final Object dest, final Consumer<CopyOptions> option) {
         BeanUtil.copyBeanToBean(src, dest, option);
     }
 

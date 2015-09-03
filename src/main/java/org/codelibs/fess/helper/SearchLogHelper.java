@@ -86,7 +86,7 @@ public abstract class SearchLogHelper {
 
     protected abstract void processClickLogQueue(Queue<ClickLog> queue);
 
-    public boolean addfavoriteLog(String userCode, String favoriteUrl) {
+    public boolean addfavoriteLog(final String userCode, final String favoriteUrl) {
         // TODO Auto-generated method stub
         return false;
     }

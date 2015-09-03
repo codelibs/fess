@@ -39,12 +39,12 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     //                                                                    Business Failure
     //                                                                    ================
     @Override
-    public ApiResponse handleValidationError(ApiFailureResource resource) {
+    public ApiResponse handleValidationError(final ApiFailureResource resource) {
         return asJson(createFailureBean(resource)).httpStatus(HTTP_BAD_REQUEST);
     }
 
     @Override
-    public ApiResponse handleApplicationException(ApiFailureResource resource, RuntimeException cause) {
+    public ApiResponse handleApplicationException(final ApiFailureResource resource, final RuntimeException cause) {
         final int status;
         if (cause instanceof LoginUnauthorizedException) {
             status = HTTP_UNAUTHORIZED; // unauthorized
@@ -58,23 +58,23 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     //                                                                      System Failure
     //                                                                      ==============
     @Override
-    public OptionalThing<ApiResponse> handleClientException(ApiFailureResource resource, RuntimeException cause) {
+    public OptionalThing<ApiResponse> handleClientException(final ApiFailureResource resource, final RuntimeException cause) {
         return OptionalThing.empty(); // means empty body (HTTP status will be automatically sent)
     }
 
     @Override
-    public OptionalThing<ApiResponse> handleServerException(ApiFailureResource resource, Throwable cause) {
+    public OptionalThing<ApiResponse> handleServerException(final ApiFailureResource resource, final Throwable cause) {
         return OptionalThing.empty(); // means empty body (HTTP status will be automatically sent)
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected JsonResponse<TooSimpleFailureBean> asJson(TooSimpleFailureBean bean) {
+    protected JsonResponse<TooSimpleFailureBean> asJson(final TooSimpleFailureBean bean) {
         return new JsonResponse<TooSimpleFailureBean>(bean);
     }
 
-    protected TooSimpleFailureBean createFailureBean(ApiFailureResource resource) {
+    protected TooSimpleFailureBean createFailureBean(final ApiFailureResource resource) {
         return new TooSimpleFailureBean(resource.getMessageList());
     }
 
@@ -84,7 +84,7 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
 
         public final List<String> messageList;
 
-        public TooSimpleFailureBean(List<String> messageList) {
+        public TooSimpleFailureBean(final List<String> messageList) {
             this.messageList = messageList;
         }
     }

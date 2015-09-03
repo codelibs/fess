@@ -43,7 +43,7 @@ public final class UserDictCSVUtil {
      *            line containing csv-encoded data
      * @return Array of values
      */
-    public static String[] parse(String line) {
+    public static String[] parse(final String line) {
         boolean insideQuote = false;
         final ArrayList<String> result = new ArrayList<>();
         int quoteCount = 0;
@@ -77,7 +77,7 @@ public final class UserDictCSVUtil {
         return result.toArray(new String[result.size()]);
     }
 
-    private static String unQuoteUnEscape(String original) {
+    private static String unQuoteUnEscape(final String original) {
         String result = original;
 
         // Unquote
@@ -100,7 +100,7 @@ public final class UserDictCSVUtil {
     /**
      * Quote and escape input value for CSV
      */
-    public static String quoteEscape(String original) {
+    public static String quoteEscape(final String original) {
         String result = original;
 
         if (result.indexOf('\"') >= 0) {

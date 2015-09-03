@@ -65,19 +65,19 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                                               Hook
     //                                                                              ======
     @Override
-    public ActionResponse hookBefore(ActionRuntime runtime) {
+    public ActionResponse hookBefore(final ActionRuntime runtime) {
         checkEditorStatus(runtime);
         return super.hookBefore(runtime);
     }
 
-    private void checkEditorStatus(ActionRuntime runtime) {
+    private void checkEditorStatus(final ActionRuntime runtime) {
         if (cannotEdit()) {
             throwValidationError(messages -> messages.addErrorsDesignEditorDisabled(GLOBAL), toMainHtml());
         }
     }
 
     @Override
-    protected void setupHtmlData(ActionRuntime runtime) {
+    protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("editable", cannotEdit());
         runtime.registerData("fileNameItems", loadFileNameItems());
@@ -109,7 +109,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     @Execute
-    public HtmlResponse upload(DesignForm form) {
+    public HtmlResponse upload(final DesignForm form) {
         validate(form, messages -> {}, toMainHtml());
         final String uploadedFileName = form.designFile.getFileName();
         String fileName = form.designFileName;
@@ -178,7 +178,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     @Execute
-    public StreamResponse download(DesignForm form) {
+    public StreamResponse download(final DesignForm form) {
         final File file = getTargetFile(form);
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
@@ -192,7 +192,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse delete(DesignForm form) {
+    public HtmlResponse delete(final DesignForm form) {
         final File file = getTargetFile(form);
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
@@ -210,7 +210,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                ------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse edit(DesignEditForm form) {
+    public HtmlResponse edit(final DesignEditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
         try {
@@ -223,7 +223,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editAsUseDefault(DesignEditForm form) {
+    public HtmlResponse editAsUseDefault(final DesignEditForm form) {
         final String jspType = "orig/view";
         final File jspFile = getJspFile(form.fileName, jspType);
         try {
@@ -236,7 +236,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(DesignEditForm form) {
+    public HtmlResponse update(final DesignEditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
 
@@ -263,7 +263,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private File getTargetFile(DesignForm form) {
+    private File getTargetFile(final DesignForm form) {
         final File baseDir = new File(getServletContext().getRealPath("/"));
         final File targetFile = new File(getServletContext().getRealPath(form.fileName));
         final List<File> fileList = getAccessibleFileList(baseDir);
@@ -288,7 +288,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         return fileList;
     }
 
-    private File getJspFile(String fileName, String jspType) {
+    private File getJspFile(final String fileName, final String jspType) {
         final String jspFileName = systemHelper.getDesignJspFileName(fileName);
         if (jspFileName == null) {
             throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), toMainHtml());

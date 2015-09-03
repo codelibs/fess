@@ -222,4 +222,9 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

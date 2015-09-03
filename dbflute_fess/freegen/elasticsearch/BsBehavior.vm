@@ -225,5 +225,10 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }
 

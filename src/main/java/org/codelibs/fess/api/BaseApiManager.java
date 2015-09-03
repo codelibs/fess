@@ -70,7 +70,7 @@ public class BaseApiManager {
         }
     }
 
-    public static void write(String text, String contentType, String encoding) {
+    public static void write(final String text, String contentType, String encoding) {
         if (contentType == null) {
             contentType = "text/plain";
         }
@@ -80,7 +80,7 @@ public class BaseApiManager {
                 encoding = "UTF-8";
             }
         }
-        HttpServletResponse response = LaResponseUtil.getResponse();
+        final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType(contentType + "; charset=" + encoding);
         try {
             PrintWriter out = null;
@@ -92,7 +92,7 @@ public class BaseApiManager {
                     out.close();
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
     }

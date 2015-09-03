@@ -227,4 +227,9 @@ public abstract class BsJobLogBhv extends AbstractBehavior<JobLog, JobLogCB> {
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

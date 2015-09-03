@@ -93,7 +93,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected boolean favoriteSupport;
 
     @Override
-    public ActionResponse hookBefore(ActionRuntime runtime) { // application may override
+    public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
         searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
         favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
         runtime.registerData("searchLogSupport", searchLogSupport);
@@ -102,12 +102,12 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     @Override
-    protected void setupHtmlData(ActionRuntime runtime) {
+    protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("osddLink", openSearchHelper.hasOpenSearchFile());
         runtime.registerData("helpPage", viewHelper.getPagePath("common/help"));
 
-        List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
+        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
         runtime.registerData("labelTypeItems", labelTypeItems);
         runtime.registerData("displayLabelTypeItems", labelTypeItems != null && !labelTypeItems.isEmpty());
 
@@ -135,9 +135,9 @@ public abstract class FessSearchAction extends FessBaseAction {
         }
     }
 
-    protected void buildLabelParams(SearchParamMap fields) {
+    protected void buildLabelParams(final SearchParamMap fields) {
         // label
-        List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
+        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
 
         if (!labelTypeItems.isEmpty() && !fields.containsKey(FessSearchAction.LABEL_FIELD)) {
             final String defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);

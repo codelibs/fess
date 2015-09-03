@@ -227,4 +227,9 @@ public abstract class BsKeyMatchBhv extends AbstractBehavior<KeyMatch, KeyMatchC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

@@ -237,4 +237,9 @@ public abstract class BsFileConfigBhv extends AbstractBehavior<FileConfig, FileC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

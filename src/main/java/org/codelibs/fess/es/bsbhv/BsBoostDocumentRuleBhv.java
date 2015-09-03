@@ -227,4 +227,9 @@ public abstract class BsBoostDocumentRuleBhv extends AbstractBehavior<BoostDocum
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

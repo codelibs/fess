@@ -63,7 +63,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                                                               Hook
     //                                                                              ======
     @Override
-    protected void setupHtmlData(ActionRuntime runtime) {
+    protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink("scheduledJob"));
     }
@@ -72,14 +72,14 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(ScheduledjobSearchForm form) {
+    public HtmlResponse index(final ScheduledjobSearchForm form) {
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(Integer pageNumber, ScheduledjobSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final ScheduledjobSearchForm form) {
         scheduledJobPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -87,7 +87,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(ScheduledjobSearchForm form) {
+    public HtmlResponse search(final ScheduledjobSearchForm form) {
         copyBeanToBean(form.searchParams, scheduledJobPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -95,7 +95,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse reset(ScheduledjobSearchForm form) {
+    public HtmlResponse reset(final ScheduledjobSearchForm form) {
         scheduledJobPager.clear();
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -103,13 +103,13 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(ScheduledjobSearchForm form) {
+    public HtmlResponse back(final ScheduledjobSearchForm form) {
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(RenderData data, ScheduledjobSearchForm form) {
+    protected void searchPaging(final RenderData data, final ScheduledjobSearchForm form) {
         data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(scheduledJobPager)); // page navi
 
         // restore from pager
@@ -124,7 +124,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(ScheduledjobEditForm form) {
+    public HtmlResponse createpage(final ScheduledjobEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminScheduledjob_EditJsp);
@@ -132,7 +132,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(int crudMode, String id, ScheduledjobEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
@@ -142,13 +142,13 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(ScheduledjobEditForm form) {
+    public HtmlResponse editagain(final ScheduledjobEditForm form) {
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(ScheduledjobEditForm form) {
+    public HtmlResponse editfromconfirm(final ScheduledjobEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_EditJsp);
@@ -156,7 +156,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(int crudMode, String id, ScheduledjobEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
@@ -166,7 +166,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(ScheduledjobEditForm form) {
+    public HtmlResponse deletefromconfirm(final ScheduledjobEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_ConfirmJsp);
@@ -176,7 +176,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(int crudMode, String id, ScheduledjobEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
@@ -188,7 +188,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(ScheduledjobEditForm form) {
+    public HtmlResponse confirmfromcreate(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
             data.register("running", running);
@@ -197,7 +197,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(ScheduledjobEditForm form) {
+    public HtmlResponse confirmfromupdate(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
             data.register("running", running);
@@ -209,7 +209,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(ScheduledjobEditForm form) {
+    public HtmlResponse create(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         scheduledJobService.store(createScheduledJob(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -218,7 +218,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(ScheduledjobEditForm form) {
+    public HtmlResponse update(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         scheduledJobService.store(createScheduledJob(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -226,7 +226,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse delete(ScheduledjobEditForm form) {
+    public HtmlResponse delete(final ScheduledjobEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         scheduledJobService.delete(getScheduledJob(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
@@ -234,13 +234,13 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse start(ScheduledjobEditForm form) {
+    public HtmlResponse start(final ScheduledjobEditForm form) {
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
-        ScheduledJob scheduledJob = getScheduledJob(form);
+        final ScheduledJob scheduledJob = getScheduledJob(form);
         try {
             scheduledJob.start();
             saveInfo(messages -> messages.addSuccessJobStarted(GLOBAL, scheduledJob.getName()));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throwValidationError(messages -> {
                 messages.addErrorsFailedToStartJob(GLOBAL, scheduledJob.getName());
             }, toEditHtml());
@@ -249,14 +249,14 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse stop(ScheduledjobEditForm form) {
+    public HtmlResponse stop(final ScheduledjobEditForm form) {
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
-        ScheduledJob scheduledJob = getScheduledJob(form);
+        final ScheduledJob scheduledJob = getScheduledJob(form);
         try {
             final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
             jobExecutoer.shutdown();
             saveInfo(messages -> messages.addSuccessJobStopped(GLOBAL, scheduledJob.getName()));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throwValidationError(messages -> {
                 messages.addErrorsFailedToStopJob(GLOBAL, scheduledJob.getName());
             }, toEditHtml());
@@ -267,8 +267,8 @@ public class AdminScheduledjobAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadScheduledJob(ScheduledjobEditForm form) {
-        ScheduledJob scheduledJob = getScheduledJob(form);
+    protected void loadScheduledJob(final ScheduledjobEditForm form) {
+        final ScheduledJob scheduledJob = getScheduledJob(form);
         copyBeanToBean(scheduledJob, form, op -> op.exclude("crudMode"));
         form.jobLogging = scheduledJob.isLoggingEnabled() ? Constants.ON : null;
         form.crawler = scheduledJob.isCrawlerJob() ? Constants.ON : null;
@@ -276,7 +276,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         running = scheduledJob.isRunning();
     }
 
-    protected ScheduledJob getScheduledJob(ScheduledjobEditForm form) {
+    protected ScheduledJob getScheduledJob(final ScheduledjobEditForm form) {
         final ScheduledJob scheduledJob = scheduledJobService.getScheduledJob(createKeyMap(form));
         if (scheduledJob == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
@@ -284,7 +284,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         return scheduledJob;
     }
 
-    protected ScheduledJob createScheduledJob(ScheduledjobEditForm form) {
+    protected ScheduledJob createScheduledJob(final ScheduledjobEditForm form) {
         ScheduledJob scheduledJob;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
@@ -304,7 +304,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         return scheduledJob;
     }
 
-    protected Map<String, String> createKeyMap(ScheduledjobEditForm form) {
+    protected Map<String, String> createKeyMap(final ScheduledjobEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -313,7 +313,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(ScheduledjobEditForm form, int expectedMode) {
+    protected void verifyCrudMode(final ScheduledjobEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));

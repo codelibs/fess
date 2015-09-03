@@ -226,4 +226,9 @@ public abstract class BsRequestHeaderBhv extends AbstractBehavior<RequestHeader,
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

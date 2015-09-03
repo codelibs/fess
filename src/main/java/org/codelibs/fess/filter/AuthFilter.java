@@ -173,7 +173,7 @@ public class AuthFilter implements Filter {
     protected static class AuthHttpServletRequest extends HttpServletRequestWrapper {
         protected UserInfo userInfo;
 
-        protected AuthHttpServletRequest(HttpServletRequest request, UserInfo userInfo) {
+        protected AuthHttpServletRequest(final HttpServletRequest request, final UserInfo userInfo) {
             super(request);
             this.userInfo = userInfo;
         }
@@ -184,7 +184,7 @@ public class AuthFilter implements Filter {
         }
 
         @Override
-        public boolean isUserInRole(String role) {
+        public boolean isUserInRole(final String role) {
             return userInfo.isUserInRole(role);
         }
 

@@ -49,7 +49,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     //                                                                           Find User
     //                                                                           =========
     @Override
-    protected boolean doCheckUserLoginable(String email, String cipheredPassword) {
+    protected boolean doCheckUserLoginable(final String email, final String cipheredPassword) {
         //return memberBhv.selectCount(cb -> {
         //    cb.query().arrangeLogin(email, cipheredPassword);
         //}) > 0;
@@ -57,7 +57,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     }
 
     @Override
-    protected OptionalEntity<Object> doFindLoginUser(String email, String cipheredPassword) {
+    protected OptionalEntity<Object> doFindLoginUser(final String email, final String cipheredPassword) {
         //return memberBhv.selectEntity(cb -> {
         //    cb.query().arrangeLogin(email, cipheredPassword);
         //});
@@ -65,7 +65,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     }
 
     @Override
-    protected OptionalEntity<Object> doFindLoginUser(String userId) {
+    protected OptionalEntity<Object> doFindLoginUser(final String userId) {
         //return memberBhv.selectEntity(cb -> {
         //    cb.query().arrangeLoginByIdentity(userId);
         //});
@@ -76,7 +76,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     //                                                                       Login Process
     //                                                                       =============
     @Override
-    protected FessUserBean createUserBean(Object userEntity) {
+    protected FessUserBean createUserBean(final Object userEntity) {
         return new FessUserBean();
     }
 
@@ -88,17 +88,17 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     }
 
     @Override
-    protected void saveLoginHistory(Object member, FessUserBean userBean, LoginSpecifiedOption option) {
+    protected void saveLoginHistory(final Object member, final FessUserBean userBean, final LoginSpecifiedOption option) {
         asyncManager.async(() -> {
             insertLogin(member);
         });
     }
 
-    protected void insertLogin(Object member) {
+    protected void insertLogin(final Object member) {
     }
 
     @Override
-    protected void checkPermission(LoginHandlingResource resource) throws LoginRequiredException {
+    protected void checkPermission(final LoginHandlingResource resource) throws LoginRequiredException {
         super.checkPermission(resource);
     }
 

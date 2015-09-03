@@ -43,10 +43,12 @@ import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.solr.IndexUpdater;
+import org.codelibs.robot.entity.EsAccessResult;
 import org.codelibs.robot.extractor.ExtractorFactory;
 import org.codelibs.robot.service.DataService;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public final class ComponentUtil {
     private static final String DATA_SERVICE = "dataService";
@@ -244,12 +246,16 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(MESSAGE_MANAGER);
     }
 
-    public static DataService getDataService() {
+    public static DataService<EsAccessResult> getDataService() {
         return SingletonLaContainer.getComponent(DATA_SERVICE);
     }
 
-    public static <T> T getComponent(Class<T> clazz) {
+    public static <T> T getComponent(final Class<T> clazz) {
         return SingletonLaContainer.getComponent(clazz);
+    }
+
+    public static boolean hasQueryHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
 
 }

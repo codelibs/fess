@@ -27,19 +27,22 @@ public class FessCookieResourceProvider implements CookieResourceProvider {
     protected final FessConfig harborConfig;
     protected final InvertibleCryptographer cookieCipher;
 
-    public FessCookieResourceProvider(FessConfig harborConfig, InvertibleCryptographer cookieCipher) {
+    public FessCookieResourceProvider(final FessConfig harborConfig, final InvertibleCryptographer cookieCipher) {
         this.harborConfig = harborConfig;
         this.cookieCipher = cookieCipher;
     }
 
+    @Override
     public String provideDefaultPath() {
         return harborConfig.getCookieDefaultPath();
     }
 
+    @Override
     public Integer provideDefaultExpire() {
         return harborConfig.getCookieDefaultExpireAsInteger();
     }
 
+    @Override
     public InvertibleCryptographer provideCipher() {
         return cookieCipher;
     }

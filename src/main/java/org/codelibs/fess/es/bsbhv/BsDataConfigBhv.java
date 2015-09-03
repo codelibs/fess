@@ -230,4 +230,9 @@ public abstract class BsDataConfigBhv extends AbstractBehavior<DataConfig, DataC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

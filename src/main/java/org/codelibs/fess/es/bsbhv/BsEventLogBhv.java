@@ -224,4 +224,9 @@ public abstract class BsEventLogBhv extends AbstractBehavior<EventLog, EventLogC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

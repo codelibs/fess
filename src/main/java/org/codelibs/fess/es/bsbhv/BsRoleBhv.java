@@ -220,4 +220,9 @@ public abstract class BsRoleBhv extends AbstractBehavior<Role, RoleCB> {
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

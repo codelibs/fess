@@ -222,4 +222,9 @@ public abstract class BsSearchFieldLogBhv extends AbstractBehavior<SearchFieldLo
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

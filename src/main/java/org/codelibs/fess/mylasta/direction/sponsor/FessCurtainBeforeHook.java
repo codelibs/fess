@@ -28,7 +28,8 @@ import org.lastaflute.core.direction.FwAssistantDirector;
  */
 public class FessCurtainBeforeHook implements CurtainBeforeHook {
 
-    public void hook(FwAssistantDirector assistantDirector) {
+    @Override
+    public void hook(final FwAssistantDirector assistantDirector) {
         processDBFluteSystem();
     }
 
@@ -42,6 +43,7 @@ public class FessCurtainBeforeHook implements CurtainBeforeHook {
         return new DfFinalTimeZoneProvider() {
             protected final TimeZone provided = FessUserTimeZoneProcessProvider.centralTimeZone;
 
+            @Override
             public TimeZone provide() {
                 return provided;
             }

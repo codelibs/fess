@@ -28,23 +28,23 @@ import org.slf4j.LoggerFactory;
 public class ActivityUtil {
     private static Logger logger = LoggerFactory.getLogger("activity");
 
-    public static void login(String username, HttpServletRequest request) {
+    public static void login(final String username, final HttpServletRequest request) {
         log(Action.LOGIN, username + ' ' + getRemoteAddr(request));
     }
 
-    public static void logout(String username, HttpServletRequest request) {
+    public static void logout(final String username, final HttpServletRequest request) {
         log(Action.LOGOUT, username + ' ' + getRemoteAddr(request));
     }
 
-    public static void access(String username, HttpServletRequest request) {
+    public static void access(final String username, final HttpServletRequest request) {
         log(Action.ACCESS, username + ' ' + getRemoteAddr(request) + ' ' + request.getRequestURL());
     }
 
-    protected static void log(Action action, String msg) {
+    protected static void log(final Action action, final String msg) {
         logger.info("[" + action + "] " + msg);
     }
 
-    protected static String getRemoteAddr(HttpServletRequest request) {
+    protected static String getRemoteAddr(final HttpServletRequest request) {
         final String clientIp = request.getHeader("x-forwarded-for");
         if (StringUtil.isNotBlank(clientIp)) {
             return clientIp;

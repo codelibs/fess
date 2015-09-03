@@ -224,4 +224,9 @@ public abstract class BsCrawlingSessionBhv extends AbstractBehavior<CrawlingSess
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

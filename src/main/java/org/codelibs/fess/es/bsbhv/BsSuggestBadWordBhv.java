@@ -226,4 +226,9 @@ public abstract class BsSuggestBadWordBhv extends AbstractBehavior<SuggestBadWor
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }
