@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.fess.helper.QueryHelper;
@@ -70,8 +71,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     protected FacetResponse facetResponse;
 
-    protected MoreLikeThisResponse moreLikeThisResponse;
-
     protected boolean partialResults = false;
 
     protected long queryTime;
@@ -85,11 +84,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
         this.parent = parent;
     }
 
-    public void init(final SearchResponse searchResponse, final long start, final int pageSize) {
-        long numFound = 0;
-        if (searchResponse != null) {
+    public void init(final Optional<SearchResponse> searchResponseOpt, final int start, final int pageSize) {
+        searchResponseOpt.ifPresent(searchResponse -> {
             final SearchHits searchHits = searchResponse.getHits();
-            numFound = searchHits.getTotalHits();
+            allRecordCount = searchHits.getTotalHits();
             queryTime = searchResponse.getTookInMillis();
 
             if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
@@ -97,65 +95,71 @@ public class QueryResponseList implements List<Map<String, Object>> {
             }
 
             // build highlighting fields
-            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-            ComponentUtil.getFieldHelper();
-            final String hlPrefix = queryHelper.getHighlightingPrefix();
-            for (final SearchHit searchHit : searchHits.getHits()) {
-                final Map<String, Object> docMap = new HashMap<String, Object>();
-                docMap.putAll(searchHit.getSource());
+                final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+                ComponentUtil.getFieldHelper();
+                final String hlPrefix = queryHelper.getHighlightingPrefix();
+                for (final SearchHit searchHit : searchHits.getHits()) {
+                    final Map<String, Object> docMap = new HashMap<String, Object>();
+                    if (searchHit.getSource() == null) {
+                        searchHit.getFields().forEach((key, value) -> {
+                            docMap.put(key, value.getValue());
+                        });
+                    } else {
+                        docMap.putAll(searchHit.getSource());
+                    }
 
-                final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
-                try {
-                    if (highlightFields != null) {
-                        for (final Map.Entry<String, HighlightField> entry : highlightFields.entrySet()) {
-                            final HighlightField highlightField = entry.getValue();
-                            final Text[] fragments = highlightField.fragments();
-                            if (fragments != null && fragments.length != 0) {
-                                final String[] texts = new String[fragments.length];
-                                for (int i = 0; i < fragments.length; i++) {
-                                    texts[i] = fragments[i].string();
+                    final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
+                    try {
+                        if (highlightFields != null) {
+                            for (final Map.Entry<String, HighlightField> entry : highlightFields.entrySet()) {
+                                final HighlightField highlightField = entry.getValue();
+                                final Text[] fragments = highlightField.fragments();
+                                if (fragments != null && fragments.length != 0) {
+                                    final String[] texts = new String[fragments.length];
+                                    for (int i = 0; i < fragments.length; i++) {
+                                        texts[i] = fragments[i].string();
+                                    }
+                                    final String value = StringUtils.join(texts, "...");
+                                    docMap.put(hlPrefix + highlightField.getName(), value);
                                 }
-                                final String value = StringUtils.join(texts, "...");
-                                docMap.put(hlPrefix + highlightField.getName(), value);
                             }
                         }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Could not create a highlighting value: " + docMap, e);
+                        }
                     }
-                } catch (final Exception e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Could not create a highlighting value: " + docMap, e);
+
+                    // ContentTitle
+                    final ViewHelper viewHelper = ComponentUtil.getViewHelper();
+                    if (viewHelper != null) {
+                        docMap.put("contentTitle", viewHelper.getContentTitle(docMap));
+                        docMap.put("contentDescription", viewHelper.getContentDescription(docMap));
+                        docMap.put("urlLink", viewHelper.getUrlLink(docMap));
+                        docMap.put("sitePath", viewHelper.getSitePath(docMap));
                     }
+
+                    parent.add(docMap);
                 }
 
-                // ContentTitle
-                final ViewHelper viewHelper = ComponentUtil.getViewHelper();
-                if (viewHelper != null) {
-                    docMap.put("contentTitle", viewHelper.getContentTitle(docMap));
-                    docMap.put("contentDescription", viewHelper.getContentDescription(docMap));
-                    docMap.put("urlLink", viewHelper.getUrlLink(docMap));
-                    docMap.put("sitePath", viewHelper.getSitePath(docMap));
+                // facet
+                final Aggregations aggregations = searchResponse.getAggregations();
+                if (aggregations != null) {
+                    facetResponse = new FacetResponse(aggregations);
                 }
 
-                parent.add(docMap);
-            }
+            });
 
-            // facet
-            final Aggregations aggregations = searchResponse.getAggregations();
-            if (aggregations != null) {
-                facetResponse = new FacetResponse(aggregations);
-            }
-
-        }
-        calculatePageInfo(start, pageSize, numFound);
+        calculatePageInfo(start, pageSize);
     }
 
-    protected void calculatePageInfo(final long start, final int size, final long numFound) {
+    protected void calculatePageInfo(final int start, final int size) {
         pageSize = size;
-        allRecordCount = numFound;
         allPageCount = (int) ((allRecordCount - 1) / pageSize) + 1;
         existPrevPage = start > 0;
         existNextPage = start < (long) (allPageCount - 1) * (long) pageSize;
         currentPageNumber = (int) (start / pageSize) + 1;
-        currentStartRecordNumber = numFound != 0 ? (currentPageNumber - 1) * pageSize + 1 : 0;
+        currentStartRecordNumber = allRecordCount != 0 ? (currentPageNumber - 1) * pageSize + 1 : 0;
         currentEndRecordNumber = currentPageNumber * pageSize;
         currentEndRecordNumber = allRecordCount < currentEndRecordNumber ? allRecordCount : currentEndRecordNumber;
 
@@ -362,10 +366,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     public FacetResponse getFacetResponse() {
         return facetResponse;
-    }
-
-    public MoreLikeThisResponse getMoreLikeThisResponse() {
-        return moreLikeThisResponse;
     }
 
     public boolean isPartialResults() {

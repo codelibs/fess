@@ -35,6 +35,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.ResultOffsetExceededException;
+import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.RootForm;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
@@ -139,7 +140,7 @@ public class SearchAction extends FessSearchAction {
         if (StringUtil.isBlank(form.query) && form.fields.isEmpty()) {
             // redirect to index page
             form.query = null;
-            return redirect(SearchAction.class);
+            return redirect(RootAction.class);
         }
 
         return asHtml(path_SearchJsp).renderWith(data -> {
@@ -272,7 +273,7 @@ public class SearchAction extends FessSearchAction {
             form.start = String.valueOf(DEFAULT_START_COUNT);
         } else {
             try {
-                Long.parseLong(form.start);
+                Integer.parseInt(form.start);
             } catch (final NumberFormatException e) {
                 form.start = String.valueOf(DEFAULT_START_COUNT);
             }
@@ -287,11 +288,14 @@ public class SearchAction extends FessSearchAction {
         List<Map<String, Object>> documentItems = null;
         try {
             documentItems =
-                    fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType,
-                            searchRequestBuilder -> {
-                                return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageNum)
-                                        .facetInfo(form.facet).geoInfo(form.geo).responseFields(queryHelper.getResponseFields()).build();
-                            });
+                    fessEsClient.search(fieldHelper.docIndex, fieldHelper.docType, searchRequestBuilder -> {
+                        return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset((int) pageStart).size(pageNum)
+                                .facetInfo(form.facet).geoInfo(form.geo).responseFields(queryHelper.getResponseFields()).build();
+                    }, (searchRequestBuilder, execTime, searchResponse) -> {
+                        QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
+                        queryResponseList.init(searchResponse, pageStart, pageNum);
+                        return queryResponseList;
+                    });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -310,7 +314,6 @@ public class SearchAction extends FessSearchAction {
         // search
         final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
         data.register("facetResponse", queryResponseList.getFacetResponse());
-        data.register("moreLikeThisResponse", queryResponseList.getMoreLikeThisResponse());
         final NumberFormat nf = NumberFormat.getInstance(LaRequestUtil.getRequest().getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);

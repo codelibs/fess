@@ -27,21 +27,21 @@
 				<property name="minCount">1</property>
 				<property name="field">["label"]</property>
 				<property name="query">[
-					"lastModified:[NOW/DAY-1DAY TO NOW]",
-					"lastModified:[NOW/DAY-7DAYS TO NOW]",
-					"lastModified:[NOW/DAY-1MONTH TO NOW]",
-					"lastModified:[NOW/DAY-1YEAR TO NOW]",
-					"contentLength:[0 TO 9999]",
-					"contentLength:[10000 TO 99999]",
-					"contentLength:[100000 TO 499999]",
-					"contentLength:[500000 TO 999999]",
-					"contentLength:[1000000 TO *]",
-					"filetype_s:html",
-					"filetype_s:word",
-					"filetype_s:excel",
-					"filetype_s:powerpoint",
-					"filetype_s:pdf",
-					"filetype_s:others"
+					"last_modified:[now/d-1d TO now]",
+					"last_modified:[now/d-7d TO now]",
+					"last_modified:[now/d-1M TO now]",
+					"last_modified:[now/d-1y TO now]",
+					"content_length:[0 TO 9999]",
+					"content_length:[10000 TO 99999]",
+					"content_length:[100000 TO 499999]",
+					"content_length:[500000 TO 999999]",
+					"content_length:[1000000 TO *]",
+					"filetype:html",
+					"filetype:word",
+					"filetype:excel",
+					"filetype:powerpoint",
+					"filetype:pdf",
+					"filetype:others"
 				]</property>
 			</component>
 		</property>
@@ -123,19 +123,19 @@
 					<property name="title">"label.facet_lastModified_title"</property>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1day"</arg>
-						<arg>"lastModified:[NOW/DAY-1DAY TO NOW]"</arg>
+						<arg>"last_modified:[now/d-1d TO now]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1week"</arg>
-						<arg>"lastModified:[NOW/DAY-7DAYS TO NOW]"</arg>
+						<arg>"last_modified:[now/d-7d TO now]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1month"</arg>
-						<arg>"lastModified:[NOW/DAY-1MONTH TO NOW]"</arg>
+						<arg>"last_modified:[now/d-1M TO now]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_lastModified_1year"</arg>
-						<arg>"lastModified:[NOW/DAY-1YEAR TO NOW]"</arg>
+						<arg>"last_modified:[now/d-1y TO now]"</arg>
 					</postConstruct>
 				</component>
 			</arg>
@@ -146,23 +146,23 @@
 					<property name="title">"label.facet_contentLength_title"</property>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_10k"</arg>
-						<arg>"contentLength:[0 TO 9999]"</arg>
+						<arg>"content_length:[0 TO 9999]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_10kto100k"</arg>
-						<arg>"contentLength:[10000 TO 99999]"</arg>
+						<arg>"content_length:[10000 TO 99999]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_100kto500k"</arg>
-						<arg>"contentLength:[100000 TO 499999]"</arg>
+						<arg>"content_length:[100000 TO 499999]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_500kto1m"</arg>
-						<arg>"contentLength:[500000 TO 999999]"</arg>
+						<arg>"content_length:[500000 TO 999999]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_contentLength_1m"</arg>
-						<arg>"contentLength:[1000000 TO *]"</arg>
+						<arg>"content_length:[1000000 TO *]"</arg>
 					</postConstruct>
 				</component>
 			</arg>
@@ -173,27 +173,27 @@
 					<property name="title">"label.facet_filetype_title"</property>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_html"</arg>
-						<arg>"filetype_s:html"</arg>
+						<arg>"filetype:html"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_word"</arg>
-						<arg>"filetype_s:word"</arg>
+						<arg>"filetype:word"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_excel"</arg>
-						<arg>"filetype_s:excel"</arg>
+						<arg>"filetype:excel"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_powerpoint"</arg>
-						<arg>"filetype_s:powerpoint"</arg>
+						<arg>"filetype:powerpoint"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_pdf"</arg>
-						<arg>"filetype_s:pdf"</arg>
+						<arg>"filetype:pdf"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"label.facet_filetype_others"</arg>
-						<arg>"filetype_s:others"</arg>
+						<arg>"filetype:others"</arg>
 					</postConstruct>
 				</component>
 			</arg>
