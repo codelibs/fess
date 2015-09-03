@@ -39,7 +39,7 @@ public class HelpAction extends FessSearchAction {
     //                                                                      ==============
 
     @Execute
-    public HtmlResponse help(final HelpForm form) {
+    public HtmlResponse index(final HelpForm form) {
         return asHtml(path_HelpJsp).renderWith(data -> {
             buildLabelParams(form.fields);
             buildInitParams();
