@@ -16,11 +16,14 @@
 
 package org.codelibs.fess.app.web.admin.dataconfig;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.app.service.DataConfigService;
@@ -28,6 +31,7 @@ import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -55,6 +59,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     protected RoleTypeService roleTypeService;
     @Resource
     protected LabelTypeService labelTypeService;
+    @Resource
+    protected DataStoreFactory dataStoreFactory;
 
     // ===================================================================================
     //                                                                               Hook
@@ -126,6 +132,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -138,6 +145,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -146,6 +154,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse editagain(final DataConfigEditForm form) {
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -156,6 +165,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -168,6 +178,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -178,6 +189,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -193,6 +205,7 @@ public class AdminDataconfigAction extends FessAdminAction {
             loadDataConfig(form);
             return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
+                registerHandlerNames(data);
             });
         } catch (final Exception e) {
             e.printStackTrace();
@@ -206,6 +219,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -215,6 +229,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
+            registerHandlerNames(data);
         });
     }
 
@@ -290,6 +305,18 @@ public class AdminDataconfigAction extends FessAdminAction {
         data.register("labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
+    public void registerHandlerNames(final RenderData data) {
+        final List<String> dataStoreNameList = dataStoreFactory.getDataStoreNameList();
+        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        for (final String name : dataStoreNameList) {
+            final Map<String, String> map = new HashMap<String, String>();
+            map.put(Constants.ITEM_LABEL, name);
+            map.put(Constants.ITEM_VALUE, name);
+            itemList.add(map);
+        }
+        data.register("handlerNameItems", itemList);
+    }
+
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
@@ -305,6 +332,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         return () -> {
             return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
+                registerHandlerNames(data);
             });
         };
     }

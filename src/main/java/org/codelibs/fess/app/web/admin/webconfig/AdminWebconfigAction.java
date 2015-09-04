@@ -143,7 +143,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final WebConfigEditForm form) {
-    	return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }

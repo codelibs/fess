@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
+import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.LabelType;
@@ -48,6 +49,8 @@ public class AdminLabeltypeAction extends FessAdminAction {
     private LabelTypePager labelTypePager;
     @Resource
     private SystemHelper systemHelper;
+    @Resource
+    protected RoleTypeService roleTypeService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -117,7 +120,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse createpage(final LabelTypeEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminLabeltype_EditJsp);
+        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = true, validate = false)
@@ -127,13 +132,17 @@ public class AdminLabeltypeAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadLabelType(form);
-        return asHtml(path_AdminLabeltype_EditJsp);
+        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final LabelTypeEditForm form) {
-        return asHtml(path_AdminLabeltype_EditJsp);
+        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = true, validate = false)
@@ -141,7 +150,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final LabelTypeEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadLabelType(form);
-        return asHtml(path_AdminLabeltype_EditJsp);
+        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = true, validate = false)
@@ -151,7 +162,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadLabelType(form);
-        return asHtml(path_AdminLabeltype_ConfirmJsp);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = true, validate = false)
@@ -159,7 +172,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final LabelTypeEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadLabelType(form);
-        return asHtml(path_AdminLabeltype_ConfirmJsp);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     // -----------------------------------------------------
@@ -171,21 +186,27 @@ public class AdminLabeltypeAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
         loadLabelType(form);
-        return asHtml(path_AdminLabeltype_ConfirmJsp);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(final LabelTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminLabeltype_ConfirmJsp);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(final LabelTypeEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminLabeltype_ConfirmJsp);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
+            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        });
     }
 
     // -----------------------------------------------------
