@@ -101,9 +101,7 @@
 						<exclude>org/codelibs/fess/app/web/admin/DocumentAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemInfoForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/JobLogForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/DataConfigForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/DataConfigAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SystemForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SearchListAction.java</exclude>
