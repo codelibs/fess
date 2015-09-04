@@ -70,10 +70,10 @@
 							<span><la:message key="labels.menu.web" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='fileConfig'}">class="active"</c:if>><todo:link href="/admin/fileConfig/index">
+					<li <c:if test="${param.menuType=='fileConfig'}">class="active"</c:if>><la:link href="/admin/fileconfig/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.file_system" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='dataConfig'}">class="active"</c:if>><todo:link href="/admin/dataConfig/index">
 							<i class='fa fa-angle-right'></i>

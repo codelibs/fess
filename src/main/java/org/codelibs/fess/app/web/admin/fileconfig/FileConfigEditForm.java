@@ -14,17 +14,19 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.fileconfig;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.UriType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.annotation.UriType;
 
-public class FileConfigForm implements Serializable {
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class FileConfigEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,16 +35,7 @@ public class FileConfigForm implements Serializable {
     public String[] labelTypeIds;
 
     //@IntegerType
-    public String pageNumber;
-
-    public Map<String, String> searchParams = new HashMap<String, String>();
-
-    //@IntegerType
     public int crudMode;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 1000)
