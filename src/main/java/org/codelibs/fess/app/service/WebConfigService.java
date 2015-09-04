@@ -278,4 +278,11 @@ public class WebConfigService implements Serializable {
             cb.query().docMeta().setId_Equal(id);
         }).orElse(null);//TODO
     }
+
+    public List<WebConfig> getWebConfigList() {
+        return webConfigBhv.selectList(cb -> {
+            //            cb.query().addOrderBy_SortOrder_Asc();
+            //            cb.query().addOrderBy_Name_Asc();
+            });
+    }
 }

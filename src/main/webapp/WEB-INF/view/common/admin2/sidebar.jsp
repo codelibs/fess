@@ -104,12 +104,12 @@
 							<span><la:message key="labels.menu.path_mapping" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='webAuthentication'}">class="active"</c:if>><todo:link
-							href="/admin/webAuthentication/index"
+					<li <c:if test="${param.menuType=='webAuthentication'}">class="active"</c:if>><la:link
+							href="/admin/webauthentication/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.web_authentication" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='fileAuthentication'}">class="active"</c:if>><todo:link
 							href="/admin/fileAuthentication/index"

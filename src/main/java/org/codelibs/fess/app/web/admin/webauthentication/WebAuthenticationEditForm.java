@@ -14,29 +14,22 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.webauthentication;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.codelibs.fess.util.ComponentUtil;
 
-public class WebAuthenticationForm implements Serializable {
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class WebAuthenticationEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     //@IntegerType
-    public String pageNumber;
-
-    public Map<String, String> searchParams = new HashMap<String, String>();
-
-    //@IntegerType
     public int crudMode;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 1000)
