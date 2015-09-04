@@ -124,8 +124,7 @@ public class AdminWebconfigAction extends FessAdminAction {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+            registerRolesAndLabels(data);
         });
     }
 
@@ -137,17 +136,15 @@ public class AdminWebconfigAction extends FessAdminAction {
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadWebConfig(form);
         return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+            registerRolesAndLabels(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final WebConfigEditForm form) {
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+    	return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
         });
     }
 
@@ -157,8 +154,7 @@ public class AdminWebconfigAction extends FessAdminAction {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadWebConfig(form);
         return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+            registerRolesAndLabels(data);
         });
     }
 
@@ -169,9 +165,8 @@ public class AdminWebconfigAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
         });
     }
 
@@ -180,9 +175,8 @@ public class AdminWebconfigAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final WebConfigEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
         });
     }
 
@@ -196,9 +190,8 @@ public class AdminWebconfigAction extends FessAdminAction {
             form.id = id;
             verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
             loadWebConfig(form);
-            return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
-                data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-                data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+            return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+                registerRolesAndLabels(data);
             });
         } catch (final Exception e) {
             e.printStackTrace();
@@ -211,9 +204,8 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse confirmfromcreate(final WebConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
         });
     }
 
@@ -221,9 +213,8 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse confirmfromupdate(final WebConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
         });
     }
 
@@ -294,6 +285,11 @@ public class AdminWebconfigAction extends FessAdminAction {
         return keys;
     }
 
+    protected void registerRolesAndLabels(final RenderData data) {
+        data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+    }
+
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
@@ -308,8 +304,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     protected VaErrorHook toEditHtml() {
         return () -> {
             return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
-                data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-                data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+                registerRolesAndLabels(data);
             });
         };
     }

@@ -196,9 +196,7 @@ public class AdminFileconfigAction extends FessAdminAction {
             });
         } catch (final Exception e) {
             e.printStackTrace();
-            return asHtml(path_AdminFileconfig_ConfirmJsp).renderWith(data -> {
-                registerRolesAndLabels(data);
-            });
+            return asHtml(path_AdminFileconfig_ConfirmJsp);
         }
     }
 
