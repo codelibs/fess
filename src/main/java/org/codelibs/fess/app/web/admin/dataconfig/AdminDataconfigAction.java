@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.webconfig;
+package org.codelibs.fess.app.web.admin.dataconfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,13 +22,13 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.app.pager.WebConfigPager;
+import org.codelibs.fess.app.pager.DataConfigPager;
+import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
-import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.es.exentity.WebConfig;
+import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -37,17 +37,18 @@ import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
- * @author shinsuke
+ * @author codelibs
+ * @author jflute
  */
-public class AdminWebconfigAction extends FessAdminAction {
+public class AdminDataconfigAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private WebConfigService webConfigService;
+    private DataConfigService dataConfigService;
     @Resource
-    private WebConfigPager webConfigPager;
+    private DataConfigPager dataConfigPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -61,55 +62,55 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("webConfig"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("dataConfig"));
     }
 
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final WebConfigSearchForm form) {
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+    public HtmlResponse index(final DataConfigSearchForm form) {
+        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final WebConfigSearchForm form) {
-        webConfigPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+    public HtmlResponse list(final Integer pageNumber, final DataConfigSearchForm form) {
+        dataConfigPager.setCurrentPageNumber(pageNumber);
+        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse search(final WebConfigSearchForm form) {
-        copyBeanToBean(form.searchParams, webConfigPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+    public HtmlResponse search(final DataConfigSearchForm form) {
+        copyBeanToBean(form.searchParams, dataConfigPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final WebConfigSearchForm form) {
-        webConfigPager.clear();
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+    public HtmlResponse reset(final DataConfigSearchForm form) {
+        dataConfigPager.clear();
+        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse back(final WebConfigSearchForm form) {
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+    public HtmlResponse back(final DataConfigSearchForm form) {
+        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final WebConfigSearchForm form) {
-        data.register("webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
+    protected void searchPaging(final RenderData data, final DataConfigSearchForm form) {
+        data.register("dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(webConfigPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(dataConfigPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -120,62 +121,62 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final WebConfigEditForm form) {
+    public HtmlResponse createpage(final DataConfigEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final WebConfigEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final DataConfigEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
-        loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        loadDataConfig(form);
+        return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final WebConfigEditForm form) {
-    	return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+    public HtmlResponse editagain(final DataConfigEditForm form) {
+        return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final WebConfigEditForm form) {
+    public HtmlResponse editfromconfirm(final DataConfigEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
-        loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        loadDataConfig(form);
+        return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final WebConfigEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final DataConfigEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        loadDataConfig(form);
+        return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final WebConfigEditForm form) {
+    public HtmlResponse deletefromconfirm(final DataConfigEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
-        loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        loadDataConfig(form);
+        return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
@@ -184,36 +185,35 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final WebConfigEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final DataConfigEditForm form) {
         try {
             form.crudMode = crudMode;
             form.id = id;
             verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
-            loadWebConfig(form);
-            return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            loadDataConfig(form);
+            return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
             });
         } catch (final Exception e) {
             e.printStackTrace();
-            return asHtml(path_AdminWebconfig_ConfirmJsp);
+            return asHtml(path_AdminDataconfig_ConfirmJsp);
         }
-
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final WebConfigEditForm form) {
+    public HtmlResponse confirmfromcreate(final DataConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final WebConfigEditForm form) {
+    public HtmlResponse confirmfromupdate(final DataConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
@@ -223,26 +223,26 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final WebConfigEditForm form) {
+    public HtmlResponse create(final DataConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        webConfigService.store(createWebConfig(form));
+        dataConfigService.store(createDataConfig(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final WebConfigEditForm form) {
+    public HtmlResponse update(final DataConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        webConfigService.store(createWebConfig(form));
+        dataConfigService.store(createDataConfig(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final WebConfigEditForm form) {
+    public HtmlResponse delete(final DataConfigEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        webConfigService.delete(getWebConfig(form));
+        dataConfigService.delete(getDataConfig(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
     }
@@ -250,36 +250,36 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadWebConfig(final WebConfigEditForm form) {
-        copyBeanToBean(getWebConfig(form), form, op -> op.exclude("crudMode"));
+    protected void loadDataConfig(final DataConfigEditForm form) {
+        copyBeanToBean(getDataConfig(form), form, op -> op.exclude("crudMode"));
     }
 
-    protected WebConfig getWebConfig(final WebConfigEditForm form) {
-        final WebConfig webConfig = webConfigService.getWebConfig(createKeyMap(form));
-        if (webConfig == null) {
+    protected DataConfig getDataConfig(final DataConfigEditForm form) {
+        final DataConfig dataConfig = dataConfigService.getDataConfig(createKeyMap(form));
+        if (dataConfig == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
         }
-        return webConfig;
+        return dataConfig;
     }
 
-    protected WebConfig createWebConfig(final WebConfigEditForm form) {
-        WebConfig webConfig;
+    protected DataConfig createDataConfig(final DataConfigEditForm form) {
+        DataConfig dataConfig;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (form.crudMode == CommonConstants.EDIT_MODE) {
-            webConfig = getWebConfig(form);
+            dataConfig = getDataConfig(form);
         } else {
-            webConfig = new WebConfig();
-            webConfig.setCreatedBy(username);
-            webConfig.setCreatedTime(currentTime);
+            dataConfig = new DataConfig();
+            dataConfig.setCreatedBy(username);
+            dataConfig.setCreatedTime(currentTime);
         }
-        webConfig.setUpdatedBy(username);
-        webConfig.setUpdatedTime(currentTime);
-        copyBeanToBean(form, webConfig, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
-        return webConfig;
+        dataConfig.setUpdatedBy(username);
+        dataConfig.setUpdatedTime(currentTime);
+        copyBeanToBean(form, dataConfig, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        return dataConfig;
     }
 
-    protected Map<String, String> createKeyMap(final WebConfigEditForm form) {
+    protected Map<String, String> createKeyMap(final DataConfigEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -293,7 +293,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final WebConfigEditForm form, final int expectedMode) {
+    protected void verifyCrudMode(final DataConfigEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
@@ -303,7 +303,7 @@ public class AdminWebconfigAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
             });
         };

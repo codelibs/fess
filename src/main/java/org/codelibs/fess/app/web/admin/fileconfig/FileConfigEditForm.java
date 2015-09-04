@@ -14,15 +14,19 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.fileconfig;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.annotation.UriType;
 
-public class DataConfigForm implements Serializable {
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class FileConfigEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,16 +35,7 @@ public class DataConfigForm implements Serializable {
     public String[] labelTypeIds;
 
     //@IntegerType
-    public String pageNumber;
-
-    public Map<String, String> searchParams = new HashMap<String, String>();
-
-    //@IntegerType
     public int crudMode;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 1000)
@@ -51,13 +46,38 @@ public class DataConfigForm implements Serializable {
     public String name;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @UriType(protocols = "file:,smb:")
     //@Maxbytelength(maxbytelength = 4000)
-    public String handlerName;
-
-    public String handlerParameter;
+    public String paths;
 
     //@Maxbytelength(maxbytelength = 4000)
-    public String handlerScript;
+    public String includedPaths;
+
+    //@Maxbytelength(maxbytelength = 4000)
+    public String excludedPaths;
+
+    //@Maxbytelength(maxbytelength = 4000)
+    public String includedDocPaths;
+
+    //@Maxbytelength(maxbytelength = 4000)
+    public String excludedDocPaths;
+
+    //@Maxbytelength(maxbytelength = 4000)
+    public String configParameter;
+
+    //@IntRange(min = 0, max = 2147483647)
+    public String depth;
+
+    //@LongRange(min = 0, max = 9223372036854775807l)
+    public String maxAccessCount;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@IntRange(min = 0, max = 2147483647)
+    public String numOfThread;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@IntRange(min = 0, max = 2147483647)
+    public String intervalTime;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     //@IntRange(min = 0, max = 2147483647)
@@ -93,9 +113,16 @@ public class DataConfigForm implements Serializable {
     public void initialize() {
         id = null;
         name = null;
-        handlerName = null;
-        handlerParameter = null;
-        handlerScript = null;
+        paths = null;
+        includedPaths = null;
+        excludedPaths = null;
+        includedDocPaths = null;
+        excludedDocPaths = null;
+        configParameter = null;
+        depth = null;
+        maxAccessCount = null;
+        numOfThread = null;
+        intervalTime = null;
         boost = "1";
         available = null;
         sortOrder = null;
@@ -105,5 +132,7 @@ public class DataConfigForm implements Serializable {
         updatedTime = null;
         versionNo = null;
         sortOrder = "0";
+        numOfThread = Integer.toString(Constants.DEFAULT_NUM_OF_THREAD_FOR_FS);
+        intervalTime = Integer.toString(Constants.DEFAULT_INTERVAL_TIME_FOR_FS);
     }
 }

@@ -14,17 +14,19 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.dataconfig;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.UriType;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class FileConfigForm implements Serializable {
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class DataConfigEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,38 +55,13 @@ public class FileConfigForm implements Serializable {
     public String name;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    @UriType(protocols = "file:,smb:")
     //@Maxbytelength(maxbytelength = 4000)
-    public String paths;
+    public String handlerName;
 
-    //@Maxbytelength(maxbytelength = 4000)
-    public String includedPaths;
+    public String handlerParameter;
 
     //@Maxbytelength(maxbytelength = 4000)
-    public String excludedPaths;
-
-    //@Maxbytelength(maxbytelength = 4000)
-    public String includedDocPaths;
-
-    //@Maxbytelength(maxbytelength = 4000)
-    public String excludedDocPaths;
-
-    //@Maxbytelength(maxbytelength = 4000)
-    public String configParameter;
-
-    //@IntRange(min = 0, max = 2147483647)
-    public String depth;
-
-    //@LongRange(min = 0, max = 9223372036854775807l)
-    public String maxAccessCount;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@IntRange(min = 0, max = 2147483647)
-    public String numOfThread;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@IntRange(min = 0, max = 2147483647)
-    public String intervalTime;
+    public String handlerScript;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     //@IntRange(min = 0, max = 2147483647)
@@ -120,16 +97,9 @@ public class FileConfigForm implements Serializable {
     public void initialize() {
         id = null;
         name = null;
-        paths = null;
-        includedPaths = null;
-        excludedPaths = null;
-        includedDocPaths = null;
-        excludedDocPaths = null;
-        configParameter = null;
-        depth = null;
-        maxAccessCount = null;
-        numOfThread = null;
-        intervalTime = null;
+        handlerName = null;
+        handlerParameter = null;
+        handlerScript = null;
         boost = "1";
         available = null;
         sortOrder = null;
@@ -139,7 +109,5 @@ public class FileConfigForm implements Serializable {
         updatedTime = null;
         versionNo = null;
         sortOrder = "0";
-        numOfThread = Integer.toString(Constants.DEFAULT_NUM_OF_THREAD_FOR_FS);
-        intervalTime = Integer.toString(Constants.DEFAULT_INTERVAL_TIME_FOR_FS);
     }
 }
