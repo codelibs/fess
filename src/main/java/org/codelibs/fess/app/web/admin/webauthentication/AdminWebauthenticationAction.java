@@ -126,7 +126,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
-            data.register("webConfigItems", webConfigService.getAllWebConfigList());
+            // data.register("webConfigItems", webConfigService.getAllWebConfigList());
         });
     }
 
@@ -138,7 +138,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
-            data.register("webConfigItems", webConfigService.getAllWebConfigList());
+            // data.register("webConfigItems", webConfigService.getAllWebConfigList());
         });
     }
 
@@ -232,40 +232,6 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    //    public boolean isDisplayCreateLink() {
-    //        return !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty();
-    //    }
-    //
-    //    public List<Map<String, String>> getWebConfigItems() {
-    //        final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-    //        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
-    //        for (final WebConfig webConfig : webConfigList) {
-    //            items.add(createItem(webConfig.getName(), webConfig.getId().toString()));
-    //        }
-    //        return items;
-    //    }
-    //
-    //        public List<Map<String, String>> getProtocolSchemeItems() {
-    //            final List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-    //            items.add(createItem(
-    //                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_basic"),
-    //                    Constants.BASIC));
-    //            items.add(createItem(
-    //                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_digest"),
-    //                    Constants.DIGEST));
-    //            items.add(createItem(
-    //                    MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.web_authentication_scheme_ntlm"),
-    //                    Constants.NTLM));
-    //            return items;
-    //        }
-    //
-    //    protected Map<String, String> createItem(final String label, final String value) {
-    //        final Map<String, String> map = new HashMap<String, String>(2);
-    //        map.put("label", label);
-    //        map.put("value", value);
-    //        return map;
-    //    }
-
     protected void loadWebAuthentication(final WebAuthenticationEditForm form) {
         copyBeanToBean(getWebAuthentication(form), form, op -> op.exclude("crudMode"));
     }
