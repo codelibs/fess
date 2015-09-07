@@ -19,10 +19,12 @@ package org.codelibs.fess.app.web.admin.webauthentication;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.WebAuthenticationPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
@@ -32,6 +34,7 @@ import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.WebAuthentication;
 import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -126,7 +129,8 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
-            // data.register("webConfigItems", webConfigService.getAllWebConfigList());
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
         });
     }
 
@@ -138,14 +142,18 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
-            // data.register("webConfigItems", webConfigService.getAllWebConfigList());
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final WebAuthenticationEditForm form) {
-        return asHtml(path_AdminWebauthentication_EditJsp);
+        return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -153,7 +161,10 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final WebAuthenticationEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_EditJsp);
+        return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -163,7 +174,10 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_ConfirmJsp);
+        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -171,7 +185,10 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final WebAuthenticationEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_ConfirmJsp);
+        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     // -----------------------------------------------------
@@ -183,21 +200,30 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
         loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_ConfirmJsp);
+        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(final WebAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebauthentication_ConfirmJsp);
+        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(final WebAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebauthentication_ConfirmJsp);
+        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     // -----------------------------------------------------
@@ -267,6 +293,34 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         return keys;
     }
 
+    protected void registerProtocolSchemeItems(final RenderData data) {
+        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_basic"),
+                Constants.BASIC));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_digest"),
+                Constants.DIGEST));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_ntlm"),
+                Constants.NTLM));
+        data.register("protocolSchemeItems", itemList);
+    }
+
+    protected void registerWebConfigItems(final RenderData data) {
+        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
+        for (final WebConfig webConfig : webConfigList) {
+            itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
+        }
+        data.register("webConfigItems", itemList);
+    }
+
+    protected Map<String, String> createItem(final String label, final String value) {
+        final Map<String, String> map = new HashMap<String, String>(2);
+        map.put(Constants.ITEM_LABEL, label);
+        map.put(Constants.ITEM_VALUE, value);
+        return map;
+    }
+
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
@@ -280,7 +334,9 @@ public class AdminWebauthenticationAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminWebauthentication_EditJsp);
+            return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+                registerWebConfigItems(data);
+            });
         };
     }
 }
