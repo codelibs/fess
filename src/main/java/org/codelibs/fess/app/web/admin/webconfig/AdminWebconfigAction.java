@@ -165,7 +165,7 @@ public class AdminWebconfigAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
@@ -175,7 +175,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final WebConfigEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadWebConfig(form);
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
@@ -190,7 +190,7 @@ public class AdminWebconfigAction extends FessAdminAction {
             form.id = id;
             verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
             loadWebConfig(form);
-            return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
             });
         } catch (final Exception e) {
@@ -204,7 +204,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse confirmfromcreate(final WebConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
@@ -213,7 +213,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse confirmfromupdate(final WebConfigEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }

@@ -76,7 +76,7 @@
 														<c:if test="${data.endTime!=null}"><fmt:formatDate value="${data.endTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></c:if>
 														<c:if test="${data.endTime==null}"><la:message key="labels.none" /></c:if>
 													</td>
-													<td style="overflow-x: auto;>
+													<td style="overflow-x: auto;">
 														<la:link href="confirmpage/4/${f:u(data.id)}">
 															<la:message key="labels.joblog_link_details" />
 														</la:link>

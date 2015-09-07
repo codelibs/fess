@@ -84,7 +84,7 @@
 														<c:if test="${data.expiredTime==null}"><la:message key="labels.none" /></c:if>
 														<c:if test="${data.expiredTime!=null}">${f:h(data.expiredTime)}</c:if>
 													</td>
-													<td style="overflow-x: auto;>
+													<td style="overflow-x: auto;">
 														<la:link href="confirmpage/4/${f:u(data.id)}">
 															<la:message key="labels.crawling_session_link_details" />
 														</la:link>

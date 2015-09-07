@@ -63,7 +63,7 @@
 													<td>
 														<la:link href="download/${f:u(logFile.logFileName)}">${f:h(logFile.name)}</la:link>
 													</td>
-													<td style="overflow-x: auto;>
+													<td style="overflow-x: auto;">
 														<fmt:formatDate	value="${logFile.lastModified}" type="BOTH" dateStyle="MEDIUM" />
 													</td>
 												</tr>

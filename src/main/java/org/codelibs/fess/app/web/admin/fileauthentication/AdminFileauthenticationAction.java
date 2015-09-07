@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.webauthentication;
+package org.codelibs.fess.app.web.admin.fileauthentication;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +26,13 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.app.pager.WebAuthenticationPager;
-import org.codelibs.fess.app.service.WebAuthenticationService;
-import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.app.pager.FileAuthenticationPager;
+import org.codelibs.fess.app.service.FileAuthenticationService;
+import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.es.exentity.WebAuthentication;
+import org.codelibs.fess.es.exentity.FileAuthentication;
+import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -45,20 +46,20 @@ import org.lastaflute.web.validation.VaErrorHook;
 /**
  * @author shinsuke
  */
-public class AdminWebauthenticationAction extends FessAdminAction {
+public class AdminFileauthenticationAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private WebAuthenticationService webAuthenticationService;
+    private FileAuthenticationService fileAuthenticationService;
     @Resource
-    private WebAuthenticationPager webAuthenticationPager;
+    private FileAuthenticationPager fileAuthenticationPager;
     @Resource
     private SystemHelper systemHelper;
 
     @Resource
-    protected WebConfigService webConfigService;
+    protected FileConfigService fileConfigService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -66,55 +67,55 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("webAuthentication"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("fileAuthentication"));
     }
 
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final WebAuthenticationSearchForm form) {
-        return asHtml(path_AdminWebauthentication_IndexJsp).renderWith(data -> {
+    public HtmlResponse index(final FileAuthenticationSearchForm form) {
+        return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final WebAuthenticationSearchForm form) {
-        webAuthenticationPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminWebauthentication_IndexJsp).renderWith(data -> {
+    public HtmlResponse list(final Integer pageNumber, final FileAuthenticationSearchForm form) {
+        fileAuthenticationPager.setCurrentPageNumber(pageNumber);
+        return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse search(final WebAuthenticationSearchForm form) {
-        copyBeanToBean(form.searchParams, webAuthenticationPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminWebauthentication_IndexJsp).renderWith(data -> {
+    public HtmlResponse search(final FileAuthenticationSearchForm form) {
+        copyBeanToBean(form.searchParams, fileAuthenticationPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final WebAuthenticationSearchForm form) {
-        webAuthenticationPager.clear();
-        return asHtml(path_AdminWebauthentication_IndexJsp).renderWith(data -> {
+    public HtmlResponse reset(final FileAuthenticationSearchForm form) {
+        fileAuthenticationPager.clear();
+        return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse back(final WebAuthenticationSearchForm form) {
-        return asHtml(path_AdminWebauthentication_IndexJsp).renderWith(data -> {
+    public HtmlResponse back(final FileAuthenticationSearchForm form) {
+        return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final WebAuthenticationSearchForm form) {
-        data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthenticationPager)); // page navi
-        data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
+    protected void searchPaging(final RenderData data, final FileAuthenticationSearchForm form) {
+        data.register("fileAuthenticationItems", fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
+        data.register("displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
         // restore from pager
-        copyBeanToBean(webAuthenticationPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(fileAuthenticationPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -125,69 +126,69 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final WebAuthenticationEditForm form) {
+    public HtmlResponse createpage(final FileAuthenticationEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+        return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final WebAuthenticationEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
-        loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+        loadFileAuthentication(form);
+        return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final WebAuthenticationEditForm form) {
-        return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+    public HtmlResponse editagain(final FileAuthenticationEditForm form) {
+        return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final WebAuthenticationEditForm form) {
+    public HtmlResponse editfromconfirm(final FileAuthenticationEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
-        loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
+        loadFileAuthentication(form);
+        return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final WebAuthenticationEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+        loadFileAuthentication(form);
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final WebAuthenticationEditForm form) {
+    public HtmlResponse deletefromconfirm(final FileAuthenticationEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
-        loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+        loadFileAuthentication(form);
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
@@ -195,34 +196,34 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final WebAuthenticationEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
-        loadWebAuthentication(form);
-        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+        loadFileAuthentication(form);
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final WebAuthenticationEditForm form) {
+    public HtmlResponse confirmfromcreate(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final WebAuthenticationEditForm form) {
+    public HtmlResponse confirmfromupdate(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
+            registerFileConfigItems(data);
         });
     }
 
@@ -231,26 +232,26 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final WebAuthenticationEditForm form) {
+    public HtmlResponse create(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        webAuthenticationService.store(createWebAuthentication(form));
+        fileAuthenticationService.store(createFileAuthentication(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final WebAuthenticationEditForm form) {
+    public HtmlResponse update(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        webAuthenticationService.store(createWebAuthentication(form));
+        fileAuthenticationService.store(createFileAuthentication(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final WebAuthenticationEditForm form) {
+    public HtmlResponse delete(final FileAuthenticationEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        webAuthenticationService.delete(getWebAuthentication(form));
+        fileAuthenticationService.delete(getFileAuthentication(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
     }
@@ -258,36 +259,36 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadWebAuthentication(final WebAuthenticationEditForm form) {
-        copyBeanToBean(getWebAuthentication(form), form, op -> op.exclude("crudMode"));
+    protected void loadFileAuthentication(final FileAuthenticationEditForm form) {
+        copyBeanToBean(getFileAuthentication(form), form, op -> op.exclude("crudMode"));
     }
 
-    protected WebAuthentication getWebAuthentication(final WebAuthenticationEditForm form) {
-        final WebAuthentication webAuthentication = webAuthenticationService.getWebAuthentication(createKeyMap(form));
-        if (webAuthentication == null) {
+    protected FileAuthentication getFileAuthentication(final FileAuthenticationEditForm form) {
+        final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap(form));
+        if (fileAuthentication == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
         }
-        return webAuthentication;
+        return fileAuthentication;
     }
 
-    protected WebAuthentication createWebAuthentication(final WebAuthenticationEditForm form) {
-        WebAuthentication webAuthentication;
+    protected FileAuthentication createFileAuthentication(final FileAuthenticationEditForm form) {
+        FileAuthentication fileAuthentication;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (form.crudMode == CommonConstants.EDIT_MODE) {
-            webAuthentication = getWebAuthentication(form);
+            fileAuthentication = getFileAuthentication(form);
         } else {
-            webAuthentication = new WebAuthentication();
-            webAuthentication.setCreatedBy(username);
-            webAuthentication.setCreatedTime(currentTime);
+            fileAuthentication = new FileAuthentication();
+            fileAuthentication.setCreatedBy(username);
+            fileAuthentication.setCreatedTime(currentTime);
         }
-        webAuthentication.setUpdatedBy(username);
-        webAuthentication.setUpdatedTime(currentTime);
-        copyBeanToBean(form, webAuthentication, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
-        return webAuthentication;
+        fileAuthentication.setUpdatedBy(username);
+        fileAuthentication.setUpdatedTime(currentTime);
+        copyBeanToBean(form, fileAuthentication, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        return fileAuthentication;
     }
 
-    protected Map<String, String> createKeyMap(final WebAuthenticationEditForm form) {
+    protected Map<String, String> createKeyMap(final FileAuthenticationEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -296,22 +297,18 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     protected void registerProtocolSchemeItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
         final Locale locale = LaRequestUtil.getRequest().getLocale();
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_basic"),
-                Constants.BASIC));
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_digest"),
-                Constants.DIGEST));
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_ntlm"),
-                Constants.NTLM));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.file_authentication_scheme_samba"),
+                Constants.SAMBA));
         data.register("protocolSchemeItems", itemList);
     }
 
-    protected void registerWebConfigItems(final RenderData data) {
+    protected void registerFileConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
-        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
-        for (final WebConfig webConfig : webConfigList) {
-            itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
+        final List<FileConfig> fileConfigList = fileConfigService.getAllFileConfigList(false, false, false, null);
+        for (final FileConfig fileConfig : fileConfigList) {
+            itemList.add(createItem(fileConfig.getName(), fileConfig.getId().toString()));
         }
-        data.register("webConfigItems", itemList);
+        data.register("fileConfigItems", itemList);
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
@@ -324,7 +321,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final WebAuthenticationEditForm form, final int expectedMode) {
+    protected void verifyCrudMode(final FileAuthenticationEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
@@ -334,9 +331,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
-                registerWebConfigItems(data);
-            });
+            return asHtml(path_AdminFileauthentication_EditJsp);
         };
     }
 }

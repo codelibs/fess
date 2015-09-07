@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.fileauthentication;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -22,12 +22,13 @@ import java.util.Map;
 
 import org.codelibs.fess.util.ComponentUtil;
 
-public class SuggestElevateWordForm implements Serializable {
+/**
+ * @author codelibs
+ * @author jflute
+ */
+public class FileAuthenticationEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    //@Required(target = "upload")
-    //public FormFile suggestElevateWordFile;
 
     //@IntegerType
     public String pageNumber;
@@ -45,18 +46,28 @@ public class SuggestElevateWordForm implements Serializable {
     //@Maxbytelength(maxbytelength = 1000)
     public String id;
 
+    //@Maxbytelength(maxbytelength = 100)
+    public String hostname;
+
+    //@IntRange(min = -1, max = 2147483647)
+    public String port;
+
+    //@Maxbytelength(maxbytelength = 10)
+    public String protocolScheme;
+
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    public String suggestWord;
+    //@Maxbytelength(maxbytelength = 100)
+    public String username;
 
-    public String reading;
+    //@Maxbytelength(maxbytelength = 100)
+    public String password;
 
-    public String targetRole;
-
-    public String targetLabel;
+    //@Maxbytelength(maxbytelength = 1000)
+    public String parameters;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@FloatType
-    public String boost;
+    //@Maxbytelength(maxbytelength = 1000)
+    public String fileConfigId;
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 255)
@@ -78,16 +89,18 @@ public class SuggestElevateWordForm implements Serializable {
 
     public void initialize() {
         id = null;
-        suggestWord = null;
-        reading = null;
-        targetRole = null;
-        targetLabel = null;
-        boost = null;
+        hostname = null;
+        port = null;
+        protocolScheme = null;
+        username = null;
+        password = null;
+        parameters = null;
+        fileConfigId = null;
         createdBy = "system";
         createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         updatedBy = null;
         updatedTime = null;
         versionNo = null;
-        boost = "100";
     }
+
 }

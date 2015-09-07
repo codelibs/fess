@@ -120,12 +120,10 @@
 						<exclude>org/codelibs/fess/app/web/admin/DataAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SuggestBadWordForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/FileAuthenticationAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/FileAuthenticationForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/base/AbstractLoginAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/LoginAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/LoginForm.java</exclude>
