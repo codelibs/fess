@@ -143,12 +143,12 @@
 				></i> <span><la:message key="labels.menu_suggest" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
-					<li <c:if test="${param.menuType=='suggestElevateWord'}">class="active"</c:if>><todo:link
-							href="/admin/suggestElevateWord/index"
+					<li <c:if test="${param.menuType=='suggestElevateWord'}">class="active"</c:if>><la:link
+							href="/admin/suggestelevateword/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.suggest_elevate_word" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><todo:link
 							href="/admin/suggestBadWord/index"
