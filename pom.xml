@@ -106,7 +106,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/SystemForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SearchListAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SuggestElevateWordForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/CrawlAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SuggestBadWordAction.java</exclude>
@@ -121,7 +120,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SuggestBadWordForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/CrawlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/base/AbstractLoginAction.java</exclude>
