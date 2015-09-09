@@ -16,22 +16,30 @@
 
 package org.codelibs.fess.app.web.admin.requestheader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.RequestHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
+import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.RequestHeader;
+import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -48,6 +56,8 @@ public class AdminRequestheaderAction extends FessAdminAction {
     private RequestHeaderPager requestHeaderPager;
     @Resource
     private SystemHelper systemHelper;
+    @Resource
+    protected WebConfigService webConfigService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -101,6 +111,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final RequestHeaderSearchForm form) {
         data.register("requestHeaderItems", requestHeaderService.getRequestHeaderList(requestHeaderPager)); // page navi
+        data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
 
         // restore from pager
         copyBeanToBean(requestHeaderPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
@@ -117,7 +128,10 @@ public class AdminRequestheaderAction extends FessAdminAction {
     public HtmlResponse createpage(final RequestHeaderEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminRequestheader_EditJsp);
+        return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -127,13 +141,19 @@ public class AdminRequestheaderAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadRequestHeader(form);
-        return asHtml(path_AdminRequestheader_EditJsp);
+        return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final RequestHeaderEditForm form) {
-        return asHtml(path_AdminRequestheader_EditJsp);
+        return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -141,7 +161,10 @@ public class AdminRequestheaderAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final RequestHeaderEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadRequestHeader(form);
-        return asHtml(path_AdminRequestheader_EditJsp);
+        return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -151,7 +174,10 @@ public class AdminRequestheaderAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadRequestHeader(form);
-        return asHtml(path_AdminRequestheader_ConfirmJsp);
+        return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = true, validate = false)
@@ -159,7 +185,10 @@ public class AdminRequestheaderAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final RequestHeaderEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadRequestHeader(form);
-        return asHtml(path_AdminRequestheader_ConfirmJsp);
+        return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     // -----------------------------------------------------
@@ -255,6 +284,34 @@ public class AdminRequestheaderAction extends FessAdminAction {
         return keys;
     }
 
+    protected void registerProtocolSchemeItems(final RenderData data) {
+        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_basic"),
+                Constants.BASIC));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_digest"),
+                Constants.DIGEST));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_ntlm"),
+                Constants.NTLM));
+        data.register("protocolSchemeItems", itemList);
+    }
+
+    protected void registerWebConfigItems(final RenderData data) {
+        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
+        for (final WebConfig webConfig : webConfigList) {
+            itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
+        }
+        data.register("webConfigItems", itemList);
+    }
+
+    protected Map<String, String> createItem(final String label, final String value) {
+        final Map<String, String> map = new HashMap<String, String>(2);
+        map.put(Constants.ITEM_LABEL, label);
+        map.put(Constants.ITEM_VALUE, value);
+        return map;
+    }
+
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
@@ -268,7 +325,9 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminRequestheader_EditJsp);
+            return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
+                registerWebConfigItems(data);
+            });
         };
     }
 }
