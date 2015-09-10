@@ -23,25 +23,27 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.helper.SystemHelper;
-import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
-import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.annotation.Token;
+import org.codelibs.fess.app.web.admin.keymatch.AdminKeymatchAction;
+import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  */
 public class AdminCrawlAction extends FessAdminAction {
 
+    private static final Logger logger = LoggerFactory.getLogger(AdminKeymatchAction.class);
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -61,11 +63,12 @@ public class AdminCrawlAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink("crawl"));
+        runtime.registerData("supportedSearchItems", getSupportedSearchItems());
     }
 
     // ===================================================================================
 
-    protected String showIndex(final boolean redirect, CrawlEditForm form) {
+    protected void updateForm(CrawlEditForm form) {
         form.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
         form.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
         form.dayForCleanup = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
@@ -91,11 +94,6 @@ public class AdminCrawlAction extends FessAdminAction {
         form.notificationTo = crawlerProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
         form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
         form.purgeSuggestSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
-        if (redirect) {
-            return "index?redirect=true";
-        } else {
-            return "index.jsp";
-        }
     }
 
     //
@@ -103,7 +101,7 @@ public class AdminCrawlAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final CrawlEditForm form) {
         return asHtml(path_AdminCrawl_IndexJsp).renderWith(data -> {
-            showIndex(false, form);
+            updateForm(form);
         });
     }
 
@@ -144,17 +142,10 @@ public class AdminCrawlAction extends FessAdminAction {
         crawlerProperties.setProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
                 form.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(form.suggestSearchLog) ? Constants.TRUE : Constants.FALSE);
         crawlerProperties.setProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay);
-        //        try {
-        //            crawlerProperties.store();
-        //            SAStrutsUtil.addSessionMessage("success.update_crawler_params");
-        //            return showIndex(true, form);
-        //        } catch (final Exception e) {
-        //            logger.error("Failed to update crawler parameters.", e);
-        //            throw new SSCActionMessagesException(e, "errors.failed_to_update_crawler_params", e);
-        //        }
-        return asHtml(path_AdminCrawl_IndexJsp).renderWith(data -> {
-            showIndex(false, form);
-        });
+
+        crawlerProperties.store();
+        saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
+        return redirect(getClass());
     }
 
     public List<String> getDayItems() {
@@ -169,12 +160,14 @@ public class AdminCrawlAction extends FessAdminAction {
         return items;
     }
 
-    public List<Map<String, String>> getSupportedSearchItems() {
+    private List<Map<String, String>> getSupportedSearchItems() {
         final List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        //            list.add(createItem(MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_web"),
-        //                    Constants.SUPPORTED_SEARCH_WEB));
-        //            list.add(createItem(MessageResourcesUtil.getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_none"),
-        //                    Constants.SUPPORTED_SEARCH_NONE));
+        list.add(createItem(
+                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_web"),
+                Constants.SUPPORTED_SEARCH_WEB));
+        list.add(createItem(
+                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_none"),
+                Constants.SUPPORTED_SEARCH_NONE));
         return list;
     }
 
