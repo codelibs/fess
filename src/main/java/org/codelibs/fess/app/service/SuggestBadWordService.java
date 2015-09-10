@@ -91,14 +91,18 @@ public class SuggestBadWordService implements Serializable {
     public void store(final SuggestBadWord suggestBadWord) throws CrudMessageException {
         setupStoreCondition(suggestBadWord);
 
-        suggestBadWordBhv.insertOrUpdate(suggestBadWord);
+        suggestBadWordBhv.insertOrUpdate(suggestBadWord, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final SuggestBadWord suggestBadWord) throws CrudMessageException {
         setupDeleteCondition(suggestBadWord);
 
-        suggestBadWordBhv.delete(suggestBadWord);
+        suggestBadWordBhv.delete(suggestBadWord, op -> {
+            op.setRefresh(true);
+        });
 
     }
 

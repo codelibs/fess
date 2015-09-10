@@ -90,14 +90,18 @@ public class SuggestElevateWordService implements Serializable {
     public void store(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
         setupStoreCondition(suggestElevateWord);
 
-        suggestElevateWordBhv.insertOrUpdate(suggestElevateWord);
+        suggestElevateWordBhv.insertOrUpdate(suggestElevateWord, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
         setupDeleteCondition(suggestElevateWord);
 
-        suggestElevateWordBhv.delete(suggestElevateWord);
+        suggestElevateWordBhv.delete(suggestElevateWord, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
