@@ -30,9 +30,6 @@ public class SuggestElevateWordEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Required(target = "upload")
-    //public FormFile suggestElevateWordFile;
-
     //@IntegerType
     public String pageNumber;
 

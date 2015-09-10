@@ -24,6 +24,7 @@ import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainBeforeHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCurtainFinallyHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessListedClassificationProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMailDeliveryDepartmentCreator;
+import org.codelibs.fess.mylasta.direction.sponsor.FessMultipartRequestHandler;
 import org.codelibs.fess.mylasta.direction.sponsor.FessSecurityResourceProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessTimeResourceProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessUserLocaleProcessProvider;
@@ -36,6 +37,8 @@ import org.lastaflute.core.security.OneWayCryptographer;
 import org.lastaflute.db.dbflute.classification.ListedClassificationProvider;
 import org.lastaflute.db.direction.FwDbDirection;
 import org.lastaflute.web.direction.FwWebDirection;
+import org.lastaflute.web.ruts.multipart.MultipartRequestHandler;
+import org.lastaflute.web.ruts.multipart.MultipartResourceProvider;
 
 /**
  * @author jflute
@@ -124,6 +127,12 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directAdjustment(createActionAdjustmentProvider());
         direction.directMessage(nameList -> nameList.add("fess_message"), "fess_label");
         direction.directApiCall(createApiFailureHook());
+        direction.directMultipart(new MultipartResourceProvider() {
+            @Override
+            public MultipartRequestHandler createHandler() {
+                return new FessMultipartRequestHandler();
+            }
+        });
     }
 
     protected FessUserLocaleProcessProvider createUserLocaleProcessProvider() {
