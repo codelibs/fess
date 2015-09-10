@@ -33,7 +33,6 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.codelibs.fess.es.exentity.FileConfig;
-import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;

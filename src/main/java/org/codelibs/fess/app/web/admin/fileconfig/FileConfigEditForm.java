@@ -19,8 +19,8 @@ package org.codelibs.fess.app.web.admin.fileconfig;
 import java.io.Serializable;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.annotation.UriType;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author codelibs
