@@ -27,7 +27,7 @@
           "path" : "id"
         },
         "properties" : {
-          "group" : {
+          "groups" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -43,7 +43,7 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
-          "role" : {
+          "roles" : {
             "type" : "string",
             "index" : "not_analyzed"
           }

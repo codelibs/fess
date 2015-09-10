@@ -40,7 +40,6 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
 import org.codelibs.fess.util.QueryUtil;
-import org.codelibs.fess.util.SearchParamMap;
 import org.lastaflute.web.ruts.message.ActionMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -965,7 +964,7 @@ public class QueryHelper implements Serializable {
         return "count".equals(sort) || "index".equals(sort);
     }
 
-    public String buildOptionQuery(final SearchParamMap optionMap) {
+    public String buildOptionQuery(final Map<String, String[]> optionMap) {
         if (optionMap == null) {
             return StringUtil.EMPTY;
         }

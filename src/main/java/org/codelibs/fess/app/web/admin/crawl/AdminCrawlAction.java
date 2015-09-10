@@ -68,7 +68,7 @@ public class AdminCrawlAction extends FessAdminAction {
 
     // ===================================================================================
 
-    protected void updateForm(CrawlEditForm form) {
+    protected void updateForm(final CrawlEditForm form) {
         form.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
         form.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
         form.dayForCleanup = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");

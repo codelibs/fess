@@ -59,7 +59,8 @@
 							<span><la:message key="labels.menu.dict" /></span>
 						</todo:link></li>
 
-				</ul></li>
+				</ul>
+			</li>
 			<li class="treeview <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>"><a href="#"><i
 					class='fa fa-cogs'
 				></i> <span><la:message key="labels.menu_crawl" /></span> <i class="fa fa-angle-left pull-right"></i></a>
@@ -137,7 +138,36 @@
 							<span><la:message key="labels.menu.role_type" /></span>
 						</la:link></li>
 
-				</ul></li>
+				</ul>
+			</li>
+			<li class="treeview <c:if test="${param.menuCategoryType=='user'}">active</c:if>"><a href="#"><i
+					class='fa fa-list'
+				></i> <span><la:message key="labels.menu_user" /></span> <i class="fa fa-angle-left pull-right"></i></a>
+				<ul class="treeview-menu">
+
+					<li <c:if test="${param.menuType=='user'}">class="active"</c:if>><la:link
+							href="/admin/user/index"
+						>
+							<i class='fa fa-angle-right'></i>
+							<span><la:message key="labels.menu.user" /></span>
+						</la:link></li>
+
+					<li <c:if test="${param.menuType=='role'}">class="active"</c:if>><la:link
+							href="/admin/role/index"
+						>
+							<i class='fa fa-angle-right'></i>
+							<span><la:message key="labels.menu.role" /></span>
+						</la:link></li>
+
+					<li <c:if test="${param.menuType=='group'}">class="active"</c:if>><la:link
+							href="/admin/group/index"
+						>
+							<i class='fa fa-angle-right'></i>
+							<span><la:message key="labels.menu.group" /></span>
+						</la:link></li>
+
+				</ul>
+			</li>
 			<li class="treeview <c:if test="${param.menuCategoryType=='suggest'}">active</c:if>"><a href="#"><i
 					class='fa fa-list'
 				></i> <span><la:message key="labels.menu_suggest" /></span> <i class="fa fa-angle-left pull-right"></i></a>
@@ -157,7 +187,8 @@
 							<span><la:message key="labels.menu.suggest_bad_word" /></span>
 						</todo:link></li>
 
-				</ul></li>
+				</ul>
+			</li>
 			<li class="treeview <c:if test="${param.menuCategoryType=='log'}">active</c:if>"><a href="#"><i
 					class='fa fa-files-o'
 				></i> <span><la:message key="labels.menu_system_log" /></span> <i class="fa fa-angle-left pull-right"></i></a>
@@ -195,7 +226,8 @@
 							<span><la:message key="labels.menu.search_list" /></span>
 						</todo:link></li>
 
-				</ul></li>
+				</ul>
+			</li>
 		</ul>
 		<!-- /.sidebar-menu -->
 	</section>

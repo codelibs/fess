@@ -16,10 +16,12 @@
 
 package org.codelibs.fess.app.web.search;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codelibs.fess.app.web.RootForm;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
-import org.codelibs.fess.util.SearchParamMap;
 
 public class SearchForm extends RootForm {
 
@@ -79,6 +81,6 @@ public class SearchForm extends RootForm {
 
     // advance
 
-    public SearchParamMap options = new SearchParamMap();
+    public Map<String, String[]> options = new HashMap<>();
 
 }

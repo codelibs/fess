@@ -17,14 +17,14 @@
 package org.codelibs.fess.app.web;
 
 import java.io.Serializable;
-
-import org.codelibs.fess.util.SearchParamMap;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RootForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public SearchParamMap fields = new SearchParamMap();
+    public Map<String, String[]> fields = new HashMap<>();
 
     //@Maxbytelength(maxbytelength = 1000)
     public String query;

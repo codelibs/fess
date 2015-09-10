@@ -14,24 +14,18 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.util;
+package org.codelibs.fess.app.web.admin.user;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
-import org.codelibs.core.lang.StringUtil;
-
-public class SearchParamMap extends HashMap<String, String[]> {
+/**
+ * @author shinsuke
+ */
+public class UserSearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String CLASS_NAME = "org.codelibs.fess.util.SearchParamMap";
-
-    @Override
-    public String[] get(final Object key) {
-        if (CLASS_NAME.equals(key)) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return super.get(key);
-    }
-
+    public Map<String, String> searchParams = new HashMap<String, String>();
 }

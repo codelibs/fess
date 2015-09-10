@@ -123,8 +123,8 @@ public class BsUserCB extends AbstractConditionBean {
             columnList.add(name);
         }
 
-        public void columnGroup() {
-            doColumn("group");
+        public void columnGroups() {
+            doColumn("groups");
         }
 
         public void columnId() {
@@ -139,8 +139,8 @@ public class BsUserCB extends AbstractConditionBean {
             doColumn("password");
         }
 
-        public void columnRole() {
-            doColumn("role");
+        public void columnRoles() {
+            doColumn("roles");
         }
     }
 }

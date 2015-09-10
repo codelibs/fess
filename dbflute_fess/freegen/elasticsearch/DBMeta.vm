@@ -44,7 +44,11 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 #elseif ($col.isRefColumn)
 #set ($javaNative = ${col.camelizedName})
 #end
+#if ($arrayColumnNames.contains($col.name))
+        setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}((${javaNative}[])vl), "${col.uncapCamelName}");
+#else
         setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}(DfTypeUtil.to${javaNative}(vl)), "${col.uncapCamelName}");
+#end
 #end
     }
 
@@ -62,7 +66,8 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 #elseif ($col.isRefColumn)
 #set ($javaNative = ${col.camelizedName})
 #end
-    protected final ColumnInfo _column${col.camelizedName} = cci("${col.name}", "${col.name}", null, null, ${javaNative}.class, "${col.uncapCamelName}", null, false, false, false, "${col.type}", 0, 0, null, false, null, null, null, null, null, false);
+#if ($arrayColumnNames.contains($col.name))#set($arrayType = "[]")#else#set($arrayType = "")#end
+    protected final ColumnInfo _column${col.camelizedName} = cci("${col.name}", "${col.name}", null, null, ${javaNative}${arrayType}.class, "${col.uncapCamelName}", null, false, false, false, "${col.type}", 0, 0, null, false, null, null, null, null, null, false);
 #end
 
 #foreach ($col in $table.columnList)

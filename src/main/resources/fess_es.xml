@@ -37,4 +37,8 @@
     <component name="searchFieldLogBhv" class="org.codelibs.fess.es.exbhv.SearchFieldLogBhv"/>
     <component name="searchLogBhv" class="org.codelibs.fess.es.exbhv.SearchLogBhv"/>
     <component name="userInfoBhv" class="org.codelibs.fess.es.exbhv.UserInfoBhv"/>
+
+    <component name="userBhv" class="org.codelibs.fess.es.exbhv.UserBhv"/>
+    <component name="roleBhv" class="org.codelibs.fess.es.exbhv.RoleBhv"/>
+    <component name="groupBhv" class="org.codelibs.fess.es.exbhv.GroupBhv"/>
 </components>

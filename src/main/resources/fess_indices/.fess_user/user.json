@@ -22,11 +22,11 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "group": {
+      "groups": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "role": {
+      "roles": {
         "type": "string",
         "index": "not_analyzed"
       }

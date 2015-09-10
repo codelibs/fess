@@ -58,7 +58,11 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
+#if ($arrayColumnNames.contains($column.name))
+            result.set${column.capCamelName}(to${javaNative}Array(source.get("${column.name}")));
+#else
             result.set${column.capCamelName}(DfTypeUtil.to$javaNative(source.get("${column.name}")));
+#end
 #end
 #end
             return result;

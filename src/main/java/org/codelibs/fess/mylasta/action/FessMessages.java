@@ -354,6 +354,15 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upload the UserDict file. */
     public static final String ERRORS_failed_to_upload_userdict_file = "{errors.failed_to_upload_userdict_file}";
 
+    /** The key of the message: Password is required. */
+    public static final String ERRORS_blank_password = "{errors.blank_password}";
+
+    /** The key of the message: Confirm Password does not match. */
+    public static final String ERRORS_invalid_confirm_password = "{errors.invalid_confirm_password}";
+
+    /** The key of the message: Invalid password. */
+    public static final String ERRORS_password_does_not_exist_in_session = "{errors.password_does_not_exist_in_session}";
+
     /** The key of the message: The given query is invalid. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -2204,6 +2213,48 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUploadUserdictFile(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_upload_userdict_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.blank_password' with parameters.
+     * <pre>
+     * message: Password is required.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsBlankPassword(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_blank_password));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_confirm_password' with parameters.
+     * <pre>
+     * message: Confirm Password does not match.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidConfirmPassword(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_confirm_password));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_does_not_exist_in_session' with parameters.
+     * <pre>
+     * message: Invalid password.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordDoesNotExistInSession(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_password_does_not_exist_in_session));
         return this;
     }
 

@@ -44,6 +44,7 @@ import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
 
@@ -66,7 +67,10 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private FessLoginAssist fessLoginAssist;
+    protected FessLoginAssist fessLoginAssist;
+
+    @Resource
+    protected SessionManager sessionManager;
 
     // ===================================================================================
     //                                                                               Hook

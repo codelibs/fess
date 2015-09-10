@@ -35,11 +35,11 @@ public class UserDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((User) et).getGroup(), (et, vl) -> ((User) et).setGroup(DfTypeUtil.toString(vl)), "group");
+        setupEpg(_epgMap, et -> ((User) et).getGroups(), (et, vl) -> ((User) et).setGroups((String[]) vl), "groups");
         setupEpg(_epgMap, et -> ((User) et).getId(), (et, vl) -> ((User) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((User) et).getName(), (et, vl) -> ((User) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((User) et).getPassword(), (et, vl) -> ((User) et).setPassword(DfTypeUtil.toString(vl)), "password");
-        setupEpg(_epgMap, et -> ((User) et).getRole(), (et, vl) -> ((User) et).setRole(DfTypeUtil.toString(vl)), "role");
+        setupEpg(_epgMap, et -> ((User) et).getRoles(), (et, vl) -> ((User) et).setRoles((String[]) vl), "roles");
     }
 
     @Override
@@ -50,19 +50,19 @@ public class UserDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnGroup = cci("group", "group", null, null, String.class, "group", null, false, false, false, "String",
-            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnGroups = cci("groups", "groups", null, null, String[].class, "groups", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
             false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRole = cci("role", "role", null, null, String.class, "role", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnGroup() {
-        return _columnGroup;
+    public ColumnInfo columnGroups() {
+        return _columnGroups;
     }
 
     public ColumnInfo columnId() {
@@ -77,17 +77,17 @@ public class UserDbm extends AbstractDBMeta {
         return _columnPassword;
     }
 
-    public ColumnInfo columnRole() {
-        return _columnRole;
+    public ColumnInfo columnRoles() {
+        return _columnRoles;
     }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnGroup());
+        ls.add(columnGroups());
         ls.add(columnId());
         ls.add(columnName());
         ls.add(columnPassword());
-        ls.add(columnRole());
+        ls.add(columnRoles());
         return ls;
     }
 

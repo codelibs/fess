@@ -17,14 +17,12 @@ package org.codelibs.fess.app.web.base;
 
 import java.util.function.Consumer;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.lastaflute.di.util.LdiFileUtil;
-import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -37,8 +35,6 @@ public abstract class FessAdminAction extends FessBaseAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
-    private SessionManager sessionManager;
 
     // ===================================================================================
     //                                                                        Small Helper

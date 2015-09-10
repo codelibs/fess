@@ -45,7 +45,6 @@ import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.SuggestElevateWord;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;

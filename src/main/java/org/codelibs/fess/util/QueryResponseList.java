@@ -158,7 +158,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
         allPageCount = (int) ((allRecordCount - 1) / pageSize) + 1;
         existPrevPage = start > 0;
         existNextPage = start < (long) (allPageCount - 1) * (long) pageSize;
-        currentPageNumber = (int) (start / pageSize) + 1;
+        currentPageNumber = start / pageSize + 1;
         currentStartRecordNumber = allRecordCount != 0 ? (currentPageNumber - 1) * pageSize + 1 : 0;
         currentEndRecordNumber = currentPageNumber * pageSize;
         currentEndRecordNumber = allRecordCount < currentEndRecordNumber ? allRecordCount : currentEndRecordNumber;

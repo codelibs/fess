@@ -25,6 +25,7 @@ import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.coption.CursorSelectOption;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -346,6 +347,19 @@ public abstract class AbstractBehavior<ENTITY extends Entity, CB extends Conditi
             results[i] = resultList.get(i);
         }
         return results;
+    }
+
+    public static String[] toStringArray(final Object value) {
+        if (value instanceof String[]) {
+            return (String[]) value;
+        } else if (value instanceof List) {
+            return ((List<?>) value).stream().map(v -> v.toString()).toArray(n -> new String[n]);
+        }
+        String str = DfTypeUtil.toString(value);
+        if (str == null) {
+            return null;
+        }
+        return new String[] { str };
     }
 
     public static class BulkList<E> implements List<E> {

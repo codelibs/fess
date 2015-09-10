@@ -26,8 +26,8 @@ public class BsUser extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** group */
-    protected String group;
+    /** groups */
+    protected String[] groups;
 
     /** name */
     protected String name;
@@ -35,22 +35,22 @@ public class BsUser extends AbstractEntity {
     /** password */
     protected String password;
 
-    /** role */
-    protected String role;
+    /** roles */
+    protected String[] roles;
 
     // [Referrers] *comment only
 
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getGroup() {
-        checkSpecifiedProperty("group");
-        return group;
+    public String[] getGroups() {
+        checkSpecifiedProperty("groups");
+        return groups;
     }
 
-    public void setGroup(String value) {
-        registerModifiedProperty("group");
-        this.group = value;
+    public void setGroups(String[] value) {
+        registerModifiedProperty("groups");
+        this.groups = value;
     }
 
     public String getId() {
@@ -83,21 +83,21 @@ public class BsUser extends AbstractEntity {
         this.password = value;
     }
 
-    public String getRole() {
-        checkSpecifiedProperty("role");
-        return role;
+    public String[] getRoles() {
+        checkSpecifiedProperty("roles");
+        return roles;
     }
 
-    public void setRole(String value) {
-        registerModifiedProperty("role");
-        this.role = value;
+    public void setRoles(String[] value) {
+        registerModifiedProperty("roles");
+        this.roles = value;
     }
 
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (group != null) {
-            sourceMap.put("group", group);
+        if (groups != null) {
+            sourceMap.put("groups", groups);
         }
         if (asDocMeta().id() != null) {
             sourceMap.put("id", asDocMeta().id());
@@ -108,8 +108,8 @@ public class BsUser extends AbstractEntity {
         if (password != null) {
             sourceMap.put("password", password);
         }
-        if (role != null) {
-            sourceMap.put("role", role);
+        if (roles != null) {
+            sourceMap.put("roles", roles);
         }
         return sourceMap;
     }

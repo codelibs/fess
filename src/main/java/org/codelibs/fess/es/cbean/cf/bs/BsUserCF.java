@@ -106,127 +106,127 @@ public abstract class BsUserCF extends AbstractConditionFilter {
         }
     }
 
-    public void setGroup_NotEqual(String group) {
-        setGroup_NotEqual(group, null, null);
+    public void setGroups_NotEqual(String groups) {
+        setGroups_NotEqual(groups, null, null);
     }
 
-    public void setGroup_NotEqual(String group, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+    public void setGroups_NotEqual(String groups, ConditionOptionCall<NotFilterBuilder> notOpLambda,
             ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
         not(subCf -> {
-            subCf.setGroup_Equal(group, eqOpLambda);
+            subCf.setGroups_Equal(groups, eqOpLambda);
         }, notOpLambda);
     }
 
-    public void setGroup_Equal(String group) {
-        setGroup_Term(group, null);
+    public void setGroups_Equal(String groups) {
+        setGroups_Term(groups, null);
     }
 
-    public void setGroup_Equal(String group, ConditionOptionCall<TermFilterBuilder> opLambda) {
-        setGroup_Term(group, opLambda);
+    public void setGroups_Equal(String groups, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setGroups_Term(groups, opLambda);
     }
 
-    public void setGroup_Term(String group) {
-        setGroup_Term(group, null);
+    public void setGroups_Term(String groups) {
+        setGroups_Term(groups, null);
     }
 
-    public void setGroup_Term(String group, ConditionOptionCall<TermFilterBuilder> opLambda) {
-        TermFilterBuilder builder = regTermF("group", group);
+    public void setGroups_Term(String groups, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_Terms(Collection<String> groupList) {
-        setGroup_Terms(groupList, null);
+    public void setGroups_Terms(Collection<String> groupsList) {
+        setGroups_Terms(groupsList, null);
     }
 
-    public void setGroup_Terms(Collection<String> groupList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
-        TermsFilterBuilder builder = regTermsF("group", groupList);
+    public void setGroups_Terms(Collection<String> groupsList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("groups", groupsList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_InScope(Collection<String> groupList) {
-        setGroup_Terms(groupList, null);
+    public void setGroups_InScope(Collection<String> groupsList) {
+        setGroups_Terms(groupsList, null);
     }
 
-    public void setGroup_InScope(Collection<String> groupList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
-        setGroup_Terms(groupList, opLambda);
+    public void setGroups_InScope(Collection<String> groupsList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setGroups_Terms(groupsList, opLambda);
     }
 
-    public void setGroup_Prefix(String group) {
-        setGroup_Prefix(group, null);
+    public void setGroups_Prefix(String groups) {
+        setGroups_Prefix(groups, null);
     }
 
-    public void setGroup_Prefix(String group, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
-        PrefixFilterBuilder builder = regPrefixF("group", group);
+    public void setGroups_Prefix(String groups, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_Exists() {
-        setGroup_Exists(null);
+    public void setGroups_Exists() {
+        setGroups_Exists(null);
     }
 
-    public void setGroup_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
-        ExistsFilterBuilder builder = regExistsF("group");
+    public void setGroups_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_Missing() {
-        setGroup_Missing(null);
+    public void setGroups_Missing() {
+        setGroups_Missing(null);
     }
 
-    public void setGroup_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
-        MissingFilterBuilder builder = regMissingF("group");
+    public void setGroups_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_GreaterThan(String group) {
-        setGroup_GreaterThan(group, null);
+    public void setGroups_GreaterThan(String groups) {
+        setGroups_GreaterThan(groups, null);
     }
 
-    public void setGroup_GreaterThan(String group, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("group", ConditionKey.CK_GREATER_THAN, group);
+    public void setGroups_GreaterThan(String groups, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("groups", ConditionKey.CK_GREATER_THAN, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_LessThan(String group) {
-        setGroup_LessThan(group, null);
+    public void setGroups_LessThan(String groups) {
+        setGroups_LessThan(groups, null);
     }
 
-    public void setGroup_LessThan(String group, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("group", ConditionKey.CK_LESS_THAN, group);
+    public void setGroups_LessThan(String groups, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("groups", ConditionKey.CK_LESS_THAN, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_GreaterEqual(String group) {
-        setGroup_GreaterEqual(group, null);
+    public void setGroups_GreaterEqual(String groups) {
+        setGroups_GreaterEqual(groups, null);
     }
 
-    public void setGroup_GreaterEqual(String group, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("group", ConditionKey.CK_GREATER_EQUAL, group);
+    public void setGroups_GreaterEqual(String groups, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("groups", ConditionKey.CK_GREATER_EQUAL, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_LessEqual(String group) {
-        setGroup_LessEqual(group, null);
+    public void setGroups_LessEqual(String groups) {
+        setGroups_LessEqual(groups, null);
     }
 
-    public void setGroup_LessEqual(String group, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("group", ConditionKey.CK_LESS_EQUAL, group);
+    public void setGroups_LessEqual(String groups, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("groups", ConditionKey.CK_LESS_EQUAL, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -610,127 +610,127 @@ public abstract class BsUserCF extends AbstractConditionFilter {
         }
     }
 
-    public void setRole_NotEqual(String role) {
-        setRole_NotEqual(role, null, null);
+    public void setRoles_NotEqual(String roles) {
+        setRoles_NotEqual(roles, null, null);
     }
 
-    public void setRole_NotEqual(String role, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+    public void setRoles_NotEqual(String roles, ConditionOptionCall<NotFilterBuilder> notOpLambda,
             ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
         not(subCf -> {
-            subCf.setRole_Equal(role, eqOpLambda);
+            subCf.setRoles_Equal(roles, eqOpLambda);
         }, notOpLambda);
     }
 
-    public void setRole_Equal(String role) {
-        setRole_Term(role, null);
+    public void setRoles_Equal(String roles) {
+        setRoles_Term(roles, null);
     }
 
-    public void setRole_Equal(String role, ConditionOptionCall<TermFilterBuilder> opLambda) {
-        setRole_Term(role, opLambda);
+    public void setRoles_Equal(String roles, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setRoles_Term(roles, opLambda);
     }
 
-    public void setRole_Term(String role) {
-        setRole_Term(role, null);
+    public void setRoles_Term(String roles) {
+        setRoles_Term(roles, null);
     }
 
-    public void setRole_Term(String role, ConditionOptionCall<TermFilterBuilder> opLambda) {
-        TermFilterBuilder builder = regTermF("role", role);
+    public void setRoles_Term(String roles, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_Terms(Collection<String> roleList) {
-        setRole_Terms(roleList, null);
+    public void setRoles_Terms(Collection<String> rolesList) {
+        setRoles_Terms(rolesList, null);
     }
 
-    public void setRole_Terms(Collection<String> roleList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
-        TermsFilterBuilder builder = regTermsF("role", roleList);
+    public void setRoles_Terms(Collection<String> rolesList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("roles", rolesList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_InScope(Collection<String> roleList) {
-        setRole_Terms(roleList, null);
+    public void setRoles_InScope(Collection<String> rolesList) {
+        setRoles_Terms(rolesList, null);
     }
 
-    public void setRole_InScope(Collection<String> roleList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
-        setRole_Terms(roleList, opLambda);
+    public void setRoles_InScope(Collection<String> rolesList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setRoles_Terms(rolesList, opLambda);
     }
 
-    public void setRole_Prefix(String role) {
-        setRole_Prefix(role, null);
+    public void setRoles_Prefix(String roles) {
+        setRoles_Prefix(roles, null);
     }
 
-    public void setRole_Prefix(String role, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
-        PrefixFilterBuilder builder = regPrefixF("role", role);
+    public void setRoles_Prefix(String roles, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_Exists() {
-        setRole_Exists(null);
+    public void setRoles_Exists() {
+        setRoles_Exists(null);
     }
 
-    public void setRole_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
-        ExistsFilterBuilder builder = regExistsF("role");
+    public void setRoles_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_Missing() {
-        setRole_Missing(null);
+    public void setRoles_Missing() {
+        setRoles_Missing(null);
     }
 
-    public void setRole_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
-        MissingFilterBuilder builder = regMissingF("role");
+    public void setRoles_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_GreaterThan(String role) {
-        setRole_GreaterThan(role, null);
+    public void setRoles_GreaterThan(String roles) {
+        setRoles_GreaterThan(roles, null);
     }
 
-    public void setRole_GreaterThan(String role, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("role", ConditionKey.CK_GREATER_THAN, role);
+    public void setRoles_GreaterThan(String roles, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("roles", ConditionKey.CK_GREATER_THAN, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_LessThan(String role) {
-        setRole_LessThan(role, null);
+    public void setRoles_LessThan(String roles) {
+        setRoles_LessThan(roles, null);
     }
 
-    public void setRole_LessThan(String role, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("role", ConditionKey.CK_LESS_THAN, role);
+    public void setRoles_LessThan(String roles, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("roles", ConditionKey.CK_LESS_THAN, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_GreaterEqual(String role) {
-        setRole_GreaterEqual(role, null);
+    public void setRoles_GreaterEqual(String roles) {
+        setRoles_GreaterEqual(roles, null);
     }
 
-    public void setRole_GreaterEqual(String role, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("role", ConditionKey.CK_GREATER_EQUAL, role);
+    public void setRoles_GreaterEqual(String roles, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("roles", ConditionKey.CK_GREATER_EQUAL, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_LessEqual(String role) {
-        setRole_LessEqual(role, null);
+    public void setRoles_LessEqual(String roles) {
+        setRoles_LessEqual(roles, null);
     }
 
-    public void setRole_LessEqual(String role, ConditionOptionCall<RangeFilterBuilder> opLambda) {
-        RangeFilterBuilder builder = regRangeF("role", ConditionKey.CK_LESS_EQUAL, role);
+    public void setRoles_LessEqual(String roles, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("roles", ConditionKey.CK_LESS_EQUAL, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

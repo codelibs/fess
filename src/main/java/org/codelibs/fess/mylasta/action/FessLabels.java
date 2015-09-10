@@ -566,6 +566,18 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: &#x00bb; Role */
     public static final String LABELS_MENU_role_type = "{labels.menu.role_type}";
 
+    /** The key of the message: User */
+    public static final String LABELS_menu_user = "{labels.menu_user}";
+
+    /** The key of the message: User */
+    public static final String LABELS_MENU_USER = "{labels.menu.user}";
+
+    /** The key of the message: Role */
+    public static final String LABELS_MENU_ROLE = "{labels.menu.role}";
+
+    /** The key of the message: Group */
+    public static final String LABELS_MENU_GROUP = "{labels.menu.group}";
+
     /** The key of the message: Suggest */
     public static final String LABELS_menu_suggest = "{labels.menu_suggest}";
 
@@ -604,9 +616,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: &#x00bb; Statistics */
     public static final String LABELS_MENU_STATS = "{labels.menu.stats}";
-
-    /** The key of the message: &#x00bb; Users */
-    public static final String LABELS_MENU_USER = "{labels.menu.user}";
 
     /** The key of the message: &#x00bb; Popular URL */
     public static final String LABELS_MENU_FAVORITE_LOG = "{labels.menu.favoriteLog}";
@@ -766,9 +775,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Home */
     public static final String LABELS_HOME = "{labels.home}";
-
-    /** The key of the message: User Name */
-    public static final String LABELS_user_name = "{labels.user_name}";
 
     /** The key of the message: Login */
     public static final String LABELS_LOGIN = "{labels.login}";
@@ -3271,6 +3277,213 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Bad Word File */
     public static final String LABELS_suggest_bad_word_file = "{labels.suggest_bad_word_file}";
 
+    /** The key of the message: User */
+    public static final String LABELS_user_configuration = "{labels.user_configuration}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_user_link_create_new = "{labels.user_link_create_new}";
+
+    /** The key of the message: List */
+    public static final String LABELS_user_link_list = "{labels.user_link_list}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_user_link_create = "{labels.user_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_user_link_update = "{labels.user_link_update}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_user_link_confirm = "{labels.user_link_confirm}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_user_link_details = "{labels.user_link_details}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_user_link_edit = "{labels.user_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_user_link_delete = "{labels.user_link_delete}";
+
+    /** The key of the message: Prev */
+    public static final String LABELS_user_link_prev_page = "{labels.user_link_prev_page}";
+
+    /** The key of the message: Next */
+    public static final String LABELS_user_link_next_page = "{labels.user_link_next_page}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_user_list_name = "{labels.user_list_name}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_user_name = "{labels.user_name}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_user_password = "{labels.user_password}";
+
+    /** The key of the message: Confirm */
+    public static final String LABELS_user_confirm_password = "{labels.user_confirm_password}";
+
+    /** The key of the message: Role */
+    public static final String LABELS_user_role = "{labels.user_role}";
+
+    /** The key of the message: Group */
+    public static final String LABELS_user_group = "{labels.user_group}";
+
+    /** The key of the message: User */
+    public static final String LABELS_user_title_details = "{labels.user_title_details}";
+
+    /** The key of the message: Create */
+    public static final String LABELS_user_button_create = "{labels.user_button_create}";
+
+    /** The key of the message: Back */
+    public static final String LABELS_user_button_back = "{labels.user_button_back}";
+
+    /** The key of the message: Confirm */
+    public static final String LABELS_user_button_confirm = "{labels.user_button_confirm}";
+
+    /** The key of the message: Confirm User */
+    public static final String LABELS_user_title_confirm = "{labels.user_title_confirm}";
+
+    /** The key of the message: Update */
+    public static final String LABELS_user_button_update = "{labels.user_button_update}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_user_button_delete = "{labels.user_button_delete}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_user_button_edit = "{labels.user_button_edit}";
+
+    /** The key of the message: Role */
+    public static final String LABELS_role_configuration = "{labels.role_configuration}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_role_link_create_new = "{labels.role_link_create_new}";
+
+    /** The key of the message: List */
+    public static final String LABELS_role_link_list = "{labels.role_link_list}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_role_link_create = "{labels.role_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_role_link_update = "{labels.role_link_update}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_role_link_confirm = "{labels.role_link_confirm}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_role_link_details = "{labels.role_link_details}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_role_link_edit = "{labels.role_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_role_link_delete = "{labels.role_link_delete}";
+
+    /** The key of the message: Prev */
+    public static final String LABELS_role_link_prev_page = "{labels.role_link_prev_page}";
+
+    /** The key of the message: Next */
+    public static final String LABELS_role_link_next_page = "{labels.role_link_next_page}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_role_list_name = "{labels.role_list_name}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_role_name = "{labels.role_name}";
+
+    /** The key of the message: Role */
+    public static final String LABELS_role_title_details = "{labels.role_title_details}";
+
+    /** The key of the message: Create */
+    public static final String LABELS_role_button_create = "{labels.role_button_create}";
+
+    /** The key of the message: Back */
+    public static final String LABELS_role_button_back = "{labels.role_button_back}";
+
+    /** The key of the message: Confirm */
+    public static final String LABELS_role_button_confirm = "{labels.role_button_confirm}";
+
+    /** The key of the message: Confirm Role */
+    public static final String LABELS_role_title_confirm = "{labels.role_title_confirm}";
+
+    /** The key of the message: Update */
+    public static final String LABELS_role_button_update = "{labels.role_button_update}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_role_button_delete = "{labels.role_button_delete}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_role_button_edit = "{labels.role_button_edit}";
+
+    /** The key of the message: group */
+    public static final String LABELS_group_configuration = "{labels.group_configuration}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_group_link_create_new = "{labels.group_link_create_new}";
+
+    /** The key of the message: List */
+    public static final String LABELS_group_link_list = "{labels.group_link_list}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_group_link_create = "{labels.group_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_group_link_update = "{labels.group_link_update}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_group_link_confirm = "{labels.group_link_confirm}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_group_link_details = "{labels.group_link_details}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_group_link_edit = "{labels.group_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_group_link_delete = "{labels.group_link_delete}";
+
+    /** The key of the message: Prev */
+    public static final String LABELS_group_link_prev_page = "{labels.group_link_prev_page}";
+
+    /** The key of the message: Next */
+    public static final String LABELS_group_link_next_page = "{labels.group_link_next_page}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_group_list_name = "{labels.group_list_name}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_group_name = "{labels.group_name}";
+
+    /** The key of the message: Group */
+    public static final String LABELS_group_title_details = "{labels.group_title_details}";
+
+    /** The key of the message: Create */
+    public static final String LABELS_group_button_create = "{labels.group_button_create}";
+
+    /** The key of the message: Back */
+    public static final String LABELS_group_button_back = "{labels.group_button_back}";
+
+    /** The key of the message: Confirm */
+    public static final String LABELS_group_button_confirm = "{labels.group_button_confirm}";
+
+    /** The key of the message: Confirm Group */
+    public static final String LABELS_group_title_confirm = "{labels.group_title_confirm}";
+
+    /** The key of the message: Update */
+    public static final String LABELS_group_button_update = "{labels.group_button_update}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_group_button_delete = "{labels.group_button_delete}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_group_button_edit = "{labels.group_button_edit}";
+
+    /** The key of the message: Roles */
+    public static final String LABELS_ROLES = "{labels.roles}";
+
+    /** The key of the message: Groups */
+    public static final String LABELS_GROUPS = "{labels.groups}";
+
     /** The key of the message: Create */
     public static final String LABELS_crud_button_create = "{labels.crud_button_create}";
 
@@ -3894,6 +4107,18 @@ public class FessLabels extends ActionMessages {
         /** The key of the label: &#x00bb; Role */
         String LABELS_MENU_role_type = "{labels.menu.role_type}";
 
+        /** The key of the label: User */
+        String LABELS_menu_user = "{labels.menu_user}";
+
+        /** The key of the label: User */
+        String LABELS_MENU_USER = "{labels.menu.user}";
+
+        /** The key of the label: Role */
+        String LABELS_MENU_ROLE = "{labels.menu.role}";
+
+        /** The key of the label: Group */
+        String LABELS_MENU_GROUP = "{labels.menu.group}";
+
         /** The key of the label: Suggest */
         String LABELS_menu_suggest = "{labels.menu_suggest}";
 
@@ -3932,9 +4157,6 @@ public class FessLabels extends ActionMessages {
 
         /** The key of the label: &#x00bb; Statistics */
         String LABELS_MENU_STATS = "{labels.menu.stats}";
-
-        /** The key of the label: &#x00bb; Users */
-        String LABELS_MENU_USER = "{labels.menu.user}";
 
         /** The key of the label: &#x00bb; Popular URL */
         String LABELS_MENU_FAVORITE_LOG = "{labels.menu.favoriteLog}";
@@ -4094,9 +4316,6 @@ public class FessLabels extends ActionMessages {
 
         /** The key of the label: Home */
         String LABELS_HOME = "{labels.home}";
-
-        /** The key of the label: User Name */
-        String LABELS_user_name = "{labels.user_name}";
 
         /** The key of the label: Login */
         String LABELS_LOGIN = "{labels.login}";
@@ -6596,6 +6815,213 @@ public class FessLabels extends ActionMessages {
 
         /** The key of the label: Bad Word File */
         String LABELS_suggest_bad_word_file = "{labels.suggest_bad_word_file}";
+
+        /** The key of the label: User */
+        String LABELS_user_configuration = "{labels.user_configuration}";
+
+        /** The key of the label: Create New */
+        String LABELS_user_link_create_new = "{labels.user_link_create_new}";
+
+        /** The key of the label: List */
+        String LABELS_user_link_list = "{labels.user_link_list}";
+
+        /** The key of the label: Create New */
+        String LABELS_user_link_create = "{labels.user_link_create}";
+
+        /** The key of the label: Edit */
+        String LABELS_user_link_update = "{labels.user_link_update}";
+
+        /** The key of the label: Details */
+        String LABELS_user_link_confirm = "{labels.user_link_confirm}";
+
+        /** The key of the label: Details */
+        String LABELS_user_link_details = "{labels.user_link_details}";
+
+        /** The key of the label: Edit */
+        String LABELS_user_link_edit = "{labels.user_link_edit}";
+
+        /** The key of the label: Delete */
+        String LABELS_user_link_delete = "{labels.user_link_delete}";
+
+        /** The key of the label: Prev */
+        String LABELS_user_link_prev_page = "{labels.user_link_prev_page}";
+
+        /** The key of the label: Next */
+        String LABELS_user_link_next_page = "{labels.user_link_next_page}";
+
+        /** The key of the label: Name */
+        String LABELS_user_list_name = "{labels.user_list_name}";
+
+        /** The key of the label: Name */
+        String LABELS_user_name = "{labels.user_name}";
+
+        /** The key of the label: Password */
+        String LABELS_user_password = "{labels.user_password}";
+
+        /** The key of the label: Confirm */
+        String LABELS_user_confirm_password = "{labels.user_confirm_password}";
+
+        /** The key of the label: Role */
+        String LABELS_user_role = "{labels.user_role}";
+
+        /** The key of the label: Group */
+        String LABELS_user_group = "{labels.user_group}";
+
+        /** The key of the label: User */
+        String LABELS_user_title_details = "{labels.user_title_details}";
+
+        /** The key of the label: Create */
+        String LABELS_user_button_create = "{labels.user_button_create}";
+
+        /** The key of the label: Back */
+        String LABELS_user_button_back = "{labels.user_button_back}";
+
+        /** The key of the label: Confirm */
+        String LABELS_user_button_confirm = "{labels.user_button_confirm}";
+
+        /** The key of the label: Confirm User */
+        String LABELS_user_title_confirm = "{labels.user_title_confirm}";
+
+        /** The key of the label: Update */
+        String LABELS_user_button_update = "{labels.user_button_update}";
+
+        /** The key of the label: Delete */
+        String LABELS_user_button_delete = "{labels.user_button_delete}";
+
+        /** The key of the label: Edit */
+        String LABELS_user_button_edit = "{labels.user_button_edit}";
+
+        /** The key of the label: Role */
+        String LABELS_role_configuration = "{labels.role_configuration}";
+
+        /** The key of the label: Create New */
+        String LABELS_role_link_create_new = "{labels.role_link_create_new}";
+
+        /** The key of the label: List */
+        String LABELS_role_link_list = "{labels.role_link_list}";
+
+        /** The key of the label: Create New */
+        String LABELS_role_link_create = "{labels.role_link_create}";
+
+        /** The key of the label: Edit */
+        String LABELS_role_link_update = "{labels.role_link_update}";
+
+        /** The key of the label: Details */
+        String LABELS_role_link_confirm = "{labels.role_link_confirm}";
+
+        /** The key of the label: Details */
+        String LABELS_role_link_details = "{labels.role_link_details}";
+
+        /** The key of the label: Edit */
+        String LABELS_role_link_edit = "{labels.role_link_edit}";
+
+        /** The key of the label: Delete */
+        String LABELS_role_link_delete = "{labels.role_link_delete}";
+
+        /** The key of the label: Prev */
+        String LABELS_role_link_prev_page = "{labels.role_link_prev_page}";
+
+        /** The key of the label: Next */
+        String LABELS_role_link_next_page = "{labels.role_link_next_page}";
+
+        /** The key of the label: Name */
+        String LABELS_role_list_name = "{labels.role_list_name}";
+
+        /** The key of the label: Name */
+        String LABELS_role_name = "{labels.role_name}";
+
+        /** The key of the label: Role */
+        String LABELS_role_title_details = "{labels.role_title_details}";
+
+        /** The key of the label: Create */
+        String LABELS_role_button_create = "{labels.role_button_create}";
+
+        /** The key of the label: Back */
+        String LABELS_role_button_back = "{labels.role_button_back}";
+
+        /** The key of the label: Confirm */
+        String LABELS_role_button_confirm = "{labels.role_button_confirm}";
+
+        /** The key of the label: Confirm Role */
+        String LABELS_role_title_confirm = "{labels.role_title_confirm}";
+
+        /** The key of the label: Update */
+        String LABELS_role_button_update = "{labels.role_button_update}";
+
+        /** The key of the label: Delete */
+        String LABELS_role_button_delete = "{labels.role_button_delete}";
+
+        /** The key of the label: Edit */
+        String LABELS_role_button_edit = "{labels.role_button_edit}";
+
+        /** The key of the label: group */
+        String LABELS_group_configuration = "{labels.group_configuration}";
+
+        /** The key of the label: Create New */
+        String LABELS_group_link_create_new = "{labels.group_link_create_new}";
+
+        /** The key of the label: List */
+        String LABELS_group_link_list = "{labels.group_link_list}";
+
+        /** The key of the label: Create New */
+        String LABELS_group_link_create = "{labels.group_link_create}";
+
+        /** The key of the label: Edit */
+        String LABELS_group_link_update = "{labels.group_link_update}";
+
+        /** The key of the label: Details */
+        String LABELS_group_link_confirm = "{labels.group_link_confirm}";
+
+        /** The key of the label: Details */
+        String LABELS_group_link_details = "{labels.group_link_details}";
+
+        /** The key of the label: Edit */
+        String LABELS_group_link_edit = "{labels.group_link_edit}";
+
+        /** The key of the label: Delete */
+        String LABELS_group_link_delete = "{labels.group_link_delete}";
+
+        /** The key of the label: Prev */
+        String LABELS_group_link_prev_page = "{labels.group_link_prev_page}";
+
+        /** The key of the label: Next */
+        String LABELS_group_link_next_page = "{labels.group_link_next_page}";
+
+        /** The key of the label: Name */
+        String LABELS_group_list_name = "{labels.group_list_name}";
+
+        /** The key of the label: Name */
+        String LABELS_group_name = "{labels.group_name}";
+
+        /** The key of the label: Group */
+        String LABELS_group_title_details = "{labels.group_title_details}";
+
+        /** The key of the label: Create */
+        String LABELS_group_button_create = "{labels.group_button_create}";
+
+        /** The key of the label: Back */
+        String LABELS_group_button_back = "{labels.group_button_back}";
+
+        /** The key of the label: Confirm */
+        String LABELS_group_button_confirm = "{labels.group_button_confirm}";
+
+        /** The key of the label: Confirm Group */
+        String LABELS_group_title_confirm = "{labels.group_title_confirm}";
+
+        /** The key of the label: Update */
+        String LABELS_group_button_update = "{labels.group_button_update}";
+
+        /** The key of the label: Delete */
+        String LABELS_group_button_delete = "{labels.group_button_delete}";
+
+        /** The key of the label: Edit */
+        String LABELS_group_button_edit = "{labels.group_button_edit}";
+
+        /** The key of the label: Roles */
+        String LABELS_ROLES = "{labels.roles}";
+
+        /** The key of the label: Groups */
+        String LABELS_GROUPS = "{labels.groups}";
 
         /** The key of the label: Create */
         String LABELS_crud_button_create = "{labels.crud_button_create}";

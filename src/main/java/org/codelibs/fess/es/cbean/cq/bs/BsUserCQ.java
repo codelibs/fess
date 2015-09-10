@@ -62,150 +62,150 @@ public abstract class BsUserCQ extends AbstractConditionQuery {
         }
     }
 
-    public void setGroup_Equal(String group) {
-        setGroup_Term(group, null);
+    public void setGroups_Equal(String groups) {
+        setGroups_Term(groups, null);
     }
 
-    public void setGroup_Equal(String group, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setGroup_Term(group, opLambda);
+    public void setGroups_Equal(String groups, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setGroups_Term(groups, opLambda);
     }
 
-    public void setGroup_Term(String group) {
-        setGroup_Term(group, null);
+    public void setGroups_Term(String groups) {
+        setGroups_Term(groups, null);
     }
 
-    public void setGroup_Term(String group, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("group", group);
+    public void setGroups_Term(String groups, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_Terms(Collection<String> groupList) {
-        setGroup_Terms(groupList, null);
+    public void setGroups_Terms(Collection<String> groupsList) {
+        setGroups_Terms(groupsList, null);
     }
 
-    public void setGroup_Terms(Collection<String> groupList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("group", groupList);
+    public void setGroups_Terms(Collection<String> groupsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("groups", groupsList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_InScope(Collection<String> groupList) {
-        setGroup_Terms(groupList, null);
+    public void setGroups_InScope(Collection<String> groupsList) {
+        setGroups_Terms(groupsList, null);
     }
 
-    public void setGroup_InScope(Collection<String> groupList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setGroup_Terms(groupList, opLambda);
+    public void setGroups_InScope(Collection<String> groupsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setGroups_Terms(groupsList, opLambda);
     }
 
-    public void setGroup_Match(String group) {
-        setGroup_Match(group, null);
+    public void setGroups_Match(String groups) {
+        setGroups_Match(groups, null);
     }
 
-    public void setGroup_Match(String group, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("group", group);
+    public void setGroups_Match(String groups, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_MatchPhrase(String group) {
-        setGroup_MatchPhrase(group, null);
+    public void setGroups_MatchPhrase(String groups) {
+        setGroups_MatchPhrase(groups, null);
     }
 
-    public void setGroup_MatchPhrase(String group, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("group", group);
+    public void setGroups_MatchPhrase(String groups, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_MatchPhrasePrefix(String group) {
-        setGroup_MatchPhrasePrefix(group, null);
+    public void setGroups_MatchPhrasePrefix(String groups) {
+        setGroups_MatchPhrasePrefix(groups, null);
     }
 
-    public void setGroup_MatchPhrasePrefix(String group, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("group", group);
+    public void setGroups_MatchPhrasePrefix(String groups, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_Fuzzy(String group) {
-        setGroup_Fuzzy(group, null);
+    public void setGroups_Fuzzy(String groups) {
+        setGroups_Fuzzy(groups, null);
     }
 
-    public void setGroup_Fuzzy(String group, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("group", group);
+    public void setGroups_Fuzzy(String groups, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_Prefix(String group) {
-        setGroup_Prefix(group, null);
+    public void setGroups_Prefix(String groups) {
+        setGroups_Prefix(groups, null);
     }
 
-    public void setGroup_Prefix(String group, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("group", group);
+    public void setGroups_Prefix(String groups, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("groups", groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_GreaterThan(String group) {
-        setGroup_GreaterThan(group, null);
+    public void setGroups_GreaterThan(String groups) {
+        setGroups_GreaterThan(groups, null);
     }
 
-    public void setGroup_GreaterThan(String group, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("group", ConditionKey.CK_GREATER_THAN, group);
+    public void setGroups_GreaterThan(String groups, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("groups", ConditionKey.CK_GREATER_THAN, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_LessThan(String group) {
-        setGroup_LessThan(group, null);
+    public void setGroups_LessThan(String groups) {
+        setGroups_LessThan(groups, null);
     }
 
-    public void setGroup_LessThan(String group, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("group", ConditionKey.CK_LESS_THAN, group);
+    public void setGroups_LessThan(String groups, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("groups", ConditionKey.CK_LESS_THAN, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_GreaterEqual(String group) {
-        setGroup_GreaterEqual(group, null);
+    public void setGroups_GreaterEqual(String groups) {
+        setGroups_GreaterEqual(groups, null);
     }
 
-    public void setGroup_GreaterEqual(String group, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("group", ConditionKey.CK_GREATER_EQUAL, group);
+    public void setGroups_GreaterEqual(String groups, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("groups", ConditionKey.CK_GREATER_EQUAL, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setGroup_LessEqual(String group) {
-        setGroup_LessEqual(group, null);
+    public void setGroups_LessEqual(String groups) {
+        setGroups_LessEqual(groups, null);
     }
 
-    public void setGroup_LessEqual(String group, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("group", ConditionKey.CK_LESS_EQUAL, group);
+    public void setGroups_LessEqual(String groups, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("groups", ConditionKey.CK_LESS_EQUAL, groups);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsUserCQ addOrderBy_Group_Asc() {
-        regOBA("group");
+    public BsUserCQ addOrderBy_Groups_Asc() {
+        regOBA("groups");
         return this;
     }
 
-    public BsUserCQ addOrderBy_Group_Desc() {
-        regOBD("group");
+    public BsUserCQ addOrderBy_Groups_Desc() {
+        regOBD("groups");
         return this;
     }
 
@@ -650,150 +650,150 @@ public abstract class BsUserCQ extends AbstractConditionQuery {
         return this;
     }
 
-    public void setRole_Equal(String role) {
-        setRole_Term(role, null);
+    public void setRoles_Equal(String roles) {
+        setRoles_Term(roles, null);
     }
 
-    public void setRole_Equal(String role, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setRole_Term(role, opLambda);
+    public void setRoles_Equal(String roles, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRoles_Term(roles, opLambda);
     }
 
-    public void setRole_Term(String role) {
-        setRole_Term(role, null);
+    public void setRoles_Term(String roles) {
+        setRoles_Term(roles, null);
     }
 
-    public void setRole_Term(String role, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("role", role);
+    public void setRoles_Term(String roles, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_Terms(Collection<String> roleList) {
-        setRole_Terms(roleList, null);
+    public void setRoles_Terms(Collection<String> rolesList) {
+        setRoles_Terms(rolesList, null);
     }
 
-    public void setRole_Terms(Collection<String> roleList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("role", roleList);
+    public void setRoles_Terms(Collection<String> rolesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("roles", rolesList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_InScope(Collection<String> roleList) {
-        setRole_Terms(roleList, null);
+    public void setRoles_InScope(Collection<String> rolesList) {
+        setRoles_Terms(rolesList, null);
     }
 
-    public void setRole_InScope(Collection<String> roleList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setRole_Terms(roleList, opLambda);
+    public void setRoles_InScope(Collection<String> rolesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setRoles_Terms(rolesList, opLambda);
     }
 
-    public void setRole_Match(String role) {
-        setRole_Match(role, null);
+    public void setRoles_Match(String roles) {
+        setRoles_Match(roles, null);
     }
 
-    public void setRole_Match(String role, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("role", role);
+    public void setRoles_Match(String roles, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_MatchPhrase(String role) {
-        setRole_MatchPhrase(role, null);
+    public void setRoles_MatchPhrase(String roles) {
+        setRoles_MatchPhrase(roles, null);
     }
 
-    public void setRole_MatchPhrase(String role, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("role", role);
+    public void setRoles_MatchPhrase(String roles, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_MatchPhrasePrefix(String role) {
-        setRole_MatchPhrasePrefix(role, null);
+    public void setRoles_MatchPhrasePrefix(String roles) {
+        setRoles_MatchPhrasePrefix(roles, null);
     }
 
-    public void setRole_MatchPhrasePrefix(String role, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("role", role);
+    public void setRoles_MatchPhrasePrefix(String roles, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_Fuzzy(String role) {
-        setRole_Fuzzy(role, null);
+    public void setRoles_Fuzzy(String roles) {
+        setRoles_Fuzzy(roles, null);
     }
 
-    public void setRole_Fuzzy(String role, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("role", role);
+    public void setRoles_Fuzzy(String roles, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_Prefix(String role) {
-        setRole_Prefix(role, null);
+    public void setRoles_Prefix(String roles) {
+        setRoles_Prefix(roles, null);
     }
 
-    public void setRole_Prefix(String role, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("role", role);
+    public void setRoles_Prefix(String roles, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_GreaterThan(String role) {
-        setRole_GreaterThan(role, null);
+    public void setRoles_GreaterThan(String roles) {
+        setRoles_GreaterThan(roles, null);
     }
 
-    public void setRole_GreaterThan(String role, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("role", ConditionKey.CK_GREATER_THAN, role);
+    public void setRoles_GreaterThan(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_GREATER_THAN, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_LessThan(String role) {
-        setRole_LessThan(role, null);
+    public void setRoles_LessThan(String roles) {
+        setRoles_LessThan(roles, null);
     }
 
-    public void setRole_LessThan(String role, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("role", ConditionKey.CK_LESS_THAN, role);
+    public void setRoles_LessThan(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_LESS_THAN, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_GreaterEqual(String role) {
-        setRole_GreaterEqual(role, null);
+    public void setRoles_GreaterEqual(String roles) {
+        setRoles_GreaterEqual(roles, null);
     }
 
-    public void setRole_GreaterEqual(String role, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("role", ConditionKey.CK_GREATER_EQUAL, role);
+    public void setRoles_GreaterEqual(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_GREATER_EQUAL, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRole_LessEqual(String role) {
-        setRole_LessEqual(role, null);
+    public void setRoles_LessEqual(String roles) {
+        setRoles_LessEqual(roles, null);
     }
 
-    public void setRole_LessEqual(String role, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("role", ConditionKey.CK_LESS_EQUAL, role);
+    public void setRoles_LessEqual(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_LESS_EQUAL, roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsUserCQ addOrderBy_Role_Asc() {
-        regOBA("role");
+    public BsUserCQ addOrderBy_Roles_Asc() {
+        regOBA("roles");
         return this;
     }
 
-    public BsUserCQ addOrderBy_Role_Desc() {
-        regOBD("role");
+    public BsUserCQ addOrderBy_Roles_Desc() {
+        regOBD("roles");
         return this;
     }
 

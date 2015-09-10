@@ -288,14 +288,15 @@ public class SearchAction extends FessSearchAction {
         List<Map<String, Object>> documentItems = null;
         try {
             documentItems =
-                    fessEsClient.search(fieldHelper.docIndex, fieldHelper.docType, searchRequestBuilder -> {
-                        return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset((int) pageStart).size(pageNum)
-                                .facetInfo(form.facet).geoInfo(form.geo).responseFields(queryHelper.getResponseFields()).build();
-                    }, (searchRequestBuilder, execTime, searchResponse) -> {
-                        QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
-                        queryResponseList.init(searchResponse, pageStart, pageNum);
-                        return queryResponseList;
-                    });
+                    fessEsClient.search(fieldHelper.docIndex, fieldHelper.docType,
+                            searchRequestBuilder -> {
+                                return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageNum)
+                                        .facetInfo(form.facet).geoInfo(form.geo).responseFields(queryHelper.getResponseFields()).build();
+                            }, (searchRequestBuilder, execTime, searchResponse) -> {
+                                final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
+                                queryResponseList.init(searchResponse, pageStart, pageNum);
+                                return queryResponseList;
+                            });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
