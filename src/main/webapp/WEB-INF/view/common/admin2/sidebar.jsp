@@ -180,12 +180,12 @@
 							<span><la:message key="labels.menu.suggest_elevate_word" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><todo:link
-							href="/admin/suggestBadWord/index"
+					<li <c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><la:link
+							href="/admin/suggestbadword/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.suggest_bad_word" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 				</ul>
 			</li>
