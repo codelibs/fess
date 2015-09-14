@@ -37,10 +37,10 @@
 							<span><la:message key="labels.menu.crawl_config" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='system'}">class="active"</c:if>><todo:link href="/admin/system/index">
+					<li <c:if test="${param.menuType=='system'}">class="active"</c:if>><la:link href="/admin/system/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.system_config" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='scheduledJob'}">class="active"</c:if>><la:link
 							href="/admin/scheduledjob/index"
