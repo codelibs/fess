@@ -35,9 +35,10 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-								<textarea id="envData" style="height: 300px;" class="form-control">
-									<c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
-								</textarea>
+							    <textarea id="envData" style="height: 300px;" class="form-control">
+<c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}
+</c:forEach>
+							    </textarea>
 							</div>
 						</div>
 						<div class="box">
@@ -50,7 +51,8 @@
 							<%-- Box Body --%>
 							<div class="box-body">
 								<textarea id="propData" style="height: 300px;" class="form-control">
-									<c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+<c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}
+</c:forEach>
 								</textarea>
 							</div>
 						</div>
@@ -64,13 +66,12 @@
 							<%-- Box Body --%>
 							<div class="box-body">
 								<c:if test="${empty fessPropItems}">
-									<textarea id="fessPropData" style="height: 300px;" class="form-control">
-										<la:message key="labels.system_info_crawler_properties_does_not_exist" />
-									</textarea>
+									<textarea id="fessPropData" style="height: 300px;" class="form-control"><la:message key="labels.system_info_crawler_properties_does_not_exist" /></textarea>
 								</c:if>
 								<c:if test="${!empty fessPropItems}">
 									<textarea id="fessPropData" style="height: 300px;" class="form-control">
-										<c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+<c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}
+</c:forEach>
 									</textarea>
 								</c:if>
 							</div>
@@ -85,7 +86,8 @@
 							<%-- Box Body --%>
 							<div class="box-body">
 								<textarea id="bugReportData" style="height: 300px;" class="form-control">
-									<c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}</c:forEach>
+<c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}
+</c:forEach>
 								</textarea>
 							</div>
 						</div>
@@ -100,4 +102,3 @@
 	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
 </body>
 </html>
-
