@@ -24,7 +24,7 @@ import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Keiichi Watanabe
  */
 public class FileAuthenticationEditForm implements Serializable {
 

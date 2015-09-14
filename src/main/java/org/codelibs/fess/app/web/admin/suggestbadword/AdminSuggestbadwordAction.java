@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.suggestelevateword;
+package org.codelibs.fess.app.web.admin.suggestbadword;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -38,11 +38,11 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.app.pager.SuggestElevateWordPager;
-import org.codelibs.fess.app.service.SuggestElevateWordService;
+import org.codelibs.fess.app.pager.SuggestBadWordPager;
+import org.codelibs.fess.app.service.SuggestBadWordService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.es.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.exentity.SuggestBadWord;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -52,17 +52,17 @@ import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
- * @author Keiichi Watanabe
+ * @author shinsuke
  */
-public class AdminSuggestelevatewordAction extends FessAdminAction {
+public class AdminSuggestbadwordAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private SuggestElevateWordService suggestElevateWordService;
+    private SuggestBadWordService suggestBadWordService;
     @Resource
-    private SuggestElevateWordPager suggestElevateWordPager;
+    private SuggestBadWordPager suggestBadWordPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -74,54 +74,54 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("suggestElevateWord"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("suggestBadWord"));
     }
 
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SuggestElevateWordSearchForm form) {
-        return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
+    public HtmlResponse index(final SuggestBadWordSearchForm form) {
+        return asHtml(path_AdminSuggestbadword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final SuggestElevateWordSearchForm form) {
-        suggestElevateWordPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
+    public HtmlResponse list(final Integer pageNumber, final SuggestBadWordSearchForm form) {
+        suggestBadWordPager.setCurrentPageNumber(pageNumber);
+        return asHtml(path_AdminSuggestbadword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse search(final SuggestElevateWordSearchForm form) {
-        copyBeanToBean(form.searchParams, suggestElevateWordPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
+    public HtmlResponse search(final SuggestBadWordSearchForm form) {
+        copyBeanToBean(form.searchParams, suggestBadWordPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        return asHtml(path_AdminSuggestbadword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final SuggestElevateWordSearchForm form) {
-        suggestElevateWordPager.clear();
-        return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
+    public HtmlResponse reset(final SuggestBadWordSearchForm form) {
+        suggestBadWordPager.clear();
+        return asHtml(path_AdminSuggestbadword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse back(final SuggestElevateWordSearchForm form) {
-        return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
+    public HtmlResponse back(final SuggestBadWordSearchForm form) {
+        return asHtml(path_AdminSuggestbadword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final SuggestElevateWordSearchForm form) {
-        data.register("suggestElevateWordItems", suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager)); // page navi
+    protected void searchPaging(final RenderData data, final SuggestBadWordSearchForm form) {
+        data.register("suggestBadWordItems", suggestBadWordService.getSuggestBadWordList(suggestBadWordPager)); // page navi
         // restore from pager
-        copyBeanToBean(suggestElevateWordPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(suggestBadWordPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -132,78 +132,78 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final SuggestElevateWordEditForm form) {
+    public HtmlResponse createpage(final SuggestBadWordEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminSuggestelevateword_EditJsp);
+        return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
-        loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_EditJsp);
+        loadSuggestBadWord(form);
+        return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final SuggestElevateWordEditForm form) {
-        return asHtml(path_AdminSuggestelevateword_EditJsp);
+    public HtmlResponse editagain(final SuggestBadWordEditForm form) {
+        return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final SuggestElevateWordEditForm form) {
+    public HtmlResponse editfromconfirm(final SuggestBadWordEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
-        loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_EditJsp);
+        loadSuggestBadWord(form);
+        return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
+        loadSuggestBadWord(form);
+        return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final SuggestElevateWordEditForm form) {
+    public HtmlResponse deletefromconfirm(final SuggestBadWordEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
-        loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
+        loadSuggestBadWord(form);
+        return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
     // -----------------------------------------------------
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
-        loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
+        loadSuggestBadWord(form);
+        return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final SuggestElevateWordEditForm form) {
+    public HtmlResponse confirmfromcreate(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
+        return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final SuggestElevateWordEditForm form) {
+    public HtmlResponse confirmfromupdate(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
+        return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -211,24 +211,24 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse downloadpage(final SuggestElevateWordSearchForm form) {
-        return asHtml(path_AdminSuggestelevateword_DownloadJsp);
+    public HtmlResponse downloadpage(final SuggestBadWordSearchForm form) {
+        return asHtml(path_AdminSuggestbadword_DownloadJsp);
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse download(final SuggestElevateWordSearchForm form) {
+    public HtmlResponse download(final SuggestBadWordSearchForm form) {
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + "elevateword.csv" + "\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + "badword.csv" + "\"");
         try (Writer writer =
                 new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), crawlerProperties.getProperty(
                         Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)))) {
-            suggestElevateWordService.exportCsv(writer);
+            suggestBadWordService.exportCsv(writer);
         } catch (final Exception e) {
             e.printStackTrace();
         }
-        return asHtml(path_AdminSuggestelevateword_DownloadJsp);
+        return asHtml(path_AdminSuggestbadword_DownloadJsp);
     }
 
     // -----------------------------------------------------
@@ -236,8 +236,8 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse uploadpage(final SuggestElevateWordUploadForm form) {
-        return asHtml(path_AdminSuggestelevateword_UploadJsp);
+    public HtmlResponse uploadpage(final SuggestBadWordUploadForm form) {
+        return asHtml(path_AdminSuggestbadword_UploadJsp);
     }
 
     // -----------------------------------------------------
@@ -245,40 +245,40 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final SuggestElevateWordEditForm form) {
+    public HtmlResponse create(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        suggestElevateWordService.store(createSuggestElevateWord(form));
+        suggestBadWordService.store(createSuggestBadWord(form));
         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final SuggestElevateWordEditForm form) {
+    public HtmlResponse update(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        suggestElevateWordService.store(createSuggestElevateWord(form));
+        suggestBadWordService.store(createSuggestBadWord(form));
         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final SuggestElevateWordEditForm form) {
+    public HtmlResponse delete(final SuggestBadWordEditForm form) {
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        suggestElevateWordService.delete(getSuggestElevateWord(form));
+        suggestBadWordService.delete(getSuggestBadWord(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse upload(final SuggestElevateWordUploadForm form) {
+    public HtmlResponse upload(final SuggestBadWordUploadForm form) {
         BufferedInputStream is = null;
         File tempFile = null;
         FileOutputStream fos = null;
         final byte[] b = new byte[20];
         try {
-            tempFile = File.createTempFile("suggestelevateword-import-", ".csv");
-            is = new BufferedInputStream(form.suggestElevateWordFile.getInputStream());
+            tempFile = File.createTempFile("suggestbadword-import-", ".csv");
+            is = new BufferedInputStream(form.suggestBadWordFile.getInputStream());
             is.mark(20);
             if (is.read(b, 0, 20) <= 0) {
                 // TODO
@@ -306,7 +306,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
                 Reader reader = null;
                 try {
                     reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
-                    suggestElevateWordService.importCsv(reader);
+                    suggestBadWordService.importCsv(reader);
                 } catch (final Exception e) {
                     throw new FessSystemException("Failed to import data.", e);
                 } finally {
@@ -321,43 +321,43 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
                 // TODO
             }
         }
-        saveInfo(messages -> messages.addSuccessUploadSuggestElevateWord(GLOBAL));
+        saveInfo(messages -> messages.addSuccessUploadSuggestBadWord(GLOBAL));
         return redirect(getClass());
     }
 
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadSuggestElevateWord(final SuggestElevateWordEditForm form) {
-        copyBeanToBean(getSuggestElevateWord(form), form, op -> op.exclude("crudMode"));
+    protected void loadSuggestBadWord(final SuggestBadWordEditForm form) {
+        copyBeanToBean(getSuggestBadWord(form), form, op -> op.exclude("crudMode"));
     }
 
-    protected SuggestElevateWord getSuggestElevateWord(final SuggestElevateWordEditForm form) {
-        final SuggestElevateWord suggestElevateWord = suggestElevateWordService.getSuggestElevateWord(createKeyMap(form));
-        if (suggestElevateWord == null) {
+    protected SuggestBadWord getSuggestBadWord(final SuggestBadWordEditForm form) {
+        final SuggestBadWord suggestBadWord = suggestBadWordService.getSuggestBadWord(createKeyMap(form));
+        if (suggestBadWord == null) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
         }
-        return suggestElevateWord;
+        return suggestBadWord;
     }
 
-    protected SuggestElevateWord createSuggestElevateWord(final SuggestElevateWordEditForm form) {
-        SuggestElevateWord suggestElevateWord;
+    protected SuggestBadWord createSuggestBadWord(final SuggestBadWordEditForm form) {
+        SuggestBadWord suggestBadWord;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         if (form.crudMode == CommonConstants.EDIT_MODE) {
-            suggestElevateWord = getSuggestElevateWord(form);
+            suggestBadWord = getSuggestBadWord(form);
         } else {
-            suggestElevateWord = new SuggestElevateWord();
-            suggestElevateWord.setCreatedBy(username);
-            suggestElevateWord.setCreatedTime(currentTime);
+            suggestBadWord = new SuggestBadWord();
+            suggestBadWord.setCreatedBy(username);
+            suggestBadWord.setCreatedTime(currentTime);
         }
-        suggestElevateWord.setUpdatedBy(username);
-        suggestElevateWord.setUpdatedTime(currentTime);
-        copyBeanToBean(form, suggestElevateWord, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
-        return suggestElevateWord;
+        suggestBadWord.setUpdatedBy(username);
+        suggestBadWord.setUpdatedTime(currentTime);
+        copyBeanToBean(form, suggestBadWord, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        return suggestBadWord;
     }
 
-    protected Map<String, String> createKeyMap(final SuggestElevateWordEditForm form) {
+    protected Map<String, String> createKeyMap(final SuggestBadWordEditForm form) {
         final Map<String, String> keys = new HashMap<String, String>();
         keys.put("id", form.id);
         return keys;
@@ -373,7 +373,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final SuggestElevateWordEditForm form, final int expectedMode) {
+    protected void verifyCrudMode(final SuggestBadWordEditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
@@ -383,7 +383,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminSuggestelevateword_EditJsp);
+            return asHtml(path_AdminSuggestbadword_EditJsp);
         };
     }
 }

@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.suggestbadword;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -22,7 +22,11 @@ import java.util.Map;
 
 import org.codelibs.fess.util.ComponentUtil;
 
-public class SuggestBadWordForm implements Serializable {
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
+public class SuggestBadWordEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,9 +49,15 @@ public class SuggestBadWordForm implements Serializable {
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     public String suggestWord;
 
+    public String reading;
+
     public String targetRole;
 
     public String targetLabel;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@FloatType
+    public String boost;
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 255)
@@ -67,18 +77,18 @@ public class SuggestBadWordForm implements Serializable {
     //@IntegerType
     public String versionNo;
 
-    //@Required(target = "upload")
-    //public FormFile suggestBadWordFile;
-
     public void initialize() {
         id = null;
         suggestWord = null;
+        reading = null;
         targetRole = null;
         targetLabel = null;
+        boost = null;
         createdBy = "system";
         createdTime = Long.toString(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         updatedBy = null;
         updatedTime = null;
         versionNo = null;
+        boost = "100";
     }
 }

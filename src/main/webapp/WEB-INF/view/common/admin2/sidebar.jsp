@@ -37,10 +37,10 @@
 							<span><la:message key="labels.menu.crawl_config" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='system'}">class="active"</c:if>><todo:link href="/admin/system/index">
+					<li <c:if test="${param.menuType=='system'}">class="active"</c:if>><la:link href="/admin/system/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.system_config" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='scheduledJob'}">class="active"</c:if>><la:link
 							href="/admin/scheduledjob/index"
@@ -180,12 +180,12 @@
 							<span><la:message key="labels.menu.suggest_elevate_word" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><todo:link
-							href="/admin/suggestBadWord/index"
+					<li <c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><la:link
+							href="/admin/suggestbadword/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.suggest_bad_word" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 				</ul>
 			</li>
@@ -194,10 +194,10 @@
 				></i> <span><la:message key="labels.menu_system_log" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
-					<li <c:if test="${param.menuType=='systemInfo'}">class="active"</c:if>><todo:link href="/admin/systemInfo/index">
+					<li <c:if test="${param.menuType=='systemInfo'}">class="active"</c:if>><la:link href="/admin/systeminfo/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.system_info" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='jobLog'}">class="active"</c:if>><todo:link href="/admin/jobLog/index">
 							<i class='fa fa-angle-right'></i>

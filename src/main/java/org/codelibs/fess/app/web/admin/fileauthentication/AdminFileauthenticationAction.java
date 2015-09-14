@@ -43,7 +43,7 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
- * @author shinsuke
+ * @author Keiichi Watanabe
  */
 public class AdminFileauthenticationAction extends FessAdminAction {
 

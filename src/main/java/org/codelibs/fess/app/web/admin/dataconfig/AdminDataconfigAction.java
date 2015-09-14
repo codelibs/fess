@@ -42,7 +42,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Keiichi Watanabe
  */
 public class AdminDataconfigAction extends FessAdminAction {
 
