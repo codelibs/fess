@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Keiichi Watanabe
  */
 public class FileAuthenticationSearchForm implements Serializable {
 

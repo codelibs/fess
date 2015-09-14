@@ -53,7 +53,7 @@ import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
- * @author shinsuke
+ * @author Keiichi Watanabe
  */
 public class AdminSuggestelevatewordAction extends FessAdminAction {
 

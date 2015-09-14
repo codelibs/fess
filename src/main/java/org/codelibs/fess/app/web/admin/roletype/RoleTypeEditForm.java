@@ -22,7 +22,7 @@ import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Keiichi Watanabe
  */
 public class RoleTypeEditForm implements Serializable {
 
