@@ -43,7 +43,6 @@ import org.codelibs.fess.app.service.SuggestElevateWordService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.SuggestElevateWord;
-import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -66,8 +65,6 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     private SuggestElevateWordPager suggestElevateWordPager;
     @Resource
     private SystemHelper systemHelper;
-    @Resource
-    protected SuggestHelper suggestHelper;
     @Resource
     protected DynamicProperties crawlerProperties;
 
@@ -138,9 +135,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     public HtmlResponse createpage(final SuggestElevateWordEditForm form) {
         form.initialize();
         form.crudMode = CommonConstants.CREATE_MODE;
-        return asHtml(path_AdminSuggestelevateword_EditJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -150,17 +145,13 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.EDIT_MODE);
         loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_EditJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final SuggestElevateWordEditForm form) {
-        return asHtml(path_AdminSuggestelevateword_EditJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -168,9 +159,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final SuggestElevateWordEditForm form) {
         form.crudMode = CommonConstants.EDIT_MODE;
         loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_EditJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -180,9 +169,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.DELETE_MODE);
         loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     @Token(save = true, validate = false)
@@ -190,9 +177,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final SuggestElevateWordEditForm form) {
         form.crudMode = CommonConstants.DELETE_MODE;
         loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -204,27 +189,21 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
         loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(final SuggestElevateWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(final SuggestElevateWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).renderWith(data -> {
-            // TODO
-            });
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -335,7 +314,6 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
                         // TODO
                 }
                 IOUtils.closeQuietly(reader);
-                suggestHelper.storeAllElevateWords();
             }
         }   ).start();
         } catch (final Exception e) {
