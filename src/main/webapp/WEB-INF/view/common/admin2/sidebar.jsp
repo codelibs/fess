@@ -204,12 +204,12 @@
 							<span><la:message key="labels.menu.jobLog" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='crawlingSession'}">class="active"</c:if>><todo:link
-							href="/admin/crawlingSession/index"
+					<li <c:if test="${param.menuType=='crawlingSession'}">class="active"</c:if>><la:link
+							href="/admin/crawlingsession/index"
 						>
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.session_info" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='log'}">class="active"</c:if>><todo:link href="/admin/log/index">
 							<i class='fa fa-angle-right'></i>

@@ -112,8 +112,6 @@
 						<exclude>org/codelibs/fess/app/web/admin/SuggestElevateWordAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/LogForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/CrawlingSessionForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/FailureUrlForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/base/AbstractLoginAction.java</exclude>
