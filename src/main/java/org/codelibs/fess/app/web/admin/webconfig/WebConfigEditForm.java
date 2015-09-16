@@ -25,7 +25,7 @@ import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Shunji Makino
  */
 public class WebConfigEditForm implements Serializable {
 

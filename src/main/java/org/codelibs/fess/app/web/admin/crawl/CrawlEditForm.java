@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Shunji Makino
  */
 public class CrawlEditForm implements Serializable {
 

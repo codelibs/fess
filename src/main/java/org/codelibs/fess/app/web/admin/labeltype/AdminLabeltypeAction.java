@@ -37,6 +37,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
+ * @author Shunji Makino
  */
 public class AdminLabeltypeAction extends FessAdminAction {
 
