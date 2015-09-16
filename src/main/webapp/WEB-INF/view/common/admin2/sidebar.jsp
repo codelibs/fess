@@ -199,10 +199,10 @@
 							<span><la:message key="labels.menu.system_info" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='jobLog'}">class="active"</c:if>><todo:link href="/admin/jobLog/index">
+					<li <c:if test="${param.menuType=='jobLog'}">class="active"</c:if>><la:link href="/admin/joblog/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.jobLog" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='crawlingSession'}">class="active"</c:if>><todo:link
 							href="/admin/crawlingSession/index"
