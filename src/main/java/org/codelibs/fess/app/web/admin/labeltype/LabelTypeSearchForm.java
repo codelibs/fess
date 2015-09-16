@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * @author codelibs
- * @author jflute
+ * @author Shunji Makino
  */
 public class LabelTypeSearchForm implements Serializable {
 

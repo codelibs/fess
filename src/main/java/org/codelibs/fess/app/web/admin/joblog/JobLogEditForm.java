@@ -14,27 +14,20 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.joblog;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
-public class JobLogForm implements Serializable {
+/**
+ * @author codelibs
+ * @author Shunji Makino
+ */
+public class JobLogEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     //@IntegerType
-    public String pageNumber;
-
-    public Map<String, String> searchParams = new HashMap<String, String>();
-
-    //@IntegerType
     public int crudMode;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
 
     //@Required(target = "confirmfromupdate,update,delete")
     //@LongType

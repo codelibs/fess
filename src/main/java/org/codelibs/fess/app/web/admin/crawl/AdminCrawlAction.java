@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
+ * @author Shunji Makino
  */
 public class AdminCrawlAction extends FessAdminAction {
 

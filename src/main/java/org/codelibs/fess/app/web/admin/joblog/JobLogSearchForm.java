@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.pathmapping;
+package org.codelibs.fess.app.web.admin.joblog;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
  * @author codelibs
  * @author Shunji Makino
  */
-public class PathMappingSearchForm implements Serializable {
+public class JobLogSearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
