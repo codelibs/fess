@@ -30,31 +30,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-
 import javax.servlet.http.HttpServletResponse;
 
 import jp.sf.fess.Constants;
-import jp.sf.fess.WebApiException;
 import jp.sf.fess.api.BaseApiManager;
 import jp.sf.fess.api.WebApiManager;
 import jp.sf.fess.api.WebApiRequest;
 import jp.sf.fess.api.WebApiResponse;
 import jp.sf.fess.db.allcommon.CDef;
-import jp.sf.fess.entity.FieldAnalysisResponse;
-import jp.sf.fess.entity.PingResponse;
-import jp.sf.fess.entity.PingResponse.Target;
-import jp.sf.fess.service.SearchService;
-import jp.sf.fess.suggest.entity.SpellCheckResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse;
-import jp.sf.fess.suggest.entity.SuggestResponse.SuggestResponseList;
 import jp.sf.fess.util.ComponentUtil;
-import jp.sf.fess.util.FacetResponse;
-import jp.sf.fess.util.FacetResponse.Field;
-import jp.sf.fess.util.MoreLikeThisResponse;
 import jp.sf.fess.util.WebApiUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -68,7 +58,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
     private static final Logger logger = LoggerFactory
             .getLogger(GsaApiManager.class);
 
-    protected String gsaPathPrefix = "/gsa";
+    public String gsaPathPrefix = "/gsa";
 
     public String gsaMetaPrefix = "MT_";
 
@@ -94,62 +84,10 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             case SEARCH:
                 processSearchRequest(request, response, chain);
                 break;
-            case LABEL:
-                processLabelRequest(request, response, chain);
-                break;
-            case SUGGEST:
-                processSuggestRequest(request, response, chain);
-                break;
-            case SPELLCHECK:
-                processSpellCheckRequest(request, response, chain);
-                break;
-            case ANALYSIS:
-                processAnalysisRequest(request, response, chain);
-                break;
-            case PING:
-                processPingRequest(request, response, chain);
-                break;
             default:
-                writeXmlResponse(-1, StringUtil.EMPTY, "Not found.");
+                writeXmlResponse(-1, false, StringUtil.EMPTY, "Not found.");
                 break;
         }
-
-    }
-
-    protected void processPingRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
-        final SearchService searchService = ComponentUtil.getSearchService();
-        int status;
-        final StringBuilder buf = new StringBuilder(1000);
-        String errMsg = null;
-        try {
-            final PingResponse pingResponse = searchService.ping();
-            status = pingResponse.getStatus();
-            buf.append("<result>");
-            for (final Target target : pingResponse.getTargets()) {
-                buf.append("<server><status>");
-                buf.append(target.getStatus());
-                buf.append("</status><url>");
-                buf.append(escapeXml(target.getUrl()));
-                buf.append("</url><query-time>");
-                buf.append(target.getQueryTime());
-                buf.append("</query-time><search-time>");
-                buf.append(target.getSearchTime());
-                buf.append("</search-time></server>");
-            }
-            buf.append("</result>");
-        } catch (final Exception e) {
-            status = 9;
-            errMsg = e.getMessage();
-            if (errMsg == null) {
-                errMsg = e.getClass().getName();
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a ping request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
     }
 
     protected void processSearchRequest(final HttpServletRequest request,
@@ -160,10 +98,21 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         String query = null;
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
                 CDef.AccessType.Xml);
+        boolean xmlDtd = false;
+
         try {
             Map<String, String[]> extraParams = new TreeMap<String, String[]>();
             List<String> additional = new ArrayList<String>();
             final List<String> getFields = new ArrayList<String>();
+            StringBuilder requestUri = new StringBuilder(request.getRequestURI());
+            if (request.getQueryString() != null) {
+                requestUri.append("?").append(request.getQueryString());
+            }
+            final String uriQueryString = requestUri.toString();
+            // DTD
+            if ("xml".equals(request.getParameter("output"))) {
+                xmlDtd = true;
+            }
             // keywords
             query = request.getParameter("q");
             extraParams.put("query", new String[]{request.getParameter("q")});
@@ -173,6 +122,27 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                 additional.add(" (label:"
                         + site.replace(".", " AND label:").replace("|",
                                 " OR label:") + ")");
+            }
+            // sorting
+            final String sort = request.getParameter("sort");
+            if (StringUtil.isNotBlank(sort)) {
+                final String[] sortParams = sort.split(":");
+                String sortDirection = "desc";
+                if ("date".equals(sortParams[0])) {
+                    if ("A".equals(sortParams[1])) {
+                        sortDirection = "asc";
+                    } else if ("D".equals(sortParams[1])) {
+                        sortDirection = "desc";
+                    }
+                    // TODO: Now ignore sort mode
+//                    if ("S".equals(sortParams[2])) {
+//                    } else if ("R".equals(sortParams[2])) {
+//                    } else if ("L".equals(sortParams[2])) {
+//                    }
+                    // sortParams[3]=<mode> is fixed as "d1"
+                    extraParams.put("sort", new String[] { "lastModified."
+                            + sortDirection });
+                }
             }
             // dynmic fields
             final String requiredFields = (String) request
@@ -193,6 +163,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             if (StringUtil.isNotBlank(getFieldsParam)) {
                 getFields.addAll(Arrays.asList(getFieldsParam.split("\\.")));
             }
+            // Input/Output encoding
+            final String ie = request.getCharacterEncoding();
+            final String oe = "UTF-8";
+            // IP address
+            final String ip = request.getRemoteAddr();
 
             chain.doFilter(new WrappedWebApiRequest(request, SEARCH_API, extraParams),
                     new WebApiResponse(response));
@@ -213,10 +188,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             if (endNumber > allRecordCount) {
             	endNumber = allRecordCount;
             }
-            final FacetResponse facetResponse = WebApiUtil
-                    .getObject("facetResponse");
-            final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil
-                    .getObject("moreLikeThisResponse");
 
             buf.append("<Q>");
             buf.append(escapeXml(query));
@@ -224,7 +195,8 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<TM>");
             buf.append(execTime);
             buf.append("</TM>");
-            for (final Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            for (final Entry<String, String[]> entry : request
+                    .getParameterMap().entrySet()) {
                 final String[] values = entry.getValue();
                 if (values == null) {
                     continue;
@@ -240,15 +212,39 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("\"/>");
                 }
             }
-            buf.append("<M>");
-            buf.append(allRecordCount);
-            buf.append("</M>");
+            buf.append("<PARAM name=\"ie\" value=\"");
+            buf.append(ie);
+            buf.append("\" original_value=\"");
+            buf.append(URLEncoder.encode(ie, Constants.UTF_8));
+            buf.append("\"/>");
+            buf.append("<PARAM name=\"oe\" value=\"");
+            buf.append(oe);
+            buf.append("\" original_value=\"");
+            buf.append(URLEncoder.encode(ie, Constants.UTF_8));
+            buf.append("\"/>");
+            buf.append("<PARAM name=\"ip\" value=\"");
+            buf.append(ip);
+            buf.append("\" original_value=\"");
+            buf.append(URLEncoder.encode(ie, Constants.UTF_8));
+            buf.append("\"/>");
             if (documentItems.size() > 0) {
                 buf.append("<RES SN=\"");
                 buf.append(startNumber);
                 buf.append("\" EN=\"");
                 buf.append(endNumber);
                 buf.append("\">");
+                buf.append("<M>");
+                buf.append(allRecordCount);
+                buf.append("</M>");
+                if (endNumber < allRecordCount) {
+                    buf.append("<NB>");
+                    buf.append("<NU>");
+                    buf.append(escapeXml(uriQueryString.replaceFirst(
+                            "start=([^&]+)",
+                            "start=" + endNumber)));
+                    buf.append("</NU>");
+                    buf.append("</NB>");
+                }
                 int recordNumber = startNumber;
                 for (Map<String, Object> document : documentItems) {
                     buf.append("<R N=\"");
@@ -258,10 +254,12 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     document.put("UE", url);
                     document.put("U", URLDecoder.decode(url, Constants.UTF_8));
                     document.put("T", document.remove("title"));
-                    document.put("RK", document.remove("sore"));
+                    float score = (float) document.remove("score");
+                    document.put("RK", (int)(score * 10));
                     document.put("S", ((String) document
                             .remove("contentDescription")).replaceAll(
                             "<(/*)em>", "<$1b>"));
+                    document.put("LANG", document.remove("lang_s"));
                     for (final Map.Entry<String, Object> entry : document
                             .entrySet()) {
                         final String name = entry.getKey();
@@ -294,78 +292,33 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                             }
                         }
                     }
+                    buf.append("<HAS>");
+                    buf.append("<L/>");
+                    buf.append("<C SZ=\"");
+                    buf.append((long)document.remove("contentLength")/1000);
+                    buf.append("k\" CID=\"");
+                    buf.append(document.remove("docId"));
+                    buf.append("\" ENC=\"");
+                    String charset = (String) document.remove("charset_s");
+                    if (StringUtil.isNotBlank(charset)) {
+                        buf.append(charset);
+                    } else {
+                        charset = (String) document.remove("contentType_s");
+                        if (StringUtil.isNotBlank(charset)) {
+                            Matcher m = Pattern.compile(".*;\\s*charset=(.+)")
+                                    .matcher(charset);
+                            if (m.matches()) {
+                                charset = m.group(1);
+                                buf.append(charset);
+                            }
+                        }
+                    }
+                    buf.append("\"/>");
+                    buf.append("</HAS>");
                     buf.append("</R>");
                     recordNumber++;
                 }
                 buf.append("</RES>");
-            } else {
-                buf.append("<RES/>");
-            }
-            if (facetResponse != null && facetResponse.hasFacetResponse()) {
-                buf.append("<facet>");
-                // facet field
-                if (facetResponse.getFieldList() != null) {
-                    for (final Field field : facetResponse.getFieldList()) {
-                        buf.append("<field name=\"");
-                        buf.append(escapeXml(field.getName()));
-                        buf.append("\">");
-                        for (final Map.Entry<String, Long> entry : field
-                                .getValueCountMap().entrySet()) {
-                            buf.append("<value count=\"");
-                            buf.append(escapeXml(entry.getValue()));
-                            buf.append("\">");
-                            buf.append(escapeXml(entry.getKey()));
-                            buf.append("</value>");
-                        }
-                        buf.append("</field>");
-                    }
-                }
-                // facet query
-                if (facetResponse.getQueryCountMap() != null) {
-                    buf.append("<query>");
-                    for (final Map.Entry<String, Long> entry : facetResponse
-                            .getQueryCountMap().entrySet()) {
-                        buf.append("<value count=\"");
-                        buf.append(escapeXml(entry.getValue()));
-                        buf.append("\">");
-                        buf.append(escapeXml(entry.getKey()));
-                        buf.append("</value>");
-                    }
-                    buf.append("</query>");
-                }
-                buf.append("</facet>");
-            }
-            if (moreLikeThisResponse != null && !moreLikeThisResponse.isEmpty()) {
-                buf.append("<more-like-this>");
-                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse
-                        .entrySet()) {
-                    buf.append("<result id=\"");
-                    buf.append(escapeXml(mltEntry.getKey()));
-                    buf.append("\">");
-                    for (final Map<String, Object> document : mltEntry
-                            .getValue()) {
-                        buf.append("<doc>");
-                        for (final Map.Entry<String, Object> entry : document
-                                .entrySet()) {
-                            if (StringUtil.isNotBlank(entry.getKey())
-                                    && entry.getValue() != null) {
-                                final String tagName = convertTagName(entry
-                                        .getKey());
-                                buf.append('<');
-                                buf.append(tagName);
-                                buf.append('>');
-                                buf.append(escapeXml(entry.getValue()
-                                        .toString()));
-                                buf.append("</");
-                                buf.append(tagName);
-                                buf.append('>');
-                            }
-                        }
-                        buf.append("</doc>");
-                    }
-                    buf.append("</result>");
-                }
-                buf.append("</more-like-this>");
             }
         } catch (final Exception e) {
             status = 1;
@@ -378,7 +331,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             }
         }
 
-        writeXmlResponse(status, buf.toString(), errMsg);
+        writeXmlResponse(status, xmlDtd, buf.toString(), errMsg);
     }
     
     private String convertTagName(final String name) {
@@ -387,273 +340,13 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         return tagName;
     }
 
-    protected void processLabelRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            final List<Map<String, String>> labelTypeItems = ComponentUtil
-                    .getLabelTypeHelper().getLabelTypeItemList();
-            buf.append("<record-count>");
-            buf.append(labelTypeItems.size());
-            buf.append("</record-count>");
-            buf.append("<result>");
-            for (final Map<String, String> labelMap : labelTypeItems) {
-                buf.append("<label>");
-                buf.append("<name>");
-                buf.append(escapeXml(labelMap.get(Constants.ITEM_LABEL)));
-                buf.append("</name>");
-                buf.append("<value>");
-                buf.append(escapeXml(labelMap.get(Constants.ITEM_VALUE)));
-                buf.append("</value>");
-                buf.append("</label>");
-            }
-            buf.append("</result>");
-        } catch (final Exception e) {
-            status = 1;
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a label request.", e);
-            }
-
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-    }
-
-    protected void processSuggestRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, SUGGEST_API),
-                    new WebApiResponse(response));
-            WebApiUtil.validate();
-            final Integer suggestRecordCount = WebApiUtil
-                    .getObject("suggestRecordCount");
-            final List<SuggestResponse> suggestResultList = WebApiUtil
-                    .getObject("suggestResultList");
-            final List<String> suggestFieldName = WebApiUtil
-                    .getObject("suggestFieldName");
-
-            buf.append("<record-count>");
-            buf.append(suggestRecordCount);
-            buf.append("</record-count>");
-            if (suggestResultList.size() > 0) {
-                buf.append("<result>");
-
-                for (int i = 0; i < suggestResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = suggestResultList
-                            .get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
-                        final String fn = suggestFieldName.get(i);
-                        buf.append("<suggest>");
-                        buf.append("<token>");
-                        buf.append(escapeXml(entry.getKey()));
-                        buf.append("</token>");
-                        buf.append("<fn>");
-                        buf.append(escapeXml(fn));
-                        buf.append("</fn>");
-                        buf.append("<start-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getStartOffset())));
-                        buf.append("</start-offset>");
-                        buf.append("<end-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getEndOffset())));
-                        buf.append("</end-offset>");
-                        buf.append("<num-found>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getNumFound())));
-                        buf.append("</num-found>");
-                        buf.append("<result>");
-                        for (final String value : srList) {
-                            buf.append("<value>");
-                            buf.append(escapeXml(value));
-                            buf.append("</value>");
-                        }
-                        buf.append("</result>");
-                        buf.append("</suggest>");
-
-                    }
-                }
-                buf.append("</result>");
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a suggest request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-    }
-
-    protected void processSpellCheckRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, SPELLCHECK_API),
-                    new WebApiResponse(response));
-            WebApiUtil.validate();
-            final Integer spellCheckRecordCount = WebApiUtil
-                    .getObject("spellCheckRecordCount");
-            final List<SpellCheckResponse> spellCheckResultList = WebApiUtil
-                    .getObject("spellCheckResultList");
-            final List<String> spellCheckFieldName = WebApiUtil
-                    .getObject("spellCheckFieldName");
-
-            buf.append("<record-count>");
-            buf.append(spellCheckRecordCount);
-            buf.append("</record-count>");
-            if (spellCheckResultList.size() > 0) {
-                buf.append("<result>");
-
-                for (int i = 0; i < spellCheckResultList.size(); i++) {
-
-                    final SuggestResponse suggestResponse = spellCheckResultList
-                            .get(i);
-
-                    for (final Map.Entry<String, List<String>> entry : suggestResponse
-                            .entrySet()) {
-                        final SuggestResponseList srList = (SuggestResponseList) entry
-                                .getValue();
-                        final String fn = spellCheckFieldName.get(i);
-                        buf.append("<suggest>");
-                        buf.append("<token>");
-                        buf.append(escapeXml(entry.getKey()));
-                        buf.append("</token>");
-                        buf.append("<fn>");
-                        buf.append(escapeXml(fn));
-                        buf.append("</fn>");
-                        buf.append("<start-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getStartOffset())));
-                        buf.append("</start-offset>");
-                        buf.append("<end-offset>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getEndOffset())));
-                        buf.append("</end-offset>");
-                        buf.append("<num-found>");
-                        buf.append(escapeXml(Integer.toString(srList
-                                .getNumFound())));
-                        buf.append("</num-found>");
-                        buf.append("<result>");
-                        for (final String value : srList) {
-                            buf.append("<value>");
-                            buf.append(escapeXml(value));
-                            buf.append("</value>");
-                        }
-                        buf.append("</result>");
-                        buf.append("</suggest>");
-
-                    }
-                }
-                buf.append("</result>");
-            }
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a spellcheck request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-    }
-
-    protected String processAnalysisRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final FilterChain chain) {
-
-        int status = 0;
-        String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
-        try {
-            chain.doFilter(new WebApiRequest(request, ANALYSIS_API),
-                    new WebApiResponse(response));
-            WebApiUtil.validate();
-            final FieldAnalysisResponse fieldAnalysis = WebApiUtil
-                    .getObject("fieldAnalysis");
-
-            buf.append("<record-count>");
-            buf.append(fieldAnalysis.size());
-            buf.append("</record-count>");
-            if (fieldAnalysis.size() > 0) {
-                buf.append("<result>");
-                for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis
-                        .entrySet()) {
-
-                    buf.append("<field name=\"")
-                            .append(escapeXml(fEntry.getKey())).append("\">");
-                    for (final Map.Entry<String, List<Map<String, Object>>> aEntry : fEntry
-                            .getValue().entrySet()) {
-                        buf.append("<analysis name=\"")
-                                .append(escapeXml(aEntry.getKey()))
-                                .append("\">");
-                        for (final Map<String, Object> dataMap : aEntry
-                                .getValue()) {
-                            buf.append("<token>");
-                            for (final Map.Entry<String, Object> dEntry : dataMap
-                                    .entrySet()) {
-                                final String key = dEntry.getKey();
-                                final Object value = dEntry.getValue();
-                                if (StringUtil.isNotBlank(key) && value != null) {
-                                    buf.append("<value name=\"")
-                                            .append(escapeXml(key))
-                                            .append("\">")
-                                            .append(escapeXml(value))
-                                            .append("</value>");
-                                }
-                            }
-                            buf.append("</token>");
-                        }
-                        buf.append("</analysis>");
-                    }
-                    buf.append("</field>");
-                }
-                buf.append("</result>");
-            }
-
-        } catch (final Exception e) {
-            if (e instanceof WebApiException) {
-                status = ((WebApiException) e).getStatusCode();
-            } else {
-                status = 1;
-            }
-            errMsg = e.getMessage();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a suggest request.", e);
-            }
-        }
-
-        writeXmlResponse(status, buf.toString(), errMsg);
-        return null;
-    }
-
-    protected void writeXmlResponse(final int status, final String body,
-            final String errMsg) {
+    protected void writeXmlResponse(final int status, final boolean xmlDtd,
+            final String body, final String errMsg) {
         final StringBuilder buf = new StringBuilder(1000);
         buf.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
+        if (xmlDtd) {
+            buf.append("<!DOCTYPE GSP SYSTEM \"google.dtd\">");
+        }
         buf.append("<GSP VER=\"");
         buf.append(Constants.GSA_API_VERSION);
         buf.append("\">");
@@ -732,6 +425,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             if (parameters == null) {
                 parameters = new HashMap<String, String[]>();
                 parameters.putAll(super.getParameterMap());
+                // Parameter of the same key will be overwritten
                 parameters.putAll(extraParameters);
             }
             return Collections.unmodifiableMap(parameters);
