@@ -211,10 +211,10 @@
 							<span><la:message key="labels.menu.session_info" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='log'}">class="active"</c:if>><todo:link href="/admin/log/index">
+					<li <c:if test="${param.menuType=='log'}">class="active"</c:if>><la:link href="/admin/log/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.log" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='failureUrl'}">class="active"</c:if>><todo:link href="/admin/failureUrl/index">
 							<i class='fa fa-angle-right'></i>

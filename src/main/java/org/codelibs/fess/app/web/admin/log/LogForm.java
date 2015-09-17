@@ -14,10 +14,14 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.log;
 
 import java.io.Serializable;
 
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
 public class LogForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
