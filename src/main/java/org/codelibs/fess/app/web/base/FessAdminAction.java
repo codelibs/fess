@@ -22,7 +22,9 @@ import javax.servlet.ServletContext;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
+import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -74,5 +76,13 @@ public abstract class FessAdminAction extends FessBaseAction {
     @Override
     public void document1_CallableSuperMethod() {
         super.document1_CallableSuperMethod();
+    }
+
+    // ===================================================================================
+    //                                                                           User Info
+    //                                                                           =========
+    @Override
+    protected OptionalThing<LoginManager> myLoginManager() {
+        return OptionalThing.of(fessLoginAssist);
     }
 }

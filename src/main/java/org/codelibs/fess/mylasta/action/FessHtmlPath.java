@@ -383,9 +383,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /index.jsp */
     HtmlNext path_IndexJsp = new HtmlNext("/index.jsp");
 
-    /** The path of the HTML: /login/error.jsp */
-    HtmlNext path_Login_ErrorJsp = new HtmlNext("/login/error.jsp");
-
     /** The path of the HTML: /login/footer.jsp */
     HtmlNext path_Login_FooterJsp = new HtmlNext("/login/footer.jsp");
 

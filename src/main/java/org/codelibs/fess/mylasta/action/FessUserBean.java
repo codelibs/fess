@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import org.codelibs.fess.es.exentity.User;
 import org.lastaflute.web.login.TypicalUserBean;
 
 /**
@@ -27,6 +28,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                          ==========
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
+    private User user;
 
     // ===================================================================================
     //                                                                           Attribute
@@ -36,6 +38,11 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                         Constructor
     //                                                                         ===========
     public FessUserBean() {
+        // TODO needed?
+    }
+
+    public FessUserBean(User user) {
+        this.user = user;
     }
 
     // ===================================================================================
@@ -43,7 +50,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                      ==============
     @Override
     public String getUserId() {
-        return null;
+        return user.getName();
     }
 
     // ===================================================================================

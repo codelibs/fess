@@ -15,8 +15,7 @@
 	<jsp:include page="header.jsp" />
 	<div id="content-body" class="container">
 		<div id="main" class="content" style="background-color:#fafafa;">
-			<form id="login" method="post"
-				action="<%=response.encodeURL("j_security_check")%>">
+			<la:form styleId="login" method="post">
 				<div class="row">
 					<div class="modal" style="top:320px;">
 						<div class="modal-header">
@@ -26,45 +25,43 @@
 						</div>
 						<div class="modal-body">
 							<fieldset>
-								<%
-									if ("error.login_error".equals(request.getParameter("msgs"))) {
-								%>
-								<div class="alert-message error">
-									<p>
-										<la:message key="error.login_error" />
-									</p>
+								<%-- Message --%>
+								<div>
+									<la:info id="msg" message="true">
+										<div class="alert-message info">
+											${msg}
+										</div>
+									</la:info>
+									<la:errors />
 								</div>
-								<%
-									}
-								%>
 								<div class="clearfix">
-									<label for="j_username"> <la:message
+									<label for="username"> <la:message
 											key="labels.user_name" />
 									</label>
 									<div class="input">
-										<input type="text" name="j_username" size="30" />
+										<la:text property="username" size="30" />
 									</div>
 								</div>
 								<div class="clearfix">
-									<label for="j_username"> <la:message
+									<label for="password"> <la:message
 											key="labels.password" />
 									</label>
 									<div class="input">
-										<input type="password" name="j_password" size="30" />
+										<la:password property="password" size="30" />
 									</div>
 								</div>
 							</fieldset>
 						</div>
 						<div class="modal-footer">
 							<div class="clearfix">
-								<input type="submit" name="loginButton"
+								<input type="submit" name="login"
 										value="<la:message key="labels.login"/>"
 										class="btn small primary" />
 							</div>
 						</div>
 					</div>
 				</div>
-			</form>
+			</la:form>
 		</div>
 		<jsp:include page="footer.jsp" />
 	</div>

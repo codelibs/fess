@@ -42,7 +42,6 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextArranger;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.callback.ActionRuntime;
-import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
@@ -122,9 +121,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                           =========
     @Override
     protected OptionalThing<FessUserBean> getUserBean() { // to return as concrete class
-        // #login waiting
-        //return fessLoginAssist.getSessionUserBean();
-        return OptionalThing.empty();// uses application server authentication so empty here
+        return fessLoginAssist.getSessionUserBean();
     }
 
     @Override
@@ -135,13 +132,6 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @Override
     protected OptionalThing<String> myUserType() { // for framework
         return OptionalThing.of(USER_TYPE); // same reason as getUserBean()
-    }
-
-    @Override
-    protected OptionalThing<LoginManager> myLoginManager() {
-        // #login waiting
-        //return OptionalThing.of(fessLoginAssist);
-        return OptionalThing.empty(); // same reason as getUserBean()
     }
 
     // ===================================================================================

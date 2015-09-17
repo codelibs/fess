@@ -176,7 +176,9 @@ public abstract class AbstractEntity implements Entity, Serializable, Cloneable 
 
     public abstract Map<String, Object> toSource();
 
-    public class DocMeta {
+    public class DocMeta implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         protected String id;
 

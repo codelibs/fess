@@ -43,7 +43,9 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.screenshot.ScreenShotManager;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -98,6 +100,11 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("searchLogSupport", searchLogSupport);
         runtime.registerData("favoriteSupport", favoriteSupport);
         return super.hookBefore(runtime);
+    }
+
+    @Override
+    protected OptionalThing<LoginManager> myLoginManager() {
+        return OptionalThing.empty();
     }
 
     @Override

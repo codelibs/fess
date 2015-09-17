@@ -17,6 +17,9 @@ package org.codelibs.fess.app.web.base.login;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.es.exbhv.UserBhv;
+import org.codelibs.fess.es.exentity.User;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
@@ -31,8 +34,9 @@ import org.lastaflute.web.login.option.LoginSpecifiedOption;
 
 /**
  * @author jflute
+ * @author shinsuke
  */
-public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Object> // #change_it also UserBean
+public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, User> // #change_it also UserBean
         implements LoginManager {
 
     // ===================================================================================
@@ -44,40 +48,41 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     private AsyncManager asyncManager;
     @Resource
     private FessConfig fessConfig;
+    @Resource
+    private UserBhv userBhv;
 
     // ===================================================================================
     //                                                                           Find User
     //                                                                           =========
     @Override
-    protected boolean doCheckUserLoginable(final String email, final String cipheredPassword) {
-        //return memberBhv.selectCount(cb -> {
-        //    cb.query().arrangeLogin(email, cipheredPassword);
-        //}) > 0;
-        return false;
+    protected boolean doCheckUserLoginable(final String username, final String cipheredPassword) {
+        return userBhv.selectCount(cb -> {
+            cb.query().setName_Equal(username);
+            cb.query().setPassword_Equal(cipheredPassword);
+        }) > 0;
     }
 
     @Override
-    protected OptionalEntity<Object> doFindLoginUser(final String email, final String cipheredPassword) {
-        //return memberBhv.selectEntity(cb -> {
-        //    cb.query().arrangeLogin(email, cipheredPassword);
-        //});
-        return null;
+    protected OptionalEntity<User> doFindLoginUser(final String username, final String cipheredPassword) {
+        return userBhv.selectEntity(cb -> {
+            cb.query().setName_Equal(username);
+            cb.query().setPassword_Equal(cipheredPassword);
+        });
     }
 
     @Override
-    protected OptionalEntity<Object> doFindLoginUser(final String userId) {
-        //return memberBhv.selectEntity(cb -> {
-        //    cb.query().arrangeLoginByIdentity(userId);
-        //});
-        return null;
+    protected OptionalEntity<User> doFindLoginUser(final String username) {
+        return userBhv.selectEntity(cb -> {
+            cb.query().setName_Equal(username);
+        });
     }
 
     // ===================================================================================
     //                                                                       Login Process
     //                                                                       =============
     @Override
-    protected FessUserBean createUserBean(final Object userEntity) {
-        return new FessUserBean();
+    protected FessUserBean createUserBean(final User user) {
+        return new FessUserBean(user);
     }
 
     @Override
@@ -88,9 +93,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
     }
 
     @Override
-    protected void saveLoginHistory(final Object member, final FessUserBean userBean, final LoginSpecifiedOption option) {
+    protected void saveLoginHistory(final User user, final FessUserBean userBean, final LoginSpecifiedOption option) {
         asyncManager.async(() -> {
-            insertLogin(member);
+            insertLogin(user);
         });
     }
 
@@ -112,8 +117,6 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Ob
 
     @Override
     protected Class<?> getLoginActionType() {
-        // TODO
-        //        return LoginAction.class;
-        throw new UnsupportedOperationException("TODO");
+        return LoginAction.class;
     }
 }

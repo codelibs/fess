@@ -1442,6 +1442,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Reset */
     public static final String LABELS_crawling_session_reset = "{labels.crawling_session_reset}";
 
+    /** The key of the message: List */
+    public static final String LABELS_crawling_session_link_list = "{labels.crawling_session_link_list}";
+
     /** The key of the message: Details */
     public static final String LABELS_crawling_session_link_details = "{labels.crawling_session_link_details}";
 
@@ -4982,6 +4985,9 @@ public class FessLabels extends ActionMessages {
 
         /** The key of the label: Reset */
         String LABELS_crawling_session_reset = "{labels.crawling_session_reset}";
+
+        /** The key of the label: List */
+        String LABELS_crawling_session_link_list = "{labels.crawling_session_link_list}";
 
         /** The key of the label: Details */
         String LABELS_crawling_session_link_details = "{labels.crawling_session_link_details}";

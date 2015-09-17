@@ -20,11 +20,9 @@
               <li>
                 <a href="${helpLink}" target="_olh"><i class="fa fa-question-circle"></i></a>
               </li>
-              <%-- TODO
               <li>
-                <la:link href="${contextPath}/admin/logout"><i class="fa fa-sign-out"></i></la:link>
+                <a href="${contextPath}/logout"><i class="fa fa-sign-out"></i></a>
               </li>
-              --%>
             </ul>
           </div>
         </nav>
