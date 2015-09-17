@@ -17,8 +17,6 @@
 package org.codelibs.fess.app.web.admin.systeminfo;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author codelibs

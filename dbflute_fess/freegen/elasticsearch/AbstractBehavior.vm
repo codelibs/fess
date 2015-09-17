@@ -347,6 +347,13 @@ public abstract class AbstractBehavior<ENTITY extends Entity, CB extends Conditi
         return results;
     }
 
+    @Override
+    protected UpdateOption<CB> createPlainUpdateOption() {
+        UpdateOption<CB> updateOption = new UpdateOption<CB>();
+        updateOption.xtoBeCompatibleBatchUpdateDefaultEveryColumn();
+        return updateOption;
+    }
+
     public static String[] toStringArray(final Object value) {
         if (value instanceof String[]) {
             return (String[]) value;
