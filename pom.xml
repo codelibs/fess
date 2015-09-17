@@ -98,22 +98,14 @@
 						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/SystemAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/SystemForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/SearchListAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/SuggestElevateWordForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/IndexAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/LogAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/FailureUrlAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/SuggestElevateWordAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/LogForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/WizardForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/FailureUrlForm.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

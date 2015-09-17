@@ -14,13 +14,19 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.failureurl;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FailureUrlForm implements Serializable {
+import org.codelibs.fess.util.ComponentUtil;
+
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
+public class FailureUrlEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,7 +39,8 @@ public class FailureUrlForm implements Serializable {
 
     public Map<String, String> searchParams = new HashMap<String, String>();
 
-    //@IntegerType
+    //@IntegerType 
+    // TODO necessary?
     public int crudMode;
 
     public String getCurrentPageNumber() {
