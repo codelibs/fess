@@ -216,10 +216,10 @@
 							<span><la:message key="labels.menu.log" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='failureUrl'}">class="active"</c:if>><todo:link href="/admin/failureUrl/index">
+					<li <c:if test="${param.menuType=='failureUrl'}">class="active"</c:if>><la:link href="/admin/failureurl/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.failure_url" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='searchList'}">class="active"</c:if>><todo:link href="/admin/searchList/index">
 							<i class='fa fa-angle-right'></i>
