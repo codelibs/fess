@@ -9,7 +9,7 @@
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="jobLog" />
 		</jsp:include>
 
@@ -71,9 +71,9 @@
 												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/joblog/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.jobName)}</td>
 													<td>${f:h(data.jobStatus)}</td>
-													<td><fmt:formatDate value="${data.startTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
+													<td><fmt:formatDate value="${fe:date(data.startTime)}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
 													<td>
-														<c:if test="${data.endTime!=null}"><fmt:formatDate value="${data.endTime}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></c:if>
+														<c:if test="${data.endTime!=null}"><fmt:formatDate value="${fe:date(data.endTime)}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></c:if>
 														<c:if test="${data.endTime==null}"><la:message key="labels.none" /></c:if>
 													</td>
 													<td style="overflow-x: auto;">

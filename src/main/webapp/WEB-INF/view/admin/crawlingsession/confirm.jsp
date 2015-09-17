@@ -9,7 +9,7 @@
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="crawlingSession" />
 		</jsp:include>
 
@@ -18,7 +18,7 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.crawling_session_title_details" />
+					<la:message key="labels.crawling_session_title_confirm" />
 				</h1>
 				<ol class="breadcrumb">
 					<li><la:link href="index">

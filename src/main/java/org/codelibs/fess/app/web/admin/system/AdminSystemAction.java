@@ -72,9 +72,9 @@ public class AdminSystemAction extends FessAdminAction {
             // TODO
             // data.register("clusterName", );
             // data.register("clusterStatus", );
-            data.register("crawlerRunning", isCrawlerRunning());
-            data.register("runningSessionIds", getRunningSessionIds());
-        });
+                data.register("crawlerRunning", isCrawlerRunning());
+                data.register("runningSessionIds", getRunningSessionIds());
+            });
     }
 
     @Token(save = false, validate = true)
