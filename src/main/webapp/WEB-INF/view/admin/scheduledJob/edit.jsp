@@ -9,6 +9,18 @@
 	<tiles:put name="menuType" value="scheduledJob" />
 	<tiles:put name="headerScript" type="string"></tiles:put>
 	<tiles:put name="body" type="string">
+<script>
+$(function(){
+    if (!($("#cronEnabled").prop('checked'))) {
+        $("#cronExpression").prop('disabled',true);
+    }
+    $('#cronEnabled').on('change', function(){
+        var chk = $(this).prop('checked'),
+        obj = $('#cronExpression');
+        (chk) ? obj.prop('disabled',false) : obj.prop('disabled',true);
+    });
+});
+</script>
 
 		<h3>
 			<bean:message key="labels.scheduledjob_title_details" />
@@ -69,7 +81,7 @@
 						</tr>
 						<tr>
 							<th><bean:message key="labels.scheduledjob_cronExpression" /></th>
-							<td><html:text property="cronExpression" styleClass="xlarge" /></td>
+							<td><html:text property="cronExpression" styleId="cronExpression" styleClass="xlarge" />&nbsp;<html:checkbox property="cronEnabled" styleId="cronEnabled"/><bean:message key="labels.enabled"/></td>
 						</tr>
 						<tr>
 							<th><bean:message key="labels.scheduledjob_scriptType" /></th>

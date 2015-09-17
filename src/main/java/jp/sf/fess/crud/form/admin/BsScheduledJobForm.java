@@ -54,10 +54,12 @@ public abstract class BsScheduledJobForm {
     @Maxbytelength(maxbytelength = 100)
     public String target;
 
-    @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @Maxbytelength(maxbytelength = 100)
     @CronExpression
     public String cronExpression;
+
+    // ignore
+    public String cronEnabled;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     @Maxbytelength(maxbytelength = 100)
@@ -107,6 +109,7 @@ public abstract class BsScheduledJobForm {
         name = null;
         target = null;
         cronExpression = null;
+        cronEnabled = null;
         scriptType = null;
         scriptData = null;
         crawler = null;

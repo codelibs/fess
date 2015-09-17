@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.util.StringUtil;
+
 import jp.sf.fess.Constants;
 import jp.sf.fess.crud.service.BsScheduledJobService;
 import jp.sf.fess.db.cbean.ScheduledJobCB;
@@ -89,11 +91,12 @@ public class ScheduledJobService extends BsScheduledJobService implements
     public void store(final ScheduledJob scheduledJob) {
         final boolean isNew = scheduledJob.getId() == null;
         final boolean isDelete = scheduledJob.getDeletedBy() != null;
+        final boolean isEnabled = StringUtil.isNotBlank(scheduledJob.getCronExpression());
         super.store(scheduledJob);
         if (!isNew) {
             jobScheduler.unregister(scheduledJob);
         }
-        if (!isDelete) {
+        if (!isDelete && isEnabled) {
             jobScheduler.register(scheduledJob);
         }
     }

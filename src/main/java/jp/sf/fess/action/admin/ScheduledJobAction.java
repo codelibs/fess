@@ -36,6 +36,7 @@ import jp.sf.fess.util.FessBeans;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
 import org.seasar.struts.annotation.Execute;
 import org.seasar.struts.exception.ActionMessagesException;
@@ -69,6 +70,8 @@ public class ScheduledJobAction extends BsScheduledJobAction {
         FessBeans.copy(scheduledJob, scheduledJobForm)
                 .commonColumnDateConverter()
                 .excludes("searchParams", "mode", "jobLogging").execute();
+		scheduledJobForm.cronEnabled = StringUtil.isNotBlank(scheduledJob
+				.getCronExpression()) ? Constants.ON : null;
         scheduledJobForm.jobLogging = scheduledJob.isLoggingEnabled() ? Constants.ON
                 : null;
         scheduledJobForm.crawler = scheduledJob.isCrawlerJob() ? Constants.ON
@@ -100,6 +103,9 @@ public class ScheduledJobAction extends BsScheduledJobAction {
         scheduledJob.setUpdatedTime(timestamp);
         FessBeans.copy(scheduledJobForm, scheduledJob).excludesCommonColumns()
                 .execute();
+		scheduledJob.setCronExpression(Constants.ON
+				.equals(scheduledJobForm.cronEnabled) ? null
+				: scheduledJobForm.cronExpression);
         scheduledJob.setJobLogging(Constants.ON
                 .equals(scheduledJobForm.jobLogging) ? Constants.T
                 : Constants.F);

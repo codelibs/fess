@@ -34,6 +34,7 @@ public class ScheduledJobForm extends BsScheduledJobForm implements
         super.initialize();
         target = Constants.DEFAULT_JOB_TARGET;
         cronExpression = Constants.DEFAULT_CRON_EXPRESSION;
+        cronEnabled = Constants.ON;
         scriptType = Constants.DEFAULT_JOB_SCRIPT_TYPE;
         sortOrder = "0";
         // Temporary data

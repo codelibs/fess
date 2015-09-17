@@ -97,6 +97,10 @@ public class JobScheduler {
     }
 
     public void register(final ScheduledJob scheduledJob) {
+        final String cronExpression = scheduledJob.getCronExpression();
+        if (StringUtil.isBlank(cronExpression)) {
+            return;
+        }
         if (scheduledJob == null) {
             throw new ScheduledJobException("No job.");
         }
@@ -136,7 +140,7 @@ public class JobScheduler {
                 .usingJobData(jobDataMap).build();
 
         final Trigger trigger = newTrigger().withIdentity(triggerId)
-                .withSchedule(cronSchedule(scheduledJob.getCronExpression()))
+                .withSchedule(cronSchedule(cronExpression))
                 .startNow().build();
 
         try {

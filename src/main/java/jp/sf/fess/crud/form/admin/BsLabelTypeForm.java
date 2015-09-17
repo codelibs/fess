@@ -52,7 +52,7 @@ public abstract class BsLabelTypeForm {
     public String name;
 
     @Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    @Maxbytelength(maxbytelength = 20)
+    @Maxbytelength(maxbytelength = 40)
     @Mask(mask = "^[a-zA-Z0-9_-]+$", msg = @Msg(key = "errors.alphaDigitOnly"))
     public String value;
 
