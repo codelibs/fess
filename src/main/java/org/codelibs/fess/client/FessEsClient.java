@@ -194,6 +194,10 @@ public class FessEsClient implements Client {
         this.clusterName = clusterName;
     }
 
+    public String getStatus() {
+        return admin().cluster().prepareHealth().execute().actionGet().getStatus().name();
+    }
+
     public void setRunner(final ElasticsearchClusterRunner runner) {
         this.runner = runner;
     }

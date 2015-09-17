@@ -27,6 +27,7 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -53,6 +54,8 @@ public class AdminSystemAction extends FessAdminAction {
     protected JobHelper jobHelper;
     @Resource
     protected ScheduledJobService scheduledJobService;
+    @Resource
+    protected FessEsClient fessEsClient;
 
     // ===================================================================================
     //                                                                               Hook
@@ -69,12 +72,11 @@ public class AdminSystemAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SystemForm form) {
         return asHtml(path_AdminSystem_IndexJsp).renderWith(data -> {
-            // TODO
-            // data.register("clusterName", );
-            // data.register("clusterStatus", );
-                data.register("crawlerRunning", isCrawlerRunning());
-                data.register("runningSessionIds", getRunningSessionIds());
-            });
+            data.register("clusterName", fessEsClient.getClusterName());
+            data.register("clusterStatus", fessEsClient.getStatus());
+            data.register("crawlerRunning", isCrawlerRunning());
+            data.register("runningSessionIds", getRunningSessionIds());
+        });
     }
 
     @Token(save = false, validate = true)
