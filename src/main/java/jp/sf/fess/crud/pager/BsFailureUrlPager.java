@@ -42,8 +42,6 @@ public abstract class BsFailureUrlPager implements Serializable {
 
     public String id;
 
-    public String url;
-
     public String threadName;
 
     public String errorCount;
@@ -55,7 +53,6 @@ public abstract class BsFailureUrlPager implements Serializable {
         currentPageNumber = getDefaultCurrentPageNumber();
 
         id = null;
-        url = null;
         threadName = null;
         errorCount = null;
         lastAccessTime = null;

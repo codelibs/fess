@@ -96,7 +96,7 @@ public class SearchService implements Serializable {
             if (i != 0) {
                 buf.append(" OR ");
             }
-            buf.append(fieldHelper.docIdField + ":").append(docIds[i]);
+            buf.append(fieldHelper.docIdField).append(':').append(docIds[i]);
         }
         return getDocumentList(buf.toString(), 0, pageSize, null, null, null,
                 responseFields, docValuesFields);

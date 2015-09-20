@@ -152,7 +152,7 @@ public class CrawlJob {
     }
 
     public String execute() {
-        final StringBuilder resultBuf = new StringBuilder();
+        final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null
                 && dataConfigIds == null;
 

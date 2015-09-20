@@ -86,7 +86,7 @@ public class H2ConfigServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        if (System.getProperty("java.specification.version").equals("1.7")) {
+        if ("1.7".equals(System.getProperty("java.specification.version"))) {
             DisposableUtil.add(new Disposable() {
                 @Override
                 public void dispose() {
