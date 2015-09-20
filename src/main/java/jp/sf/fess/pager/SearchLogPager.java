@@ -45,10 +45,6 @@ public class SearchLogPager extends BsSearchLogPager {
 
     public String startPage;
 
-    public SearchLogPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

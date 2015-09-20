@@ -23,10 +23,6 @@ public class KeyMatchPager extends BsKeyMatchPager {
 
     private static final long serialVersionUID = 1L;
 
-    public KeyMatchPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

@@ -23,10 +23,6 @@ public class CrawlingSessionPager extends BsCrawlingSessionPager {
 
     private static final long serialVersionUID = 1L;
 
-    public CrawlingSessionPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

@@ -23,10 +23,6 @@ public class SuggestElevateWordPager extends BsSuggestElevateWordPager {
 
     private static final long serialVersionUID = 1L;
 
-    public SuggestElevateWordPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

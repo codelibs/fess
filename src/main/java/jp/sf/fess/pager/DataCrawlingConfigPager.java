@@ -23,10 +23,6 @@ public class DataCrawlingConfigPager extends BsDataCrawlingConfigPager {
 
     private static final long serialVersionUID = 1L;
 
-    public DataCrawlingConfigPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

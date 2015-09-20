@@ -333,12 +333,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         writeXmlResponse(status, xmlDtd, buf.toString(), errMsg);
     }
-    
-    private String convertTagName(final String name) {
-        final String tagName = StringUtil.decamelize(name).replaceAll("_", "-")
-                .toLowerCase();
-        return tagName;
-    }
 
     protected void writeXmlResponse(final int status, final boolean xmlDtd,
             final String body, final String errMsg) {

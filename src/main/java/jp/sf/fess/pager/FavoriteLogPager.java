@@ -37,10 +37,6 @@ public class FavoriteLogPager extends BsFavoriteLogPager {
 
     public String endMin;
 
-    public FavoriteLogPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

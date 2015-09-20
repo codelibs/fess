@@ -23,10 +23,6 @@ public class ScheduledJobPager extends BsScheduledJobPager {
 
     private static final long serialVersionUID = 1L;
 
-    public ScheduledJobPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

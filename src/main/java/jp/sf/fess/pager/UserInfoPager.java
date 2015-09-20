@@ -27,10 +27,6 @@ public class UserInfoPager extends BsUserInfoPager {
 
     public Timestamp updatedTimeBefore;
 
-    public UserInfoPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

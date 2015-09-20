@@ -56,9 +56,7 @@ public class AdRoleHelper {
             final SearchControls controls = new SearchControls();
             controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-            String name = domain;
-            name = "dc=" + name;
-            name = name.replace(".", ",dc=");
+            final String name = "dc=" + domain.replace(".", ",dc=");
 
             //search
             final NamingEnumeration<SearchResult> rslt = ctx.search(name,
@@ -102,7 +100,9 @@ public class AdRoleHelper {
             }
         }
 
-        logger.debug("ADGroup:" + rolelist.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("ADGroup:" + rolelist.toString());
+        }
         return rolelist;
     }
 }

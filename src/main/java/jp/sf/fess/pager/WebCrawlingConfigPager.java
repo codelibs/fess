@@ -23,10 +23,6 @@ public class WebCrawlingConfigPager extends BsWebCrawlingConfigPager {
 
     private static final long serialVersionUID = 1L;
 
-    public WebCrawlingConfigPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

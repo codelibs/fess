@@ -23,10 +23,6 @@ public class LabelTypePager extends BsLabelTypePager {
 
     private static final long serialVersionUID = 1L;
 
-    public LabelTypePager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

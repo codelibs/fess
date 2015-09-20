@@ -23,10 +23,6 @@ public class PathMappingPager extends BsPathMappingPager {
 
     private static final long serialVersionUID = 1L;
 
-    public PathMappingPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

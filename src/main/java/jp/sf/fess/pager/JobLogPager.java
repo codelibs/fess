@@ -23,10 +23,6 @@ public class JobLogPager extends BsJobLogPager {
 
     private static final long serialVersionUID = 1L;
 
-    public JobLogPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

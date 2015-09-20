@@ -162,7 +162,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                 line = line.replaceAll("#.*$", StringUtil.EMPTY);
 
                 // Skip empty lines or comment lines
-                if (line.trim().length() == 0) {
+                if (StringUtil.isBlank(line)) {
                     if (updater != null) {
                         updater.write(line);
                     }

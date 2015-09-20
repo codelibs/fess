@@ -23,10 +23,6 @@ public class RequestHeaderPager extends BsRequestHeaderPager {
 
     private static final long serialVersionUID = 1L;
 
-    public RequestHeaderPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

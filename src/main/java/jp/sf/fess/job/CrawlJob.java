@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 
@@ -382,7 +383,7 @@ public class CrawlJob {
         final File[] jarFiles = libDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(final File dir, final String name) {
-                return name.toLowerCase().endsWith(".jar");
+                return name.toLowerCase(Locale.ENGLISH).endsWith(".jar");
             }
         });
         if (jarFiles != null) {

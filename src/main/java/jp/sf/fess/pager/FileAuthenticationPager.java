@@ -23,10 +23,6 @@ public class FileAuthenticationPager extends BsFileAuthenticationPager {
 
     private static final long serialVersionUID = 1L;
 
-    public FileAuthenticationPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

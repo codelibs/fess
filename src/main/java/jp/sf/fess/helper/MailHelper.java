@@ -37,7 +37,7 @@ public class MailHelper implements Serializable {
 
     public String from = Constants.DEFAULT_FROM_EMAIL;
 
-    private final boolean debug = false;
+    private boolean debug = false;
 
     Properties props = new Properties();
 
@@ -76,6 +76,10 @@ public class MailHelper implements Serializable {
             throw new FessSystemException("Failed to send "
                     + Arrays.toString(toAddresses), e);
         }
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
 }

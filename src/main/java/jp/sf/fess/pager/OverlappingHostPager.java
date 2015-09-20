@@ -23,10 +23,6 @@ public class OverlappingHostPager extends BsOverlappingHostPager {
 
     private static final long serialVersionUID = 1L;
 
-    public OverlappingHostPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

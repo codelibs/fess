@@ -23,10 +23,6 @@ public class WebAuthenticationPager extends BsWebAuthenticationPager {
 
     private static final long serialVersionUID = 1L;
 
-    public WebAuthenticationPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

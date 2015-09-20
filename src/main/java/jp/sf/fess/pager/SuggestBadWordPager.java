@@ -23,10 +23,6 @@ public class SuggestBadWordPager extends BsSuggestBadWordPager {
 
     private static final long serialVersionUID = 1L;
 
-    public SuggestBadWordPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

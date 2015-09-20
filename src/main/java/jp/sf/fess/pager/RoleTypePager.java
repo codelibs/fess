@@ -23,10 +23,6 @@ public class RoleTypePager extends BsRoleTypePager {
 
     private static final long serialVersionUID = 1L;
 
-    public RoleTypePager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

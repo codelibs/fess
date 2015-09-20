@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import jp.sf.fess.Constants;
@@ -71,8 +72,8 @@ public class FessStatusPolicy extends StatusPolicyImpl {
                 if (StringUtil.isNotBlank(indexValue)
                         && UNFINISHED.equals(indexValue)) {
                     // index: UNFINISHED -> COMPLETED
-                    dataMap.put("indexBefore", UNFINISHED.toUpperCase());
-                    dataMap.put("indexAfter", COMPLETED.toUpperCase());
+                    dataMap.put("indexBefore", UNFINISHED.toUpperCase(Locale.ENGLISH));
+                    dataMap.put("indexAfter", COMPLETED.toUpperCase(Locale.ENGLISH));
                 }
                 break;
             case ADD:
@@ -80,8 +81,8 @@ public class FessStatusPolicy extends StatusPolicyImpl {
                 if (StringUtil.isNotBlank(indexValue)
                         && UNFINISHED.equals(indexValue)) {
                     // index: UNFINISHED -> READY
-                    dataMap.put("indexBefore", UNFINISHED.toUpperCase());
-                    dataMap.put("indexAfter", READY.toUpperCase());
+                    dataMap.put("indexBefore", UNFINISHED.toUpperCase(Locale.ENGLISH));
+                    dataMap.put("indexAfter", READY.toUpperCase(Locale.ENGLISH));
                 }
                 break;
             case PING:
@@ -128,8 +129,8 @@ public class FessStatusPolicy extends StatusPolicyImpl {
                         && !UNFINISHED.equals(indexValue)) {
                     // index: READY/COMPLETED -> UNFINISHED
                     dataMap.put("indexBefore", indexValue == null ? "UNKNOWN"
-                            : indexValue.toUpperCase());
-                    dataMap.put("indexAfter", UNFINISHED.toUpperCase());
+                            : indexValue.toUpperCase(Locale.ENGLISH));
+                    dataMap.put("indexAfter", UNFINISHED.toUpperCase(Locale.ENGLISH));
                 }
                 break;
             case PING:

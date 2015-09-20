@@ -38,10 +38,6 @@ public class FailureUrlPager extends BsFailureUrlPager {
     @Maxbytelength(maxbytelength = 1000)
     public String errorName;
 
-    public FailureUrlPager() {
-        super();
-    }
-
     @Override
     public void clear() {
         super.clear();

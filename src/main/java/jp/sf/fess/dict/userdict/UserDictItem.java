@@ -201,7 +201,7 @@ public class UserDictItem extends DictionaryItem {
             result = result.replace("\"", "\"\"");
         }
         if (result.indexOf(',') >= 0) {
-            result = "\"" + result + "\"";
+            return "\"" + result + "\"";
         }
         return result;
     }

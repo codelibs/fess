@@ -23,18 +23,18 @@ import java.util.List;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 
 public class PingResponse {
-    private final int status = 0;
+    private int status = 0;
 
     private final Target[] targets;
 
     public PingResponse(final Collection<SolrPingResponse> responses) {
         final List<Target> targetList = new ArrayList<>();
         for (final SolrPingResponse response : responses) {
-            int status = response.getStatus();
-            if (status != 0) {
+            int innerStatus = response.getStatus();
+            if (innerStatus != 0) {
                 status = 1;
             }
-            targetList.add(new Target(status, response.getRequestUrl(),
+            targetList.add(new Target(innerStatus, response.getRequestUrl(),
                     response.getElapsedTime(), response.getQTime()));
         }
         targets = targetList.toArray(new Target[targetList.size()]);

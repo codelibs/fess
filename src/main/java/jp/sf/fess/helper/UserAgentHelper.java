@@ -73,11 +73,13 @@ public class UserAgentHelper {
                     return Integer.parseInt(substring.split("[ \\.]")[1]);
                 } else if (userAgent.contains("rv")) {
                     String substring = userAgent.substring(
-                            userAgent.indexOf("rv"), userAgent.indexOf(")"));
+                            userAgent.indexOf("rv"), userAgent.indexOf(')'));
                     return Integer.parseInt(substring.split("[ :\\.]")[1]);
                 }
             } catch (Exception e) {
-                logger.debug("Invalid request header: " + userAgent, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid request header: " + userAgent, e);
+                }
             }
         }
         return 0;

@@ -19,6 +19,7 @@ package jp.sf.fess.helper;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -36,9 +37,9 @@ public class JobHelper {
     private static final Logger logger = LoggerFactory
             .getLogger(JobHelper.class);
 
-    private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<>();
 
     @DestroyMethod
     public void destroy() {

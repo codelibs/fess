@@ -39,7 +39,7 @@ import org.codelibs.core.util.StringUtil;
 import org.seasar.extension.filter.EncodingFilter;
 
 public class FessEncodingFilter extends EncodingFilter {
-    public static String ENCODING_MAP = "encodingRules";
+    public static final String ENCODING_MAP = "encodingRules";
 
     protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
 

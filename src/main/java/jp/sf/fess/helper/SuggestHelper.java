@@ -18,8 +18,10 @@ package jp.sf.fess.helper;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import jp.sf.fess.Constants;
 import jp.sf.fess.db.cbean.SuggestBadWordCB;
 import jp.sf.fess.db.cbean.SuggestElevateWordCB;
 import jp.sf.fess.db.exbhv.SuggestBadWordBhv;
@@ -121,7 +124,7 @@ public class SuggestHelper {
         badWordCB.query().setSuggestWord_Equal(word);
         final List<SuggestBadWord> badWordList = suggestBadWordBhv
                 .selectList(badWordCB);
-        if (badWordList.size() > 0) {
+        if (!badWordList.isEmpty()) {
             return;
         }
 
@@ -181,7 +184,7 @@ public class SuggestHelper {
             if (!file.exists()) {
                 file.createNewFile();
             }
-            bw = new BufferedWriter(new FileWriter(file, false));
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Constants.CHARSET_UTF_8));
             for (final SuggestBadWord suggestBadWord : list) {
                 bw.write(suggestBadWord.getSuggestWord());
                 bw.newLine();

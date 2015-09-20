@@ -8,7 +8,7 @@ import org.codelibs.core.CoreLibConstants;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class CsvUtil {
+public final class CsvUtil {
     private CsvUtil() {
     }
 
