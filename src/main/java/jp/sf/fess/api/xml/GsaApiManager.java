@@ -153,7 +153,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                                 .replace(".", " AND " + gsaMetaPrefix)
                                 .replace("|", " OR " + gsaMetaPrefix) + ")");
             }
-            if (additional.size() > 0) {
+            if (!additional.isEmpty()) {
                 extraParams.put("additional", (String[]) additional
                         .toArray(new String[additional.size()]));
             }
@@ -227,7 +227,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             buf.append("\" original_value=\"");
             buf.append(URLEncoder.encode(ie, Constants.UTF_8));
             buf.append("\"/>");
-            if (documentItems.size() > 0) {
+            if (!documentItems.isEmpty()) {
                 buf.append("<RES SN=\"");
                 buf.append(startNumber);
                 buf.append("\" EN=\"");

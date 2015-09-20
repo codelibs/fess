@@ -190,11 +190,10 @@ public class LoginAction implements Serializable {
     private String getAdminRootPath() {
         String returnPath = RequestUtil.getRequest().getContextPath();
         if (StringUtil.isEmpty(returnPath) || "/".equals(returnPath)) {
-            returnPath = "/admin";
+            return "/admin";
         } else {
-            returnPath = returnPath + "/admin";
+            return returnPath + "/admin";
         }
-        return returnPath;
     }
 
     @Execute(validator = false, input = "../index")

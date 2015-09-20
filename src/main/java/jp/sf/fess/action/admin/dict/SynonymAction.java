@@ -437,7 +437,7 @@ public class SynonymAction {
             return;
         }
         for (String value : values) {
-            if (value.indexOf(",") >= 0) {
+            if (value.indexOf(',') >= 0) {
                 throw new SSCActionMessagesException("errors.invalid_str_is_included", value, ",");
             }
             if (value.indexOf("=>") >= 0) {

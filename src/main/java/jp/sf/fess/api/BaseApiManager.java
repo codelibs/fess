@@ -16,6 +16,8 @@
 
 package jp.sf.fess.api;
 
+import java.util.Locale;
+
 public class BaseApiManager {
     protected static final String FAVORITES_API = "/favoritesApi";
 
@@ -35,15 +37,11 @@ public class BaseApiManager {
         SEARCH, LABEL, SUGGEST, SPELLCHECK, ANALYSIS, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
-    public BaseApiManager() {
-        super();
-    }
-
     protected FormatType getFormatType(final String formatType) {
         if (formatType == null) {
             return FormatType.SEARCH;
         }
-        final String type = formatType.toUpperCase();
+        final String type = formatType.toUpperCase(Locale.ENGLISH);
         if (FormatType.SEARCH.name().equals(type)) {
             return FormatType.SEARCH;
         } else if (FormatType.LABEL.name().equals(type)) {

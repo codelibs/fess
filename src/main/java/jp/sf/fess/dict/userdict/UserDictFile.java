@@ -63,7 +63,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
     }
 
     @Override
-    public UserDictItem get(final long id) {
+    public synchronized UserDictItem get(final long id) {
         for (final UserDictItem userDictItem : userDictItemList) {
             if (id == userDictItem.getId()) {
                 return userDictItem;
@@ -149,7 +149,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         }
     }
 
-    protected void reload(final UserDictUpdater updater) {
+    private void reload(final UserDictUpdater updater) {
         final List<UserDictItem> itemList = new ArrayList<UserDictItem>();
         BufferedReader reader = null;
         try {
@@ -320,7 +320,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         return new BufferedInputStream(new FileInputStream(file));
     }
 
-    public void update(final InputStream in) throws IOException {
+    public synchronized void update(final InputStream in) throws IOException {
         StreamUtil.drain(in, file);
         reload(null);
     }

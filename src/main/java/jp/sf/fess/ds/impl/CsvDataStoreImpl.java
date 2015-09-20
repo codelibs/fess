@@ -102,8 +102,10 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                             return isCsvFile(file, name);
                         }
                     });
-                    for (final File file : files) {
-                        fileList.add(file);
+                    if (files != null) {
+                        for (final File file : files) {
+                            fileList.add(file);
+                        }
                     }
                 } else {
                     logger.warn(path + " is not a directory.");

@@ -417,7 +417,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append("\"recordCount\":");
             buf.append(suggestRecordCount);
 
-            if (suggestResultList.size() > 0) {
+            if (!suggestResultList.isEmpty()) {
                 buf.append(',');
                 buf.append("\"result\":[");
                 boolean first1 = true;
@@ -501,7 +501,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append("\"recordCount\":");
             buf.append(spellCheckRecordCount);
 
-            if (spellCheckResultList.size() > 0) {
+            if (!spellCheckResultList.isEmpty()) {
                 buf.append(',');
                 buf.append("\"result\":[");
                 boolean first1 = true;
@@ -581,7 +581,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
             buf.append("\"recordCount\":");
             buf.append(fieldAnalysis.size());
 
-            if (fieldAnalysis.size() > 0) {
+            if (!fieldAnalysis.isEmpty()) {
                 buf.append(',');
                 buf.append("\"result\":[");
                 boolean first1 = true;

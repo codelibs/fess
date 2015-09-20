@@ -361,7 +361,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<record-count>");
             buf.append(suggestRecordCount);
             buf.append("</record-count>");
-            if (suggestResultList.size() > 0) {
+            if (!suggestResultList.isEmpty()) {
                 buf.append("<result>");
 
                 for (int i = 0; i < suggestResultList.size(); i++) {
@@ -441,7 +441,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<record-count>");
             buf.append(spellCheckRecordCount);
             buf.append("</record-count>");
-            if (spellCheckResultList.size() > 0) {
+            if (!spellCheckResultList.isEmpty()) {
                 buf.append("<result>");
 
                 for (int i = 0; i < spellCheckResultList.size(); i++) {
@@ -517,7 +517,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
             buf.append("<record-count>");
             buf.append(fieldAnalysis.size());
             buf.append("</record-count>");
-            if (fieldAnalysis.size() > 0) {
+            if (!fieldAnalysis.isEmpty()) {
                 buf.append("<result>");
                 for (final Map.Entry<String, Map<String, List<Map<String, Object>>>> fEntry : fieldAnalysis
                         .entrySet()) {

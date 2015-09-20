@@ -62,7 +62,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     @Override
-    public SynonymItem get(final long id) {
+    public synchronized SynonymItem get(final long id) {
         for (final SynonymItem synonymItem : synonymItemList) {
             if (id == synonymItem.getId()) {
                 return synonymItem;
@@ -148,7 +148,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         }
     }
 
-    protected void reload(final SynonymUpdater updater) {
+    private void reload(final SynonymUpdater updater) {
         final List<SynonymItem> itemList = new ArrayList<SynonymItem>();
         BufferedReader reader = null;
         try {
@@ -393,7 +393,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         return new BufferedInputStream(new FileInputStream(file));
     }
 
-    public void update(final InputStream in) throws IOException {
+    public synchronized void update(final InputStream in) throws IOException {
         StreamUtil.drain(in, file);
         reload(null);
     }

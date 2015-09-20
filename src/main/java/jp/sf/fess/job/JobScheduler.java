@@ -97,12 +97,13 @@ public class JobScheduler {
     }
 
     public void register(final ScheduledJob scheduledJob) {
+        if (scheduledJob == null) {
+            throw new ScheduledJobException("No job.");
+        }
+
         final String cronExpression = scheduledJob.getCronExpression();
         if (StringUtil.isBlank(cronExpression)) {
             return;
-        }
-        if (scheduledJob == null) {
-            throw new ScheduledJobException("No job.");
         }
 
         if (!Constants.T.equals(scheduledJob.getAvailable())) {
