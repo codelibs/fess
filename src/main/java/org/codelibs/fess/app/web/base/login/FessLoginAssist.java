@@ -119,4 +119,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
     protected Class<?> getLoginActionType() {
         return LoginAction.class;
     }
+
+    @Override
+    protected String toTypedUserId(String userKey) {
+        return userKey;
+    }
 }

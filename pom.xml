@@ -39,7 +39,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp8</dbflute.version>
-		<lastaflute.version>0.6.2-B-SNAPSHOT</lastaflute.version>
+		<lastaflute.version>0.6.2-RC4</lastaflute.version>
 		<lasta.taglib.version>0.6.0</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
