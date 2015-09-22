@@ -89,7 +89,7 @@ public class QueryHelper implements Serializable {
 
     protected String[] responseDocValuesFields;
 
-    protected String[] highlightingFields;
+    protected String[] highlightedFields;
 
     protected String[] searchFields;
 
@@ -103,7 +103,7 @@ public class QueryHelper implements Serializable {
 
     protected String[] supportedAnalysisFields;
 
-    protected int highlightSnippetSize = 5;
+    protected int highlightFragmentSize = 100;
 
     protected boolean useBigram = true;
 
@@ -121,7 +121,7 @@ public class QueryHelper implements Serializable {
 
     protected List<SortField> defaultSortFieldList = new ArrayList<SortField>();
 
-    protected String highlightingPrefix = "hl_";
+    protected String highlightPrefix = "hl_";
 
     protected String minimumShouldMatch = "100%";
 
@@ -158,8 +158,8 @@ public class QueryHelper implements Serializable {
         if (responseDocValuesFields == null) {
             responseDocValuesFields = new String[] { fieldHelper.clickCountField, fieldHelper.favoriteCountField };
         }
-        if (highlightingFields == null) {
-            highlightingFields = new String[] { fieldHelper.contentField };
+        if (highlightedFields == null) {
+            highlightedFields = new String[] { fieldHelper.contentField };
         }
         if (searchFields == null) {
             searchFields =
@@ -1112,17 +1112,17 @@ public class QueryHelper implements Serializable {
     }
 
     /**
-     * @return the highlightingFields
+     * @return the highlightedFields
      */
-    public String[] getHighlightingFields() {
-        return highlightingFields;
+    public String[] getHighlightedFields() {
+        return highlightedFields;
     }
 
     /**
-     * @param highlightingFields the highlightingFields to set
+     * @param highlightedFields the highlightedFields to set
      */
-    public void setHighlightingFields(final String[] highlightingFields) {
-        this.highlightingFields = highlightingFields;
+    public void setHighlightedFields(final String[] highlightedFields) {
+        this.highlightedFields = highlightedFields;
     }
 
     /**
@@ -1186,17 +1186,17 @@ public class QueryHelper implements Serializable {
     }
 
     /**
-     * @return the highlightSnippetSize
+     * @return the highlightFragmentSize
      */
-    public int getHighlightSnippetSize() {
-        return highlightSnippetSize;
+    public int getHighlightFragmentSize() {
+        return highlightFragmentSize;
     }
 
     /**
-     * @param highlightSnippetSize the highlightSnippetSize to set
+     * @param highlightFragmentSize the highlightFragmentSize to set
      */
-    public void setHighlightSnippetSize(final int highlightSnippetSize) {
-        this.highlightSnippetSize = highlightSnippetSize;
+    public void setHighlightFragmentSize(final int highlightFragmentSize) {
+        this.highlightFragmentSize = highlightFragmentSize;
     }
 
     /**
@@ -1290,12 +1290,12 @@ public class QueryHelper implements Serializable {
         return defaultSortFieldList.toArray(new SortField[defaultSortFieldList.size()]);
     }
 
-    public void setHighlightingPrefix(final String highlightingPrefix) {
-        this.highlightingPrefix = highlightingPrefix;
+    public void setHighlightPrefix(final String highlightPrefix) {
+        this.highlightPrefix = highlightPrefix;
     }
 
-    public String getHighlightingPrefix() {
-        return highlightingPrefix;
+    public String getHighlightPrefix() {
+        return highlightPrefix;
     }
 
     public String[] getSupportedMltFields() {

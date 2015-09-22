@@ -9,11 +9,11 @@
 		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"ja/mapping.txt"</arg>
+			<arg>"synonym.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
-			<arg>"ja/synonym.txt"</arg>
+			<arg>"ja/mapping.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>

@@ -314,6 +314,15 @@ public class FessEsClient implements Client {
                                     logger.warn("Failed to register " + filePath, e);
                                 }
                             });
+                    try (CurlResponse response = Curl.post(runner.node(), "_configsync/flush").execute()) {
+                        if (response.getHttpStatusCode() == 200) {
+                            logger.info("Flushed config files.");
+                        } else {
+                            logger.warn("Failed to flush config files.");
+                        }
+                    } catch (final Exception e) {
+                        logger.warn("Failed to flush config files.", e);
+                    }
                 }
 
                 try {
@@ -719,10 +728,10 @@ public class FessEsClient implements Client {
                 }
             }
             // highlighting
-            if (ComponentUtil.getQueryHelper().getHighlightingFields() != null
-                    && ComponentUtil.getQueryHelper().getHighlightingFields().length != 0) {
-                for (final String hf : ComponentUtil.getQueryHelper().getHighlightingFields()) {
-                    searchRequestBuilder.addHighlightedField(hf, ComponentUtil.getQueryHelper().getHighlightSnippetSize());
+            if (ComponentUtil.getQueryHelper().getHighlightedFields() != null
+                    && ComponentUtil.getQueryHelper().getHighlightedFields().length != 0) {
+                for (final String hf : ComponentUtil.getQueryHelper().getHighlightedFields()) {
+                    searchRequestBuilder.addHighlightedField(hf, ComponentUtil.getQueryHelper().getHighlightFragmentSize());
                 }
             }
 
