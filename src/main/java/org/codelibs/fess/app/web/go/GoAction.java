@@ -33,10 +33,12 @@ import org.codelibs.fess.es.exentity.ClickLog;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.robot.util.CharUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
@@ -61,7 +63,7 @@ public class GoAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final GoForm form) throws IOException {
+    public ActionResponse index(final GoForm form) throws IOException {
         searchAvailable();
 
         Map<String, Object> doc = null;
@@ -80,13 +82,12 @@ public class GoAction extends FessSearchAction {
                 messages.addErrorsDocidNotFound(GLOBAL, form.docId);
             }, () -> asHtml(path_ErrorJsp));
         }
-        final Object urlObj = doc.get(fieldHelper.urlField);
-        if (urlObj == null) {
+        final String url = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+        if (url == null) {
             throwValidationError(messages -> {
                 messages.addErrorsDocumentNotFound(GLOBAL, form.docId);
             }, () -> asHtml(path_ErrorJsp));
         }
-        final String url = urlObj.toString();
 
         if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
             final String userSessionId = userInfoHelper.getUserCode();
@@ -100,9 +101,9 @@ public class GoAction extends FessSearchAction {
                 clickLog.setUserSessionId(userSessionId);
                 clickLog.setDocId(form.docId);
                 long clickCount = 0;
-                final Object count = doc.get(fieldHelper.clickCountField);
-                if (count instanceof Long) {
-                    clickCount = ((Long) count).longValue();
+                final Integer count = DocumentUtil.getValue(doc, fieldHelper.clickCountField, Integer.class);
+                if (count != null) {
+                    clickCount = count.longValue();
                 }
                 clickLog.setClickCount(clickCount);
                 searchLogHelper.addClickLog(clickLog);
@@ -133,13 +134,13 @@ public class GoAction extends FessSearchAction {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
                 final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 try {
-                    viewHelper.writeContent(doc);
-                    return null;
+                    return viewHelper.asContentResponse(doc);
                 } catch (final Exception e) {
                     logger.error("Failed to load: " + doc, e);
                     throwValidationError(messages -> {
                         messages.addErrorsNotLoadFromServer(GLOBAL, url);
                     }, () -> asHtml(path_ErrorJsp));
+                    return null; // workaround
                 }
             } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
                 final String path = url.replaceFirst("file:/+", "//");
@@ -159,15 +160,13 @@ public class GoAction extends FessSearchAction {
                     }, () -> asHtml(path_ErrorJsp));
                 }
 
-                LaResponseUtil.getResponse().setStatus(HttpServletResponse.SC_NO_CONTENT);
-                return null;
+                return HtmlResponse.asEmptyBody().httpStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
-                LaResponseUtil.getResponse().sendRedirect(url + hash);
+                return newHtmlResponseAsRediect(url + hash);
             }
         } else {
-            LaResponseUtil.getResponse().sendRedirect(url + hash);
+            return newHtmlResponseAsRediect(url + hash);
         }
-        return null;
     }
 
     protected boolean isFileSystemPath(final String url) {

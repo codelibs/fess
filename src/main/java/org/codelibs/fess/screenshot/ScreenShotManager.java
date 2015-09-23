@@ -36,6 +36,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +113,7 @@ public class ScreenShotManager {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final ScreenShotGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
-                final String url = (String) docMap.get(fieldHelper.urlField);
+                final String url = DocumentUtil.getValue(docMap, fieldHelper.urlField, String.class);
                 final String path = getImageFilename(docMap);
                 if (!screenShotTaskQueue.offer(new ScreenShotTask(url, new File(baseDir, path), generator))) {
                     logger.warn("Failed to offer a screenshot task: " + url + " -> " + path);
@@ -125,7 +126,7 @@ public class ScreenShotManager {
     protected String getImageFilename(final Map<String, Object> docMap) {
         final StringBuilder buf = new StringBuilder(50);
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final String docid = (String) docMap.get(fieldHelper.docIdField);
+        final String docid = DocumentUtil.getValue(docMap, fieldHelper.docIdField, String.class);
         for (int i = 0; i < docid.length(); i++) {
             if (i > 0 && i % splitSize == 0) {
                 buf.append('/');

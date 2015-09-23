@@ -30,6 +30,7 @@ import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.OutputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
@@ -70,7 +71,7 @@ public class ScreenshotAction extends FessSearchAction {
                 queryRequestBuilder.addFields(queryHelper.getResponseFields());
                 return true;
             }).get();
-            final String url = doc == null ? null : (String) doc.get(fieldHelper.urlField);
+            final String url = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
             if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
                 // 404
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);

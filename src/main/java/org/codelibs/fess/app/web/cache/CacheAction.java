@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
@@ -73,7 +74,7 @@ public class CacheAction extends FessSearchAction {
             }, () -> asHtml(path_ErrorJsp));
         }
 
-        return asStream((String) doc.get(fieldHelper.docIdField)).contentType("text/html; charset=UTF-8").data(
+        return asStream(DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class)).contentType("text/html; charset=UTF-8").data(
                 content.getBytes(Constants.CHARSET_UTF_8));
     }
 

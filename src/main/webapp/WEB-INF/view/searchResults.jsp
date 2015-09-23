@@ -29,15 +29,15 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title ellipsis">
-						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.docId}">${f:h(doc.contentTitle)}</a>
+						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.doc_id}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
 						<div class="description">${doc.contentDescription}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.sitePath)}</cite>
 							<c:if test="${doc.hasCache_s_s=='true'}">
-								<a href="cache?docId=${doc.docId}${appendHighlightQueries}" class="cache"><la:message
-										key="labels.search_result_cache" /></a>
+								<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightQueries}" class="cache"><la:message
+										key="labels.search_result_cache" /></la:link>
 							</c:if>
 						</div>
 						<div class="more visible-phone">
@@ -47,27 +47,27 @@
 							<c:if test="${doc.created!=null && doc.created!=''}">
 								<c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_created" />
-								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
+								<fmt:formatDate value="${fe:date(doc.created)}" type="BOTH" />
 							</c:if>
-							<c:if test="${doc.lastModified!=null && doc.lastModified!=''}">
+							<c:if test="${doc.last_modified!=null && doc.last_modified!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
-								<la:message key="labels.search_result_lastModified" />
-								<fmt:formatDate value="${fe:parseDate(doc.lastModified)}" type="BOTH" />
+								<la:message key="labels.search_result_last_modified" />
+								<fmt:formatDate value="${fe:date(doc.last_modified)}" type="BOTH" />
 							</c:if>
-							<c:if test="${doc.contentLength!=null && doc.contentLength!=''}">
+							<c:if test="${doc.content_length!=null && doc.content_length!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_size"
-									arg0="${f:h(doc.contentLength)}" />
+									arg0="${f:h(doc.content_length)}" />
 							</c:if>
 							<c:if test="${searchLogSupport}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_click_count"
-									arg0="${f:h(doc.clickCount_l_x_dv)}" />
+									arg0="${f:h(doc.click_count)}" />
 							</c:if>
 							<c:if test="${favoriteSupport}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
-								<a href="#${doc.docId}" class="favorite"><la:message
-										key="labels.search_result_favorite" /> (${f:h(doc.favoriteCount_l_x_dv)})</a>
+								<a href="#${doc.doc_id}" class="favorite"><la:message
+										key="labels.search_result_favorite" /> (${f:h(doc.favorite_count)})</a>
 								<span class="favorited"><la:message
 										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favoriteCount_l_x_dv)})</span></span>
 							</c:if>

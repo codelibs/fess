@@ -17,11 +17,9 @@
 package org.codelibs.fess.helper;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -39,12 +37,9 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
@@ -59,6 +54,7 @@ import org.codelibs.fess.es.exentity.CrawlingConfig;
 import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.robot.builder.RequestDataBuilder;
 import org.codelibs.robot.client.S2RobotClient;
@@ -67,6 +63,7 @@ import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.util.CharUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.taglib.function.LaFunctions;
+import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -398,18 +395,20 @@ public class ViewHelper implements Serializable {
         if (locale == null) {
             locale = Locale.ENGLISH;
         }
-        String url = (String) doc.get("urlLink");
+        String url = DocumentUtil.getValue(doc, "urlLink", String.class);
         if (url == null) {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        Object created = doc.get(fieldHelper.createdField);
-        if (created instanceof Date) {
+        String createdStr;
+        Long created = DocumentUtil.getValue(doc, fieldHelper.createdField, Long.class);
+        if (created != null) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            created = sdf.format((Date) created);
+            createdStr = sdf.format(new Date(created.longValue()));
         } else {
-            created = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
+            createdStr = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        doc.put("cacheMsg", ComponentUtil.getMessageManager().getMessage(locale, "labels.search_cache_msg", new Object[] { url, created }));
+        doc.put("cacheMsg",
+                ComponentUtil.getMessageManager().getMessage(locale, "labels.search_cache_msg", new Object[] { url, createdStr }));
 
         doc.put("queries", queries);
 
@@ -476,7 +475,7 @@ public class ViewHelper implements Serializable {
         return null;
     }
 
-    public void writeContent(final Map<String, Object> doc) {
+    public StreamResponse asContentResponse(final Map<String, Object> doc) {
         if (logger.isDebugEnabled()) {
             logger.debug("writing the content of: " + doc);
         }
@@ -516,37 +515,32 @@ public class ViewHelper implements Serializable {
             throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
         }
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
-        final HttpServletResponse response = LaResponseUtil.getResponse();
+        StreamResponse response = new StreamResponse(StringUtil.EMPTY);
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
-        InputStream is = null;
-        OutputStream os = null;
-        try {
-            is = new BufferedInputStream(responseData.getResponseBody());
-            os = new BufferedOutputStream(response.getOutputStream());
-            CopyUtil.copy(is, os);
-            os.flush();
-        } catch (final IOException e) {
-            if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
-                throw new FessSystemException("Failed to write a content. configId: " + configIdObj + ", url: " + url, e);
+        response.stream(out -> {
+            try (InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
+                out.write(is);
+            } catch (final IOException e) {
+                if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
+                    throw new FessSystemException("Failed to write a content. configId: " + configIdObj + ", url: " + url, e);
+                }
             }
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(os);
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Finished to write " + url);
-        }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Finished to write " + url);
+            }
+        });
+        return response;
     }
 
-    protected void writeNoCache(final HttpServletResponse response, final ResponseData responseData) {
-        response.setHeader("Pragma", "no-cache");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+    protected void writeNoCache(final StreamResponse response, final ResponseData responseData) {
+        response.header("Pragma", "no-cache");
+        response.header("Cache-Control", "no-cache");
+        response.header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
     }
 
-    protected void writeFileName(final HttpServletResponse response, final ResponseData responseData) {
+    protected void writeFileName(final StreamResponse response, final ResponseData responseData) {
         final UserAgentHelper userAgentHelper = ComponentUtil.getUserAgentHelper();
         final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
         String charset = responseData.getCharSet();
@@ -569,19 +563,19 @@ public class ViewHelper implements Serializable {
 
             switch (userAgentType) {
             case IE:
-                response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
+                response.header("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
                 break;
             case OPERA:
-                response.setHeader("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
+                response.header("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
                 break;
             case SAFARI:
-                response.setHeader("Content-Disposition", "attachment; filename=\"" + name + "\"");
+                response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
                 break;
             case CHROME:
             case FIREFOX:
             case OTHER:
             default:
-                response.setHeader("Content-Disposition",
+                response.header("Content-Disposition",
                         "attachment; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
                 break;
             }
@@ -590,22 +584,23 @@ public class ViewHelper implements Serializable {
         }
     }
 
-    protected void writeContentType(final HttpServletResponse response, final ResponseData responseData) {
+    protected void writeContentType(final StreamResponse response, final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
         if (logger.isDebugEnabled()) {
             logger.debug("mimeType: " + mimeType);
         }
         if (mimeType == null) {
+            response.contentTypeOctetStream();
             return;
         }
         if (mimeType.startsWith("text/")) {
-            final String charset = response.getCharacterEncoding();
+            final String charset = LaResponseUtil.getResponse().getCharacterEncoding();
             if (charset != null) {
-                response.setContentType(mimeType + "; charset=" + charset);
+                response.contentType(mimeType + "; charset=" + charset);
                 return;
             }
         }
-        response.setContentType(mimeType);
+        response.contentType(mimeType);
     }
 
     public boolean isUseSession() {

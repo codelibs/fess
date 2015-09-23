@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -131,6 +132,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -138,6 +140,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
@@ -501,7 +504,15 @@ public class FessEsClient implements Client {
     public Optional<Map<String, Object>> getDocument(final String index, final String type,
             final SearchCondition<SearchRequestBuilder> condition) {
         return getDocument(index, type, condition, (response, hit) -> {
-            return hit.getSource();
+            Map<String, Object> source = hit.getSource();
+            if (source != null) {
+                return source;
+            }
+            Map<String, SearchHitField> fields = hit.getFields();
+            if (fields != null) {
+                return fields.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+            }
+            return null;
         });
     }
 
@@ -521,7 +532,15 @@ public class FessEsClient implements Client {
     public Optional<Map<String, Object>> getDocument(final String index, final String type, final String id,
             final SearchCondition<GetRequestBuilder> condition) {
         return getDocument(index, type, id, condition, (response, result) -> {
-            return response.getSource();
+            Map<String, Object> source = response.getSource();
+            if (source != null) {
+                return source;
+            }
+            Map<String, GetField> fields = response.getFields();
+            if (fields != null) {
+                return fields.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+            }
+            return null;
         });
     }
 
