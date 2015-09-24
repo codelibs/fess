@@ -25,6 +25,20 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
+import org.codelibs.sastruts.core.annotation.Token;
+import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
+import org.codelibs.solr.lib.SolrGroupManager;
+import org.codelibs.solr.lib.response.CoreReloadResponse;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.struts.annotation.ActionForm;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.exception.ActionMessagesException;
+import org.seasar.struts.util.ResponseUtil;
+
 import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
@@ -35,18 +49,6 @@ import jp.sf.fess.form.admin.dict.SynonymForm;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.pager.SynonymPager;
 import jp.sf.fess.service.SynonymService;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.codelibs.core.util.StringUtil;
-import org.codelibs.sastruts.core.annotation.Token;
-import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.ResponseUtil;
 
 public class SynonymAction {
 
@@ -65,9 +67,14 @@ public class SynonymAction {
     @Resource
     protected SystemHelper systemHelper;
 
+    @Resource
+    protected SolrGroupManager solrGroupManager;
+
     public List<SynonymItem> synonymItemItems;
 
     public String filename;
+
+    public String coreName;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("dict");
@@ -330,7 +337,8 @@ public class SynonymAction {
             throw new SSCActionMessagesException(
                     "errors.synonym_file_is_not_found");
         }
-        filename = synonymFile.getSimpleName();
+        filename = synonymFile.getCoreName() + ":"
+                + synonymFile.getSimpleName();
         return "download.jsp";
     }
 
@@ -362,7 +370,8 @@ public class SynonymAction {
             throw new SSCActionMessagesException(
                     "errors.synonym_file_is_not_found");
         }
-        filename = synonymFile.getName();
+        filename = synonymFile.getCoreName() + ":"
+                + synonymFile.getSimpleName();
         return "upload.jsp";
     }
 
@@ -385,6 +394,40 @@ public class SynonymAction {
         SAStrutsUtil.addSessionMessage("success.upload_synonym_file");
 
         return "uploadpage?dictId=" + synonymForm.dictId + "&redirect=true";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "reloadpage")
+    public String reloadpage() {
+        final SynonymFile synonymFile = synonymService
+                .getSynonymFile(synonymForm.dictId);
+        if (synonymFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.synonym_file_is_not_found");
+        }
+        coreName = synonymFile.getCoreName();
+        return "reload.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "reloadpage")
+    public String reload() {
+        final SynonymFile synonymFile = synonymService
+                .getSynonymFile(synonymForm.dictId);
+        if (synonymFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.synonym_file_is_not_found");
+        }
+
+        CoreReloadResponse response = solrGroupManager.reloadCore(synonymFile
+                .getCoreName());
+        if (response.getStatus() == 0) {
+            SAStrutsUtil.addSessionMessage("success.reload_core");
+        } else {
+            throw new SSCActionMessagesException("errors.failed_to_reload_core");
+        }
+
+        return "reloadpage?dictId=" + synonymForm.dictId + "&redirect=true";
     }
 
     protected void loadSynonym() {
@@ -438,10 +481,12 @@ public class SynonymAction {
         }
         for (String value : values) {
             if (value.indexOf(',') >= 0) {
-                throw new SSCActionMessagesException("errors.invalid_str_is_included", value, ",");
+                throw new SSCActionMessagesException(
+                        "errors.invalid_str_is_included", value, ",");
             }
             if (value.indexOf("=>") >= 0) {
-                throw new SSCActionMessagesException("errors.invalid_str_is_included", value, "=>");
+                throw new SSCActionMessagesException(
+                        "errors.invalid_str_is_included", value, "=>");
             }
         }
     }

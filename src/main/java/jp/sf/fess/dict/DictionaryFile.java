@@ -39,6 +39,8 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
 
     public abstract void delete(T item);
 
+    public abstract String getCoreName();
+
     public String getId() {
         return id;
     }

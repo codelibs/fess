@@ -41,6 +41,9 @@
 					<li><s:link href="uploadpage?dictId=${f:u(dictId)}">
 							<bean:message key="labels.dict_userdict_link_upload" />
 						</s:link></li>
+					<li><s:link href="reloadpage?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_userdict_link_reload" />
+						</s:link></li>
 				</ul>
 			</div>
 

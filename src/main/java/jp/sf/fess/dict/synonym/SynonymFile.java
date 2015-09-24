@@ -31,14 +31,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jp.sf.fess.Constants;
-import jp.sf.fess.dict.DictionaryException;
-import jp.sf.fess.dict.DictionaryFile;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.robot.util.StreamUtil;
+
+import jp.sf.fess.Constants;
+import jp.sf.fess.dict.DictionaryException;
+import jp.sf.fess.dict.DictionaryFile;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";
@@ -49,6 +49,22 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
     public SynonymFile(final File file) {
         this.file = file;
+    }
+
+    @Override
+    public String getCoreName() {
+        File parentFile = file.getParentFile();
+        while (parentFile != null) {
+            if ("conf".equals(parentFile.getName())) {
+                File file = parentFile.getParentFile();
+                if (file != null) {
+                    return file.getName();
+                }
+                return null;
+            }
+            parentFile = parentFile.getParentFile();
+        }
+        return null;
     }
 
     @Override

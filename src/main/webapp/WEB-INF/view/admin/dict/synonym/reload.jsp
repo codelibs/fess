@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tiles:insert template="/WEB-INF/view/common/admin/layout.jsp"
 	flush="true">
 	<tiles:put name="title">
-		<bean:message key="labels.dict_userdict_configuration" />
+		<bean:message key="labels.dict_synonym_configuration" />
 	</tiles:put>
 	<tiles:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tiles:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
@@ -11,7 +11,7 @@
 	<tiles:put name="body" type="string">
 
 		<h3>
-			<bean:message key="labels.dict_userdict_title" />
+			<bean:message key="labels.dict_synonym_title" />
 		</h3>
 
 		<%-- Message: BEGIN --%>
@@ -29,20 +29,20 @@
 							<bean:message key="labels.dict_list_link" />
 						</s:link></li>
 					<li><s:link href="index?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_list_link" />
+							<bean:message key="labels.dict_synonym_list_link" />
 						</s:link></li>
 					<li><s:link href="createpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_link_create" />
+							<bean:message key="labels.dict_synonym_link_create" />
+						</s:link></li>
+					<li><s:link href="downloadpage?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_synonym_link_download" />
+						</s:link></li>
+					<li><s:link href="uploadpage?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_synonym_link_upload" />
 						</s:link></li>
 					<li class="active"><a href="#">
-							<bean:message key="labels.dict_userdict_link_download" />
+							<bean:message key="labels.dict_synonym_link_reload" />
 						</a></li>
-					<li><s:link href="uploadpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_link_upload" />
-						</s:link></li>
-					<li><s:link href="reloadpage?dictId=${f:u(dictId)}">
-							<bean:message key="labels.dict_userdict_link_reload" />
-						</s:link></li>
 				</ul>
 			</div>
 
@@ -53,10 +53,13 @@
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
-							<th style="vertical-align: middle;">${f:h(filename)}</th>
-							<td style="width: 150px;text-align: center;"><input type="submit"
-								class="btn small" name="download"
-								value="<bean:message key="labels.dict_userdict_button_download"/>" />
+							<th style="vertical-align: middle;"><bean:message key="labels.dict_synonym_link_reload" /></th>
+							<td style="vertical-align: middle;">${f:h(coreName)}</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="width: 150px;text-align: center;"><input type="submit"
+								class="btn small" name="reload"
+								value="<bean:message key="labels.dict_synonym_button_reload"/>" />
 							</td>
 						</tr>
 					</tbody>

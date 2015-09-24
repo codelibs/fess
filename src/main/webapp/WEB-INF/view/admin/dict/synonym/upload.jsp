@@ -40,6 +40,9 @@
 					<li class="active"><a href="#">
 							<bean:message key="labels.dict_synonym_link_upload" />
 						</a></li>
+					<li><s:link href="reloadpage?dictId=${f:u(dictId)}">
+							<bean:message key="labels.dict_synonym_link_reload" />
+						</s:link></li>
 				</ul>
 			</div>
 
@@ -61,7 +64,7 @@
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="2">
+							<td colspan="2" style="text-align: center;">
 									<input type="submit" class="btn small" name="upload"
 										value="<bean:message key="labels.dict_synonym_button_upload"/>" />
 							</td>

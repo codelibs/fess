@@ -34,15 +34,15 @@
 					<li><s:link href="createpage?dictId=${f:u(dictId)}">
 							<bean:message key="labels.dict_userdict_link_create" />
 						</s:link></li>
-					<li class="active"><a href="#">
+					<li><s:link href="downloadpage?dictId=${f:u(dictId)}">
 							<bean:message key="labels.dict_userdict_link_download" />
-						</a></li>
+						</s:link></li>
 					<li><s:link href="uploadpage?dictId=${f:u(dictId)}">
 							<bean:message key="labels.dict_userdict_link_upload" />
 						</s:link></li>
-					<li><s:link href="reloadpage?dictId=${f:u(dictId)}">
+					<li class="active"><a href="#">
 							<bean:message key="labels.dict_userdict_link_reload" />
-						</s:link></li>
+						</a></li>
 				</ul>
 			</div>
 
@@ -53,10 +53,13 @@
 				<table class="bordered-table zebra-striped" style="width: 500px;">
 					<tbody>
 						<tr>
-							<th style="vertical-align: middle;">${f:h(filename)}</th>
-							<td style="width: 150px;text-align: center;"><input type="submit"
-								class="btn small" name="download"
-								value="<bean:message key="labels.dict_userdict_button_download"/>" />
+							<th style="vertical-align: middle;"><bean:message key="labels.dict_userdict_core_name" /></th>
+							<td style="vertical-align: middle;">${f:h(coreName)}</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="width: 150px;text-align: center;"><input type="submit"
+								class="btn small" name="reload"
+								value="<bean:message key="labels.dict_userdict_button_reload"/>" />
 							</td>
 						</tr>
 					</tbody>

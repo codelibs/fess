@@ -24,6 +24,19 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.codelibs.core.util.StringUtil;
+import org.codelibs.sastruts.core.annotation.Token;
+import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
+import org.codelibs.solr.lib.SolrGroupManager;
+import org.codelibs.solr.lib.response.CoreReloadResponse;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.struts.annotation.ActionForm;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.exception.ActionMessagesException;
+import org.seasar.struts.util.ResponseUtil;
+
 import jp.sf.fess.crud.CommonConstants;
 import jp.sf.fess.crud.CrudMessageException;
 import jp.sf.fess.crud.util.SAStrutsUtil;
@@ -34,17 +47,6 @@ import jp.sf.fess.form.admin.dict.UserDictForm;
 import jp.sf.fess.helper.SystemHelper;
 import jp.sf.fess.pager.UserDictPager;
 import jp.sf.fess.service.UserDictService;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.codelibs.core.util.StringUtil;
-import org.codelibs.sastruts.core.annotation.Token;
-import org.codelibs.sastruts.core.exception.SSCActionMessagesException;
-import org.seasar.framework.beans.util.Beans;
-import org.seasar.struts.annotation.ActionForm;
-import org.seasar.struts.annotation.Execute;
-import org.seasar.struts.exception.ActionMessagesException;
-import org.seasar.struts.util.ResponseUtil;
 
 public class UserDictAction {
 
@@ -63,9 +65,14 @@ public class UserDictAction {
     @Resource
     protected SystemHelper systemHelper;
 
+    @Resource
+    protected SolrGroupManager solrGroupManager;
+
     public List<UserDictItem> userDictItemItems;
 
     public String filename;
+
+    public String coreName;
 
     public String getHelpLink() {
         return systemHelper.getHelpLink("dict");
@@ -318,7 +325,8 @@ public class UserDictAction {
             throw new SSCActionMessagesException(
                     "errors.userdict_file_is_not_found");
         }
-        filename = userdictFile.getSimpleName();
+        filename = userdictFile.getCoreName() + ":"
+                + userdictFile.getSimpleName();
         return "download.jsp";
     }
 
@@ -350,7 +358,8 @@ public class UserDictAction {
             throw new SSCActionMessagesException(
                     "errors.userdict_file_is_not_found");
         }
-        filename = userdictFile.getName();
+        filename = userdictFile.getCoreName() + ":"
+                + userdictFile.getSimpleName();
         return "upload.jsp";
     }
 
@@ -373,6 +382,40 @@ public class UserDictAction {
         SAStrutsUtil.addSessionMessage("success.upload_userdict_file");
 
         return "uploadpage?dictId=" + userDictForm.dictId + "&redirect=true";
+    }
+
+    @Token(save = true, validate = false)
+    @Execute(validator = false, input = "reloadpage")
+    public String reloadpage() {
+        final UserDictFile userdictFile = userDictService
+                .getUserDictFile(userDictForm.dictId);
+        if (userdictFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.userdict_file_is_not_found");
+        }
+        coreName = userdictFile.getCoreName();
+        return "reload.jsp";
+    }
+
+    @Token(save = false, validate = true)
+    @Execute(validator = true, input = "reloadpage")
+    public String reload() {
+        final UserDictFile userdictFile = userDictService
+                .getUserDictFile(userDictForm.dictId);
+        if (userdictFile == null) {
+            throw new SSCActionMessagesException(
+                    "errors.userdict_file_is_not_found");
+        }
+
+        CoreReloadResponse response = solrGroupManager.reloadCore(userdictFile
+                .getCoreName());
+        if (response.getStatus() == 0) {
+            SAStrutsUtil.addSessionMessage("success.reload_core");
+        } else {
+            throw new SSCActionMessagesException("errors.failed_to_reload_core");
+        }
+
+        return "reloadpage?dictId=" + userDictForm.dictId + "&redirect=true";
     }
 
     protected void loadUserDict() {
