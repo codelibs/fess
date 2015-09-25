@@ -63,6 +63,11 @@
   </filter>
 
   <filter>
+    <filter-name>lastaShowbaseFilter</filter-name>
+    <filter-class>org.lastaflute.web.servlet.filter.LastaShowbaseFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>lastaToActionFilter</filter-name>
     <filter-class>org.lastaflute.web.servlet.filter.LastaToActionFilter</filter-class>
   </filter>
@@ -179,6 +184,12 @@
   </filter-mapping>
 
   <filter-mapping>
+    <filter-name>lastaShowbaseFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
     <filter-name>lastaToActionFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
@@ -241,34 +252,6 @@
       <include-prelude>/WEB-INF/view/common/common.jsp</include-prelude>
     </jsp-property-group>
   </jsp-config>
-
-  <!-- ================================================================================= -->
-  <!--                                                                          Security -->
-  <!--                                                                          ======== -->
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Fess Authentication</web-resource-name>
-      <url-pattern>/login/login</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>fess</role-name>
-      <!--
-      <role-name>role1</role-name>
-      -->
-    </auth-constraint>
-  </security-constraint>
-
-  <security-role>
-    <role-name>fess</role-name>
-  </security-role>
-
-  <login-config>
-    <auth-method>FORM</auth-method>
-    <form-login-config>
-      <form-login-page>/WEB-INF/view/login/index.jsp</form-login-page>
-      <form-error-page>/WEB-INF/view/login/error.jsp</form-error-page>
-    </form-login-config>
-  </login-config>
 
   <!-- ================================================================================= -->
   <!--                                                                        Error Page -->

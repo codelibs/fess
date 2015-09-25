@@ -51,7 +51,7 @@
   <logger name="org.lastaflute" additivity="false" level="${log.level}">
     <appender-ref ref="console"/><appender-ref ref="appfile"/><appender-ref ref="errorfile"/>
   </logger>
-  <root level="debug">
+  <root level="info">
     <appender-ref ref="console"/><appender-ref ref="errorfile"/>
   </root>
 </configuration>
