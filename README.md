@@ -12,24 +12,29 @@ Fess is Solr based search server, but knowledge/experience about Solr is NOT nee
  - [English](http://fess.codelibs.org/)
  - [Japanese](http://fess.codelibs.org/ja/)
 
-### Issues/Questions
+## Issues/Questions
 
 Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 (Japanese forum is [here](https://github.com/codelibs/codelibs-ja-forum "here").)
 
-### Development
+## Development
+
+### Get Source Code
 
 First of all, clone Fess's repositories:
 
     $ cd ~/workspace
     $ git clone https://github.com/codelibs/fess.git
-    $ git clone https://github.com/codelibs/fess-db.git
-    $ git clone https://github.com/codelibs/fess-suggest.git
-    $ git clone https://github.com/codelibs/fess-solr-plugin.git
 
-and then imports them as Maven project.
-If you want to re-create H2 database for Fess, runs:
+and then imports it as Maven project on eclipse or ohter IDE.
 
-    $ cd fess-db/fess-db-h2
-    $ mvn dbflute:download
-    $ mvn dbflute:replace-schema
+### Download Elasticsearch Plugins
+
+Run antrun:run to download plugins into plugins directory:
+
+    $ mvn antrun:run
+
+### Run Fess
+
+Run or debug org.codelibs.fess.FessBoot on IDE, and then access http://localhost:8080/fess/
+
