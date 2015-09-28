@@ -37,7 +37,7 @@
 								<h3 class="box-title">
 									<la:message key="labels.search_list_configuration" />
 								</h3>
-								<la:form action="search" method="get">
+								<la:form>
 									<div class="input">
 										<la:text styleClass="query" property="query" title="Search" size="50" maxlength="1000" />
 										<input class="btn" type="submit" value="<la:message key="labels.search"/>" name="search" />
@@ -79,7 +79,7 @@
 												</c:if>
 											</p>
 										</div>
-						
+
 										<div id="result">
 											<div>
 												<ol>
@@ -107,7 +107,7 @@
 												</ol>
 											</div>
 										</div>
-						
+
 										<div class="row center">
 											<div class="pagination">
 												<ul>
@@ -166,7 +166,7 @@
 						</div>
 					</div>
 				</div>
-
+</div>
 			</section>
 		</div>
 
@@ -175,4 +175,3 @@
 	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
 </body>
 </html>
-
