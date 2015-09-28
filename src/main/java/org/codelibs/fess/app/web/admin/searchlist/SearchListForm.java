@@ -14,10 +14,14 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.searchlist;
 
 import java.io.Serializable;
 
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
 public class SearchListForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -39,5 +43,4 @@ public class SearchListForm implements Serializable {
 
     //@Required(target = "confirmDelete")
     public String url;
-
 }

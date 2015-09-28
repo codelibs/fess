@@ -221,10 +221,10 @@
 							<span><la:message key="labels.menu.failure_url" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='searchList'}">class="active"</c:if>><todo:link href="/admin/searchList/index">
+					<li <c:if test="${param.menuType=='searchList'}">class="active"</c:if>><la:link href="/admin/searchlist/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.search_list" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 				</ul>
 			</li>

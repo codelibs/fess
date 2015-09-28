@@ -95,14 +95,12 @@
 					<!-- TODO remove -->
 					<excludes>
 						<exclude>org/codelibs/fess/app/web/admin/WizardAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/SearchListForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DictForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/SearchListAction.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DocumentForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/DataForm.java</exclude>
 						<exclude>org/codelibs/fess/app/web/admin/IndexAction.java</exclude>
