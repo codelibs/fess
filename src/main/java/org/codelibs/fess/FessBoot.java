@@ -1,12 +1,12 @@
 package org.codelibs.fess;
 
-import org.dbflute.jetty.JettyBoot;
+import org.dbflute.tomcat.TomcatBoot;
 
 public class FessBoot {
 
     public static void main(String[] args) {
         // TODO args
-        new JettyBoot(8080, "/fess").asDevelopment(isNoneEnv()).bootAwait();
+        new TomcatBoot(8080, "/fess").useTldDetect().asDevelopment(isNoneEnv()).bootAwait();
     }
 
     private static boolean isNoneEnv() {

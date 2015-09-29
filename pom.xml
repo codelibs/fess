@@ -65,15 +65,10 @@
 		<elasticsearch.version>1.7.2</elasticsearch.version>
 		<cluster.runner.version>1.7.0.0</cluster.runner.version>
 
-		<!-- Jetty -->
-		<jetty.boot.version>0.3.4</jetty.boot.version>
-
 		<!-- Tomcat -->
-		<tomcat.delegate>true</tomcat.delegate>
-		<tomcat.useSeparateTomcatClassLoader>true</tomcat.useSeparateTomcatClassLoader>
-		<maven.tomcat.uriEncoding>UTF-8</maven.tomcat.uriEncoding>
-		<maven.tomcat.tomcatUsers.file>${basedir}/src/test/resources/tomcat-users.xml</maven.tomcat.tomcatUsers.file>
+		<tomcat.boot.version>0.3.7</tomcat.boot.version>
 
+		<!-- Maven Repository -->
 		<maven.snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</maven.snapshot.repo.url>
 		<maven.release.repo.url>http://central.maven.org/maven2</maven.release.repo.url>
 	</properties>
@@ -201,11 +196,6 @@
 						<exclude>**/*min.js</exclude>
 					</excludes>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codelibs</groupId>
-				<artifactId>tomcat8-maven-plugin</artifactId>
-				<version>3.0-SNAPSHOT</version>
 			</plugin>
 			<plugin>
 				<groupId>org.dbflute</groupId>
@@ -584,26 +574,10 @@
 
 		<!-- jetty -->
 		<dependency>
-			<groupId>org.dbflute.jetty</groupId>
-			<artifactId>jetty-boot</artifactId>
-			<version>${jetty.boot.version}</version>
+			<groupId>org.dbflute.tomcat</groupId>
+			<artifactId>tomcat-boot</artifactId>
+			<version>${tomcat.boot.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency> <!-- jetty-all does not contain JSP -->
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-jsp</artifactId>
-			<version>9.2.13.v20150730</version>
-			<scope>provided</scope>
-			<exclusions> <!-- jstl already exists -->
-				<exclusion>
-					<groupId>org.eclipse.jetty.orbit</groupId>
-					<artifactId>javax.servlet.jsp.jstl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.glassfish.web</groupId>
-					<artifactId>javax.servlet.jsp.jstl</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- test -->
