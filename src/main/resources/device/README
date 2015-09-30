@@ -1,8 +1,0 @@
-Please put profile data into this directory.
-You can get them from http://valueengine.jp/
-and then rename files:
-
- ProfileData_YYYY-MM-DD.csv -> ProfileData.csv
- UserAgent_YYYY-MM-DD.csv -> UserAgent.csv
- DisplayInfo_YYYY-MM-DD.csv -> DisplayInfo.csv
-
