@@ -30,6 +30,7 @@ import org.codelibs.fess.es.cbean.BoostDocumentRuleCB;
 import org.codelibs.fess.es.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class BoostDocumentRuleService implements Serializable {
 
@@ -59,17 +60,8 @@ public class BoostDocumentRuleService implements Serializable {
         return boostDocumentRuleList;
     }
 
-    public BoostDocumentRule getBoostDocumentRule(final Map<String, String> keys) {
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (boostDocumentRule == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return boostDocumentRule;
+    public OptionalEntity<BoostDocumentRule> getBoostDocumentRule(final String id) {
+        return boostDocumentRuleBhv.selectByPK(id);
     }
 
     public void store(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {

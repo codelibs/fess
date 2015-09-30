@@ -16,9 +16,6 @@
 
 package org.codelibs.fess.app.web.admin.boostdocumentrule;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.annotation.Token;
@@ -28,6 +25,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -62,14 +60,14 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final BoostDocumentRuleSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final BoostDocumentRuleSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         boostDocumentRulePager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -77,15 +75,15 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final BoostDocumentRuleSearchForm form) {
-        copyBeanToBean(form.searchParams, boostDocumentRulePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, boostDocumentRulePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final BoostDocumentRuleSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         boostDocumentRulePager.clear();
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -93,17 +91,17 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final BoostDocumentRuleSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminBoostdocumentrule_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final BoostDocumentRuleSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocumentRulePager)); // page navi
 
         // restore from pager
-        copyBeanToBean(boostDocumentRulePager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(boostDocumentRulePager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -114,51 +112,92 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final BoostDocumentRuleEditForm form) {
-        form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminBoostdocumentrule_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CommonConstants.CREATE_MODE;
+            });
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CommonConstants.EDIT_MODE);
+        return asHtml(path_AdminBoostdocumentrule_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CommonConstants.CREATE_MODE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminBoostdocumentrule_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final BoostDocumentRuleEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
-        loadBoostDocumentRule(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CommonConstants.EDIT_MODE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminBoostdocumentrule_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final BoostDocumentRuleEditForm form) {
-        return asHtml(path_AdminBoostdocumentrule_EditJsp);
-    }
-
-    @Token(save = true, validate = false)
-    @Execute
-    public HtmlResponse editfromconfirm(final BoostDocumentRuleEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CommonConstants.EDIT_MODE;
-        loadBoostDocumentRule(form);
+        String id = form.id;
+        boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminBoostdocumentrule_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final BoostDocumentRuleEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        loadBoostDocumentRule(form);
-        return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CommonConstants.DELETE_MODE);
+        return asHtml(path_AdminBoostdocumentrule_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final BoostDocumentRuleEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CommonConstants.DELETE_MODE;
-        loadBoostDocumentRule(form);
+        String id = form.id;
+        boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
     }
 
@@ -166,25 +205,35 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final BoostDocumentRuleEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
-        loadBoostDocumentRule(form);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CommonConstants.CONFIRM_MODE);
+        return asHtml(path_AdminBoostdocumentrule_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        });
+    }
+
+    @Token(save = false, validate = true, keep = true)
+    @Execute
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CommonConstants.CREATE_MODE;
         return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final BoostDocumentRuleEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
-    }
-
-    @Token(save = false, validate = true, keep = true)
-    @Execute
-    public HtmlResponse confirmfromupdate(final BoostDocumentRuleEditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CommonConstants.EDIT_MODE;
         return asHtml(path_AdminBoostdocumentrule_ConfirmJsp);
     }
 
@@ -193,75 +242,88 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final BoostDocumentRuleEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CommonConstants.CREATE_MODE);
         validate(form, messages -> {}, toEditHtml());
-        boostDocumentRuleService.store(createBoostDocumentRule(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createBoostDocumentRule(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+            boostDocumentRuleService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final BoostDocumentRuleEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CommonConstants.EDIT_MODE);
         validate(form, messages -> {}, toEditHtml());
-        boostDocumentRuleService.store(createBoostDocumentRule(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createBoostDocumentRule(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+            boostDocumentRuleService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final BoostDocumentRuleEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
-        boostDocumentRuleService.delete(getBoostDocumentRule(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CommonConstants.DELETE_MODE);
+        validate(form, messages -> {}, toEditHtml());
+        String id = form.id;
+        boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+            boostDocumentRuleService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadBoostDocumentRule(final BoostDocumentRuleEditForm form) {
-        copyBeanToBean(getBoostDocumentRule(form), form, op -> op.exclude("crudMode"));
-    }
 
-    protected BoostDocumentRule getBoostDocumentRule(final BoostDocumentRuleEditForm form) {
-        final BoostDocumentRule boostDocumentRule = boostDocumentRuleService.getBoostDocumentRule(createKeyMap(form));
-        if (boostDocumentRule == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return boostDocumentRule;
-    }
-
-    protected BoostDocumentRule createBoostDocumentRule(final BoostDocumentRuleEditForm form) {
-        BoostDocumentRule boostDocumentRule;
+    protected OptionalEntity<BoostDocumentRule> createBoostDocumentRule(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
-            boostDocumentRule = getBoostDocumentRule(form);
-        } else {
-            boostDocumentRule = new BoostDocumentRule();
-            boostDocumentRule.setCreatedBy(username);
-            boostDocumentRule.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CommonConstants.CREATE_MODE:
+            if (form instanceof CreateForm) {
+                BoostDocumentRule entity = new BoostDocumentRule();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CommonConstants.EDIT_MODE:
+            if (form instanceof EditForm) {
+                return boostDocumentRuleService.getBoostDocumentRule(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        boostDocumentRule.setUpdatedBy(username);
-        boostDocumentRule.setUpdatedTime(currentTime);
-        copyBeanToBean(form, boostDocumentRule, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
-        return boostDocumentRule;
-    }
-
-    protected Map<String, String> createKeyMap(final BoostDocumentRuleEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final BoostDocumentRuleEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }
