@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+	<id>package</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>fess-${project.version}/app</outputDirectory>
+			<useProjectArtifact>true</useProjectArtifact>
+			<unpack>true</unpack>
+			<includes>
+				<include>org.codelibs.fess:fess</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+	<fileSets>
+		<!-- lib -->
+		<fileSet>
+			<directory>${project.build.directory}/tomcat-lib</directory>
+			<outputDirectory>fess-${project.version}/lib</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/</directory>
+			<includes>
+				<include>FessBoot**</include>
+			</includes>
+			<outputDirectory>fess-${project.version}/lib/org/codelibs/fess</outputDirectory>
+		</fileSet>
+		<!-- app -->
+		<fileSet>
+			<directory>${project.basedir}/src/main/assemblies/scripts</directory>
+			<fileMode>0755</fileMode>
+			<lineEnding>lf</lineEnding>
+			<includes>
+				<include>fess</include>
+				<include>fess.in.sh</include>
+			</includes>
+			<outputDirectory>fess-${project.version}/bin</outputDirectory>
+		</fileSet>
+		<!-- logs -->
+		<fileSet>
+			<directory>src/main/assemblies/scripts</directory>
+			<outputDirectory>fess-${project.version}/logs</outputDirectory>
+			<excludes>
+				<exclude>*</exclude>
+			</excludes>
+			<filtered>false</filtered>
+		</fileSet>
+		<!-- temp -->
+		<fileSet>
+			<directory>src/main/assemblies/scripts</directory>
+			<outputDirectory>fess-${project.version}/temp</outputDirectory>
+			<excludes>
+				<exclude>*</exclude>
+			</excludes>
+			<filtered>false</filtered>
+		</fileSet>
+		<!-- es/plugins -->
+		<fileSet>
+			<directory>${project.basedir}/plugins</directory>
+			<outputDirectory>fess-${project.version}/es/plugins</outputDirectory>
+		</fileSet>
+		<!-- es/data -->
+		<fileSet>
+			<directory>src/main/assemblies/scripts</directory>
+			<outputDirectory>fess-${project.version}/es/data</outputDirectory>
+			<excludes>
+				<exclude>*</exclude>
+			</excludes>
+			<filtered>false</filtered>
+		</fileSet>
+	</fileSets>
+</assembly>

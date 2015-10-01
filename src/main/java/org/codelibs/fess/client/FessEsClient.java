@@ -2,6 +2,7 @@ package org.codelibs.fess.client;
 
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -241,10 +242,15 @@ public class FessEsClient implements Client {
                     config.basePath(esDir);
                 }
                 runner.onBuild((number, settingsBuilder) -> {
+                    File pluginDir = new File(esDir, "plugins");
+                    if (pluginDir.isDirectory()) {
+                        settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
+                    } else {
+                        settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
+                    }
                     if (settings != null) {
                         settingsBuilder.put(settings);
                     }
-                    settingsBuilder.put("path.plugins", System.getProperty("user.dir") + "/plugins");
                 });
                 runner.build(config);
             }

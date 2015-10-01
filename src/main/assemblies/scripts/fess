@@ -1,0 +1,191 @@
+#!/bin/sh
+
+# OPTIONS:
+#    -d            daemonize (run in background)
+#    -p pidfile    write PID to <pidfile>
+#    -h
+#    --help        print command line options
+#    -v            print fess version, then exit
+#    -D prop       set JAVA system property
+#    -X prop       set non-standard JAVA system property
+#   --prop=val
+#   --prop val     set fess property (i.e.  -Des.<prop>=<val>)
+
+CDPATH=""
+SCRIPT="$0"
+
+# SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
+while [ -h "$SCRIPT" ] ; do
+  ls=`ls -ld "$SCRIPT"`
+  # Drop everything prior to ->
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    SCRIPT="$link"
+  else
+    SCRIPT=`dirname "$SCRIPT"`/"$link"
+  fi
+done
+
+# determine fess home
+FESS_HOME=`dirname "$SCRIPT"`/..
+
+# make ELASTICSEARCH_HOME absolute
+FESS_HOME=`cd "$FESS_HOME"; pwd`
+
+
+# If an include wasn't specified in the environment, then search for one...
+if [ "x$FESS_INCLUDE" = "x" ]; then
+    # Locations (in order) to use when searching for an include file.
+    for include in /usr/share/fess/fess.in.sh \
+                   /usr/local/share/fess/fess.in.sh \
+                   /opt/fess/bin/fess.in.sh \
+                   ~/.fess.in.sh \
+                   $FESS_HOME/bin/fess.in.sh \
+                   "`dirname "$0"`"/fess.in.sh; do
+        if [ -r "$include" ]; then
+            . "$include"
+            break
+        fi
+    done
+# ...otherwise, source the specified include.
+elif [ -r "$FESS_INCLUDE" ]; then
+    . "$FESS_INCLUDE"
+fi
+
+if [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    JAVA=`which java`
+fi
+
+if [ ! -x "$JAVA" ]; then
+    echo "Could not find any executable java binary. Please install java in your PATH or set JAVA_HOME"
+    exit 1
+fi
+
+if [ -z "$FESS_CLASSPATH" ]; then
+    echo "You must set the FESS_CLASSPATH var" >&2
+    exit 1
+fi
+
+# Special-case path variables.
+case `uname` in
+    CYGWIN*)
+        FESS_CLASSPATH=`cygpath -p -w "$FESS_CLASSPATH"`
+        FESS_HOME=`cygpath -p -w "$FESS_HOME"`
+    ;;
+esac
+
+launch_service()
+{
+    pidpath=$1
+    daemonized=$2
+    props=$3
+    fess_parms="-Dfess"
+
+    if [ "x$pidpath" != "x" ]; then
+        fess_parms="$fess_parms -Dfess.pidfile=$pidpath"
+    fi
+
+    # Make sure we dont use any predefined locale, as we check some exception message strings and rely on english language
+    # As those strings are created by the OS, they are dependant on the configured locale
+    LANG=en_US.UTF-8
+    LC_ALL=en_US.UTF-8
+
+    export HOSTNAME=`hostname -s`
+
+    if [ "x$daemonized" = "x" ]; then
+        fess_parms="$fess_parms -Dfess.foreground=yes"
+        exec "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
+                org.codelibs.fess.FessBoot $FESS_OPTS
+    else
+        exec "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
+                org.codelibs.fess.FessBoot $FESS_OPTS <&- &
+        return $?
+    fi
+}
+
+# Print command line usage / help
+usage() {
+    echo "Usage: $0 [-vdh] [-p pidfile] [-D prop] [-X prop]"
+    echo "Start fess."
+    echo "    -d            daemonize (run in background)"
+    echo "    -p pidfile    write PID to <pidfile>"
+    echo "    -h"
+    echo "    --help        print command line options"
+    echo "    -v            print fess version, then exit"
+    echo "    -D prop       set JAVA system property"
+    echo "    -X prop       set non-standard JAVA system property"
+    echo "   --prop=val"
+    echo "   --prop val     set fess property (i.e. -Des.<prop>=<val>)"
+}
+
+# Parse any long getopt options and put them into properties before calling getopt below
+# Be dash compatible to make sure running under ubuntu works
+ARGV=""
+while [ $# -gt 0 ]
+do
+    case $1 in
+      --help) ARGV="$ARGV -h"; shift;;
+      --*=*) properties="$properties -Dfess.${1#--}"
+           shift 1
+           ;;
+      --*) [ $# -le 1 ] && {
+                echo "Option requires an argument: '$1'."
+                shift
+                continue
+            }
+           properties="$properties -Dfess.${1#--}=$2"
+           shift 2
+           ;;
+      *) ARGV="$ARGV $1" ; shift
+    esac
+done
+
+# Parse any command line options.
+args=`getopt vdhp:D:X: $ARGV`
+eval set -- "$args"
+
+while true; do
+    case $1 in
+        -v)
+            "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -cp "$FESS_CLASSPATH" $props \
+                    org.codelibs.fess.Version
+            exit 0
+        ;;
+        -p)
+            pidfile="$2"
+            shift 2
+        ;;
+        -d)
+            daemonized="yes"
+            shift
+        ;;
+        -h)
+            usage
+            exit 0
+        ;;
+        -D)
+            properties="$properties -D$2"
+            shift 2
+        ;;
+        -X)
+            properties="$properties -X$2"
+            shift 2
+        ;;
+        --)
+            shift
+            break
+        ;;
+        *)
+            echo "Error parsing argument $1!" >&2
+            usage
+            exit 1
+        ;;
+    esac
+done
+
+# Start up the service
+launch_service "$pidfile" "$daemonized" "$properties"
+
+exit $?
