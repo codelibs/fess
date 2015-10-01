@@ -36,8 +36,9 @@ public class CommonConstants {
     public static final String[] PAGER_CONVERSION_RULE = { "allRecordCount", "pageSize", "currentPageNumber", "allPageCount",
             "existPrePage", "existNextPage" };
 
-    public static final String[] COMMON_CONVERSION_RULE = new String[] { "searchParams", "mode", "createdBy", "createdTime", "updatedBy",
-            "updatedTime" };
+    // TODO remove searchParams
+    public static final String[] COMMON_CONVERSION_RULE = new String[] { "searchParams", "crudMode", "createdBy", "createdTime",
+            "updatedBy", "updatedTime" };
 
     protected CommonConstants() {
         // nothing

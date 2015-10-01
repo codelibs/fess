@@ -21,7 +21,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -32,7 +31,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author codelibs
