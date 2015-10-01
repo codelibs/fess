@@ -19,6 +19,7 @@ package org.codelibs.fess.util;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.helper.AdRoleHelper;
@@ -248,6 +249,10 @@ public final class ComponentUtil {
 
     public static DataService<EsAccessResult> getDataService() {
         return SingletonLaContainer.getComponent(DATA_SERVICE);
+    }
+
+    public static FessLoginAssist getLoginAssist() {
+        return getComponent(FessLoginAssist.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

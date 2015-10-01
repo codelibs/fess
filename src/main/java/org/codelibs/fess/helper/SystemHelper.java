@@ -121,11 +121,9 @@ public class SystemHelper implements Serializable {
     }
 
     public String getUsername() {
-        String username = LaRequestUtil.getRequest().getRemoteUser();
-        if (StringUtil.isBlank(username)) {
-            username = "guest";
-        }
-        return username;
+        return ComponentUtil.getLoginAssist().getSessionUserBean().map(user -> {
+            return user.getUserId();
+        }).orElse(Constants.GUEST_USER);
     }
 
     public LocalDateTime getCurrentTime() {
