@@ -46,10 +46,7 @@
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
 						<la:hidden property="id" />
-						<la:hidden property="versionNo" />
 					</c:if>
-					<la:hidden property="createdBy" />
-					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
