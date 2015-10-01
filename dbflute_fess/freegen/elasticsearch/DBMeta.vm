@@ -38,13 +38,14 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
 #foreach ($col in $table.columnList)
 #if ($col.isNormalColumn)
 #set ($javaNative = ${col.type})
 #elseif ($col.isRefColumn)
 #set ($javaNative = ${col.camelizedName})
 #end
-#if ($arrayColumnNames.contains($col.name))
+#if ($tableMetaSettings.properties.get($col.name).array)
         setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}((${javaNative}[])vl), "${col.uncapCamelName}");
 #else
         setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}(DfTypeUtil.to${javaNative}(vl)), "${col.uncapCamelName}");
@@ -66,7 +67,7 @@ public class ${table.camelizedName}Dbm extends AbstractDBMeta {
 #elseif ($col.isRefColumn)
 #set ($javaNative = ${col.camelizedName})
 #end
-#if ($arrayColumnNames.contains($col.name))#set($arrayType = "[]")#else#set($arrayType = "")#end
+#if ($tableMetaSettings.properties.get($col.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
     protected final ColumnInfo _column${col.camelizedName} = cci("${col.name}", "${col.name}", null, null, ${javaNative}${arrayType}.class, "${col.uncapCamelName}", null, false, false, false, "${col.type}", 0, 0, null, false, null, null, null, null, null, false);
 #end
 

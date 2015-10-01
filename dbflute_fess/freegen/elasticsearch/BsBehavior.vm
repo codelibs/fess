@@ -55,10 +55,11 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
     protected <RESULT extends ${table.camelizedName}> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
-#if ($arrayColumnNames.contains($column.name))
+#if ($tableMetaSettings.properties.get($column.name).array)
             result.set${column.capCamelName}(to${javaNative}Array(source.get("${column.name}")));
 #else
             result.set${column.capCamelName}(DfTypeUtil.to$javaNative(source.get("${column.name}")));

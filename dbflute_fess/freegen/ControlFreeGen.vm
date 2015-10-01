@@ -44,7 +44,6 @@ $manager.makeDirectory($request.generateDirPath)
   #end
 #end
 #elseif ($request.isResourceTypeElasticsearch())
-#set ($arrayColumnNames = ["groups", "roles"])
 #if ($request.requestName.startsWith("Elasticsearch"))
   ##
   ## <<<  Elasticsearch Schema Gen  >>>

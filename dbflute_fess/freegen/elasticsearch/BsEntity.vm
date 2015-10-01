@@ -33,13 +33,14 @@ public class Bs${table.camelizedName} extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
 #elseif ($column.isRefColumn)
 #set ($javaNative = ${column.camelizedName})
 #end
-#if ($arrayColumnNames.contains($column.name))#set($arrayType = "[]")#else#set($arrayType = "")#end
+#if ($tableMetaSettings.properties.get($column.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
 #if ($column.name != $idColumn)
     /** ${column.name} */
     protected ${javaNative}${arrayType} ${column.uncapCamelName};
@@ -60,7 +61,7 @@ public class Bs${table.camelizedName} extends AbstractEntity {
 #elseif ($column.isRefColumn)
 #set ($javaNative = ${column.camelizedName})
 #end
-#if ($arrayColumnNames.contains($column.name))#set($arrayType = "[]")#else#set($arrayType = "")#end
+#if ($tableMetaSettings.properties.get($column.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
 #if ($column.name != $idColumn)
 #if ($javaNative == "boolean")
     public ${javaNative} is${column.capCamelName}() {
