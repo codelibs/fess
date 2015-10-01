@@ -77,10 +77,17 @@ public abstract class AbstractBehavior<ENTITY extends Entity, CB extends Conditi
     protected <RESULT extends ENTITY> List<RESULT> delegateSelectList(final ConditionBean cb, final Class<? extends RESULT> entityType) {
         // TODO check response
         final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsSearchType());
+        final int from;
+        final int size;
         if (cb.isFetchScopeEffective()) {
-            builder.setFrom(cb.getFetchStartIndex());
-            builder.setSize(cb.getFetchSize());
+            from = cb.getFetchStartIndex();
+            size = cb.getFetchSize();
+        } else {
+            from = 0;
+            size = 10;
         }
+        builder.setFrom(from);
+        builder.setSize(size);
         ((AbstractConditionBean) cb).request().build(builder);
         final SearchResponse response = ((AbstractConditionBean) cb).build(builder).execute().actionGet();
 
@@ -95,8 +102,8 @@ public abstract class AbstractBehavior<ENTITY extends Entity, CB extends Conditi
             list.add(entity);
         });
 
+        list.setPageSize(size);
         list.setAllRecordCount((int) searchHits.totalHits());
-        list.setPageSize(cb.getFetchSize());
         list.setCurrentPageNumber(cb.getFetchPageNumber());
 
         list.setTook(response.getTookInMillis());
