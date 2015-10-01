@@ -14,44 +14,48 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.wizard;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.crud.util.SAStrutsUtil;
-import org.codelibs.fess.es.exentity.FileConfig;
-import org.codelibs.fess.es.exentity.ScheduledJob;
-import org.codelibs.fess.es.exentity.WebConfig;
-import org.codelibs.fess.exception.SSCActionMessagesException;
-import org.codelibs.fess.helper.JobHelper;
-import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.job.TriggeredJob;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.app.web.admin.system.AdminSystemAction;
+import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.es.exentity.FileConfig;
+import org.codelibs.fess.es.exentity.ScheduledJob;
+import org.codelibs.fess.es.exentity.WebConfig;
+import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.job.TriggeredJob;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.util.CharUtil;
+import org.lastaflute.web.Execute;
+import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.response.HtmlResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WizardAction implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class AdminWizardAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(WizardAction.class);
+    // ===================================================================================
+    //                                                                            Constant
+    //     
+    private static final Logger logger = LoggerFactory.getLogger(AdminWizardAction.class);
 
-    //@ActionForm
-    @Resource
-    protected WizardForm wizardForm;
-
+    // ===================================================================================
+    //                                                                           Attribute
+    //     
     @Resource
     protected DynamicProperties crawlerProperties;
 
@@ -70,47 +74,62 @@ public class WizardAction implements Serializable {
     @Resource
     protected ScheduledJobService scheduledJobService;
 
-    public String getHelpLink() {
-        return systemHelper.getHelpLink("wizard");
+    // ===================================================================================
+    //                                                                               Hook
+    //                                                                              ======
+    @Override
+    protected void setupHtmlData(final ActionRuntime runtime) {
+        super.setupHtmlData(runtime);
+        runtime.registerData("helpLink", systemHelper.getHelpLink("wizard"));
     }
 
-    //@Execute(validator = false)
-    public String index() {
-        return "index.jsp";
+    // ===================================================================================
+    //                                                                      Search Execute
+    //                                                                      ==============
+
+    @Execute
+    public HtmlResponse index() {
+        return asHtml(path_AdminWizard_IndexJsp).useForm(IndexForm.class);
     }
 
     @Token(save = true, validate = false)
-    //@Execute(validator = false)
-    public String crawlingConfigForm() {
-        return "crawlingConfig.jsp";
+    @Execute
+    public HtmlResponse crawlingConfigForm() {
+        return asHtml(path_AdminWizard_CrawlingConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
     @Token(save = false, validate = true)
-    //@Execute(validator = true, input = "crawlingConfigForm")
-    public String crawlingConfig() {
-        final String name = crawlingConfigInternal(wizardForm.crawlingConfigName, wizardForm.crawlingConfigPath);
-        SAStrutsUtil.addSessionMessage("success.create_crawling_config_at_wizard", name);
-        return "crawlingConfigForm?redirect=true";
+    @Execute
+    public HtmlResponse crawlingConfig(CrawlingConfigForm form) {
+        validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminWizard_CrawlingConfigJsp);
+        });
+        final String name = crawlingConfigInternal(form);
+        saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
+        return redirectWith(getClass(), moreUrl("crawlingConfigForm"));
     }
 
     @Token(save = false, validate = true)
-    //@Execute(validator = true, input = "crawlingConfigForm")
-    public String crawlingConfigNext() {
-        final String name = crawlingConfigInternal(wizardForm.crawlingConfigName, wizardForm.crawlingConfigPath);
-        SAStrutsUtil.addSessionMessage("success.create_crawling_config_at_wizard", name);
-        return "startCrawlingForm?redirect=true";
+    @Execute
+    public HtmlResponse crawlingConfigNext(CrawlingConfigForm form) {
+        validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminWizard_CrawlingConfigJsp);
+        });
+        final String name = crawlingConfigInternal(form);
+        saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
+        return redirectWith(getClass(), moreUrl("startCrawlingForm"));
     }
 
-    protected String crawlingConfigInternal(final String crawlingConfigName, final String crawlingConfigPath) {
+    protected String crawlingConfigInternal(final CrawlingConfigForm form) {
 
-        String configName = crawlingConfigName;
-        String configPath = crawlingConfigPath.trim();
+        String configName = form.crawlingConfigName;
+        String configPath = form.crawlingConfigPath.trim();
         if (StringUtil.isBlank(configName)) {
             configName = StringUtils.abbreviate(configPath, 30);
         }
 
         // normalize
-        final StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder(1000);
         for (int i = 0; i < configPath.length(); i++) {
             final char c = configPath.charAt(i);
             if (c == '\\') {
@@ -138,16 +157,16 @@ public class WizardAction implements Serializable {
                 wConfig.setBoost(1.0f);
                 wConfig.setCreatedBy(username);
                 wConfig.setCreatedTime(now);
-                if (StringUtil.isNotBlank(wizardForm.depth)) {
-                    wConfig.setDepth(Integer.parseInt(wizardForm.depth));
+                if (StringUtil.isNotBlank(form.depth)) {
+                    wConfig.setDepth(Integer.parseInt(form.depth));
                 }
                 wConfig.setExcludedDocUrls(getDefaultString("default.config.web.excludedDocUrls", StringUtil.EMPTY));
                 wConfig.setExcludedUrls(getDefaultString("default.config.web.excludedUrls", StringUtil.EMPTY));
                 wConfig.setIncludedDocUrls(getDefaultString("default.config.web.includedDocUrls", StringUtil.EMPTY));
                 wConfig.setIncludedUrls(getDefaultString("default.config.web.includedUrls", StringUtil.EMPTY));
                 wConfig.setIntervalTime(getDefaultInteger("default.config.web.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_WEB));
-                if (StringUtil.isNotBlank(wizardForm.maxAccessCount)) {
-                    wConfig.setMaxAccessCount(Long.parseLong(wizardForm.maxAccessCount));
+                if (StringUtil.isNotBlank(form.maxAccessCount)) {
+                    wConfig.setMaxAccessCount(Long.parseLong(form.maxAccessCount));
                 }
                 wConfig.setName(configName);
                 wConfig.setNumOfThread(getDefaultInteger("default.config.web.numOfThread", Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB));
@@ -166,16 +185,16 @@ public class WizardAction implements Serializable {
                 fConfig.setBoost(1.0f);
                 fConfig.setCreatedBy(username);
                 fConfig.setCreatedTime(now);
-                if (StringUtil.isNotBlank(wizardForm.depth)) {
-                    fConfig.setDepth(Integer.parseInt(wizardForm.depth));
+                if (StringUtil.isNotBlank(form.depth)) {
+                    fConfig.setDepth(Integer.parseInt(form.depth));
                 }
                 fConfig.setExcludedDocPaths(getDefaultString("default.config.file.excludedDocPaths", StringUtil.EMPTY));
                 fConfig.setExcludedPaths(getDefaultString("default.config.file.excludedPaths", StringUtil.EMPTY));
                 fConfig.setIncludedDocPaths(getDefaultString("default.config.file.includedDocPaths", StringUtil.EMPTY));
                 fConfig.setIncludedPaths(getDefaultString("default.config.file.includedPaths", StringUtil.EMPTY));
                 fConfig.setIntervalTime(getDefaultInteger("default.config.file.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_FS));
-                if (StringUtil.isNotBlank(wizardForm.maxAccessCount)) {
-                    fConfig.setMaxAccessCount(Long.parseLong(wizardForm.maxAccessCount));
+                if (StringUtil.isNotBlank(form.maxAccessCount)) {
+                    fConfig.setMaxAccessCount(Long.parseLong(form.maxAccessCount));
                 }
                 fConfig.setName(configName);
                 fConfig.setNumOfThread(getDefaultInteger("default.config.file.numOfThread", Constants.DEFAULT_NUM_OF_THREAD_FOR_FS));
@@ -188,8 +207,11 @@ public class WizardAction implements Serializable {
             }
             return configName;
         } catch (final Exception e) {
-            logger.error("Failed to create crawling config: " + wizardForm.crawlingConfigPath, e);
-            throw new SSCActionMessagesException(e, "errors.failed_to_create_crawling_config_at_wizard", wizardForm.crawlingConfigPath);
+            logger.error("Failed to create crawling config: " + form.crawlingConfigPath, e);
+            throwValidationError(messages -> messages.addErrorsFailedToCreateCrawlingConfigAtWizard(GLOBAL), () -> {
+                return asHtml(path_AdminWizard_CrawlingConfigJsp);
+            });
+            return null;
         }
     }
 
@@ -249,23 +271,23 @@ public class WizardAction implements Serializable {
     }
 
     @Token(save = true, validate = false)
-    //@Execute(validator = false)
-    public String startCrawlingForm() {
-        return "startCrawling.jsp";
+    @Execute
+    public HtmlResponse startCrawlingForm() {
+        return asHtml(path_AdminWizard_StartCrawlingJsp).useForm(StartCrawlingForm.class);
     }
 
     @Token(save = false, validate = true)
-    //@Execute(validator = false)
-    public String startCrawling() {
+    @Execute
+    public HtmlResponse startCrawling(StartCrawlingForm form) {
         if (!jobHelper.isCrawlProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawloerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
                 new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();
             }
-            SAStrutsUtil.addSessionMessage("success.start_crawl_process");
+            saveInfo(messages -> messages.addSuccessStartCrawlProcess(GLOBAL));
         } else {
-            SAStrutsUtil.addSessionMessage("success.failed_to_start_crawl_process");
+            saveError(messages -> messages.addErrorsFailedToStartCrawlProcess(GLOBAL));
         }
-        return "../system/index?redirect=true";
+        return redirect(AdminSystemAction.class);
     }
 }

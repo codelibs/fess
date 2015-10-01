@@ -27,10 +27,10 @@
 				></i> <span><la:message key="labels.menu_system" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
-					<li <c:if test="${param.menuType=='wizard'}">class="active"</c:if>><todo:link href="/admin/wizard/index">
+					<li <c:if test="${param.menuType=='wizard'}">class="active"</c:if>><la:link href="/admin/wizard/index">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.wizard" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 					<li <c:if test="${param.menuType=='crawl'}">class="active"</c:if>><la:link href="/admin/crawl/index">
 							<i class='fa fa-angle-right'></i>
