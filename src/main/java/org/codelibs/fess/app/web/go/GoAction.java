@@ -40,7 +40,6 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,10 +161,10 @@ public class GoAction extends FessSearchAction {
 
                 return HtmlResponse.asEmptyBody().httpStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
-                return newHtmlResponseAsRediect(url + hash);
+                return HtmlResponse.fromRedirectPathAsIs(url + hash);
             }
         } else {
-            return newHtmlResponseAsRediect(url + hash);
+            return HtmlResponse.fromRedirectPathAsIs(url + hash);
         }
     }
 
