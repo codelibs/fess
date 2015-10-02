@@ -3,41 +3,48 @@ package org.codelibs.fess;
 import java.io.File;
 
 import org.dbflute.tomcat.TomcatBoot;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
 
 public class FessBoot extends TomcatBoot {
 
+    private static final String FESS_CONTEXT_PATH = "fess.context.path";
+
+    private static final String FESS_PORT = "fess.port";
+
+    private static final String FESS_TEMP_PATH = "fess.temp.path";
+
+    private static final String FESS_WEBXML_PATH = "fess.webxml.path";
+
+    private static final String FESS_WEBAPP_PATH = "fess.webapp.path";
+
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-    protected Options options;
-
-    public FessBoot(Options options) {
-        super(options.port, options.contextPath);
-        this.options = options;
+    public FessBoot(int port, String contextPath) {
+        super(port, contextPath);
     }
 
     @Override
     protected String prepareWebappPath() {
-        if (options.webappPath != null) {
-            return options.webappPath;
+        String value = System.getProperty(FESS_WEBAPP_PATH);
+        if (value != null) {
+            return value;
         }
         return super.prepareWebappPath();
     }
 
     @Override
     protected String prepareWebXmlPath() {
-        if (options.webXmlPath != null) {
-            return options.webXmlPath;
+        String value = System.getProperty(FESS_WEBXML_PATH);
+        if (value != null) {
+            return value;
         }
         return super.prepareWebXmlPath();
     }
 
     protected String getMarkDir() {
-        if (options.tempPath != null) {
-            System.setProperty(JAVA_IO_TMPDIR, options.tempPath);
-            return new File(options.tempPath, "fessboot").getAbsolutePath();
+        String value = System.getProperty(FESS_TEMP_PATH);
+        if (value != null) {
+            System.setProperty(JAVA_IO_TMPDIR, value);
+            return new File(value, "fessboot").getAbsolutePath();
         }
         return new File(System.getProperty(JAVA_IO_TMPDIR), "fessboot").getAbsolutePath();
     }
@@ -47,40 +54,26 @@ public class FessBoot extends TomcatBoot {
     //                                                                        ============
 
     public static void main(String[] args) {
-        final Options options = new Options();
-
-        final CmdLineParser parser = new CmdLineParser(options);
-        try {
-            parser.parseArgument(args);
-        } catch (final CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + FessBoot.class.getCanonicalName() + " [options...] arguments...");
-            parser.printUsage(System.err);
-            return;
-        }
-
-        new FessBoot(options).useTldDetect().asDevelopment(isNoneEnv()).bootAwait();
+        new FessBoot(getPort(), getContextPath()).useTldDetect().asDevelopment(isNoneEnv()).bootAwait();
     }
 
     private static boolean isNoneEnv() {
         return System.getProperty("lasta.env") == null;
     }
 
-    protected static class Options {
+    protected static int getPort() {
+        String value = System.getProperty(FESS_PORT);
+        if (value != null) {
+            return Integer.parseInt(value);
+        }
+        return 8080;
+    }
 
-        @Option(name = "--port", metaVar = "port", usage = "Listen port")
-        protected int port = 8080;
-
-        @Option(name = "--context-path", metaVar = "contextPath", usage = "Context path")
-        protected String contextPath = "/fess";
-
-        @Option(name = "--webapp-path", metaVar = "webappPath", usage = "Webapp path")
-        protected String webappPath = null;
-
-        @Option(name = "--webxml-path", metaVar = "webXmlPath", usage = "web.xml path")
-        protected String webXmlPath = null;
-
-        @Option(name = "--temp-path", metaVar = "tempPath", usage = "Temporary path")
-        protected String tempPath = null;
+    protected static String getContextPath() {
+        String value = System.getProperty(FESS_CONTEXT_PATH);
+        if (value != null) {
+            return value;
+        }
+        return "/fess";
     }
 }

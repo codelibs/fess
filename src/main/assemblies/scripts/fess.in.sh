@@ -68,9 +68,9 @@ JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"
 JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
 
 ES_HOME=$FESS_HOME/es
-FESS_OPTS="$FESS_OPTS --context-path /fess"
-FESS_OPTS="$FESS_OPTS --port 8080"
-FESS_OPTS="$FESS_OPTS --webapp-path $FESS_HOME/app"
-FESS_OPTS="$FESS_OPTS --webxml-path $FESS_HOME/app/WEB-INF/web.xml"
-FESS_OPTS="$FESS_OPTS --temp-path $FESS_HOME/temp"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=/fess"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.port=8080"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webapp.path=$FESS_HOME/app"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webxml.path=$FESS_HOME/app/WEB-INF/web.xml"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_HOME/temp"
 
