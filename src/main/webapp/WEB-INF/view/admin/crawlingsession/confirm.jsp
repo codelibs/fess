@@ -34,7 +34,7 @@
 						<li class="active"><a href="#"><la:message key="labels.crawling_session_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.crawling_session_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message key="labels.crawling_session_link_details" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -46,10 +46,7 @@
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
 						<la:hidden property="id" />
-						<la:hidden property="versionNo" />
 					</c:if>
-					<la:hidden property="createdBy" />
-					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -66,7 +63,7 @@
 											<la:message key="labels.crawling_session_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<la:message key="labels.crawling_session_link_confirm" />
+											<la:message key="labels.crawling_session_link_details" />
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
