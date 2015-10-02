@@ -95,9 +95,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/userDict/upload.jsp */
     HtmlNext path_AdminDictUserDict_UploadJsp = new HtmlNext("/admin/dict/userDict/upload.jsp");
 
-    /** The path of the HTML: /admin/document/index.jsp */
-    HtmlNext path_AdminDocument_IndexJsp = new HtmlNext("/admin/document/index.jsp");
-
     /** The path of the HTML: /admin/failureurl/confirm.jsp */
     HtmlNext path_AdminFailureurl_ConfirmJsp = new HtmlNext("/admin/failureurl/confirm.jsp");
 

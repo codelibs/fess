@@ -91,11 +91,11 @@ public abstract class Bs${table.camelizedName}CF extends AbstractConditionFilter
         }
     }
 
-    public void query(org.codelibs.fess.es.cbean.cq.bs.AbstractConditionQuery.OperatorCall<${table.camelizedName}CQ> queryLambda) {
+    public void query(${request.package}.cbean.cq.bs.AbstractConditionQuery.OperatorCall<${table.camelizedName}CQ> queryLambda) {
         query(queryLambda, null);
     }
 
-    public void query(org.codelibs.fess.es.cbean.cq.bs.AbstractConditionQuery.OperatorCall<${table.camelizedName}CQ> queryLambda,
+    public void query(${request.package}.cbean.cq.bs.AbstractConditionQuery.OperatorCall<${table.camelizedName}CQ> queryLambda,
             ConditionOptionCall<QueryFilterBuilder> opLambda) {
         ${table.camelizedName}CQ query = new ${table.camelizedName}CQ();
         queryLambda.callback(query);
