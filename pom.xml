@@ -148,11 +148,6 @@
 							<directory>${project.build.directory}/${project.build.finalName}-compress</directory>
 						</resource>
 					</webResources>
-					<archive>
-						<manifest>
-							<mainClass>org.docksidestage.HarborBoot</mainClass>
-						</manifest>
-					</archive>
 				</configuration>
 			</plugin>
 			<plugin>
