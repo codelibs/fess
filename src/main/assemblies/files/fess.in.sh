@@ -1,6 +1,6 @@
 #!/bin/sh
 
-FESS_CLASSPATH=$FESS_HOME/lib
+FESS_CLASSPATH=$FESS_HOME/lib/classes
 
 if [ "x$FESS_MIN_MEM" = "x" ]; then
     FESS_MIN_MEM=256m
@@ -70,6 +70,7 @@ JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
 # Application Configuration
 APP_NAME=fess
 ES_HOME=$FESS_HOME/es
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.home=$FESS_HOME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=/$APP_NAME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.port=8080"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webapp.path=$FESS_HOME/app"

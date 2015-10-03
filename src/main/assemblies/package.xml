@@ -22,18 +22,25 @@
 		<!-- lib -->
 		<fileSet>
 			<directory>${project.build.directory}/tomcat-lib</directory>
-			<outputDirectory>fess-${project.version}/lib</outputDirectory>
+			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/</directory>
 			<includes>
 				<include>FessBoot**</include>
 			</includes>
-			<outputDirectory>fess-${project.version}/lib/org/codelibs/fess</outputDirectory>
+			<outputDirectory>fess-${project.version}/lib/classes/org/codelibs/fess</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/src/main/assemblies/files</directory>
+			<includes>
+				<include>logging.properties</include>
+			</includes>
+			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
 		</fileSet>
 		<!-- app -->
 		<fileSet>
-			<directory>${project.basedir}/src/main/assemblies/scripts</directory>
+			<directory>${project.basedir}/src/main/assemblies/files</directory>
 			<fileMode>0755</fileMode>
 			<lineEnding>lf</lineEnding>
 			<includes>
@@ -44,7 +51,7 @@
 		</fileSet>
 		<!-- logs -->
 		<fileSet>
-			<directory>src/main/assemblies/scripts</directory>
+			<directory>src/main/assemblies/files</directory>
 			<outputDirectory>fess-${project.version}/logs</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
@@ -53,7 +60,7 @@
 		</fileSet>
 		<!-- temp -->
 		<fileSet>
-			<directory>src/main/assemblies/scripts</directory>
+			<directory>src/main/assemblies/files</directory>
 			<outputDirectory>fess-${project.version}/temp</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
@@ -67,7 +74,7 @@
 		</fileSet>
 		<!-- es/data -->
 		<fileSet>
-			<directory>src/main/assemblies/scripts</directory>
+			<directory>src/main/assemblies/files</directory>
 			<outputDirectory>fess-${project.version}/es/data</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
